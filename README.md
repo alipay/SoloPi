@@ -39,7 +39,15 @@
 
 ### 录制回放
 
-   整体录制回放的流程可以参考公众号文章中 **删除垃圾邮件** 和 **游戏自动化** 两个视频。
+   整体录制回放的流程可以参考 **删除垃圾邮件** 和 **游戏自动化** 两个视频。
+
+**删除垃圾邮件**
+
+<iframe height=498 width=510 src='http://player.youku.com/embed/XNDIyODI4NTQ5Ng==' frameborder=0 'allowfullscreen'></iframe>
+
+**游戏自动化**
+
+<iframe height=498 width=510 src='http://player.youku.com/embed/XNDIyODI4OTM4OA==' frameborder=0 'allowfullscreen'></iframe>
 
 #### 录制
 
@@ -81,6 +89,10 @@ Soloπ会弹出一个悬浮窗，进入到想要操作的界面，点击绿色�
 
 ### 一机多控
 
+**操作视频**
+
+<iframe height=498 width=510 src='http://player.youku.com/embed/XNDIyODI5MzMwNA==' frameborder=0 'allowfullscreen'></iframe>
+
 #### 建立连接
 
    一机多控分为主从机两部分，通过网络进行通信，所以请保持主从机在同一网络环境下。在主机上选择需要测试的应用，配置为主机模式，从机需要配置为从机。点击开始执行后，主机会显示"扫码添加设备"和"点击连接设备"的悬浮窗，从机会显示二维码图标。主机上通过扫码与从机建立通信后，点击连接设备完成连接，从机的二维码悬浮窗会缩小为"π"图标。
@@ -103,6 +115,10 @@ Soloπ会弹出一个悬浮窗，进入到想要操作的界面，点击绿色�
 
 #### 常规性能测试
 
+**使用视频**
+
+<iframe height=498 width=510 src='http://player.youku.com/embed/XNDIyODI5NDQ2MA==' frameborder=0 'allowfullscreen'></iframe>
+
    在性能测试页选择待测应用，勾选需要测试的性能指标，即可开始进行性能测试，Soloπ会显示性能悬浮窗，实时展示性能数据，点击悬浮窗上的应用文字可直接跳转到对应应用。
 
 ![performance](assets/performance.png)
@@ -112,6 +128,10 @@ Soloπ会弹出一个悬浮窗，进入到想要操作的界面，点击绿色�
 ![save_record](assets/save_record.png)
 
 #### 响应耗时测试
+
+**使用视频**
+
+<iframe height=498 width=510 src='http://player.youku.com/embed/XNDIyODI5NTU3Ng==' frameborder=0 'allowfullscreen'></iframe>
 
    点击启动耗时计算功能，第一次进入会提示是否加载计算插件，点击确认进行加载。加载完成后再次点击即可进入。
 
