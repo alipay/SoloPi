@@ -43,11 +43,11 @@
 
 **删除垃圾邮件**
 
-<video src="videos/垃圾邮件处理.mov"></video>
+[![删除垃圾邮件](https://vthumb.ykimg.com/054101085D03A0ED000001318A0B207E)](https://github.com/soloPi/SoloPi/blob/master/videos/垃圾邮件处理.mov?raw=true)
 
 **游戏自动化**
 
-<video src="videos/游戏自动化.mp4"></video>
+[![游戏自动化](https://vthumb.ykimg.com/054106015D03A18A00000175220A66C7)](https://github.com/soloPi/SoloPi/blob/master/videos/游戏自动化.mp4?raw=true)
 
 #### 录制
 
@@ -91,7 +91,7 @@ Soloπ会弹出一个悬浮窗，进入到想要操作的界面，点击绿色�
 
 **操作视频**
 
-<video src="videos/一机多控.mov"></video>
+[![一机多控](https://vthumb.ykimg.com/054106015D03A20600000132E703B1CD)](https://github.com/soloPi/SoloPi/blob/master/videos/一机多控.mov?raw=true)
 
 #### 建立连接
 
@@ -117,7 +117,7 @@ Soloπ会弹出一个悬浮窗，进入到想要操作的界面，点击绿色�
 
 **使用视频**
 
-<video src="videos/性能工具.mov"></video>
+[![常规性能测试](https://vthumb.ykimg.com/054102085D03A243000001725D07942E)](https://github.com/soloPi/SoloPi/blob/master/videos/性能工具.mov?raw=true)
 
    在性能测试页选择待测应用，勾选需要测试的性能指标，即可开始进行性能测试，Soloπ会显示性能悬浮窗，实时展示性能数据，点击悬浮窗上的应用文字可直接跳转到对应应用。
 
@@ -131,7 +131,7 @@ Soloπ会弹出一个悬浮窗，进入到想要操作的界面，点击绿色�
 
 **使用视频**
 
-<video src="videos/响应耗时计算.mov"></video>
+[![响应耗时](https://vthumb.ykimg.com/054106015D03A28800000103E707348B)](https://github.com/soloPi/SoloPi/blob/master/videos/响应耗时计算.mov?raw=true)
 
    点击启动耗时计算功能，第一次进入会提示是否加载计算插件，点击确认进行加载。加载完成后再次点击即可进入。
 
