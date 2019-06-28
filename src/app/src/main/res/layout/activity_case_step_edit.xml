@@ -1,0 +1,55 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <include layout="@layout/head_panel_layout" android:id="@+id/case_step_edit_head"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="100dp">
+        <com.zhy.view.flowlayout.TagFlowLayout
+            android:id="@+id/case_step_edit_tag_group"
+            app:max_select="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp">
+        </com.zhy.view.flowlayout.TagFlowLayout>
+    </ScrollView>
+    <include layout="@layout/divider" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.yydcdut.sdlv.SlideAndDragListView
+            android:id="@+id/case_step_edit_drag_list"
+            android:divider="@null"
+            android:dividerHeight="0dp"
+            android:listSelector="?attr/selectableItemBackground"
+            android:drawSelectorOnTop="false"
+            android:choiceMode="none"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </com.yydcdut.sdlv.SlideAndDragListView>
+    </LinearLayout>
+</LinearLayout>

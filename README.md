@@ -1,154 +1,191 @@
 # Soloπ
-## 关于工具
 
-   Soloπ是一个无线化、非侵入式的Android自动化工具，公测版拥有录制回放、性能测试、一机多控三项主要功能，能为测试开发人员节省宝贵时间。
+## Introduction (简介)
 
+Soloπ是一个无线化、非侵入式的Android自动化工具，公测版拥有录制回放、性能测试、一机多控三项主要功能，能为测试开发人员节省宝贵时间。
 
+## Features (功能)
 
-## 运行环境要求
+#### 录制回放
 
-- Android 4.3+
+Soloπ拥有录制操作的能力，用户只需要通过Soloπ执行用例步骤，Soloπ就能够将用户的操作记录下来，并且支持在各个设备上进行回放，这一切都能够在手机上独立完成。详见[录制回放](../../wikis/RecordCase)一篇。
 
-- 手机初始化需要依赖PC（具备adb运行环境），详见下文
+#### 性能工具
 
+Soloπ能够记录待测应用的各项指标，你可以在悬浮窗中观察实时更新的数据，也可以对性能数据进行录制，在录制结束后查看图表；同时，Soloπ还支持性能加压，能够对CPU、内存与网络环境进行限制，复现应用在性能较差、网络环境不佳场景下的表现。
 
+除了常规性能指标，Soloπ还提供了启动耗时计算工具，测试同学只需要点击两次按钮，就可以得到最贴近用户体验的启动耗时数据。同时，启动耗时计算工具还可以通过广播调用，可以非常方便的与UI自动化测试打通。详见[性能工具](../../wikis/Performance)一篇。
 
-## 环境准备
+#### 一机多控
 
-### Android设备调试模式
+Soloπ支持通过操作一台主机设备来控制多台从机设备，不需要在各个设备上分别进行重复冗杂的兼容性测试，能够极大提升兼容性测试的效率。详见[一机多控](../../wikis/OneToMany)一篇。
 
-   需要开启 Android 设备USB调试功能（常见位置：设置 -> 开发者选项 -> USB调试功能。如果设置中不包含开发者选项，请参考 https://developer.android.com/studio/debug/dev-options?hl=zh-cn#enable 中的`启用开发者选项和调试`）。
+## Discuss (讨论群)
 
-### 常见问题
-
-   VIVO设备需要开启开发者选项中的`USB安全操作`（如有），否则录制回放与一机多控功能可能会无法正常操作。
-
-   小米设备需要开启开发者选项中的 `USB安装`与`USB调试（安全设置）`并手动开启Soloπ应用权限中的`后台弹出界面`选项，否则可能无法正常使用。
-
-### 初始化手机环境
-
-   在手机开机的情况下，通常只需要进行一次初始化，手机的初始化依赖电脑上的adb命令，请参考网上的一些adb配置文档进行准备，比如 [**https://sspai.com/post/40471**](https://sspai.com/post/40471) 。对于Window系统，可能需要安装对应设备的驱动才能连接。
-
-   adb环境配置完成并连接上设备后，在电脑控制台中执行 `adb tcpip 5555` 来开启设备远程adb调试端口。
-
-   远程端口开启后，进入Soloπ，按照提示授予相应权限，即可完成环境准备。
-
-
-
-## 功能使用
-
-### 录制回放
-
-   整体录制回放的流程可以参考 **删除垃圾邮件** 和 **游戏自动化** 两个视频。
-
-**删除垃圾邮件**
-
-[![删除垃圾邮件](https://vthumb.ykimg.com/054101085D03A0ED000001318A0B207E)](https://github.com/soloPi/SoloPi/blob/master/videos/垃圾邮件处理.mov?raw=true)
-
-**游戏自动化**
-
-[![游戏自动化](https://vthumb.ykimg.com/054106015D03A18A00000175220A66C7)](https://github.com/soloPi/SoloPi/blob/master/videos/游戏自动化.mp4?raw=true)
-
-#### 录制
-
-   进入录制界面后，选择待测应用并输入用例名称，点击开始。
-
-![record_config](assets/record_config.png)
-
-Soloπ会弹出一个悬浮窗，进入到想要操作的界面，点击绿色箭头即可开始录制。
-
-![start_record](assets/start_record.png)
-
-   录制时点击屏幕上控件，Soloπ会用红色框高亮对应控件，并显示控件操作功能框，Soloπ提供了点击、长按、发现则点击、输入文字、相对点击位置滑动、断言、设置变量等功能。如果发现高亮位置有问题，可以点击操作框外取消选择；如果多次点击均不能定位到控件，可以使用重载界面功能重新加载页面结构，也可以切换为图像查找模式进行查找。
-
-![node_func](assets/node_func.png)
-
-   Soloπ包含了一些常用的操作功能，包括返回、处理弹窗、截图、回到首页、切换查找模式、Scheme跳转、屏幕滑动、Sleep等功能，可以通过点击屏幕右侧的"π"悬浮窗触发（全局操作模式下不会有红色高亮框）。
-
-![global_func](assets/global_func.png)
-
-   如果想要停止或暂停录制，可以点击右侧"π"图标，在最后一项中选择停止或者暂停。当你想从暂停状态恢复时，点击右侧的"π"图标即可。
-
-#### 回放
-
-   可以通过点击录制回放首页里的最近录制项或全部用例列表中的用例来回放用例，Soloπ会自动跳转到待测应用，并显示悬浮窗，请手动进入录制用例时的起始页面，点击绿色箭头开始回放，Soloπ会自动回放这条用例，并在用例回放完成时显示回放结果。
-
-![replay_highlight](assets/replay_highlight.png)
-
-   在回放结果页，Soloπ会显示用例的执行状态，每一步的操作信息（包括截图、控件信息、状态、执行参数），被测应用运行日志（保存在文件，结果页显示部分日志）和截图。
-
-![replay_result](assets/replay_result.png)
-
-#### 其他功能
-
-   在全部用例列表页，可以通过长按来删除、重复执行或编辑用例，用例编辑页面里支持删除用例、调整用例顺序、添加新步骤、编辑用例信息。点击用例列表右上角批量回放功能，可以勾选用例依次进行回放。
-
-![other_func](assets/other_func.png)
-
-
-
-### 一机多控
-
-**操作视频**
-
-[![一机多控](https://vthumb.ykimg.com/054106015D03A20600000132E703B1CD)](https://github.com/soloPi/SoloPi/blob/master/videos/一机多控.mov?raw=true)
-
-#### 建立连接
-
-   一机多控分为主从机两部分，通过网络进行通信，所以请保持主从机在同一网络环境下。在主机上选择需要测试的应用，配置为主机模式，从机需要配置为从机。点击开始执行后，主机会显示"扫码添加设备"和"点击连接设备"的悬浮窗，从机会显示二维码图标。主机上通过扫码与从机建立通信后，点击连接设备完成连接，从机的二维码悬浮窗会缩小为"π"图标。
-
-#### 操作
-
-   连接完毕后，在主机上点击绿色三角即可开始多控操作（操控初始请保持主从机在同一页面）。主机上的操作方式与录制用例时一致，每执行一步，从机会跟随主机的步骤同步执行。
-   为便于统一安装应用，一机多控增加了安装应用和下载文件两项功能（对于Vivo和OPPO手机，安装应用需要输入密码，请在Soloπ设置中填写密码信息，以便自动安装）。
-   在主机执行过程中，可以通过添加从机功能动态添加设备。
-
-#### 退出
-
-   当使用完毕后，可以在主机上使用结束功能结束一机多控，主从机会同时退出连接。如果只想退出一台从机，可以在从机上点击右侧"π"图标退出分组，结束一机多控。
-
-
-
-### 性能工具
-
-性能工具主要分为三块：常规性能测试、响应耗时测试、性能加压。
-
-#### 常规性能测试
-
-**使用视频**
-
-[![常规性能测试](https://vthumb.ykimg.com/054102085D03A243000001725D07942E)](https://github.com/soloPi/SoloPi/blob/master/videos/性能工具.mov?raw=true)
-
-   在性能测试页选择待测应用，勾选需要测试的性能指标，即可开始进行性能测试，Soloπ会显示性能悬浮窗，实时展示性能数据，点击悬浮窗上的应用文字可直接跳转到对应应用。
-
-![performance](assets/performance.png)
-
-   如果想要记录一段时间内的性能变化情况，可以点击悬浮窗的绿色三角开始录制，停止时点击红色圆形，Soloπ会弹出悬浮窗提示保存的位置（以CSV的格式保存，也可以在性能工具首页-录制数据查看菜单中查看之前录制的数据），并恢复为实时展示模式。
-
-![save_record](assets/save_record.png)
-
-#### 响应耗时测试
-
-**使用视频**
-
-[![响应耗时](https://vthumb.ykimg.com/054106015D03A28800000103E707348B)](https://github.com/soloPi/SoloPi/blob/master/videos/响应耗时计算.mov?raw=true)
-
-   点击启动耗时计算功能，第一次进入会提示是否加载计算插件，点击确认进行加载。加载完成后再次点击即可进入。
-
-   首先配置录屏的相关参数，主要关注二值对比差异一项，如果测试场景不关注页面细微变化，可以设置一个较高的二值对比差异值，比如设置为"2"（表示前后两帧图片像素点差异需超过2%才认为响应结束）。
-
-   点击启动按钮，Soloπ会弹出开始录制悬浮窗，请手动进入需要测试的功能入口，点击开始录制，手动点击相应入口控件，待页面加载完毕后，点击结束录制，Soloπ会计算并显示实际跳转的耗时。
-
-#### 性能加压
-
-   Soloπ同时支持内存与CPU加压。在性能工具底部，滑动配置单核CPU负载百分比、占用CPU核数、内存占用大小，即可进行加压（注意，由于设备总内存有限，如果配置内存加压过高，会导致系统资源不足，可能会导致Soloπ进程被杀掉）。
-
-
-
-## 下载地址
-
-   大家可以直接下载 Soloπ.apk 使用。如果你觉得工具对你有些帮助，欢迎点一下右上角的三个功能哈~
-
-   在使用过程中遇到了什么问题的话，可以在体验交流群里进行留言，我们的交流群二维码如下图。
+面向行业测试相关从业人员，对工具有什么意见或者建议的话也欢迎Issue、PR或加群讨论。
+ 
+- 钉钉群：
 
 ![group](assets/group.jpeg)
+
+
+## Limitation (限制)
+
+- adb
+- Android 4.3+
+
+## Installation (安装)
+
+#### 下载配置Android SDK路径
+
+   前往<https://developer.android.com/studio/releases/platform-tools#downloads>下载对应系统版本的SDK Platform Tools，解压好后在系统环境变量中添加环境变量`ANDROID_SDK=${sdk解压路径}`。你也可以参考网上的一些adb配置文档进行准备，比如 [https://sspai.com/post/40471](https://sspai.com/post/40471)
+
+   > 对于Windows 10以上，配置完环境变量后就可以在新开启的命令行中生效，对于较老版本的Windows系统，需要重启PC才能生效，对于Linux和macOS系统，请通过`echo $ANDROID_SDK`的方式检验是否生效。
+
+#### 开启手机的开发者模式
+
+   请打开手机设置应用，在`关于手机->软件信息`菜单下，连续点击`编译编号`一项7次，系统会提示`您已进入开发者模式`或者类似文案（不同的系统版本开发者模式开启方式略有不同）。
+
+   回到设置应用根页面，可以看到`开发者选项`一项，开启`USB调试`功能。
+
+#### 常见问题
+
+   VIVO设备，如果在开发者选项中包含“USB安全操作”，需要确保开启，否则录制回放与一机多控功能可能会无法正常操作。
+
+   小米设备需要开启开发者选项中的 USB安装与USB调试（安全设置），否则录制回放与一机多控功能会无法正常操作；此外，还需要手动开启Soloπ应用权限中的后台弹出界面选项，否则无法正常使用。
+
+#### 连接设备并开启wifi调试端口
+
+   请先连接设备到PC，通过下方命令检查设备是否与电脑建立好连接。
+
+   连接时，您的设备上会提示`是否允许USB调试`，请选择确定。
+
+   Windows：
+
+   ```bash
+   %ANDROID_SDK%\platform-tools\adb.exe devices
+   ```
+
+   macOS或Linux：
+
+   ```shell
+   $ANDROID_SDK/platform-tools/adb devices
+   ```
+
+   如果命令行显示出对应的设备号（如下图所示），则表示连接成功。
+
+   ![建立连接](../../wikis/FirstUse/genConnection.png)
+
+   > 对于Windows系统，需要安装Android设备的驱动程序才可以连接成功，可以前往手机厂商官网下载安装对应的驱动程序（通常厂商会将驱动程序集成在手机管家程序中，可以通过下载安装手机管家配置驱动）
+
+   如果显示的不是`device`，请确认下您的设备是否已经安装好驱动，并且允许了USB调试，部分手机需要将连接模式设置为`传输图片（MTP）`模式才可正常连接。
+
+   单机场景
+
+   Windows：
+
+   ```bash
+   %ANDROID_SDK%\platform-tools\adb.exe tcpip 5555
+   ```
+
+   macOS或Linux：
+
+   ```shell
+   $ANDROID_SDK/platform-tools/adb tcpip 5555
+   ```
+
+   通常设备会显示`restarting in TCP mode port: 5555`来提示手机已开启无线ADB调试模式。
+
+   > 请确保您使用设备的网络安全，不要随意允许ADB调试请求。
+
+   多机场景
+
+   在设备号列表中找到您需要使用的设备，请记录下`device`字段之前的一段字母数字组合，这个是手机的序列号。
+
+   Windows：
+
+   ```bash
+   %ANDROID_SDK%\platform-tools\adb.exe -s ${之前记录的序列号} tcpip 5555
+   ```
+
+   macOS或Linux：
+
+   ```shell
+   $ANDROID_SDK/platform-tools/adb -s ${之前记录的序列号} tcpip 5555
+   ```
+
+#### 下载打包好的Soloπ APK（Soloπ.apk文件），或者clone源码在本地编译，具体在Soloπ中的操作可以参考： [第一次使用](../../wikis/FirstUse)
+
+## Compiling (编译)
+
+> 开源部分包含录制回放与性能测试工具，一机多控功能由于稳定性原因暂时我们还没有开源，后续我们会继续推进。
+
+#### 编译环境：
+* macOS 10.14.3
+* Android Studio 3.2
+* Gradle 4.4
+* Ndk 15.2.4203819
+* TargetApi 25
+* MinimumApi 18
+* **注意，构建时请将Android Studio的instant run功能关闭，否则打出来的安装包会无法使用**
+
+## Getting Started （必看）
+
+- 如果你是第一次使用Soloπ，推荐你先了解Soloπ的一些[使用注意事项](../../wikis/FirstUse)
+- Wiki文档： [Home](../../wikis/home)
+
+## 代码导读
+
+- app： 应用业务逻辑。
+- shared: 应用核心功能，主要包含node（页面节点获取操作）、event（各类事件监控获取，包含辅助功能事件、触摸事件）、io（数据维护，数据库）、display（性能工具监控项）
+- common: 应用框架功能，包含adb能力包装、全局Service能力、消息模块与常用工具。
+- mdlibrary: ExportService对应的Proxy生成(引用)
+- permission: 权限处理包(引用)
+- AdbLib: ADB连接处理(引用)
+- androidWebscokets: Android实现的WebSocket(引用)
+
+## Related projects (相关的项目)
+
+可以在 [版权信息](licenses/NOTICE.md) 中进行查看
+
+## Contribution (参与贡献)
+
+   独乐乐不如众乐乐，开源的核心还是在于技术的分享交流，当你对开源项目产生了一些想法时，有时还会有更加Smart的表达方式，比如(Thanks to uiautomator2)：
+
+   - 我们的业务需要这项功能 ==> 我加了个功能，可以在很多场景用到，已经提交MR了。
+
+   - 这块儿功能有更详细的文档吗？ ==> 这块内容我改了一下，更方便使用了，帮忙合并一下。
+
+   - 我在XXX上怎么用不了啊？ ==> 在XXX手机上功能有点问题，我已经修复了。
+
+   - 我刚用了XXX功能，怎么和文档上不一样啊？ ==> 我根据文档试用了一下，碰到了一些坑，这是我在ATA、Lark发的踩坑贴，有些内容可以补充一下。
+
+   - 这个是不是一直维护啊？ ==> 我能做些什么？
+
+   当然，Star、Fork、Merge Request、Issue等功能也随时欢迎大家使用哈！
+
+   如果你有什么好的想法，也可以与我们直接联系，进行更加深入的讨论，我们希望将这套移动端的测试工具框架进行更好的推广，欢迎大家多多宣传。
+
+## License (协议)
+
+This project is under the Apache 2.0 License. See the [LICENSE](LICENSE) file for the full license text.
+
+```text
+Copyright (C) 2015-present, Ant Financial Services Group
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+ 	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
+## Disclaimer (免责声明)
+
+[免责声明](Disclaimer.md)

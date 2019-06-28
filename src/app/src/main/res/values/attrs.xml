@@ -1,0 +1,41 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<resources>
+    <declare-styleable name="TextSpinner">
+        <attr name="name" format="string|reference" />
+        <attr name="textAppearance" format="reference" />
+        <attr name="entries" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="CheckableRelativeLayout">
+        <attr name="selectColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="ReverseImageView">
+        <attr name="maskImg" format="reference" />
+        <attr name="targetImg" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="CaseStepStatusView" >
+        <attr name="css_backgroundColor" format="color" />
+        <attr name="css_lineColor" format="color" />
+        <attr name="css_textSize" format="dimension" />
+        <attr name="css_textWidth" format="dimension" />
+        <attr name="css_lineSpace" format="dimension" />
+        <attr name="css_lineWidth" format="dimension" />
+        <attr name="css_triangleWidth" format="dimension" />
+    </declare-styleable>
+</resources>

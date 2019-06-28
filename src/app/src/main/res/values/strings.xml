@@ -1,0 +1,95 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<resources>
+
+    <string name="app_name">Soloπ</string>
+    <string name="accessibility_description">Soloπ自动化工具\n支持功能：\n1. 用例录制回放\n2. 记录性能数据\n3. 一机多控
+    </string>
+
+    <string name="more_setting">更多设置</string>
+    <string name="collapse_setting">收起</string>
+    <string name="target_app">目标应用</string>
+    <string name="help_text"><![CDATA[问题或建议请通过邮箱联系<a href=\"mailto:ruikai.qrk@antfin.com\">ruikai.qrk@antfin.com</a>]]></string>
+    <string name="app_desc">Android自动化工具</string>
+    <string name="default_scroll_percentage">50</string>
+    <string name="default_long_click_time">2000</string>
+    <string name="default_sleep_time">10000</string>
+    <string name="to_long_template">内容过长，请前往\'%s\'查看</string>
+    <string name="attention_input_space">请注意输入是否包含空格</string>
+    <string name="splash_app_desc">自动化测试工具</string>
+    <string name="disclaimer">
+&#160;&#160;&#160;&#160;Soloπ开源自动化测试工具的功能是我们针对不同用户的需求而特别提供。Soloπ提供的应用、代码和资料的著作权均归Soloπ所有，用户具有自由的使用权。\n
+&#160;&#160;&#160;&#160;如果用户下载、安装、使用、修改本工具及相关代码，即表明用户信任该工具。那么，用户在使用本工具时造成对用户自己或他人任何形式的损失和伤害，Soloπ工具不承担任何责任。\n
+&#160;&#160;&#160;&#160;本工具不含有任何旨在破坏用户计算机数据和获取用户隐私信息的恶意代码；本工具使用过程中获取到的操作信息在打印日志时默认会进行脱敏，且不会进行上传；当应用出现异常时，用户可手动选择是否通过邮件上报故障日志，不会泄漏用户隐私。\n
+&#160;&#160;&#160;&#160;对于用户从非工具发布站点下载的应用，本工具无法保证其是否感染计算机病毒、是否隐藏有伪装的特洛伊木马程序或者黑客软件。用户使用此类软件，将可能导致不可预测的风险，建议用户不要轻易下载、安装、使用。本工具不承担由此产生的一切法律责任。\n
+&#160;&#160;&#160;&#160;用户不得利用本工具提供的功能误导、欺骗他人；用户仅可将本工具用于学习交流，不得用于非法用途；不得故意避开或者破坏本工具为保护著作权而采取的技术措施。\n
+&#160;&#160;&#160;&#160;本工具提供的功能经过详细的测试，但不能保证与所有的软硬件系统完全兼容，不能保证本工具完全没有错误。如果出现不兼容及软件错误的情况，用户可以到交流群获得技术支持。我们将尽力为用户解决问题、解答疑问。\n
+&#160;&#160;&#160;&#160;使用本工具所提供的系统所产生的风险由用户自行承担。在适用法律允许的最大范围内，对因使用或不能使用本系统所产生的损害及风险，本工具不承担任何相关责任。\n
+&#160;&#160;&#160;&#160;如果本协议中的任何条款无论因何种原因完全或部分无效或不具有执行力，或违反任何适用的法律条款，则该条款被视为删除，但本协议的其余条款仍有效并且具有约束力。\n
+&#160;&#160;&#160;&#160;作者有权根据有关法律、法规的变化以及工具的发展需求等因素修改本协议。若新旧协议有冲突，以最新版本协议为准。如果用户继续使用本系统，则视为您接受本协议的变动。\n
+&#160;&#160;&#160;&#160;本协议的一切解释权与修改权归本工具所有。\n
+</string>
+
+    <string name="replay_step_fragment__node_size_format">%d x %d</string>
+    <string name="record_service__cost_time">耗时为：%dms</string>
+    <string name="qr_scan__url_not_support">%s\\n此链接类型不支持，请重试</string>
+    <string name="info__version_text">v%s</string>
+    <string name="function_select__text">Text</string>
+    <string name="function_select__description">Description</string>
+    <string name="function_select__class_name">ClassName</string>
+    <string name="function_select__xpath">Xpath</string>
+    <string name="function_select__res_id">ResID</string>
+    <string name="case_replay_result__case_name">用例名称: %s</string>
+    <string name="case_replay_result__targe_app">目标应用: %s</string>
+    <string name="case_replay_result__start_time">开始时间: %s</string>
+    <string name="case_replay_result__end_time">结束时间: %s</string>
+    <string name="batch_replay_result__case_count">用例总数：%d</string>
+    <string name="batch_replay_result__success_count">成功数： %d</string>
+    <string name="batch_replay_result__failed_count">失败数： %d</string>
+    <string name="constant_global">全局</string>
+    <string name="constant__batch_replay">批量回放</string>
+    <string name="constant__case_list">用例列表</string>
+    <string name="constant__not_config">未设置</string>
+    <string name="settings__performance_upload_url">性能数据上传地址</string>
+    <string name="settings__record_upload_url">录屏耗时上传地址</string>
+    <string name="settings__plugin_url">Plugin获取地址</string>
+    <string name="settings__encrept_key">用例加密秘钥</string>
+    <string name="settings__config_failed">配置失败</string>
+    <string name="settings__auto_clean_time">文件超期时间</string>
+    <string name="settings_auto_clean_hint">-1表示不清理</string>
+    <string name="settings__whether_hide_node_info">日志中隐藏控件信息</string>
+    <string name="constant__yes">是</string>
+    <string name="constant__no">否</string>
+    <string name="settings__load_extrenal_case">加载外部用例中</string>
+    <string name="settings__load_count_case">加载了%d条用例</string>
+    <string name="settings__load_plugin">加载插件中</string>
+    <string name="settings__load_success">插件【%s】加载完毕</string>
+    <string name="settings__load_failed">插件安装失败</string>
+    <string name="constant__setting">设置</string>
+    <string name="index__select_mail_app">请选择使用的邮件应用</string>
+    <string name="index__report_error_log">故障日志上传</string>
+    <string name="index__error_occur_time">发生时间: %d</string>
+    <string name="index__find_error_log">发现未上报的故障日志，是否发送？</string>
+    <string name="case_replay_result__running_result">运行结果：%s</string>
+    <string name="settings__response_upload_url">响应耗时上传地址</string>
+    <string name="settings__for_auto_install">用于自动装包</string>
+    <string name="settings__clear_file_over_days">清理超过指定天数的文件</string>
+    <string name="settings__replay_highlight">回放时是否高亮</string>
+    <string name="settings__to_load_external_case">导入外部用例</string>
+    <string name="settings__load_patch_in_patches">导入patch目录下插件</string>
+    <string name="settings__default_patch_path">/sdcard/solopi/patch</string>
+    <string name="settings__about">关于</string>
+</resources>

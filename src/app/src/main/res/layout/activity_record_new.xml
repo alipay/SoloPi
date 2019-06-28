@@ -1,0 +1,258 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <FrameLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">a
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@null">
+
+            <include layout="@layout/head_panel_layout"
+                     android:id="@+id/head_layout"/>
+
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:focusableInTouchMode="true"
+                    android:focusable="true"
+                    android:descendantFocusability="beforeDescendants">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:paddingLeft="15dp"
+                        android:paddingRight="15dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
+                            android:text="测试应用"
+                            android:textColor="@color/mainFont"
+                            android:textSize="16dp"/>
+
+                        <LinearLayout
+                            android:id="@+id/switch_app"
+                            android:layout_width="wrap_content"
+                            android:layout_height="24dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:background="@drawable/bg_round_corner">
+                            <ImageView
+                                android:layout_width="12dp"
+                                android:layout_height="12dp"
+                                android:layout_marginLeft="6dp"
+                                android:layout_marginRight="6dp"
+                                android:scaleType="centerInside"
+                                android:src="@drawable/swap"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="切换"
+                                android:textSize="12dp"
+                                android:layout_marginRight="7dp"
+                                android:textColor="@color/mainBlue"/>
+                        </LinearLayout>
+                    </RelativeLayout>
+
+                    <ImageView
+                        android:id="@+id/test_app_icon"
+                        android:layout_marginTop="12dp"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"/>
+                    <TextView
+                        android:id="@+id/test_app_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textColor="@color/mainFont"
+                        android:textSize="20dp"/>
+                    <TextView
+                        android:id="@+id/test_app_pkg_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/subFont"
+                        android:textSize="12dp"/>
+
+                    <EditText
+                        android:id="@+id/case_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:padding="5dp"
+                        android:textSize="16dp"
+                        android:background="@drawable/bg_custom_input"
+                        android:textColorHint="#aaaaaa"
+                        android:hint="请输入用例名称(必填)"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginRight="16dp"
+                        android:layout_marginTop="20dp"
+                        android:textCursorDrawable="@null"/>
+
+                    <EditText
+                        android:id="@+id/case_desc"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:padding="5dp"
+                        android:textSize="16dp"
+                        android:background="@drawable/bg_custom_input"
+                        android:textColorHint="#aaaaaa"
+                        android:hint="请输入用例描述(选填)"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginRight="16dp"
+                        android:layout_marginTop="20dp"
+                        android:textCursorDrawable="@null"/>
+
+
+
+                    <Button
+                        android:id="@+id/start_record"
+                        android:layout_width="174dp"
+                        android:layout_height="45dp"
+                        android:layout_marginTop="30dp"
+                        android:textSize="16dp"
+                        android:text="启动"
+                        android:textColor="@color/white"
+                        android:background="@drawable/bg_solid_round_btn"
+                        android:layout_marginBottom="19dp"/>
+
+                    <LinearLayout
+                        android:id="@+id/recent_case_wrapper"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="12dp"
+                            android:background="@color/default_background_color"/>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="44dp"
+                            android:paddingLeft="15dp"
+                            android:paddingRight="15dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="16dp"
+                                android:textColor="@color/mainFont"
+                                android:text="最近录制"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"/>
+
+                            <TextView
+                                android:id="@+id/check_all_cases"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="14dp"
+                                android:textColor="@color/colorPrimary"
+                                android:text="查看全部"
+                                android:layout_alignParentRight="true"
+                                android:layout_centerVertical="true"/>
+
+                        </RelativeLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="2dp"
+                            android:layout_marginRight="15dp"
+                            android:layout_marginLeft="15dp"
+                            android:background="#f6f6f6"/>
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <com.alipay.hulu.ui.TotalMeasureListView
+                                android:id="@+id/recent_case_list"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:divider="@null"/>
+
+                            <TextView
+                                android:id="@+id/empty_hint"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginTop="10dp"
+                                android:layout_marginBottom="10dp"
+                                android:text="本地还没有录制过用例哦"/>
+
+                        </FrameLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </ScrollView>
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/app_list_container"
+        android:layout_width="303dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:orientation="vertical"
+        android:background="@color/white">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:layout_marginLeft="25dp"
+            android:text="切换应用"
+            android:textSize="19dp"
+            android:textColor="@color/mainFont"/>
+
+        <ListView
+            android:id="@+id/app_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="17dp"
+            android:scrollbars="none"
+            android:overScrollMode="never"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0dp">
+        </ListView>
+
+    </LinearLayout>
+
+</android.support.v4.widget.DrawerLayout>

@@ -1,0 +1,84 @@
+/*
+ * Copyright (C) 2015-present, Ant Financial Services Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "26.0.2"
+    defaultConfig {
+        applicationId "com.alipay.hulu"
+        minSdkVersion 18
+        targetSdkVersion 25
+        multiDexEnabled true
+    }
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            versionNameSuffix "-" + new Date().format("yyMMddHHmm")
+        }
+    }
+
+
+    signingConfigs {
+        release {
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
+    }
+
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+}
+
+dependencies {
+    implementation 'com.android.support:support-v4:25.4.0'
+    implementation 'com.android.support:support-core-utils:25.4.0'
+    implementation 'com.android.support:appcompat-v7:25.4.0'
+    implementation 'com.android.support:recyclerview-v7:25.4.0'
+    implementation 'com.android.support:design:25.4.0'
+    implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'
+    implementation 'com.alibaba:fastjson:1.1.71.android'
+    implementation 'org.greenrobot:greendao:3.2.2'
+    implementation 'com.squareup.okhttp3:okhttp:3.12.3'
+    implementation 'org.greenrobot:eventbus:3.1.1'
+    implementation 'com.dlazaro66.qrcodereaderview:qrcodereaderview:2.0.3'
+    implementation 'com.liulishuo.filedownloader:library:1.7.6'
+    implementation 'com.hyman:flowlayout-lib:1.1.2'
+    implementation 'com.yydcdut:sdlv:0.7.6'
+
+    implementation('com.theartofdev.edmodo:android-image-cropper:2.5.1') {
+        exclude group: "com.android.support"
+    }
+    implementation('com.github.bumptech.glide:glide:4.9.0') {
+        exclude group: "com.android.support"
+    }
+    implementation 'commons-io:commons-io:2.6'
+    implementation ('com.orhanobut:logger:2.2.0') {
+        exclude group: "com.android.support"
+    }
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation project(':shared')
+}

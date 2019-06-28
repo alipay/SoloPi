@@ -1,0 +1,14 @@
+apply plugin: 'java'
+
+sourceSets {
+
+    main {
+        java {
+            srcDirs = ['src']
+            targetCompatibility = '1.7'
+            sourceCompatibility = '1.7'
+        }
+    }
+
+}
+

@@ -1,0 +1,7 @@
+include ':AdbLib'
+include ':permission'
+include ':androidWebsockets'
+include ':mdlibrary'
+include ':common'
+include ':shared'
+include ':app'

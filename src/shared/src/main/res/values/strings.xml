@@ -1,0 +1,27 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<resources>
+    <string name="app_name">shared</string>
+    <string name="accessibility_description">Soloπ自动化工具\n支持功能：\n1. 用例录制回放\n2. 记录性能数据\n3. 一机多控
+    </string>
+    <string name="download__progress">%d%%</string>
+    <string name="download__download_failed">下载失败: %s\\n%s</string>
+    <string name="download__prepare_download">准备下载</string>
+    <string name="download__download_success_store">下载成功，文件存储在: %s</string>
+    <string name="download__installing">安装中...</string>
+    <string name="download__install_success">安装成功</string>
+    <string name="download__install_fail">安装失败</string>
+</resources>

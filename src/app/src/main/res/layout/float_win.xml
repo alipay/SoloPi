@@ -1,0 +1,181 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<RelativeLayout android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="0dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+    <ImageView
+        android:id="@+id/floatIcon"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:visibility="gone"
+        android:src="@drawable/solopi_float" />
+
+    <LinearLayout
+        android:id="@+id/float_card"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:minWidth="240dp"
+        android:adjustViewBounds="true"
+        android:layout_margin="2dp"
+        android:padding="2dp"
+        android:background="@drawable/dialog_background"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/float_head"
+            android:layout_width="match_parent"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/float_card_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/solopi_float" />
+            <ImageView
+                android:id="@+id/closeIcon"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="12dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/close_icon"
+                android:tint="@color/colorAccent"/>
+            <ImageView
+                android:id="@+id/homeIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_centerVertical="true"
+                android:scaleType="centerCrop"
+                android:layout_toLeftOf="@id/closeIcon"
+                android:layout_marginEnd="12dp"
+                android:src="@drawable/home"
+                android:tint="@color/yellow"/>
+            <ImageView
+                android:id="@+id/recordIcon"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_centerVertical="true"
+                android:scaleType="centerCrop"
+                android:layout_toLeftOf="@id/homeIcon"
+                android:layout_marginEnd="12dp"
+                android:src="@drawable/start"
+                />
+            <TextView
+                android:id="@+id/recordText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@+id/recordIcon"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="12dp"
+                android:text="00:00"
+                android:visibility="gone"
+                android:textColor="@color/colorAccent"
+                android:textSize="16sp" />
+
+
+        </RelativeLayout>
+        <include layout="@layout/divider" />
+
+        <LinearLayout
+            android:id="@+id/float_title"
+            android:layout_width="280dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textSize="14dp"
+                android:textColor="@color/primaryText"
+                android:gravity="center"
+                android:text="@string/target_app"/>
+            <TextView
+                android:id="@+id/float_title_app"
+                android:textSize="16dp"
+                android:textColor="@color/colorAccent"
+                android:layout_width="match_parent"
+                android:textAlignment="center"
+                android:layout_height="wrap_content"
+                android:gravity="center"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/float_display_wrapper"
+            android:layout_width="match_parent"
+            android:visibility="gone"
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+            <include layout="@layout/divider" />
+            <LinearLayout
+                android:id="@+id/float_display_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"/>
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/float_expand_layout"
+            android:layout_width="match_parent"
+            android:minWidth="240dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical">
+            <include layout="@layout/divider" />
+            <ImageView
+                android:id="@+id/float_expand_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:src="@drawable/angel"
+                android:tint="@color/divider_color"
+                android:clickable="false"
+                android:focusable="false"
+                android:scaleType="centerInside"
+                android:layout_gravity="center_horizontal"/>
+            <include layout="@layout/divider" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/float_extra_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            />
+
+        <LinearLayout
+            android:id="@+id/float_expand_panel"
+            android:layout_width="match_parent"
+            android:visibility="gone"
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+            <ListView
+                android:id="@+id/float_expand_item"
+                android:divider="@color/divider_color"
+                android:dividerHeight="1px"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

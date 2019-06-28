@@ -1,0 +1,182 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="400dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_column="2"
+        android:divider="@drawable/divider"
+        android:showDividers="middle|beginning|end">
+        <TableRow
+            android:padding="2dp"
+            >
+            <TextView
+                android:minWidth="56dp"
+                android:textColor="@color/primaryText"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="14dp"
+                android:maxLines="1"
+                android:layout_gravity="center"
+                android:text="类型"/>
+            <TextView
+                android:textColor="@color/secondaryText"
+                android:layout_weight="3"
+                android:textSize="13dp"
+                android:id="@+id/text_node_classname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextView"/>
+
+        </TableRow>
+        <TableRow
+            android:padding="2dp"
+            >
+            <TextView
+                android:minWidth="56dp"
+                android:textColor="@color/primaryText"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:maxLines="1"
+                android:layout_gravity="center"
+                android:textSize="14dp"
+                android:text="ID"/>
+            <TextView
+                android:textColor="@color/secondaryText"
+                android:textSize="13dp"
+                android:layout_weight="3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/text_node_id"/>
+
+        </TableRow>
+        <TableRow
+            android:padding="2dp"
+            >
+            <TextView
+                android:minWidth="56dp"
+                android:textColor="@color/primaryText"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:maxLines="1"
+                android:layout_gravity="center"
+                android:textSize="14dp"
+                android:text="文字"/>
+            <TextView
+                android:textColor="@color/secondaryText"
+                android:textSize="13dp"
+                android:layout_weight="3"
+                android:id="@+id/text_node_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="用例中心"/>
+
+        </TableRow>
+        <TableRow
+            android:padding="2dp"
+            >
+            <TextView
+                android:minWidth="56dp"
+                android:textColor="@color/primaryText"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:textSize="14dp"
+                android:maxLines="1"
+                android:text="描述"/>
+            <TextView
+                android:textColor="@color/secondaryText"
+                android:textSize="13dp"
+                android:layout_weight="3"
+                android:id="@+id/text_node_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="用例中心"/>
+
+        </TableRow>
+        <TableRow
+            android:padding="2dp"
+            >
+            <TextView
+                android:minWidth="56dp"
+                android:textColor="@color/primaryText"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:textSize="14dp"
+                android:maxLines="1"
+                android:text="Xpath"/>
+            <TextView
+                android:textColor="@color/secondaryText"
+                android:textSize="13dp"
+                android:id="@+id/text_node_xpath"
+                android:layout_weight="3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="/sdada/dasdasda/sdadasd/asdas[csc]"/>
+
+        </TableRow>
+        <TableRow
+            android:padding="2dp"
+            >
+            <TextView
+                android:minWidth="56dp"
+                android:textColor="@color/primaryText"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:textSize="14dp"
+                android:text="大小"/>
+            <TextView
+                android:textColor="@color/secondaryText"
+                android:textSize="13dp"
+                android:id="@+id/text_node_size"
+                android:layout_weight="3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""/>
+
+        </TableRow>
+        <TableRow
+            android:padding="2dp"
+            >
+            <TextView
+                android:minWidth="56dp"
+                android:textColor="@color/primaryText"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:textSize="14dp"
+                android:maxLines="1"
+                android:text="深度"/>
+            <TextView
+                android:textColor="@color/secondaryText"
+                android:textSize="13dp"
+                android:layout_weight="3"
+                android:id="@+id/text_node_depth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""/>
+
+        </TableRow>
+
+    </TableLayout>
+
+</ScrollView>
