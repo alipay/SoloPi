@@ -1,6 +1,4 @@
-# <img src="assets/icon.png" width="64" /> Soloπ
-
-----
+# <img src="assets/icon.png" width="48" /> Soloπ
 
 [![GitHub stars](https://img.shields.io/github/stars/soloPi/SoloPi.svg)](https://github.com/soloPi/SoloPi/stargazers) [![GitHub license](https://img.shields.io/github/license/soloPi/SoloPi.svg)](https://github.com/soloPi/SoloPi/blob/master/LICENSE) [![GitHub release](https://img.shields.io/github/release/alipay/SoloPi.svg)](https://github.com/soloPi/SoloPi/releases)
 
