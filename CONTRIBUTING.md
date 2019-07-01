@@ -6,7 +6,7 @@ Soloπ is released under the Apache 2.0 license, and follows a very standard Git
 
 Before we accept a non-trivial patch or pull request we will need you to sign the Contributor License Agreement. Signing the contributor’s agreement does not grant anyone commit rights to the main repository, but it does mean that we can accept your contributions, and you will get an author credit if we do. Active contributors might be asked to join the core team, and given the ability to merge pull requests.
 
-To get started, [sign the Contributor License Agreement](https://www.clahub.com/agreements/soloPi/SoloPi).
+To get started, [sign the Contributor License Agreement](https://www.clahub.com/agreements/alipay/SoloPi).
 
 ### Code Conventions
 
