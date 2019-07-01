@@ -1,3 +1,7 @@
+# <img src="assets/icon.png" width="64" /> Soloπ
+
+----
+
 [![GitHub stars](https://img.shields.io/github/stars/soloPi/SoloPi.svg)](https://github.com/soloPi/SoloPi/stargazers) [![GitHub license](https://img.shields.io/github/license/soloPi/SoloPi.svg)](https://github.com/soloPi/SoloPi/blob/master/LICENSE) [![GitHub release](https://img.shields.io/github/release/alipay/SoloPi.svg)](https://github.com/soloPi/SoloPi/releases)
 
 > Soloπ是一个无线化、非侵入式的Android自动化工具，公测版拥有录制回放、性能测试、一机多控三项主要功能，能为测试开发人员节省宝贵时间。
@@ -7,15 +11,25 @@
 
 #### 录制回放
 
+[![录制回放](assets/replay.gif)](videos/游戏自动化.mp4)
+
+[Native应用录制回放](videos/垃圾邮件处理.mov)
+
 Soloπ拥有录制操作的能力，用户只需要通过Soloπ执行用例步骤，Soloπ就能够将用户的操作记录下来，并且支持在各个设备上进行回放，这一切都能够在手机上独立完成。详见[录制回放](../../wikis/RecordCase)一篇。
 
 #### 性能工具
+
+[![性能工具](assets/performance.gif)](videos/性能工具.mov)
+
+[响应耗时计算](videos/响应耗时计算.mov)
 
 Soloπ能够记录待测应用的各项指标，你可以在悬浮窗中观察实时更新的数据，也可以对性能数据进行录制，在录制结束后查看图表；同时，Soloπ还支持性能加压，能够对CPU、内存与网络环境进行限制，复现应用在性能较差、网络环境不佳场景下的表现。
 
 除了常规性能指标，Soloπ还提供了启动耗时计算工具，测试同学只需要点击两次按钮，就可以得到最贴近用户体验的启动耗时数据。同时，启动耗时计算工具还可以通过广播调用，可以非常方便的与UI自动化测试打通。详见[性能工具](../../wikis/Performance)一篇。
 
 #### 一机多控
+
+[![一机多控](assets/oneToMany.gif)](videos/一机多控.mov)
 
 Soloπ支持通过操作一台主机设备来控制多台从机设备，不需要在各个设备上分别进行重复冗杂的兼容性测试，能够极大提升兼容性测试的效率。详见[一机多控](../../wikis/OneToMany)一篇。
 
@@ -55,7 +69,7 @@ Soloπ支持通过操作一台主机设备来控制多台从机设备，不需�
 
    VIVO设备，如果在开发者选项中包含“USB安全操作”，需要确保开启，否则录制回放与一机多控功能可能会无法正常操作。
 
-   小米设备需要开启开发者选项中的 USB安装与USB调试（安全设置），否则录制回放与一机多控功能会无法正常操作；此外，还需要手动开启Soloπ应用权限中的后台弹出界面选项，否则无法正常使用。
+   小米设备需要开启开发者选项中的 **USB安装** 与 **USB调试（安全设置）** ，否则录制回放与一机多控功能会无法正常操作；此外，还需要手动开启Soloπ应用权限中的 **后台弹出界面** 选项，否则无法正常使用。
 
 #### 连接设备并开启wifi调试端口
 
@@ -99,7 +113,7 @@ Soloπ支持通过操作一台主机设备来控制多台从机设备，不需�
 
    通常设备会显示`restarting in TCP mode port: 5555`来提示手机已开启无线ADB调试模式。
 
-> 请确保您使用设备的网络安全，不要随意允许ADB调试请求。
+> 请确保设备处于安全的网络环境，不要随意允许ADB调试请求，以免给您带来不必要的损失。
 
    多机场景
 
@@ -147,6 +161,12 @@ Soloπ支持通过操作一台主机设备来控制多台从机设备，不需�
 - 钉钉群：
 
 ![group](assets/group.jpeg)
+
+* 微信群：
+
+  添加好友后回复加群。
+
+  ![wechatGroup](assets/wechatGroup.jpg)
 
 
 
