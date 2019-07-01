@@ -59,7 +59,7 @@ public class PatchRequest {
      * 更新Patch列表
      */
     public static void updatePatchList() {
-        String storedUrl = SPService.getString(SPService.KEY_PATCH_URL, "https://raw.githubusercontent.com/soloPi/SoloPi/master/<abi>.json");
+        String storedUrl = SPService.getString(SPService.KEY_PATCH_URL, "https://raw.githubusercontent.com/alipay/SoloPi/master/<abi>.json");
         // 地址为空
         if (StringUtil.isEmpty(storedUrl)) {
             LogUtil.e(TAG, "Patch url is empty");

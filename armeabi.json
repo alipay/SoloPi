@@ -4,19 +4,19 @@
     "version": 1,
     "data": [
         {
-            "url": "https://raw.githubusercontent.com/soloPi/SoloPi/master/plugins/hulu_imageCompare.zip",
+            "url": "https://raw.githubusercontent.com/alipay/SoloPi/master/plugins/hulu_imageCompare.zip",
             "version": 7,
             "type": "base",
             "name": "hulu_imageCompare"
         },
         {
-            "url": "https://raw.githubusercontent.com/soloPi/SoloPi/master/plugins/hulu_screenRecord_armeabi.zip",
+            "url": "https://raw.githubusercontent.com/alipay/SoloPi/master/plugins/hulu_screenRecord_armeabi.zip",
             "version": 7,
             "type": "required",
             "name": "hulu_screenRecord"
         },
         {
-            "url": "https://raw.githubusercontent.com/soloPi/SoloPi/master/plugins/hulu_minicap.v7a.zip",
+            "url": "https://raw.githubusercontent.com/alipay/SoloPi/master/plugins/hulu_minicap.v7a.zip",
             "version": 3,
             "type": "base",
             "name": "minicap"

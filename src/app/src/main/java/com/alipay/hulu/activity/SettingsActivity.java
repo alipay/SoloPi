@@ -187,7 +187,7 @@ public class SettingsActivity extends BaseActivity {
                     }
                 }, getString(R.string.settings__plugin_url),
                         Collections.singletonList(new Pair<>(getString(R.string.settings__plugin_url),
-                                SPService.getString(SPService.KEY_PATCH_URL, "https://raw.githubusercontent.com/soloPi/SoloPi/master/<abi>.json"))));
+                                SPService.getString(SPService.KEY_PATCH_URL, "https://raw.githubusercontent.com/alipay/SoloPi/master/<abi>.json"))));
             }
         });
 
@@ -496,7 +496,7 @@ public class SettingsActivity extends BaseActivity {
         mPatchListWrapper = findViewById(R.id.patch_list_setting_wrapper);
         mPatchListInfo = (TextView) findViewById(R.id.patch_list_setting_info);
         path = SPService.getString(SPService.KEY_PATCH_URL,
-                "https://raw.githubusercontent.com/soloPi/SoloPi/master/<abi>.json");
+                "https://raw.githubusercontent.com/alipay/SoloPi/master/<abi>.json");
         if (StringUtil.isEmpty(path)) {
             mPatchListInfo.setText("未设置");
         } else {
