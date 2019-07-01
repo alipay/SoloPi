@@ -714,13 +714,11 @@ public class OperationExecutor {
                     processors.add(AccessibilityNodeProcessor.class);
                     operationManagerRef.get().configProcessors(processors);
                     operationManagerRef.get().configProvider(AccessibilityProvider.class);
-                    SPService.putBoolean(SPService.KEY_H5_COMPAT, false);
                 } else if (toRunningMode == RunningModeEnum.CAPTURE_MODE) {
                     List<Class<? extends AbstractNodeProcessor>> processors = new ArrayList<>();
                     processors.add(CaptureProcessor.class);
                     operationManagerRef.get().configProcessors(processors);
                     operationManagerRef.get().configProvider(CaptureProvider.class);
-                    SPService.putBoolean(SPService.KEY_H5_COMPAT, false);
                 } else {
                     return false;
                 }

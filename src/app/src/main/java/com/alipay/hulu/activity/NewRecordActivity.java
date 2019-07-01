@@ -194,8 +194,6 @@ public class NewRecordActivity extends BaseActivity {
                     return;
                 }
 
-                SPService.putBoolean(SPService.KEY_H5_COMPAT, false);
-
                 // 检查权限
                 PermissionUtil.requestPermissions(Arrays.asList("adb", Settings.ACTION_ACCESSIBILITY_SETTINGS), NewRecordActivity.this, new PermissionUtil.OnPermissionCallback() {
                     @Override
@@ -368,7 +366,6 @@ public class NewRecordActivity extends BaseActivity {
 
                 AdvanceCaseSetting setting = new AdvanceCaseSetting();
 
-                SPService.putBoolean(SPService.KEY_H5_COMPAT, false);
                 RunningModeEnum currentRunningMode = RunningModeEnum.ACCESSIBILITY_MODE;
                 setting.setDescriptorMode(currentRunningMode.getCode());
                 setting.setVersion(SystemUtil.getAppVersionCode());
