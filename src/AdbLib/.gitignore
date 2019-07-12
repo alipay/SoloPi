@@ -6,3 +6,4 @@
 *.ear
 .gradle/
 build/
+*.iml
