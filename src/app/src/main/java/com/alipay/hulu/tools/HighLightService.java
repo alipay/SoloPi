@@ -47,7 +47,7 @@ public class HighLightService implements ExportService, View.OnTouchListener {
 
 	private static final String TAG = "HighLightService";
 
-	private static int WINDOW_LEVEL = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+	private static int WINDOW_LEVEL = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
 	Context cx = null;
 	private WeakReference<View> windowViewRef = null;

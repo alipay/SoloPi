@@ -831,7 +831,7 @@ public abstract class LauncherApplication extends Application {
                         });
                     }
                     dialog = builder.create();
-                    dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                    dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION);
                     dialog.setCanceledOnTouchOutside(false);                                   //点击外面区域不会让dialog消失
                     dialog.setCancelable(false);
                 } else {

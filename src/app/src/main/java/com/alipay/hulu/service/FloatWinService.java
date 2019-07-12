@@ -364,7 +364,7 @@ public class FloatWinService extends BaseService {
 		wm = (WindowManager) getApplicationContext().getSystemService(WINDOW_SERVICE);
 		// 设置LayoutParams(全局变量）相关参数
 		wmParams = ((MyApplication) getApplication()).getFloatWinParams();
-		wmParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+		wmParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 		wmParams.flags |= 8;
 		wmParams.gravity = Gravity.LEFT | Gravity.TOP; // 调整悬浮窗口至左上角
 		// 以屏幕左上角为原点，设置x、y初始值
