@@ -1,6 +1,6 @@
 # <img src="assets/icon.png" width="48" /> Soloπ
 
-[![GitHub stars](https://img.shields.io/github/stars/soloPi/SoloPi.svg)](https://github.com/soloPi/SoloPi/stargazers) [![GitHub license](https://img.shields.io/github/license/soloPi/SoloPi.svg)](https://github.com/soloPi/SoloPi/blob/master/LICENSE) [![GitHub release](https://img.shields.io/github/release/alipay/SoloPi.svg)](https://github.com/soloPi/SoloPi/releases)
+[![GitHub stars](https://img.shields.io/github/stars/soloPi/SoloPi.svg)](https://github.com/soloPi/SoloPi/stargazers) [![GitHub license](https://img.shields.io/github/license/soloPi/SoloPi.svg)](https://github.com/soloPi/SoloPi/blob/master/LICENSE) [![GitHub release](https://img.shields.io/github/release/alipay/SoloPi.svg)](https://github.com/soloPi/SoloPi/releases) [![API](https://img.shields.io/badge/API-18%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=18) [![TesterHome](https://img.shields.io/badge/TTF-TesterHome-2955C5.svg)](https://testerhome.com/opensource_projects/82)
 
 > Soloπ是一个无线化、非侵入式的Android自动化工具，公测版拥有录制回放、性能测试、一机多控三项主要功能，能为测试开发人员节省宝贵时间。
 
@@ -9,17 +9,21 @@
 
 #### 录制回放
 
-[![录制回放](assets/replay.gif)](videos/游戏自动化.mp4)
+![录制回放](assets/replay.gif)
 
-[Native应用录制回放](videos/垃圾邮件处理.mov)
+**[游戏录制回放使用视频](videos/游戏自动化.mp4)**
+
+**[Native应用录制回放使用视频](videos/垃圾邮件处理.mov)**
 
 Soloπ拥有录制操作的能力，用户只需要通过Soloπ执行用例步骤，Soloπ就能够将用户的操作记录下来，并且支持在各个设备上进行回放，这一切都能够在手机上独立完成。详见[录制回放](../../wikis/RecordCase)一篇。
 
 #### 性能工具
 
-[![性能工具](assets/performance.gif)](videos/性能工具.mov)
+![性能工具](assets/performance.gif)
 
-[响应耗时计算](videos/响应耗时计算.mov)
+**[性能工具使用视频](videos/性能工具.mov)**
+
+**[响应耗时计算使用视频](videos/响应耗时计算.mov)**
 
 Soloπ能够记录待测应用的各项指标，你可以在悬浮窗中观察实时更新的数据，也可以对性能数据进行录制，在录制结束后查看图表；同时，Soloπ还支持性能加压，能够对CPU、内存与网络环境进行限制，复现应用在性能较差、网络环境不佳场景下的表现。
 
@@ -27,7 +31,9 @@ Soloπ能够记录待测应用的各项指标，你可以在悬浮窗中观察�
 
 #### 一机多控
 
-[![一机多控](assets/oneToMany.gif)](videos/一机多控.mov)
+![一机多控](assets/oneToMany.gif)
+
+**[一机多控使用视频](videos/一机多控.mov)**
 
 Soloπ支持通过操作一台主机设备来控制多台从机设备，不需要在各个设备上分别进行重复冗杂的兼容性测试，能够极大提升兼容性测试的效率。详见[一机多控](../../wikis/OneToMany)一篇。
 
@@ -41,7 +47,7 @@ Soloπ支持通过操作一台主机设备来控制多台从机设备，不需�
 
 - macOS 10.14.3
 - Android Studio 3.2
-- Gradle 4.4
+- **Gradle 4.4（Android Studio打开项目时会提示升级Gradle版本，建议不要进行升级）**
 - Ndk 15.2.4203819
 - TargetApi 25
 - MinimumApi 18
@@ -65,9 +71,17 @@ Soloπ支持通过操作一台主机设备来控制多台从机设备，不需�
 
 #### 常见问题
 
-   VIVO设备，如果在开发者选项中包含“USB安全操作”，需要确保开启，否则录制回放与一机多控功能可能会无法正常操作。
+   ** 如果使用过程中有遇到问题，可以先去[FAQ](../../wiki/FAQ)查找是否有解决方法 **
 
-   小米设备需要开启开发者选项中的 **USB安装** 与 **USB调试（安全设置）** ，否则录制回放与一机多控功能会无法正常操作；此外，还需要手动开启Soloπ应用权限中的 **后台弹出界面** 选项，否则无法正常使用。
+   对于VIVO设备，如果在开发者选项中包含“USB安全操作”，需要手动进行开启，否则录制回放与一机多控功能可能会无法正常操作
+
+   对于小米设备，需要开启开发者选项中的`USB安装`与`USB调试（安全设置）`，否则录制回放与一机多控功能会无法正常操作；此外，还需要手动开启Soloπ应用权限中的`后台弹出界面`选项，否则无法正常使用
+
+   对于魅族设备，如果待测应用属于支付、金融类应用，需要在手机管家中关闭安全支付功能，否则录制回放与一机多控功能可能会无法正常操作
+
+   对于华为设备，需要开启开发者选项中的 `"仅充电"模式下允许ADB调试`，否则断开USB线后会提示adb调试中断
+
+   对于OPPO设备，系统会10分钟自动断开USB调试，导致Soloπ不可用。如果想要保持调试稳定，需要将设备连接到电脑
 
 #### 连接设备并开启wifi调试端口
 
