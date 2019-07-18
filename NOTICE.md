@@ -176,17 +176,6 @@ greenDAO binaries and source code can be used according to the Apache License, V
 
 > Apache License 2.0: http://www.apache.org/licenses/LICENSE-2.0
 
-## EventBus
-
-> https://github.com/greenrobot/EventBus
-
-
-Copyright (C) 2012-2017 Markus Junginger, greenrobot (http://greenrobot.org)
-
-EventBus binaries and source code can be used according to the Apache License, Version 2.0.
-
-> Apache License 2.0: http://www.apache.org/licenses/LICENSE-2.0
-
 ## QRCodeReaderView
 
 > https://github.com/dlazaro66/QRCodeReaderView
