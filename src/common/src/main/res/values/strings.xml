@@ -32,4 +32,7 @@
     <string name="cmd__adb_break">ADB连接中断，请尝试重新开启调试端口</string>
     <string name="constant__sure">好的</string>
     <string name="constant__cancel">取消</string>
+    <string name="constant__confirm">确定</string>
+    <string name="permission__request_permission">权限申请(</string>
+    <string name="constant__no_inform">不再提示</string>
 </resources>

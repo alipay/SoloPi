@@ -16,6 +16,8 @@
 package com.alipay.hulu.activity;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,6 +36,7 @@ import java.util.Arrays;
 
 public class SplashActivity extends BaseActivity {
 	private Handler handler;
+	private static final String DISPLAY_ALERT_INFO = "displayAlertInfo";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
@@ -45,6 +48,29 @@ public class SplashActivity extends BaseActivity {
 		String baseDir = SPService.getString(SPService.KEY_BASE_DIR);
 		if (!StringUtil.isEmpty(baseDir)) {
 			FileUtils.setSolopiBaseDir(baseDir);
+		}
+
+		// 免责弹窗
+		boolean showDisplay = SPService.getBoolean(DISPLAY_ALERT_INFO, true);
+		if (showDisplay) {
+			new AlertDialog.Builder(this).setTitle(R.string.index__disclaimer)
+					.setMessage(R.string.disclaimer)
+					.setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							processPemission();
+							dialog.dismiss();
+						}
+					}).setNegativeButton(R.string.constant__no_inform, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					SPService.putBoolean(DISPLAY_ALERT_INFO, false);
+					processPemission();
+					dialog.dismiss();
+				}
+			}).show();
+		} else {
+			processPemission();
 		}
 	}
 
@@ -89,10 +115,7 @@ public class SplashActivity extends BaseActivity {
 		});
 	}
 
-	@Override
-	protected void onStart() {
-		super.onStart();
-
+	private void processPemission() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			// 如果不存储在/sdcard/solopi，说明已经降级到外置私有目录下了
 			if (!StringUtil.equals(SPService.getString(SPService.KEY_SOLOPI_PATH_NAME, "solopi"), "solopi")) {

@@ -61,6 +61,7 @@ import com.alipay.hulu.event.ScanSuccessEvent;
 import com.alipay.hulu.shared.io.bean.GeneralOperationLogBean;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
 import com.alipay.hulu.shared.io.db.GreenDaoManager;
+import com.alipay.hulu.shared.io.util.OperationStepUtil;
 import com.alipay.hulu.shared.node.action.OperationExecutor;
 import com.alipay.hulu.shared.node.action.OperationMethod;
 import com.alipay.hulu.shared.node.action.PerformActionEnum;
@@ -77,6 +78,10 @@ import com.zhy.view.flowlayout.FlowLayout;
 import com.zhy.view.flowlayout.TagAdapter;
 import com.zhy.view.flowlayout.TagFlowLayout;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -96,6 +101,8 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
     private SlideAndDragListView dragList;
 
     private List<OperationStep> stepList;
+
+    private String storePath;
 
     private List<CaseStepAdapter.MyDataWrapper> dragEntities;
 
@@ -172,6 +179,11 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
         currentIdx = new AtomicInteger();
 
         GeneralOperationLogBean generalOperation = JSON.parseObject(recordCase.getOperationLog(), GeneralOperationLogBean.class);
+
+        // load from file
+        OperationStepUtil.afterLoad(generalOperation);
+        storePath = generalOperation.getStorePath();
+
         if (generalOperation.getSteps() != null) {
             stepList = generalOperation.getSteps();
         }
@@ -345,6 +357,8 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
 
         GeneralOperationLogBean logBean = new GeneralOperationLogBean();
         logBean.setSteps(operations);
+        logBean.setStorePath(storePath);
+        OperationStepUtil.beforeStore(logBean);
 
         recordCase.setOperationLog(JSON.toJSONString(logBean));
     }

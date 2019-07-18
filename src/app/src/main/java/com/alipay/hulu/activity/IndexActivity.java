@@ -36,6 +36,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.hulu.R;
 import com.alipay.hulu.activity.entry.EntryActivity;
+import com.alipay.hulu.bean.GithubReleaseBean;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.constant.Constant;
 import com.alipay.hulu.common.service.SPService;
@@ -50,6 +51,7 @@ import com.alipay.hulu.ui.ColorFilterRelativeLayout;
 import com.alipay.hulu.ui.HeadControlPanel;
 import com.alipay.hulu.upgrade.PatchRequest;
 import com.alipay.hulu.util.SystemUtil;
+import com.alipay.hulu.util.UpgradeUtil;
 import com.alipay.hulu.util.ZipUtil;
 
 import java.io.File;
@@ -72,7 +74,6 @@ import java.util.regex.Pattern;
 
 public class IndexActivity extends BaseActivity {
     private static final String TAG = IndexActivity.class.getSimpleName();
-    private static final String DISPLAY_ALERT_INFO = "displayAlertInfo";
 
     private HeadControlPanel mPanel;
     private GridView mGridView;
@@ -86,23 +87,48 @@ public class IndexActivity extends BaseActivity {
         initData();
         loadOthers();
 
-        // 免责弹窗
-        boolean showDisplay = SPService.getBoolean(DISPLAY_ALERT_INFO, true);
-        if (showDisplay) {
-            new AlertDialog.Builder(this).setTitle("免责声明")
-                    .setMessage(R.string.disclaimer)
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+        // check update
+        if (SPService.getBoolean(SPService.KEY_CHECK_UPDATE, true)) {
+            BackgroundExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    UpgradeUtil.checkForUpdate(new UpgradeUtil.CheckUpdateListener() {
                         @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
+                        public void onNoUpdate() {
+
                         }
-                    }).setNegativeButton("不再提示", new DialogInterface.OnClickListener() {
+
                         @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            SPService.putBoolean(DISPLAY_ALERT_INFO, false);
-                            dialog.dismiss();
+                        public void onNewUpdate(final GithubReleaseBean release) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    new AlertDialog.Builder(IndexActivity.this).setTitle("发现新版本: " + release.getTag_name())
+                                            .setMessage(release.getBody())
+                                            .setPositiveButton("前往更新", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    Uri uri = Uri.parse(release.getHtml_url());
+                                                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                                                    startActivity(intent);
+                                                }
+                                            }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                        }
+                                    }).show();
+                                }
+                            });
                         }
-                    }).show();
+
+                        @Override
+                        public void onUpdateFailed(Throwable t) {
+
+                        }
+                    });
+                }
+            });
         }
     }
 
@@ -299,7 +325,11 @@ public class IndexActivity extends BaseActivity {
 
         public Entry(EntryActivity activity, Class<? extends Activity> target) {
             this.iconId = activity.icon();
-            this.name = activity.name();
+            String name = activity.name();
+            if (activity.nameRes() > 0) {
+                name = StringUtil.getString(activity.nameRes());
+            }
+            this.name = name;
             permissions = activity.permissions();
             level = activity.level();
             targetActivity = target;

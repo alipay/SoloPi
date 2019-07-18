@@ -71,7 +71,7 @@ import java.util.List;
 /**
  * Created by lezhou.wyl on 2018/2/1.
  */
-@EntryActivity(icon = R.drawable.icon_luxiang, name = "录制回放", permissions = {"adb", "float", "toast:请将Soloπ添加到后台白名单中"}, index = 1, cornerText = "图像", cornerPersist = 3, cornerBg = 0xFFFF5900)
+@EntryActivity(icon = R.drawable.icon_luxiang, nameRes = R.string.record__name, permissions = {"adb", "float", "toast:请将Soloπ添加到后台白名单中"}, index = 1, cornerText = "New", cornerPersist = 3, cornerBg = 0xFFFF5900)
 public class NewRecordActivity extends BaseActivity {
 
     private static final String TAG = NewRecordActivity.class.getSimpleName();
@@ -121,8 +121,7 @@ public class NewRecordActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record_new);
-        InjectorService injectorService = LauncherApplication.getInstance().findServiceByName(InjectorService.class.getName());
-        injectorService.register(this);
+        InjectorService.g().register(this);
 
         initDrawerLayout();
         initAppList();
@@ -194,7 +193,7 @@ public class NewRecordActivity extends BaseActivity {
                     public void onPermissionResult(boolean result, String reason) {
                         if (result) {
 
-                            showProgressDialog("正在加载中");
+                            showProgressDialog(getString(R.string.record__preparing));
 
                             BackgroundExecutor.execute(new Runnable() {
                                 @Override
@@ -220,7 +219,7 @@ public class NewRecordActivity extends BaseActivity {
                                             @Override
                                             public void run() {
                                                 dismissProgressDialog();
-                                                Toast.makeText(NewRecordActivity.this, "环境准备失败", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(NewRecordActivity.this, R.string.record__prepare_failed, Toast.LENGTH_SHORT).show();
                                             }
                                         });
                                     }
@@ -237,7 +236,7 @@ public class NewRecordActivity extends BaseActivity {
 
     private void initHeadPanel() {
         mPanel = (HeadControlPanel) findViewById(R.id.head_layout);
-        mPanel.setMiddleTitle("录制回放");
+        mPanel.setMiddleTitle(getString(R.string.record__name));
         mPanel.setBackIconClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -344,7 +343,7 @@ public class NewRecordActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 if (StringUtil.isEmpty(mCaseName.getText().toString().trim())) {
-                    Toast.makeText(NewRecordActivity.this, "用例名不能为空", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(NewRecordActivity.this, R.string.record__case_name_empty, Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -378,7 +377,7 @@ public class NewRecordActivity extends BaseActivity {
                     public void onPermissionResult(boolean result, String reason) {
                         if (result) {
 
-                            showProgressDialog("正在加载中");
+                            showProgressDialog(getString(R.string.record__preparing));
 
                             BackgroundExecutor.execute(new Runnable() {
                                 @Override
@@ -404,7 +403,7 @@ public class NewRecordActivity extends BaseActivity {
                                             @Override
                                             public void run() {
                                                 dismissProgressDialog();
-                                                Toast.makeText(NewRecordActivity.this, "环境准备失败", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(NewRecordActivity.this, R.string.record__prepare_failed, Toast.LENGTH_SHORT).show();
                                             }
                                         });
                                     }

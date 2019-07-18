@@ -19,6 +19,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import com.orhanobut.logger.LogStrategy;
 
@@ -51,7 +52,7 @@ public final class DiskLogStrategy implements LogStrategy {
     }
 
     private static class WriteHandler extends Handler {
-        // 最大1MB
+        // max 512KB
         private static final int MAX_SIZE = 512 * 1024;
         private File root;
 
@@ -93,8 +94,8 @@ public final class DiskLogStrategy implements LogStrategy {
                 writer.append(log);
                 writer.flush();
             } catch (IOException e) {
-                e.printStackTrace();
                 // 日志系统故障，没办法打日志
+                Log.e(TAG, "Catch java.io.IOException: " + e.getMessage(), e);
             }
         }
 
@@ -124,7 +125,7 @@ public final class DiskLogStrategy implements LogStrategy {
                 } catch (IOException e) {
                     e.printStackTrace();
                     // 日志系统故障，没办法打日志
-                    //LogUtil.e(TAG, "Catch java.io.IOException: " + e.getMessage(), e);
+                    Log.e(TAG, "Catch java.io.IOException: " + e.getMessage(), e);
                 }
             }
 
@@ -137,8 +138,7 @@ public final class DiskLogStrategy implements LogStrategy {
                 }
             } catch (IOException e) {
                 // 日志系统故障，没办法打日志
-                e.printStackTrace();
-                //LogUtil.e(TAG, "Catch java.io.IOException: " + e.getMessage(), e);
+                Log.e(TAG, "Catch java.io.IOException: " + e.getMessage(), e);
             }
         }
 
@@ -148,7 +148,7 @@ public final class DiskLogStrategy implements LogStrategy {
                 try {
                     writer.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "Catch java.io.IOException: " + e.getMessage(), e);
                 }
             }
             super.finalize();

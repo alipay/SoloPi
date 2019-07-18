@@ -177,6 +177,12 @@ void *(**On*Event);
 -keep interface com.alipay.hulu.shared.node.utils.prepare.PrepareWorker { *; }
 -keep @com.alipay.hulu.shared.node.utils.prepare.PrepareWorker$PrepareTool class * implements com.alipay.hulu.shared.node.utils.prepare.PrepareWorker { *; }
 
+#Github Replease
+-keep class com.alipay.hulu.bean.GithubReleaseBean { *; }
+-keep class com.alipay.hulu.bean.GithubReleaseBean$AuthorBean { *; }
+-keep class com.alipay.hulu.bean.GithubReleaseBean$AssetsBean { *; }
+-keep class com.alipay.hulu.bean.GithubReleaseBean$AssetsBean$UploaderBean { *; }
+
 # 三方库
 -keep class com.cgutman.adblib.** {*;}
 -keep class com.mdit.library.** {*;}

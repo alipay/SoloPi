@@ -29,6 +29,8 @@ import javax.crypto.spec.SecretKeySpec;
  */
 
 public class AESUtils {
+    public static final String DEFAULT_AES_KEY = "com.alipay.hulu";
+
     /**
      * 根据默认配置的Seed加密
      * @param cleartext
@@ -36,7 +38,7 @@ public class AESUtils {
      * @throws Exception
      */
     public static String encrypt(String cleartext) throws Exception {
-        String seed = SPService.getString(SPService.KEY_AES_KEY, "com.alipay.hulu");
+        String seed = SPService.getString(SPService.KEY_AES_KEY, DEFAULT_AES_KEY);
         return encrypt(cleartext, seed);
     }
 

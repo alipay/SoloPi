@@ -27,6 +27,7 @@ import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.io.bean.GeneralOperationLogBean;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
+import com.alipay.hulu.shared.io.util.OperationStepUtil;
 import com.alipay.hulu.shared.node.OperationService;
 import com.alipay.hulu.shared.node.action.OperationExecutor;
 import com.alipay.hulu.shared.node.action.OperationMethod;
@@ -115,6 +116,13 @@ public class OperationStepProvider extends AbstractStepProvider {
             return;
         }
         GeneralOperationLogBean generalOperation = JSON.parseObject(content, GeneralOperationLogBean.class);
+        if (generalOperation == null) {
+            return;
+        }
+
+        // load from file
+        OperationStepUtil.afterLoad(generalOperation);
+
         if (generalOperation.getSteps() != null) {
             stepList.addAll(generalOperation.getSteps());
         }

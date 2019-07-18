@@ -164,10 +164,10 @@ public class CaseEditActivity extends BaseActivity {
      * 更新本地用例
      */
     private void updateLocalCase() {
-        wrapRecordCase();
         BackgroundExecutor.execute(new Runnable() {
             @Override
             public void run() {
+                wrapRecordCase();
                 GreenDaoManager.getInstance().getRecordCaseInfoDao().save(mRecordCase);
                 toastShort("更新成功");
                 InjectorService.g().pushMessage(NewRecordActivity.NEED_REFRESH_LOCAL_CASES_LIST);

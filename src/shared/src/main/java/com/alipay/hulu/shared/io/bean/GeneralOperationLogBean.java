@@ -27,11 +27,21 @@ public class GeneralOperationLogBean {
 
     private List<OperationStep> steps;
 
+    private String storePath;
+
     public List<OperationStep> getSteps() {
         return steps;
     }
 
     public void setSteps(List<OperationStep> steps) {
         this.steps = steps;
+    }
+
+    public String getStorePath() {
+        return storePath;
+    }
+
+    public void setStorePath(String storePath) {
+        this.storePath = storePath;
     }
 }

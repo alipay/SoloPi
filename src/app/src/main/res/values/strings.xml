@@ -115,4 +115,13 @@
     <string name="settings__screenshot_size">截图分辨率</string>
     <string name="batch__execution_list">执行序列</string>
     <string name="patch__load_failed">插件%s加载失败</string>
+    <string name="settings__check_update">检查更新</string>
+    <string name="settings__updating_cases">更新用例(%d/%d)</string>
+    <string name="settings__start_update_cases">开始更新用例</string>
+    <string name="settings__unset">未设置</string>
+    <string name="record__preparing">正在准备中</string>
+    <string name="record__prepare_failed">环境准备失败</string>
+    <string name="record__case_name_empty">用例名不能为空</string>
+    <string name="record__name">录制回放</string>
+    <string name="index__disclaimer">免责声明</string>
 </resources>

@@ -37,7 +37,13 @@ public @interface EntryActivity {
      *
      * @return
      */
-    String name();
+    String name() default "";
+
+    /**
+     * name string res
+     * @return
+     */
+    int nameRes() default 0;
 
     /**
      * 依赖权限

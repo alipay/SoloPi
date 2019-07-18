@@ -48,6 +48,7 @@ import com.alipay.hulu.shared.io.bean.GeneralOperationLogBean;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
 import com.alipay.hulu.shared.io.db.GreenDaoManager;
 import com.alipay.hulu.shared.io.db.RecordCaseInfoDao;
+import com.alipay.hulu.shared.io.util.OperationStepUtil;
 import com.alipay.hulu.shared.node.action.OperationMethod;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
 import com.alipay.hulu.ui.HeadControlPanel;
@@ -92,6 +93,9 @@ public class SettingsActivity extends BaseActivity {
 
     private View mDisplaySystemAppSettingWrapper;
     private TextView mDisplaySystemAppSettingInfo;
+
+    private View mCheckUpdateSettingWrapper;
+    private TextView mCheckUpdateSettingInfo;
 
     private View mBaseDirSettingWrapper;
     private TextView mBaseDirSettingInfo;
@@ -330,18 +334,18 @@ public class SettingsActivity extends BaseActivity {
             public void onClick(View v) {
                 new AlertDialog.Builder(SettingsActivity.this, R.style.SimpleDialogTheme)
                         .setMessage("回放时是否高亮待操作控件？")
-                        .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.constant__yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 SPService.putBoolean(SPService.KEY_HIGHLIGHT_REPLAY_NODE, true);
-                                mHightlightSettingInfo.setText("是");
+                                mHightlightSettingInfo.setText(R.string.constant__yes);
                                 dialog.dismiss();
                             }
-                        }).setNegativeButton("否", new DialogInterface.OnClickListener() {
+                        }).setNegativeButton(R.string.constant__no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         SPService.putBoolean(SPService.KEY_HIGHLIGHT_REPLAY_NODE, false);
-                        mHightlightSettingInfo.setText("否");
+                        mHightlightSettingInfo.setText(R.string.constant__no);
                         dialog.dismiss();
                     }
                 }).show();
@@ -512,7 +516,7 @@ public class SettingsActivity extends BaseActivity {
         new AlertDialog.Builder(SettingsActivity.this, R.style.AppDialogTheme)
                 .setTitle(title)
                 .setView(v)
-                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         List<String> result = new ArrayList<>(editTexts.size() + 1);
@@ -527,7 +531,7 @@ public class SettingsActivity extends BaseActivity {
                         }
                         dialog.dismiss();
                     }
-                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -544,7 +548,7 @@ public class SettingsActivity extends BaseActivity {
         mRecordScreenUploadInfo = (TextView) findViewById(R.id.recordscreen_upload_setting_info);
         String path = SPService.getString(SPService.KEY_RECORD_SCREEN_UPLOAD);
         if (StringUtil.isEmpty(path)) {
-            mRecordScreenUploadInfo.setText("未设置");
+            mRecordScreenUploadInfo.setText(R.string.settings__unset);
         } else {
             mRecordScreenUploadInfo.setText(path);
         }
@@ -553,7 +557,7 @@ public class SettingsActivity extends BaseActivity {
         mRecordUploadInfo = (TextView) findViewById(R.id.performance_upload_setting_info);
         path = SPService.getString(SPService.KEY_PERFORMANCE_UPLOAD);
         if (StringUtil.isEmpty(path)) {
-            mRecordUploadInfo.setText("未设置");
+            mRecordUploadInfo.setText(R.string.settings__unset);
         } else {
             mRecordUploadInfo.setText(path);
         }
@@ -578,15 +582,24 @@ public class SettingsActivity extends BaseActivity {
 
         mHightlightSettingWrapper = findViewById(R.id.replay_highlight_setting_wrapper);
         mHightlightSettingInfo = (TextView) findViewById(R.id.replay_highlight_setting_info);
-        mHightlightSettingInfo.setText(SPService.getBoolean(SPService.KEY_HIGHLIGHT_REPLAY_NODE, true)? "是": "否");
+        mHightlightSettingInfo.setText(SPService.getBoolean(SPService.KEY_HIGHLIGHT_REPLAY_NODE, true)? R.string.constant__yes: R.string.constant__no);
 
         mDisplaySystemAppSettingWrapper = findViewById(R.id.display_system_app_setting_wrapper);
         mDisplaySystemAppSettingInfo = (TextView) findViewById(R.id.display_system_app_setting_info);
         boolean displaySystemApp = SPService.getBoolean(SPService.KEY_DISPLAY_SYSTEM_APP, false);
         if (displaySystemApp) {
-            mDisplaySystemAppSettingInfo.setText("是");
+            mDisplaySystemAppSettingInfo.setText(R.string.constant__yes);
         } else {
-            mDisplaySystemAppSettingInfo.setText("否");
+            mDisplaySystemAppSettingInfo.setText(R.string.constant__no);
+        }
+
+        mCheckUpdateSettingWrapper = findViewById(R.id.check_update_setting_wrapper);
+        mCheckUpdateSettingInfo = (TextView) findViewById(R.id.check_update_setting_info);
+        boolean checkUpdate = SPService.getBoolean(SPService.KEY_CHECK_UPDATE, true);
+        if (checkUpdate) {
+            mCheckUpdateSettingInfo.setText(R.string.constant__yes);
+        } else {
+            mCheckUpdateSettingInfo.setText(R.string.constant__no);
         }
 
         mBaseDirSettingWrapper = findViewById(R.id.base_dir_setting_wrapper);
@@ -595,7 +608,7 @@ public class SettingsActivity extends BaseActivity {
 
         mAesSeedSettingWrapper = findViewById(R.id.aes_seed_setting_wrapper);
         mAesSeedSettingInfo = (TextView) findViewById(R.id.aes_seed_setting_info);
-        mAesSeedSettingInfo.setText(SPService.getString(SPService.KEY_AES_KEY, "com.alipay.hulu"));
+        mAesSeedSettingInfo.setText(SPService.getString(SPService.KEY_AES_KEY, AESUtils.DEFAULT_AES_KEY));
 
         mClearFilesSettingWrapper = findViewById(R.id.clear_files_setting_wrapper);
         mClearFilesSettingInfo = (TextView) findViewById(R.id.clear_files_setting_info);
@@ -604,9 +617,9 @@ public class SettingsActivity extends BaseActivity {
         mHideLogSettingInfo = (TextView) findViewById(R.id.hide_log_setting_info);
         boolean hideLog = SPService.getBoolean(SPService.KEY_HIDE_LOG, true);
         if (hideLog) {
-            mHideLogSettingInfo.setText("是");
+            mHideLogSettingInfo.setText(R.string.constant__yes);
         } else {
-            mHideLogSettingInfo.setText("否");
+            mHideLogSettingInfo.setText(R.string.constant__no);
         }
 
         mImportCaseSettingWrapper = findViewById(R.id.import_case_setting_wrapper);
@@ -647,7 +660,7 @@ public class SettingsActivity extends BaseActivity {
      * @param newSeed
      */
     private void updateStoredRecords(final String oldSeed, final String newSeed) {
-        showProgressDialog("开始更新用例");
+        showProgressDialog(getString(R.string.settings__start_update_cases));
         BackgroundExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -658,7 +671,7 @@ public class SettingsActivity extends BaseActivity {
 
                     if (cases != null && cases.size() > 0) {
                         for (int i = 0; i < cases.size(); i++) {
-                            showProgressDialog("更新用例(" + (i + 1) + "/" + cases.size() + ")");
+                            showProgressDialog(getString(R.string.settings__updating_cases, i + 1, cases.size()));
                             RecordCaseInfo caseInfo = cases.get(i);
                             GeneralOperationLogBean generalOperation;
                             try {
@@ -672,6 +685,10 @@ public class SettingsActivity extends BaseActivity {
                             if (generalOperation == null) {
                                 continue;
                             }
+
+                            // load file content
+                            OperationStepUtil.afterLoad(generalOperation);
+
                             List<OperationStep> steps = generalOperation.getSteps();
                             if (generalOperation.getSteps() != null) {
                                 for (OperationStep step : steps) {
@@ -691,6 +708,7 @@ public class SettingsActivity extends BaseActivity {
                                     }
                                 }
                             }
+                            OperationStepUtil.beforeStore(generalOperation);
 
                             // 更新operationLog字段
                             caseInfo.setOperationLog(JSON.toJSONString(generalOperation));

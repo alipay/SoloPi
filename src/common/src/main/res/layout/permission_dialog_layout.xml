@@ -31,7 +31,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="权限申请("
+            android:text="@string/permission__request_permission"
             android:textSize="18dp"
             android:textStyle="bold"
             android:layout_gravity="center_vertical"
@@ -44,7 +44,6 @@
             android:id="@+id/permission_success"
             android:textStyle="bold"
             android:textColor="#FF4081"
-            android:text="4"
             android:textSize="18dp"
             android:layout_gravity="center_vertical"/>
         <TextView
@@ -126,7 +125,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="取消"
+                android:text="@string/constant__cancel"
                 android:textColor="#FF4081"/>
         </LinearLayout>
         <LinearLayout
@@ -142,7 +141,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="确定"
+                android:text="@string/constant__confirm"
                 android:textColor="#FF4081"
                 />
         </LinearLayout>

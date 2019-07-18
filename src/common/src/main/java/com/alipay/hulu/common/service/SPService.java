@@ -37,6 +37,7 @@ public class SPService {
     public static final String KEY_PERFORMANCE_UPLOAD = "KEY_PERFORMANCE_UPLOAD";
     public static final String KEY_DISPLAY_SYSTEM_APP = "KEY_DISPLAY_SYSTEM_APP";
     public static final String KEY_BASE_DIR = "KEY_BASE_DIR";
+    public static final String KEY_CHECK_UPDATE = "KEY_CHECK_UPDATE";
     public static final String KEY_RECORD_SCREEN_UPLOAD = "KEY_RECORD_SCREEN_UPLOAD";
     public static final String KEY_PATCH_URL = "KEY_PATCH_URL";
     public static final String KEY_AES_KEY = "KEY_AES_KEY";

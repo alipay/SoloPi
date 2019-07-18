@@ -15,16 +15,17 @@
  */
 package com.alipay.hulu.shared.io.db;
 
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Pair;
 
 import com.alibaba.fastjson.JSON;
+import com.alipay.hulu.common.injector.InjectorService;
+import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.shared.io.bean.GeneralOperationLogBean;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
+import com.alipay.hulu.shared.io.util.OperationStepUtil;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -36,6 +37,10 @@ import java.util.concurrent.Executors;
  * 操作入库
  */
 public class OperationLogHandler {
+    /**
+     * notify update local cases
+     */
+    public static final String NEED_REFRESH_LOCAL_CASES_LIST = "NEED_REFRESH_LOCAL_CASES_LIST";
 
     private static final String TAG = "OperationLogHandler";
 
@@ -94,12 +99,16 @@ public class OperationLogHandler {
 
         // 仅当录制步骤数超过0才会入库
         if (realList.size() > 0) {
+            // store step to file
+            OperationStepUtil.beforeStore(generalOperation);
+
             String jsonString = JSON.toJSONString(generalOperation);
             caseInfo.setOperationLog(jsonString);
-
             saveCaseInDB();
         }
     }
+
+
 
     private void saveCaseInDB() {
         if (caseInfo != null) {
@@ -108,14 +117,14 @@ public class OperationLogHandler {
                 public void run() {
                     caseInfo.setGmtCreate(System.currentTimeMillis());
                     caseInfo.setGmtModify(System.currentTimeMillis());
-                    GreenDaoManager.getInstance().getRecordCaseInfoDao().insert(caseInfo);
+                    long newId = GreenDaoManager.getInstance().getRecordCaseInfoDao().insert(caseInfo);
+
+                    LogUtil.i(TAG, "Save case with id %d", newId);
+
+                    // update case list
+                    InjectorService.g().pushMessage(NEED_REFRESH_LOCAL_CASES_LIST);
                 }
             });
         }
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
     }
 }
