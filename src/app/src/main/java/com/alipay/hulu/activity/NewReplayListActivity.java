@@ -16,6 +16,7 @@
 package com.alipay.hulu.activity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -23,10 +24,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.alipay.hulu.R;
+import com.alipay.hulu.common.utils.ContextUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.fragment.ReplayListFragment;
 import com.alipay.hulu.ui.HeadControlPanel;
@@ -52,7 +57,12 @@ public class NewReplayListActivity extends BaseActivity {
         mPager = (ViewPager) findViewById(R.id.pager);
         mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
         mHeadPanel = (HeadControlPanel) findViewById(R.id.head_replay_list);
-        rightTitle = (TextView) mHeadPanel.findViewById(R.id.right_title);
+
+        // 配置菜单信息
+        rightTitle = new TextView(this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMarginEnd(ContextUtil.dip2px(this, 16));
+        rightTitle.setTextColor(Color.WHITE);
         rightTitle.setText(R.string.constant__batch_replay);
         rightTitle.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,6 +70,7 @@ public class NewReplayListActivity extends BaseActivity {
                 startActivity(new Intent(NewReplayListActivity.this, BatchExecutionActivity.class));
             }
         });
+        mHeadPanel.addMenuFromLeft(rightTitle);
 
         mHeadPanel.setMiddleTitle(getString(R.string.constant__case_list));
         mHeadPanel.setBackIconClickListener(new View.OnClickListener() {

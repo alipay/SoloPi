@@ -20,7 +20,7 @@
                 android:radius="4dp"/>
 
             <solid
-                android:color="#2e6c96"/>
+                android:color="@color/colorPrimaryDark"/>
 
         </shape>
     </item>
@@ -30,7 +30,7 @@
                 android:radius="4dp"/>
 
             <solid
-                android:color="#1f90e6"/>
+                android:color="@color/colorPrimary"/>
 
         </shape>
     </item>

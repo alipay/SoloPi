@@ -96,6 +96,37 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
     }
 
     /**
+     * 强制设置根目录
+     * @param path
+     */
+    public static void setSolopiBaseDir(String path) {
+        // 如果没设置
+        if (StringUtil.isEmpty(path)) {
+            return;
+        }
+
+        solopiBaseDir = new File(path);
+        if (solopiBaseDir.exists() && solopiBaseDir.isDirectory()) {
+            return;
+        }
+
+        // 如果目录不存在，创建目录
+        if (!solopiBaseDir.exists()) {
+            boolean result = solopiBaseDir.mkdirs();
+            if (!result) {
+                solopiBaseDir = null;
+                return;
+            }
+        }
+
+        // 如果不是目录
+        if (!solopiBaseDir.isDirectory()) {
+            solopiBaseDir = null;
+            return;
+        }
+    }
+
+    /**
      * 获取Solopi文件夹目录名称
      * @return
      */

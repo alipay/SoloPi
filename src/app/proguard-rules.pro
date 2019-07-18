@@ -158,11 +158,6 @@ void *(**On*Event);
 # OkHttp platform used only on JVM and when Conscrypt dependency is available.
 -dontwarn okhttp3.internal.platform.ConscryptPlatform
 
-#eventbus
--keepclassmembers class ** {
-@org.greenrobot.eventbus.Subscribe <methods>;
-}
-
 # injector
 -keepclassmembers class ** {
 @com.alipay.hulu.common.injector.param.Subscriber <methods>;
@@ -227,7 +222,9 @@ public static java.lang.String TABLENAME;
   public *;
 }
 
--keep class ** implements com.alipay.hulu.shared.display.items.base.Displayable {*;}
+-keep class ** implements com.alipay.hulu.shared.display.items.base.Displayable {
+public void clear();
+}
 
 -keep interface com.alipay.hulu.common.service.base.ExportService { *; }
 -keep @interface com.alipay.hulu.common.service.base.LocalService {*;}
@@ -238,12 +235,6 @@ public com.alipay.hulu.common.utils.patch.PatchContext getContext();
 
 -keep interface ** extends com.alipay.hulu.common.service.base.ExportService { *; }
 
--keep enum org.greenrobot.eventbus.ThreadMode { *; }
-# Only required if you use AsyncExecutor
--keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
-<init>(java.lang.Throwable);
-}
-
 -dontwarn android.support.v4.**
 -keep class android.support.** {*;}
 -keepattributes Exceptions,InnerClasses,Signature
@@ -251,6 +242,11 @@ public com.alipay.hulu.common.utils.patch.PatchContext getContext();
 #fastjson
 -dontwarn com.alibaba.fastjson.**
 -keep class com.alibaba.fastjson.** { *; }
+
+# 性能数据上报混淆
+-keep class com.alipay.hulu.util.RecordUtil$RecordUploadData { *; }
+-keep class com.alipay.hulu.util.RecordUtil$UploadData { *; }
+
 # fresco
 -dontwarn javax.annotation.**
 #保留混淆mapping文件

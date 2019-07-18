@@ -13,17 +13,17 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.alipay.hulu.common">
-
-    <uses-permission android:name="android.permission.REORDER_TASKS" />
-    <application
-        tools:node="merge"
-        >
-        <activity android:name=".utils.activity.PermissionDialogActivity"
-            android:theme="@style/PermissionAppDialogTheme"/>
-        <activity android:name=".utils.activity.FileChooseDialogActivity"
-            android:theme="@style/PermissionAppDialogTheme" />
-    </application>
-</manifest>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="4dp"
+    android:insetTop="6dp"
+    android:insetRight="4dp"
+    android:insetBottom="6dp">
+    <shape android:shape="rectangle">
+        <corners android:radius="2dp" />
+        <solid android:color="@color/colorPrimarySecond" />
+        <padding android:left="8dp"
+            android:top="4dp"
+            android:right="8dp"
+            android:bottom="4dp" />
+    </shape>
+</inset>

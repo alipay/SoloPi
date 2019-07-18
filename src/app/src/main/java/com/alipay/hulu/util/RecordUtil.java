@@ -17,6 +17,7 @@ package com.alipay.hulu.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alipay.hulu.common.bean.DeviceInfo;
+import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.utils.DeviceInfoUtil;
 import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.HttpUtil;
@@ -27,8 +28,13 @@ import org.apache.commons.io.Charsets;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -66,6 +72,16 @@ public class RecordUtil {
         // 保存目录
         File saveFolder = loadSaveDir(startTime, endTime);
 
+        // 加载编码信息
+        String charsetName = SPService.getString(SPService.KEY_OUTPUT_CHARSET, "GBK");
+        Charset charset;
+        try {
+            charset = Charset.forName(charsetName);
+        } catch (UnsupportedCharsetException e) {
+            LogUtil.w(TAG, "unsupported charset for name=" + charsetName, e);
+            charset = Charset.forName("UTF-8");
+        }
+
         for (Map.Entry<RecordPattern, List<RecordPattern.RecordItem>> entry: records.entrySet()){
             RecordPattern pattern = entry.getKey();
 
@@ -73,7 +89,7 @@ public class RecordUtil {
             File saveFile = new File(saveFolder, pattern.getName() + "_" + pattern.getSource() + "_" + pattern.getStartTime() + "_" + pattern.getEndTime() + ".csv");
             try {
                 if (saveFile.createNewFile()) {
-                    BufferedWriter writer = new BufferedWriter(new FileWriter(saveFile));
+                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(saveFile), charset));
 
                     // 第一行写标题
                     writer.write("RecordTime," + pattern.getName() + "(" + pattern.getUnit() + "),extra\n");

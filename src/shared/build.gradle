@@ -57,7 +57,6 @@ dependencies {
     compileOnly 'com.liulishuo.filedownloader:library:1.7.6'
     compileOnly 'com.squareup.okhttp3:okhttp:3.12.3'
     compileOnly 'org.greenrobot:greendao:3.2.2'
-    compileOnly 'org.greenrobot:eventbus:3.1.1'
 
     compileOnly group: 'commons-io', name: 'commons-io', version: '2.6'
     api project(':common')

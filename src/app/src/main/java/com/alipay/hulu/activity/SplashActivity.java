@@ -40,6 +40,12 @@ public class SplashActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		handler = new Handler();
 		setContentView(R.layout.splash);
+
+		// 如果有自定义目录
+		String baseDir = SPService.getString(SPService.KEY_BASE_DIR);
+		if (!StringUtil.isEmpty(baseDir)) {
+			FileUtils.setSolopiBaseDir(baseDir);
+		}
 	}
 
 	/**

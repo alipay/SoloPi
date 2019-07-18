@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.hulu.activity;
+package com.alipay.hulu.fragment;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -32,6 +32,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
@@ -41,10 +42,12 @@ import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 import com.alipay.hulu.R;
+import com.alipay.hulu.activity.CaseEditActivity;
+import com.alipay.hulu.activity.NewRecordActivity;
+import com.alipay.hulu.activity.QRScanActivity;
 import com.alipay.hulu.adapter.CaseStepAdapter;
 import com.alipay.hulu.adapter.CaseStepMethodAdapter;
 import com.alipay.hulu.adapter.CaseStepNodeAdapter;
-import com.alipay.hulu.bean.CaseStepHolder;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.RunningThread;
@@ -64,7 +67,6 @@ import com.alipay.hulu.shared.node.action.PerformActionEnum;
 import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
 import com.alipay.hulu.shared.node.utils.LogicUtil;
-import com.alipay.hulu.ui.HeadControlPanel;
 import com.alipay.hulu.ui.MaxHeightScrollView;
 import com.alipay.hulu.ui.TwoLevelSelectLayout;
 import com.alipay.hulu.util.FunctionSelectUtil;
@@ -83,16 +85,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.alipay.hulu.shared.node.utils.LogicUtil.SCOPE;
 
-/**
- * Created by qiaoruikai on 2019/2/18 8:05 PM.
- */
-public class CaseStepEditActivity extends BaseActivity implements TagFlowLayout.OnTagClickListener {
-    private static final String TAG = "CaseStepEditActivity";
+public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.OnTagClickListener, CaseEditActivity.OnCaseSaveListener{
+    private static final String TAG = "CaseStepEditFragment";
     private boolean isOverrideInstall = false;
 
     private RecordCaseInfo recordCase;
-
-    private HeadControlPanel head;
 
     private TagFlowLayout tagGroup;
 
@@ -106,16 +103,35 @@ public class CaseStepEditActivity extends BaseActivity implements TagFlowLayout.
 
     private CaseStepAdapter adapter;
 
-    private boolean saved = false;
+    /**
+     * 通过RecordCase初始化
+     *
+     * @param
+     */
+    public static CaseStepEditFragment getInstance(RecordCaseInfo recordCaseInfo) {
+        CaseStepEditFragment fragment = new CaseStepEditFragment();
+        fragment.recordCase = recordCaseInfo;
+        return fragment;
+    }
 
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_case_step_edit, container, false);
+        // 加载相关控件
+        tagGroup = (TagFlowLayout) root.findViewById(R.id.case_step_edit_tag_group);
+        dragList = (SlideAndDragListView) root.findViewById(R.id.case_step_edit_drag_list);
+
+        LayoutAnimationController controller = new LayoutAnimationController(
+                AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
+        controller.setDelay(0);
+        dragList.setLayoutAnimation(controller);
+        return root;
+    }
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_case_step_edit);
-
-        initView();
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         initData();
     }
 
@@ -146,50 +162,14 @@ public class CaseStepEditActivity extends BaseActivity implements TagFlowLayout.
     }
 
     /**
-     * 初始化界面
-     */
-    private void initView() {
-        head = (HeadControlPanel) findViewById(R.id.case_step_edit_head);
-
-        // 加载相关控件
-        tagGroup = (TagFlowLayout) findViewById(R.id.case_step_edit_tag_group);
-        dragList = (SlideAndDragListView) findViewById(R.id.case_step_edit_drag_list);
-
-        LayoutAnimationController controller = new LayoutAnimationController(
-                AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
-        controller.setDelay(0);
-        dragList.setLayoutAnimation(controller);
-    }
-
-    /**
      * 初始化用例数据
      */
     private void initData() {
-        int id = getIntent().getIntExtra("case", 0);
-        recordCase = CaseStepHolder.getCase(id);
         if (recordCase == null) {
             return;
         }
 
-        head.setMiddleTitle(recordCase.getCaseName());
-
         currentIdx = new AtomicInteger();
-
-        head.setBackIconClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
-
-        head.setInfoIconClickListener(R.drawable.icon_save, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveRecord();
-                saved = true;
-            }
-        });
-        saved = false;
 
         GeneralOperationLogBean generalOperation = JSON.parseObject(recordCase.getOperationLog(), GeneralOperationLogBean.class);
         if (generalOperation.getSteps() != null) {
@@ -221,7 +201,7 @@ public class CaseStepEditActivity extends BaseActivity implements TagFlowLayout.
         tagGroup.setAdapter(new TagAdapter<String>(stepTags) {
             @Override
             public View getView(FlowLayout parent, int position, String o) {
-                View tag = LayoutInflater.from(CaseStepEditActivity.this).inflate(R.layout.item_case_step_tag, null);
+                View tag = LayoutInflater.from(getActivity()).inflate(R.layout.item_case_step_tag, null);
                 TextView title = (TextView) tag.findViewById(R.id.case_step_edit_tag_title);
                 ImageView icon = (ImageView) tag.findViewById(R.id.case_step_edit_tag_icon);
 
@@ -244,15 +224,15 @@ public class CaseStepEditActivity extends BaseActivity implements TagFlowLayout.
         tagGroup.setOnTagClickListener(this);
 
         // 用例adapter
-        adapter = new CaseStepAdapter(this, dragEntities);
+        adapter = new CaseStepAdapter(getActivity(), dragEntities);
 
         // 设置菜单相关样式
-        int dp64 = ContextUtil.dip2px(this, 64);
+        int dp64 = ContextUtil.dip2px(getActivity(), 64);
         int colorWhile;
         int colorIf;
         if (Build.VERSION.SDK_INT >= 23) {
-            colorWhile = getColor(R.color.colorStatusBlue);
-            colorIf = getColor(R.color.colorStatusRed);
+            colorWhile = getActivity().getColor(R.color.colorStatusBlue);
+            colorIf = getActivity().getColor(R.color.colorStatusRed);
         } else {
             colorWhile = getResources().getColor(R.color.colorStatusBlue);
             colorIf = getResources().getColor(R.color.colorStatusRed);
@@ -353,10 +333,8 @@ public class CaseStepEditActivity extends BaseActivity implements TagFlowLayout.
         }
     }
 
-    /**
-     * 保存用例
-     */
-    private void saveRecord() {
+    @Override
+    public void onCaseSave() {
         // 同步下scope信息
         saveScopeInfo();
 
@@ -369,7 +347,6 @@ public class CaseStepEditActivity extends BaseActivity implements TagFlowLayout.
         logBean.setSteps(operations);
 
         recordCase.setOperationLog(JSON.toJSONString(logBean));
-        doUpdateCase(recordCase);
     }
 
     /**
@@ -377,7 +354,7 @@ public class CaseStepEditActivity extends BaseActivity implements TagFlowLayout.
      * @param wrapper
      */
     private void showEditDialog(final CaseStepAdapter.MyDataWrapper wrapper) {
-        final View v = LayoutInflater.from(this).inflate(R.layout.dialog_case_step_edit, null);
+        final View v = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_case_step_edit, null);
         final RecyclerView r = (RecyclerView) v.findViewById(R.id.dialog_case_step_edit_recycler);
         MaxHeightScrollView scroll = (MaxHeightScrollView) v.findViewById(R.id.dialog_case_step_edit_scroll);
         DisplayMetrics dm = new DisplayMetrics();
@@ -387,7 +364,7 @@ public class CaseStepEditActivity extends BaseActivity implements TagFlowLayout.
 
         // 拷贝一份
         final OperationStep clone = clone(wrapper.currentStep);
-        r.setLayoutManager(new LinearLayoutManager(this));
+        r.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         final CaseStepNodeAdapter nodeAdapter;
         final TabLayout tab = (TabLayout) v.findViewById(R.id.dialog_case_step_edit_tab);
@@ -467,7 +444,7 @@ public class CaseStepEditActivity extends BaseActivity implements TagFlowLayout.
             }
         };
 
-        final AlertDialog dialog = new AlertDialog.Builder(this)
+        final AlertDialog dialog = new AlertDialog.Builder(getActivity())
                 .setView(v).setPositiveButton("确定", dialogClick)
                 .setNegativeButton("取消", dialogClick)
                 .setTitle(clone.getOperationMethod().getActionEnum().getDesc()).create();
@@ -500,37 +477,16 @@ public class CaseStepEditActivity extends BaseActivity implements TagFlowLayout.
                     mRecordCase.setGmtModify(System.currentTimeMillis());
                     GreenDaoManager.getInstance().getRecordCaseInfoDao().save(mRecordCase);
                     toastShort("更新成功");
-                    InjectorService.g().pushMessage(NewRecordActivity.NEED_REFRESH_CASES_LIST);
+                    InjectorService.g().pushMessage(NewRecordActivity.NEED_REFRESH_LOCAL_CASES_LIST);
                 }
         });
-    }
-
-    @Override
-    public void onBackPressed() {
-        // 如果没有点过保存，问一下是否需要保存用例
-        if (!saved) {
-            LauncherApplication.getInstance().showDialog(this, "是否保存用例", "是", new Runnable() {
-                @Override
-                public void run() {
-                    saveRecord();
-                    finish();
-                }
-            }, "否", new Runnable() {
-                @Override
-                public void run() {
-                    finish();
-                }
-            });
-        } else {
-            finish();
-        }
     }
 
     /**
      * 显示添加操作界面
      */
     private void showAddFunctionView() {
-        FunctionSelectUtil.showFunctionView(this, null, GLOBAL_KEYS, GLOBAL_ICONS,
+        FunctionSelectUtil.showFunctionView(getActivity(), null, GLOBAL_KEYS, GLOBAL_ICONS,
                 GLOBAL_ACTION_MAP, null, null, null,
                 new FunctionSelectUtil.FunctionListener() {
                     @Override
@@ -541,12 +497,14 @@ public class CaseStepEditActivity extends BaseActivity implements TagFlowLayout.
                             if (StringUtil.equals(method.getParam("scan"), "1")) {
                                 // 注册下Service
                                 InjectorService injectorService = LauncherApplication.getInstance().findServiceByName(InjectorService.class.getName());
-                                injectorService.register(CaseStepEditActivity.this);
+                                injectorService.register(CaseStepEditFragment.this);
 
 
-                                Intent intent = new Intent(CaseStepEditActivity.this, QRScanActivity.class);
+                                Intent intent = new Intent(getActivity(), QRScanActivity.class);
 
-                                intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_SCHEME);
+                                if (action == PerformActionEnum.JUMP_TO_PAGE) {
+                                    intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_SCHEME);
+                                }
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
                                 return;

@@ -18,25 +18,25 @@
     style="@style/Widget.AppCompat.Button.Small"
     android:background="@drawable/primary_button_layer"
     android:paddingTop="5dp"
-
     android:paddingLeft="8dp"
     android:paddingRight="8dp"
     android:paddingBottom="5dp"
-    android:minHeight="33dp"
+    android:minHeight="38dp"
     android:gravity="center_vertical"
     android:layout_height="wrap_content">
-    <ImageView
-        android:id="@+id/case_step_edit_tag_icon"
-        android:scaleType="fitCenter"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:tint="@color/white"/>
     <TextView
-        android:id="@+id/case_step_edit_tag_title"
+        android:id="@+id/batch_execute_tag_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:textColor="@color/white"
-        android:textSize="12dp"/>
+        android:textSize="16dp"/>
+    <ImageView
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="4dp"
+        android:scaleType="fitCenter"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:src="@drawable/batch_execute_remove"/>
 </LinearLayout>

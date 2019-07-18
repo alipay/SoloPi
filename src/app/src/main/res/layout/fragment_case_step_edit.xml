@@ -18,8 +18,6 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <include layout="@layout/head_panel_layout" android:id="@+id/case_step_edit_head"/>
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="100dp">
@@ -28,8 +26,8 @@
             app:max_select="1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="16dp"
-            android:paddingBottom="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             android:paddingLeft="8dp"
             android:paddingRight="8dp">
         </com.zhy.view.flowlayout.TagFlowLayout>

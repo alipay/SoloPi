@@ -35,6 +35,7 @@ public class BatchStepProvider extends AbstractStepProvider {
     private int currentCaseIdx;
 
     private OperationStep prepareStep;
+    private boolean restart;
 
     OperationStepProvider currentStepProvider;
 
@@ -46,9 +47,10 @@ public class BatchStepProvider extends AbstractStepProvider {
         loadProvider(currentCaseIdx);
     }
 
-    public BatchStepProvider(List<RecordCaseInfo> recordCaseInfos) {
+    public BatchStepProvider(List<RecordCaseInfo> recordCaseInfos, boolean restart) {
         mRecordCases = recordCaseInfos;
         currentCaseIdx = 0;
+        this.restart = restart;
 
         resultBeans = new ArrayList<>(recordCaseInfos.size() + 1);
     }
@@ -73,8 +75,11 @@ public class BatchStepProvider extends AbstractStepProvider {
 
         currentStepProvider = new OperationStepProvider(currentCase);
 
-        prepareStep = new OperationStep();
-        prepareStep.setOperationMethod(new OperationMethod(PerformActionEnum.GOTO_INDEX));
+        // 重启应用
+        if (restart) {
+            prepareStep = new OperationStep();
+            prepareStep.setOperationMethod(new OperationMethod(PerformActionEnum.GOTO_INDEX));
+        }
 
         currentStepProvider.prepare();
     }

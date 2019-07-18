@@ -106,7 +106,7 @@ public enum PerformActionEnum {
     DELETE_CASE("deleteCase", "删除用例", -3, 0, R.drawable.dialog_action_drawable_cancel),
     EXPORT_CASE("exportCase", "导出用例", -3, 0, R.drawable.dialog_action_drawable_export),
     PLAY_MULTI_TIMES("playMultiTimes", "重复播放", -3, 0, R.drawable.dialog_action_drawable_multi_times),
-    EDIT_CASE("editCase", "编辑用例", -3, 0, R.drawable.dialog_action_drawable_extra),
+//    EDIT_CASE("editCase", "编辑用例", -3, 0, R.drawable.dialog_action_drawable_extra),
 
     /**
      * 逻辑判断部分，由StepProvider内部处理

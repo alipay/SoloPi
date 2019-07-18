@@ -66,6 +66,9 @@
     <string name="settings__performance_upload_url">性能数据上传地址</string>
     <string name="settings__record_upload_url">录屏耗时上传地址</string>
     <string name="settings__plugin_url">Plugin获取地址</string>
+    <string name="settings__base_dir">数据保存根目录</string>
+    <string name="settings__display_system_app">显示系统应用</string>
+    <string name="settings__output_charset">性能数据导出编码</string>
     <string name="settings__encrept_key">用例加密秘钥</string>
     <string name="settings__config_failed">配置失败</string>
     <string name="settings__auto_clean_time">文件超期时间</string>
@@ -92,4 +95,24 @@
     <string name="settings__load_patch_in_patches">导入patch目录下插件</string>
     <string name="settings__default_patch_path">/sdcard/solopi/patch</string>
     <string name="settings__about">关于</string>
+    <string name="record__test_app">测试应用</string>
+    <string name="record__switch_app">切换应用</string>
+    <string name="record__input_case_name">请输入用例名称(必填)</string>
+    <string name="record__input_case_desc">请输入用例描述(选填)</string>
+    <string name="record__no_local_case">本地还没有录制过用例哦</string>
+    <string name="record__all_cases">查看全部</string>
+    <string name="record__recent_record">最近录制</string>
+    <string name="qr__camera_permission">Soloπ需要权限来展示相机预览</string>
+    <string name="qr__requst_permission">未获得权限，正在申请相机权限</string>
+    <string name="setting__display_system_app">是否显示系统应用？</string>
+    <string name="repeat__restart_before_exec">执行用例前重启应用</string>
+    <string name="replay__save_result_to">用例结果保存到%s目录</string>
+    <string name="replay__save_failed">保存失败</string>
+    <string name="replay__replay_result">回放结果</string>
+    <string name="replay__case_steps">用例步骤</string>
+    <string name="replay__running_log">运行日志</string>
+    <string name="replay__case_screenshot">用例截图</string>
+    <string name="settings__screenshot_size">截图分辨率</string>
+    <string name="batch__execution_list">执行序列</string>
+    <string name="patch__load_failed">插件%s加载失败</string>
 </resources>

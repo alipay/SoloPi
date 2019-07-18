@@ -116,14 +116,20 @@ public class PermissionUtil {
      * @param result
      * @param reason
      */
-    public static void onPermissionResult(int idx, boolean result, String reason) {
+    public static void onPermissionResult(int idx, final boolean result, final String reason) {
         if (_callbackMap.isEmpty() || _callbackMap.get(idx) == null) {
             LogUtil.e(TAG, "callback引用消失");
             return;
         }
 
-        OnPermissionCallback _callback = _callbackMap.remove(idx);
-        _callback.onPermissionResult(result, reason);
+        final OnPermissionCallback _callback = _callbackMap.remove(idx);
+        LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                _callback.onPermissionResult(result, reason);
+
+            }
+        }, 1);
     }
 
     /**

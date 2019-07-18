@@ -16,51 +16,53 @@
 package com.alipay.hulu.activity;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
-import android.util.Log;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 
-import com.alibaba.fastjson.JSON;
 import com.alipay.hulu.R;
-import com.alipay.hulu.bean.AdvanceCaseSetting;
 import com.alipay.hulu.bean.CaseStepHolder;
+import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.utils.LogUtil;
-import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.common.utils.MiscUtil;
+import com.alipay.hulu.fragment.CaseDescEditFragment;
+import com.alipay.hulu.fragment.CaseStepEditFragment;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
 import com.alipay.hulu.shared.io.db.GreenDaoManager;
 import com.alipay.hulu.ui.HeadControlPanel;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 用例编辑Activity
  */
-public class CaseEditActivity extends BaseActivity implements AdapterView.OnItemSelectedListener {
+public class CaseEditActivity extends BaseActivity {
     private static final String TAG = "CaseEditActivity";
-
-    public static final String RECORD_CASE_EXTRA = "record_case";
-
-    private HeadControlPanel mHeadPanel;
-
-    private EditText mCaseName;
-
-    private EditText mCaseDesc;
-
-    private Button updateButton;
 
     private RecordCaseInfo mRecordCase;
 
-    private String operationMode = null;
+    public static final String RECORD_CASE_EXTRA = "record_case";
 
-    private int caseVersion = 0;
+    private List<WeakReference<OnCaseSaveListener>> caseSaveListeners = new ArrayList<>();
+
+    private boolean shouldSave = true;
+
+    private boolean saved = false;
+
+    private HeadControlPanel mHeadPanel;
+
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,14 +77,10 @@ public class CaseEditActivity extends BaseActivity implements AdapterView.OnItem
      */
     private void initView() {
         setContentView(R.layout.activity_edit_case);
+        mHeadPanel = (HeadControlPanel) findViewById(R.id.case_edit_head);
 
-        // 获取各项控件
-        mHeadPanel = (HeadControlPanel) findViewById(R.id.head_edit_case);
-        mCaseName = (EditText) findViewById(R.id.case_name);
-        mCaseDesc = (EditText) findViewById(R.id.case_desc);
-
-        // 获取button
-        updateButton = (Button) findViewById(R.id.button_update_case);
+        tabLayout = (TabLayout) findViewById(R.id.case_edit_tab_layout);
+        viewPager = (ViewPager) findViewById(R.id.case_edit_pager);
     }
 
     /**
@@ -92,67 +90,88 @@ public class CaseEditActivity extends BaseActivity implements AdapterView.OnItem
         int caseId = getIntent().getIntExtra(RECORD_CASE_EXTRA, 0);
         mRecordCase = CaseStepHolder.getCase(caseId);
 
-        mHeadPanel.setMiddleTitle("用例编辑");
-        mHeadPanel.setBackIconClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CaseEditActivity.this.finish();
-            }
-        });
-
         if (mRecordCase == null) {
             LogUtil.e(TAG, "There is no record case");
             return;
         }
 
-        // 如果有高级设置
-        if (!StringUtil.isEmpty(mRecordCase.getAdvanceSettings())) {
-            AdvanceCaseSetting setting = JSON.parseObject(mRecordCase.getAdvanceSettings(),
-                    AdvanceCaseSetting.class);
-            caseVersion = setting.getVersion();
-            operationMode = setting.getDescriptorMode();
-        }
+        saved = false;
+        caseSaveListeners.clear();
+        mHeadPanel.setMiddleTitle("用例编辑");
 
-
-        mCaseName.setText(mRecordCase.getCaseName());
-        mCaseDesc.setText(mRecordCase.getCaseDesc());
-
-        updateButton.setOnClickListener(new View.OnClickListener() {
+        mHeadPanel.setBackIconClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (TextUtils.isEmpty(mCaseName.getText())) {
-                    toastShort("用例名称不能为空");
-                    return;
-                }
-
-                wrapRecordCase();
-                doUpdateCase();
+                onBackPressed();
             }
         });
+
+        mHeadPanel.setInfoIconClickListener(R.drawable.icon_save, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateLocalCase();
+            }
+        });
+
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.setupWithViewPager(viewPager);
+        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+        tabLayout.setTabMode(TabLayout.MODE_FIXED);
+        tabLayout.setSelectedTabIndicatorColor(getResources().getColor(R.color.mainBlue));
+        tabLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                MiscUtil.setIndicator(tabLayout, 0, 0);
+            }
+        });
+
+        CustomPagerAdapter pagerAdapter = new CustomPagerAdapter(getSupportFragmentManager(), this);
+        viewPager.setAdapter(pagerAdapter);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (shouldSave && !saved) {
+            LauncherApplication.getInstance().showDialog(this, "是否保存用例", "是", new Runnable() {
+                @Override
+                public void run() {
+                    updateLocalCase();
+                    finish();
+                }
+            }, "否", new Runnable() {
+                @Override
+                public void run() {
+                    finish();
+                }
+            });
+        } else {
+            finish();
+        }
     }
 
     /**
      * 包装用例信息
      */
     private void wrapRecordCase() {
-        mRecordCase.setCaseName(mCaseName.getText().toString());
-        mRecordCase.setCaseDesc(mCaseDesc.getText().toString());
-
-        AdvanceCaseSetting advanceCaseSetting = new AdvanceCaseSetting();
-        advanceCaseSetting.setDescriptorMode(operationMode);
-        advanceCaseSetting.setVersion(caseVersion);
-
-        mRecordCase.setAdvanceSettings(JSON.toJSONString(advanceCaseSetting));
+        for (WeakReference<OnCaseSaveListener> listenerRef: caseSaveListeners) {
+            if (listenerRef.get() != null) {
+                listenerRef.get().onCaseSave();
+            }
+        }
     }
 
-    private void doUpdateCase() {
+    /**
+     * 更新本地用例
+     */
+    private void updateLocalCase() {
+        wrapRecordCase();
         BackgroundExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                mRecordCase.setGmtModify(System.currentTimeMillis());
                 GreenDaoManager.getInstance().getRecordCaseInfoDao().save(mRecordCase);
                 toastShort("更新成功");
-                InjectorService.g().pushMessage(NewRecordActivity.NEED_REFRESH_CASES_LIST);
+                InjectorService.g().pushMessage(NewRecordActivity.NEED_REFRESH_LOCAL_CASES_LIST);
+                saved = true;
             }
         });
     }
@@ -166,18 +185,46 @@ public class CaseEditActivity extends BaseActivity implements AdapterView.OnItem
         }
     }
 
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        if (position == 0) {
-            ((TextView) view).setTextColor(ContextCompat
-                    .getColor(this, R.color.hint_color));
-        } else {
-            ((TextView) view).setTextColor(Color.BLACK);
+    private static class CustomPagerAdapter extends FragmentPagerAdapter {
+        private RecordCaseInfo caseInfo;
+        private WeakReference<CaseEditActivity> ref;
+
+        public CustomPagerAdapter(FragmentManager fm, CaseEditActivity activity) {
+            super(fm);
+            this.caseInfo = activity.mRecordCase;
+            ref = new WeakReference<>(activity);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            if (position == 1) {
+                CaseDescEditFragment fragment = CaseDescEditFragment.getInstance(caseInfo);
+                CaseEditActivity activity = ref.get();
+                if (activity != null) {
+                    activity.caseSaveListeners.add(new WeakReference<OnCaseSaveListener>(fragment));
+                }
+                return fragment;
+            } else {
+                CaseStepEditFragment fragment = CaseStepEditFragment.getInstance(caseInfo);
+                CaseEditActivity activity = ref.get();
+                if (activity != null) {
+                    activity.caseSaveListeners.add(new WeakReference<OnCaseSaveListener>(fragment));
+                }
+                return fragment;
+            }
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return position == 1? "用例信息": "用例步骤";
+        }
+        @Override
+        public int getCount() {
+            return 2;
         }
     }
 
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
+    public interface OnCaseSaveListener {
+        void onCaseSave();
     }
 }

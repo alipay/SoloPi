@@ -42,6 +42,7 @@ import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.PatchProcessUtil;
 import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.common.utils.activity.FileChooseDialogActivity;
 import com.alipay.hulu.common.utils.patch.PatchLoadResult;
 import com.alipay.hulu.shared.io.bean.GeneralOperationLogBean;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
@@ -70,6 +71,8 @@ import java.util.Map;
 public class SettingsActivity extends BaseActivity {
     private static final String TAG = "SettingsActivity";
 
+    private static final int REQUEST_FILE_CHOOSE = 1101;
+
     private HeadControlPanel mPanel;
 
     private View mRecordUploadWrapper;
@@ -86,6 +89,15 @@ public class SettingsActivity extends BaseActivity {
 
     private View mHightlightSettingWrapper;
     private TextView mHightlightSettingInfo;
+
+    private View mDisplaySystemAppSettingWrapper;
+    private TextView mDisplaySystemAppSettingInfo;
+
+    private View mBaseDirSettingWrapper;
+    private TextView mBaseDirSettingInfo;
+
+    private View mOutputCharsetSettingWrapper;
+    private TextView mOutputCharsetSettingInfo;
 
     private View mAesSeedSettingWrapper;
     private TextView mAesSeedSettingInfo;
@@ -188,6 +200,59 @@ public class SettingsActivity extends BaseActivity {
                 }, getString(R.string.settings__plugin_url),
                         Collections.singletonList(new Pair<>(getString(R.string.settings__plugin_url),
                                 SPService.getString(SPService.KEY_PATCH_URL, "https://raw.githubusercontent.com/alipay/SoloPi/master/<abi>.json"))));
+            }
+        });
+
+        mOutputCharsetSettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMultipleEditDialog(new OnDialogResultListener() {
+                                           @Override
+                                           public void onDialogPositive(List<String> data) {
+                                               if (data.size() == 1) {
+                                                   String charset = data.get(0);
+                                                   SPService.putString(SPService.KEY_OUTPUT_CHARSET, charset);
+                                                   mOutputCharsetSettingInfo.setText(charset);
+                                               }
+                                           }
+                                       }, getString(R.string.settings__output_charset),
+                        Collections.singletonList(new Pair<>(getString(R.string.settings__output_charset),
+                                SPService.getString(SPService.KEY_OUTPUT_CHARSET))));
+            }
+        });
+
+
+        mDisplaySystemAppSettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AlertDialog.Builder(SettingsActivity.this, R.style.SimpleDialogTheme)
+                        .setMessage(R.string.setting__display_system_app)
+                        .setPositiveButton(R.string.constant__yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SPService.putBoolean(SPService.KEY_DISPLAY_SYSTEM_APP, true);
+                                mDisplaySystemAppSettingInfo.setText(R.string.constant__yes);
+                                MyApplication.getInstance().reloadAppList();
+                                dialog.dismiss();
+                            }
+                        }).setNegativeButton(R.string.constant__no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SPService.putBoolean(SPService.KEY_DISPLAY_SYSTEM_APP, false);
+                        mDisplaySystemAppSettingInfo.setText(R.string.constant__no);
+                        MyApplication.getInstance().reloadAppList();
+                        dialog.dismiss();
+                    }
+                }).show();
+            }
+        });
+
+        mBaseDirSettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FileChooseDialogActivity.startFileChooser(SettingsActivity.this,
+                        REQUEST_FILE_CHOOSE, StringUtil.getString(R.string.settings__base_dir), "solopi",
+                        FileUtils.getSolopiDir());
             }
         });
 
@@ -503,6 +568,10 @@ public class SettingsActivity extends BaseActivity {
             mPatchListInfo.setText(path);
         }
 
+        mOutputCharsetSettingWrapper = findViewById(R.id.output_charset_setting_wrapper);
+        mOutputCharsetSettingInfo = (TextView) findViewById(R.id.output_charset_setting_info);
+        mOutputCharsetSettingInfo.setText(SPService.getString(SPService.KEY_OUTPUT_CHARSET, "GBK"));
+
         mResolutionSettingWrapper = findViewById(R.id.screenshot_resolution_setting_wrapper);
         mResolutionSettingInfo = (TextView) findViewById(R.id.screenshot_resolution_setting_info);
         mResolutionSettingInfo.setText(SPService.getInt(SPService.KEY_SCREENSHOT_RESOLUTION, 720) + "P");
@@ -510,6 +579,19 @@ public class SettingsActivity extends BaseActivity {
         mHightlightSettingWrapper = findViewById(R.id.replay_highlight_setting_wrapper);
         mHightlightSettingInfo = (TextView) findViewById(R.id.replay_highlight_setting_info);
         mHightlightSettingInfo.setText(SPService.getBoolean(SPService.KEY_HIGHLIGHT_REPLAY_NODE, true)? "是": "否");
+
+        mDisplaySystemAppSettingWrapper = findViewById(R.id.display_system_app_setting_wrapper);
+        mDisplaySystemAppSettingInfo = (TextView) findViewById(R.id.display_system_app_setting_info);
+        boolean displaySystemApp = SPService.getBoolean(SPService.KEY_DISPLAY_SYSTEM_APP, false);
+        if (displaySystemApp) {
+            mDisplaySystemAppSettingInfo.setText("是");
+        } else {
+            mDisplaySystemAppSettingInfo.setText("否");
+        }
+
+        mBaseDirSettingWrapper = findViewById(R.id.base_dir_setting_wrapper);
+        mBaseDirSettingInfo = (TextView) findViewById(R.id.base_dir_setting_info);
+        mBaseDirSettingInfo.setText(FileUtils.getSolopiDir().getPath());
 
         mAesSeedSettingWrapper = findViewById(R.id.aes_seed_setting_wrapper);
         mAesSeedSettingInfo = (TextView) findViewById(R.id.aes_seed_setting_info);
@@ -541,6 +623,22 @@ public class SettingsActivity extends BaseActivity {
         mClearFilesSettingInfo.setText(StringUtil.toString(clearDays));
 
         mAboutBtn = findViewById(R.id.about_wrapper);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_FILE_CHOOSE) {
+            if (resultCode == RESULT_OK) {
+                String targetFile = data.getStringExtra(FileChooseDialogActivity.KEY_TARGET_FILE);
+                if (!StringUtil.isEmpty(targetFile)) {
+                    SPService.putString(SPService.KEY_BASE_DIR, targetFile);
+                    mBaseDirSettingInfo.setText(targetFile);
+                    FileUtils.setSolopiBaseDir(targetFile);
+                }
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     /**

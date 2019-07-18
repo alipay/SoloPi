@@ -198,12 +198,12 @@ public class IndexActivity extends BaseActivity {
                         // 只上传一条，根据修改时间查看
                         LauncherApplication.getInstance().showDialog(
                                 IndexActivity.this,
-                                getString(R.string.index__find_error_log), getString(R.string.constant__yes), new Runnable() {
+                                getString(R.string.index__find_error_log), getString(R.string.constant__sure), new Runnable() {
                                     @Override
                                     public void run() {
                                         reportError(time, errorLog);
                                     }
-                                }, "取消", null);
+                                }, getString(R.string.constant__cancel), null);
                         break;
                     }
                 }
@@ -417,27 +417,19 @@ public class IndexActivity extends BaseActivity {
                         public void onPermissionResult(boolean result, String reason) {
                             LogUtil.d(TAG, "权限申请耗时：%dms", System.currentTimeMillis() - startTime);
                             if (result) {
-                                if (mPanel != null) {
-
-                                    // 记录下进入次数
-                                    Integer count = entryCount.getInteger(item.name);
-                                    if (count == null) {
-                                        count = 1;
-                                    } else {
-                                        count ++;
-                                    }
-                                    entryCount.put(item.name, count);
-                                    versionsCount.put(Integer.toString(currentVersionCode), entryCount);
-                                    SPService.putString(SPService.KEY_INDEX_RECORD, JSON.toJSONString(versionsCount));
-
-                                    mPanel.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Intent intent = new Intent(IndexActivity.this, item.targetActivity);
-                                            startActivity(intent);
-                                        }
-                                    });
+                                // 记录下进入次数
+                                Integer count = entryCount.getInteger(item.name);
+                                if (count == null) {
+                                    count = 1;
+                                } else {
+                                    count ++;
                                 }
+                                entryCount.put(item.name, count);
+                                versionsCount.put(Integer.toString(currentVersionCode), entryCount);
+                                SPService.putString(SPService.KEY_INDEX_RECORD, JSON.toJSONString(versionsCount));
+
+                                Intent intent = new Intent(IndexActivity.this, item.targetActivity);
+                                startActivity(intent);
                             }
                         }
                     });

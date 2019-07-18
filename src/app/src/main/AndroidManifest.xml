@@ -14,9 +14,10 @@
   ~ limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.alipay.hulu"
-    android:versionCode="25"
-    android:versionName="0.1.0">
+    android:versionCode="26"
+    android:versionName="0.9.1">
 
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -49,7 +50,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:replace="android:theme">
 
         <activity
             android:name=".activity.SplashActivity"
@@ -108,11 +110,6 @@
             android:label="扫码"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"/>
-        <activity
-            android:name=".shared.node.utils.activity.DownloadActivity"
-            android:label="下载"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"/>
 
         <activity android:name=".activity.BatchExecutionActivity"
                   android:label="批量执行"
@@ -124,9 +121,6 @@
         <activity android:name=".activity.LicenseActivity"
             android:label="版权声明"
             android:screenOrientation="portrait" />
-        <activity android:name=".activity.CaseStepEditActivity"
-            android:label="用例编辑"
-            android:screenOrientation="portrait"/>
         <activity android:name=".screenRecord.RecorderConfigActivity" />
 
         <service android:name=".service.FloatWinService"/>

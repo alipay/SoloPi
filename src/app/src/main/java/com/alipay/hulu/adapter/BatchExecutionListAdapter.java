@@ -20,8 +20,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.alipay.hulu.R;
@@ -45,7 +43,7 @@ public class BatchExecutionListAdapter extends BaseAdapter{
     private Delegate mDelegate;
 
     public interface Delegate {
-        void onItemChecked(boolean isAllSelected);
+        void onItemAdd(RecordCaseInfo caseInfo);
     }
 
     public BatchExecutionListAdapter(Context context) {
@@ -62,34 +60,6 @@ public class BatchExecutionListAdapter extends BaseAdapter{
 
         mData = data;
         notifyDataSetChanged();
-    }
-
-
-    public void onSelectAllClick(boolean isSelected) {
-        for (RecordCaseInfo caseInfo : mData) {
-            caseInfo.setSelected(isSelected);
-        }
-        notifyDataSetChanged();
-    }
-
-    public boolean isAllSelected() {
-        for (RecordCaseInfo caseInfo : mData) {
-         if (!(caseInfo.isSelected())) {
-             return false;
-         }
-        }
-        return true;
-    }
-
-    public List<RecordCaseInfo> getCurrentSelectedCases() {
-        List<RecordCaseInfo> targetCases = new ArrayList<>();
-        for (RecordCaseInfo caseInfo : mData) {
-            if (caseInfo.isSelected()) {
-                targetCases.add(caseInfo);
-            }
-        }
-
-        return targetCases;
     }
 
     @Override
@@ -116,7 +86,7 @@ public class BatchExecutionListAdapter extends BaseAdapter{
             holder.caseName = (TextView) convertView.findViewById(R.id.case_name);
             holder.caseDesc = (TextView) convertView.findViewById(R.id.case_desc);
             holder.createTime = (TextView) convertView.findViewById(R.id.create_time);
-            holder.checkbox = (CheckBox) convertView.findViewById(R.id.status);
+            holder.addBtn = convertView.findViewById(R.id.batch_item_add);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -133,14 +103,14 @@ public class BatchExecutionListAdapter extends BaseAdapter{
             } else {
                 holder.caseDesc.setText(recordCaseInfo.getCaseDesc());
             }
-            holder.checkbox.setOnCheckedChangeListener(null);
-            holder.checkbox.setChecked(recordCaseInfo.isSelected());
-            holder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            holder.addBtn.setTag(position);
+            holder.addBtn.setOnClickListener(new View.OnClickListener() {
+
                 @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    recordCaseInfo.setSelected(isChecked);
-                    if (mDelegate != null) {
-                        mDelegate.onItemChecked(isAllSelected());
+                public void onClick(View v) {
+                    int position = (int) v.getTag();
+                    if (position >= 0 && position < mData.size() && mDelegate != null) {
+                        mDelegate.onItemAdd(mData.get(position));
                     }
                 }
             });
@@ -153,7 +123,6 @@ public class BatchExecutionListAdapter extends BaseAdapter{
         TextView caseName;
         TextView caseDesc;
         TextView createTime;
-        CheckBox checkbox;
+        View addBtn;
     }
-
 }

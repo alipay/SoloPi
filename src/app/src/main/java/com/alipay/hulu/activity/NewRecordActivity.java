@@ -18,7 +18,6 @@ package com.alipay.hulu.activity;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -54,7 +53,6 @@ import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
-import com.alipay.hulu.event.RecordCaseChangedEvent;
 import com.alipay.hulu.replay.OperationStepProvider;
 import com.alipay.hulu.service.CaseRecordManager;
 import com.alipay.hulu.service.CaseReplayManager;
@@ -66,10 +64,6 @@ import com.alipay.hulu.shared.node.utils.AppUtil;
 import com.alipay.hulu.shared.node.utils.PrepareUtil;
 import com.alipay.hulu.ui.HeadControlPanel;
 import com.alipay.hulu.util.SystemUtil;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Arrays;
 import java.util.List;
@@ -83,7 +77,7 @@ public class NewRecordActivity extends BaseActivity {
     private static final String TAG = NewRecordActivity.class.getSimpleName();
     public static final String NEED_REFRESH_PAGE = "NEED_REFRESH_PAGE";
 
-    public static final String NEED_REFRESH_CASES_LIST = "NEED_REFRESH_CASES_LIST";
+    public static final String NEED_REFRESH_LOCAL_CASES_LIST = "NEED_REFRESH_LOCAL_CASES_LIST";
 
     private DrawerLayout mDrawerLayout;
 
@@ -116,7 +110,7 @@ public class NewRecordActivity extends BaseActivity {
         this.app = app;
     }
 
-    @Subscriber(@Param(value = NEED_REFRESH_CASES_LIST, sticky = false))
+    @Subscriber(@Param(value = NEED_REFRESH_LOCAL_CASES_LIST, sticky = false))
     public void notifyCaseListChange() {
         if (!isDestroyed()) {
             getRecentCaseList();
@@ -126,11 +120,10 @@ public class NewRecordActivity extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_record_new);
         InjectorService injectorService = LauncherApplication.getInstance().findServiceByName(InjectorService.class.getName());
         injectorService.register(this);
 
-        EventBus.getDefault().register(this);
-        setContentView(R.layout.activity_record_new);
         initDrawerLayout();
         initAppList();
         initHeadPanel();
@@ -169,6 +162,7 @@ public class NewRecordActivity extends BaseActivity {
                 if (caseInfo == null) {
                     return;
                 }
+                caseInfo = caseInfo.clone();
 
                 // 启动编辑页
                 Intent intent = new Intent(NewRecordActivity.this, CaseEditActivity.class);
@@ -527,15 +521,7 @@ public class NewRecordActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onRecordCaseChanged(RecordCaseChangedEvent event) {
-        if (event.getType() == RecordCaseChangedEvent.TYPE_CASE_ADD
-                || event.getType() == RecordCaseChangedEvent.TYPE_LOCAL_DELETE) {
-            getRecentCaseList();
-        }
+        InjectorService.g().unregister(this);
     }
 
     @Override

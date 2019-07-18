@@ -182,8 +182,8 @@ public class QRScanActivity extends BaseActivity
 
     private void requestCameraPermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-            Snackbar.make(mainLayout, "Soloπ需要权限来展示相机预览",
-                    Snackbar.LENGTH_INDEFINITE).setAction("好的", new View.OnClickListener() {
+            Snackbar.make(mainLayout, R.string.qr__camera_permission,
+                    Snackbar.LENGTH_INDEFINITE).setAction(R.string.constant__yes, new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     ActivityCompat.requestPermissions(QRScanActivity.this, new String[]{
@@ -192,7 +192,7 @@ public class QRScanActivity extends BaseActivity
                 }
             }).show();
         } else {
-            Snackbar.make(mainLayout, "未获得权限，正在申请相机权限",
+            Snackbar.make(mainLayout, R.string.qr__requst_permission,
                     Snackbar.LENGTH_SHORT).show();
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.CAMERA

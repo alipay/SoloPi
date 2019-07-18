@@ -28,4 +28,8 @@
     <string name="device_usage_permission">Soloπ需要访问设备使用情况，请点击确定前往开启</string>
     <string name="adb_open_advice">如有ADB连接电脑提示弹窗，请点击允许</string>
     <string name="open_adb_permission_failed">开启ADB权限失败，请连接电脑并在命令行输入\"adb tcpip 5555\"后再点击重试</string>
+    <string name="constant__start_execution">开始执行</string>
+    <string name="cmd__adb_break">ADB连接中断，请尝试重新开启调试端口</string>
+    <string name="constant__sure">好的</string>
+    <string name="constant__cancel">取消</string>
 </resources>

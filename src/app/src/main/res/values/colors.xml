@@ -29,6 +29,7 @@
     <color name="mix_gray">#CECED2</color>
     <color name="colorPrimary">#03A9F4</color>
     <color name="colorPrimaryDark">#0288D1</color>
+    <color name="colorPrimarySecond">#43B9F6</color>
     <color name="colorPrimaryLight">#B3E5FC</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorAccentTransparent">#aaFF4081</color>

@@ -63,7 +63,6 @@ dependencies {
     implementation 'com.alibaba:fastjson:1.1.71.android'
     implementation 'org.greenrobot:greendao:3.2.2'
     implementation 'com.squareup.okhttp3:okhttp:3.12.3'
-    implementation 'org.greenrobot:eventbus:3.1.1'
     implementation 'com.dlazaro66.qrcodereaderview:qrcodereaderview:2.0.3'
     implementation 'com.liulishuo.filedownloader:library:1.7.6'
     implementation 'com.hyman:flowlayout-lib:1.1.2'

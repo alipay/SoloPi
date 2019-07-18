@@ -23,7 +23,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.Settings;
 import android.view.WindowManager;
 
@@ -41,13 +40,10 @@ import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.HuluCrashHandler;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
-import com.alipay.hulu.event.AppForegroundEvent;
 import com.alipay.hulu.service.CaseReplayManager;
 import com.alipay.hulu.shared.io.db.GreenDaoManager;
 import com.alipay.hulu.util.LargeObjectHolder;
 import com.liulishuo.filedownloader.FileDownloader;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -300,6 +296,21 @@ public class MyApplication extends LauncherApplication {
         return packageList;
     }
 
+    /**
+     * 获取应用列表
+     * @return
+     */
+    public void reloadAppList() {
+        BackgroundExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (MyApplication.class) {
+                    loadApplicationList();
+                }
+            }
+        });
+    }
+
     private void registerLifecycleCallbacks() {
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
@@ -310,9 +321,6 @@ public class MyApplication extends LauncherApplication {
             @Override
             public void onActivityStarted(Activity activity) {
                 activityCount++;
-                if (activityCount == 1) {
-                    EventBus.getDefault().post(new AppForegroundEvent(true));
-                }
             }
 
             @Override
@@ -328,9 +336,6 @@ public class MyApplication extends LauncherApplication {
             @Override
             public void onActivityStopped(Activity activity) {
                 activityCount--;
-                if (activityCount == 0) {
-                    EventBus.getDefault().post(new AppForegroundEvent(false));
-                }
             }
 
             @Override
@@ -355,13 +360,16 @@ public class MyApplication extends LauncherApplication {
 
         List<ApplicationInfo> removedItems = new ArrayList<>();
 
+        String selfPackage = getPackageName();
+        boolean displaySystemApp = SPService.getBoolean(SPService.KEY_DISPLAY_SYSTEM_APP, false);
+
         for (ApplicationInfo pack: listPack) {
-            if ((pack.flags & ApplicationInfo.FLAG_SYSTEM) > 0) {
+            if (!displaySystemApp && (pack.flags & ApplicationInfo.FLAG_SYSTEM) > 0) {
                 removedItems.add(pack);
             }
 
             // 移除自身
-            if (StringUtil.equals(getPackageName(), pack.packageName)) {
+            if (StringUtil.equals(selfPackage, pack.packageName)) {
                 removedItems.add(pack);
             }
         }
@@ -508,6 +516,10 @@ public class MyApplication extends LauncherApplication {
 
     private void initGreenDao() {
         GreenDaoManager.getInstance();
+    }
+
+    public void updateDefaultIme(String ime) {
+        curSysInputMethod = ime;
     }
 
     public static MyApplication getInstance() {

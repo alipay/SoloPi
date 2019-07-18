@@ -22,7 +22,7 @@
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white">a
+        android:background="@color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -60,7 +60,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
                             android:layout_centerVertical="true"
-                            android:text="测试应用"
+                            android:text="@string/record__test_app"
                             android:textColor="@color/mainFont"
                             android:textSize="16dp"/>
 
@@ -83,7 +83,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="切换"
+                                android:text="@string/record__switch_app"
                                 android:textSize="12dp"
                                 android:layout_marginRight="7dp"
                                 android:textColor="@color/mainBlue"/>
@@ -118,7 +118,7 @@
                         android:textSize="16dp"
                         android:background="@drawable/bg_custom_input"
                         android:textColorHint="#aaaaaa"
-                        android:hint="请输入用例名称(必填)"
+                        android:hint="@string/record__input_case_name"
                         android:layout_marginLeft="16dp"
                         android:layout_marginRight="16dp"
                         android:layout_marginTop="20dp"
@@ -132,7 +132,7 @@
                         android:textSize="16dp"
                         android:background="@drawable/bg_custom_input"
                         android:textColorHint="#aaaaaa"
-                        android:hint="请输入用例描述(选填)"
+                        android:hint="@string/record__input_case_desc"
                         android:layout_marginLeft="16dp"
                         android:layout_marginRight="16dp"
                         android:layout_marginTop="20dp"
@@ -146,7 +146,7 @@
                         android:layout_height="45dp"
                         android:layout_marginTop="30dp"
                         android:textSize="16dp"
-                        android:text="启动"
+                        android:text="@string/constant__start_execution"
                         android:textColor="@color/white"
                         android:background="@drawable/bg_solid_round_btn"
                         android:layout_marginBottom="19dp"/>
@@ -173,7 +173,7 @@
                                 android:layout_height="wrap_content"
                                 android:textSize="16dp"
                                 android:textColor="@color/mainFont"
-                                android:text="最近录制"
+                                android:text="@string/record__recent_record"
                                 android:layout_alignParentLeft="true"
                                 android:layout_centerVertical="true"/>
 
@@ -183,7 +183,7 @@
                                 android:layout_height="wrap_content"
                                 android:textSize="14dp"
                                 android:textColor="@color/colorPrimary"
-                                android:text="查看全部"
+                                android:text="@string/record__all_cases"
                                 android:layout_alignParentRight="true"
                                 android:layout_centerVertical="true"/>
 
@@ -213,7 +213,7 @@
                                 android:layout_gravity="center_horizontal"
                                 android:layout_marginTop="10dp"
                                 android:layout_marginBottom="10dp"
-                                android:text="本地还没有录制过用例哦"/>
+                                android:text="@string/record__no_local_case"/>
 
                         </FrameLayout>
 
@@ -238,7 +238,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="25dp"
             android:layout_marginLeft="25dp"
-            android:text="切换应用"
+            android:text="@string/record__switch_app"
             android:textSize="19dp"
             android:textColor="@color/mainFont"/>
 

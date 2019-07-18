@@ -18,7 +18,7 @@
     android:layout_height="50dp"
     android:layout_alignParentTop="true"
     android:elevation="3dp"
-    android:tag="标题" >
+    android:tag="标题">
 
     <ImageView
         android:id="@+id/back_icon"
@@ -27,30 +27,33 @@
         android:layout_marginStart="16dp"
         android:layout_alignParentLeft="true"
         android:scaleType="centerInside"
-        android:layout_centerVertical="true"/>
+        android:layout_centerVertical="true" />
 
-    <TextView 
+    <!--标题区域-->
+    <TextView
         android:id="@+id/midle_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:textColor="@android:color/white"/>
-    <TextView 
-         android:id="@+id/right_title"
+        android:textColor="@android:color/white" />
+
+    <!--右侧功能区域-->
+    <LinearLayout
+        android:id="@+id/head_info_menu_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-         android:layout_marginEnd="16dp"
-         android:layout_centerVertical="true"
-        android:textColor="@android:color/white"/>
-
-    <ImageView
-        android:id="@+id/info_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:scaleType="centerInside"
-        android:layout_alignParentRight="true"
         android:layout_marginEnd="16dp"
-        android:layout_centerVertical="true"/>
-        
+        android:layout_centerVertical="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/info_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:scaleType="centerInside" />
+
+    </LinearLayout>
 </com.alipay.hulu.ui.HeadControlPanel>

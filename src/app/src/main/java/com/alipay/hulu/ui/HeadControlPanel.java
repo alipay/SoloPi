@@ -17,18 +17,23 @@ package com.alipay.hulu.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alipay.hulu.R;
+import com.alipay.hulu.common.utils.ContextUtil;
 
 public class HeadControlPanel extends RelativeLayout {
 
 	private TextView mMidleTitle;
 	private ImageView infoIcon;
 	private ImageView backIcon;
-	private static final float middle_title_size = 20f; 
+	private LinearLayout headMenuLayout;
+	private static final float middle_title_size = 20f;
 
 	public HeadControlPanel(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -41,6 +46,7 @@ public class HeadControlPanel extends RelativeLayout {
 		mMidleTitle = (TextView)findViewById(R.id.midle_title);
 		infoIcon = (ImageView) findViewById(R.id.info_icon);
 		backIcon = (ImageView) findViewById(R.id.back_icon);
+		headMenuLayout = (LinearLayout) findViewById(R.id.head_info_menu_layout);
 
 		backIcon.setVisibility(GONE);
 		infoIcon.setVisibility(GONE);
@@ -49,7 +55,56 @@ public class HeadControlPanel extends RelativeLayout {
 		super.onFinishInflate();
 	}
 
-	public void setMiddleTitle(String s){
+    /**
+     * 左侧添加菜单
+     * @param v
+     */
+    public void addMenuFromLeft(View v) {
+        ViewGroup.LayoutParams params = v.getLayoutParams();
+        LinearLayout.LayoutParams real;
+        if (params != null) {
+            if (params instanceof LinearLayout.LayoutParams) {
+                real = (LinearLayout.LayoutParams) params;
+            } else {
+                real = new LinearLayout.LayoutParams(params);
+            }
+        } else {
+            real = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        // 保证右侧16DP间距
+        real.setMarginEnd(ContextUtil.dip2px(getContext(), 16));
+        v.setLayoutParams(real);
+
+        headMenuLayout.addView(v, 0);
+    }
+
+    /**
+     * 右侧添加菜单
+     * @param v
+     */
+    public void addMenuFromRight(View v) {
+        ViewGroup.LayoutParams params = v.getLayoutParams();
+        LinearLayout.LayoutParams real;
+        if (params != null) {
+            if (params instanceof LinearLayout.LayoutParams) {
+                real = (LinearLayout.LayoutParams) params;
+            } else {
+                real = new LinearLayout.LayoutParams(params);
+            }
+        } else {
+            real = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        // 保证左侧16DP间距
+        real.setMarginStart(ContextUtil.dip2px(getContext(), 16));
+        v.setLayoutParams(real);
+
+        headMenuLayout.addView(v);
+    }
+
+
+    public void setMiddleTitle(String s){
 		mMidleTitle.setText(s);
 		mMidleTitle.setTextSize(middle_title_size);
 	}

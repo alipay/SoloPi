@@ -33,9 +33,5 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility" />
         </service>
-        <activity android:name=".node.utils.activity.DownloadActivity"
-            android:label="下载"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait" />
     </application>
 </manifest>

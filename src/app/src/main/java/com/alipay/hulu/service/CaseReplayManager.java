@@ -37,6 +37,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alipay.hulu.R;
+import com.alipay.hulu.activity.MyApplication;
 import com.alipay.hulu.bean.ReplayResultBean;
 import com.alipay.hulu.bean.ReplayStepInfoBean;
 import com.alipay.hulu.common.application.LauncherApplication;
@@ -51,6 +52,7 @@ import com.alipay.hulu.common.service.ScreenCaptureService;
 import com.alipay.hulu.common.service.base.ExportService;
 import com.alipay.hulu.common.service.base.LocalService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
+import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.ContextUtil;
 import com.alipay.hulu.common.utils.DeviceInfoUtil;
 import com.alipay.hulu.common.utils.FileUtils;
@@ -285,6 +287,11 @@ public class CaseReplayManager implements ExportService {
         // 准备
         provider.prepare();
 
+        // 先记录下默认输入法
+        String defaultIme = CmdTools.execHighPrivilegeCmd("settings get secure default_input_method");
+        MyApplication.getInstance().updateDefaultIme("com.alipay.hulu/.tools.AdbIME");
+        CmdTools.execHighPrivilegeCmd("settings put secure default_input_method com.alipay.hulu/.tools.AdbIME", 0);
+
         // 执行各步骤
         while (provider.hasNext()) {
             OperationStep step = null;
@@ -339,6 +346,10 @@ public class CaseReplayManager implements ExportService {
         }
 
         watcher.sleepUntilContentDontChange();
+
+        // 切换回默认输入法
+        MyApplication.getInstance().updateDefaultIme(defaultIme);
+        CmdTools.execHighPrivilegeCmd("settings put secure default_input_method " + defaultIme, 0);
 
         // 汇报结果
         final List<ReplayResultBean> resultBeans = provider.genReplayResult();

@@ -93,8 +93,6 @@ import com.alipay.hulu.util.DialogUtils;
 import com.alipay.hulu.util.FunctionSelectUtil;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -964,7 +962,6 @@ public class CaseRecordManager implements ExportService {
         stopListener = null;
 
         injectorService.unregister(this);
-        EventBus.getDefault().unregister(this);
     }
 
     /**

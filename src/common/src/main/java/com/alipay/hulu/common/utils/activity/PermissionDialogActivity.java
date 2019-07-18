@@ -168,10 +168,15 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
 
     @Override
     public void finish() {
-        // 都是手工调finish结束的，所以通过finish判断
+        runningStatus = false;
+        super.finish();
+    }
+
+    @Override
+    protected void onDestroy() {
         runningStatus = false;
         LogUtil.i(TAG, "权限弹窗Stop");
-        super.finish();
+        super.onDestroy();
     }
 
     /**

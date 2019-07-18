@@ -32,16 +32,26 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.hulu.R;
 import com.alipay.hulu.bean.CaseStepHolder;
 import com.alipay.hulu.bean.ReplayResultBean;
+import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.tools.BackgroundExecutor;
+import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
+import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.fragment.ReplayLogFragment;
 import com.alipay.hulu.fragment.ReplayMainResultFragment;
 import com.alipay.hulu.fragment.ReplayScreenShotFragment;
 import com.alipay.hulu.fragment.ReplayStepFragment;
 import com.alipay.hulu.ui.HeadControlPanel;
+import com.alipay.hulu.util.DialogUtils;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -86,6 +96,13 @@ public class CaseReplayResultActivity extends BaseActivity {
     }
 
     private void initData() {
+        Intent intent = getIntent();
+        int id = intent.getIntExtra("data", 0);
+        result = CaseStepHolder.getResult(id);
+        if (result == null) {
+            return;
+        }
+
         mHeadPanel.setMiddleTitle("回放结果");
         mHeadPanel.setBackIconClickListener(new View.OnClickListener() {
             @Override
@@ -93,6 +110,33 @@ public class CaseReplayResultActivity extends BaseActivity {
                 CaseReplayResultActivity.this.finish();
             }
         });
+
+        // 如果没保存过
+        File f = new File(FileUtils.getSubDir("replay"), result.getCaseName() + "_" + result.getEndTime().getTime());
+        if (!f.exists()) {
+            // 保存结果
+            mHeadPanel.setInfoIconClickListener(R.drawable.icon_save, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showProgressDialog("保存中");
+                    BackgroundExecutor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            File result = saveReplayResult();
+                            dismissProgressDialog();
+                            if (result != null) {
+                                LauncherApplication.getInstance().showDialog(
+                                        CaseReplayResultActivity.this,
+                                        getString(R.string.replay__save_result_to, result.getPath()),
+                                        getString(R.string.constant__sure), null);
+                            } else {
+                                toastLong(getString(R.string.replay__save_failed));
+                            }
+                        }
+                    });
+                }
+            });
+        }
 
         mPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
         mTabLayout.setupWithViewPager(mPager);
@@ -105,14 +149,6 @@ public class CaseReplayResultActivity extends BaseActivity {
                 setIndicator(mTabLayout, 0, 0);
             }
         });
-
-
-        Intent intent = getIntent();
-        int id = intent.getIntExtra("data", 0);
-        result = CaseStepHolder.getResult(id);
-        if (result == null) {
-            return;
-        }
 
         mCaseName.setText(getString(R.string.case_replay_result__case_name, result.getCaseName()));
         mTargetApp.setText(getString(R.string.case_replay_result__targe_app, result.getTargetApp()));
@@ -130,6 +166,55 @@ public class CaseReplayResultActivity extends BaseActivity {
 
         mAdapter = new ReplayResultFragmentAdapter(getSupportFragmentManager(), result);
         mPager.setAdapter(mAdapter);
+    }
+
+    /**
+     * 保存回放结果
+     * @return
+     */
+    private File saveReplayResult() {
+        // 生成根目录
+        File root = new File(FileUtils.getSubDir("replay"), result.getCaseName() + "_" + result.getEndTime().getTime());
+        boolean mkResult = root.mkdirs();
+        if (!root.exists() || !root.isDirectory()) {
+            return null;
+        }
+
+        File info = new File(root, "info.json");
+        JSONObject infoObj = new JSONObject();
+        infoObj.put("caseName", result.getCaseName());
+        infoObj.put("targetApp", result.getTargetApp());
+        infoObj.put("startTime", result.getStartTime());
+        infoObj.put("endTime", result.getEndTime());
+        infoObj.put("exceptionMessage", result.getExceptionMessage());
+        infoObj.put("exceptionStep", result.getExceptionStep());
+        try {
+            JSON.writeJSONStringTo(infoObj, new FileWriter(info));
+        } catch (IOException e) {
+            LogUtil.e(TAG, "输出结果失败", e);
+        }
+
+        File logFile = new File(root, "running.log");
+        try {
+            FileUtils.copyFile(new File(result.getLogFile()), logFile);
+        } catch (IOException e) {
+            LogUtil.e(TAG, "输出日志失败", e);
+        }
+
+        File stepsFile = new File(root, "steps.json");
+        try {
+            JSON.writeJSONStringTo(result.getCurrentOperationLog(), new FileWriter(stepsFile));
+        } catch (IOException e) {
+            LogUtil.e(TAG, "输出步骤信息失败", e);
+        }
+
+        File actionsFile = new File(root, "actions.json");
+        try {
+            JSON.writeJSONStringTo(result.getActionLogs(), new FileWriter(actionsFile));
+        } catch (IOException e) {
+            LogUtil.e(TAG, "输出步骤信息失败", e);
+        }
+        return root;
     }
 
     private void setIndicator(TabLayout tabs, int leftDip, int rightDip) {
@@ -194,13 +279,13 @@ public class CaseReplayResultActivity extends BaseActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "回放结果";
+                    return StringUtil.getString(R.string.replay__replay_result);
                 case 1:
-                    return "用例步骤";
+                    return StringUtil.getString(R.string.replay__case_steps);
                 case 2:
-                    return "运行日志";
+                    return StringUtil.getString(R.string.replay__running_log);
                 case 3:
-                    return "用例截图";
+                    return StringUtil.getString(R.string.replay__case_screenshot);
             }
             return "";
         }

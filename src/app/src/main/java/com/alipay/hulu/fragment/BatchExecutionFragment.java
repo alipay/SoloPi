@@ -18,7 +18,6 @@ package com.alipay.hulu.fragment;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +30,7 @@ import android.widget.Toast;
 
 import com.alipay.hulu.R;
 import com.alipay.hulu.activity.BaseActivity;
+import com.alipay.hulu.activity.BatchExecutionActivity;
 import com.alipay.hulu.activity.MyApplication;
 import com.alipay.hulu.adapter.BatchExecutionListAdapter;
 import com.alipay.hulu.common.application.LauncherApplication;
@@ -49,8 +49,7 @@ import java.util.List;
  * Created by lezhou.wyl on 2018/8/19.
  */
 
-public class BatchExecutionFragment extends Fragment implements CompoundButton.OnCheckedChangeListener
-        , BatchExecutionListAdapter.Delegate{
+public class BatchExecutionFragment extends BaseFragment {
     private static final String TAG = "BatchExeFrag";
     private static final String KEY_ARG_FRAGMENT_TYPE = "KEY_ARG_FRAGMENT_TYPE";
 
@@ -60,8 +59,6 @@ public class BatchExecutionFragment extends Fragment implements CompoundButton.O
     private View mEmptyView;
     private TextView mEmptyTextView;
     private BatchExecutionListAdapter mAdapter;
-    private CheckBox mSelectAllCheckbox;
-    private Button mConfirmBtn;
     private View mContentContainer;
 
     public static int[] getTypes() {
@@ -103,33 +100,7 @@ public class BatchExecutionFragment extends Fragment implements CompoundButton.O
 
     private void initOtherView(View view) {
         mContentContainer = view.findViewById(R.id.content_container);
-        mSelectAllCheckbox = (CheckBox) view.findViewById(R.id.select_all_checkbox);
-        mConfirmBtn = (Button) view.findViewById(R.id.confirm_btn);
 
-        mSelectAllCheckbox.setOnCheckedChangeListener(this);
-
-        mConfirmBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final List<RecordCaseInfo> recordCases = mAdapter.getCurrentSelectedCases();
-                if (recordCases.size() == 0) {
-                    ((BaseActivity)(getActivity())).toastShort("请选择用例");
-                    return;
-                }
-
-                PermissionUtil.OnPermissionCallback callback = new PermissionUtil.OnPermissionCallback() {
-                    @Override
-                    public void onPermissionResult(boolean result, String reason) {
-                        if (result) {
-                            BatchStepProvider provider = new BatchStepProvider(recordCases);
-                            CaseReplayManager manager = LauncherApplication.getInstance().findServiceByName(CaseReplayManager.class.getName());
-                            manager.start(provider, MyApplication.MULTI_REPLAY_LISTENER);
-                        }
-                    }
-                };
-                checkPermissions(callback);
-            }
-        });
     }
 
     private void getReplayRecordsFromDB() {
@@ -166,7 +137,7 @@ public class BatchExecutionFragment extends Fragment implements CompoundButton.O
         mAdapter = new BatchExecutionListAdapter(getContext());
 
         mListView.setAdapter(mAdapter);
-        mAdapter.setDelegate(this);
+        mAdapter.setDelegate((BatchExecutionActivity) getActivity());
     }
 
     private void initEmptyView(View view) {
@@ -177,22 +148,5 @@ public class BatchExecutionFragment extends Fragment implements CompoundButton.O
 
     private void showEnableAccessibilityServiceHint() {
         Toast.makeText(getContext(), "请在辅助功能中开启Soloπ", Toast.LENGTH_LONG).show();
-    }
-
-    private void checkPermissions(PermissionUtil.OnPermissionCallback callback) {
-        // 高权限，悬浮窗权限判断
-        PermissionUtil.requestPermissions(Arrays.asList("adb", Settings.ACTION_ACCESSIBILITY_SETTINGS), getActivity(), callback);
-    }
-
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        mAdapter.onSelectAllClick(mSelectAllCheckbox.isChecked());
-    }
-
-    @Override
-    public void onItemChecked(boolean isAllSelected) {
-        mSelectAllCheckbox.setOnCheckedChangeListener(null);
-        mSelectAllCheckbox.setChecked(mAdapter.isAllSelected());
-        mSelectAllCheckbox.setOnCheckedChangeListener(this);
     }
 }
