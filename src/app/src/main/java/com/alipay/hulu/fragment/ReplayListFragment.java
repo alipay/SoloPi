@@ -53,9 +53,11 @@ import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.replay.OperationStepProvider;
 import com.alipay.hulu.replay.RepeatStepProvider;
 import com.alipay.hulu.service.CaseReplayManager;
+import com.alipay.hulu.shared.io.bean.GeneralOperationLogBean;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
 import com.alipay.hulu.shared.io.db.GreenDaoManager;
 import com.alipay.hulu.shared.io.db.RecordCaseInfoDao;
+import com.alipay.hulu.shared.io.util.OperationStepUtil;
 import com.alipay.hulu.shared.node.action.PerformActionEnum;
 import com.alipay.hulu.shared.node.utils.AppUtil;
 import com.alipay.hulu.util.DialogUtils;
@@ -280,10 +282,16 @@ public class ReplayListFragment extends BaseFragment {
         if (caseInfo == null) {
             return;
         }
-
         BackgroundExecutor.execute(new Runnable() {
             @Override
             public void run() {
+                // 读取实际用例信息
+                String operationLog = caseInfo.getOperationLog();
+                GeneralOperationLogBean logBean = JSON.parseObject(operationLog, GeneralOperationLogBean.class);
+                OperationStepUtil.afterLoad(logBean);
+                logBean.setStorePath(null);
+                caseInfo.setOperationLog(JSON.toJSONString(logBean));
+
                 String content = JSON.toJSONString(caseInfo);
 
                 // 导出文件

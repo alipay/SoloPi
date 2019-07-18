@@ -87,7 +87,6 @@ public abstract class LauncherApplication extends Application {
     protected static LauncherApplication appInstance;
     protected Map<String, ServiceReference> registeredService = new HashMap<>();
     private Handler handler;
-    private AlertDialog dialog;
 
     private Stack<ContextInstanceWrapper> openedActivity = new Stack<>();
     private Stack<ContextInstanceWrapper> openedService = new Stack<>();
@@ -807,38 +806,32 @@ public abstract class LauncherApplication extends Application {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (dialog == null) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.PermissionAppDialogTheme)
-                            .setMessage(message)
-                            .setPositiveButton(positiveText, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    if (positiveRunnable != null) {
-                                        positiveRunnable.run();
-                                    }
-                                    dialog.dismiss();
-                                }
-                    });
-                    if (!StringUtil.isEmpty(negativeText)) {
-                        builder.setNegativeButton(negativeText, new DialogInterface.OnClickListener() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.PermissionAppDialogTheme)
+                        .setMessage(message)
+                        .setPositiveButton(positiveText, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                if (negativeRunnable != null) {
-                                    negativeRunnable.run();
+                                if (positiveRunnable != null) {
+                                    positiveRunnable.run();
                                 }
                                 dialog.dismiss();
                             }
-                        });
-                    }
-                    dialog = builder.create();
-                    dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-                    dialog.setCanceledOnTouchOutside(false);                                   //点击外面区域不会让dialog消失
-                    dialog.setCancelable(false);
-                } else {
-                    dialog.setMessage(message);
-                    dialog.setButton(AlertDialog.BUTTON_POSITIVE, positiveText, listener);
-                    dialog.setButton(AlertDialog.BUTTON_NEGATIVE, negativeText, listener);
+                });
+                if (!StringUtil.isEmpty(negativeText)) {
+                    builder.setNegativeButton(negativeText, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (negativeRunnable != null) {
+                                negativeRunnable.run();
+                            }
+                            dialog.dismiss();
+                        }
+                    });
                 }
+                AlertDialog dialog = builder.create();
+                dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                dialog.setCanceledOnTouchOutside(false);                                   //点击外面区域不会让dialog消失
+                dialog.setCancelable(false);
 
                 try {
                     dialog.show();

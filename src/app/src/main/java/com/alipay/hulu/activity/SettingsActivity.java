@@ -352,6 +352,30 @@ public class SettingsActivity extends BaseActivity {
             }
         });
 
+        // check update
+        mCheckUpdateSettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AlertDialog.Builder(SettingsActivity.this, R.style.SimpleDialogTheme)
+                        .setMessage(R.string.settings__check_update)
+                        .setPositiveButton(R.string.constant__yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SPService.putBoolean(SPService.KEY_CHECK_UPDATE, true);
+                                mCheckUpdateSettingInfo.setText(R.string.constant__yes);
+                                dialog.dismiss();
+                            }
+                        }).setNegativeButton(R.string.constant__no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SPService.putBoolean(SPService.KEY_CHECK_UPDATE, false);
+                        mCheckUpdateSettingInfo.setText(R.string.constant__no);
+                        dialog.dismiss();
+                    }
+                }).show();
+            }
+        });
+
         mHideLogSettingWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -404,6 +428,10 @@ public class SettingsActivity extends BaseActivity {
 
                                         // 加载实例
                                         RecordCaseInfo caseInfo = JSON.parseObject(sb.toString(), RecordCaseInfo.class);
+                                        String operationLog = caseInfo.getOperationLog();
+                                        GeneralOperationLogBean log = JSON.parseObject(operationLog, GeneralOperationLogBean.class);
+                                        OperationStepUtil.beforeStore(log);
+                                        caseInfo.setOperationLog(JSON.toJSONString(log));
 
                                         GreenDaoManager.getInstance().getRecordCaseInfoDao().insert(caseInfo);
 
