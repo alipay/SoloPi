@@ -67,6 +67,7 @@ dependencies {
     implementation 'com.liulishuo.filedownloader:library:1.7.6'
     implementation 'com.hyman:flowlayout-lib:1.1.2'
     implementation 'com.yydcdut:sdlv:0.7.6'
+    implementation 'com.atlassian.commonmark:commonmark:0.13.0'
 
     implementation('com.theartofdev.edmodo:android-image-cropper:2.5.1') {
         exclude group: "com.android.support"

@@ -27,6 +27,8 @@ import android.support.v4.content.FileProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -42,7 +44,7 @@ import com.alipay.hulu.common.constant.Constant;
 import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.utils.ClassUtil;
-import com.alipay.hulu.common.utils.DeviceInfoUtil;
+import com.alipay.hulu.common.utils.ContextUtil;
 import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.PermissionUtil;
@@ -53,6 +55,10 @@ import com.alipay.hulu.upgrade.PatchRequest;
 import com.alipay.hulu.util.SystemUtil;
 import com.alipay.hulu.util.UpgradeUtil;
 import com.alipay.hulu.util.ZipUtil;
+
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -100,13 +106,39 @@ public class IndexActivity extends BaseActivity {
 
                         @Override
                         public void onNewUpdate(final GithubReleaseBean release) {
+                            Parser parser = Parser.builder().build();
+                            Node document = parser.parse(release.getBody());
+
+                            // text size 16dp
+                            int px = ContextUtil.dip2px(IndexActivity.this, 16);
+                            HtmlRenderer renderer = HtmlRenderer.builder().build();
+                            String css = "<html><header><style type=\"text/css\"> img {" +
+                                    "width:100%;" +
+                                    "height:auto;" +
+                                    "}" +
+                                    "body {" +
+                                    "margin-right:30px;" +
+                                    "margin-left:30px;" +
+                                    "margin-top:30px;" +
+                                    "font-size:" + px + "px;" +
+                                    "word-wrap:break-word;"+
+                                    "}" +
+                                    "</style></header>";
+                            final String content = css + renderer.render(document) + "</html>";
+
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    WebView webView = new WebView(IndexActivity.this);
+                                    WebSettings webSettings = webView.getSettings();
+                                    webSettings.setUseWideViewPort(true);
+                                    webSettings.setLoadWithOverviewMode(true);
+                                    webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
+                                    webView.loadData(content, null, null);
                                     new AlertDialog.Builder(IndexActivity.this).setTitle("发现新版本: " + release.getTag_name())
-                                            .setMessage(release.getBody())
+                                            .setView(webView)
                                             .setPositiveButton("前往更新", new DialogInterface.OnClickListener() {
-                                                @Override
+
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     Uri uri = Uri.parse(release.getHtml_url());
                                                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);

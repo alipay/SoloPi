@@ -124,4 +124,5 @@
     <string name="record__case_name_empty">用例名不能为空</string>
     <string name="record__name">录制回放</string>
     <string name="index__disclaimer">免责声明</string>
+    <string name="replay__delete_case">删除此用例？</string>
 </resources>

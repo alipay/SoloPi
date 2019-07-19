@@ -713,7 +713,7 @@ public class CmdTools {
             if (ERROR_NO_CONNECTION.equals(result) || ERROR_CONNECTION_ILLEGAL_STATE.equals(result)) {
                 generateConnection();
                 MiscUtil.sleep(2000);
-            } else if (ERROR_CONNECTION_COMMON_EXCEPTION.equals("result")) {
+            } else if (ERROR_CONNECTION_COMMON_EXCEPTION.equals(result)) {
                 MiscUtil.sleep(2000);
             } else {
                 break;

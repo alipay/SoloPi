@@ -50,6 +50,7 @@ import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.PermissionUtil;
+import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.replay.OperationStepProvider;
 import com.alipay.hulu.replay.RepeatStepProvider;
 import com.alipay.hulu.service.CaseReplayManager;
@@ -250,20 +251,38 @@ public class ReplayListFragment extends BaseFragment {
     private void deleteCase(final int position) {
         AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.SimpleDialogTheme)
                 .setCancelable(false)
-                .setMessage("删除此用例？")
-                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                .setMessage(R.string.replay__delete_case)
+                .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onClick(final DialogInterface dialog, int which) {
                         final RecordCaseInfo recordCaseInfo = (RecordCaseInfo) mAdapter.getItem(position);
                         if (recordCaseInfo == null) {
                             return;
                         }
-                        GreenDaoManager.getInstance().getRecordCaseInfoDao().deleteByKey(recordCaseInfo.getId());
-                        InjectorService.g().pushMessage(NewRecordActivity.NEED_REFRESH_LOCAL_CASES_LIST);
 
-                        dialog.dismiss();
+                        // delete step file
+                        BackgroundExecutor.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                String operationLog = recordCaseInfo.getOperationLog();
+                                if (!StringUtil.isEmpty(operationLog)) {
+                                    GeneralOperationLogBean logBean = JSON.parseObject(operationLog, GeneralOperationLogBean.class);
+                                    if (logBean != null && !StringUtil.isEmpty(logBean.getStorePath())) {
+                                        File steps = new File(logBean.getStorePath());
+                                        if (steps.exists()) {
+                                            FileUtils.deleteFile(steps);
+                                        }
+                                    }
+                                }
+                                GreenDaoManager.getInstance().getRecordCaseInfoDao().deleteByKey(recordCaseInfo.getId());
+                                InjectorService.g().pushMessage(NewRecordActivity.NEED_REFRESH_LOCAL_CASES_LIST);
+
+                                dialog.dismiss();
+                            }
+                        });
+
                     }
-                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -404,7 +423,7 @@ public class ReplayListFragment extends BaseFragment {
     private void initEmptyView(View view) {
         mEmptyView = view.findViewById(R.id.empty_view_container);
         mEmptyTextView = (TextView) view.findViewById(R.id.empty_text);
-        mEmptyTextView.setText("您还没有录制用例哦");
+        mEmptyTextView.setText(R.string.record__no_local_case);
     }
 
     /**

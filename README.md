@@ -11,9 +11,9 @@
 
 ![录制回放](assets/replay.gif)
 
-**[游戏录制回放使用视频](videos/游戏自动化.mp4)**
+**[游戏录制回放使用视频](https://gw.alipayobjects.com/mdn/rms_e29b5f/afts/file/A*ym07T6nACDIAAAAAAAAAAABkARQnAQ)**
 
-**[Native应用录制回放使用视频](videos/垃圾邮件处理.mov)**
+**[Native应用录制回放使用视频](https://gw.alipayobjects.com/os/basement_prod/3472d35c-bd57-4c82-8112-5dcde42fcb32.mov)**
 
 Soloπ拥有录制操作的能力，用户只需要通过Soloπ执行用例步骤，Soloπ就能够将用户的操作记录下来，并且支持在各个设备上进行回放，这一切都能够在手机上独立完成。详见[录制回放](../../wikis/RecordCase)一篇。
 
@@ -21,9 +21,9 @@ Soloπ拥有录制操作的能力，用户只需要通过Soloπ执行用例步�
 
 ![性能工具](assets/performance.gif)
 
-**[性能工具使用视频](videos/性能工具.mov)**
+**[性能工具使用视频](https://gw.alipayobjects.com/os/basement_prod/1996390b-9ec8-4046-8ce8-459afa05d6c5.mov)**
 
-**[响应耗时计算使用视频](videos/响应耗时计算.mov)**
+**[响应耗时计算使用视频](https://gw.alipayobjects.com/os/basement_prod/4e82ca85-13fc-4de2-82ff-a9079344f5ef.mov)**
 
 Soloπ能够记录待测应用的各项指标，你可以在悬浮窗中观察实时更新的数据，也可以对性能数据进行录制，在录制结束后查看图表；同时，Soloπ还支持性能加压，能够对CPU、内存与网络环境进行限制，复现应用在性能较差、网络环境不佳场景下的表现。
 
@@ -33,7 +33,7 @@ Soloπ能够记录待测应用的各项指标，你可以在悬浮窗中观察�
 
 ![一机多控](assets/oneToMany.gif)
 
-**[一机多控使用视频](videos/一机多控.mov)**
+**[一机多控使用视频](https://gw.alipayobjects.com/os/basement_prod/971b5467-3db0-4781-86e3-15b3907323f6.mov)**
 
 Soloπ支持通过操作一台主机设备来控制多台从机设备，不需要在各个设备上分别进行重复冗杂的兼容性测试，能够极大提升兼容性测试的效率。详见[一机多控](../../wikis/OneToMany)一篇。
 
