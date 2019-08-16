@@ -170,9 +170,9 @@ Soloπ支持通过操作一台主机设备来控制多台从机设备，不需�
 
 面向行业测试相关从业人员，对工具有什么意见或者建议的话也欢迎Issue、PR或加群讨论。
 
-- 钉钉群：
+- 钉钉群（一群已满，请添加二群）：
 
-![group](assets/group.jpeg)
+![group](https://gw.alipayobjects.com/mdn/site_comm/afts/img/A*hZQNTYPG_J0AAAAAAAAAAABkARQnAQ)
 
 * 微信群：
 
