@@ -25,7 +25,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="循环模式"
+        android:text="@string/while__loop_mode"
         android:textColor="@color/secondaryText"
         android:textSize="14dp"
         />
@@ -43,7 +43,7 @@
         android:layout_marginTop="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="循环条件"
+        android:text="@string/while__loop_check"
         android:textColor="@color/secondaryText"
         android:textSize="14dp"
         />
@@ -55,7 +55,6 @@
         android:textColorHighlight="@color/colorAccent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="循环次数"
         android:textSize="18sp" />
     <TextView
         android:layout_width="wrap_content"

@@ -18,103 +18,98 @@ package com.alipay.hulu.shared.node.action;
 
 import android.support.annotation.IntDef;
 
+import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import static com.alipay.hulu.shared.node.action.PerformActionMethodMaps.*;
 
 /**
  * AccessibilityNodeInfo 操作Enum
  * Created by cathor on 2017/12/6.
  */
 public enum PerformActionEnum {
-    CANCEL("cancel", "取消", 0, 0, R.drawable.dialog_action_drawable_cancel),
-    CLICK("click", "点击", 1, 0, R.drawable.dialog_action_drawable_click),
-    LONG_CLICK("longClick", "长按", 1, 0, R.drawable.dialog_action_drawable_long_click),
-    INPUT("input", "输入", 1, 0, R.drawable.dialog_action_drawable_input),
-    MULTI_CLICK("multiClick", "重复点击", 1, 0, R.drawable.dialog_action_drawable_multi_click),
-    CLICK_IF_EXISTS("clickIfExists", "发现则点击", 1, 0, R.drawable.dialog_action_drawable_click_if_exists),
-    CLICK_QUICK("clickQuick", "快速点击", 1, 0, R.drawable.dialog_action_drawable_quick_click_2),
-    INPUT_SEARCH("inputSearch", "输入并搜索", 1, 0, R.drawable.dialog_action_drawable_search),
-    SCROLL_TO_BOTTOM("scrollToBottom", "下滑", 1, 0, R.drawable.dialog_action_drawable_scroll_up),
-    SCROLL_TO_TOP("scrollToTop", "上滑", 1, 0, R.drawable.dialog_action_drawable_scroll_down),
-    SCROLL_TO_RIGHT("scrollToRight", "右滑", 1, 0, R.drawable.dialog_action_drawable_scroll_left),
-    SCROLL_TO_LEFT("scrollToLeft", "左滑", 1, 0, R.drawable.dialog_action_drawable_scroll_right),
-    ASSERT("assert", "断言", 1, 0, R.drawable.dialog_action_drawable_assert),
-    SLEEP_UNTIL("sleepUntil", "等待节点出现", 1, 0, R.drawable.dialog_action_drawable_sleep),
-    OTHER_NODE("otherNode", "附加功能", 1, 0, R.drawable.dialog_action_drawable_extra),
+    CANCEL("cancel", R.string.action__cancel, 0, 0, R.drawable.dialog_action_drawable_cancel),
+    CLICK("click", R.string.action__click, 1, 0, R.drawable.dialog_action_drawable_click),
+    LONG_CLICK("longClick", R.string.action__long_click, 1, 0, R.drawable.dialog_action_drawable_long_click, LONG_CLICK_PARAMS),
+    INPUT("input", R.string.action__input, 1, 0, R.drawable.dialog_action_drawable_input, INPUT_PARAMS),
+    MULTI_CLICK("multiClick", R.string.action__multi_click, 1, 0, R.drawable.dialog_action_drawable_multi_click, MULTICLICK_PARAMS),
+    CLICK_IF_EXISTS("clickIfExists", R.string.action__find_click, 1, 0, R.drawable.dialog_action_drawable_click_if_exists),
+    CLICK_QUICK("clickQuick", R.string.action__quick_click, 1, 0, R.drawable.dialog_action_drawable_quick_click_2),
+    INPUT_SEARCH("inputSearch", R.string.action__input_search, 1, 0, R.drawable.dialog_action_drawable_search, SEARCH_PARAMS),
+    SCROLL_TO_BOTTOM("scrollToBottom", R.string.action__scroll_to_bottom, 1, 0, R.drawable.dialog_action_drawable_scroll_up, SCROLL_PARAMS),
+    SCROLL_TO_TOP("scrollToTop", R.string.action_scroll_to_top, 1, 0, R.drawable.dialog_action_drawable_scroll_down, SCROLL_PARAMS),
+    SCROLL_TO_RIGHT("scrollToRight", R.string.action__scroll_to_right, 1, 0, R.drawable.dialog_action_drawable_scroll_left, SCROLL_PARAMS),
+    SCROLL_TO_LEFT("scrollToLeft", R.string.action__scroll_to_left, 1, 0, R.drawable.dialog_action_drawable_scroll_right, SCROLL_PARAMS),
+    ASSERT("assert", R.string.action__assert, 1, 0, R.drawable.dialog_action_drawable_assert, ASSERT_PARAMS),
+    SLEEP_UNTIL("sleepUntil", R.string.action__sleep_until, 1, 0, R.drawable.dialog_action_drawable_sleep, SLEEP_UNTIL_PARAMS),
+    OTHER_NODE("otherNode", R.string.action__other_node, 1, 0, R.drawable.dialog_action_drawable_extra, OTHER_PARAMS),
 
+    BACK("back", R.string.action__back, 2, 0, R.drawable.dialog_action_drawable_back),
+    RELOAD("reload", R.string.action__reload, 2, 0, R.drawable.dialog_action_drawable_restart_app),
+    HANDLE_ALERT("handleAlert", R.string.action__handle_alert, 2, 0, R.drawable.dialog_action_drawable_handle_alert),
+    JUMP_TO_PAGE("jumpToPage", R.string.action__scheme_jump, 2, 0, R.drawable.dialog_action_drawable_scheme, JUMP_PAGE_PARAMS),
+    CHANGE_MODE("changeMode", R.string.action__change_mode, 4, 0, R.drawable.dialog_action_drawable_change_mode, CHANGE_MODE_PARAMS),
 
-    BACK("back", "返回", 2, 0, R.drawable.dialog_action_drawable_back),
-    RELOAD("reload", "重载界面", 2, 0, R.drawable.dialog_action_drawable_restart_app),
-    HANDLE_ALERT("handleAlert", "处理弹窗", 2, 0, R.drawable.dialog_action_drawable_handle_alert),
-    JUMP_TO_PAGE("jumpToPage", "Scheme跳转", 2, 0, R.drawable.dialog_action_drawable_scheme),
-    CHANGE_MODE("changeMode", "切换查找模式", 4, 0, R.drawable.dialog_action_drawable_change_mode),
+    GLOBAL_SCROLL_TO_BOTTOM("globalScrollToBottom", R.string.action__global_scroll_down, 2, 0, R.drawable.dialog_action_drawable_scroll_up),
+    GLOBAL_SCROLL_TO_TOP("globalScrollToTop", R.string.action__global_scroll_up, 2, 0, R.drawable.dialog_action_drawable_scroll_down),
+    GLOBAL_SCROLL_TO_RIGHT("globalScrollToRight", R.string.action__global_scroll_right, 2, 0, R.drawable.dialog_action_drawable_scroll_left),
+    GLOBAL_SCROLL_TO_LEFT("globalScrollToLeft", R.string.action__global_scroll_left, 2, 0, R.drawable.dialog_action_drawable_scroll_right),
+    GOTO_INDEX("goToIndex", R.string.action__goto_index, 2, 0, R.drawable.dialog_action_drawable_goto_index),
+    CLEAR_DATA("clearData", R.string.action__clear_data, 2, 0, R.drawable.dialog_action_drawable_app_operation),
 
+    KILL_PROCESS("killProcess", R.string.action__kill_process, 2, 0, R.drawable.dialog_action_drawable_kill_process),
+    SLEEP("sleep", R.string.action__sleep, 2, 0, R.drawable.dialog_action_drawable_sleep, SLEEP_PARAMS),
+    SCREENSHOT("screenshot", R.string.action__screen_shot, 3, 0, R.drawable.dialog_action_drawable_screenshot, SCREENSHOT_PARAMS),
+    HOME("home", R.string.action__home, 3, 0, R.drawable.dialog_action_drawable_home),
+    NOTIFICATION("notification", R.string.action__notification, 3, 0, R.drawable.dialog_action_drawable_notification),
+    RECENT_TASK("recentTask", R.string.action__recent_task, 3, 0, R.drawable.dialog_action_drawable_tasks),
+    DEVICE_INFO("deviceInfo", R.string.action__device_info, 3, 2, R.drawable.dialog_action_drawable_device_info),
+    EXECUTE_SHELL("executeShell", R.string.action__exe_shell, 2, 0, R.drawable.dialog_action_drawable_cmdline, SHELL_PARAMS),
 
-    GLOBAL_SCROLL_TO_BOTTOM("globalScrollToBottom", "全局下滑", 2, 0, R.drawable.dialog_action_drawable_scroll_up),
-    GLOBAL_SCROLL_TO_TOP("globalScrollToTop", "全局上滑", 2, 0, R.drawable.dialog_action_drawable_scroll_down),
-    GLOBAL_SCROLL_TO_RIGHT("globalScrollToRight", "全局右滑", 2, 0, R.drawable.dialog_action_drawable_scroll_left),
-    GLOBAL_SCROLL_TO_LEFT("globalScrollToLeft", "全局左滑", 2, 0, R.drawable.dialog_action_drawable_scroll_right),
-    GOTO_INDEX("goToIndex", "回到首页", 2, 0, R.drawable.dialog_action_drawable_goto_index),
-    CLEAR_DATA("clearData", "清理数据", 2, 0, R.drawable.dialog_action_drawable_app_operation),
-
-
-    KILL_PROCESS("killProcess", "结束进程", 2, 0, R.drawable.dialog_action_drawable_kill_process),
-    SLEEP("sleep", "Sleep", 2, 0, R.drawable.dialog_action_drawable_sleep),
-    SCREENSHOT("screenshot", "截图", 3, 0, R.drawable.dialog_action_drawable_screenshot),
-    HOME("home", "主页键", 3, 0, R.drawable.dialog_action_drawable_home),
-    NOTIFICATION("notification", "通知页", 3, 0, R.drawable.dialog_action_drawable_notification),
-    RECENT_TASK("recentTask", "最近任务", 3, 0, R.drawable.dialog_action_drawable_tasks),
-    DEVICE_INFO("deviceInfo", "设备信息", 3, 2, R.drawable.dialog_action_drawable_device_info),
-    EXECUTE_SHELL("executeShell", "执行adb命令", 2, 0, R.drawable.dialog_action_drawable_cmdline),
-
-    PAUSE("pause", "暂停", 3, 2, R.drawable.dialog_action_drawable_cancel),
-    OTHER_GLOBAL("otherGlobal", "附加功能", 3, 0, R.drawable.dialog_action_drawable_extra),
-    FINISH("finish", "结束", 4, 0, R.drawable.dialog_action_drawable_finish),
-    FOCUS("focus", "切换焦点", 0, 0, R.drawable.dialog_action_drawable_long_click),
+    PAUSE("pause", R.string.action__pause, 3, 2, R.drawable.dialog_action_drawable_cancel),
+    OTHER_GLOBAL("otherGlobal", R.string.action__other_gloabl, 3, 0, R.drawable.dialog_action_drawable_extra, OTHER_PARAMS),
+    FINISH("finish", R.string.action__finish, 4, 0, R.drawable.dialog_action_drawable_finish),
+    FOCUS("focus", R.string.action__focus, 0, 0, R.drawable.dialog_action_drawable_long_click),
 
     /**
      * 运行时设置变量
      */
-    LET_NODE("letNode", "设置变量", 1, 1, R.drawable.dialog_action_drawable_variable),
-    LET("let", "设置变量", 4, 1, R.drawable.dialog_action_drawable_variable),
-    CHECK_NODE("checkNode", "检查变量", 1, 1, R.drawable.dialog_action_drawable_cancel),
-    CHECK("check", "检查", 4, 1, R.drawable.dialog_action_drawable_cancel),
+    LET_NODE("letNode", R.string.action__let_node, 1, 1, R.drawable.dialog_action_drawable_variable, LET_PARAMS),
+    LET("let", R.string.action__let, 4, 1, R.drawable.dialog_action_drawable_variable, LET_PARAMS),
+    LOAD_PARAM("load", R.string.action__load_param, 4, 1, R.drawable.dialog_action_drawable_load_param, LOAD_PARAM_PARAMS),
+    CHECK_NODE("checkNode", R.string.action__check_node, 1, 1, R.drawable.dialog_action_drawable_cancel),
+    CHECK("check", R.string.action__check, 4, 1, R.drawable.dialog_action_drawable_cancel),
 
     /**
      * 本地模式专用 5
      */
 
     /**
-     * 远程模式专用 6
-     */
-    SLAVE_EXIT("slaveExit", "退出分组", 6, 2, R.drawable.dialog_action_drawable_slave_exit),
-
-    /**
      * 内部操作，不对外
      */
-    HANDLE_PERMISSION_ALERT("permissionAlert", "权限弹窗", -2, 0, R.drawable.dialog_action_drawable_cancel),
-    HIDE_INPUT_METHOD("inputMethod", "隐藏输入法", -2, 0, R.drawable.dialog_action_drawable_cancel),
+    HANDLE_PERMISSION_ALERT("permissionAlert", R.string.action__permission_alert, -2, 0, R.drawable.dialog_action_drawable_cancel),
+    HIDE_INPUT_METHOD("inputMethod", R.string.action__hide_input, -2, 0, R.drawable.dialog_action_drawable_cancel),
 
 
     /**
      * 对用例操作
      */
-    DELETE_CASE("deleteCase", "删除用例", -3, 0, R.drawable.dialog_action_drawable_cancel),
-    EXPORT_CASE("exportCase", "导出用例", -3, 0, R.drawable.dialog_action_drawable_export),
-    PLAY_MULTI_TIMES("playMultiTimes", "重复播放", -3, 0, R.drawable.dialog_action_drawable_multi_times),
-//    EDIT_CASE("editCase", "编辑用例", -3, 0, R.drawable.dialog_action_drawable_extra),
-
+    DELETE_CASE("deleteCase", R.string.action__delete_case, -3, 0, R.drawable.dialog_action_drawable_cancel),
+    EXPORT_CASE("exportCase", R.string.action__export_case, -3, 0, R.drawable.dialog_action_drawable_export),
+    PLAY_MULTI_TIMES("playMultiTimes", R.string.action__play_multi_time, -3, 0, R.drawable.dialog_action_drawable_multi_times),
+    GEN_MULTI_PARAM("genMultiParam", R.string.action__gen_multi_param, -3, 0, R.drawable.dialog_action_drawable_params_gen),
     /**
      * 逻辑判断部分，由StepProvider内部处理
      */
-    WHILE("while", "循环", -2, 1, R.drawable.dialog_action_drawable_loop),
-    IF("if", "判断", -2, 1, R.drawable.dialog_action_drawable_if),
-    CONTINUE("continue", "继续循环", -2, 1, R.drawable.dialog_action_drawable_continue),
-    BREAK("break", "中断循环", -2, 1, R.drawable.dialog_action_drawable_break);
+    WHILE("while", R.string.action__while, -2, 1, R.drawable.dialog_action_drawable_loop, LOGIC_PARAMS),
+    IF("if", R.string.action__if, -2, 1, R.drawable.dialog_action_drawable_if, LOGIC_PARAMS),
+    CONTINUE("continue", R.string.action__continue, -2, 1, R.drawable.dialog_action_drawable_continue),
+    BREAK("break", R.string.action__break, -2, 1, R.drawable.dialog_action_drawable_break);
 
     /**
      * 无效操作
@@ -182,7 +177,7 @@ public enum PerformActionEnum {
     /**
      * 描述
      */
-    private String desc;
+    private int desc;
 
     /**
      * 分类
@@ -199,12 +194,22 @@ public enum PerformActionEnum {
      */
     private int icon;
 
-    PerformActionEnum(String code, String desc, int category, int action, int icon) {
+    /**
+     * 操作方法
+     */
+    private Map<String, Integer> actionParams;
+
+    PerformActionEnum(String code, int desc, int category, int action, int icon) {
+        this(code, desc, category, action, icon, PerformActionMethodMaps.GLOBAL_PARAMS);
+    }
+
+    PerformActionEnum(String code, int desc, int category, int action, int icon, Map<String, Integer> methods) {
         this.code = code;
         this.desc = desc;
         this.category = category;
         this.actionType = action;
         this.icon = icon;
+        this.actionParams = methods;
     }
 
     @IntDef({
@@ -323,7 +328,7 @@ public enum PerformActionEnum {
     }
 
     public String getDesc() {
-        return desc;
+        return StringUtil.getString(desc);
     }
 
     /**
@@ -343,5 +348,9 @@ public enum PerformActionEnum {
      */
     public int getIcon() {
         return icon;
+    }
+
+    public Map<String, Integer> getActionParams() {
+        return actionParams;
     }
 }

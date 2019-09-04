@@ -144,7 +144,7 @@ public class RecordService extends Service {
         view = LayoutInflater.from(this).inflate(R.layout.record_service, null);
 
         recordBtn = (TextView) view.findViewById(R.id.record_btn);
-        recordBtn.setText("开始录制");
+        recordBtn.setText(R.string.record__start_record);
         closeBtn = (ImageView) view.findViewById(R.id.close_btn);
         resultView = (TextView) view.findViewById(R.id.result);
         resultView.setVisibility(View.GONE);
@@ -373,8 +373,8 @@ public class RecordService extends Service {
                     public void run() {
                         isRecording = false;
                         isCalculating = true;
-                        recordBtn.setText("正在计算");
-                        resultView.setText("请稍候...");
+                        recordBtn.setText(R.string.record__calculating);
+                        resultView.setText(R.string.record__please_wait);
                         resultView.setVisibility(View.VISIBLE);
                     }
                 });
@@ -389,9 +389,9 @@ public class RecordService extends Service {
                                             @Override
                                             public void run() {
                                                 isCalculating = false;
-                                                recordBtn.setText("开始录制");
+                                                recordBtn.setText(R.string.record__start_record);
                                                 if (result <= 0) {
-                                                    resultView.setText("操作过快，请重试");
+                                                    resultView.setText(R.string.record__operation_fast);
                                                 } else {
                                                     resultView.setText(getString(R.string.record_service__cost_time, result));
                                                 }
@@ -405,7 +405,7 @@ public class RecordService extends Service {
                                             @Override
                                             public void run() {
                                                 isCalculating = false;
-                                                recordBtn.setText("开始录制");
+                                                recordBtn.setText(R.string.record__start_record);
                                                 resultView.setText(msg);
                                             }
                                         });
@@ -429,7 +429,7 @@ public class RecordService extends Service {
                     public void run() {
                         isRecording = true;
                         hasClicked = false;
-                        recordBtn.setText("结束录制");
+                        recordBtn.setText(R.string.record__stop_record);
                         resultView.setVisibility(View.GONE);
                         mNotifications.recording(0);
                     }

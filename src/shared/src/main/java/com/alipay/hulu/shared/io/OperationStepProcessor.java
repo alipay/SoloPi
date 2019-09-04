@@ -13,14 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.hulu.shared.node.tree.export;
+package com.alipay.hulu.shared.io;
 
-import com.alipay.hulu.shared.node.action.OperationMethod;
-import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
+import android.content.Context;
+
+import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
+import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
 
 /**
- * Created by qiaoruikai on 2018/10/10 5:15 PM.
+ * Created by qiaoruikai on 2019-08-06 14:20.
  */
-public interface BaseStepProvider<T> {
-    T exportStep(AbstractNodeTree root, AbstractNodeTree currentNode, OperationMethod method);
+public interface OperationStepProcessor {
+    void onStartRecord(RecordCaseInfo recordCaseInfo);
+
+    boolean onStopRecord(Context context);
+
+    void onOperationStep(int operationIdx, OperationStep step);
 }

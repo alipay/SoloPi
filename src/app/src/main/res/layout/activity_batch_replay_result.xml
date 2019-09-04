@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:text="回放总结"
+        android:text="@string/batch_result__replay_summary"
         android:textColor="@color/primaryText"
         android:layout_marginTop="10dp"
         android:textSize="20dp"/>
@@ -38,7 +38,6 @@
         android:layout_marginTop="10dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:text="用例总数"
         android:textColor="@color/subFont"
         android:textSize="14dp"/>
 
@@ -49,7 +48,6 @@
         android:layout_marginTop="5dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:text="成功"
         android:textColor="@color/subFont"
         android:textSize="14dp"/>
 
@@ -60,7 +58,6 @@
         android:layout_marginTop="5dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:text="失败"
         android:textColor="@color/subFont"
         android:textSize="14dp"/>
 

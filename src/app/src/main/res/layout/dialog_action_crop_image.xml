@@ -27,7 +27,7 @@
         android:layout_marginLeft="16dp"
         android:textColor="@color/primaryText"
         android:layout_marginBottom="8dp"
-        android:text="请选择待操作区域"/>
+        android:text="@string/crop__select_action_area"/>
     <com.theartofdev.edmodo.cropper.CropImageView
         xmlns:custom="http://schemas.android.com/apk/res-auto"
         android:id="@+id/dialog_action_crop_view"

@@ -30,11 +30,11 @@
         android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
         android:textSize="16dp"
-        android:text="录屏编码设置(H.264 AVC)"/>
+        android:text="@string/record_config__title"/>
 
     <com.alipay.hulu.screenRecord.TextSpinner
         android:id="@+id/spinner_video_codec"
-        app:name="编解码器"
+        app:name="@string/record_config__codec"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_marginTop="20dp"
@@ -46,7 +46,7 @@
 
     <com.alipay.hulu.screenRecord.TextSpinner
         android:id="@+id/spinner_resolution"
-        app:name="分辨率"
+        app:name="@string/record_config__resolution"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_marginTop="8dp"
@@ -56,7 +56,7 @@
 
     <com.alipay.hulu.screenRecord.TextSpinner
         android:id="@+id/spinner_video_bitrate"
-        app:name="比特率 (kbps)"
+        app:name="@string/record_config__bitrate"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_marginTop="8dp"
@@ -68,7 +68,7 @@
 
     <com.alipay.hulu.screenRecord.TextSpinner
         android:id="@+id/spinner_framerate"
-        app:name="帧数 (fps)"
+        app:name="@string/record_config__framerate"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_marginTop="8dp"
@@ -78,7 +78,7 @@
 
     <com.alipay.hulu.screenRecord.TextSpinner
         android:id="@+id/spinner_except_diff"
-        app:name="二值对比差异 (%)"
+        app:name="@string/record_config__expect_diff"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_marginTop="8dp"
@@ -93,7 +93,7 @@
         android:layout_marginRight="16dp"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:text="启动"
+        android:text="@string/record_config__start"
         android:textColor="@color/white"
         android:background="@drawable/bg_solid_round_btn"/>
 

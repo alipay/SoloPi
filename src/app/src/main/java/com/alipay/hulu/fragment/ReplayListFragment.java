@@ -20,9 +20,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,18 +32,24 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 import com.alipay.hulu.R;
 import com.alipay.hulu.activity.CaseEditActivity;
+import com.alipay.hulu.activity.CaseParamEditActivity;
 import com.alipay.hulu.activity.MyApplication;
 import com.alipay.hulu.activity.NewRecordActivity;
 import com.alipay.hulu.adapter.ReplayListAdapter;
+import com.alipay.hulu.bean.AdvanceCaseSetting;
+import com.alipay.hulu.bean.CaseParamBean;
 import com.alipay.hulu.bean.CaseStepHolder;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.injector.InjectorService;
+import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
@@ -61,6 +69,7 @@ import com.alipay.hulu.shared.io.db.RecordCaseInfoDao;
 import com.alipay.hulu.shared.io.util.OperationStepUtil;
 import com.alipay.hulu.shared.node.action.PerformActionEnum;
 import com.alipay.hulu.shared.node.utils.AppUtil;
+import com.alipay.hulu.util.CaseReplayUtil;
 import com.alipay.hulu.util.DialogUtils;
 
 import java.io.BufferedWriter;
@@ -68,6 +77,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -85,6 +95,8 @@ public class ReplayListFragment extends BaseFragment {
     private View mEmptyView;
     private TextView mEmptyTextView;
     private ReplayListAdapter mAdapter;
+    private SwipeRefreshLayout refreshLayout;
+    private String app;
 
     public static ReplayListFragment newInstance(int type) {
         return new ReplayListFragment();
@@ -104,6 +116,11 @@ public class ReplayListFragment extends BaseFragment {
         InjectorService.g().register(this);
     }
 
+    @Subscriber(@Param(SubscribeParamEnum.APP))
+    public void setApp(String app) {
+        this.app = app;
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -116,7 +133,7 @@ public class ReplayListFragment extends BaseFragment {
         initEmptyView(view);
         initListView(view);
 
-        getReplayRecordsFromDB();
+        getReplayRecordsFromDB(null);
     }
 
     /**
@@ -124,10 +141,10 @@ public class ReplayListFragment extends BaseFragment {
      */
     @Subscriber(value = @Param(value = NewRecordActivity.NEED_REFRESH_LOCAL_CASES_LIST, sticky = false))
     public void reloadLocalCases() {
-        getReplayRecordsFromDB();
+        getReplayRecordsFromDB(null);
     }
 
-    private void getReplayRecordsFromDB() {
+    private void getReplayRecordsFromDB(final Runnable r) {
         BackgroundExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -137,6 +154,9 @@ public class ReplayListFragment extends BaseFragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        if (r != null) {
+                            r.run();
+                        }
                         if (mCases != null && mCases.size() > 0) {
                             mAdapter.updateData(mCases);
                             mListView.setVisibility(View.VISIBLE);
@@ -152,21 +172,29 @@ public class ReplayListFragment extends BaseFragment {
     }
 
     private void initListView(View view) {
+        refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.replay_swipe_refresh);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Runnable r = new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshLayout.setRefreshing(false);
+                    }
+                };
+
+                // 读取用例
+                getReplayRecordsFromDB(r);
+            }
+        });
+
         mListView = (ListView) view.findViewById(R.id.replay_list);
         mAdapter = new ReplayListAdapter(getContext());
 
         mListView.setAdapter(mAdapter);
 
-        // 设置编辑按键监听器
-        mAdapter.setOnEditClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                editCase(position);
-            }
-        });
-
-        // 默认点击播放
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        // 设置播放按键监听器
+        mAdapter.setOnPlayClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final RecordCaseInfo caseInfo = (RecordCaseInfo) mAdapter.getItem(position);
@@ -178,15 +206,19 @@ public class ReplayListFragment extends BaseFragment {
                     @Override
                     public void onPermissionResult(final boolean result, String reason) {
                         if (result) {
-                            OperationStepProvider stepProvider = new OperationStepProvider(caseInfo);
-                            MyApplication.getInstance().updateAppAndNameTemp(caseInfo.getTargetAppPackage(), caseInfo.getTargetAppLabel());
-                            CaseReplayManager manager = LauncherApplication.getInstance().findServiceByName(CaseReplayManager.class.getName());
-                            manager.start(stepProvider, MyApplication.SINGLE_REPLAY_LISTENER);
-
+                            CaseReplayUtil.startReplay(caseInfo);
                             startTargetApp(caseInfo.getTargetAppPackage());
                         }
                     }
                 });
+            }
+        });
+
+        // 默认点击编辑
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                editCase(position);
             }
         });
 
@@ -207,6 +239,9 @@ public class ReplayListFragment extends BaseFragment {
                                 break;
                             case PLAY_MULTI_TIMES:
                                 repeatPrepare(position);
+                                break;
+                            case GEN_MULTI_PARAM:
+                                genMultiParams(position);
                                 break;
                         }
                     }
@@ -241,6 +276,19 @@ public class ReplayListFragment extends BaseFragment {
         Intent intent = new Intent(getActivity(), CaseEditActivity.class);
         int caseId = CaseStepHolder.storeCase(caseInfo);
         intent.putExtra(CaseEditActivity.RECORD_CASE_EXTRA, caseId);
+        startActivity(intent);
+    }
+
+    private void genMultiParams(final int position) {
+        RecordCaseInfo caseInfo = (RecordCaseInfo) mAdapter.getItem(position);
+        if (caseInfo == null) {
+            return;
+        }
+        caseInfo = caseInfo.clone();
+
+        Intent intent = new Intent(getActivity(), CaseParamEditActivity.class);
+        int caseId = CaseStepHolder.storeCase(caseInfo);
+        intent.putExtra(CaseParamEditActivity.RECORD_CASE_EXTRA, caseId);
         startActivity(intent);
     }
 
@@ -343,7 +391,7 @@ public class ReplayListFragment extends BaseFragment {
         textPattern = Pattern.compile("\\d{1,3}");
 
         final AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.AppDialogTheme)
-                .setTitle("请输入回放次数")
+                .setTitle(R.string.replay__set_replay_count)
                 .setView(v)
                 .setPositiveButton(R.string.constant__start_execution, new DialogInterface.OnClickListener() {
                     @Override
@@ -409,11 +457,7 @@ public class ReplayListFragment extends BaseFragment {
             @Override
             public void onPermissionResult(final boolean result, String reason) {
                 if (result) {
-                    RepeatStepProvider stepProvider = new RepeatStepProvider(caseInfo, count, prepare);
-                    MyApplication.getInstance().updateAppAndNameTemp(caseInfo.getTargetAppPackage(), caseInfo.getTargetAppLabel());
-                    CaseReplayManager manager = LauncherApplication.getInstance().findServiceByName(CaseReplayManager.class.getName());
-                    manager.start(stepProvider, MyApplication.MULTI_REPLAY_LISTENER);
-
+                    CaseReplayUtil.startReplayMultiTimes(caseInfo, count, prepare);
                     startTargetApp(caseInfo.getTargetAppPackage());
                 }
             }

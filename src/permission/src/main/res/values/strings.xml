@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="float__go_to_grant">现在去开启</string>
+    <string name="float__no_grant_now">暂不开启</string>
+    <string name="vivo__open_float"><![CDATA[请进入\"应用管理->权限管理->悬浮窗\"页面开启权限]]></string>
+    <string name="vivo__open_float_b"><![CDATA[请手动开启i管家，进入\"应用管理->权限管理->悬浮窗\"页面开启权限]]></string>
+    <string name="vivo__open_float_c"><![CDATA[请手动开启i管家，进入\"应用管理->权限管理->悬浮窗\"页面开启权限]]></string>
+    <string name="huawei__setting_fail">进入设置页面失败，请手动设置</string>
+</resources>

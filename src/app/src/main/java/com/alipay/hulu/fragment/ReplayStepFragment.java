@@ -16,7 +16,6 @@
 package com.alipay.hulu.fragment;
 
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -38,9 +37,8 @@ import com.alipay.hulu.bean.ReplayStepInfoBean;
 import com.alipay.hulu.common.utils.GlideApp;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
-import com.alipay.hulu.shared.node.action.OperationExecutor;
 import com.alipay.hulu.shared.node.action.OperationMethod;
-import com.alipay.hulu.shared.node.tree.export.OperationStepProvider;
+import com.alipay.hulu.shared.node.tree.export.OperationStepExporter;
 import com.alipay.hulu.shared.node.tree.OperationNode;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
 import com.alipay.hulu.shared.node.utils.BitmapUtil;
@@ -249,13 +247,13 @@ public class ReplayStepFragment extends Fragment {
             try {
                 // 获取base64信息
                 findBytes = BitmapUtil.decodeBase64(findNode == null? null:
-                        findNode.getExtraValue(OperationStepProvider.CAPTURE_IMAGE_BASE64));
+                        findNode.getExtraValue(OperationStepExporter.CAPTURE_IMAGE_BASE64));
                 targetBytes = null;
                 if (method != null) {
                     if (method.containsParam(ImageCompareActionProvider.KEY_TARGET_IMAGE)) {
                         targetBytes = BitmapUtil.decodeBase64(method.getParam(ImageCompareActionProvider.KEY_TARGET_IMAGE));
-                    } else if (node != null && node.containsExtra(OperationStepProvider.CAPTURE_IMAGE_BASE64)) {
-                        targetBytes = BitmapUtil.decodeBase64(node.getExtraValue(OperationStepProvider.CAPTURE_IMAGE_BASE64));
+                    } else if (node != null && node.containsExtra(OperationStepExporter.CAPTURE_IMAGE_BASE64)) {
+                        targetBytes = BitmapUtil.decodeBase64(node.getExtraValue(OperationStepExporter.CAPTURE_IMAGE_BASE64));
                     }
                 }
 
@@ -312,8 +310,8 @@ public class ReplayStepFragment extends Fragment {
         private void showContentDialog(OperationNode node) {
             AlertDialog dialog = new AlertDialog.Builder(mTargetNode.getContext())
                     .setView(wrapView(node))
-                    .setTitle("节点结构")
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    .setTitle(R.string.replay__node_struct)
+                    .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();

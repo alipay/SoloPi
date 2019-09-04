@@ -42,8 +42,7 @@
         android:layout_width="55dp"
         android:layout_height="55dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp"
-        android:src="@drawable/icon_xingneng" />
+        android:layout_marginTop="30dp"/>
 
     <TextView
         android:id="@+id/tv"
@@ -52,7 +51,6 @@
         android:layout_below="@id/img"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="12dp"
-        android:text="录制回放"
         android:textSize="13dp" />
 
 </com.alipay.hulu.ui.ColorFilterRelativeLayout>

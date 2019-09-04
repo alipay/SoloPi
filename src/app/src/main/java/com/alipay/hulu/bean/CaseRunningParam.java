@@ -13,14 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.hulu.shared.io.constant;
+package com.alipay.hulu.bean;
+
+import com.alibaba.fastjson.JSONObject;
+
+import java.util.List;
 
 /**
- * Created by qiaoruikai on 2018/10/10 8:54 PM.
+ * Created by qiaoruikai on 2019-08-19 21:05.
  */
-public class Constant {
+public class CaseRunningParam {
+    private ParamMode mode;
+    private List<JSONObject> paramList;
+
+    public ParamMode getMode() {
+        return mode;
+    }
+
+    public void setMode(ParamMode mode) {
+        this.mode = mode;
+    }
+
+    public List<JSONObject> getParamList() {
+        return paramList;
+    }
+
+    public void setParamList(List<JSONObject> paramList) {
+        this.paramList = paramList;
+    }
+
     /**
-     * 通知记录操作步骤
+     * 可选模式
      */
-    public static final String NOTIFY_RECORD_STEP = "notifyRecordStep";
+    public enum ParamMode {
+        SEPARATE,
+        UNION
+    }
 }

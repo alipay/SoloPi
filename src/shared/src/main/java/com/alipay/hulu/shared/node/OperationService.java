@@ -19,10 +19,13 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
+import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.service.base.ExportService;
 import com.alipay.hulu.common.service.base.LocalService;
 import com.alipay.hulu.common.utils.ClassUtil;
@@ -35,7 +38,7 @@ import com.alipay.hulu.shared.node.action.provider.ActionProviderManager;
 import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
 import com.alipay.hulu.shared.node.tree.annotation.NodeProcessor;
 import com.alipay.hulu.shared.node.tree.annotation.NodeProvider;
-import com.alipay.hulu.shared.node.tree.export.BaseStepProvider;
+import com.alipay.hulu.shared.node.tree.export.BaseStepExporter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +47,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static android.view.Surface.ROTATION_0;
@@ -68,9 +72,9 @@ public class OperationService implements ExportService {
 
     private OperationExecutor executor;
 
-    private ConcurrentHashMap<String, Object> runtimeVariables;
+    private Stack<HashMap<String, Object>> runtimeVariables;
 
-    private ConcurrentHashMap<String, Object> templateVariables;
+    private ConcurrentHashMap<String, Object> temporaryVariables;
 
     private int currentOrientation = ROTATION_0;
 
@@ -171,7 +175,7 @@ public class OperationService implements ExportService {
      * @param stepProvider 导出操作类型
      * @return
      */
-    public <T> T doAndRecordAction(OperationMethod method, AbstractNodeTree targetNode, BaseStepProvider<T> stepProvider, OperationContext.OperationListener listener) {
+    public <T> T doAndRecordAction(OperationMethod method, AbstractNodeTree targetNode, BaseStepExporter<T> stepProvider, OperationContext.OperationListener listener) {
         if (executor == null) {
             executor = new OperationExecutor(this);
         }
@@ -194,7 +198,7 @@ public class OperationService implements ExportService {
      * @param <T>
      * @return
      */
-    public <T> T doAndRecordAction(OperationMethod method, AbstractNodeTree targetNode, BaseStepProvider<T> stepProvider) {
+    public <T> T doAndRecordAction(OperationMethod method, AbstractNodeTree targetNode, BaseStepExporter<T> stepProvider) {
         return doAndRecordAction(method, targetNode, stepProvider, null);
     }
 
@@ -357,16 +361,29 @@ public class OperationService implements ExportService {
      * 初始化运行环境
      */
     public void initParams() {
-        if (templateVariables != null) {
-            templateVariables.clear();
+        if (temporaryVariables != null) {
+            temporaryVariables.clear();
         } else {
-            templateVariables = new ConcurrentHashMap<>();
+            temporaryVariables = new ConcurrentHashMap<>();
         }
         if (runtimeVariables != null) {
             runtimeVariables.clear();
         } else {
-            runtimeVariables = new ConcurrentHashMap<>();
+            runtimeVariables = new Stack<>();
         }
+
+        // 存放全局变量
+        HashMap<String, Object> globalParam = new HashMap<>();
+        String globalSettings = SPService.getString(SPService.KEY_GLOBAL_SETTINGS, "{}");
+        JSONObject obj = JSON.parseObject(globalSettings);
+        if (obj != null && obj.size() > 0) {
+            for (String key : obj.keySet()) {
+                globalParam.put(key, obj.getString(key));
+            }
+        }
+        runtimeVariables.push(globalParam);
+
+        runtimeVariables.push(new HashMap<String, Object>());
     }
 
     /**
@@ -375,12 +392,12 @@ public class OperationService implements ExportService {
      * @param key
      * @param value
      */
-    public void putTemplateParam(String key, Object value) {
-        if (templateVariables == null) {
-            templateVariables = new ConcurrentHashMap<>();
+    public void putTemporaryParam(String key, Object value) {
+        if (temporaryVariables == null) {
+            temporaryVariables = new ConcurrentHashMap<>();
         }
 
-        templateVariables.put(key, value);
+        temporaryVariables.put(key, value);
     }
 
     /**
@@ -389,12 +406,12 @@ public class OperationService implements ExportService {
      * @param key
      * @return
      */
-    public Object removeTemplateParam(String key) {
-        if (templateVariables == null) {
+    public Object removeTemporaryParam(String key) {
+        if (temporaryVariables == null) {
             return null;
         }
 
-        return templateVariables.remove(key);
+        return temporaryVariables.remove(key);
     }
 
     /**
@@ -402,12 +419,60 @@ public class OperationService implements ExportService {
      * @param key
      * @param value
      */
-    public void putRuntimeParam(String key, Object value) {
+    public synchronized void putRuntimeParam(String key, Object value) {
         if (runtimeVariables == null) {
-            runtimeVariables = new ConcurrentHashMap<>();
+            runtimeVariables = new Stack<>();
+            runtimeVariables.push(new HashMap<String, Object>());
+        } else if (runtimeVariables.isEmpty()) {
+            runtimeVariables.push(new HashMap<String, Object>());
         }
 
-        runtimeVariables.put(key, value);
+        // already in param stack
+        for (HashMap<String, Object> stack: runtimeVariables) {
+            if (stack.containsKey(key)) {
+                stack.put(key, value);
+                return;
+            }
+        }
+
+        runtimeVariables.peek().put(key, value);
+    }
+
+    /**
+     * 设置全局变量
+     * @param params
+     */
+    public synchronized void putAllRuntimeParamAtTop(Map<String, ?> params) {
+        if (runtimeVariables == null) {
+            runtimeVariables = new Stack<>();
+            runtimeVariables.push(new HashMap<String, Object>());
+        } else if (runtimeVariables.isEmpty()) {
+            runtimeVariables.push(new HashMap<String, Object>());
+        }
+
+        runtimeVariables.peek().putAll(params);
+    }
+
+    /**
+     * add new param stack
+     */
+    public synchronized void pushParamStack() {
+        if (runtimeVariables == null) {
+            runtimeVariables = new Stack<>();
+        }
+
+        runtimeVariables.push(new HashMap<String, Object>());
+    }
+
+    /**
+     * remove top param stack
+     */
+    public synchronized void popParamStack() {
+        if (runtimeVariables == null || runtimeVariables.isEmpty()) {
+            return;
+        }
+
+        runtimeVariables.pop();
     }
 
     /**
@@ -415,12 +480,18 @@ public class OperationService implements ExportService {
      * @param key
      * @return
      */
-    public Object removeRuntimeParam(String key) {
+    public synchronized Object removeRuntimeParam(String key) {
         if (runtimeVariables == null) {
             return null;
         }
 
-        return runtimeVariables.remove(key);
+        for (HashMap<String, Object> stack: runtimeVariables) {
+            if (stack.containsKey(key)) {
+                return stack.remove(key);
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -428,19 +499,27 @@ public class OperationService implements ExportService {
      * @param key
      * @return
      */
-    public Object getRuntimeParam(String key) {
+    public synchronized Object getRuntimeParam(String key) {
         // 如果设置了临时变量，取临时变量值
-        if (templateVariables != null) {
-            Object tmpVal = templateVariables.get(key);
+        if (temporaryVariables != null) {
+            Object tmpVal = temporaryVariables.get(key);
             if (tmpVal != null) {
                 return tmpVal;
             }
         }
 
-        if (runtimeVariables == null){
+        if (runtimeVariables == null || runtimeVariables.isEmpty()){
             return null;
         }
-        return runtimeVariables.get(key);
+
+        // 遍历栈
+        for (HashMap<String, Object> stackParam: runtimeVariables) {
+            if (stackParam.containsKey(key)) {
+                return stackParam.get(key);
+            }
+        }
+
+        return null;
     }
 
     public ActionProviderManager getActionProviderMng() {

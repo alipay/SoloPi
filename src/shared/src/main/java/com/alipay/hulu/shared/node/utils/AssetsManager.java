@@ -23,7 +23,9 @@ import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.PatchProcessUtil;
+import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.common.utils.patch.PatchLoadResult;
+import com.alipay.hulu.shared.R;
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadSampleListener;
 import com.liulishuo.filedownloader.FileDownloader;
@@ -42,7 +44,7 @@ public class AssetsManager {
     private static final String TAG = "AssetsManager";
 
     public static PatchLoadResult loadPatchFromServer(String name, PrepareUtil.PrepareStatus prepareStatus) {
-        LauncherApplication.getInstance().showToast("加载" + name + "插件中");
+        LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.assets__load_plugin, name));
 
         // 如果没有下载地址
         Pair<Float, String> patchInfo = ClassUtil.getAvaliablePatchInfo(name);
@@ -54,7 +56,7 @@ public class AssetsManager {
         Pair<String, String> assetInfo = new Pair<>(name + ".zip", patchInfo.second);
         File f = AssetsManager.getAssetFile(assetInfo, prepareStatus, true);
 
-        prepareStatus.currentStatus(100, 100, "加载插件中", true);
+        prepareStatus.currentStatus(100, 100, StringUtil.getString(R.string.assets__load_plugin, name), true);
         boolean success = false;
         try {
 
@@ -69,8 +71,8 @@ public class AssetsManager {
             LogUtil.e(TAG, "加载插件异常", e);
         }
 
-        prepareStatus.currentStatus(100, 100, "插件加载完毕", success);
-        LauncherApplication.getInstance().showToast("加载插件结果: " + success);
+        prepareStatus.currentStatus(100, 100, StringUtil.getString(R.string.loading_plugin_finish), success);
+        LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.assets__load_plugin_result, success));
 
         return ClassUtil.getPatchInfo(name);
     }

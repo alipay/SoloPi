@@ -32,6 +32,7 @@
     <color name="colorPrimarySecond">#43B9F6</color>
     <color name="colorPrimaryLight">#B3E5FC</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorAccentSecond">#FF6096</color>
     <color name="colorAccentTransparent">#aaFF4081</color>
     <color name="orangered">#FF4500</color>
     <color name="bkg_light">#F5F5F5</color>

@@ -131,7 +131,7 @@ public class PerformanceChartActivity extends BaseActivity {
     private void initView(){
         setContentView(R.layout.activity_record_chart);
         headPanel = (HeadControlPanel) findViewById(R.id.head_layout);
-        headPanel.setMiddleTitle("录制数据");
+        headPanel.setMiddleTitle(getString(R.string.activity__performance_display));
         headPanel.setBackIconClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -227,7 +227,7 @@ public class PerformanceChartActivity extends BaseActivity {
                     }
 
                     if (realPattern == null) {
-                        Toast.makeText(PerformanceChartActivity.this, "录制数据未找到，请重新打开应用", Toast.LENGTH_SHORT).show();
+                        toastShort(R.string.performance_chart__no_record_data);
                         return;
                     }
 

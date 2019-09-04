@@ -99,7 +99,7 @@ public class BatchExecutionListAdapter extends BaseAdapter{
             holder.createTime.setText(DateFormat.getDateTimeInstance().format(sDate));
             String caseDesc = recordCaseInfo.getCaseDesc();
             if (StringUtil.isEmpty(caseDesc)) {
-                holder.caseDesc.setText("暂无描述");
+                holder.caseDesc.setText(R.string.batch_adapter__no_desc);
             } else {
                 holder.caseDesc.setText(recordCaseInfo.getCaseDesc());
             }

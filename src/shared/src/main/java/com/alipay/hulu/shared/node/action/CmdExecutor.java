@@ -24,6 +24,9 @@ import com.android.permission.rom.RomUtils;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by qiaoruikai on 2018/10/8 8:51 PM.
@@ -83,7 +86,9 @@ public class CmdExecutor {
             "sendevent %1$s 1 330 0 && sendevent %1$s 0 0 0";
 
     public CmdExecutor() {
-        this.executorService = Executors.newCachedThreadPool();
+        this.executorService = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                0, TimeUnit.MILLISECONDS,
+                new SynchronousQueue<Runnable>());
     }
 
     public void setClickType(int clickType) {

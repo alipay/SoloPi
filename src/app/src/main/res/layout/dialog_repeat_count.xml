@@ -29,7 +29,7 @@
         android:textColorHighlight="@color/colorAccent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="重复次数"
+        android:hint="@string/repeat__repeat_count"
         android:textSize="18sp" />
 
     <CheckBox

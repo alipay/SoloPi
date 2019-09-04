@@ -22,15 +22,13 @@ import android.support.v7.app.AlertDialog;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.hulu.R;
 import com.alipay.hulu.common.constant.Constant;
 import com.alipay.hulu.common.service.SPService;
@@ -52,7 +50,11 @@ import com.alipay.hulu.shared.io.util.OperationStepUtil;
 import com.alipay.hulu.shared.node.action.OperationMethod;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
 import com.alipay.hulu.ui.HeadControlPanel;
+import com.alipay.hulu.util.DialogUtils;
 import com.alipay.hulu.upgrade.PatchRequest;
+import com.zhy.view.flowlayout.FlowLayout;
+import com.zhy.view.flowlayout.TagAdapter;
+import com.zhy.view.flowlayout.TagFlowLayout;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -64,6 +66,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static com.alipay.hulu.util.DialogUtils.showMultipleEditDialog;
+import com.alipay.hulu.util.DialogUtils.OnDialogResultListener;
 
 /**
  * Created by lezhou.wyl on 01/01/2018.
@@ -84,6 +89,8 @@ public class SettingsActivity extends BaseActivity {
 
     private View mPatchListWrapper;
     private TextView mPatchListInfo;
+
+    private View mGlobalParamSettingWrapper;
 
     private View mResolutionSettingWrapper;
     private TextView mResolutionSettingInfo;
@@ -142,10 +149,17 @@ public class SettingsActivity extends BaseActivity {
             }
         });
 
+        mGlobalParamSettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showGlobalParamEdit();
+            }
+        });
+
         mRecordUploadWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showMultipleEditDialog(new OnDialogResultListener() {
+                showMultipleEditDialog(SettingsActivity.this, new OnDialogResultListener() {
                     @Override
                     public void onDialogPositive(List<String> data) {
                         if (data.size() == 1) {
@@ -165,7 +179,7 @@ public class SettingsActivity extends BaseActivity {
         mRecordScreenUploadWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showMultipleEditDialog(new OnDialogResultListener() {
+                showMultipleEditDialog(SettingsActivity.this, new OnDialogResultListener() {
                     @Override
                     public void onDialogPositive(List<String> data) {
                         if (data.size() == 1) {
@@ -185,7 +199,7 @@ public class SettingsActivity extends BaseActivity {
         mPatchListWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showMultipleEditDialog(new OnDialogResultListener() {
+                showMultipleEditDialog(SettingsActivity.this, new OnDialogResultListener() {
                     @Override
                     public void onDialogPositive(List<String> data) {
                         if (data.size() == 1) {
@@ -210,7 +224,7 @@ public class SettingsActivity extends BaseActivity {
         mOutputCharsetSettingWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showMultipleEditDialog(new OnDialogResultListener() {
+                showMultipleEditDialog(SettingsActivity.this, new DialogUtils.OnDialogResultListener() {
                                            @Override
                                            public void onDialogPositive(List<String> data) {
                                                if (data.size() == 1) {
@@ -263,7 +277,7 @@ public class SettingsActivity extends BaseActivity {
         mAesSeedSettingWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showMultipleEditDialog(new OnDialogResultListener() {
+                showMultipleEditDialog(SettingsActivity.this, new DialogUtils.OnDialogResultListener() {
                     @Override
                     public void onDialogPositive(List<String> data) {
                         if (data.size() == 1) {
@@ -285,7 +299,7 @@ public class SettingsActivity extends BaseActivity {
         mClearFilesSettingWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showMultipleEditDialog(new OnDialogResultListener() {
+                showMultipleEditDialog(SettingsActivity.this, new OnDialogResultListener() {
                     @Override
                     public void onDialogPositive(List<String> data) {
                         if (data.size() == 1) {
@@ -300,7 +314,7 @@ public class SettingsActivity extends BaseActivity {
                                 SPService.putInt(SPService.KEY_AUTO_CLEAR_FILES_DAYS, daysNum);
                                 mClearFilesSettingInfo.setText(days);
                             } else {
-                                Toast.makeText(SettingsActivity.this, R.string.settings__config_failed, Toast.LENGTH_SHORT).show();
+                                toastShort(R.string.settings__config_failed);
                             }
                         }
                     }
@@ -313,7 +327,7 @@ public class SettingsActivity extends BaseActivity {
             public void onClick(View v) {
                 List<Pair<String, String>> data = new ArrayList<>(2);
                 data.add(new Pair<>("图像查找截图分辨率", "" + SPService.getInt(SPService.KEY_SCREENSHOT_RESOLUTION, 720)));
-                showMultipleEditDialog(new OnDialogResultListener() {
+                showMultipleEditDialog(SettingsActivity.this, new DialogUtils.OnDialogResultListener() {
                     @Override
                     public void onDialogPositive(List<String> data) {
                         if (data.size() != 2) {
@@ -503,74 +517,9 @@ public class SettingsActivity extends BaseActivity {
         });
     }
 
-    private interface OnDialogResultListener {
-        void onDialogPositive(List<String> data);
-    }
-
-    /**
-     * 为多个字段配置输入框
-     *
-     * @param title
-     * @param data
-     */
-    private void showMultipleEditDialog(final OnDialogResultListener listener, String title, List<Pair<String, String>> data) {
-        ScrollView v = (ScrollView) LayoutInflater.from(ContextUtil.getContextThemeWrapper(
-                SettingsActivity.this, R.style.AppDialogTheme))
-                .inflate(R.layout.dialog_setting, null);
-        LinearLayout view = (LinearLayout) v.getChildAt(0);
-        final List<EditText> editTexts = new ArrayList<>();
-
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-
-        // 对每一个字段添加EditText
-        for (Pair<String, String> source : data) {
-            EditText edit = new EditText(this);
-
-            // 配置字段
-            edit.setHint(source.first);
-            edit.setText(source.second);
-
-            // 设置其他参数
-            edit.setTextColor(getResources().getColor(R.color.primaryText));
-            edit.setHintTextColor(getResources().getColor(R.color.secondaryText));
-            edit.setTextSize(18);
-            edit.setHighlightColor(getResources().getColor(R.color.colorAccent));
-
-            view.addView(edit, layoutParams);
-            editTexts.add(edit);
-        }
-
-        // 显示Dialog
-        new AlertDialog.Builder(SettingsActivity.this, R.style.AppDialogTheme)
-                .setTitle(title)
-                .setView(v)
-                .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        List<String> result = new ArrayList<>(editTexts.size() + 1);
-
-                        // 获取每个编辑框的文字
-                        for (EditText data : editTexts) {
-                            result.add(data.getText().toString().trim());
-                        }
-
-                        if (listener != null) {
-                            listener.onDialogPositive(result);
-                        }
-                        dialog.dismiss();
-                    }
-                }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        }).setCancelable(true)
-                .show();
-    }
-
     private void initView() {
         mPanel = (HeadControlPanel) findViewById(R.id.head_layout);
-        mPanel.setMiddleTitle(getString(R.string.constant__setting));
+        mPanel.setMiddleTitle(getString(R.string.activity__setting));
 
         mRecordScreenUploadWrapper = findViewById(R.id.recordscreen_upload_setting_wrapper);
         mRecordScreenUploadInfo = (TextView) findViewById(R.id.recordscreen_upload_setting_info);
@@ -595,10 +544,11 @@ public class SettingsActivity extends BaseActivity {
         path = SPService.getString(SPService.KEY_PATCH_URL,
                 "https://raw.githubusercontent.com/alipay/SoloPi/master/<abi>.json");
         if (StringUtil.isEmpty(path)) {
-            mPatchListInfo.setText("未设置");
+            mPatchListInfo.setText(R.string.settings__unset);
         } else {
             mPatchListInfo.setText(path);
         }
+        mGlobalParamSettingWrapper = findViewById(R.id.global_param_setting_wrapper);
 
         mOutputCharsetSettingWrapper = findViewById(R.id.output_charset_setting_wrapper);
         mOutputCharsetSettingInfo = (TextView) findViewById(R.id.output_charset_setting_info);
@@ -665,6 +615,102 @@ public class SettingsActivity extends BaseActivity {
 
         mAboutBtn = findViewById(R.id.about_wrapper);
     }
+
+
+    /**
+     * 展示全局变量配置窗口
+     */
+    private void showGlobalParamEdit() {
+        final List<Pair<String, String>> paramList = new ArrayList<>();
+
+        String globalParam = SPService.getString(SPService.KEY_GLOBAL_SETTINGS);
+        JSONObject params = JSON.parseObject(globalParam);
+        if (params != null && params.size() > 0) {
+            for (String key: params.keySet()) {
+                paramList.add(new Pair<>(key, params.getString(key)));
+            }
+        }
+
+        final LayoutInflater inflater = LayoutInflater.from(ContextUtil.getContextThemeWrapper(
+                SettingsActivity.this, R.style.AppDialogTheme));
+        final View view = inflater.inflate(R.layout.dialog_global_param_setting, null);
+        final TagFlowLayout tagFlowLayout = (TagFlowLayout) view.findViewById(R.id.global_param_group);
+        final EditText paramName= (EditText) view.findViewById(R.id.global_param_name);
+        final EditText paramValue = (EditText) view.findViewById(R.id.global_param_value);
+        View paramAdd = view.findViewById(R.id.global_param_add);
+
+        tagFlowLayout.setAdapter(new TagAdapter<Pair<String, String>>(paramList) {
+            @Override
+            public View getView(FlowLayout parent, int position, Pair<String, String> o) {
+                View root = inflater.inflate(R.layout.item_param_info, parent, false);
+
+                TextView title = (TextView) root.findViewById(R.id.batch_execute_tag_name);
+                title.setText(getString(R.string.settings__global_param_key_value, o.first, o.second));
+                return root;
+            }
+        });
+        tagFlowLayout.setOnTagClickListener(new TagFlowLayout.OnTagClickListener() {
+            @Override
+            public boolean onTagClick(View view, int position, FlowLayout parent) {
+                paramList.remove(position);
+                tagFlowLayout.getAdapter().notifyDataChanged();
+                return true;
+            }
+        });
+
+        paramAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String key = paramName.getText().toString().trim();
+                String value = paramValue.getText().toString().trim();
+                if (StringUtil.isEmpty(key) || key.contains("=")) {
+                    toastShort(getString(R.string.setting__invalid_param_name));
+                }
+
+                // 清空输入框
+                paramName.setText("");
+                paramValue.setText("");
+
+                int replacePosition = -1;
+                for (int i = 0; i < paramList.size(); i++) {
+                    if (key.equals(paramList.get(i).first)) {
+                        replacePosition = i;
+                        break;
+                    }
+                }
+
+                // 如果有相同的，就进行替换
+                if (replacePosition > -1) {
+                    paramList.set(replacePosition, new Pair<>(key, value));
+                } else {
+                    paramList.add(new Pair<>(key, value));
+                }
+
+                tagFlowLayout.getAdapter().notifyDataChanged();
+            }
+        });
+
+        new AlertDialog.Builder(SettingsActivity.this, R.style.AppDialogTheme)
+                .setView(view)
+                .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        JSONObject newGlobalParam = new JSONObject(paramList.size() + 1);
+                        for (Pair<String, String> param: paramList) {
+                            newGlobalParam.put(param.first, param.second);
+                        }
+                        SPService.putString(SPService.KEY_GLOBAL_SETTINGS, newGlobalParam.toJSONString());
+                        dialog.dismiss();
+                    }
+                }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        }).setCancelable(true)
+                .show();
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

@@ -60,6 +60,15 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"/>
 
+    <CheckBox
+        android:id="@+id/case_step_edit_content_check"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="12dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true" />
+
     <LinearLayout
         android:layout_marginLeft="16dp"
         android:layout_marginRight="24dp"
@@ -72,7 +81,6 @@
         <TextView
             android:id="@+id/case_step_edit_content_title"
             android:textSize="16dp"
-            android:text="CLICK"
             android:textColor="@color/primaryText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -82,7 +90,6 @@
             android:textColor="@color/secondaryText"
             android:textSize="14dp"
             android:singleLine="true"
-            android:text="text=财富财富财富财富财富财富财富财富财富财富财富财富财富财富财富财富财富财富财富财富财富财富财富财富财富财富财富财富"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>

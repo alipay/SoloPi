@@ -66,62 +66,66 @@
         </activity>
         <activity
             android:name=".activity.PerformanceChartActivity"
-            android:label="图表"
+            android:label="@string/activity__performance_display"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.CaseEditActivity"
-            android:label="用例管理"
+            android:label="@string/activity__case_edit"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".activity.InfoActivity"
-            android:label="关于"
+            android:label="@string/activity__about"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".activity.SettingsActivity"
             android:screenOrientation="portrait"
-            android:label="设置" />
+            android:label="@string/activity__setting" />
         <activity
             android:name=".activity.PerformanceActivity"
-            android:label="性能测试"
+            android:label="@string/activity__performance_test"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".activity.CaseReplayResultActivity"
-            android:label="回放结果"
+            android:label="@string/activity__replay_result"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".activity.NewReplayListActivity"
-            android:label="请选择要回放的用例"
+            android:label="@string/activity__case_list"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".activity.IndexActivity"
             android:launchMode="singleTask"
-            android:label="首页"
+            android:label="@string/activity__index"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".activity.NewRecordActivity"
-            android:label="录制回放"
+            android:label="@string/activity__record"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"/>
         <activity android:name=".activity.RecordManageActivity"
-            android:label="录制数据管理"
+            android:label="@string/activity__performance_manage"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.QRScanActivity"
-            android:label="扫码"
+            android:label="@string/activity__scan"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"/>
 
         <activity android:name=".activity.BatchExecutionActivity"
-                  android:label="批量执行"
+                  android:label="@string/activity__batch_replay"
                   android:screenOrientation="portrait"/>
 
         <activity android:name=".activity.BatchReplayResultActivity"
-                  android:label="批量执行结果"
+                  android:label="@string/activity__batch_replay_result"
                   android:screenOrientation="portrait"/>
         <activity android:name=".activity.LicenseActivity"
-            android:label="版权声明"
+            android:label="@string/activity__license"
             android:screenOrientation="portrait" />
-        <activity android:name=".screenRecord.RecorderConfigActivity" />
+        <activity android:name=".screenRecord.RecorderConfigActivity"
+            android:label="@string/activity__record_config"
+            />
+        <activity android:name=".activity.CaseParamEditActivity"
+            android:label="@string/activity__gen_param_case"/>
 
         <service android:name=".service.FloatWinService"/>
 

@@ -31,7 +31,7 @@
         android:textSize="19dp"
         android:textColor="@color/primaryText"
         android:layout_gravity="center_vertical"
-        android:text="录制数据查看"
+        android:text="@string/performance__view_record"
         android:layout_weight="1"
         />
 

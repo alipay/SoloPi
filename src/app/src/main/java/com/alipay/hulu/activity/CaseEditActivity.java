@@ -97,7 +97,7 @@ public class CaseEditActivity extends BaseActivity {
 
         saved = false;
         caseSaveListeners.clear();
-        mHeadPanel.setMiddleTitle("用例编辑");
+        mHeadPanel.setMiddleTitle(getString(R.string.activity__case_edit));
 
         mHeadPanel.setBackIconClickListener(new View.OnClickListener() {
             @Override
@@ -152,7 +152,7 @@ public class CaseEditActivity extends BaseActivity {
     /**
      * 包装用例信息
      */
-    private void wrapRecordCase() {
+    public void wrapRecordCase() {
         for (WeakReference<OnCaseSaveListener> listenerRef: caseSaveListeners) {
             if (listenerRef.get() != null) {
                 listenerRef.get().onCaseSave();
@@ -169,7 +169,7 @@ public class CaseEditActivity extends BaseActivity {
             public void run() {
                 wrapRecordCase();
                 GreenDaoManager.getInstance().getRecordCaseInfoDao().save(mRecordCase);
-                toastShort("更新成功");
+                toastShort(getString(R.string.case__update_success));
                 InjectorService.g().pushMessage(NewRecordActivity.NEED_REFRESH_LOCAL_CASES_LIST);
                 saved = true;
             }
@@ -183,6 +183,10 @@ public class CaseEditActivity extends BaseActivity {
         if (resultCode != RESULT_OK) {
             return;
         }
+    }
+
+    public RecordCaseInfo getRecordCase() {
+        return mRecordCase;
     }
 
     private static class CustomPagerAdapter extends FragmentPagerAdapter {

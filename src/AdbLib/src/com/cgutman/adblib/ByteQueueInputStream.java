@@ -110,7 +110,7 @@ class ByteQueueInputStream extends InputStream {
      * <code>buf</code>.
      *
      */
-    protected ByteQueueInputStream() {
+    public ByteQueueInputStream() {
         this.readQueue = new ConcurrentLinkedQueue<>();
         this.pos = 0;
         this.count = 0;
@@ -133,7 +133,7 @@ class ByteQueueInputStream extends InputStream {
      * 添加bytes到队列中
      * @param bytes
      */
-    protected void addBytes(byte[] bytes) {
+    public void addBytes(byte[] bytes) {
         this.readQueue.add(bytes);
 
         if (socketForward) {

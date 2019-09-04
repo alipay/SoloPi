@@ -1,0 +1,128 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="24dp"
+    android:paddingBottom="8dp"
+    >
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18dp"
+        android:layout_marginLeft="24dp"
+        android:textColor="@color/primaryText"
+        android:text="@string/settings__global_param"
+        />
+    <ScrollView
+        android:background="@drawable/bg_template_list"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="80dp">
+    <com.zhy.view.flowlayout.TagFlowLayout
+        android:id="@+id/global_param_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    </ScrollView>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:textColor="@color/primaryText"
+        android:text="@string/settings__add_param"
+        />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:text="@string/settings__param_name"
+                android:textSize="12dp"
+                android:textColor="@color/colorAccent"
+                />
+
+            <EditText
+                android:paddingTop="6dp"
+                android:id="@+id/global_param_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/primaryText"
+                android:textSize="18dp"
+                android:text=""
+                android:focusable="true"
+                android:textColorHint="@color/secondaryText"
+                android:textColorHighlight="@color/colorAccent"
+                android:inputType="text" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:text="@string/settings__param_value"
+                android:textSize="12dp"
+                android:textColor="@color/colorAccent"
+                />
+
+            <EditText
+                android:paddingTop="6dp"
+                android:id="@+id/global_param_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/primaryText"
+                android:textSize="18dp"
+                android:text=""
+                android:focusable="true"
+                android:textColorHint="@color/secondaryText"
+                android:textColorHighlight="@color/colorAccent"
+                android:inputType="text" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="1px"
+            android:layout_height="match_parent"
+            android:background="@color/divider_color"/>
+
+        <ImageView
+            android:id="@+id/global_param_add"
+            android:foreground="?attr/selectableItemBackground"
+            android:layout_width="48dp"
+            android:scaleType="fitCenter"
+            android:layout_height="match_parent"
+            android:tint="@color/colorAccentSecond"
+            android:src="@drawable/case_step_add"/>
+
+    </LinearLayout>
+</LinearLayout>

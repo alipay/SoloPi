@@ -156,6 +156,13 @@ public class QRScanActivity extends BaseActivity
 
         if (curScanType == ScanSuccessEvent.SCAN_TYPE_SCHEME) {
             notifyScanSuccess(text);
+        } else if (curScanType == ScanSuccessEvent.SCAN_TYPE_PARAM) {
+            if (StringUtil.startWith(text, "http://") || StringUtil.startWith(text, "https://")) {
+                notifyScanSuccess(text);
+            } else {
+                resultTextView.setText(getString(R.string.qr_scan__url_not_support, text));
+                enableQRCodeReadListener();
+            }
         }
     }
 

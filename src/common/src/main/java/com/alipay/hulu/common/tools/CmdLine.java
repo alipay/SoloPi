@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -120,6 +121,41 @@ public class CmdLine implements AbstCmdLine, WrapSocket {
             }
         } catch (Exception e) {
             LogUtil.e(TAG, "Write command " + cmd + " failed", e);
+        }
+    }
+
+    /**
+     * 读取命令行当前所有输出
+     *
+     * @return
+     */
+    public String readUntilSomething() {
+        try {
+            if (isAdb) {
+                BlockingQueue<byte[]> queue = (BlockingQueue<byte[]>) stream.getReadQueue();
+                StringBuilder builder = new StringBuilder();
+                // 读取消息
+                synchronized (stream.getReadQueue()) {
+                    String content = new String(queue.take());
+                    builder.append(content);
+                    while (!queue.isEmpty()) {
+                        content = new String(queue.poll());
+                        builder.append(content);
+                    }
+                    stream.getReadQueue().notifyAll();
+                }
+                return builder.toString();
+            } else {
+                StringBuilder stringBuilder = new StringBuilder();
+                while (!readList.isEmpty()) {
+                    stringBuilder.append(new String(readList.poll()));
+                }
+
+                return stringBuilder.toString();
+            }
+        } catch (Exception e) {
+            LogUtil.e(TAG, "Read content failed", e);
+            return null;
         }
     }
 

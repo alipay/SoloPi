@@ -32,7 +32,7 @@
             android:gravity="center"
             android:id="@+id/record_btn"
             android:padding="10dp"
-            android:text="开始录制"
+            android:text="@string/record_float__start_record"
             android:textSize="15dp"
             android:textColor="@color/black"/>
 
@@ -52,7 +52,7 @@
         android:gravity="center"
         android:textSize="14dp"
         android:textColor="@color/black"
-        android:text="计算中..."
+        android:text="@string/record_float__calculating"
         android:ellipsize="end"
         android:visibility="gone">
     </TextView>

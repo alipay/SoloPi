@@ -40,7 +40,7 @@
         android:layout_marginLeft="16dp"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
-        android:text="启动耗时计算"
+        android:text="@string/performance__start_screen_record"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <TextView
@@ -50,7 +50,7 @@
         android:textSize="16dp"
         android:padding="2dp"
         android:textColor="@color/secondaryText"
-        android:text="录屏分帧"
+        android:text="@string/performance__record_split"
         android:layout_marginRight="8dp"/>
 
     <ImageView

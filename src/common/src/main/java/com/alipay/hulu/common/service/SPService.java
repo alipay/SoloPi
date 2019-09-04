@@ -34,6 +34,7 @@ public class SPService {
     public static final String KEY_SOLOPI_PATH_NAME = "KEY_SOLOPI_PATH_NAME";
     public static final String KEY_OUTPUT_CHARSET = "KEY_OUTPUT_CHARSET";
     public static final String KEY_ERROR_CHECK_TIME = "KEY_ERROR_CHECK_TIME";
+    public static final String KEY_GLOBAL_SETTINGS = "KEY_GLOBAL_SETTINGS";
     public static final String KEY_PERFORMANCE_UPLOAD = "KEY_PERFORMANCE_UPLOAD";
     public static final String KEY_DISPLAY_SYSTEM_APP = "KEY_DISPLAY_SYSTEM_APP";
     public static final String KEY_BASE_DIR = "KEY_BASE_DIR";

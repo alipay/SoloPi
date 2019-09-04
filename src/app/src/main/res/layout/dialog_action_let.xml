@@ -48,12 +48,12 @@
                 android:checked="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="字符串"/>
+                android:text="@string/let__string"/>
             <RadioButton
                 android:id="@+id/dialog_action_let_other_type_int"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="整数"/>
+                android:text="@string/let__integer"/>
         </RadioGroup>
 
         <TextView
@@ -63,13 +63,13 @@
             android:layout_toRightOf="@id/dialog_action_let_item_radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="自定义"/>
+            android:text="@string/let__custom"/>
         <EditText
             android:id="@+id/dialog_action_let_other_value"
             android:enabled="false"
             android:layout_marginTop="2dp"
             android:textSize="14dp"
-            android:hint="${node.text}格式，可使用'+'与'*'"
+            android:hint="@string/let__custom_hint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/dialog_action_let_item_radio"
@@ -115,7 +115,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="变量名"
+            android:text="@string/custom__variable_name"
             android:textColor="@color/primaryText"
             android:textSize="18dp"
             />

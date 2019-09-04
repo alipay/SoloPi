@@ -65,7 +65,7 @@ import java.util.List;
 /**
  * Created by lezhou.wyl on 2018/1/28.
  */
-@EntryActivity(icon = R.drawable.icon_xingneng, name = "性能工具", permissions = {"adb", "float"}, index = 2)
+@EntryActivity(icon = R.drawable.icon_xingneng, nameRes = R.string.activity__performance_test, permissions = {"adb", "float"}, index = 2)
 public class PerformanceActivity extends BaseActivity {
     private String TAG = "PerformanceFragment";
 
@@ -99,7 +99,7 @@ public class PerformanceActivity extends BaseActivity {
         mPerfStressAdapter = new PerformStressAdapter(this);
 
         mPanel = (HeadControlPanel) findViewById(R.id.head_layout);
-        mPanel.setMiddleTitle("性能测试");
+        mPanel.setMiddleTitle(getString(R.string.activity__performance_test));
         mPanel.setBackIconClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -214,7 +214,7 @@ public class PerformanceActivity extends BaseActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // 全局特殊处理
                 if (position == 0) {
-                    ((MyApplication)getApplication()).updateAppAndName("-", "全局");
+                    ((MyApplication)getApplication()).updateAppAndName("-", getString(R.string.constant__gloabl));
                 } else {
                     ApplicationInfo info = listPack.get(position - 1);
                     LogUtil.i(TAG, "Select info: " + StringUtil.hide(info.packageName));
@@ -237,15 +237,15 @@ public class PerformanceActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                    toastShort("此功能不支持Android5.0以下设备");
+                    toastShort(getString(R.string.performance__not_support_for_android_l));
                     return;
                 }
 
                 if (ClassUtil.getPatchInfo(VideoAnalyzer.SCREEN_RECORD_PATCH) == null) {
-                    LauncherApplication.getInstance().showDialog(PerformanceActivity.this, "是否加载录屏耗时计算插件?", "是", new Runnable() {
+                    LauncherApplication.getInstance().showDialog(PerformanceActivity.this, getString(R.string.performance__load_record_plugin), getString(R.string.constant__yes), new Runnable() {
                         @Override
                         public void run() {
-                            showProgressDialog("插件下载中");
+                            showProgressDialog(getString(R.string.performance__downloading_plugin));
                             BackgroundExecutor.execute(new Runnable() {
                                 @Override
                                 public void run() {
@@ -258,7 +258,7 @@ public class PerformanceActivity extends BaseActivity {
                                     if (rs == null) {
                                         // 降级到网络模式
                                         dismissProgressDialog();
-                                        toastLong("无法加载计算插件");
+                                        toastLong(getString(R.string.performance__load_plugin_failed));
                                         return;
                                     }
 
@@ -268,7 +268,7 @@ public class PerformanceActivity extends BaseActivity {
                             });
 
                         }
-                    }, "否", null);
+                    }, getString(R.string.constant__no), null);
                     return;
                 }
 
@@ -284,8 +284,7 @@ public class PerformanceActivity extends BaseActivity {
 
                     @Override
                     public void onGrantFail(String msg) {
-                        toastLong("设备需要开启ADB 5555端口并授权调试才可使用" +
-                                "\n请在命令行执行 adb tcpip 5555");
+                        toastLong(getString(R.string.performance__grant_adb));
                     }
                 });
             }

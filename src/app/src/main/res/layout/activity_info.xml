@@ -91,7 +91,7 @@
                 android:textSize="19dp"
                 android:textColor="@color/primaryText"
                 android:layout_gravity="center_vertical"
-                android:text="版权信息"
+                android:text="@string/info__license_info"
                 android:layout_weight="1"
                 />
 

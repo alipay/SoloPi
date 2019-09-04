@@ -56,13 +56,16 @@ import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.replay.OperationStepProvider;
 import com.alipay.hulu.service.CaseRecordManager;
 import com.alipay.hulu.service.CaseReplayManager;
+import com.alipay.hulu.shared.io.OperationStepService;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
 import com.alipay.hulu.shared.io.db.GreenDaoManager;
+import com.alipay.hulu.shared.io.db.OperationLogHandler;
 import com.alipay.hulu.shared.io.db.RecordCaseInfoDao;
 import com.alipay.hulu.shared.node.action.RunningModeEnum;
 import com.alipay.hulu.shared.node.utils.AppUtil;
 import com.alipay.hulu.shared.node.utils.PrepareUtil;
 import com.alipay.hulu.ui.HeadControlPanel;
+import com.alipay.hulu.util.CaseReplayUtil;
 import com.alipay.hulu.util.SystemUtil;
 
 import java.util.Arrays;
@@ -71,7 +74,7 @@ import java.util.List;
 /**
  * Created by lezhou.wyl on 2018/2/1.
  */
-@EntryActivity(icon = R.drawable.icon_luxiang, nameRes = R.string.record__name, permissions = {"adb", "float", "toast:请将Soloπ添加到后台白名单中"}, index = 1, cornerText = "New", cornerPersist = 3, cornerBg = 0xFFFF5900)
+@EntryActivity(icon = R.drawable.icon_luxiang, nameRes = R.string.activity__record, permissions = {"adb", "float", "toast:请将Soloπ添加到后台白名单中"}, index = 1, cornerText = "New", cornerPersist = 3, cornerBg = 0xFFFF5900)
 public class NewRecordActivity extends BaseActivity {
 
     private static final String TAG = NewRecordActivity.class.getSimpleName();
@@ -154,20 +157,11 @@ public class NewRecordActivity extends BaseActivity {
         mEmptyView = findViewById(R.id.empty_hint);
         mCheckAllCasesBtn = findViewById(R.id.check_all_cases);
         mRecentCaseAdapter = new ReplayListAdapter(this);
-        mRecentCaseAdapter.setOnEditClickListener(new AdapterView.OnItemClickListener() {
+        mRecentCaseAdapter.setOnPlayClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RecordCaseInfo caseInfo = (RecordCaseInfo) mRecentCaseAdapter.getItem(position);
-                if (caseInfo == null) {
-                    return;
-                }
-                caseInfo = caseInfo.clone();
-
-                // 启动编辑页
-                Intent intent = new Intent(NewRecordActivity.this, CaseEditActivity.class);
-                int storeId = CaseStepHolder.storeCase(caseInfo);
-                intent.putExtra(CaseEditActivity.RECORD_CASE_EXTRA, storeId);
-                startActivity(intent);
+                playCase(caseInfo);
             }
         });
         mRecentCaseListView.setAdapter(mRecentCaseAdapter);
@@ -182,61 +176,85 @@ public class NewRecordActivity extends BaseActivity {
         mRecentCaseListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final RecordCaseInfo caseInfo = (RecordCaseInfo) mRecentCaseAdapter.getItem(position);
-                if (caseInfo == null) {
-                    return;
-                }
-
-                // 检查权限
-                PermissionUtil.requestPermissions(Arrays.asList("adb", Settings.ACTION_ACCESSIBILITY_SETTINGS), NewRecordActivity.this, new PermissionUtil.OnPermissionCallback() {
-                    @Override
-                    public void onPermissionResult(boolean result, String reason) {
-                        if (result) {
-
-                            showProgressDialog(getString(R.string.record__preparing));
-
-                            BackgroundExecutor.execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    boolean prepareResult = PrepareUtil.doPrepareWork(caseInfo.getTargetAppPackage(), new PrepareUtil.PrepareStatus() {
-                                        @Override
-                                        public void currentStatus(int progress, int total, String message, boolean status) {
-                                            updateProgressDialog(progress, total, message);
-                                        }
-                                    });
-
-                                    if (prepareResult) {
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                dismissProgressDialog();
-                                                startReplay(caseInfo);
-                                                startTargetApp(caseInfo.getTargetAppPackage());
-                                            }
-                                        });
-                                    } else {
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                dismissProgressDialog();
-                                                Toast.makeText(NewRecordActivity.this, R.string.record__prepare_failed, Toast.LENGTH_SHORT).show();
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                        }
-                    }
-                });
+                RecordCaseInfo caseInfo = (RecordCaseInfo) mRecentCaseAdapter.getItem(position);
+                editCase(caseInfo);
             }
         });
 
 
     }
 
+    /**
+     * 编辑用例
+     * @param caseInfo
+     */
+    private void editCase(RecordCaseInfo caseInfo) {
+        if (caseInfo == null) {
+            return;
+        }
+
+        caseInfo = caseInfo.clone();
+
+        // 启动编辑页
+        Intent intent = new Intent(NewRecordActivity.this, CaseEditActivity.class);
+        int storeId = CaseStepHolder.storeCase(caseInfo);
+        intent.putExtra(CaseEditActivity.RECORD_CASE_EXTRA, storeId);
+        startActivity(intent);
+    }
+
+    /**
+     * 执行用例
+     * @param caseInfo
+     */
+    private void playCase(final RecordCaseInfo caseInfo) {
+        if (caseInfo == null) {
+            return;
+        }
+// 检查权限
+        PermissionUtil.requestPermissions(Arrays.asList("adb", Settings.ACTION_ACCESSIBILITY_SETTINGS), NewRecordActivity.this, new PermissionUtil.OnPermissionCallback() {
+            @Override
+            public void onPermissionResult(boolean result, String reason) {
+                if (result) {
+                    showProgressDialog(getString(R.string.record__preparing));
+                    BackgroundExecutor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            boolean prepareResult = PrepareUtil.doPrepareWork(caseInfo.getTargetAppPackage(), new PrepareUtil.PrepareStatus() {
+                                @Override
+                                public void currentStatus(int progress, int total, String message, boolean status) {
+                                    updateProgressDialog(progress, total, message);
+                                }
+                            });
+
+                            if (prepareResult) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        dismissProgressDialog();
+                                        CaseReplayUtil.startReplay(caseInfo);
+                                        startTargetApp(caseInfo.getTargetAppPackage());
+                                    }
+                                });
+                            } else {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        dismissProgressDialog();
+                                        toastShort(getString(R.string.record__prepare_env_fail));
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+
+    }
+
     private void initHeadPanel() {
         mPanel = (HeadControlPanel) findViewById(R.id.head_layout);
-        mPanel.setMiddleTitle(getString(R.string.record__name));
+        mPanel.setMiddleTitle(getString(R.string.activity__record));
         mPanel.setBackIconClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -343,7 +361,7 @@ public class NewRecordActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 if (StringUtil.isEmpty(mCaseName.getText().toString().trim())) {
-                    Toast.makeText(NewRecordActivity.this, R.string.record__case_name_empty, Toast.LENGTH_SHORT).show();
+                    toastShort(R.string.record__case_name_empty);
                     return;
                 }
 
@@ -376,7 +394,6 @@ public class NewRecordActivity extends BaseActivity {
                     @Override
                     public void onPermissionResult(boolean result, String reason) {
                         if (result) {
-
                             showProgressDialog(getString(R.string.record__preparing));
 
                             BackgroundExecutor.execute(new Runnable() {
@@ -394,6 +411,9 @@ public class NewRecordActivity extends BaseActivity {
                                             @Override
                                             public void run() {
                                                 dismissProgressDialog();
+
+                                                LauncherApplication.service(OperationStepService.class).registerStepProcessor(new OperationLogHandler());
+
                                                 startRecord(caseInfo);
                                                 startTargetApp(caseInfo.getTargetAppPackage());
                                             }
@@ -403,7 +423,7 @@ public class NewRecordActivity extends BaseActivity {
                                             @Override
                                             public void run() {
                                                 dismissProgressDialog();
-                                                Toast.makeText(NewRecordActivity.this, R.string.record__prepare_failed, Toast.LENGTH_SHORT).show();
+                                                toastShort(R.string.record__prepare_failed);
                                             }
                                         });
                                     }

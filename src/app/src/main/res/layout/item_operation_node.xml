@@ -35,7 +35,7 @@
                 android:textSize="14dp"
                 android:maxLines="1"
                 android:layout_gravity="center"
-                android:text="类型"/>
+                android:text="@string/node_item__class"/>
             <TextView
                 android:textColor="@color/secondaryText"
                 android:layout_weight="3"
@@ -43,7 +43,7 @@
                 android:id="@+id/text_node_classname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView"/>
+                />
 
         </TableRow>
         <TableRow
@@ -57,7 +57,7 @@
                 android:maxLines="1"
                 android:layout_gravity="center"
                 android:textSize="14dp"
-                android:text="ID"/>
+                android:text="@string/node_item__id"/>
             <TextView
                 android:textColor="@color/secondaryText"
                 android:textSize="13dp"
@@ -78,7 +78,7 @@
                 android:maxLines="1"
                 android:layout_gravity="center"
                 android:textSize="14dp"
-                android:text="文字"/>
+                android:text="@string/node_item__text"/>
             <TextView
                 android:textColor="@color/secondaryText"
                 android:textSize="13dp"
@@ -86,7 +86,7 @@
                 android:id="@+id/text_node_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="用例中心"/>
+                />
 
         </TableRow>
         <TableRow
@@ -100,7 +100,7 @@
                 android:layout_gravity="center"
                 android:textSize="14dp"
                 android:maxLines="1"
-                android:text="描述"/>
+                android:text="@string/node_item__desc"/>
             <TextView
                 android:textColor="@color/secondaryText"
                 android:textSize="13dp"
@@ -108,7 +108,7 @@
                 android:id="@+id/text_node_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="用例中心"/>
+                />
 
         </TableRow>
         <TableRow
@@ -122,7 +122,7 @@
                 android:layout_gravity="center"
                 android:textSize="14dp"
                 android:maxLines="1"
-                android:text="Xpath"/>
+                android:text="@string/node_item__xpath"/>
             <TextView
                 android:textColor="@color/secondaryText"
                 android:textSize="13dp"
@@ -130,7 +130,7 @@
                 android:layout_weight="3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="/sdada/dasdasda/sdadasd/asdas[csc]"/>
+                />
 
         </TableRow>
         <TableRow
@@ -143,7 +143,7 @@
                 android:gravity="center"
                 android:layout_gravity="center"
                 android:textSize="14dp"
-                android:text="大小"/>
+                android:text="@string/node_item__size"/>
             <TextView
                 android:textColor="@color/secondaryText"
                 android:textSize="13dp"
@@ -151,7 +151,7 @@
                 android:layout_weight="3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=""/>
+                />
 
         </TableRow>
         <TableRow
@@ -165,7 +165,7 @@
                 android:layout_gravity="center"
                 android:textSize="14dp"
                 android:maxLines="1"
-                android:text="深度"/>
+                android:text="@string/node_item__depth"/>
             <TextView
                 android:textColor="@color/secondaryText"
                 android:textSize="13dp"
@@ -173,7 +173,7 @@
                 android:id="@+id/text_node_depth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=""/>
+                />
 
         </TableRow>
 

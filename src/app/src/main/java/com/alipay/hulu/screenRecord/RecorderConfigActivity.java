@@ -109,7 +109,7 @@ public class RecorderConfigActivity extends BaseActivity {
     private void initViews() {
 
         mPanel = (HeadControlPanel) findViewById(R.id.info_head);
-        mPanel.setMiddleTitle("录屏设置");
+        mPanel.setMiddleTitle(getString(R.string.activity__record_config));
         mPanel.setBackIconClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,7 +124,7 @@ public class RecorderConfigActivity extends BaseActivity {
                 if (checkVideoSettings()) {
                     startWindow(v);
                 } else {
-                    toastShort("视频参数不支持");
+                    toastShort(getString(R.string.codec__video_config_unsupport));
                 }
             }
         });
@@ -297,15 +297,15 @@ public class RecorderConfigActivity extends BaseActivity {
         int resetPos = Math.max(selectedPosition - 1, 0);
         if (!videoCapabilities.isSizeSupported(width, height)) {
             mVideoResolution.setSelectedPosition(resetPos);
-            toastShort("codec '%s' unsupported size %dx%d ",
-                    codecName, width, height);
+            toastShort(getString(R.string.codec_config__unsupport_size,
+                    codecName, width, height));
             LogUtil.w(TAG, codecName +
                     " height range: " + videoCapabilities.getSupportedHeights() +
                     "\n width range: " + videoCapabilities.getSupportedHeights());
         } else if (!videoCapabilities.areSizeAndRateSupported(width, height, selectedFramerate)) {
             mVideoResolution.setSelectedPosition(resetPos);
-            toastShort("codec '%s' unsupported size %dx%d\nwith framerate %d",
-                    codecName, width, height, (int) selectedFramerate);
+            toastShort(getString(R.string.codec_config__unsupport_size_framerate,
+                    codecName, width, height, (int) selectedFramerate));
         }
     }
 
@@ -320,7 +320,7 @@ public class RecorderConfigActivity extends BaseActivity {
         int resetPos = Math.max(selectedPosition - 1, 0);
         if (!videoCapabilities.getBitrateRange().contains(selectedBitrate)) {
             mVideoBitrate.setSelectedPosition(resetPos);
-            toastShort("codec '%s' unsupported bitrate %d", codecName, selectedBitrate);
+            toastShort(getString(R.string.codec_config__unsupport_bitrate, codecName, selectedBitrate));
             LogUtil.w(TAG, codecName +
                     " bitrate range: " + videoCapabilities.getBitrateRange());
         }
@@ -345,11 +345,11 @@ public class RecorderConfigActivity extends BaseActivity {
         int resetPos = Math.max(selectedPosition - 1, 0);
         if (!videoCapabilities.getSupportedFrameRates().contains(selectedFramerate)) {
             mVideoFrameRate.setSelectedPosition(resetPos);
-            toastShort("codec '%s' unsupported framerate %d", codecName, selectedFramerate);
+            toastShort(getString(R.string.codec_config__unsupport_framerate, codecName, selectedFramerate));
         } else if (!videoCapabilities.areSizeAndRateSupported(width, height, selectedFramerate)) {
             mVideoFrameRate.setSelectedPosition(resetPos);
-            toastShort("codec '%s' unsupported size %dx%d\nwith framerate %d",
-                    codecName, width, height, selectedFramerate);
+            toastShort(getString(R.string.codec_config__unsupport_size_framerate,
+                    codecName, width, height, selectedFramerate));
         }
     }
 

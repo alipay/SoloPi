@@ -19,6 +19,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +32,7 @@ import com.alipay.hulu.R;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.utils.DeviceInfoUtil;
 import com.alipay.hulu.common.utils.LogUtil;
+import com.alipay.hulu.common.utils.StringUtil;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -59,7 +61,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             // 主线程等待
             LauncherApplication.getInstance().prepareInMain();
 
-            LogUtil.w("BaseActivity", "Activity: %s, 等待Launcher初始化耗时: %dms", getClass().getSimpleName(), System.currentTimeMillis() - startTime);
+            LogUtil.w("BaseActivity", "Activity: %s, waiting launcher to initialize: %dms", getClass().getSimpleName(), System.currentTimeMillis() - startTime);
         }
 
         // 为了正常初始化
@@ -117,6 +119,22 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     /**
+     * 短toast
+     * @param stringRes
+     */
+    public void toastShort(@StringRes final int stringRes) {
+        toastShort(getString(stringRes));
+    }
+
+    /**
+     * 短toast
+     * @param stringRes
+     */
+    public void toastShort(@StringRes final int stringRes, final Object... args) {
+        toastShort(getString(stringRes, args));
+    }
+
+    /**
      * toast短时间提示
      *
      * @param msg
@@ -144,6 +162,22 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     /**
+     * 短toast
+     * @param stringRes
+     */
+    public void toastLong(@StringRes final int stringRes) {
+        toastLong(getString(stringRes));
+    }
+
+    /**
+     * 短toast
+     * @param stringRes
+     */
+    public void toastLong(@StringRes final int stringRes, final Object... args) {
+        toastLong(getString(stringRes, args));
+    }
+
+    /**
      * toast长时间提示
      *
      * @param msg
@@ -163,11 +197,6 @@ public abstract class BaseActivity extends AppCompatActivity {
                 toast.show();
             }
         });
-    }
-
-    public void toastLong(String msg, Object... args) {
-        String formatMsg = String.format(msg, args);
-        toastLong(formatMsg);
     }
 
     public void showProgressDialog(final String str) {

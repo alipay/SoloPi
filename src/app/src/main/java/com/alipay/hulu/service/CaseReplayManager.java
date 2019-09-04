@@ -73,7 +73,7 @@ import com.alipay.hulu.shared.node.tree.OperationNode;
 import com.alipay.hulu.shared.node.tree.accessibility.AccessibilityNodeProcessor;
 import com.alipay.hulu.shared.node.tree.accessibility.AccessibilityProvider;
 import com.alipay.hulu.shared.node.tree.capture.CaptureTree;
-import com.alipay.hulu.shared.node.tree.export.OperationStepProvider;
+import com.alipay.hulu.shared.node.tree.export.OperationStepExporter;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
 import com.alipay.hulu.shared.node.utils.AppUtil;
 import com.alipay.hulu.shared.node.utils.BitmapUtil;
@@ -166,7 +166,7 @@ public class CaseReplayManager implements ExportService {
             if (provider.canStart()) {
                 startProcess();
             } else {
-                Toast.makeText(binder.loadServiceContext(), "无法手动启动", Toast.LENGTH_SHORT).show();
+                LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.replay__not_start_by_hand));
             }
             return 0;
         }
@@ -303,7 +303,7 @@ public class CaseReplayManager implements ExportService {
                 LauncherApplication.getInstance().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        showDialog("解析异常", e.getClass() + ": " + e.getMessage(), binder.loadServiceContext(), 0);
+                        showDialog(StringUtil.getString(R.string.ui__parse_failed), e.getClass() + ": " + e.getMessage(), binder.loadServiceContext(), 0);
                     }
                 });
                 break;
@@ -325,10 +325,11 @@ public class CaseReplayManager implements ExportService {
                 result = "执行异常:" + e.getMessage();
             }
 
-            if (result != null) {
+            boolean isError = result != null;
+            if (isError) {
                 LogUtil.e(TAG, "执行步骤出现问题：%s", result);
 
-                boolean isError = provider.reportErrorStep(step, result);
+                isError = provider.reportErrorStep(step, result, new ArrayList<String>());
 
                 if (StringUtil.equals(result, "回放中止")) {
                     break;
@@ -522,7 +523,7 @@ public class CaseReplayManager implements ExportService {
                 return "执行失败";
             }
 
-            OperationNode opNode = OperationStepProvider.exportNodeToOperationNode(node);
+            OperationNode opNode = OperationStepExporter.exportNodeToOperationNode(node);
 
             // 等待操作结束
             try {
@@ -550,12 +551,21 @@ public class CaseReplayManager implements ExportService {
                 return "执行失败";
             }
 
-            // 成功执行，需要等待
+            // 成功执行，需要等待，最长10分钟
             // 等待操作结束
-            try {
-                runningFlag.await(600 * 100, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
+            if (operation.getOperationMethod().getActionEnum() != PerformActionEnum.SLEEP) {
+                try {
+                    runningFlag.await(600, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
+                }
+            } else {
+                // SLEEP特殊处理，等1小时
+                try {
+                    runningFlag.await(60, TimeUnit.MINUTES);
+                } catch (InterruptedException e) {
+                    LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
+                }
             }
         }
         LogUtil.d(TAG, "操作执行完毕");
@@ -619,14 +629,14 @@ public class CaseReplayManager implements ExportService {
     public void receiveDeviceInfoMessage(UIOperationMessage message) {
         if (message.eventType == UIOperationMessage.TYPE_DEVICE_INFO) {
             DeviceInfo info = DeviceInfoUtil.generateDeviceInfo();
-            showDialog("设备信息", info.toString(), binder.loadServiceContext(), 0);
+            showDialog(StringUtil.getString(R.string.ui__device_info), info.toString(), binder.loadServiceContext(), 0);
         } else if (message.eventType == UIOperationMessage.TYPE_DIALOG) {
             String info = message.getParam("msg");
             String title = message.getParam("title");
             showDialog(title, info, binder.loadServiceContext(), 0);
         } else if (message.eventType == UIOperationMessage.TYPE_COUNT_DOWN) {
             long timeMillis = message.getParam("time");
-            showDialog("SLEEP", "等待" + timeMillis + "ms", binder.loadServiceContext(), timeMillis);
+            showDialog(StringUtil.getString(R.string.ui__sleep), StringUtil.getString(R.string.ui__sleep_time, timeMillis), binder.loadServiceContext(), timeMillis);
         } else if (message.eventType == UIOperationMessage.TYPE_DISMISS) {
             // 隐藏掉原来的Dialog
             if (dialogRef != null && dialogRef.get() != null && dialogRef.get().isShowing()) {
@@ -669,7 +679,7 @@ public class CaseReplayManager implements ExportService {
             final AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
                     .setTitle(title)
                     .setView(v)
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();

@@ -28,6 +28,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
+import com.alipay.hulu.common.R;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.tools.CmdTools;
@@ -190,8 +191,7 @@ public class PermissionUtil {
                     CmdTools.generateConnection();
                 }
             });
-            Toast.makeText(context, "非Root设备需要开启ADB 5555端口并授权调试才可使用" +
-                    "\n请在命令行执行 adb tcpip 5555", Toast.LENGTH_LONG).show();
+            LauncherApplication.toast(R.string.permission__no_root_need_adb);
             return false;
         }
         return true;

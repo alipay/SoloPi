@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.provider.Settings;
 import android.widget.Toast;
 
+import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.service.base.ExportService;
 import com.alipay.hulu.common.service.base.LocalService;
 import com.alipay.hulu.common.utils.PermissionUtil;
@@ -123,6 +124,6 @@ public class EventService implements ExportService {
      * 展示开启辅助功能提示
      */
     private void showEnableAccessibilityServiceHint() {
-        Toast.makeText(contextRef.get(), "请在辅助功能中开启Soloπ", Toast.LENGTH_LONG).show();
+        LauncherApplication.getInstance().showToast("请在辅助功能中开启Soloπ");
     }
 }

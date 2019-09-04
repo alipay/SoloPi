@@ -237,9 +237,9 @@ public class FileChooseDialogActivity extends Activity implements View.OnClickLi
         editText.setText(defaultFileName);
         // 显示Dialog
         new AlertDialog.Builder(this, R.style.PermissionAppDialogTheme)
-                .setTitle("创建新文件夹")
+                .setTitle(R.string.file_choose__create_folder)
                 .setView(editText)
-                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (StringUtil.isEmpty(editText.getText())) {
@@ -255,7 +255,7 @@ public class FileChooseDialogActivity extends Activity implements View.OnClickLi
                         }
                         dialog.dismiss();
                     }
-                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();

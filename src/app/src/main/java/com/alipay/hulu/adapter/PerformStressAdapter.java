@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alipay.hulu.R;
+import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.shared.display.items.MemoryTools;
 import com.alipay.hulu.tools.PerformStressImpl;
@@ -55,21 +56,21 @@ public class PerformStressAdapter extends BaseAdapter {
 		Map<String, Object> map = new HashMap<String, Object>();
 
 		map.put("img", android.R.drawable.ic_menu_crop);
-		map.put("title", "CPU负载(%)");
+		map.put("title", cx.getString(R.string.stress__cpu_load));
 		map.put("process", 0);
 		map.put("max", 100);
 		mData.add(map);
 
 		map = new HashMap<String, Object>();
 		map.put("img", android.R.drawable.ic_menu_crop);
-		map.put("title", "CPU多核(n)");
+		map.put("title", cx.getString(R.string.stress__cpu_core));
 		map.put("process", 1);
 		map.put("max", getCpuCoreNum());
 		mData.add(map);
 
 		map = new HashMap<String, Object>();
 		map.put("img", android.R.drawable.ic_menu_crop);
-		map.put("title", "内存占用(m)");
+		map.put("title", cx.getString(R.string.stress__memory));
 		map.put("process", 0);
 		map.put("max", MemoryTools.getAvailMemory(cx).intValue());
 
@@ -138,11 +139,6 @@ public class PerformStressAdapter extends BaseAdapter {
 				// TODO 改成接口定义通用加压方法
 				switch (position) {
 				case 0:// CPU占用率
-					performStressImpl.performCpuStressByCount((int) mData.get(0).get("process"), (int) mData.get(1)
-							.get("process"));
-					// CPUTools.performStress((int)
-					// mData.get(position).get("process"));
-					break;
 				case 1:// CPU多核
 					performStressImpl.performCpuStressByCount((int) mData.get(0).get("process"), (int) mData.get(1)
 							.get("process"));
@@ -154,7 +150,7 @@ public class PerformStressAdapter extends BaseAdapter {
 							seekBar.setProgress(allocMemory);
 						}
 					} catch (OutOfMemoryError e) {
-						Toast.makeText(cx, "内存不足:" + e,Toast.LENGTH_SHORT).show();
+						LauncherApplication.toast(R.string.stress__insufficient_memory, e.getMessage());
 					}
 					break;
 				default:

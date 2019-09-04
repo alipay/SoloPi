@@ -218,7 +218,7 @@ public class ImageCompareActionProvider implements ActionProvider {
 
                 // 还没有，无法执行
                 if (rs == null) {
-                    LauncherApplication.getInstance().showToast("图像断言失败");
+                    LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.image_compare__assert_failed));
                     return false;
                 }
             }
@@ -228,7 +228,7 @@ public class ImageCompareActionProvider implements ActionProvider {
                 Rect target = findTargetRect(rs, query, context.screenWidth, context.screenHeight, defaultWidth);
                 if (target == null) {
                     LogUtil.e(TAG, "Can't find target Image");
-                    LauncherApplication.getInstance().showToast("图像断言失败");
+                    LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.image_compare__assert_failed));
                     return false;
                 } else {
                     // 高亮控件
@@ -242,7 +242,7 @@ public class ImageCompareActionProvider implements ActionProvider {
 
                     // 执行adb命令
                     context.notifyOperationFinish();
-                    LauncherApplication.getInstance().showToast("图像断言成功");
+                    LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.image_compare__assert_success));
                     return true;
                 }
             } catch (Exception e) {
@@ -250,7 +250,7 @@ public class ImageCompareActionProvider implements ActionProvider {
                 context.notifyOperationFinish();
             }
 
-            LauncherApplication.getInstance().showToast("图像断言失败");
+            LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.image_compare__assert_failed));
             return false;
         }
 

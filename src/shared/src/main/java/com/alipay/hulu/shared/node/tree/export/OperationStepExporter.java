@@ -21,7 +21,6 @@ import android.view.WindowManager;
 
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.service.SPService;
-import com.alipay.hulu.common.utils.DeviceInfoUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.node.action.OperationMethod;
 import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
@@ -38,13 +37,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by qiaoruikai on 2018/10/10 5:15 PM.
  */
-public class OperationStepProvider implements BaseStepProvider<OperationStep> {
+public class OperationStepExporter implements BaseStepExporter<OperationStep> {
     public static final String CAPTURE_IMAGE_BASE64 = "captureImage";
     public static final String ORIGIN_SCREEN_SIZE = "screenSize";
     String operationId;
     AtomicInteger operationIdx;
 
-    public OperationStepProvider(String operationId) {
+    public OperationStepExporter(String operationId) {
         this.operationId = operationId;
         operationIdx = new AtomicInteger(0);
     }

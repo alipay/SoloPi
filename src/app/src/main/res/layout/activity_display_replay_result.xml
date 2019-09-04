@@ -27,7 +27,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="用例名称: "
+            android:text="@string/case_result__case_name"
             android:id="@+id/case_name"
             android:textSize="20dp"
             android:textColor="@color/primaryText"

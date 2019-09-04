@@ -43,7 +43,7 @@ public class LicenseActivity extends BaseActivity {
                 finish();
             }
         });
-        panel.setMiddleTitle("开源许可");
+        panel.setMiddleTitle(getString(R.string.activity__license));
 
         final WebView licenseText = (WebView) findViewById(R.id.license_text);
         licenseText.loadUrl(NOTICE_HTML);

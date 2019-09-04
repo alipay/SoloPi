@@ -21,6 +21,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -34,7 +36,7 @@ import com.alipay.hulu.shared.node.action.OperationMethod;
 import com.alipay.hulu.shared.node.action.PerformActionEnum;
 import com.alipay.hulu.shared.node.action.provider.ActionProviderManager;
 import com.alipay.hulu.shared.node.tree.OperationNode;
-import com.alipay.hulu.shared.node.tree.export.OperationStepProvider;
+import com.alipay.hulu.shared.node.tree.export.OperationStepExporter;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
 import com.alipay.hulu.shared.node.utils.BitmapUtil;
 import com.alipay.hulu.shared.node.utils.LogicUtil;
@@ -44,16 +46,23 @@ import com.yydcdut.sdlv.SlideAndDragListView;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Created by qiaoruikai on 2019/2/18 9:50 PM.
  */
-public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener, SlideAndDragListView.OnDragDropListener {
+public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener,
+        SlideAndDragListView.OnDragDropListener, CompoundButton.OnCheckedChangeListener {
     private Context context;
     private int SCOPE_OFFSET_DP = 10;
     private List<MyDataWrapper> data;
+    private boolean selectMode = false;
+
+    private Set<Integer> selectSet;
 
     private List<int[]> runningScope = new ArrayList<>();
 
@@ -62,6 +71,7 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
     public CaseStepAdapter(Context context, List<MyDataWrapper> data) {
         this.context = context;
         this.data = data;
+        selectSet = new HashSet<>();
 
         reloadScope();
     }
@@ -85,6 +95,64 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
         super.notifyDataSetChanged();
     }
 
+    /**
+     * 设置当前模式
+     * @param selectMode
+     */
+    public void setCurrentMode(boolean selectMode) {
+        this.selectMode = selectMode;
+        notifyDataSetChanged();
+    }
+
+    /**
+     * 获取选中的IDX
+     * @return
+     */
+    public List<MyDataWrapper> getAndClearSelectOperationSteps() {
+        reloadScope();
+        Set<Integer> selected = new HashSet<>(selectSet);
+        selectSet.clear();
+        List<MyDataWrapper> operations = new ArrayList<>(selected.size() + 1);
+        if (selected.size() > 0) {
+            for (MyDataWrapper wrapper : data) {
+                if (selected.contains(wrapper.idx)) {
+                    operations.add(wrapper);
+                }
+            }
+        }
+
+        notifyDataSetChanged();
+        return operations;
+    }
+
+    /**
+     * 替换steps为step
+     * @param idxs
+     * @param step
+     */
+    public void changeStepsToStep(Set<Integer> idxs, MyDataWrapper step) {
+        int position = 0;
+        boolean findFlag = false;
+        Iterator<MyDataWrapper> wrapperIterator = data.iterator();
+        while (wrapperIterator.hasNext()) {
+            MyDataWrapper wrapper = wrapperIterator.next();
+            if (idxs.contains(wrapper.idx)) {
+                findFlag = true;
+                wrapperIterator.remove();
+            } else if (!findFlag) {
+                position++;
+            }
+        }
+
+        if (findFlag) {
+            data.add(position, step);
+        } else {
+            data.add(step);
+        }
+
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getViewTypeCount() {
         return 2;
@@ -102,7 +170,7 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return position;
     }
 
     @Override
@@ -125,13 +193,30 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
         TextView title = (TextView) convertView.findViewById(R.id.case_step_edit_content_title);
         TextView param = (TextView) convertView.findViewById(R.id.case_step_edit_content_param);
         ImageView icon = (ImageView) convertView.findViewById(R.id.case_step_edit_content_close);
+        CheckBox select = (CheckBox) convertView.findViewById(R.id.case_step_edit_content_check);
+        select.setTag(position);
+
+        if (init) {
+            icon.setOnClickListener(this);
+            select.setOnCheckedChangeListener(this);
+        }
+
+        if (selectMode) {
+            select.setVisibility(View.VISIBLE);
+            icon.setVisibility(View.GONE);
+
+            if (selectSet.contains(data.get(position).idx)) {
+                select.setChecked(true);
+            } else {
+                select.setChecked(false);
+            }
+        } else {
+            select.setVisibility(View.GONE);
+            icon.setVisibility(View.VISIBLE);
+        }
         icon.setTag(position);
 
         // 如果是第一次加载，设置下ClickListener
-        if (init) {
-            icon.setOnClickListener(this);
-        }
-
         List<Integer> occurred = new ArrayList<>();
         int start = -1;
         List<Integer> end = new ArrayList<>();
@@ -175,8 +260,8 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
         String base64 = null;
         if (method.containsParam(ImageCompareActionProvider.KEY_TARGET_IMAGE)) {
             base64 = method.getParam(ImageCompareActionProvider.KEY_TARGET_IMAGE);
-        } else if (node != null && node.containsExtra(OperationStepProvider.CAPTURE_IMAGE_BASE64)) {
-            base64 = node.getExtraValue(OperationStepProvider.CAPTURE_IMAGE_BASE64);
+        } else if (node != null && node.containsExtra(OperationStepExporter.CAPTURE_IMAGE_BASE64)) {
+            base64 = node.getExtraValue(OperationStepExporter.CAPTURE_IMAGE_BASE64);
         }
 
         // 如果有截图的话，使用截图作为图标
@@ -273,6 +358,18 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
         int position = (int) v.getTag();
         data.remove(position);
         notifyDataSetChanged();
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        int position = (int) buttonView.getTag();
+        MyDataWrapper dataWrapper = data.get(position);
+        if (isChecked) {
+            selectSet.add(dataWrapper.idx);
+        } else {
+            selectSet.remove(dataWrapper.idx);
+        }
+
     }
 
     public static class MyDataWrapper {

@@ -116,7 +116,7 @@ public class LogicUtil {
         // 确保临时变量不影响全局变量
         try {
             // 设置临时变量
-            service.putTemplateParam(NODE_NAME, node);
+            service.putTemporaryParam(NODE_NAME, node);
             String realValue = getMappedContent(allocValue, service);
 
             // 根据声明类型解析
@@ -136,7 +136,7 @@ public class LogicUtil {
             LogUtil.e(TAG, "do let throw FormatException: " + e.getMessage(), e);
             return false;
         } finally {
-            service.removeTemplateParam(NODE_NAME);
+            service.removeTemporaryParam(NODE_NAME);
         }
     }
 

@@ -135,16 +135,16 @@ public class IndexActivity extends BaseActivity {
                                     webSettings.setLoadWithOverviewMode(true);
                                     webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
                                     webView.loadData(content, null, null);
-                                    new AlertDialog.Builder(IndexActivity.this).setTitle("发现新版本: " + release.getTag_name())
+                                    new AlertDialog.Builder(IndexActivity.this).setTitle(getString(R.string.index__new_version, release.getTag_name()))
                                             .setView(webView)
-                                            .setPositiveButton("前往更新", new DialogInterface.OnClickListener() {
+                                            .setPositiveButton(R.string.index__go_update, new DialogInterface.OnClickListener() {
 
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     Uri uri = Uri.parse(release.getHtml_url());
                                                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                                                     startActivity(intent);
                                                 }
-                                            }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                            }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             dialog.dismiss();
@@ -333,7 +333,7 @@ public class IndexActivity extends BaseActivity {
                         }
                     });
                 } else {
-                    toastLong("日志打包失败");
+                    toastLong(getString(R.string.index__package_crash_failed));
 
                     // 回设检查时间，以便下次上报
                     SPService.putLong(SPService.KEY_ERROR_CHECK_TIME, errorTime - 10);

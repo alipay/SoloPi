@@ -103,7 +103,7 @@ public class CaseReplayResultActivity extends BaseActivity {
             return;
         }
 
-        mHeadPanel.setMiddleTitle("回放结果");
+        mHeadPanel.setMiddleTitle(getString(R.string.activity__replay_result));
         mHeadPanel.setBackIconClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,7 +118,7 @@ public class CaseReplayResultActivity extends BaseActivity {
             mHeadPanel.setInfoIconClickListener(R.drawable.icon_save, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showProgressDialog("保存中");
+                    showProgressDialog(getString(R.string.case_replay__saving));
                     BackgroundExecutor.execute(new Runnable() {
                         @Override
                         public void run() {

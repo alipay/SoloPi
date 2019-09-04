@@ -21,28 +21,45 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ListView;
 
 import com.alibaba.fastjson.JSON;
+import com.alipay.hulu.adapter.ParamListAdapter;
 import com.alipay.hulu.R;
 import com.alipay.hulu.activity.CaseEditActivity;
 import com.alipay.hulu.bean.AdvanceCaseSetting;
+import com.alipay.hulu.bean.CaseParamBean;
+import com.alipay.hulu.common.injector.InjectorService;
+import com.alipay.hulu.common.injector.param.RunningThread;
+import com.alipay.hulu.common.injector.param.Subscriber;
+import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
 
+import java.util.Collections;
+import java.util.List;
+
 public class CaseDescEditFragment extends BaseFragment implements CaseEditActivity.OnCaseSaveListener {
     private static final String TAG = "CaseStepEditFrag";
 
-    public static final String RECORD_CASE_EXTRA = "record_case";
-
     private RecordCaseInfo mRecordCase;
+
+    private AdvanceCaseSetting setting;
 
     private EditText mCaseName;
 
     private EditText mCaseDesc;
+    private ListView mParams;
 
-    // 用例版本号
-    private int caseVersion = 0;
+    private ParamListAdapter adapter;
+
+    @Subscriber(value = @Param(sticky = false), thread = RunningThread.MAIN_THREAD)
+    public void receiveNewParam(CaseParamBean param) {
+        List<CaseParamBean> paramBeanList = adapter.getData();
+        paramBeanList.add(param);
+        adapter.setData(paramBeanList);
+    }
 
     /**
      * 通过RecordCase初始化
@@ -62,6 +79,7 @@ public class CaseDescEditFragment extends BaseFragment implements CaseEditActivi
         // 获取各项控件
         mCaseName = (EditText) root.findViewById(R.id.case_name);
         mCaseDesc = (EditText) root.findViewById(R.id.case_desc);
+        mParams = (ListView) root.findViewById(R.id.case_params);
         return root;
     }
 
@@ -83,12 +101,17 @@ public class CaseDescEditFragment extends BaseFragment implements CaseEditActivi
 
         mCaseName.setText(mRecordCase.getCaseName());
         mCaseDesc.setText(mRecordCase.getCaseDesc());
+        setting = JSON.parseObject(mRecordCase.getAdvanceSettings()
+                , AdvanceCaseSetting.class);
 
-        // 如果有高级设置
-        if (!StringUtil.isEmpty(mRecordCase.getAdvanceSettings())) {
-            AdvanceCaseSetting setting = JSON.parseObject(mRecordCase.getAdvanceSettings(),
-                    AdvanceCaseSetting.class);
-            caseVersion = setting.getVersion();
+        // 参数列表
+        adapter = new ParamListAdapter(getActivity());
+        mParams.setAdapter(adapter);
+
+        if (setting != null) {
+            adapter.setData(setting.getParams());
+        } else {
+            mParams.setVisibility(View.GONE);
         }
     }
 
@@ -97,9 +120,24 @@ public class CaseDescEditFragment extends BaseFragment implements CaseEditActivi
         mRecordCase.setCaseName(mCaseName.getText().toString());
         mRecordCase.setCaseDesc(mCaseDesc.getText().toString());
 
-        AdvanceCaseSetting advanceCaseSetting = new AdvanceCaseSetting();
-        advanceCaseSetting.setVersion(caseVersion);
+        if (setting == null) {
+            setting = new AdvanceCaseSetting();
+        }
+        if (adapter != null && mParams.getVisibility() == View.VISIBLE) {
+            setting.setParams(adapter.getData());
+        }
+        mRecordCase.setAdvanceSettings(JSON.toJSONString(setting));
+    }
 
-        mRecordCase.setAdvanceSettings(JSON.toJSONString(advanceCaseSetting));
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        InjectorService.g().register(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        InjectorService.g().unregister(this);
     }
 }

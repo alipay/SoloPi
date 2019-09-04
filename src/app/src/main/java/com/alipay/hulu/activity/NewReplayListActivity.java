@@ -72,7 +72,7 @@ public class NewReplayListActivity extends BaseActivity {
         });
         mHeadPanel.addMenuFromLeft(rightTitle);
 
-        mHeadPanel.setMiddleTitle(getString(R.string.constant__case_list));
+        mHeadPanel.setMiddleTitle(getString(R.string.activity__case_list));
         mHeadPanel.setBackIconClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -93,6 +93,7 @@ public class NewReplayListActivity extends BaseActivity {
 
         ReplayPagerAdapter pagerAdapter = new ReplayPagerAdapter(getSupportFragmentManager());
         mPager.setAdapter(pagerAdapter);
+        mPager.setOffscreenPageLimit(2);
 
     }
 

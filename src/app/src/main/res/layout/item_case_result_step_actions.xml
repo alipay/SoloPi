@@ -54,7 +54,6 @@
             android:layout_marginLeft="40dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="点击"
             android:textColor="@color/primaryText"
             android:textSize="18dp"/>
         <TableLayout
@@ -71,7 +70,7 @@
                 android:id="@+id/row_case_result_step_param"
                 >
                 <TextView
-                    android:text="回放参数"
+                    android:text="@string/step_result__replay_param"
                     android:gravity="center"
                     android:layout_gravity="right|center_vertical"
                     android:textColor="@color/primaryText"
@@ -95,7 +94,7 @@
                 android:id="@+id/row_case_result_step_capture"
                 >
                 <TextView
-                    android:text="截图对比"
+                    android:text="@string/step_result__screenshot"
                     android:gravity="center"
                     android:layout_gravity="right|center_vertical"
                     android:textColor="@color/primaryText"
@@ -133,7 +132,7 @@
                     android:gravity="center"
                     android:layout_gravity="right|center_vertical"
                     android:textSize="14dp"
-                    android:text="回放状态"/>
+                    android:text="@string/step_result__status"/>
                 <TextView
                     android:layout_weight="4"
                     android:padding="4dp"
@@ -157,7 +156,7 @@
                     android:gravity="center"
                     android:layout_gravity="right|center_vertical"
                     android:textSize="14dp"
-                    android:text="准备动作"/>
+                    android:text="@string/step_result__prepare_actions"/>
                 <TextView
                     android:layout_weight="4"
                     android:padding="4dp"
@@ -181,7 +180,7 @@
                     android:layout_gravity="right|center_vertical"
                     android:gravity="center"
                     android:textSize="14dp"
-                    android:text="节点详情"/>
+                    android:text="@string/step_result__node_info"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -202,7 +201,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="目标节点"
+                            android:text="@string/step_result__target_node"
                             android:textColor="@color/colorAccent"
                             android:textSize="14dp" />
                     </RelativeLayout>
@@ -220,7 +219,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="查找节点"
+                            android:text="@string/step_result__find_node"
                             android:textColor="@color/colorAccent"
                             android:textSize="14dp" />
                     </RelativeLayout>

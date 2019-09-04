@@ -27,7 +27,7 @@
         android:layout_marginRight="16dp"
         >
         <android.support.design.widget.TextInputEditText
-            android:hint="上报标题"
+            android:hint="@string/record_config__report_title"
             android:textSize="16dp"
             android:id="@+id/dialog_action_record_title"
             android:layout_width="match_parent"
@@ -36,7 +36,7 @@
 
     <com.alipay.hulu.screenRecord.TextSpinner
         android:id="@+id/dialog_action_record_resolution"
-        app:name="分辨率"
+        app:name="@string/record_config__resolution"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_marginTop="8dp"
@@ -46,7 +46,7 @@
 
     <com.alipay.hulu.screenRecord.TextSpinner
         android:id="@+id/dialog_action_record_bitrate"
-        app:name="比特率"
+        app:name="@string/record_config__bitrate"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_marginTop="8dp"
@@ -58,7 +58,7 @@
 
     <com.alipay.hulu.screenRecord.TextSpinner
         android:id="@+id/dialog_action_record_fps"
-        app:name="帧数"
+        app:name="@string/record_config__framerate"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_marginTop="8dp"
@@ -68,7 +68,7 @@
 
     <com.alipay.hulu.screenRecord.TextSpinner
         android:id="@+id/dialog_action_record_diff"
-        app:name="差异比"
+        app:name="@string/record_config__expect_diff"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_marginTop="8dp"

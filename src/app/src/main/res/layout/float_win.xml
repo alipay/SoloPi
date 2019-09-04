@@ -87,7 +87,6 @@
                 android:layout_toLeftOf="@+id/recordIcon"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="12dp"
-                android:text="00:00"
                 android:visibility="gone"
                 android:textColor="@color/colorAccent"
                 android:textSize="16sp" />

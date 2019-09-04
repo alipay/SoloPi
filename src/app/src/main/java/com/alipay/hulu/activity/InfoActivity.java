@@ -49,7 +49,7 @@ public class InfoActivity extends BaseActivity {
                 InfoActivity.this.finish();
             }
         });
-        panel.setMiddleTitle("关于");
+        panel.setMiddleTitle(getString(R.string.activity__about));
 
         TextView versionName = (TextView) findViewById(R.id.version_name);
         versionName.setText(getString(R.string.info__version_text, SystemUtil.getAppVersionName()));

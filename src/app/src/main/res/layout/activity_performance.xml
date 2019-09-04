@@ -39,7 +39,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="测试应用"
+                    android:text="@string/performance__target_app"
                     android:textSize="14dp"
                     android:layout_marginLeft="8dp"
                     android:layout_marginBottom="2dp"
@@ -77,7 +77,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="性能数据"
+                    android:text="@string/performance__performance_data"
                     android:textSize="14dp"
                     android:layout_marginLeft="8dp"
                     android:layout_marginBottom="2dp"
@@ -113,7 +113,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="测试结果"
+                    android:text="@string/performance__test_result"
                     android:textSize="14dp"
                     android:layout_marginLeft="8dp"
                     android:layout_marginBottom="2dp"
@@ -134,7 +134,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="环境加压"
+                    android:text="@string/performance__env_press"
                     android:textSize="14dp"
                     android:layout_marginLeft="8dp"
                     android:layout_marginBottom="2dp"

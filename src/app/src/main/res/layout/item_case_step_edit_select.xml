@@ -26,7 +26,7 @@
         android:id="@+id/case_step_edit_select_hint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="边界"
+        android:text="@string/case_step_edit__scope"
         style="@style/TextView.InputLabel"
         />
     <android.support.v7.widget.AppCompatSpinner

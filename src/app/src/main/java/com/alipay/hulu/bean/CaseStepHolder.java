@@ -16,8 +16,12 @@
 package com.alipay.hulu.bean;
 
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
+import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -27,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CaseStepHolder {
     private static Map<Integer, RecordCaseInfo> caseHolder = new HashMap<>();
     private static Map<Integer, ReplayResultBean> replayHolder = new HashMap<>();
+    private static List<OperationStep> pasteContentHolder;
     private static final AtomicInteger counter = new AtomicInteger(1);
     private static final AtomicInteger replayCounter = new AtomicInteger(1);
 
@@ -40,6 +45,34 @@ public class CaseStepHolder {
         caseHolder.put(id, caseInfo);
 
         return id;
+    }
+
+    /**
+     * 暂存拷贝步骤
+     * @param pasteContent
+     */
+    public static void storePasteContent(List<OperationStep> pasteContent) {
+        pasteContentHolder = new ArrayList<>(pasteContent);
+    }
+
+    /**
+     * 获取并置空拷贝步骤
+     * @return
+     */
+    public static List<OperationStep> getPasteContent() {
+        if (pasteContentHolder == null) {
+            return Collections.EMPTY_LIST;
+        }
+
+        return new ArrayList<>(pasteContentHolder);
+    }
+
+    /**
+     * 是否包含拷贝步骤
+     * @return
+     */
+    public static boolean containsPasteContent() {
+        return pasteContentHolder != null;
     }
 
     /**

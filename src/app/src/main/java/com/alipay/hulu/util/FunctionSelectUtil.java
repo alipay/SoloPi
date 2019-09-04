@@ -20,6 +20,8 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatSpinner;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -29,6 +31,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,8 +41,12 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.JSON;
 import com.alipay.hulu.R;
+import com.alipay.hulu.bean.CaseParamBean;
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.injector.InjectorService;
+import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.utils.ContextUtil;
 import com.alipay.hulu.common.utils.LogUtil;
@@ -59,9 +66,12 @@ import com.alipay.hulu.ui.CheckableRelativeLayout;
 import com.alipay.hulu.ui.FlowRadioGroup;
 import com.alipay.hulu.ui.TwoLevelSelectLayout;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 /**
@@ -70,14 +80,16 @@ import java.util.regex.Pattern;
  */
 public class FunctionSelectUtil {
     private static final String TAG = "FunctionSelect";
+    public static final String ACTION_EXTRA = "ACTION_EXTRA";
+
     /**
      * 展示操作界面
      *
      * @param node
      */
     public static void showFunctionView(final Context context, final AbstractNodeTree node,
-                                  final List<String> keys, final List<Integer> icons,
-                                  final Map<String,List<TwoLevelSelectLayout.SubMenuItem>> secondLevel,
+                                  final List<Integer> keys, final List<Integer> icons,
+                                  final Map<Integer,List<TwoLevelSelectLayout.SubMenuItem>> secondLevel,
                                   final HighLightService highLightService,
                                   final OperationService operationService,
                                   final Pair<Float, Float> localClickPos,
@@ -136,6 +148,11 @@ public class FunctionSelectUtil {
                     LogUtil.i(TAG, "Perform Action: " + action);
                     final OperationMethod method = new OperationMethod(
                             PerformActionEnum.getActionEnumByCode(action.key));
+
+                    // 透传一下
+                    if (!StringUtil.isEmpty(action.extra)) {
+                        method.putParam(ACTION_EXTRA, action.extra);
+                    }
 
                     // 添加控件点击位置
                     if (localClickPos != null) {
@@ -204,21 +221,16 @@ public class FunctionSelectUtil {
         PerformActionEnum action = method.getActionEnum();
         if (action == PerformActionEnum.INPUT
                 || action == PerformActionEnum.INPUT_SEARCH
-                || action == PerformActionEnum.LONG_CLICK) {
-            showEditView(node, method, context, listener);
-            return true;
-        } else if (action == PerformActionEnum.MULTI_CLICK
-                || action == PerformActionEnum.SLEEP_UNTIL) {
-            showEditView(node, method, context, listener);
-            return true;
-        } else if (action == PerformActionEnum.SLEEP
-                || action == PerformActionEnum.SCREENSHOT) {
-            showEditView(null, method, context, listener);
-            return true;
-        } else if (action == PerformActionEnum.SCROLL_TO_BOTTOM
+                || action == PerformActionEnum.LONG_CLICK
+                || action == PerformActionEnum.MULTI_CLICK
+                || action == PerformActionEnum.SLEEP_UNTIL
+                || action == PerformActionEnum.SLEEP
+                || action == PerformActionEnum.SCREENSHOT
+                || action == PerformActionEnum.SCROLL_TO_BOTTOM
                 || action == PerformActionEnum.SCROLL_TO_TOP
                 || action == PerformActionEnum.SCROLL_TO_LEFT
-                || action == PerformActionEnum.SCROLL_TO_RIGHT) {
+                || action == PerformActionEnum.SCROLL_TO_RIGHT
+                || action == PerformActionEnum.EXECUTE_SHELL) {
             showEditView(node, method, context, listener);
             return true;
         } else if (action == PerformActionEnum.ASSERT) {
@@ -227,14 +239,12 @@ public class FunctionSelectUtil {
         } else if (action == PerformActionEnum.LET_NODE) {
             chooseLetMode(node, context, listener);
             return true;
-        } else if (action == PerformActionEnum.JUMP_TO_PAGE) {
+        } else if (action == PerformActionEnum.JUMP_TO_PAGE
+                || action == PerformActionEnum.LOAD_PARAM) {
             showSelectView(method, context, listener);
             return true;
         } else if (action == PerformActionEnum.CHANGE_MODE) {
             showChangeModeView(context, listener);
-            return true;
-        }else if (action == PerformActionEnum.EXECUTE_SHELL) {
-            showEditView(node, method, context, listener);
             return true;
         } else if (action == PerformActionEnum.WHILE) {
             showWhileView(method, context, listener);
@@ -264,7 +274,7 @@ public class FunctionSelectUtil {
             }
 
             AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppDialogTheme)
-                    .setTitle("请选择要切换的模式")
+                    .setTitle(R.string.function__set_mode)
                     .setSingleChoiceItems(actions, 0, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -279,7 +289,7 @@ public class FunctionSelectUtil {
                             method.putParam(OperationExecutor.GET_NODE_MODE, modes[which].getCode());
                             listener.onProcessFunction(method, null);
                         }
-                    }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
@@ -314,8 +324,8 @@ public class FunctionSelectUtil {
             View itemUrl = customView.findViewById(R.id.item_url);
             final AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
                     .setView(customView)
-                    .setTitle("请选择操作方式")
-                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    .setTitle(R.string.function__select_function)
+                    .setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
@@ -330,6 +340,15 @@ public class FunctionSelectUtil {
                 @Override
                 public void onClick(View v) {
                     if (actionEnum == PerformActionEnum.JUMP_TO_PAGE) {
+                        if (v.getId() == R.id.item_scan) {
+                            method.putParam("scan", "1");
+                            listener.onProcessFunction(method, null);
+                        } else if (v.getId() == R.id.item_url) {
+                            dialog.dismiss();
+                            showUrlEditView(method, context, listener);
+                            return;
+                        }
+                    } else if (actionEnum == PerformActionEnum.LOAD_PARAM) {
                         if (v.getId() == R.id.item_scan) {
                             method.putParam("scan", "1");
                             listener.onProcessFunction(method, null);
@@ -367,12 +386,12 @@ public class FunctionSelectUtil {
         final PerformActionEnum actionEnum = method.getActionEnum();
         View v = LayoutInflater.from(ContextUtil.getContextThemeWrapper(context, R.style.AppDialogTheme)).inflate(R.layout.dialog_record_name, null);
         final EditText edit = (EditText) v.findViewById(R.id.dialog_record_edit);
-        edit.setHint("请输入url");
+        edit.setHint(R.string.function__please_input_url);
 
         AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
-                .setTitle("请输入url")
+                .setTitle(R.string.function__input_url)
                 .setView(v)
-                .setPositiveButton("输入", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.function__input, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         LogUtil.i(TAG, "Positive " + which);
@@ -385,9 +404,14 @@ public class FunctionSelectUtil {
                             // 向handler发送请求
                             method.putParam(OperationExecutor.SCHEME_KEY, data);
                             listener.onProcessFunction(method, null);
+                        } else if (actionEnum == PerformActionEnum.LOAD_PARAM) {
+                            method.putParam(OperationExecutor.APP_URL_KEY, data);
+
+                            // 向handler发送请求
+                            listener.onProcessFunction(method, null);
                         }
                     }
-                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -504,9 +528,9 @@ public class FunctionSelectUtil {
 
         final AbstractNodeTree finalNode = node;
         AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
-                .setTitle("请设置变量值")
+                .setTitle(R.string.function__set_variable)
                 .setView(letView)
-                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         LogUtil.i(TAG, "Positive " + which);
@@ -527,7 +551,7 @@ public class FunctionSelectUtil {
 
                         listener.onProcessFunction(method, finalNode);
                     }
-                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -616,10 +640,10 @@ public class FunctionSelectUtil {
                 });
 
                 AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
-                        .setTitle("输入数字并选择断言模式")
+                        .setTitle(R.string.function__input_number_assert)
                         .setView(content)
-                        .setPositiveButton("确定", null)
-                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.constant__confirm, null)
+                        .setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 LogUtil.i(TAG, "Negative " + which);
@@ -640,7 +664,7 @@ public class FunctionSelectUtil {
                                     param.put(OperationExecutor.ASSERT_INPUT_CONTENT, strResult[0]);
                                     postiveClick(action, node, dialog, param, listener);
                                 } else {
-                                    Toast.makeText(context, "请输入数字", Toast.LENGTH_SHORT).show();
+                                    LauncherApplication.toast(R.string.function__input_number);
                                 }
                             }
                         });
@@ -696,10 +720,10 @@ public class FunctionSelectUtil {
                 });
 
                 AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
-                        .setTitle("输入内容并选择断言模式")
+                        .setTitle(R.string.function__input_select_assert)
                         .setView(content)
-                        .setPositiveButton("确定", null)
-                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.constant__confirm, null)
+                        .setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 LogUtil.i(TAG, "Negative " + which);
@@ -724,7 +748,7 @@ public class FunctionSelectUtil {
                                             param, listener);
 
                                 } else {
-                                    Toast.makeText(context, "请输入内容", Toast.LENGTH_SHORT).show();
+                                    LauncherApplication.toast(R.string.function__input_content);
                                 }
                             }
                         });
@@ -776,53 +800,53 @@ public class FunctionSelectUtil {
 
         try {
             PerformActionEnum action = method.getActionEnum();
-            String title = "请输入具体内容";
+            String title = StringUtil.getString(R.string.function__input_title);
             View v = LayoutInflater.from(ContextUtil.getContextThemeWrapper(context, R.style.AppDialogTheme)).inflate(R.layout.dialog_record_name, null);
             final EditText edit = (EditText) v.findViewById(R.id.dialog_record_edit);
             final Pattern textPattern;
             if (action == PerformActionEnum.SLEEP) {
-                edit.setHint("sleep时长（单位ms）");
-                title = "请设置Sleep时长";
+                edit.setHint(R.string.function__sleep_time);
+                title = StringUtil.getString(R.string.function__set_sleep_time);
                 textPattern = Pattern.compile("\\d+");
             } else if (action == PerformActionEnum.SCREENSHOT) {
-                edit.setHint("截图名称");
-                title = "请输入截图名称";
+                edit.setHint(R.string.function__screenshot_name);
+                title = StringUtil.getString(R.string.function__set_screenshot_name);
                 textPattern = Pattern.compile("\\S+(.*\\S+)?");
             } else if (action ==PerformActionEnum.MULTI_CLICK) {
-                edit.setHint("点击次数");
-                title = "请输入连续点击次数(1-99次)";
+                edit.setHint(R.string.function__click_time);
+                title = StringUtil.getString(R.string.function__set_click_time);
                 textPattern = Pattern.compile("\\d{1,2}");
             } else if (action ==PerformActionEnum.SLEEP_UNTIL) {
-                edit.setHint("最长等待时间");
+                edit.setHint(R.string.function__max_wait);
                 edit.setText(R.string.default_sleep_time);
-                title = "请输入最长等待时间(单位ms)";
+                title = StringUtil.getString(R.string.function__set_max_wait);
                 textPattern = Pattern.compile("\\d+");
             } else if (action == PerformActionEnum.SCROLL_TO_BOTTOM
                     || action == PerformActionEnum.SCROLL_TO_TOP
                     || action == PerformActionEnum.SCROLL_TO_LEFT
                     || action == PerformActionEnum.SCROLL_TO_RIGHT) {
-                edit.setHint("滑动百分比");
+                edit.setHint(R.string.function__scroll_percent);
                 edit.setText(R.string.default_scroll_percentage);
-                title = "请输入滑动百分比";
+                title = StringUtil.getString(R.string.function__set_scroll_percent);
                 textPattern = Pattern.compile("\\d+");
             } else if (action == PerformActionEnum.EXECUTE_SHELL) {
-                edit.setHint("请输入adb shell命令");
-                title = "请输入shell命令";
+                edit.setHint(R.string.function__adb_cmd);
+                title = StringUtil.getString(R.string.function__set_adb_cmd);
                 textPattern = null;
             } else if (action == PerformActionEnum.LONG_CLICK) {
-                edit.setHint("长按时长");
-                title = "请输入长按时长(单位ms)";
+                edit.setHint(R.string.function__long_press);
+                title = StringUtil.getString(R.string.function__set_long_press);
                 textPattern = Pattern.compile("[1-9]\\d+");
                 edit.setText(R.string.default_long_click_time);
             } else {
-                edit.setHint("具体内容");
+                edit.setHint(R.string.function__input_content);
                 textPattern = null;
             }
 
             final AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
                     .setTitle(title)
                     .setView(v)
-                    .setPositiveButton("输入", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(R.string.function__input, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             LogUtil.i(TAG, "Positive " + which);
@@ -843,7 +867,7 @@ public class FunctionSelectUtil {
                                 }
                             }, 500);
                         }
-                    }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             LogUtil.i(TAG, "Negative " + which);
@@ -914,12 +938,12 @@ public class FunctionSelectUtil {
                 edit.clearComposingText();
 
                 if (position == 0) {
-                    hint.setText("循环次数");
-                    edit.setHint("循环次数");
+                    hint.setText(R.string.function__loop_count);
+                    edit.setHint(R.string.function__loop_count);
                     edit.setInputType(InputType.TYPE_CLASS_NUMBER);
                 } else {
-                    hint.setText("循环条件");
-                    edit.setHint("循环条件");
+                    hint.setText(R.string.function__loop_condition);
+                    edit.setHint(R.string.function__loop_condition);
                     edit.setInputType(InputType.TYPE_CLASS_TEXT);
                 }
             }
@@ -931,9 +955,9 @@ public class FunctionSelectUtil {
         });
 
         final AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
-                .setTitle("添加循环")
+                .setTitle(R.string.function__add_loop)
                 .setView(v)
-                .setPositiveButton("添加", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.function__add, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         LogUtil.i(TAG, "Positive " + which);
@@ -958,7 +982,7 @@ public class FunctionSelectUtil {
                             }
                         }, 500);
                     }
-                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         LogUtil.i(TAG, "Negative " + which);
@@ -999,7 +1023,7 @@ public class FunctionSelectUtil {
         AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
                 .setView(view)
                 .setCancelable(false)
-                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         LogUtil.i(TAG, "Positive " + which);
@@ -1020,7 +1044,7 @@ public class FunctionSelectUtil {
                             listener.onProcessFunction(method, node);
                         }
                     }
-                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         LogUtil.i(TAG, "Negative " + which);

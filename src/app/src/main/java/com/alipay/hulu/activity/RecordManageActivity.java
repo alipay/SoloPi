@@ -15,7 +15,6 @@
  */
 package com.alipay.hulu.activity;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -25,7 +24,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.alipay.hulu.R;
-import com.alipay.hulu.common.service.SPService;
+import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
@@ -75,7 +74,7 @@ public class RecordManageActivity extends BaseActivity {
         setContentView(R.layout.activity_record_manage);
 
         headPanel = (HeadControlPanel) findViewById(R.id.head_layout);
-        headPanel.setMiddleTitle("性能数据管理");
+        headPanel.setMiddleTitle(getString(R.string.activity__performance_manage));
         headPanel.setBackIconClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -169,7 +168,7 @@ public class RecordManageActivity extends BaseActivity {
                 }
 
                 if (!folder.delete()) {
-                    Toast.makeText(this, "文件夹\"" + folderName + "\"无法删除，请手动删除", Toast.LENGTH_LONG).show();
+                    LauncherApplication.toast(R.string.record__fail_delete_folder, folder);
                 }
             }
         }

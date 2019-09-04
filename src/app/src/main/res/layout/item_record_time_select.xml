@@ -23,6 +23,5 @@
         android:textSize="14sp"
         android:textColor="@color/black"
         android:id="@+id/record_time_select_title"
-        android:layout_gravity="center_horizontal"
-        android:text="2017-12-27 00:00:00 - 2017-12-12 00:01:00"/>
+        android:layout_gravity="center_horizontal"/>
 </LinearLayout>

@@ -22,7 +22,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="输入法"
+        android:text="@string/ime__click_change"
         android:layout_centerInParent="true"
         android:textColor="#fff"
         />

@@ -14,29 +14,41 @@
   ~ limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="8dp"
-    android:paddingRight="8dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
-    <android.support.design.widget.TextInputLayout
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp">
+    <TextView
+        android:id="@+id/item_case_step_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:textSize="12dp"
+        android:textColor="@color/colorAccent"
+        />
+
+    <EditText
+        android:paddingTop="6dp"
+        android:id="@+id/item_case_step_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/item_case_step_edit_input_layout"
-        app:hintEnabled="true"
-        >
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/item_case_step_edit_input_edit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/primaryText"
-            android:textSize="16dp"
-            android:inputType="text"
-            android:maxLines="3"
-            />
-    </android.support.design.widget.TextInputLayout>
+        android:textColor="@color/primaryText"
+        android:textSize="18dp"
+        android:text=""
+        android:focusable="true"
+        android:textColorHint="@color/secondaryText"
+        android:textColorHighlight="@color/colorAccent"
+        android:inputType="text" />
+    <TextView
+        android:id="@+id/item_case_step_create_param"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorAccent"
+        android:layout_gravity="right"
+        android:layout_marginRight="12dp"
+        android:layout_marginTop="0dp"/>
 
 </LinearLayout>

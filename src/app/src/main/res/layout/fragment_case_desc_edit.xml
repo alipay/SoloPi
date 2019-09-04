@@ -15,7 +15,8 @@
 -->
 <ScrollView android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -28,11 +29,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             android:gravity="center_vertical">
 
             <TextView
-                android:text="用例名称："
+                android:text="@string/case_edit__case_name"
                 android:textSize="16dp"
                 android:layout_width="80dp"
                 android:textColor="#000000"
@@ -44,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:padding="5dp"
                 android:textSize="16dp"
-                android:hint="请输入用例名称（必填）"
+                android:hint="@string/record__input_case_name"
                 android:background="@drawable/bg_custom_input"
                 android:textColorHint="#aaaaaa"/>
         </LinearLayout>
@@ -54,11 +55,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="16dp"
             android:gravity="center_vertical">
 
             <TextView
-                android:text="用例描述："
+                android:text="@string/case_edit__case_desc"
                 android:textSize="16dp"
                 android:layout_width="80dp"
                 android:textColor="#000000"
@@ -70,9 +71,31 @@
                 android:layout_height="wrap_content"
                 android:padding="5dp"
                 android:textSize="16dp"
-                android:hint="请输入用例描述"
+                android:hint="@string/record__input_case_desc"
                 android:background="@drawable/bg_custom_input"
                 android:textColorHint="#aaaaaa"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:text="@string/case_edit__case_param"
+                android:textSize="16dp"
+                android:layout_width="wrap_content"
+                android:textColor="#000000"
+                android:layout_height="wrap_content"/>
+            <com.alipay.hulu.ui.TotalMeasureListView
+                android:id="@+id/case_params"
+                android:divider="@null"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_case_param"
+                />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

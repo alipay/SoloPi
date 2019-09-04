@@ -26,23 +26,21 @@ import com.alipay.hulu.common.service.base.LocalService;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.shared.io.bean.OperationStepMessage;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
-import com.alipay.hulu.shared.io.constant.Constant;
-import com.alipay.hulu.shared.io.db.OperationLogHandler;
 
 /**
  * Created by qiaoruikai on 2018/10/10 8:35 PM.
  */
 @LocalService
 public class OperationStepService implements ExportService {
+    public static final String NOTIFY_OPERATION_STEP = "notifyRecordStep";
+
     private static final String TAG = "OperationStepService";
 
-    OperationLogHandler dbHandler;
+    OperationStepProcessor processor;
     InjectorService injectorService;
 
     @Override
     public void onCreate(Context context) {
-        dbHandler = new OperationLogHandler();
-
         injectorService = LauncherApplication.getInstance().findServiceByName(InjectorService.class.getName());
         injectorService.register(this);
     }
@@ -53,21 +51,31 @@ public class OperationStepService implements ExportService {
     }
 
     /**
+     * 配置步骤处理器
+     * @param processor
+     */
+    public void registerStepProcessor(OperationStepProcessor processor) {
+        this.processor = processor;
+    }
+
+    /**
      * 启动用例录制
      * @param recordCaseInfo
      */
     public void startRecord(RecordCaseInfo recordCaseInfo) {
-        dbHandler.startRecord(recordCaseInfo);
+        if (processor == null) return;
+        processor.onStartRecord(recordCaseInfo);
     }
 
     /**
      * 停止用例录制
      */
-    public void stopRecord() {
-        dbHandler.stopRecord();
+    public boolean stopRecord(Context context) {
+        if (processor == null) return false;
+        return processor.onStopRecord(context);
     }
 
-    @Subscriber(@Param(Constant.NOTIFY_RECORD_STEP))
+    @Subscriber(@Param(NOTIFY_OPERATION_STEP))
     public void processRecordStep(OperationStepMessage message) {
         // 空消息不处理
         if (message == null) {
@@ -75,9 +83,14 @@ public class OperationStepService implements ExportService {
             return;
         }
 
+        if (processor == null) {
+            LogUtil.e(TAG, "No step processor registered");
+            return;
+        }
+
         // 如果通常步骤非空
         if (message.getGeneralOperationStep() != null) {
-            dbHandler.recordStep(message.getStepIdx(), message.getGeneralOperationStep());
+            processor.onOperationStep(message.getStepIdx(), message.getGeneralOperationStep());
         } else {
             LogUtil.e(TAG, "无法处理空步骤: %s", message);
         }

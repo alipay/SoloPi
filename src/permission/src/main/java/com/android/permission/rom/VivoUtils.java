@@ -10,6 +10,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.floatwindowpermission.R;
+
 import java.lang.reflect.Method;
 
 /**
@@ -57,7 +59,7 @@ public class VivoUtils {
                     ((Activity) context).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(context, "请进入\"应用管理->权限管理->悬浮窗\"页面开启权限", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, R.string.vivo__open_float, Toast.LENGTH_LONG).show();
                         }
                     });
                 }
@@ -68,7 +70,7 @@ public class VivoUtils {
                     ((Activity) context).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(context, "请手动开启i管家，进入\"应用管理->权限管理->悬浮窗\"页面开启权限", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, R.string.vivo__open_float_b, Toast.LENGTH_LONG).show();
                         }
                     });
                 }
@@ -78,7 +80,7 @@ public class VivoUtils {
                 ((Activity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(context, "请手动开启i管家，进入\"应用管理->权限管理->悬浮窗\"页面开启权限", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, R.string.vivo__open_float_c, Toast.LENGTH_LONG).show();
                     }
                 });
             }

@@ -1281,27 +1281,27 @@ public class CmdTools {
                                 break;
                             }
                         }
-                    }
 
-                    // 恢复失败
-                    if (!genResult) {
-                        Context con = LauncherApplication.getInstance().loadActivityOnTop();
-                        if (con == null) {
-                            con = LauncherApplication.getInstance().loadRunningService();
-                        }
+                        // 恢复失败
+                        if (!genResult) {
+                            Context con = LauncherApplication.getInstance().loadActivityOnTop();
+                            if (con == null) {
+                                con = LauncherApplication.getInstance().loadRunningService();
+                            }
 
-                        if (con == null) {
-                            LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.cmd__adb_break));
+                            if (con == null) {
+                                LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.cmd__adb_break));
+                                return;
+                            }
+
+                            // 回首页
+                            LauncherApplication.getInstance().showDialog(con, StringUtil.getString(R.string.cmd__adb_break), StringUtil.getString(R.string.constant__sure), null);
+
+                            // 通知各个功能ADB挂了
+                            InjectorService.g().pushMessage(FATAL_ADB_CANNOT_RECOVER);
+
                             return;
                         }
-
-                        // 回首页
-                        LauncherApplication.getInstance().showDialog(con, StringUtil.getString(R.string.cmd__adb_break), StringUtil.getString(R.string.constant__sure), null);
-
-                        // 通知各个功能ADB挂了
-                        InjectorService.g().pushMessage(FATAL_ADB_CANNOT_RECOVER);
-
-                        return;
                     }
                 }
 

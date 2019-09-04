@@ -192,7 +192,7 @@ public class PatchRequest {
         if (loadingCount.get() > 0) {
             final BaseActivity activity = (BaseActivity) LauncherApplication.getInstance().loadActivityOnTop();
             if (activity != null) {
-                activity.showProgressDialog("加载插件中，请耐心等待");
+                activity.showProgressDialog(StringUtil.getString(R.string.patch__loading_plugin_wait));
                 BackgroundExecutor.execute(new Runnable() {
                     @Override
                     public void run() {

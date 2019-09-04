@@ -25,6 +25,9 @@ import android.util.DisplayMetrics;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
@@ -36,6 +39,7 @@ import com.alipay.hulu.common.service.ScreenCaptureService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.FileUtils;
+import com.alipay.hulu.common.utils.HttpUtil;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.StringUtil;
@@ -55,9 +59,14 @@ import com.alipay.hulu.shared.node.utils.PrepareUtil;
 import com.android.permission.rom.RomUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -224,7 +233,7 @@ public class OperationExecutor {
      * @param service
      * @return
      */
-    private static String getMappedContent(String origin, final OperationService service) {
+    public static String getMappedContent(String origin, final OperationService service) {
         if (service == null) {
             return origin;
         }
@@ -605,7 +614,12 @@ public class OperationExecutor {
                     opContext.notifyOnFinish(new Runnable() {
                         @Override
                         public void run() {
-                            MiscUtil.sleep(count);
+                            long startTime = System.currentTimeMillis();
+                            long sleeper;
+                            // 防止sleep不够
+                            while ((sleeper = System.currentTimeMillis() - startTime) < count - 10) {
+                                MiscUtil.sleep(count - sleeper);
+                            }
                         }
                     });
                     return true;
@@ -731,6 +745,39 @@ public class OperationExecutor {
                 result = LogicUtil.checkStep(method, null, operationManagerRef.get());
                 opContext.notifyOperationFinish();
                 return result;
+            case LOAD_PARAM:
+                final String url = method.getParam(APP_URL_KEY);
+                if (StringUtil.isEmpty(url)) {
+                    return false;
+                }
+
+                opContext.notifyOnFinish(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            String content = HttpUtil.getSync(url);
+                            JSONObject params = JSON.parseObject(content);
+
+                            // 解析失败
+                            if (params == null) {
+                                return;
+                            }
+
+                            // 存放到顶层参数map
+                            Map<String, String> realParams = new HashMap<>(params.size() + 1);
+                            for (String key: params.keySet()) {
+                                realParams.put(key, params.getString(key));
+                            }
+
+                            operationManagerRef.get().putAllRuntimeParamAtTop(realParams);
+                        } catch (IOException e) {
+                            LogUtil.e(TAG, "Catch java.io.IOException: " + e.getMessage(), e);
+                        } catch (JSONException e) {
+                            LogUtil.e(TAG, "Parse response failed, " + e.getMessage(), e);
+                        }
+                    }
+                });
+                return true;
         }
 
         opContext.notifyOperationFinish();

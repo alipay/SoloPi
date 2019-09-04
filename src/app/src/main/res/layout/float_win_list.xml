@@ -23,7 +23,6 @@
     <TextView
         android:id="@+id/display_title"
         android:textSize="12sp"
-        android:text="CPU"
         android:layout_gravity="center_vertical"
         android:gravity="center"
         android:textColor="@color/colorPrimary"
@@ -38,7 +37,6 @@
         android:focusable="false"
         android:layout_gravity="center_vertical"
         android:textColor="@color/colorPrimaryDark"
-        android:text="sdsdsds"
         android:maxLines="2"
         android:textSize="12sp"
         />
@@ -52,7 +50,6 @@
         android:focusable="true"
         android:layout_gravity="center_vertical"
         android:textColor="@color/colorAccent"
-        android:text="清零"
         android:maxLines="2"
         android:textSize="13.5sp"
         />

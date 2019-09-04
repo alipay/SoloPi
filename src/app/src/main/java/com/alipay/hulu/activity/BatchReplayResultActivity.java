@@ -120,7 +120,7 @@ public class BatchReplayResultActivity extends BaseActivity {
                 finish();
             }
         });
-        mPanel.setMiddleTitle("批量回放执行结果");
+        mPanel.setMiddleTitle(getString(R.string.activity__batch_replay_result));
     }
 
     private static class ResultAdapter extends BaseAdapter {
@@ -166,10 +166,10 @@ public class BatchReplayResultActivity extends BaseActivity {
             if (bean != null) {
                 holder.caseName.setText(bean.getCaseName());
                 if (TextUtils.isEmpty(bean.getExceptionMessage())) {
-                    holder.result.setText("成功");
+                    holder.result.setText(R.string.constant__success);
                     holder.result.setTextColor(0xff65c0ba);
                 } else {
-                    holder.result.setText("失败");
+                    holder.result.setText(R.string.constant__fail);
                     holder.result.setTextColor(0xfff76262);
                 }
             }

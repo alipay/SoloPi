@@ -216,7 +216,7 @@ public class FloatWinService extends BaseService {
 			messageText = (TextView) v.findViewById(R.id.loading_dialog_text);
 			loadingDialog = new AlertDialog.Builder(this, R.style.AppDialogTheme)
 					.setView(v)
-					.setNegativeButton("隐藏", new DialogInterface.OnClickListener() {
+					.setNegativeButton(R.string.float__hide, new DialogInterface.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							dialog.dismiss();

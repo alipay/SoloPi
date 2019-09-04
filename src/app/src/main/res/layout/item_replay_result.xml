@@ -25,7 +25,7 @@
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="16dp"
         android:textSize="16dp"
-        android:text="用例名称"/>
+        />
 
     <TextView
         android:id="@+id/result"
@@ -34,7 +34,6 @@
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:layout_marginRight="16dp"
-        android:textSize="14dp"
-        android:text="结果"/>
+        android:textSize="14dp"/>
 
 </RelativeLayout>

@@ -61,6 +61,7 @@ public class PrepareUtil {
                     }
                 } catch (Throwable t) {
                     LogUtil.e(TAG, "准备失败，message=" + t.getMessage(), t);
+                    return false;
                 }
             }
         }

@@ -17,7 +17,6 @@ package com.alipay.hulu.adapter;
 
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -25,12 +24,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 import com.alipay.hulu.R;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.node.tree.OperationNode;
+import com.alipay.hulu.shared.node.tree.export.OperationStepExporter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +62,11 @@ public class CaseStepNodeAdapter extends RecyclerView.Adapter<CaseStepNodeAdapte
     }
 
     @Override
+    public int getItemViewType(int position) {
+        return StringUtil.equals(properties.get(position), OperationStepExporter.CAPTURE_IMAGE_BASE64)? 1: 0;
+    }
+
+    @Override
     public void onBindViewHolder(NodePropertyHolder holder, int position) {
         String property = properties.get(position);
         String value = extractNodeProperties(node, property);
@@ -75,24 +81,27 @@ public class CaseStepNodeAdapter extends RecyclerView.Adapter<CaseStepNodeAdapte
     public static class NodePropertyHolder extends RecyclerView.ViewHolder implements TextWatcher {
         private String key;
 
-        private TextInputLayout layout;
+        private TextView title;
         private EditText editText;
+        private TextView infoText;
         private OperationNode node;
 
         public NodePropertyHolder(View itemView, OperationNode node) {
             super(itemView);
             this.node = node;
 
-            layout = (TextInputLayout) itemView.findViewById(R.id.item_case_step_edit_input_layout);
-            editText = (EditText) itemView.findViewById(R.id.item_case_step_edit_input_edit);
+            title = (TextView) itemView.findViewById(R.id.item_case_step_name);
+            editText = (EditText) itemView.findViewById(R.id.item_case_step_edit);
             editText.addTextChangedListener(this);
+            infoText = (TextView) itemView.findViewById(R.id.item_case_step_create_param);
+            infoText.setText("");
         }
 
         private void wrapData(String key, String value) {
             this.key = key;
 
             editText.setText(value);
-            layout.setHint(key);
+            title.setText(key);
         }
 
         @Override
@@ -109,9 +118,9 @@ public class CaseStepNodeAdapter extends RecyclerView.Adapter<CaseStepNodeAdapte
         public void afterTextChanged(Editable s) {
             boolean result = updateNodeProperty(key, s.toString(), node);
             if (!result) {
-                layout.setError("格式不合法");
+                infoText.setText(R.string.node__invalid_param);
             } else {
-                layout.setError(null);
+                infoText.setText("");
             }
         }
     }
@@ -171,6 +180,12 @@ public class CaseStepNodeAdapter extends RecyclerView.Adapter<CaseStepNodeAdapte
         if (node.getExtra() != null) {
             Map<String, String> extras = node.getExtra();
             list.addAll(extras.keySet());
+        }
+
+        // 截图放最前面
+        if (list.contains(OperationStepExporter.CAPTURE_IMAGE_BASE64)) {
+            list.remove(OperationStepExporter.CAPTURE_IMAGE_BASE64);
+            list.add(0, OperationStepExporter.CAPTURE_IMAGE_BASE64);
         }
 
         return list;

@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
-            android:text="内容"
+            android:text="@string/assert__content"
             android:textColor="@color/black"
             android:textSize="14dp" />
 
@@ -41,7 +41,7 @@
             android:layout_marginLeft="15dp"
             android:layout_marginRight="30dp"
             android:layout_toRightOf="@id/assert_string_title"
-            android:hint="请输入待匹配内容"
+            android:hint="@string/assert__input_assert_content"
             android:textColor="@color/primaryText"
             android:textColorHighlight="@color/colorAccent"
             android:textColorHint="@color/secondaryText"
@@ -61,19 +61,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="精准匹配" />
+            android:text="@string/assert__accurate" />
 
         <RadioButton
             android:id="@+id/ch2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="包含" />
+            android:text="@string/assert__include" />
 
         <RadioButton
             android:id="@+id/ch3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="正则匹配" />
+            android:text="@string/assert__regex" />
 
     </com.alipay.hulu.ui.FlowRadioGroup>
 </RelativeLayout>

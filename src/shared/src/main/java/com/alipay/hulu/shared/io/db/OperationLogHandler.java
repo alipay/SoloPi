@@ -15,12 +15,14 @@
  */
 package com.alipay.hulu.shared.io.db;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Pair;
 
 import com.alibaba.fastjson.JSON;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.utils.LogUtil;
+import com.alipay.hulu.shared.io.OperationStepProcessor;
 import com.alipay.hulu.shared.io.bean.GeneralOperationLogBean;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
 import com.alipay.hulu.shared.io.util.OperationStepUtil;
@@ -36,7 +38,7 @@ import java.util.concurrent.Executors;
 /**
  * 操作入库
  */
-public class OperationLogHandler {
+public class OperationLogHandler implements OperationStepProcessor {
     /**
      * notify update local cases
      */
@@ -63,7 +65,8 @@ public class OperationLogHandler {
      * 开始录制
      * @param caseInfo
      */
-    public void startRecord(RecordCaseInfo caseInfo) {
+    @Override
+    public void onStartRecord(RecordCaseInfo caseInfo) {
         updateCase(caseInfo);
         generalOperation = new GeneralOperationLogBean();
         if (generalPriorityQueue == null) {
@@ -83,14 +86,16 @@ public class OperationLogHandler {
      * @param stepIdx
      * @param operation
      */
-    public void recordStep(int stepIdx, OperationStep operation) {
+    @Override
+    public void onOperationStep(int stepIdx, OperationStep operation) {
         generalPriorityQueue.add(new Pair<>(stepIdx, operation));
     }
 
     /**
      * 停止录制
      */
-    public void stopRecord() {
+    @Override
+    public boolean onStopRecord(Context context) {
         List<OperationStep> realList = new ArrayList<>(generalPriorityQueue.size());
         while (!generalPriorityQueue.isEmpty()) {
             realList.add(generalPriorityQueue.poll().second);
@@ -106,6 +111,8 @@ public class OperationLogHandler {
             caseInfo.setOperationLog(jsonString);
             saveCaseInDB();
         }
+
+        return false;
     }
 
 

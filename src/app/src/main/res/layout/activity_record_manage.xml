@@ -14,7 +14,9 @@
   ~ limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <include layout="@layout/head_panel_layout"
@@ -27,7 +29,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="性能数据列表"
+            android:text="@string/record_manage__data_list"
             android:textSize="14dp"
             android:layout_marginLeft="8dp"
             android:layout_marginBottom="2dp"
@@ -47,6 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            tools:listitem="@layout/item_record_manage"
             android:choiceMode="multipleChoice"
             />
 
@@ -59,7 +62,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"
             android:textSize="14dp"
-            android:text="删除数据"
+            android:text="@string/record_manage__delete_data"
             android:textColor="@color/white"
             android:background="@drawable/bg_solid_round_btn"
             android:layout_marginBottom="19dp"/>

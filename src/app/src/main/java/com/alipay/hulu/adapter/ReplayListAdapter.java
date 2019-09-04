@@ -82,8 +82,8 @@ public class ReplayListAdapter extends BaseAdapter implements View.OnClickListen
             holder.caseName = (TextView) convertView.findViewById(R.id.case_name);
             holder.caseDesc = (TextView) convertView.findViewById(R.id.case_desc);
             holder.createTime = (TextView) convertView.findViewById(R.id.create_time);
-            holder.edit = (RelativeLayout) convertView.findViewById(R.id.case_edit);
-            holder.edit.setOnClickListener(this);
+            holder.play = (RelativeLayout) convertView.findViewById(R.id.case_play);
+            holder.play.setOnClickListener(this);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -96,11 +96,11 @@ public class ReplayListAdapter extends BaseAdapter implements View.OnClickListen
             holder.createTime.setText(DateFormat.getDateTimeInstance().format(sDate));
             String caseDesc = recordCaseInfo.getCaseDesc();
             if (StringUtil.isEmpty(caseDesc)) {
-                holder.caseDesc.setText("暂无描述");
+                holder.caseDesc.setText(R.string.replay_list__no_desc);
             } else {
                 holder.caseDesc.setText(recordCaseInfo.getCaseDesc());
             }
-            holder.edit.setTag(position);
+            holder.play.setTag(position);
         }
         return convertView;
     }
@@ -137,7 +137,7 @@ public class ReplayListAdapter extends BaseAdapter implements View.OnClickListen
         }
     }
 
-    public void setOnEditClickListener(AdapterView.OnItemClickListener onItemClickListener) {
+    public void setOnPlayClickListener(AdapterView.OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
 
@@ -145,7 +145,7 @@ public class ReplayListAdapter extends BaseAdapter implements View.OnClickListen
         TextView caseName;
         TextView caseDesc;
         TextView createTime;
-        RelativeLayout edit;
+        RelativeLayout play;
     }
 
 }

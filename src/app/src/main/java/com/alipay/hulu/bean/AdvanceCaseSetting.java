@@ -15,6 +15,8 @@
  */
 package com.alipay.hulu.bean;
 
+import java.util.List;
+
 /**
  * Created by lezhou.wyl on 2018/7/16.
  */
@@ -22,6 +24,8 @@ public class AdvanceCaseSetting {
 
     private String descriptorMode;
     private int version;
+    private List<CaseParamBean> params;
+    private CaseRunningParam runningParam;
 
     public String getDescriptorMode() {
         return descriptorMode;
@@ -37,5 +41,22 @@ public class AdvanceCaseSetting {
 
     public void setVersion(int version) {
         this.version = version;
+    }
+
+
+    public List<CaseParamBean> getParams() {
+        return params;
+    }
+
+    public void setParams(List<CaseParamBean> params) {
+        this.params = params;
+    }
+
+    public CaseRunningParam getRunningParam() {
+        return runningParam;
+    }
+
+    public void setRunningParam(CaseRunningParam runningParam) {
+        this.runningParam = runningParam;
     }
 }

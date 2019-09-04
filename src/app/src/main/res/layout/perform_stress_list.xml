@@ -34,7 +34,6 @@
         android:layout_width="140dp"
         android:textColor="@color/primaryText"
         android:layout_height="wrap_content"
-        android:text="CPU负载(%)"
         android:textSize="19dp"
         android:layout_gravity="center_vertical"/>
 

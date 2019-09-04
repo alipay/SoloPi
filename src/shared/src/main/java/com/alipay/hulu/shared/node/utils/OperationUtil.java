@@ -147,12 +147,12 @@ public class OperationUtil {
                 if (!(operationNode instanceof CaptureTree)) {
                     // 判断下是否在屏幕内
                     Rect bound = operationNode.getNodeBound();
-                    LogUtil.d(TAG, "控件空间属性：%s, 屏幕属性：%s",  bound, DeviceInfoUtil.curScreenSize);
+                    LogUtil.d(TAG, "控件空间属性：%s, 屏幕属性：%s",  bound, DeviceInfoUtil.realScreenSize);
                     if (bound.top <= 0 && bound.bottom <= 0) {
                         service.doSomeAction(new OperationMethod(PerformActionEnum.GLOBAL_SCROLL_TO_BOTTOM), null);
                         MiscUtil.sleep(2500);
                         scrollCount ++;
-                    } else if (bound.top >= DeviceInfoUtil.curScreenSize.y) {
+                    } else if (bound.top >= DeviceInfoUtil.realScreenSize.y) {
                         service.doSomeAction(new OperationMethod(PerformActionEnum.GLOBAL_SCROLL_TO_TOP), null);
                         MiscUtil.sleep(2500);
                         scrollCount ++;
@@ -160,7 +160,7 @@ public class OperationUtil {
                         service.doSomeAction(new OperationMethod(PerformActionEnum.GLOBAL_SCROLL_TO_RIGHT), null);
                         MiscUtil.sleep(2500);
                         scrollCount ++;
-                    } else if (bound.centerX() >= DeviceInfoUtil.curScreenSize.x) {
+                    } else if (bound.centerX() >= DeviceInfoUtil.realScreenSize.x) {
                         service.doSomeAction(new OperationMethod(PerformActionEnum.GLOBAL_SCROLL_TO_LEFT), null);
                         MiscUtil.sleep(2500);
                         scrollCount ++;

@@ -1,0 +1,30 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<vector android:height="23.25926dp" android:viewportHeight="157"
+    android:viewportWidth="162" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="#FF4081" android:fillType="nonZero"
+        android:pathData="M133.8,119L133.8,139.833L28.2,139.833L28.2,119L15,119L15,139.833C15,149 20.94,156.5 28.2,156.5L133.8,156.5C141.06,156.5 147,149 147,139.833L147,119L133.8,119L133.8,119Z"
+        android:strokeColor="#00000000" android:strokeWidth="1"/>
+    <path android:fillColor="#FF4081" android:fillType="nonZero"
+        android:pathData="M89.333,35.667L89.333,81.5L72.667,81.5L72.667,35.667L51.833,35.667L81,0.667L110.167,35.667L89.333,35.667Z"
+        android:strokeColor="#00000000" android:strokeWidth="1"/>
+    <path android:fillColor="#FF4081" android:fillType="nonZero"
+        android:pathData="M34.387,66.352L34.75,66.583C66,83.667 67.667,86.583 67.667,118.667L51,118.667C51,106.167 51,99.083 48.917,95.333C46.833,91.583 39.75,87.417 27.25,80.75L26.342,80.296L17.667,95.333L1,57.833L42.667,52L34.387,66.352Z"
+        android:strokeColor="#00000000" android:strokeWidth="1"/>
+    <path android:fillColor="#FF4081" android:fillType="nonZero"
+        android:pathData="M135.604,80.781L134.833,81.167C122.333,87.833 115.25,92 113.167,95.75C110.667,99.083 110.667,106.167 110.667,118.667L94,118.667C94,86.583 95.667,83.667 126.917,66.583L127.302,66.391L119,52L160.667,57.833L144,95.333L135.604,80.781Z"
+        android:strokeColor="#00000000" android:strokeWidth="1"/>
+</vector>

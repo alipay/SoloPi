@@ -28,8 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:textColor="@color/secondaryText"
-            android:textSize="14dp"
-            android:text="正在加载HTML页面结构，请耐心等待"/>
+            android:textSize="14dp"/>
 
         <ProgressBar
             android:layout_width="wrap_content"

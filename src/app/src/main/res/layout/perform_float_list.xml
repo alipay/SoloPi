@@ -41,14 +41,13 @@
         android:layout_marginLeft="16dp"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
-        android:text="Tool Name" />
+        />
 
     <TextView
         android:id="@+id/tip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="16dp"
-        android:text="hint text"
         android:textColor="@color/secondaryText"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="4dp"/>

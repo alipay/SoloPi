@@ -18,14 +18,23 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="6dp"
-    android:paddingBottom="6dp"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp"
     android:duplicateParentState="true"
     app:selectColor="@color/item_pressed">
 
     <ImageView
-        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
         android:id="@+id/first_level_icon"
-        android:layout_width="28dp"
-        android:layout_height="28dp" />
+        android:layout_width="24dp"
+        android:layout_height="24dp" />
+
+    <TextView
+        android:textSize="12dp"
+        android:textColor="@color/primaryText"
+        android:id="@+id/first_level_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/first_level_icon"/>
 </com.alipay.hulu.ui.CheckableRelativeLayout>

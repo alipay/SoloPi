@@ -17,7 +17,7 @@
               android:layout_width="match_parent"
               android:layout_height="64dp">
     <RelativeLayout
-        android:id="@+id/case_edit"
+        android:id="@+id/case_play"
         android:layout_centerVertical="true"
         android:layout_width="64dp"
         android:layout_height="64dp"
@@ -27,7 +27,7 @@
             android:layout_centerInParent="true"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/case_edit" />
+            android:src="@drawable/case_play" />
     </RelativeLayout>
 
     <LinearLayout
@@ -35,7 +35,7 @@
         android:gravity="center_vertical"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toLeftOf="@id/case_edit"
+        android:layout_toLeftOf="@id/case_play"
         android:paddingLeft="16dp"
         android:paddingRight="8dp"
         android:layout_width="match_parent">

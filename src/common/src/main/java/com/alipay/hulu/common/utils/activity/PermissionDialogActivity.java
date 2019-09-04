@@ -264,7 +264,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
      */
     public void processPermission() {
         if (allPermissions == null || allPermissions.size() == 0) {
-            showAction(StringUtil.getString(R.string.permission_list_error), "确定", new Runnable() {
+            showAction(StringUtil.getString(R.string.permission_list_error), getString(R.string.constant__confirm), new Runnable() {
                 @Override
                 public void run() {
                     finish();
@@ -347,16 +347,16 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
      */
     private boolean processFloatPermission() {
         if (!FloatWindowManager.getInstance().checkPermission(this)) {
-            showAction(StringUtil.getString(R.string.float_permission), "我已授权", new Runnable() {
+            showAction(StringUtil.getString(R.string.float_permission), getString(R.string.permission__i_grant), new Runnable() {
                 @Override
                 public void run() {
                     if (FloatWindowManager.getInstance().checkPermission(PermissionDialogActivity.this)) {
                         processedAction();
                     } else {
-                        Toast.makeText(PermissionDialogActivity.this, "悬浮窗权限未获取", Toast.LENGTH_SHORT).show();
+                        LauncherApplication.toast(R.string.permission__no_float_permission);
                     }
                 }
-            }, "确定", new Runnable() {
+            }, getString(R.string.constant__confirm), new Runnable() {
                 @Override
                 public void run() {
                     FloatWindowManager.getInstance().applyPermissionDirect(PermissionDialogActivity.this);
@@ -373,7 +373,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
      */
     private boolean processRootPermission() {
         if (!CmdTools.isRooted()) {
-            showAction(StringUtil.getString(R.string.root_permission), "确定", new Runnable() {
+            showAction(StringUtil.getString(R.string.root_permission), getString(R.string.constant__confirm), new Runnable() {
                 @Override
                 public void run() {
                     finish();
@@ -401,7 +401,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                     status = CmdTools.isInitialized();
                 }
                 if (!status) {
-                    showAction(StringUtil.getString(R.string.adb_permission), "确定", new Runnable() {
+                    showAction(StringUtil.getString(R.string.adb_permission), getString(R.string.constant__confirm), new Runnable() {
                         @Override
                         public void run() {
                             SPService.putBoolean(PERMISSION_GRANT_ADB, true);
@@ -440,7 +440,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                                 }
                             });
                         }
-                    }, "取消", new Runnable() {
+                    }, getString(R.string.constant__cancel), new Runnable() {
                         @Override
                         public void run() {
                             finish();
@@ -473,12 +473,12 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
         }
 
         if (!real.isEmpty()) {
-            showAction(StringUtil.join("\n", real), "我知道了", new Runnable() {
+            showAction(StringUtil.join("\n", real), getString(R.string.permission__i_know), new Runnable() {
                 @Override
                 public void run() {
                     processedAction();
                 }
-            }, "不再提示", new Runnable() {
+            }, getString(R.string.constant__no_inform), new Runnable() {
                 @Override
                 public void run() {
                     for (String p: real) {
@@ -498,16 +498,16 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
      */
     private boolean processUsagePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && !PermissionUtil.isUsageStatPermissionOn(this)) {
-            showAction(StringUtil.getString(R.string.device_usage_permission), "我已开启", new Runnable() {
+            showAction(StringUtil.getString(R.string.device_usage_permission), getString(R.string.permission__i_open), new Runnable() {
                 @Override
                 public void run() {
                     if (PermissionUtil.isUsageStatPermissionOn(PermissionDialogActivity.this)) {
                         processedAction();
                     } else {
-                        Toast.makeText(PermissionDialogActivity.this, "校验失败", Toast.LENGTH_SHORT).show();
+                        LauncherApplication.toast(R.string.permission__valid_fail);
                     }
                 }
-            }, "确定", new Runnable() {
+            }, getString(R.string.constant__confirm), new Runnable() {
                 @Override
                 public void run() {
                     Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
@@ -529,16 +529,16 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
 
         // 没有注册上AccessibilityService，需要开辅助功能
         if (service.getMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, null) == null) {
-            showAction(StringUtil.getString(R.string.accessibility_permission), "我已开启", new Runnable() {
+            showAction(StringUtil.getString(R.string.accessibility_permission), getString(R.string.permission__i_open), new Runnable() {
                 @Override
                 public void run() {
                     if (service.getMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, null) != null) {
                         processedAction();
                     } else {
-                        Toast.makeText(PermissionDialogActivity.this, "校验失败", Toast.LENGTH_SHORT).show();
+                        LauncherApplication.toast(R.string.permission__valid_fail);
                     }
                 }
-            }, "确定", new Runnable() {
+            }, getString(R.string.constant__confirm), new Runnable() {
                 @Override
                 public void run() {
                     Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
@@ -566,7 +566,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
         }
 
         if (Build.VERSION.SDK_INT < 21) {
-            showAction(StringUtil.getString(R.string.record_screen_android_version_error, Build.VERSION.SDK_INT), "确定", new Runnable() {
+            showAction(StringUtil.getString(R.string.record_screen_android_version_error, Build.VERSION.SDK_INT), getString(R.string.constant__confirm), new Runnable() {
                 @Override
                 public void run() {
                     SPService.putBoolean(PERMISSION_SKIP_RECORD, true);
@@ -586,17 +586,17 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                 startActivityForResult(intent, MEDIA_PROJECTION_REQUEST);
             }
 
-            showAction(StringUtil.getString(R.string.record_screen_permission), "我已允许", new Runnable() {
+            showAction(StringUtil.getString(R.string.record_screen_permission), getString(R.string.permission__i_permit), new Runnable() {
                 @Override
                 public void run() {
                     if (injectorService.getMessage(Constant.EVENT_RECORD_SCREEN_CODE, Intent.class) != null) {
                         processedAction();
                         SPService.putBoolean(PERMISSION_GRANT_RECORD, true);
                     } else {
-                        Toast.makeText(PermissionDialogActivity.this, "未获取录屏信息", Toast.LENGTH_SHORT).show();
+                        LauncherApplication.toast(R.string.permission__no_record_info);
                     }
                 }
-            }, "确定", new Runnable() {
+            }, getString(R.string.constant__confirm), new Runnable() {
                 @Override
                 public void run() {
                     startActivityForResult(intent, MEDIA_PROJECTION_REQUEST);
@@ -626,7 +626,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
 
 
         if (Build.VERSION.SDK_INT < maxVersion) {
-            showAction(StringUtil.getString(R.string.android_version_error, maxVersion, Build.VERSION.SDK_INT), "确定", new Runnable() {
+            showAction(StringUtil.getString(R.string.android_version_error, maxVersion, Build.VERSION.SDK_INT), getString(R.string.constant__confirm), new Runnable() {
                 @Override
                 public void run() {
                     finish();
@@ -673,12 +673,12 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
 
                 String permissionNames = StringUtil.join("、", mappedName);
 
-                showAction(StringUtil.getString(R.string.request_dynamic_permission, permissionNames, ungrantedPermissions.size()), "确定", new Runnable() {
+                showAction(StringUtil.getString(R.string.request_dynamic_permission, permissionNames, ungrantedPermissions.size()), getString(R.string.constant__confirm), new Runnable() {
                     @Override
                     public void run() {
                         ActivityCompat.requestPermissions(PermissionDialogActivity.this, ungrantedPermissions.toArray(new String[0]), M_PERMISSION_REQUEST);
                     }
-                }, "取消", new Runnable() {
+                }, getString(R.string.constant__cancel), new Runnable() {
                     @Override
                     public void run() {
                         LogUtil.i(TAG, "用户取消授权");

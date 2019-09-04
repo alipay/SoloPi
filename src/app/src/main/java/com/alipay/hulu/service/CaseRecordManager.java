@@ -81,7 +81,7 @@ import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
 import com.alipay.hulu.shared.node.tree.accessibility.AccessibilityNodeProcessor;
 import com.alipay.hulu.shared.node.tree.accessibility.AccessibilityProvider;
 import com.alipay.hulu.shared.node.tree.capture.CaptureTree;
-import com.alipay.hulu.shared.node.tree.export.OperationStepProvider;
+import com.alipay.hulu.shared.node.tree.export.OperationStepExporter;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
 import com.alipay.hulu.shared.node.utils.AppUtil;
 import com.alipay.hulu.shared.node.utils.BitmapUtil;
@@ -142,13 +142,13 @@ public class CaseRecordManager implements ExportService {
 
     protected volatile boolean forceStopBlocking = false;
 
-    private InjectorService injectorService;
+    protected InjectorService injectorService;
 
     protected OperationService operationService;
 
     protected EventService eventService;
 
-    protected OperationStepProvider stepProvider;
+    protected OperationStepExporter stepProvider;
 
     private WindowManager windowManager;
 
@@ -233,6 +233,14 @@ public class CaseRecordManager implements ExportService {
                 // 录制模式需要记录下
                 operationAndRecord(method, null);
                 break;
+            case ScanSuccessEvent.SCAN_TYPE_PARAM:
+                // 向handler发送请求
+                method = new OperationMethod(PerformActionEnum.LOAD_PARAM);
+                method.putParam(OperationExecutor.APP_URL_KEY, event.getContent());
+
+                // 录制模式需要记录下
+                operationAndRecord(method, null);
+                break;
             default:
                 break;
         }
@@ -253,7 +261,7 @@ public class CaseRecordManager implements ExportService {
                         try {
                             boolean result = CmdTools.generateConnection();
                             if (!result) {
-                                LauncherApplication.getInstance().showToast("ADB未恢复，请连接PC执行'adb tcpip 5555'开启端口");
+                                LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.record__adb_hint));
                             } else {
                                 setServiceToTouchBlockMode();
                                 operationService.invalidRoot();
@@ -326,12 +334,13 @@ public class CaseRecordManager implements ExportService {
         isRecording = true;
         displayDialog = true;
 
+        // 初始化
         operationService.initParams();
         operationStepService.startRecord(caseInfo);
 
         // 刷新数据导出
         if (stepProvider == null) {
-            stepProvider = new OperationStepProvider(currentRecordId);
+            stepProvider = new OperationStepExporter(currentRecordId);
         } else {
             stepProvider.refresh(currentRecordId);
         }
@@ -398,7 +407,7 @@ public class CaseRecordManager implements ExportService {
         // 看下是否点到Soloπ图标
         if (binder.checkInFloat(point)) {
             LogUtil.i(TAG, "点到了Soloπ");
-            showFunctionView(null, 2, 3, 4);
+            showFunctionView(null);
             return;
         }
 
@@ -420,7 +429,7 @@ public class CaseRecordManager implements ExportService {
             float yFactor = (y - bound.top) / (float) bound.height();
 
             localClickPos = new Pair<>(xFactor, yFactor);
-            showFunctionView(node, 1);
+            showFunctionView(node);
         } finally {
             nodeLoading = false;
         }
@@ -456,14 +465,14 @@ public class CaseRecordManager implements ExportService {
                 desc = action.getDesc();
             }
 
-            LauncherApplication.getInstance().showToast(binder.loadServiceContext(), String.format(Locale.CHINA, "执行操作[%s]失败，请尝试重新执行", desc));
+            LauncherApplication.getInstance().showToast(binder.loadServiceContext(), StringUtil.getString(R.string.record__execute_fail, desc));
             return;
         }
 
         OperationStepMessage message = new OperationStepMessage();
         message.setStepIdx(step.getOperationIndex());
         message.setGeneralOperationStep(step);
-        injectorService.pushMessage(com.alipay.hulu.shared.io.constant.Constant.NOTIFY_RECORD_STEP, message, true);
+        injectorService.pushMessage(OperationStepService.NOTIFY_OPERATION_STEP, message, true);
     }
 
     /**
@@ -553,23 +562,23 @@ public class CaseRecordManager implements ExportService {
         });
     }
 
-    protected static final List<String> NODE_KEYS = new ArrayList<>();
+    protected static final List<Integer> NODE_KEYS = new ArrayList<>();
 
     protected static final List<Integer> NODE_ICONS = new ArrayList<>();
 
-    protected static final Map<String, List<TwoLevelSelectLayout.SubMenuItem>> NODE_ACTION_MAP = new HashMap<>();
+    protected static final Map<Integer, List<TwoLevelSelectLayout.SubMenuItem>> NODE_ACTION_MAP = new HashMap<>();
 
 
-    protected static final List<String> GLOBAL_KEYS = new ArrayList<>();
+    protected static final List<Integer> GLOBAL_KEYS = new ArrayList<>();
 
     protected static final List<Integer> GLOBAL_ICONS = new ArrayList<>();
 
-    protected static final Map<String, List<TwoLevelSelectLayout.SubMenuItem>> GLOBAL_ACTION_MAP = new HashMap<>();
+    protected static final Map<Integer, List<TwoLevelSelectLayout.SubMenuItem>> GLOBAL_ACTION_MAP = new HashMap<>();
 
     // 初始化二级菜单
     static {
         // 节点操作
-        NODE_KEYS.add("click");
+        NODE_KEYS.add(R.string.function_group__click);
         NODE_ICONS.add(R.drawable.dialog_action_drawable_quick_click_2);
         List<TwoLevelSelectLayout.SubMenuItem> clickActions = new ArrayList<>();
         clickActions.add(convertPerformActionToSubMenu(PerformActionEnum.CLICK));
@@ -577,38 +586,38 @@ public class CaseRecordManager implements ExportService {
         clickActions.add(convertPerformActionToSubMenu(PerformActionEnum.CLICK_IF_EXISTS));
         clickActions.add(convertPerformActionToSubMenu(PerformActionEnum.CLICK_QUICK));
         clickActions.add(convertPerformActionToSubMenu(PerformActionEnum.MULTI_CLICK));
-        NODE_ACTION_MAP.put("click", clickActions);
+        NODE_ACTION_MAP.put(R.string.function_group__click, clickActions);
 
-        NODE_KEYS.add("input");
+        NODE_KEYS.add(R.string.function_group__input);
         NODE_ICONS.add(R.drawable.dialog_action_drawable_input);
         List<TwoLevelSelectLayout.SubMenuItem> inputActions = new ArrayList<>();
         inputActions.add(convertPerformActionToSubMenu(PerformActionEnum.INPUT));
         inputActions.add(convertPerformActionToSubMenu(PerformActionEnum.INPUT_SEARCH));
-        NODE_ACTION_MAP.put("input", inputActions);
+        NODE_ACTION_MAP.put(R.string.function_group__input, inputActions);
 
-        NODE_KEYS.add("scroll");
+        NODE_KEYS.add(R.string.function_group__scroll);
         NODE_ICONS.add(R.drawable.dialog_action_drawable_scroll);
         List<TwoLevelSelectLayout.SubMenuItem> scrollActions = new ArrayList<>();
         scrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.SCROLL_TO_BOTTOM));
         scrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.SCROLL_TO_TOP));
         scrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.SCROLL_TO_LEFT));
         scrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.SCROLL_TO_RIGHT));
-        NODE_ACTION_MAP.put("scroll", scrollActions);
+        NODE_ACTION_MAP.put(R.string.function_group__scroll, scrollActions);
 
-        NODE_KEYS.add("assert");
+        NODE_KEYS.add(R.string.function_group__assert);
         NODE_ICONS.add(R.drawable.dialog_action_drawable_assert);
         List<TwoLevelSelectLayout.SubMenuItem> assertActions = new ArrayList<>();
         assertActions.add(convertPerformActionToSubMenu(PerformActionEnum.ASSERT));
         assertActions.add(convertPerformActionToSubMenu(PerformActionEnum.SLEEP_UNTIL));
         assertActions.add(convertPerformActionToSubMenu(PerformActionEnum.LET_NODE));
-        NODE_ACTION_MAP.put("assert", assertActions);
+        NODE_ACTION_MAP.put(R.string.function_group__assert, assertActions);
 
-        NODE_KEYS.add("other");
+        NODE_KEYS.add(R.string.function_group__extra);
         NODE_ICONS.add(R.drawable.dialog_action_drawable_extra);
 
 
         // 全局操作
-        GLOBAL_KEYS.add("device");
+        GLOBAL_KEYS.add(R.string.function_group__device);
         GLOBAL_ICONS.add(R.drawable.dialog_action_drawable_device_operation);
         List<TwoLevelSelectLayout.SubMenuItem> gDeviceActions = new ArrayList<>();
         gDeviceActions.add(convertPerformActionToSubMenu(PerformActionEnum.BACK));
@@ -619,9 +628,9 @@ public class CaseRecordManager implements ExportService {
         gDeviceActions.add(convertPerformActionToSubMenu(PerformActionEnum.EXECUTE_SHELL));
         gDeviceActions.add(convertPerformActionToSubMenu(PerformActionEnum.NOTIFICATION));
         gDeviceActions.add(convertPerformActionToSubMenu(PerformActionEnum.RECENT_TASK));
-        GLOBAL_ACTION_MAP.put("device", gDeviceActions);
+        GLOBAL_ACTION_MAP.put(R.string.function_group__device, gDeviceActions);
 
-        GLOBAL_KEYS.add("app");
+        GLOBAL_KEYS.add(R.string.function_group__app);
         GLOBAL_ICONS.add(R.drawable.dialog_action_drawable_app_operation);
         List<TwoLevelSelectLayout.SubMenuItem> gAppActions = new ArrayList<>();
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.GOTO_INDEX));
@@ -630,33 +639,34 @@ public class CaseRecordManager implements ExportService {
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.KILL_PROCESS));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.CLEAR_DATA));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.RELOAD));
-        GLOBAL_ACTION_MAP.put("app", gAppActions);
+        GLOBAL_ACTION_MAP.put(R.string.function_group__app, gAppActions);
 
-        GLOBAL_KEYS.add("scroll");
+        GLOBAL_KEYS.add(R.string.function_group__scroll);
         GLOBAL_ICONS.add(R.drawable.dialog_action_drawable_scroll);
         List<TwoLevelSelectLayout.SubMenuItem> gScrollActions = new ArrayList<>();
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_SCROLL_TO_BOTTOM));
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_SCROLL_TO_TOP));
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_SCROLL_TO_LEFT));
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_SCROLL_TO_RIGHT));
-        GLOBAL_ACTION_MAP.put("scroll", gScrollActions);
+        GLOBAL_ACTION_MAP.put(R.string.function_group__scroll, gScrollActions);
 
-        GLOBAL_KEYS.add("info");
+        GLOBAL_KEYS.add(R.string.function_group__info);
         GLOBAL_ICONS.add(R.drawable.dialog_action_drawable_device_info);
         List<TwoLevelSelectLayout.SubMenuItem> gInfoActions = new ArrayList<>();
         gInfoActions.add(convertPerformActionToSubMenu(PerformActionEnum.DEVICE_INFO));
-        GLOBAL_ACTION_MAP.put("info", gInfoActions);
+        gInfoActions.add(convertPerformActionToSubMenu(PerformActionEnum.LOAD_PARAM));
+        GLOBAL_ACTION_MAP.put(R.string.function_group__info, gInfoActions);
 
-        GLOBAL_KEYS.add("other");
+        GLOBAL_KEYS.add(R.string.function_group__extra);
         GLOBAL_ICONS.add(R.drawable.dialog_action_drawable_extra);
 
 
-        GLOBAL_KEYS.add("control");
+        GLOBAL_KEYS.add(R.string.function_group__control);
         GLOBAL_ICONS.add(R.drawable.dialog_action_drawable_finish);
         List<TwoLevelSelectLayout.SubMenuItem> gControlActions = new ArrayList<>();
         gControlActions.add(convertPerformActionToSubMenu(PerformActionEnum.FINISH));
         gControlActions.add(convertPerformActionToSubMenu(PerformActionEnum.PAUSE));
-        GLOBAL_ACTION_MAP.put("control", gControlActions);
+        GLOBAL_ACTION_MAP.put(R.string.function_group__control, gControlActions);
     }
 
     /**
@@ -664,12 +674,12 @@ public class CaseRecordManager implements ExportService {
      *
      * @param node
      */
-    private void showFunctionView(final AbstractNodeTree node, final Integer... levels) {
+    private void showFunctionView(final AbstractNodeTree node) {
         // 没有操作
         displayDialog = true;
-        final List<String> keys;
+        final List<Integer> keys;
         final List<Integer> icons;
-        final Map<String, List<TwoLevelSelectLayout.SubMenuItem>> secondLevel = new HashMap<>();
+        final Map<Integer, List<TwoLevelSelectLayout.SubMenuItem>> secondLevel = new HashMap<>();
         if (node != null) {
             Pair<Float, Float> pos = localClickPos;
 
@@ -699,7 +709,7 @@ public class CaseRecordManager implements ExportService {
 
                             root.setMinimumHeight(20);
 
-                            DialogUtils.showCustomView(binder.loadServiceContext(), root, "确定", new Runnable() {
+                            DialogUtils.showCustomView(binder.loadServiceContext(), root, StringUtil.getString(R.string.constant__confirm), new Runnable() {
                                 @Override
                                 public void run() {
                                     Rect scaledRect = crop.getCropRect();
@@ -715,7 +725,7 @@ public class CaseRecordManager implements ExportService {
                                         localClickPos = new Pair<>(0.5F, 0.5F);
                                     }
 
-                                    showFunctionView(captureTree, levels);
+                                    showFunctionView(captureTree);
                                 }
                             }, "取消", new Runnable() {
                                 @Override
@@ -735,7 +745,7 @@ public class CaseRecordManager implements ExportService {
             keys = new ArrayList<>(NODE_KEYS);
             icons = new ArrayList<>(NODE_ICONS);
             secondLevel.putAll(NODE_ACTION_MAP);
-            secondLevel.put("other", loadOtherActions(PerformActionEnum.OTHER_NODE, node));
+            secondLevel.put(R.string.function_group__extra, loadOtherActions(PerformActionEnum.OTHER_NODE, node));
 
             Rect bound = node.getNodeBound();
 
@@ -753,7 +763,7 @@ public class CaseRecordManager implements ExportService {
             secondLevel.putAll(GLOBAL_ACTION_MAP);
 
             // 加入额外操作
-            secondLevel.put("other", loadOtherActions(PerformActionEnum.OTHER_GLOBAL, null));
+            secondLevel.put(R.string.function_group__extra, loadOtherActions(PerformActionEnum.OTHER_GLOBAL, null));
         }
 
         setServiceToNormalMode();
@@ -848,21 +858,25 @@ public class CaseRecordManager implements ExportService {
             // 初始化运行环境
             operationService.initParams();
 
-            operationStepService.stopRecord();
+            boolean processed = operationStepService.stopRecord(context);
 
             eventService.stopTrackAccessibilityEvent();
             eventService.stopTrackTouch();
 
             setServiceToNormalMode();
 
-            // 恢复悬浮窗
-            binder.restoreFloat();
-            Intent intent = new Intent(context, NewRecordActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra(NewRecordActivity.NEED_REFRESH_PAGE, true);
-            context.startActivity(intent);
+            if (!processed) {
+                // 恢复悬浮窗
+                binder.restoreFloat();
+                Intent intent = new Intent(context, NewRecordActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra(NewRecordActivity.NEED_REFRESH_PAGE, true);
+                context.startActivity(intent);
 
-            LauncherApplication.getInstance().stopServiceByName(CaseRecordManager.class.getName());
+                LauncherApplication.getInstance().stopServiceByName(CaseRecordManager.class.getName());
+            } else {
+                LauncherApplication.getInstance().stopServiceByName(CaseRecordManager.class.getName());
+            }
             return false;
         } else if (action == PerformActionEnum.PAUSE) {
             setServiceToNormalMode();
@@ -877,15 +891,24 @@ public class CaseRecordManager implements ExportService {
                 }
             });
             return false;
-        } else if (action == PerformActionEnum.JUMP_TO_PAGE) {
+        } else if (action == PerformActionEnum.JUMP_TO_PAGE
+                || action == PerformActionEnum.LOAD_PARAM) {
             if (!StringUtil.equals(method.getParam("scan"), "1")) {
                 operationAndRecord(method, node);
             } else {
-                Intent intent = new Intent(context, QRScanActivity.class);
-                intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_SCHEME);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
-                setServiceToTouchBlockMode();
+                if (action == PerformActionEnum.JUMP_TO_PAGE) {
+                    Intent intent = new Intent(context, QRScanActivity.class);
+                    intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_SCHEME);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
+                    setServiceToTouchBlockMode();
+                } else if (action == PerformActionEnum.LOAD_PARAM) {
+                    Intent intent = new Intent(context, QRScanActivity.class);
+                    intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_PARAM);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
+                    setServiceToTouchBlockMode();
+                }
             }
         } else {
             operationAndRecord(method, node);
@@ -945,7 +968,7 @@ public class CaseRecordManager implements ExportService {
         Integer gestureId;
         if (gestureEvent != null && (gestureId = gestureEvent.getParam(com.alipay.hulu.shared.event.constant.Constant.KEY_GESTURE_TYPE)) != null) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP && gestureId == GESTURE_SWIPE_UP && !displayDialog && !nodeLoading) {
-                showFunctionView(null, 2, 3, 4);
+                showFunctionView(null);
             }
         }
     }
@@ -990,14 +1013,14 @@ public class CaseRecordManager implements ExportService {
     public void receiveDeviceInfoMessage(UIOperationMessage message) {
         if (message.eventType == UIOperationMessage.TYPE_DEVICE_INFO) {
             DeviceInfo info = DeviceInfoUtil.generateDeviceInfo();
-            showDialog("设备信息", info.toString(), binder.loadServiceContext(), 0);
+            showDialog(StringUtil.getString(R.string.ui__device_info), info.toString(), binder.loadServiceContext(), 0);
         } else if (message.eventType == UIOperationMessage.TYPE_DIALOG) {
             String info = message.getParam("msg");
             String title = message.getParam("title");
             showDialog(title, info, binder.loadServiceContext(), 0);
         } else if (message.eventType == UIOperationMessage.TYPE_COUNT_DOWN) {
             long timeMillis = message.getParam("time");
-            showDialog("SLEEP", "等待" + timeMillis + "ms", binder.loadServiceContext(), timeMillis);
+            showDialog(StringUtil.getString(R.string.ui__sleep), StringUtil.getString(R.string.ui__sleep_time, timeMillis), binder.loadServiceContext(), timeMillis);
         } else if (message.eventType == UIOperationMessage.TYPE_DISMISS) {
             // 如果在显示弹窗，就隐藏下
             if (dialogRef != null && dialogRef.get() != null && dialogRef.get().isShowing()) {
@@ -1053,7 +1076,7 @@ public class CaseRecordManager implements ExportService {
             final AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
                     .setTitle(title)
                     .setView(v)
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             setServiceToTouchBlockMode();

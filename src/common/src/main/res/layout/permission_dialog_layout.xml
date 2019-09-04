@@ -49,7 +49,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="/"
+            android:text="@string/permission__splash"
             android:textSize="18dp"
             android:textStyle="bold"
             android:layout_gravity="center_vertical"
@@ -64,12 +64,11 @@
             android:textColor="#212121"
             android:textStyle="bold"
             android:layout_gravity="center_vertical"
-            android:text="8"
             android:textSize="18dp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=")"
+            android:text="@string/permission__right_parentheses"
             android:textSize="18dp"
             android:textStyle="bold"
             android:layout_gravity="center_vertical"

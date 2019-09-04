@@ -20,10 +20,12 @@ import android.text.TextUtils;
 import com.alibaba.fastjson.JSON;
 import com.alipay.hulu.activity.MyApplication;
 import com.alipay.hulu.bean.AdvanceCaseSetting;
+import com.alipay.hulu.bean.CaseParamBean;
 import com.alipay.hulu.bean.ReplayResultBean;
 import com.alipay.hulu.bean.ReplayStepInfoBean;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.tools.CmdTools;
+import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.io.bean.GeneralOperationLogBean;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
@@ -32,6 +34,7 @@ import com.alipay.hulu.shared.node.OperationService;
 import com.alipay.hulu.shared.node.action.OperationExecutor;
 import com.alipay.hulu.shared.node.action.OperationMethod;
 import com.alipay.hulu.shared.node.action.PerformActionEnum;
+import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
 import com.alipay.hulu.shared.node.tree.OperationNode;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
 import com.alipay.hulu.shared.node.utils.LogicUtil;
@@ -46,7 +49,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
-import java.util.Vector;
+import java.util.regex.Pattern;
+
 import static com.alipay.hulu.shared.node.utils.LogicUtil.CHECK_PARAM;
 import static com.alipay.hulu.shared.node.utils.LogicUtil.SCOPE;
 
@@ -55,6 +59,8 @@ import static com.alipay.hulu.shared.node.utils.LogicUtil.SCOPE;
  */
 public class OperationStepProvider extends AbstractStepProvider {
     private static final String TAG = "OpStepProvider";
+    private static final Pattern FILED_CALL_PATTERN = Pattern.compile("\\$\\{[^}\\s]+\\.?[^}\\s]*\\}");
+
     protected OperationService operationService;
 
     private List<OperationStep> stepList = new ArrayList<>();
@@ -83,6 +89,11 @@ public class OperationStepProvider extends AbstractStepProvider {
     protected boolean waitForCheck;
 
     /**
+     * 是否初始化环境
+     */
+    protected boolean initEnvironment;
+
+    /**
      * check结果
      */
     protected int checkIdx = -1;
@@ -91,23 +102,118 @@ public class OperationStepProvider extends AbstractStepProvider {
 
     protected int currentIdx;
 
+    protected Map<String, String> initParams = new HashMap<>();
+
+    /**
+     * 参数映射处理
+     */
+    private OperationMethod.ParamProcessor paramReplacer = new OperationMethod.ParamProcessor() {
+        @Override
+        public String filterParam(String key, String value, PerformActionEnum action) {
+            return getMappedContent(value, operationService);
+        }
+    };
+
+    /**
+     * 将当期运行时变量映射到字符串中
+     *
+     * @param origin
+     * @param service
+     * @return
+     */
+    public static String getMappedContent(String origin, final OperationService service) {
+        if (service == null) {
+            return origin;
+        }
+
+        return StringUtil.patternReplace(origin, FILED_CALL_PATTERN, new StringUtil.PatternReplace() {
+            @Override
+            public String replacePattern(String origin) {
+                String content = origin.substring(2, origin.length() - 1);
+                // 有子内容调用
+                if (content.contains(".")) {
+                    String[] group = content.split("\\.", 2);
+
+                    if (group.length != 2) {
+                        return origin;
+                    }
+
+                    // 获取当前变量
+                    Object obj = service.getRuntimeParam(group[0]);
+                    if (obj == null) {
+                        return origin;
+                    }
+
+                    LogUtil.d(TAG, "Map key word %s to value %s", group[0], obj);
+
+                    // 特殊判断
+                    // 节点字段，自行操作
+                    if (obj instanceof AbstractNodeTree) {
+                        String replace = StringUtil.toString(((AbstractNodeTree) obj).getField(group[1]));
+                        if (replace == null) {
+                            return origin;
+                        } else {
+                            return replace;
+                        }
+                    } else {
+                        // 目前只支持length方法
+                        if (StringUtil.equals(group[1], "length")) {
+                            return Integer.toString(StringUtil.toString(obj).length());
+                        } else {
+                            return origin;
+                        }
+                    }
+                } else {
+                    String target = StringUtil.toString(service.getRuntimeParam(content));
+                    if (target == null) {
+                        return origin;
+                    } else {
+                        return target;
+                    }
+                }
+            }
+        });
+    }
+
     public OperationStepProvider(RecordCaseInfo caseInfo) {
+        this(caseInfo, true);
+    }
+
+    public OperationStepProvider(RecordCaseInfo caseInfo, boolean initParams) {
         this.caseInfo = caseInfo;
         loadOperation(caseInfo.getOperationLog());
         currentStepInfo = new HashMap<>();
         screenshotFiles = new LinkedHashMap<>();
+        initEnvironment = initParams;
         currentIdx = 0;
 
         // 加载OperationService
         operationService = LauncherApplication.getInstance().findServiceByName(OperationService.class.getName());
     }
 
+    /**
+     * 配置初始化参数
+     * @param params
+     */
+    public void putParams(Map<String, String> params) {
+        if (params == null || params.size() == 0) {
+            return;
+        }
+
+        initParams.putAll(params);
+    }
+
     @Override
     public void prepare() {
         super.prepare();
-        CmdTools.startAppLog();
-        operationService.initParams();
-        MyApplication.getInstance().updateAppAndNameTemp(caseInfo.getTargetAppPackage(), caseInfo.getTargetAppLabel());
+        if (initEnvironment) {
+            CmdTools.startAppLog();
+            operationService.initParams();
+            MyApplication.getInstance().updateAppAndNameTemp(caseInfo.getTargetAppPackage(), caseInfo.getTargetAppLabel());
+        }
+
+        operationService.putAllRuntimeParamAtTop(initParams);
+
         targetApp = caseInfo.getTargetAppLabel();
     }
 
@@ -141,15 +247,24 @@ public class OperationStepProvider extends AbstractStepProvider {
                             , stepList.get(0).getOperationId());
                     stepList.add(0, changeModeBean);
                 }
+
+                // 参数信息
+                if (setting.getParams() != null && setting.getParams().size() > 0) {
+                    Map<String, String> params = new HashMap<>(setting.getParams().size() + 1);
+                    for (CaseParamBean caseParam: setting.getParams()) {
+                        params.put(caseParam.getParamName(), caseParam.getParamDefaultValue());
+                    }
+
+                    // 设置参数
+                    initParams.putAll(params);
+                }
             }
         }
     }
 
     @Override
     public OperationStep provideStep() {
-        /**
-         * loop循环
-         */
+        // loop循环
         LoopParam param;
 
         while ((param = loopParams.peek()) != null) {
@@ -183,7 +298,9 @@ public class OperationStepProvider extends AbstractStepProvider {
 
         // screen shot改下名
         if (method.getActionEnum() == PerformActionEnum.SCREENSHOT) {
-            String screenShotName = method.getParam(OperationExecutor.INPUT_TEXT_KEY);
+            String screenShotName = OperationExecutor.getMappedContent(
+                    method.getParam(OperationExecutor.INPUT_TEXT_KEY), operationService);
+
             Date now = new Date();
             SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmssSSS_", Locale.CHINA);
             String newFileName = format.format(now) + screenShotName;
@@ -211,9 +328,12 @@ public class OperationStepProvider extends AbstractStepProvider {
             return checkStep;
         } else if (method.getActionEnum() == PerformActionEnum.WHILE) {
             String status = method.getParam(CHECK_PARAM);
+            status = OperationExecutor.getMappedContent(status, operationService);
+
+            String scopeContent =  OperationExecutor.getMappedContent(method.getParam(SCOPE), operationService);
             if (StringUtil.startWith(status, LogicUtil.LOOP_PREFIX)) {
                 LoopParam newParam = new LoopParam(currentIdx,
-                        currentIdx - 1 + Integer.parseInt(method.getParam(SCOPE)),
+                        currentIdx - 1 + Integer.parseInt(scopeContent),
                         Integer.parseInt(status.substring(6)) - 2);
 
                 // 循环次数小于1,直接跳出去
@@ -245,7 +365,7 @@ public class OperationStepProvider extends AbstractStepProvider {
 
             // 循环配置
             LoopParam newParam = new LoopParam(currentIdx - 1,
-                    currentIdx - 1 + Integer.parseInt(method.getParam(SCOPE)), 0);
+                    currentIdx - 1 + Integer.parseInt(scopeContent), 0);
             loopParams.push(newParam);
 
             return checkStep;
@@ -298,7 +418,9 @@ public class OperationStepProvider extends AbstractStepProvider {
     }
 
     @Override
-    public boolean reportErrorStep(OperationStep step, String reason) {
+    public boolean reportErrorStep(OperationStep step, String reason, List<String> stack) {
+        stack.add("Error at step " + currentIdx + " " + step.getOperationMethod().getActionEnum().getDesc());
+
         // 未查找到，也接收
         if (waitForCheck && currentIdx == checkIdx + 1 &&
                 (StringUtil.equals(reason, "执行失败") || StringUtil.equals(reason, "节点未查找到"))) {
@@ -313,7 +435,7 @@ public class OperationStepProvider extends AbstractStepProvider {
 
                 ifIdx = -1;
 
-            // Loop信息校验
+                // Loop信息校验
             } else if ((l = loopParams.peek()) != null && currentIdx == l.loopPos + 1) {
                 OperationStep whileStep = stepList.get(l.loopPos);
 
@@ -323,7 +445,7 @@ public class OperationStepProvider extends AbstractStepProvider {
 
                 loopParams.pop();
             } else {
-                this.errorReason = reason;
+                this.errorReason = reason + "\n" + StringUtil.join("\n", stack);
                 return true;
             }
 
@@ -331,7 +453,7 @@ public class OperationStepProvider extends AbstractStepProvider {
             return false;
         }
 
-        this.errorReason = reason;
+        this.errorReason = reason + "\n" + StringUtil.join("\n", stack);
         return true;
     }
 

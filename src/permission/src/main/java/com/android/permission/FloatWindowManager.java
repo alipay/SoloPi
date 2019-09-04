@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.WindowManager;
 
+import com.android.floatwindowpermission.R;
 import com.android.permission.rom.HuaweiUtils;
 import com.android.permission.rom.MeizuUtils;
 import com.android.permission.rom.MiuiUtils;
@@ -298,14 +299,14 @@ public class FloatWindowManager {
 
         dialog = new AlertDialog.Builder(context).setCancelable(true).setTitle("")
                 .setMessage(message)
-                .setPositiveButton("现在去开启",
+                .setPositiveButton(R.string.float__go_to_grant,
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 result.confirmResult(true);
                                 dialog.dismiss();
                             }
-                        }).setNegativeButton("暂不开启",
+                        }).setNegativeButton(R.string.float__no_grant_now,
                         new DialogInterface.OnClickListener() {
 
                             @Override

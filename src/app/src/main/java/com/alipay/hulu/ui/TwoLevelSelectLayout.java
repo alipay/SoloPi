@@ -46,10 +46,10 @@ import java.util.Map;
 public class TwoLevelSelectLayout extends LinearLayout {
     private static final String TAG = "TwoLevelSelectLayout";
 
-    private List<String> keys = new ArrayList<>();
+    private List<Integer> keys = new ArrayList<>();
     private List<Integer> icons = new ArrayList<>();
     private List<SubMenuItem> currentSecondLevelItems = new ArrayList<>();
-    private Map<String, List<SubMenuItem>> allSecondLevelItems = new HashMap<>();
+    private Map<Integer, List<SubMenuItem>> allSecondLevelItems = new HashMap<>();
 
     private ListView firstLevel;
     private ListView secondLevel;
@@ -151,7 +151,9 @@ public class TwoLevelSelectLayout extends LinearLayout {
 
                 // 设置图标
                 ImageView icon = (ImageView) convertView.findViewById(R.id.first_level_icon);
+                TextView title = (TextView) convertView.findViewById(R.id.first_level_text);
                 icon.setImageResource(icons.get(position));
+                title.setText(keys.get(position));
 
                 return convertView;
             }
@@ -247,7 +249,7 @@ public class TwoLevelSelectLayout extends LinearLayout {
      * @param resources
      * @param secondLevels
      */
-    public void updateMenus(List<String> keys, List<Integer> resources, Map<String, List<SubMenuItem>> secondLevels) {
+    public void updateMenus(List<Integer> keys, List<Integer> resources, Map<Integer, List<SubMenuItem>> secondLevels) {
         // 要求key与icon一一对应
         if (keys == null || resources == null || keys.size() != resources.size()) {
             return;

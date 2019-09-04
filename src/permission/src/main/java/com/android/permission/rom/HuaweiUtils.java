@@ -16,6 +16,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.floatwindowpermission.R;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -79,7 +81,7 @@ public class HuaweiUtils {
             Log.e(TAG, Log.getStackTraceString(e));
         } catch (Exception e) {
             //抛出异常时提示信息
-            Toast.makeText(context, "进入设置页面失败，请手动设置", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, R.string.huawei__setting_fail, Toast.LENGTH_LONG).show();
             Log.e(TAG, Log.getStackTraceString(e));
         }
     }

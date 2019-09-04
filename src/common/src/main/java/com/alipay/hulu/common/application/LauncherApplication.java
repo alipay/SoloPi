@@ -28,6 +28,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.StringRes;
 import android.support.multidex.MultiDex;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -447,6 +448,7 @@ public abstract class LauncherApplication extends Application {
             }
 
             CsvFormatStrategy strategy = CsvFormatStrategy.newBuilder().tag("Soloπ").logStrategy(new DiskLogStrategy(logDir)).build();
+            LogUtil.LOG_LEVEL = Logger.INFO;
             Logger.addLogAdapter(new DiskLogAdapter(strategy) {
                 @Override
                 public boolean isLoggable(int priority, String tag) {
@@ -460,6 +462,7 @@ public abstract class LauncherApplication extends Application {
         } else {
             // 调试模式走SimpleFormat
             SimpleFormatStrategy formatStrategy = new SimpleFormatStrategy();
+            LogUtil.LOG_LEVEL = Logger.VERBOSE;
             Logger.addLogAdapter(new AndroidLogAdapter(formatStrategy) {
                 @Override
                 public boolean isLoggable(int priority, String tag) {
@@ -767,6 +770,18 @@ public abstract class LauncherApplication extends Application {
     public void showDialog(Context context, final String message, final String positiveText,
                            final Runnable positiveRunnable) {
         showDialog(context, message, positiveText, positiveRunnable, null, null);
+    }
+
+    public static void toast(final String message) {
+        LauncherApplication.getInstance().showToast(message);
+    }
+
+    public static void toast(@StringRes final int message) {
+        toast(LauncherApplication.getContext().getString(message));
+    }
+
+    public static void toast(@StringRes final int message, Object... args) {
+        toast(LauncherApplication.getContext().getString(message, args));
     }
 
     /**

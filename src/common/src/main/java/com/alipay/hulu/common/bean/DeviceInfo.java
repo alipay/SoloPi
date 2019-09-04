@@ -16,6 +16,8 @@
 package com.alipay.hulu.common.bean;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.alipay.hulu.common.R;
+import com.alipay.hulu.common.utils.StringUtil;
 
 /**
  * Created by lezhou.wyl on 2018/5/27.
@@ -168,20 +170,6 @@ public class DeviceInfo {
 
     @Override
     public String toString() {
-        return  "型号：" + model + '\n' +
-                "品牌：" + brand + '\n' +
-                "制造商：" + manufacturer + '\n' +
-                "产品名：" + product + '\n' +
-                "系统版本号：" + systemVersion + '\n' +
-                "SDK NO：" + sdkVersion + '\n' +
-                "SN：" + serialNo + '\n' +
-                "屏幕物理尺寸：" + screenSize + '\n' +
-                "屏幕显示尺寸：" + displaySize + '\n' +
-                "屏幕密度：" + density + '\n' +
-                "屏幕密度DPI：" + densityDpi + '\n' +
-                "IP：" + ip + '\n' +
-                "MAC：" + mac + '\n' +
-                "RAM：" + ram + "GB" + '\n' +
-                "CPU ABI：" + cpuABI + '\n';
+        return StringUtil.getString(R.string.device_info__to_string, model, brand, manufacturer, product, systemVersion, sdkVersion, serialNo, screenSize, displaySize, density, densityDpi, ip, mac, ram, cpuABI);
     }
 }

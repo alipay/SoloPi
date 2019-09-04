@@ -28,11 +28,13 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -55,6 +57,7 @@ import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.RequestOptions;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -314,7 +317,7 @@ public class DialogUtils {
             listView.setDividerHeight(0);
 
             final AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppDialogTheme)
-                    .setTitle("请选择操作")
+                    .setTitle(R.string.function__select_function)
                     .setView(listView)
                     .setOnCancelListener(new DialogInterface.OnCancelListener() {
                         @Override
@@ -462,9 +465,9 @@ public class DialogUtils {
      * @param secondLevels
      * @param callback
      */
-    public static void showLeveledFunctionView(final Context context, final List<String> keys,
+    public static void showLeveledFunctionView(final Context context, final List<Integer> keys,
                                         final List<Integer> icons,
-                                        final Map<String, List<TwoLevelSelectLayout.SubMenuItem>> secondLevels,
+                                        final Map<Integer, List<TwoLevelSelectLayout.SubMenuItem>> secondLevels,
                                         final FunctionViewCallback<TwoLevelSelectLayout.SubMenuItem> callback) {
         if (callback == null) {
             LogUtil.e(TAG,"回调函数为空");
@@ -484,7 +487,7 @@ public class DialogUtils {
         }
 
         // 校验各个key都有对应子菜单
-        for (String key: keys) {
+        for (Integer key: keys) {
             if (!secondLevels.containsKey(key)) {
                 LogUtil.e(TAG, "菜单%s不包含对应子菜单", key);
                 return;
@@ -530,9 +533,9 @@ public class DialogUtils {
                 DisplayMetrics metrics = new DisplayMetrics();
                 wm.getDefaultDisplay().getMetrics(metrics);
 
-                // 高度350dp, 宽度250dp
-                int pix = ContextUtil.dip2px(context, 350);
-                int width = ContextUtil.dip2px(context, 250);
+                // 高度400dp, 宽度260dp
+                int pix = ContextUtil.dip2px(context, 400);
+                int width = ContextUtil.dip2px(context, 260);
                 if (metrics.heightPixels < pix) {
                     if (metrics.widthPixels < width) {
                         dialog.getWindow().setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT);
@@ -548,6 +551,75 @@ public class DialogUtils {
                 }
             }
         });
+    }
+
+    public interface OnDialogResultListener {
+        void onDialogPositive(List<String> data);
+    }
+
+    /**
+     * 为多个字段配置输入框
+     *
+     * @param title
+     * @param data
+     */
+    public static void showMultipleEditDialog(Context context, final OnDialogResultListener listener, String title, List<Pair<String, String>> data) {
+        LayoutInflater inflater =  LayoutInflater.from(ContextUtil.getContextThemeWrapper(
+                context, R.style.AppDialogTheme));
+
+        ScrollView v = (ScrollView) inflater.inflate(R.layout.dialog_setting, null);
+
+        LinearLayout view = (LinearLayout) v.getChildAt(0);
+        final List<EditText> editTexts = new ArrayList<>();
+
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        // 对每一个字段添加EditText
+        for (Pair<String, String> source : data) {
+            View editField = inflater.inflate(R.layout.item_edit_field, null);
+
+            EditText edit = (EditText) editField.findViewById(R.id.item_edit_field_edit);
+            TextView name = (TextView) editField.findViewById(R.id.item_edit_field_name);
+
+            if (StringUtil.isEmpty(source.first)) {
+                name.setVisibility(View.GONE);
+            } else {
+                // 配置字段
+                name.setText(source.first);
+            }
+            edit.setHint(source.first);
+            edit.setText(source.second);
+
+            view.addView(editField, layoutParams);
+            editTexts.add(edit);
+        }
+
+        // 显示Dialog
+        new AlertDialog.Builder(context, R.style.AppDialogTheme)
+                .setTitle(title)
+                .setView(v)
+                .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        List<String> result = new ArrayList<>(editTexts.size() + 1);
+
+                        // 获取每个编辑框的文字
+                        for (EditText data : editTexts) {
+                            result.add(data.getText().toString().trim());
+                        }
+
+                        if (listener != null) {
+                            listener.onDialogPositive(result);
+                        }
+                        dialog.dismiss();
+                    }
+                }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        }).setCancelable(true)
+                .show();
     }
 
     /**

@@ -1,0 +1,25 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="12dp"
+    android:height="12dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M462.08 483.84h380.16v56.32H462.08v-56.32z m0 112.64h274.56v56.32H462.08v-56.32z m112.64-415.36H250.88v-56.32H138.24c-14.08 0-28.16 14.08-28.16 28.16v612.48c0 14.08 14.08 28.16 28.16 28.16h112.64v56.32H138.24c-49.28 0-84.48-42.24-84.48-84.48V160c0-49.28 42.24-84.48 84.48-84.48h105.6V19.2h330.88v49.28h112.64c49.28 0 84.48 42.24 84.48 84.48v63.36h-56.32V160c0-14.08-14.08-28.16-28.16-28.16H574.72v49.28z m323.84 56.32c49.28 0 84.48 42.24 84.48 84.48v457.6l-225.28 232.32h-352c-49.28 0-84.48-42.24-84.48-84.48V321.92c0-49.28 42.24-84.48 84.48-84.48h492.8z m-161.92 711.04l183.04-190.08h-183.04v190.08z m190.08-246.4V321.92c0-14.08-14.08-28.16-28.16-28.16h-492.8c-14.08 0-28.16 14.08-28.16 28.16v598.4c0 14.08 14.08 28.16 28.16 28.16h274.56v-246.4h246.4zM462.08 378.24h380.16v56.32H462.08v-56.32z" />
+</vector>

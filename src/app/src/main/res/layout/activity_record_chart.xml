@@ -30,7 +30,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="数据选择"
+            android:text="@string/record_chart__select_data"
             android:textSize="14dp"
             android:layout_marginLeft="8dp"
             android:layout_marginBottom="2dp"
@@ -76,7 +76,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="数据展示"
+            android:text="@string/record_chart__data_display"
             android:textSize="14dp"
             android:layout_marginLeft="8dp"
             android:layout_marginBottom="2dp"

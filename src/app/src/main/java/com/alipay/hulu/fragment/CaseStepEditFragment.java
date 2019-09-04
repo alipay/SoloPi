@@ -24,6 +24,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AlertDialog;
@@ -48,6 +49,7 @@ import com.alipay.hulu.activity.QRScanActivity;
 import com.alipay.hulu.adapter.CaseStepAdapter;
 import com.alipay.hulu.adapter.CaseStepMethodAdapter;
 import com.alipay.hulu.adapter.CaseStepNodeAdapter;
+import com.alipay.hulu.bean.CaseStepHolder;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.RunningThread;
@@ -55,9 +57,11 @@ import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.utils.ContextUtil;
-import com.alipay.hulu.common.utils.LogUtil;
+import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.event.ScanSuccessEvent;
+import com.alipay.hulu.service.CaseRecordManager;
+import com.alipay.hulu.shared.io.OperationStepService;
 import com.alipay.hulu.shared.io.bean.GeneralOperationLogBean;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
 import com.alipay.hulu.shared.io.db.GreenDaoManager;
@@ -67,9 +71,12 @@ import com.alipay.hulu.shared.node.action.OperationMethod;
 import com.alipay.hulu.shared.node.action.PerformActionEnum;
 import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
+import com.alipay.hulu.shared.node.utils.AppUtil;
 import com.alipay.hulu.shared.node.utils.LogicUtil;
+import com.alipay.hulu.shared.node.utils.PrepareUtil;
 import com.alipay.hulu.ui.MaxHeightScrollView;
 import com.alipay.hulu.ui.TwoLevelSelectLayout;
+import com.alipay.hulu.util.CaseAppendOperationProcessor;
 import com.alipay.hulu.util.FunctionSelectUtil;
 import com.yydcdut.sdlv.Menu;
 import com.yydcdut.sdlv.MenuItem;
@@ -78,11 +85,8 @@ import com.zhy.view.flowlayout.FlowLayout;
 import com.zhy.view.flowlayout.TagAdapter;
 import com.zhy.view.flowlayout.TagFlowLayout;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +97,8 @@ import static com.alipay.hulu.shared.node.utils.LogicUtil.SCOPE;
 public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.OnTagClickListener, CaseEditActivity.OnCaseSaveListener{
     private static final String TAG = "CaseStepEditFragment";
     private boolean isOverrideInstall = false;
+
+    private boolean selectMode = false;
 
     private RecordCaseInfo recordCase;
 
@@ -159,6 +165,21 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
                 dragEntities.add(wrapper);
 
                 adapter.notifyDataSetChanged();
+                break;
+            case ScanSuccessEvent.SCAN_TYPE_PARAM:
+                // 向handler发送请求
+                method = new OperationMethod(PerformActionEnum.LOAD_PARAM);
+                method.putParam(OperationExecutor.APP_URL_KEY, event.getContent());
+                step = new OperationStep();
+                step.setOperationMethod(method);
+                step.setOperationIndex(currentIdx.get());
+                step.setOperationId(stepList.get(stepList.size() - 1).getOperationId());
+
+                wrapper = new CaseStepAdapter.MyDataWrapper(step, currentIdx.getAndIncrement());
+
+                dragEntities.add(wrapper);
+
+                adapter.notifyDataSetChanged();
 
                 // 录制模式需要记录下
 
@@ -197,7 +218,10 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
         final List<String> stepTags = new ArrayList<>(stepList.size() + 2);
 
         // 每一步添加一个实体
-        stepTags.add("新步骤");
+        stepTags.add(getString(R.string.step_edit__new_step));
+        stepTags.add(getString(R.string.step_edit__select_mode));
+        stepTags.add(getString(R.string.step_edit__paste));
+        stepTags.add(getString(R.string.step_edit__record_step));
         for (OperationStep step: stepList) {
             CaseStepAdapter.MyDataWrapper entity = new CaseStepAdapter.MyDataWrapper(clone(step), currentIdx.getAndIncrement());
             dragEntities.add(entity);
@@ -218,12 +242,30 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
                 ImageView icon = (ImageView) tag.findViewById(R.id.case_step_edit_tag_icon);
 
                 if (position == 0) {
-                    title.setText("新步骤");
-                    icon.setImageResource(R.drawable.case_step_add);
+                    if (!selectMode) {
+                        title.setText(R.string.step_edit__new_step);
+                        icon.setImageResource(R.drawable.case_step_add);
+                    } else {
+                        title.setText(R.string.step_edit__copy);
+                        icon.setImageResource(R.drawable.case_step_copy);
+                    }
+                } else if (position == 1) {
+                    if (selectMode) {
+                        title.setText(R.string.step_edit__exit_select);
+                    } else {
+                        title.setText(R.string.step_edit__select_mode);
+                    }
+                    icon.setImageResource(R.drawable.case_step_select);
+                } else if (position == 2) {
+                    title.setText(o);
+                    icon.setImageResource(R.drawable.case_step_paste);
+                } else if (position == 3) {
+                    title.setText(o);
+                    icon.setImageResource(R.drawable.recording);
                 } else {
 
                     // 加载下
-                    OperationStep step = stepList.get(position - 1);
+                    OperationStep step = stepList.get(position - 4);
                     PerformActionEnum actionEnum = step.getOperationMethod().getActionEnum();
 
                     // 设置资源
@@ -237,6 +279,7 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
 
         // 用例adapter
         adapter = new CaseStepAdapter(getActivity(), dragEntities);
+        adapter.setCurrentMode(selectMode);
 
         // 设置菜单相关样式
         int dp64 = ContextUtil.dip2px(getActivity(), 64);
@@ -252,10 +295,10 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
 
         // 转换模式
         Menu menu = new Menu(true, 0);
-        menu.addItem(new MenuItem.Builder().setText("转换为IF").setTextColor(Color.WHITE).setWidth(dp64)
+        menu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__convert_if)).setTextColor(Color.WHITE).setWidth(dp64)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
                 .setBackground(new ColorDrawable(colorIf)).build());
-        menu.addItem(new MenuItem.Builder().setText("转换为WHILE").setTextColor(Color.WHITE)
+        menu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__convert_while)).setTextColor(Color.WHITE)
                 .setWidth(dp64)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
                 .setBackground(new ColorDrawable(colorWhile)).build());
@@ -302,14 +345,106 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
         });
     }
 
+    /**
+     * 切换选择模式
+     */
+    private void switchSelectMode() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                selectMode = !selectMode;
+                tagGroup.getAdapter().notifyDataChanged();
+                adapter.setCurrentMode(selectMode);
+            }
+        });
+    }
+
     @Override
     public boolean onTagClick(View view, int position, FlowLayout parent) {
         if (position == 0) {
-            showAddFunctionView();
+            if (!selectMode) {
+                showAddFunctionView();
+            } else {
+                List<CaseStepAdapter.MyDataWrapper> wrappers = adapter.getAndClearSelectOperationSteps();
+                if (wrappers.size() == 0) {
+                    return true;
+                }
+                List<OperationStep> steps = new ArrayList<>(wrappers.size() + 1);
+                for (CaseStepAdapter.MyDataWrapper wrapper: wrappers) {
+                    steps.add(wrapper.currentStep);
+                }
+
+                CaseStepHolder.storePasteContent(steps);
+                switchSelectMode();
+            }
+            return true;
+        } else if (position == 1) {
+            switchSelectMode();
+            return true;
+        } else if (position == 2) {
+            List<OperationStep> pasteSteps = CaseStepHolder.getPasteContent();
+            if (pasteSteps != null && pasteSteps.size() > 0) {
+                for (OperationStep step: pasteSteps) {
+                    CaseStepAdapter.MyDataWrapper wrapper = new CaseStepAdapter.MyDataWrapper(step, currentIdx.getAndIncrement());
+                    dragEntities.add(wrapper);
+                }
+
+                adapter.notifyDataSetChanged();
+            }
+            return true;
+        } else if (position == 3) {
+            final CaseEditActivity activity = (CaseEditActivity) getActivity();
+            activity.wrapRecordCase();
+
+            final RecordCaseInfo caseInfo = activity.getRecordCase();
+            if (caseInfo == null) {
+                return false;
+            }
+
+            // 检查权限
+            PermissionUtil.requestPermissions(Arrays.asList("adb", Settings.ACTION_ACCESSIBILITY_SETTINGS), activity, new PermissionUtil.OnPermissionCallback() {
+                @Override
+                public void onPermissionResult(boolean result, String reason) {
+                    if (result) {
+                        showProgressDialog(getString(R.string.step_edit__now_loading));
+                        BackgroundExecutor.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                boolean prepareResult = PrepareUtil.doPrepareWork(caseInfo.getTargetAppPackage(), new PrepareUtil.PrepareStatus() {
+                                    @Override
+                                    public void currentStatus(int progress, int total, String message, boolean status) {
+                                        updateProgressDialog(progress, total, message);
+                                    }
+                                });
+
+
+                                if (prepareResult) {
+                                    final CaseAppendOperationProcessor processor = new CaseAppendOperationProcessor(caseInfo);
+                                    dismissProgressDialog();
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            LauncherApplication.service(OperationStepService.class).registerStepProcessor(processor);
+                                            CaseRecordManager manager = LauncherApplication.service(CaseRecordManager.class);
+                                            manager.setRecordCase(caseInfo);
+
+                                            AppUtil.startApp(caseInfo.getTargetAppPackage());
+                                            activity.finish();
+                                        }
+                                    });
+                                } else {
+                                    dismissProgressDialog();
+                                    toastShort(getString(R.string.step_edit__prepare_env_fail));
+                                }
+                            }
+                        });
+                    }
+                }
+            });
             return true;
         }
 
-        OperationStep step = stepList.get(position - 1);
+        OperationStep step = stepList.get(position - 4);
         CaseStepAdapter.MyDataWrapper entity = new CaseStepAdapter.MyDataWrapper(clone(step), currentIdx.getAndIncrement());
 
         // 如果是if和while，需要设置为0
@@ -384,17 +519,16 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
         final TabLayout tab = (TabLayout) v.findViewById(R.id.dialog_case_step_edit_tab);
         if (clone.getOperationNode() != null) {
             TabLayout.Tab tabItem = tab.newTab();
-            tabItem.setText("Node");
+            tabItem.setText(R.string.step_edit__node_info);
             tab.addTab(tabItem);
             tabItem.select();
             nodeAdapter = new CaseStepNodeAdapter(clone.getOperationNode());
         } else {
             nodeAdapter = null;
         }
-
         TabLayout.Tab tabItem = tab.newTab();
-        tabItem.setText("Method");
-        tab.addTab(tabItem);
+        tabItem.setText(R.string.step_edit__method_info);
+        tab.addTab(tabItem, 0);
 
         // 配置后续列表
         final List<CaseStepAdapter.MyDataWrapper> laterList;
@@ -420,11 +554,10 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
         final CaseStepMethodAdapter paramAdapter = new CaseStepMethodAdapter(laterList,
                 clone.getOperationMethod());
 
-        r.setAdapter(nodeAdapter != null? nodeAdapter: paramAdapter);
         tab.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                if (StringUtil.equals(tab.getText(), "Node")) {
+                if (StringUtil.equals(tab.getText(), getString(R.string.step_edit__node_info))) {
                     r.setAdapter(nodeAdapter);
                 } else {
                     r.setAdapter(paramAdapter);
@@ -441,6 +574,25 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
 
             }
         });
+
+        // 配置选中的tab
+        if (paramAdapter.getItemCount() > 0) {
+            tabItem.select();
+            r.setAdapter(paramAdapter);
+        } else {
+            if (nodeAdapter == null) {
+                tabItem.select();
+                r.setAdapter(paramAdapter);
+            } else {
+                TabLayout.Tab nodeTab = tab.getTabAt(1);
+                if (nodeTab != null) {
+                    nodeTab.select();
+                }
+
+                r.setAdapter(nodeAdapter);
+            }
+        }
+
         DialogInterface.OnClickListener dialogClick = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -459,8 +611,8 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
         };
 
         final AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                .setView(v).setPositiveButton("确定", dialogClick)
-                .setNegativeButton("取消", dialogClick)
+                .setView(v).setPositiveButton(R.string.constant__confirm, dialogClick)
+                .setNegativeButton(R.string.constant__cancel, dialogClick)
                 .setTitle(clone.getOperationMethod().getActionEnum().getDesc()).create();
         dialog.show();
 
@@ -481,22 +633,6 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
     }
 
     /**
-     * 更新用例
-     * @param mRecordCase
-     */
-    private void doUpdateCase(final RecordCaseInfo mRecordCase) {
-        BackgroundExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    mRecordCase.setGmtModify(System.currentTimeMillis());
-                    GreenDaoManager.getInstance().getRecordCaseInfoDao().save(mRecordCase);
-                    toastShort("更新成功");
-                    InjectorService.g().pushMessage(NewRecordActivity.NEED_REFRESH_LOCAL_CASES_LIST);
-                }
-        });
-    }
-
-    /**
      * 显示添加操作界面
      */
     private void showAddFunctionView() {
@@ -506,7 +642,8 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
                     @Override
                     public void onProcessFunction(OperationMethod method, AbstractNodeTree node) {
                         PerformActionEnum action = method.getActionEnum();
-                        if (action == PerformActionEnum.JUMP_TO_PAGE) {
+                        if (action == PerformActionEnum.JUMP_TO_PAGE
+                                || action == PerformActionEnum.LOAD_PARAM) {
 
                             if (StringUtil.equals(method.getParam("scan"), "1")) {
                                 // 注册下Service
@@ -518,6 +655,8 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
 
                                 if (action == PerformActionEnum.JUMP_TO_PAGE) {
                                     intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_SCHEME);
+                                } else if (action == PerformActionEnum.LOAD_PARAM) {
+                                    intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_PARAM);
                                 }
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
@@ -557,16 +696,16 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
                 });
     }
 
-    protected static final List<String> GLOBAL_KEYS = new ArrayList<>();
+    protected static final List<Integer> GLOBAL_KEYS = new ArrayList<>();
 
     protected static final List<Integer> GLOBAL_ICONS = new ArrayList<>();
 
-    protected static final Map<String, List<TwoLevelSelectLayout.SubMenuItem>> GLOBAL_ACTION_MAP = new HashMap<>();
+    protected static final Map<Integer, List<TwoLevelSelectLayout.SubMenuItem>> GLOBAL_ACTION_MAP = new HashMap<>();
 
     // 初始化二级菜单
     static {
         // 全局操作
-        GLOBAL_KEYS.add("device");
+        GLOBAL_KEYS.add(R.string.function_group__device);
         GLOBAL_ICONS.add(R.drawable.dialog_action_drawable_device_operation);
         List<TwoLevelSelectLayout.SubMenuItem> gDeviceActions = new ArrayList<>();
         gDeviceActions.add(convertPerformActionToSubMenu(PerformActionEnum.BACK));
@@ -577,35 +716,36 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
         gDeviceActions.add(convertPerformActionToSubMenu(PerformActionEnum.EXECUTE_SHELL));
         gDeviceActions.add(convertPerformActionToSubMenu(PerformActionEnum.NOTIFICATION));
         gDeviceActions.add(convertPerformActionToSubMenu(PerformActionEnum.RECENT_TASK));
-        GLOBAL_ACTION_MAP.put("device", gDeviceActions);
+        GLOBAL_ACTION_MAP.put(R.string.function_group__device, gDeviceActions);
 
-        GLOBAL_KEYS.add("app");
+        GLOBAL_KEYS.add(R.string.function_group__app);
         GLOBAL_ICONS.add(R.drawable.dialog_action_drawable_app_operation);
         List<TwoLevelSelectLayout.SubMenuItem> gAppActions = new ArrayList<>();
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.GOTO_INDEX));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.CHANGE_MODE));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.JUMP_TO_PAGE));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.KILL_PROCESS));
-        GLOBAL_ACTION_MAP.put("app", gAppActions);
+        GLOBAL_ACTION_MAP.put(R.string.function_group__app, gAppActions);
 
-        GLOBAL_KEYS.add("scroll");
+        GLOBAL_KEYS.add(R.string.function_group__scroll);
         GLOBAL_ICONS.add(R.drawable.dialog_action_drawable_scroll);
         List<TwoLevelSelectLayout.SubMenuItem> gScrollActions = new ArrayList<>();
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_SCROLL_TO_BOTTOM));
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_SCROLL_TO_TOP));
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_SCROLL_TO_LEFT));
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_SCROLL_TO_RIGHT));
-        GLOBAL_ACTION_MAP.put("scroll", gScrollActions);
+        GLOBAL_ACTION_MAP.put(R.string.function_group__scroll, gScrollActions);
 
         // 循环逻辑控制
-        GLOBAL_KEYS.add("logic");
+        GLOBAL_KEYS.add(R.string.function_group__logic);
         GLOBAL_ICONS.add(R.drawable.dialog_action_drawable_logic);
         List<TwoLevelSelectLayout.SubMenuItem> gLoopActions = new ArrayList<>();
         gLoopActions.add(convertPerformActionToSubMenu(PerformActionEnum.IF));
         gLoopActions.add(convertPerformActionToSubMenu(PerformActionEnum.WHILE));
         gLoopActions.add(convertPerformActionToSubMenu(PerformActionEnum.CONTINUE));
         gLoopActions.add(convertPerformActionToSubMenu(PerformActionEnum.BREAK));
-        GLOBAL_ACTION_MAP.put("logic", gLoopActions);
+        gLoopActions.add(convertPerformActionToSubMenu(PerformActionEnum.LOAD_PARAM));
+        GLOBAL_ACTION_MAP.put(R.string.function_group__logic, gLoopActions);
     }
 
     /**

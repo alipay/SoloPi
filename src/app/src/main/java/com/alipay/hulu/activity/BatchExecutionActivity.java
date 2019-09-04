@@ -31,14 +31,15 @@ import android.widget.TextView;
 
 import com.alipay.hulu.R;
 import com.alipay.hulu.adapter.BatchExecutionListAdapter;
-import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.tools.BackgroundExecutor;
+import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.fragment.BatchExecutionFragment;
-import com.alipay.hulu.replay.BatchStepProvider;
-import com.alipay.hulu.service.CaseReplayManager;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
+import com.alipay.hulu.shared.node.utils.AppUtil;
 import com.alipay.hulu.ui.HeadControlPanel;
+import com.alipay.hulu.util.CaseReplayUtil;
 import com.zhy.view.flowlayout.FlowLayout;
 import com.zhy.view.flowlayout.TagAdapter;
 import com.zhy.view.flowlayout.TagFlowLayout;
@@ -72,7 +73,7 @@ public class BatchExecutionActivity extends BaseActivity
         mPager = (ViewPager) findViewById(R.id.pager);
         mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
         mHeadPanel = (HeadControlPanel) findViewById(R.id.head_replay_list);
-        mHeadPanel.setMiddleTitle("批量回放");
+        mHeadPanel.setMiddleTitle(getString(R.string.activity__batch_replay));
         mHeadPanel.setBackIconClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,7 +119,7 @@ public class BatchExecutionActivity extends BaseActivity
             @Override
             public void onClick(View v) {
                 if (currentCases.size() == 0) {
-                    toastShort("请选择用例");
+                    toastShort(getString(R.string.batch__select_case));
                     return;
                 }
 
@@ -126,9 +127,8 @@ public class BatchExecutionActivity extends BaseActivity
                     @Override
                     public void onPermissionResult(boolean result, String reason) {
                         if (result) {
-                            BatchStepProvider provider = new BatchStepProvider(new ArrayList<>(currentCases), mRestartApp.isChecked());
-                            CaseReplayManager manager = LauncherApplication.getInstance().findServiceByName(CaseReplayManager.class.getName());
-                            manager.start(provider, MyApplication.MULTI_REPLAY_LISTENER);
+                            CaseReplayUtil.startReplayMultiCase(currentCases, mRestartApp.isChecked());
+                            startApp(currentCases.get(0).getTargetAppPackage());
                         }
                     }
                 };
@@ -153,6 +153,24 @@ public class BatchExecutionActivity extends BaseActivity
         currentCases.remove(position);
         updateExecutionTag();
         return false;
+    }
+
+    private void startApp(final String packageName) {
+        if (packageName == null) {
+            return;
+        }
+
+        //如果是支付宝，点击后通过scheme跳到首页
+        BackgroundExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                AppUtil.forceStopApp(packageName);
+
+                LogUtil.e("NewRecordActivity", "强制终止应用:" + packageName);
+                MiscUtil.sleep(500);
+                AppUtil.startApp(packageName);
+            }
+        });
     }
 
     /**
