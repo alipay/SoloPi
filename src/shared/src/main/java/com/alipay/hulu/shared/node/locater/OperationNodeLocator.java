@@ -90,6 +90,10 @@ public class OperationNodeLocator {
     public static final int FLAG_TEXT = 0X10000000;
 
     public static AbstractNodeTree findAbstractNode(AbstractNodeTree root, OperationNode operationNode) {
+        if (root == null) {
+            return null;
+        }
+
         // 对于Accessibility Node
         if (AccessibilityNodeTree.class.getSimpleName().equals(operationNode.getNodeType())) {
             return OperationNodeLocator.findAbstractNode(root, operationNode,

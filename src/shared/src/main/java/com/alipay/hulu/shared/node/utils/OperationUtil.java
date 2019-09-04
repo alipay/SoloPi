@@ -15,6 +15,7 @@
  */
 package com.alipay.hulu.shared.node.utils;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 
 import com.alipay.hulu.common.tools.CmdTools;
@@ -147,23 +148,28 @@ public class OperationUtil {
                 if (!(operationNode instanceof CaptureTree)) {
                     // 判断下是否在屏幕内
                     Rect bound = operationNode.getNodeBound();
-                    LogUtil.d(TAG, "控件空间属性：%s, 屏幕属性：%s",  bound, DeviceInfoUtil.realScreenSize);
-                    if (bound.top <= 0 && bound.bottom <= 0) {
-                        service.doSomeAction(new OperationMethod(PerformActionEnum.GLOBAL_SCROLL_TO_BOTTOM), null);
+                    Point screenSize = DeviceInfoUtil.realScreenSize;
+                    LogUtil.d(TAG, "控件空间属性：%s, 屏幕属性：%s",  bound, screenSize);
+                    if (bound.bottom <= 5) {
+                        CmdTools.execHighPrivilegeCmd(MiscUtil.generateSwipeCmd(screenSize.x / 2, screenSize.y / 5, screenSize.x / 2, screenSize.y / 2, 1000));
                         MiscUtil.sleep(2500);
                         scrollCount ++;
-                    } else if (bound.top >= DeviceInfoUtil.realScreenSize.y) {
-                        service.doSomeAction(new OperationMethod(PerformActionEnum.GLOBAL_SCROLL_TO_TOP), null);
+                        service.invalidRoot();
+                    } else if (bound.top >= screenSize.y - 5) {
+                        CmdTools.execHighPrivilegeCmd(MiscUtil.generateSwipeCmd(screenSize.x / 2, screenSize.y / 5 * 4, screenSize.x / 2, screenSize.y / 2, 1000));
                         MiscUtil.sleep(2500);
                         scrollCount ++;
-                    } else if (bound.centerX() <= 0) {
-                        service.doSomeAction(new OperationMethod(PerformActionEnum.GLOBAL_SCROLL_TO_RIGHT), null);
+                        service.invalidRoot();
+                    } else if (bound.centerX() <= 5) {
+                        CmdTools.execHighPrivilegeCmd(MiscUtil.generateSwipeCmd(screenSize.x / 5, screenSize.y / 2, screenSize.x / 2, screenSize.y / 2, 1000));
                         MiscUtil.sleep(2500);
                         scrollCount ++;
-                    } else if (bound.centerX() >= DeviceInfoUtil.realScreenSize.x) {
-                        service.doSomeAction(new OperationMethod(PerformActionEnum.GLOBAL_SCROLL_TO_LEFT), null);
+                        service.invalidRoot();
+                    } else if (bound.centerX() >= screenSize.x - 5) {
+                        CmdTools.execHighPrivilegeCmd(MiscUtil.generateSwipeCmd(screenSize.x / 5 * 4, screenSize.y / 2, screenSize.x / 2, screenSize.y / 2, 1000));
                         MiscUtil.sleep(2500);
                         scrollCount ++;
+                        service.invalidRoot();
                     } else {
                         pos = 1;
                     }
@@ -216,19 +222,6 @@ public class OperationUtil {
      * @return
      */
     public static AbstractNodeTree findAbstractNode(OperationNode node, OperationService service, List<String> prepareActions) {
-
-        AbstractNodeTree tmpRoot = null;
-        try {
-            tmpRoot = service.getCurrentRoot();
-        } catch (Exception e) {
-            LogUtil.e(TAG, "Catch Exception: " + e.getMessage(), e);
-        }
-
-        // 拿不到root
-        if (tmpRoot == null) {
-            return null;
-        }
-
         AbstractNodeTree targetNode = null;
 
         // 两次处理弹窗
