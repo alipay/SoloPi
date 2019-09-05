@@ -270,7 +270,7 @@ public class InjectorService implements ExportService {
 
         // 未找到，返回
         if (targetParam == null) {
-            LogUtil.e(TAG, "未能找到合适的参数【paramName=%s, value=%s】", paramName, value);
+            LogUtil.d(TAG, "未能找到合适的参数【paramName=%s, value=%s】", paramName, value);
             return;
         }
 

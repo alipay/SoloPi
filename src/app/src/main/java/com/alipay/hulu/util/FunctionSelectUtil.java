@@ -265,11 +265,6 @@ public class FunctionSelectUtil {
             final String[] actions = new String[modes.length];
 
             for (int i = 0; i < modes.length; i++) {
-                // API21以下不支持截图模式
-                if (Build.VERSION.SDK_INT < 21 && modes[i] == RunningModeEnum.CAPTURE_MODE) {
-                    continue;
-                }
-
                 actions[i] = modes[i].getDesc();
             }
 

@@ -17,15 +17,15 @@
     <string name="app_name">common</string>
     <string name="permission_default">检查权限中</string>
     <string name="android_version_error">此项功能依赖Android SDK版本%d,当前版本为%d</string>
-    <string name="request_dynamic_permission">Soloπ需要申请%s，共%d项权限，请点击确定进行授权</string>
-    <string name="record_screen_permission">Soloπ需要申请屏幕录制权限，请点击确定以允许Soloπ使用屏幕录制功能</string>
+    <string name="request_dynamic_permission">SoloPi需要申请%s，共%d项权限，请点击确定进行授权</string>
+    <string name="record_screen_permission">SoloPi需要申请屏幕录制权限，请点击确定以允许SoloPi使用屏幕录制功能</string>
     <string name="record_screen_android_version_error">屏幕录制需要Android SDK版本不小于21, 当前版本为%d</string>
-    <string name="accessibility_permission">Soloπ需要使用辅助功能，请点击确定前往开启Soloπ辅助功能，如果系统提示已开启，请尝试关闭后重新开启</string>
-    <string name="adb_permission"><![CDATA[Soloπ需要申请ADB权限，请连接电脑并在电脑输入\"adb tcpip 5555\"后点击确定进行连接\n<b style=\'color:red\'>请注意保护设备的隐私安全，开启ADB权限有可能导致设备被他人恶意侵入</b>]]></string>
-    <string name="root_permission">Soloπ需要申请Root权限，请Root后使用</string>
-    <string name="float_permission">Soloπ需要悬浮窗权限，请点击确定前往授权</string>
+    <string name="accessibility_permission">SoloPi需要使用辅助功能，请点击确定前往开启SoloPi辅助功能，如果系统提示已开启，请尝试关闭后重新开启</string>
+    <string name="adb_permission"><![CDATA[SoloPi需要申请ADB权限，请连接电脑并在电脑输入\"adb tcpip 5555\"后点击确定进行连接\n<b style=\'color:red\'>请注意保护设备的隐私安全，开启ADB权限有可能导致设备被他人恶意侵入</b>]]></string>
+    <string name="root_permission">SoloPi需要申请Root权限，请Root后使用</string>
+    <string name="float_permission">SoloPi需要悬浮窗权限，请点击确定前往授权</string>
     <string name="permission_list_error">权限申请异常</string>
-    <string name="device_usage_permission">Soloπ需要访问设备使用情况，请点击确定前往开启</string>
+    <string name="device_usage_permission">SoloPi需要访问设备使用情况，请点击确定前往开启</string>
     <string name="adb_open_advice">如有ADB连接电脑提示弹窗，请点击允许</string>
     <string name="open_adb_permission_failed">开启ADB权限失败，请连接电脑并在命令行输入\"adb tcpip 5555\"后再点击重试</string>
     <string name="constant__start_execution">开始执行</string>

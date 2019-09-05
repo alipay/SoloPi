@@ -15,7 +15,7 @@
 -->
 <resources>
     <string name="app_name">shared</string>
-    <string name="accessibility_description">Soloπ自动化工具\n支持功能：\n1. 用例录制回放\n2. 记录性能数据\n3. 一机多控
+    <string name="accessibility_description">SoloPi自动化工具\n支持功能：\n1. 用例录制回放\n2. 记录性能数据\n3. 一机多控
     </string>
     <string name="download__progress">%d%%</string>
     <string name="download__download_failed">下载失败: %s\\n%s</string>

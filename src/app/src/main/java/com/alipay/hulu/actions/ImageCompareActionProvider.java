@@ -85,9 +85,6 @@ public class ImageCompareActionProvider implements ActionProvider {
 
     @Override
     public boolean canProcess(String action) {
-        if (Build.VERSION.SDK_INT < 21) {
-            return false;
-        }
         return StringUtil.equals(action, ACTION_CLICK_BY_SCREENSHOT) ||
                 StringUtil.equals(action, ACTION_ASSERT_SCREENSHOT);
 
@@ -96,10 +93,6 @@ public class ImageCompareActionProvider implements ActionProvider {
     @Override
     public boolean processAction(final String targetAction, AbstractNodeTree node,
                                  OperationMethod method, final OperationContext context) {
-
-        if (Build.VERSION.SDK_INT < 21) {
-            return false;
-        }
 
         // 同步执行，没点到就中断
         if (StringUtil.equals(targetAction, ACTION_CLICK_BY_SCREENSHOT)) {
@@ -261,10 +254,6 @@ public class ImageCompareActionProvider implements ActionProvider {
     public Map<String, String> provideActions(AbstractNodeTree node) {
         Map<String, String> actionMap = new HashMap<>(2);
 
-        if (Build.VERSION.SDK_INT < 21) {
-            return actionMap;
-        }
-
         // 配置功能项
         actionMap.put(ACTION_ASSERT_SCREENSHOT, "截图断言");
         actionMap.put(ACTION_CLICK_BY_SCREENSHOT, "根据截图点击");
@@ -275,11 +264,6 @@ public class ImageCompareActionProvider implements ActionProvider {
     @Override
     public void provideView(final Context context, String action, final OperationMethod method,
                             final AbstractNodeTree node, final ViewLoadCallback callback) {
-        if (Build.VERSION.SDK_INT < 21) {
-            LogUtil.e(TAG, "不支持android: " + Build.VERSION.SDK_INT);
-            callback.onViewLoaded(null);
-            return;
-        }
 
         if (!StringUtil.equals(action, ACTION_CLICK_BY_SCREENSHOT) &&
                 !StringUtil.equals(action, ACTION_ASSERT_SCREENSHOT)) {

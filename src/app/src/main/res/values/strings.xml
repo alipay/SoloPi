@@ -15,8 +15,8 @@
 -->
 <resources>
 
-    <string name="app_name">Soloπ</string>
-    <string name="accessibility_description">Soloπ自动化工具\n支持功能：\n1. 用例录制回放\n2. 记录性能数据
+    <string name="app_name">SoloPi</string>
+    <string name="accessibility_description">SoloPi自动化工具\n支持功能：\n1. 用例录制回放\n2. 记录性能数据
     </string>
 
     <string name="more_setting">更多设置</string>
@@ -31,8 +31,8 @@
     <string name="attention_input_space">请注意输入是否包含空格</string>
     <string name="splash_app_desc">自动化测试工具</string>
     <string name="disclaimer">
-&#160;&#160;&#160;&#160;Soloπ开源自动化测试工具的功能是我们针对不同用户的需求而特别提供。Soloπ提供的应用、代码和资料的著作权均归Soloπ所有，用户具有自由的使用权。\n
-&#160;&#160;&#160;&#160;如果用户下载、安装、使用、修改本工具及相关代码，即表明用户信任该工具。那么，用户在使用本工具时造成对用户自己或他人任何形式的损失和伤害，Soloπ工具不承担任何责任。\n
+&#160;&#160;&#160;&#160;SoloPi开源自动化测试工具的功能是我们针对不同用户的需求而特别提供。SoloPi提供的应用、代码和资料的著作权均归SoloPi所有，用户具有自由的使用权。\n
+&#160;&#160;&#160;&#160;如果用户下载、安装、使用、修改本工具及相关代码，即表明用户信任该工具。那么，用户在使用本工具时造成对用户自己或他人任何形式的损失和伤害，SoloPi工具不承担任何责任。\n
 &#160;&#160;&#160;&#160;本工具不含有任何旨在破坏用户计算机数据和获取用户隐私信息的恶意代码；本工具使用过程中获取到的操作信息在打印日志时默认会进行脱敏，且不会进行上传；当应用出现异常时，用户可手动选择是否通过邮件上报故障日志，不会泄漏用户隐私。\n
 &#160;&#160;&#160;&#160;对于用户从非工具发布站点下载的应用，本工具无法保证其是否感染计算机病毒、是否隐藏有伪装的特洛伊木马程序或者黑客软件。用户使用此类软件，将可能导致不可预测的风险，建议用户不要轻易下载、安装、使用。本工具不承担由此产生的一切法律责任。\n
 &#160;&#160;&#160;&#160;用户不得利用本工具提供的功能误导、欺骗他人；用户仅可将本工具用于学习交流，不得用于非法用途；不得故意避开或者破坏本工具为保护著作权而采取的技术措施。\n
@@ -102,7 +102,7 @@
     <string name="record__no_local_case">本地还没有录制过用例哦</string>
     <string name="record__all_cases">查看全部</string>
     <string name="record__recent_record">最近录制</string>
-    <string name="qr__camera_permission">Soloπ需要权限来展示相机预览</string>
+    <string name="qr__camera_permission">SoloPi需要权限来展示相机预览</string>
     <string name="qr__requst_permission">未获得权限，正在申请相机权限</string>
     <string name="setting__display_system_app">是否显示系统应用？</string>
     <string name="repeat__restart_before_exec">执行用例前重启应用</string>
@@ -328,4 +328,5 @@
     <string name="function_group__info">信息</string>
     <string name="function_group__control">流程</string>
     <string name="function_group__logic">逻辑</string>
+    <string name="float__toast_title">SoloPi悬浮窗正在运行</string>
 </resources>

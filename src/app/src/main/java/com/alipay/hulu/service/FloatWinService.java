@@ -537,7 +537,7 @@ public class FloatWinService extends BaseService {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		LogUtil.d(TAG, "onStart");
-		Notification notification = new Notification.Builder(this).setContentText("Soloπ悬浮窗正在运行").setSmallIcon(R.drawable.solopi_main).build();
+		Notification notification = new Notification.Builder(this).setContentText(getString(R.string.float__toast_title)).setSmallIcon(R.drawable.solopi_main).build();
 		startForeground(NOTIFICATION_ID, notification);
 		return super.onStartCommand(intent, flags, startId);
 	}

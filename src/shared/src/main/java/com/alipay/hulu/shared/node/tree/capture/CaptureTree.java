@@ -163,16 +163,23 @@ public class CaptureTree extends AbstractNodeTree {
             @Override
             public void run() {
                 LogUtil.e(TAG, "Start Input");
-                try {
-                    String defaultIme = opContext.executor.executeCmdSync("settings get secure default_input_method");
-                    opContext.executor.executeCmdSync("settings put secure default_input_method  com.alipay.hulu/.tools.AdbIME", 0);
-                    Rect rect = getNodeBound();
+                if (StringUtil.containsChinese(text)) {
+                    try {
+                        String defaultIme = opContext.executor.executeCmdSync("settings get secure default_input_method");
+                        opContext.executor.executeCmdSync("settings put secure default_input_method  com.alipay.hulu/.tools.AdbIME", 0);
+                        Rect rect = getNodeBound();
 
+                        opContext.executor.executeCmdSync("input tap " + rect.centerX() + " " + rect.centerY(), 0);
+                        MiscUtil.sleep(1500);
+                        opContext.executor.executeCmdSync("am broadcast -a ADB_INPUT_TEXT --es msg '" + text + "' --es default '" + StringUtil.trim(defaultIme) + "'", 0);
+                    } catch (Exception e) {
+                        LogUtil.e(TAG, "Input throw Exception：" + e.getLocalizedMessage(), e);
+                    }
+                } else {
+                    Rect rect = getNodeBound();
                     opContext.executor.executeCmdSync("input tap " + rect.centerX() + " " + rect.centerY(), 0);
                     MiscUtil.sleep(1500);
-                    opContext.executor.executeCmdSync("am broadcast -a ADB_INPUT_TEXT --es msg '" + text + "' --es default '" + StringUtil.trim(defaultIme) + "'", 0);
-                } catch (Exception e) {
-                    LogUtil.e(TAG, "Input throw Exception：" + e.getLocalizedMessage(), e);
+                    opContext.executor.executeCmdSync("input text " + text);
                 }
                 LogUtil.e(TAG, "Finish Input");
             }

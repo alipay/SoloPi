@@ -241,6 +241,9 @@ public class CmdTools {
      * @returnz
      */
     public static boolean isRooted(){
+        if (true) {
+            return false;
+        }
         boolean bool = false;
 
         // 避免重复查找文件

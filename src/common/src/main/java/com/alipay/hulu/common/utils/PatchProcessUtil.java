@@ -59,7 +59,7 @@ public class PatchProcessUtil {
                     return !(pathname.isDirectory() && StringUtil.equals(pathname.getName(), "__MACOSX"));
                 }
             });
-            if (subFiles.length == 1 && subFiles[0].isDirectory()) {
+            if (subFiles != null && subFiles.length == 1 && subFiles[0].isDirectory()) {
                 outFolder = subFiles[0];
             }
 

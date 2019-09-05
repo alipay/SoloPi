@@ -227,7 +227,7 @@ public class CaseStepNodeAdapter extends RecyclerView.Adapter<CaseStepNodeAdapte
             case "nodeBound":
                 // 逗号分隔
                 String[] split = StringUtil.split(value, ",");
-                if (split.length != 4) {
+                if (split == null || split.length != 4) {
                     return false;
                 }
                 try {
