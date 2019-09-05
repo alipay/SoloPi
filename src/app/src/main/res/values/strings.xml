@@ -329,4 +329,5 @@
     <string name="function_group__control">流程</string>
     <string name="function_group__logic">逻辑</string>
     <string name="float__toast_title">SoloPi悬浮窗正在运行</string>
+    <string name="step_provider__error_step">故障步骤_%d</string>
 </resources>

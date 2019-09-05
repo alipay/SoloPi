@@ -18,6 +18,7 @@ package com.alipay.hulu.replay;
 import android.text.TextUtils;
 
 import com.alibaba.fastjson.JSON;
+import com.alipay.hulu.R;
 import com.alipay.hulu.activity.MyApplication;
 import com.alipay.hulu.bean.AdvanceCaseSetting;
 import com.alipay.hulu.bean.CaseParamBean;
@@ -31,6 +32,7 @@ import com.alipay.hulu.shared.io.bean.GeneralOperationLogBean;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
 import com.alipay.hulu.shared.io.util.OperationStepUtil;
 import com.alipay.hulu.shared.node.OperationService;
+import com.alipay.hulu.shared.node.action.OperationContext;
 import com.alipay.hulu.shared.node.action.OperationExecutor;
 import com.alipay.hulu.shared.node.action.OperationMethod;
 import com.alipay.hulu.shared.node.action.PerformActionEnum;
@@ -49,6 +51,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static com.alipay.hulu.shared.node.utils.LogicUtil.CHECK_PARAM;
@@ -446,6 +450,7 @@ public class OperationStepProvider extends AbstractStepProvider {
                 loopParams.pop();
             } else {
                 this.errorReason = reason + "\n" + StringUtil.join("\n", stack);
+                takeScreenshot();
                 return true;
             }
 
@@ -454,7 +459,40 @@ public class OperationStepProvider extends AbstractStepProvider {
         }
 
         this.errorReason = reason + "\n" + StringUtil.join("\n", stack);
+        takeScreenshot();
         return true;
+    }
+
+    /**
+     * 进行截图
+     */
+    protected void takeScreenshot() {
+        // 执行失败，进行截图
+        OperationMethod method = new OperationMethod(PerformActionEnum.SCREENSHOT);
+
+        // 生成文件名
+        Date now = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmssSSS_" +
+                StringUtil.getString(R.string.step_provider__error_step, currentIdx), Locale.CHINA);
+        String newFileName = format.format(now);
+        method.putParam(OperationExecutor.INPUT_TEXT_KEY, newFileName);
+        screenshotFiles.put(StringUtil.getString(R.string.step_provider__error_step, currentIdx), newFileName);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        // 执行截图操作
+        operationService.doSomeAction(method, null, new OperationContext.OperationListener() {
+            @Override
+            public void notifyOperationFinish() {
+                latch.countDown();
+            }
+        });
+
+        // 等5s截图保存
+        try {
+            latch.await(5000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
+        }
     }
 
     @Override

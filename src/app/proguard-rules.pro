@@ -139,6 +139,7 @@ void *(**On*Event);
 -keep class com.alipay.hulu.common.utils.ClassUtil$PatchVersionInfo { *; }
 -keep class com.alipay.hulu.common.utils.patch.PatchDescription {*;}
 
+-keep class com.alipay.hulu.common.utils.DeviceInfoUtil {*;}
 
 #内部方法
 -keepattributes EnclosingMethod
