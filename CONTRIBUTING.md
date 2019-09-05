@@ -1,4 +1,4 @@
-## Contributing to Soloπ
+## Contributing to SoloPi
 
 Soloπ is released under the Apache 2.0 license, and follows a very standard Github development process, using Github tracker for issues and merging pull requests into master . If you would like to contribute something, or simply want to hack on the code this document should help you get started.
 
