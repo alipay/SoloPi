@@ -124,6 +124,6 @@ public class EventService implements ExportService {
      * 展示开启辅助功能提示
      */
     private void showEnableAccessibilityServiceHint() {
-        LauncherApplication.getInstance().showToast("请在辅助功能中开启Soloπ");
+        LauncherApplication.getInstance().showToast("请在辅助功能中开启SoloPi");
     }
 }

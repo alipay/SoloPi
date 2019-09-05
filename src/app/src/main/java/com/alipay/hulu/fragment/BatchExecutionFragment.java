@@ -137,8 +137,4 @@ public class BatchExecutionFragment extends BaseFragment {
         mEmptyTextView = (TextView) view.findViewById(R.id.empty_text);
         mEmptyTextView.setText(R.string.batch__no_case);
     }
-
-    private void showEnableAccessibilityServiceHint() {
-        Toast.makeText(getContext(), "请在辅助功能中开启Soloπ", Toast.LENGTH_LONG).show();
-    }
 }

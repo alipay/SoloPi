@@ -447,7 +447,7 @@ public abstract class LauncherApplication extends Application {
                 logDir.mkdirs();
             }
 
-            CsvFormatStrategy strategy = CsvFormatStrategy.newBuilder().tag("Soloπ").logStrategy(new DiskLogStrategy(logDir)).build();
+            CsvFormatStrategy strategy = CsvFormatStrategy.newBuilder().tag("SoloPi").logStrategy(new DiskLogStrategy(logDir)).build();
             LogUtil.LOG_LEVEL = Logger.INFO;
             Logger.addLogAdapter(new DiskLogAdapter(strategy) {
                 @Override
