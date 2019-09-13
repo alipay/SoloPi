@@ -2,7 +2,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/soloPi/SoloPi.svg)](https://github.com/soloPi/SoloPi/stargazers) [![GitHub license](https://img.shields.io/github/license/soloPi/SoloPi.svg)](https://github.com/soloPi/SoloPi/blob/master/LICENSE) [![GitHub release](https://img.shields.io/github/release/alipay/SoloPi.svg)](https://github.com/soloPi/SoloPi/releases) [![API](https://img.shields.io/badge/API-18%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=18) [![TesterHome](https://img.shields.io/badge/TTF-TesterHome-2955C5.svg)](https://testerhome.com/opensource_projects/82)
 
-> SoloPi is a wireless, non-invasive testing tool for automatic Android software testing. The Beta version has 3 main features: real time recording, performance data analysis, convenient multi device testing.
+> SoloPi is a wireless, non-invasive testing tool for automatic Android software testing. The Beta version has 3 main features: real time recording, performance data analysis, convenient multi-device testing.
 
 ## Features
 
@@ -35,7 +35,15 @@ Video tutorial:
 
 **[Use the launch time calculator](https://gw.alipayobjects.com/os/basement_prod/4e82ca85-13fc-4de2-82ff-a9079344f5ef.mov)**
 
-### 3. Multi device testing
+### 3. Multi-device testing
+
+SoloPi supports simultaneous multi-device testing which is controlled by one device. So it enormously improves the efficiency of testing on different devices.
+
+![Multi-device testing](assets/oneToMany.gif)
+
+Video tutorial:
+
+**[Simultaneous multi-device testing](https://gw.alipayobjects.com/os/basement_prod/971b5467-3db0-4781-86e3-15b3907323f6.mov)**
 
 ## Getting started
 
