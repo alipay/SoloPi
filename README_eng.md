@@ -12,7 +12,7 @@ SoloPi captures all actions performed during tesing sessions so that issues can 
 
 ![Recording playback](assets/replay.gif)
 
-Video tutorial:
+The tutorial video:
 
 **[Record the testing on a video game.](https://gw.alipayobjects.com/mdn/rms_e29b5f/afts/file/A*ym07T6nACDIAAAAAAAAAAABkARQnAQ)**
 
@@ -29,7 +29,7 @@ Video tutorial:
 
 ![Performance analysis](assets/performance.gif)
 
-Video tutorial:
+The tutorial video:
 
 **[Use the performance analysis function](https://gw.alipayobjects.com/os/basement_prod/1996390b-9ec8-4046-8ce8-459afa05d6c5.mov)**
 
@@ -41,10 +41,62 @@ SoloPi supports simultaneous multi-device testing which is controlled by one dev
 
 ![Multi-device testing](assets/oneToMany.gif)
 
-Video tutorial:
+The tutorial video:
 
 **[Simultaneous multi-device testing](https://gw.alipayobjects.com/os/basement_prod/971b5467-3db0-4781-86e3-15b3907323f6.mov)**
 
 ## Getting started
 
-### 1. Prerequisite
+> SoloPi open source excludes the multi-device testing feature since it's still unstable.
+
+### 1. Establishing a build environment
+
+- macOS 10.14.3
+- Android Studio 3.2
+- **Gradle 4.4（Upgrading is not recommended.）**
+- Ndk 15.2.4203819
+- TargetApi 25
+- MinimumApi 18
+- **Note: Turn off instant run function in Android Studio. Otherwise the finished installing package of the app does not work.**
+
+### 2. Downloading and setting Android SDK path
+
+- Download SDK Platform [here](https://developer.android.com/studio/releases/platform-tools#downloads).
+
+- Unzip it and add the path to the system environment variable `ANDROID_SDK=${sdk path}` . You can also refer to articles such as how to set adb system environment variable.
+
+**NOTE:**
+For system above Windows 10, it takes effect immediately in a new command line window, while for older versions of system, you need to restart the computer. For Linux and MacOS, you can test if it works with `echo $ANDROID_SDK`.
+
+### 3. Turning on on-device developer mode
+
+- Open the Settings app.
+- (Only on Android 8.0 or higher) Select System.
+- Scroll to the bottom and select About phone.
+- Scroll to the bottom and tap Build number 7 times. The system will show ‘You are now a developer.’ (messages may vary.)
+- Return to the previous screen to find Developer options near the bottom. Toggle the options on and enable USB debugging
+
+### Known issues
+
+- For VIVO devices, if there’s an option like ‘USB security access’ under developer options, it needs to be toggled on, otherwise recording and multi-device testing function may not work.
+
+- For Xiaomi devices, under developer options, USB installation and USB debugging also need to be toggled on. Besides, you also need to turn on ‘后台弹出界面’ under ‘应用权限’ menu in SoloPi.
+
+- For MEIZU devices, if the application to be tested contains highly secured functions like payment function, the secure payment function in the system needs to be turned off.
+
+- For HUAWEI devices, under developer options, you need to turn on ‘USB debugging’ and ‘allow ADB debugging in charge only mode’ option. Otherwise, when the USB cable is unplugged, the ADB debugging is also shut down.
+
+- For  OPPO devices, system would ‘unchecking’ the ‘USB debugging’ every 10 minutes, leading to the unavailability of SoloPi. To solve it, keep connecting the phone to the computer.
+
+
+
+
+
+
+
+
+
+
+
+
+
