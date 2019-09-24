@@ -47,7 +47,7 @@ The tutorial video:
 
 ## Getting started
 
-> SoloPi open source excludes the multi-device testing feature since it's still unstable.
+> Open source SoloPi excludes the multi-device testing feature since it's still unstable.
 
 ### 1. Establishing a build environment
 
@@ -76,7 +76,7 @@ For system above Windows 10, it takes effect immediately in a new command line w
 - Scroll to the bottom and tap Build number 7 times. The system will show ‘You are now a developer.’ (messages may vary.)
 - Return to the previous screen to find Developer options near the bottom. Toggle the options on and enable USB debugging
 
-### Known issues
+### 4. Known issues
 
 - For VIVO devices, if there’s an option like ‘USB security access’ under developer options, it needs to be toggled on, otherwise recording and multi-device testing function may not work.
 
@@ -87,6 +87,85 @@ For system above Windows 10, it takes effect immediately in a new command line w
 - For HUAWEI devices, under developer options, you need to turn on ‘USB debugging’ and ‘allow ADB debugging in charge only mode’ option. Otherwise, when the USB cable is unplugged, the ADB debugging is also shut down.
 
 - For  OPPO devices, system would ‘unchecking’ the ‘USB debugging’ every 10 minutes, leading to the unavailability of SoloPi. To solve it, keep connecting the phone to the computer.
+
+### 5. Debugging apps over Wi-Fi
+
+- Connect the device to PC via USB and make sure debugging is working.
+
+When the device is connected to the PC, the device should pop up 'Allow USB debugging?' or similar messages. Click 'Yes'.
+
+Check if the connection is successful in command line:
+
+Windows: ```bash
+   %ANDROID_SDK%\platform-tools\adb.exe devices
+```
+MacOS/Linux: ```shell
+   $ANDROID_SDK/platform-tools/adb devices
+```
+
+If it returns with the device number, then the connection is successful.
+
+- Make the connection
+
+> **Note:** Windows system may need Android device driver to make a successful connection. Devices driver can be downloaded on device's official website. You can also download the phone manager which includes device driver.
+
+> **Note:** If the command line dosen't return `device`, make sure the device driver is installed successfully and the USB debugging is turned on. For some device, the connection mode needs to be `Media Transfer Protocal`(MTP).
+
+For single device,
+
+Windows: ```bash
+   %ANDROID_SDK%\platform-tools\adb.exe tcpip 5555
+```
+
+macOS/Linux：```shell
+   $ANDROID_SDK/platform-tools/adb tcpip 5555
+```
+
+The device may show `restarting in TCP mode port: 5555` to remind you the wi-fi ADB debugging mode is on.
+
+For multiple devices,
+
+Find the device number which is the serial number before `device` and save it.
+
+Windows：
+
+```bash
+   %ANDROID_SDK%\platform-tools\adb.exe -s ${serial number} tcpip 5555
+```
+macOS/Linux：
+
+```shell
+   $ANDROID_SDK/platform-tools/adb -s ${serial number} tcpip 5555
+```
+
+- Downloading SoloPi
+
+You can either download SoloPi.apk or clone the repository.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
