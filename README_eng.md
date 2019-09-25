@@ -90,7 +90,7 @@ For system above Windows 10, it takes effect immediately in a new command line w
 
 ### 5. Debugging apps over Wi-Fi
 
-- Connect the device to PC via USB and make sure debugging is working.
+#### 5.1 Connect the device to PC via USB and make sure debugging is working.
 
 When the device is connected to the PC, the device should pop up 'Allow USB debugging?' or similar messages. Click 'Yes'.
 
@@ -105,7 +105,7 @@ MacOS/Linux: ```shell
 
 If it returns with the device number, then the connection is successful.
 
-- Make the connection
+#### 5.2 Make the connection
 
 > **Note:** Windows system may need Android device driver to make a successful connection. Devices driver can be downloaded on device's official website. You can also download the phone manager which includes device driver.
 
@@ -138,17 +138,54 @@ macOS/Linux：
    $ANDROID_SDK/platform-tools/adb -s ${serial number} tcpip 5555
 ```
 
-- Downloading SoloPi
+#### 5.3 Downloading SoloPi
 
 You can either download SoloPi.apk or clone the repository.
 
+## Folders and description
+In the folder src,
+- app: The business logic of the application.
+- shared: The core function of the application.
+- common: The application architecture.
+- mdlibrary: Proxy generation of ExportService.
+- permission: Permission management.
+- AdbLib: ADB connection.
+- androidWebscoket: Android WebSocket.
+
+## Contributing
+
+This project is mainly open to developers who want to do software testing. If you have any suggestions or questions, you can open an issue, send a PR, or leave a message at our page at [TesterHome](https://testerhome.com/topics/node152).
+
+If you like our project, please fork/⭐Star this project!
+
+## Attributions
+
+We want to thank those [third party libraries](https://github.com/ruoranw/SoloPi/blob/master/NOTICE.md) used in this project without which this project couldn't be completed.
+
+## License
+
+This project is under the Apache 2.0 License. See the [LICENSE](LICENSE) file for the full license text.
+
+```text
+Copyright (C) 2015-present, Ant Financial Services Group
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
 
 
+## Disclaimer
 
-
-
-
-
+[Disclaimer](Disclaimer.md)
 
 
 
