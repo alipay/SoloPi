@@ -4,7 +4,16 @@
 
 > SoloPi is a wireless, non-invasive testing tool for automatic Android software testing. The Beta version has 3 main features: real time recording, performance data analysis, convenient multi-device testing.
 
-## Features
+[Features](#1)
+[Getting started](#2)
+[Folders and description](#3)
+[Contributing](#4)
+[Attributions](#5)
+[License](#6)
+[Disclaimer](#7)
+
+
+## <span id="1">Features</span>
 
 ### 1. Real time recording
 
@@ -12,7 +21,7 @@ SoloPi captures all actions performed during tesing sessions so that issues can 
 
 ![Recording playback](assets/replay.gif)
 
-The tutorial video:
+The video tutorial:
 
 **[Record the testing on a video game.](https://gw.alipayobjects.com/mdn/rms_e29b5f/afts/file/A*ym07T6nACDIAAAAAAAAAAABkARQnAQ)**
 
@@ -29,7 +38,7 @@ The tutorial video:
 
 ![Performance analysis](assets/performance.gif)
 
-The tutorial video:
+The video tutorial:
 
 **[Use the performance analysis function](https://gw.alipayobjects.com/os/basement_prod/1996390b-9ec8-4046-8ce8-459afa05d6c5.mov)**
 
@@ -41,11 +50,11 @@ SoloPi supports simultaneous multi-device testing which is controlled by one dev
 
 ![Multi-device testing](assets/oneToMany.gif)
 
-The tutorial video:
+The video tutorial:
 
 **[Simultaneous multi-device testing](https://gw.alipayobjects.com/os/basement_prod/971b5467-3db0-4781-86e3-15b3907323f6.mov)**
 
-## Getting started
+## <span id="2">Getting started</span>
 
 > Open source SoloPi excludes the multi-device testing feature since it's still unstable.
 
@@ -142,7 +151,7 @@ macOS/Linux：
 
 You can either download SoloPi.apk or clone the repository.
 
-## Folders and description
+## <span id="3">Folders and description</span>
 In the folder src,
 - app: The business logic of the application.
 - shared: The core function of the application.
@@ -152,17 +161,17 @@ In the folder src,
 - AdbLib: ADB connection.
 - androidWebscoket: Android WebSocket.
 
-## Contributing
+## <span id="4">Contributing</span>
 
 This project is mainly open to developers who want to do software testing. If you have any suggestions or questions, you can open an issue, send a PR, or leave a message at our page at [TesterHome](https://testerhome.com/topics/node152).
 
 If you like our project, please fork/⭐Star this project!
 
-## Attributions
+## <span id="5">Attributions</span>
 
 We want to thank those [third party libraries](https://github.com/ruoranw/SoloPi/blob/master/NOTICE.md) used in this project without which this project couldn't be completed.
 
-## License
+## <span id="6">License</span>
 
 This project is under the Apache 2.0 License. See the [LICENSE](LICENSE) file for the full license text.
 
@@ -183,35 +192,9 @@ limitations under the License.
 ```
 
 
-## Disclaimer
+## <span id="7">Disclaimer</span>
 
 [Disclaimer](Disclaimer.md)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
