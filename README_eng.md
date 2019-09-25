@@ -4,13 +4,13 @@
 
 > SoloPi is a wireless, non-invasive testing tool for automatic Android software testing. The Beta version has 3 main features: real time recording, performance data analysis, convenient multi-device testing.
 
-[Features](#1)<br/>
-[Getting started](#2)<br/>
-[Folders and description](#3)<br/>
-[Contributing](#4)<br/>
-[Attributions](#5)<br/>
-[License](#6)<br/>
-[Disclaimer](#7)<br/>
+### [Features](#1)<br/>
+### [Getting started](#2)<br/>
+### [Folders and description](#3)<br/>
+### [Contributing](#4)<br/>
+### [Attributions](#5)<br/>
+### [License](#6)<br/>
+### [Disclaimer](#7)<br/>
 
 
 ## <span id="1">Features</span>
