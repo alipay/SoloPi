@@ -2,6 +2,8 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/soloPi/SoloPi.svg)](https://github.com/soloPi/SoloPi/stargazers) [![GitHub license](https://img.shields.io/github/license/soloPi/SoloPi.svg)](https://github.com/soloPi/SoloPi/blob/master/LICENSE) [![GitHub release](https://img.shields.io/github/release/alipay/SoloPi.svg)](https://github.com/soloPi/SoloPi/releases) [![API](https://img.shields.io/badge/API-18%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=18) [![TesterHome](https://img.shields.io/badge/TTF-TesterHome-2955C5.svg)](https://testerhome.com/opensource_projects/82)
 
+### English Version: [README](./README_eng)
+
 > SoloPi是一个无线化、非侵入式的Android自动化工具，公测版拥有录制回放、性能测试、一机多控三项主要功能，能为测试开发人员节省宝贵时间。
 
 
@@ -48,6 +50,7 @@ SoloPi支持通过操作一台主机设备来控制多台从机设备，不需�
 - macOS 10.14.3
 - Android Studio 3.2
 - **Gradle 4.4（Android Studio打开项目时会提示升级Gradle版本，建议不要进行升级）**
+- **CMake 3.6..4111459（建议不要进行升级）**
 - Ndk 15.2.4203819
 - TargetApi 25
 - MinimumApi 18
@@ -82,6 +85,8 @@ SoloPi支持通过操作一台主机设备来控制多台从机设备，不需�
    对于华为设备，需要开启开发者选项中的 `"仅充电"模式下允许ADB调试`，否则断开USB线后会提示adb调试中断
 
    对于OPPO设备，系统会10分钟自动断开USB调试，导致SoloPi不可用。如果想要保持调试稳定，需要将设备连接到电脑
+   
+   **如果设备有安全输入法，请前往`系统设置->输入法`关闭安全输入法，否则例如密码等一些输入框无法正常输入**
 
 #### 连接设备并开启wifi调试端口
 
