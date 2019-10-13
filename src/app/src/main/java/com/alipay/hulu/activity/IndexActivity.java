@@ -218,7 +218,7 @@ public class IndexActivity extends BaseActivity {
         mGridView.setAdapter(adapter);
 
         // 有写权限，申请下
-        PatchRequest.updatePatchList();
+        PatchRequest.updatePatchList(this);
     }
 
     /**

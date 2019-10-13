@@ -64,7 +64,7 @@ public class PatchRequest {
     /**
      * 更新Patch列表
      */
-    public static void updatePatchList() {
+    public static void updatePatchList(final BaseActivity activity) {
         String storedUrl = SPService.getString(SPService.KEY_PATCH_URL, "https://raw.githubusercontent.com/alipay/SoloPi/master/<abi>.json");
         // 地址为空
         if (StringUtil.isEmpty(storedUrl)) {
@@ -87,6 +87,9 @@ public class PatchRequest {
             @Override
             public void onFailure(Call call, IOException e) {
                 LogUtil.e(TAG, "抛出IO异常，" + e.getMessage(), e);
+                if (activity != null) {
+                    activity.toastLong("Patch 更新异常,可能是cpu架构不支持 " + e.getMessage());
+                }
             }
         });
     }
