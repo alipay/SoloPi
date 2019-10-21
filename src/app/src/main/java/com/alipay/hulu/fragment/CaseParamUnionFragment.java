@@ -68,6 +68,9 @@ public class CaseParamUnionFragment extends CaseParamEditActivity.CaseParamFragm
         if (runningParam == null) {
             runningParam = new CaseRunningParam();
         }
+        if (presetParams == null) {
+            presetParams = new ArrayList<>();
+        }
 
         // 如果之前有存储p
         if (runningParam.getMode() == CaseRunningParam.ParamMode.UNION) {

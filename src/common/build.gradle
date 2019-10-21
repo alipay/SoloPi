@@ -46,7 +46,7 @@ dependencies {
     {
         exclude group: "com.android.support"
     }
-    compileOnly 'com.alibaba:fastjson:1.1.71.android'
+    compileOnly 'com.alibaba:fastjson:1.2.62'
     compileOnly group: 'commons-io', name: 'commons-io', version: '2.6'
     compileOnly 'com.android.support:multidex:1.0.3'
     annotationProcessor ('com.github.bumptech.glide:compiler:4.9.0')
