@@ -190,6 +190,11 @@ public class HttpUtil {
 
         @Override
         public void onResponse(Call call, Response response) throws IOException {
+            if (!response.isSuccessful()) {
+                onFailure(call, new IOException(String.format("Received http response code %d", response.code())));
+                return;
+            }
+
             ResponseBody body = response.body();
 
             // 空对象直接空返回

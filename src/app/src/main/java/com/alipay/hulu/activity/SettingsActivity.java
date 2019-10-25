@@ -211,7 +211,7 @@ public class SettingsActivity extends BaseActivity {
                                 mPatchListInfo.setText(path);
 
                                 // 更新patch列表
-                                PatchRequest.updatePatchList();
+                                PatchRequest.updatePatchList(SettingsActivity.this);
                             }
                         }
                     }
