@@ -24,7 +24,6 @@ import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.input.InputManager;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
@@ -62,7 +61,6 @@ import com.alipay.hulu.common.utils.ContextUtil;
 import com.alipay.hulu.common.utils.DeviceInfoUtil;
 import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
-import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.event.HandlePermissionEvent;
@@ -88,7 +86,6 @@ import com.alipay.hulu.shared.node.tree.accessibility.AccessibilityProvider;
 import com.alipay.hulu.shared.node.tree.capture.CaptureTree;
 import com.alipay.hulu.shared.node.tree.export.OperationStepExporter;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
-import com.alipay.hulu.shared.node.utils.AppUtil;
 import com.alipay.hulu.shared.node.utils.BitmapUtil;
 import com.alipay.hulu.shared.node.utils.PrepareUtil;
 import com.alipay.hulu.shared.node.utils.RectUtil;
@@ -104,7 +101,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -765,7 +761,7 @@ public class CaseRecordManager implements ExportService {
 
                                     showFunctionView(captureTree);
                                 }
-                            }, "取消", new Runnable() {
+                            }, StringUtil.getString(R.string.constant__cancel), new Runnable() {
                                 @Override
                                 public void run() {
                                     captureTree.resetBound();

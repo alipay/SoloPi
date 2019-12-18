@@ -116,4 +116,6 @@
     <string name="action__pinch_in">Pinch In</string>
     <string name="action_param__gesture_path">Gesture path</string>
     <string name="action_param__gesture_filter">Gesture interval</string>
+    <string name="running_mode__accessibility_mode">Accessibility Mode</string>
+    <string name="running_mode__capture_mode">Screenshot Mode</string>
 </resources>

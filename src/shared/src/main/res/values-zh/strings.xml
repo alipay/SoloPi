@@ -116,4 +116,6 @@
     <string name="action__pinch_in">全局缩小</string>
     <string name="action_param__gesture_path">手势路径</string>
     <string name="action_param__gesture_filter">手势操作间隔</string>
+    <string name="running_mode__accessibility_mode">通用模式</string>
+    <string name="running_mode__capture_mode">图像查找模式</string>
 </resources>

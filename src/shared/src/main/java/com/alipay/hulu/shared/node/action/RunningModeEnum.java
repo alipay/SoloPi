@@ -15,16 +15,19 @@
  */
 package com.alipay.hulu.shared.node.action;
 
+import android.support.annotation.StringRes;
+
 import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.shared.R;
 
 public enum RunningModeEnum {
-    ACCESSIBILITY_MODE("accessibilityMode", "通用模式"),
-    CAPTURE_MODE("captureMode", "图像查找模式"),
+    ACCESSIBILITY_MODE("accessibilityMode", R.string.running_mode__accessibility_mode),
+    CAPTURE_MODE("captureMode", R.string.running_mode__capture_mode),
     ;
     private String code;
-    private String desc;
+    private int desc;
 
-    RunningModeEnum(String code, String desc) {
+    RunningModeEnum(String code, @StringRes int desc) {
         this.code = code;
         this.desc = desc;
     }
@@ -34,7 +37,7 @@ public enum RunningModeEnum {
     }
 
     public String getDesc() {
-        return desc;
+        return StringUtil.getString(desc);
     }
 
     /**
