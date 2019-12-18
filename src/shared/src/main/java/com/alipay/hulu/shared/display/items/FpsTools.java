@@ -20,9 +20,11 @@ import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.shared.R;
 import com.alipay.hulu.shared.display.items.base.DisplayItem;
 import com.alipay.hulu.shared.display.items.base.Displayable;
 import com.alipay.hulu.shared.display.items.base.RecordPattern;
+import com.alipay.hulu.shared.display.items.util.FinalR;
 import com.alipay.hulu.shared.display.items.util.FpsUtil;
 
 import java.util.ArrayList;
@@ -30,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@DisplayItem(name = "帧率", permissions = "toast:请在设置里\"开发人员选项\"中开启\"GPU呈现模式分析\"选项")
+@DisplayItem(nameRes = FinalR.FPS, permissions = "toast:请在设置里\"开发人员选项\"中开启\"GPU呈现模式分析\"选项")
 public class FpsTools implements Displayable {
 	private static String TAG = "FpsTools";
 	private static Long startTime = 0L;

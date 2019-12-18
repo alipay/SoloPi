@@ -29,9 +29,11 @@ import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.shared.R;
 import com.alipay.hulu.shared.display.items.base.DisplayItem;
 import com.alipay.hulu.shared.display.items.base.Displayable;
 import com.alipay.hulu.shared.display.items.base.RecordPattern;
+import com.alipay.hulu.shared.display.items.util.FinalR;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -46,7 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@DisplayItem(name = "电池", trigger = "清零")
+@DisplayItem(nameRes = FinalR.BATTERY, trigger = "清零")
 public class BatteryInfo implements Displayable{
 
 	private static String batteryPath = null;

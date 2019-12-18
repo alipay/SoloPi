@@ -14,38 +14,41 @@
   ~ limitations under the License.
 -->
 <resources>
-    <string name="app_name">common</string>
-    <string name="permission_default">检查权限中</string>
-    <string name="android_version_error">此项功能依赖Android SDK版本%d,当前版本为%d</string>
-    <string name="request_dynamic_permission">SoloPi需要申请%s，共%d项权限，请点击确定进行授权</string>
-    <string name="record_screen_permission">SoloPi需要申请屏幕录制权限，请点击确定以允许SoloPi使用屏幕录制功能</string>
-    <string name="record_screen_android_version_error">屏幕录制需要Android SDK版本不小于21, 当前版本为%d</string>
-    <string name="accessibility_permission">SoloPi需要使用辅助功能，请点击确定前往开启SoloPi辅助功能，如果系统提示已开启，请尝试关闭后重新开启</string>
-    <string name="adb_permission"><![CDATA[SoloPi需要申请ADB权限，请连接电脑并在电脑输入\"adb tcpip 5555\"后点击确定进行连接\n<b style=\'color:red\'>请注意保护设备的隐私安全，开启ADB权限有可能导致设备被他人恶意侵入</b>]]></string>
-    <string name="root_permission">SoloPi需要申请Root权限，请Root后使用</string>
-    <string name="float_permission">SoloPi需要悬浮窗权限，请点击确定前往授权</string>
-    <string name="permission_list_error">权限申请异常</string>
-    <string name="device_usage_permission">SoloPi需要访问设备使用情况，请点击确定前往开启</string>
-    <string name="adb_open_advice">如有ADB连接电脑提示弹窗，请点击允许</string>
-    <string name="open_adb_permission_failed">开启ADB权限失败，请连接电脑并在命令行输入\"adb tcpip 5555\"后再点击重试</string>
-    <string name="constant__start_execution">开始执行</string>
-    <string name="cmd__adb_break">ADB连接中断，请尝试重新开启调试端口</string>
-    <string name="constant__sure">好的</string>
-    <string name="constant__cancel">取消</string>
-    <string name="constant__confirm">确定</string>
-    <string name="permission__request_permission">权限申请(</string>
-    <string name="constant__no_inform">不再提示</string>
-    <string name="file_choose__create_folder">创建新文件夹</string>
-    <string name="device_info__to_string">型号：%s\n品牌：%s\n制造商：%s\n产品名：%s\n系统版本号：%s\nSDK NO：%d\nSN：%s\n屏幕物理尺寸：%s\n屏幕显示尺寸：%s\n屏幕密度：%s\n屏幕密度DPI：%d\nIP：%s\nMAC：%s\nRAM：%dGB\nCPU ABI：%s</string>
-    <string name="permission__no_root_need_adb">非Root设备需要开启ADB 5555端口并授权调试才可使用 请在命令行执行 adb tcpip 5555</string>
-    <string name="permission__i_grant">我已授权</string>
-    <string name="permission__no_float_permission">悬浮窗权限未获取</string>
-    <string name="permission__i_know">我知道了</string>
-    <string name="permission__i_open">我已开启</string>
-    <string name="permission__valid_fail">校验失败</string>
-    <string name="permission__i_permit">我已允许</string>
-    <string name="permission__no_record_info">未获取录屏信息</string>
+    <string name="app_name">SoloPi</string>
+    <string name="permission_default">Check Permissions</string>
+    <string name="scheme_app_desc">Automation Testing Tools</string>
+    <string name="android_version_error">Android api %d is required, current: %d</string>
+    <string name="request_dynamic_permission">SoloPi require permissions %s, total %d, please permit</string>
+    <string name="record_screen_permission">SoloPi require screen record permission, please permit</string>
+    <string name="record_screen_android_version_error">Screen record require Android API 21+, current: %d</string>
+    <string name="accessibility_permission">SoloPi require accessibility service, click \'OK\' to grant.(If accessibility is on, please close and reopen it.)</string>
+    <string name="adb_permission"><![CDATA[SoloPi require wireless ADB, please execute \'adb tcpip 5555\' in terminal.\n<b style=\'color:red\'>Mind your data security, wireless adb may lead to data leaking.</b>]]></string>
+    <string name="root_permission">SoloPi require root, please grant root permission first.</string>
+    <string name="float_permission">SoloPi require float window permission, click \'OK\' to grant.</string>
+    <string name="permission_list_error">Permission Request Error</string>
+    <string name="device_usage_permission">SoloPi require usage access, click \'OK\' to grant.</string>
+    <string name="adb_open_advice">Please click \'allow\' button if adb connection dialog shown.</string>
+    <string name="open_adb_permission_failed">Wireless ADB connect failed, please execute \'adb tcpip 5555\' in terminal and retry.</string>
+    <string name="constant__start_execution">Start</string>
+    <string name="cmd__adb_break">Wireless ADB disconnect, please execute \'adb tcpip 5555\' in terminal and retry.</string>
+    <string name="constant__sure">Yes</string>
+    <string name="constant__cancel">Cancel</string>
+    <string name="constant__global">Global</string>
+    <string name="constant__app">App</string>
+    <string name="constant__confirm">OK</string>
+    <string name="permission__request_permission">Permission(</string>
+    <string name="constant__no_inform">Ignore</string>
+    <string name="file_choose__create_folder">New Folder</string>
+    <string name="device_info__to_string">Device: %s\nBrand: %s\nManufacturer: %s\nProduct: %s\nVersion: %s\nAPI: %d\nSN: %s\nScreen Size: %s\nDisplay Size: %s\nScreen Density: %s\nScreen DPI: %d\nIP: %s\nMAC: %s\nRAM: %dGB\nCPU ABI: %s</string>
+    <string name="permission__i_grant">Granted</string>
+    <string name="permission__no_float_permission">No Float Window Permission</string>
+    <string name="permission__i_know">I Know</string>
+    <string name="permission__valid_fail">Check Failed</string>
+    <string name="permission__no_record_info">No Record Info</string>
     <string name="permission__splash">/</string>
     <string name="permission__right_parentheses">)</string>
-    <string name="file_choose__select_dir">选择目录</string>
+    <string name="file_choose__select_dir">Select Folder</string>
+    <string name="permission__open_background_permission">Please grant \"Display pop-up window\" permission in MIUI</string>
+    <string name="permission__go_to_open">Go to Grant</string>
+    <string name="permission__opened">Granted</string>
 </resources>

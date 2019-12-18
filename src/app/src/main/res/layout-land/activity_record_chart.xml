@@ -1,0 +1,107 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<LinearLayout android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <include
+        android:id="@+id/head_layout"
+        layout="@layout/head_panel_layout"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:background="@color/default_background_color"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:text="@string/record_chart__select_data"
+                android:textSize="14dp"
+                android:paddingLeft="8dp"
+                android:paddingBottom="2dp"
+                android:gravity="bottom"
+                android:textColor="#a3a3a3"/>
+            <include layout="@layout/divider" />
+            <LinearLayout
+                android:background="@color/white"
+                android:layout_width="match_parent"
+                android:paddingLeft="16dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <android.support.v7.widget.AppCompatSpinner
+                    android:layout_margin="5dp"
+                    android:spinnerMode="dialog"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:id="@+id/record_spinner"/>
+                <include layout="@layout/divider" />
+                <android.support.v7.widget.AppCompatSpinner
+                    android:layout_margin="5dp"
+                    android:id="@+id/record_item_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"/>
+            </LinearLayout>
+            <include layout="@layout/divider" />
+
+            <TextView
+                android:layout_height="36dp"
+                android:layout_width="match_parent"
+                android:background="@color/default_background_color"
+                android:text="@string/record_chart__data_display"
+                android:textSize="14dp"
+                android:gravity="bottom"
+                android:paddingLeft="8dp"
+                android:paddingBottom="2dp"
+                android:layout_gravity="bottom"
+                android:textColor="#a3a3a3"/>
+            <include layout="@layout/divider" />
+            <LinearLayout
+                android:background="@color/white"
+                android:layout_width="match_parent"
+                android:padding="8dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_marginStart="16dp"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:minLines="2"
+                    android:textColor="@color/colorAccent"
+                    android:id="@+id/record_summary"
+                    />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_marginStart="16dp"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@color/colorAccent"
+                    android:id="@+id/record_label"
+                    android:textAlignment="center"/>
+                <com.alipay.hulu.ui.linechart.CheckableLineChartView
+                    android:layout_width="match_parent"
+                    android:minHeight="300dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/record_chart"/>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

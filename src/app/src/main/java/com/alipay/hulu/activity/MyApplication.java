@@ -60,6 +60,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
+
+import cn.dreamtobe.filedownloader.OkHttp3Connection;
+import okhttp3.OkHttpClient;
 
 public class MyApplication extends LauncherApplication {
     private static final String TAG = "MyApplication";
@@ -349,6 +353,11 @@ public class MyApplication extends LauncherApplication {
 
             }
         });
+
+        // Init the FileDownloader with the OkHttp3Connection.Creator.
+        FileDownloader.setupOnApplicationOnCreate(this)
+                .connectionCreator(new OkHttp3Connection.Creator())
+                .commit();
     }
 
     /**
@@ -424,7 +433,7 @@ public class MyApplication extends LauncherApplication {
                 this.appName = appName[0];
             } else {
                 this.appPackage = "-";
-                this.appName = "全局";
+                this.appName = getString(R.string.constant_global);
             }
         }
         injectorService.pushMessage(SubscribeParamEnum.APP, appPackage, true);
@@ -472,7 +481,7 @@ public class MyApplication extends LauncherApplication {
                 this.appName = appName[0];
             } else {
                 this.appPackage = "-";
-                this.appName = "全局";
+                this.appName = getString(R.string.constant_global);
             }
         }
 

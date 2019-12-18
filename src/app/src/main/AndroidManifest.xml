@@ -16,8 +16,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.alipay.hulu"
-    android:versionCode="27"
-    android:versionName="0.9.2">
+    android:versionCode="31"
+    android:versionName="0.9.3">
 
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -57,7 +57,7 @@
             android:name=".activity.SplashActivity"
             android:label="@string/app_name"
             android:logo="@drawable/solopi_main"
-            android:screenOrientation="portrait"
+            android:screenOrientation="unspecified"
             android:theme="@style/AppNoTitleBarTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -67,60 +67,62 @@
         <activity
             android:name=".activity.PerformanceChartActivity"
             android:label="@string/activity__performance_display"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="unspecified" />
         <activity
             android:name=".activity.CaseEditActivity"
             android:label="@string/activity__case_edit"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="unspecified"/>
         <activity
             android:name=".activity.InfoActivity"
             android:label="@string/activity__about"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="unspecified"/>
         <activity
             android:name=".activity.SettingsActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="unspecified"
             android:label="@string/activity__setting" />
         <activity
             android:name=".activity.PerformanceActivity"
             android:label="@string/activity__performance_test"
-            android:screenOrientation="portrait"/>
+            android:configChanges="orientation|keyboard|screenSize"
+            android:screenOrientation="unspecified"/>
         <activity
             android:name=".activity.CaseReplayResultActivity"
             android:label="@string/activity__replay_result"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="unspecified"/>
         <activity
             android:name=".activity.NewReplayListActivity"
             android:label="@string/activity__case_list"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="unspecified"/>
         <activity
             android:name=".activity.IndexActivity"
             android:launchMode="singleTask"
             android:label="@string/activity__index"
-            android:screenOrientation="portrait"/>
+            android:configChanges="orientation|keyboard|screenSize"
+            android:screenOrientation="unspecified"/>
         <activity
             android:name=".activity.NewRecordActivity"
             android:label="@string/activity__record"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="unspecified"/>
         <activity android:name=".activity.RecordManageActivity"
             android:label="@string/activity__performance_manage"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="unspecified" />
         <activity
             android:name=".activity.QRScanActivity"
             android:label="@string/activity__scan"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="unspecified"/>
 
         <activity android:name=".activity.BatchExecutionActivity"
                   android:label="@string/activity__batch_replay"
-                  android:screenOrientation="portrait"/>
+                  android:screenOrientation="unspecified"/>
 
         <activity android:name=".activity.BatchReplayResultActivity"
                   android:label="@string/activity__batch_replay_result"
-                  android:screenOrientation="portrait"/>
+                  android:screenOrientation="unspecified"/>
         <activity android:name=".activity.LicenseActivity"
             android:label="@string/activity__license"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="unspecified" />
         <activity android:name=".screenRecord.RecorderConfigActivity"
             android:label="@string/activity__record_config"
             />
@@ -130,7 +132,7 @@
         <service android:name=".service.FloatWinService"/>
 
         <service android:name=".tools.AdbIME"
-                 android:label="SoloPi"
+                 android:label="@string/app_name"
                  android:permission="android.permission.BIND_INPUT_METHOD">
             <intent-filter>
                 <action android:name="android.view.InputMethod" />

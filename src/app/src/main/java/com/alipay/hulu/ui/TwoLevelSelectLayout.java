@@ -106,7 +106,7 @@ public class TwoLevelSelectLayout extends LinearLayout {
         firstLevel = new ListView(styledContext);
         firstLevel.setVerticalScrollBarEnabled(false);
 
-        LayoutParams params = new LayoutParams(ContextUtil.dip2px(context, 40), ViewGroup.LayoutParams.MATCH_PARENT);
+        LayoutParams params = new LayoutParams(ContextUtil.dip2px(context, 50), ViewGroup.LayoutParams.MATCH_PARENT);
         addView(firstLevel, params);
 
         // 分割线

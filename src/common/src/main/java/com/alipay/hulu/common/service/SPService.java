@@ -19,11 +19,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.alibaba.fastjson.JSON;
-import com.alipay.hulu.common.service.base.ExportService;
-import com.alipay.hulu.common.service.base.LocalService;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by lezhou.wyl on 2018/1/12.
@@ -33,6 +28,7 @@ public class SPService {
     private static final String COMMON_CONFIG = "CommonConfig";
     public static final String KEY_SOLOPI_PATH_NAME = "KEY_SOLOPI_PATH_NAME";
     public static final String KEY_OUTPUT_CHARSET = "KEY_OUTPUT_CHARSET";
+    public static final String KEY_MAX_WAIT_TIME = "KEY_MAX_WAIT_TIME";
     public static final String KEY_ERROR_CHECK_TIME = "KEY_ERROR_CHECK_TIME";
     public static final String KEY_GLOBAL_SETTINGS = "KEY_GLOBAL_SETTINGS";
     public static final String KEY_PERFORMANCE_UPLOAD = "KEY_PERFORMANCE_UPLOAD";
@@ -42,6 +38,11 @@ public class SPService {
     public static final String KEY_RECORD_SCREEN_UPLOAD = "KEY_RECORD_SCREEN_UPLOAD";
     public static final String KEY_PATCH_URL = "KEY_PATCH_URL";
     public static final String KEY_AES_KEY = "KEY_AES_KEY";
+    public static final String KEY_REPLAY_AUTO_START = "KEY_REPLAY_AUTO_START";
+    public static final String KEY_SKIP_ACCESSIBILITY = "KEY_SKIP_ACCESSIBILITY";
+    public static final String KEY_USE_LANGUAGE = "KEY_USE_LANGUAGE";
+    public static final String KEY_SCREEN_FACTOR_ROTATION = "KEY_SCREEN_FACTOR_ROTATION";
+    public static final String KEY_SCREEN_ROTATION = "KEY_SCREEN_ROTATION";
 
     public static final String KEY_SCREENSHOT_RESOLUTION = "KEY_SCREENSHOT_RESOLUTION";
     public static final String KEY_HIGHLIGHT_REPLAY_NODE = "KEY_HIGHLIGHT_REPLAY_NODE";
@@ -53,8 +54,6 @@ public class SPService {
     public static final String KEY_INDEX_RECORD = "KEY_INDEX_RECORD";
 
     private static SharedPreferences preferences;
-
-    private static Map<String, Object> CACHED_PARAMS = new HashMap<>();
 
     public static void init(Context context) {
         preferences = context.getSharedPreferences(COMMON_CONFIG, Context.MODE_PRIVATE);
@@ -68,7 +67,6 @@ public class SPService {
     public static void putString(String key, String content) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(key, content).apply();
-        CACHED_PARAMS.put(key, content);
     }
 
     /**
@@ -87,12 +85,7 @@ public class SPService {
      * @return
      */
     public static String getString(String key, String defaultValue) {
-        if (CACHED_PARAMS.containsKey(key)) {
-            return (String) CACHED_PARAMS.get(key);
-        }
-        String content = preferences.getString(key, defaultValue);
-        CACHED_PARAMS.put(key, content);
-        return content;
+        return preferences.getString(key, defaultValue);
     }
 
     /**
@@ -103,7 +96,6 @@ public class SPService {
     public static void putBoolean(String key, boolean content) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(key, content).apply();
-        CACHED_PARAMS.put(key, content);
     }
 
     /**
@@ -113,13 +105,7 @@ public class SPService {
      * @return
      */
     public static boolean getBoolean(String key, boolean defaultValue) {
-        if (CACHED_PARAMS.containsKey(key)) {
-            return (boolean) CACHED_PARAMS.get(key);
-        }
-
-        boolean value = preferences.getBoolean(key, defaultValue);
-        CACHED_PARAMS.put(key, value);
-        return value;
+        return preferences.getBoolean(key, defaultValue);
     }
 
     /**
@@ -130,7 +116,6 @@ public class SPService {
     public static void putLong(String key, long value) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putLong(key, value).apply();
-        CACHED_PARAMS.put(key, value);
     }
 
     /**
@@ -140,14 +125,7 @@ public class SPService {
      * @return
      */
     public static long getLong(String key, long defValue) {
-        if (CACHED_PARAMS.containsKey(key)) {
-            return (long) CACHED_PARAMS.get(key);
-        }
-
-        // 缓存下
-        long value = preferences.getLong(key, defValue);
-        CACHED_PARAMS.put(key, value);
-        return value;
+        return preferences.getLong(key, defValue);
     }
 
     /**
@@ -158,7 +136,6 @@ public class SPService {
     public static void putInt(String key, int value) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt(key, value).apply();
-        CACHED_PARAMS.put(key, value);
     }
 
     /**
@@ -168,14 +145,7 @@ public class SPService {
      * @return
      */
     public static int getInt(String key, int defValue) {
-        if (CACHED_PARAMS.containsKey(key)) {
-            return (int) CACHED_PARAMS.get(key);
-        }
-
-        // 缓存
-        int result = preferences.getInt(key, defValue);
-        CACHED_PARAMS.put(key, result);
-        return result;
+        return preferences.getInt(key, defValue);
     }
 
 

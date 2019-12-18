@@ -18,6 +18,7 @@ package com.alipay.hulu.shared.node.tree.capture;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 
+import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.StringUtil;
@@ -166,10 +167,10 @@ public class CaptureTree extends AbstractNodeTree {
                 if (StringUtil.containsChinese(text)) {
                     try {
                         String defaultIme = opContext.executor.executeCmdSync("settings get secure default_input_method");
-                        opContext.executor.executeCmdSync("settings put secure default_input_method  com.alipay.hulu/.tools.AdbIME", 0);
+                        CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
                         Rect rect = getNodeBound();
 
-                        opContext.executor.executeCmdSync("input tap " + rect.centerX() + " " + rect.centerY(), 0);
+                        opContext.executor.executeClick(rect.centerX(), rect.centerY());
                         MiscUtil.sleep(1500);
                         opContext.executor.executeCmdSync("am broadcast -a ADB_INPUT_TEXT --es msg '" + text + "' --es default '" + StringUtil.trim(defaultIme) + "'", 0);
                     } catch (Exception e) {
@@ -177,7 +178,7 @@ public class CaptureTree extends AbstractNodeTree {
                     }
                 } else {
                     Rect rect = getNodeBound();
-                    opContext.executor.executeCmdSync("input tap " + rect.centerX() + " " + rect.centerY(), 0);
+                    opContext.executor.executeClick(rect.centerX(), rect.centerY());
                     MiscUtil.sleep(1500);
                     opContext.executor.executeCmdSync("input text " + text);
                 }

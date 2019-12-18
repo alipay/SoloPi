@@ -51,6 +51,7 @@ import okhttp3.RequestBody;
  */
 public class RecordUtil {
     private static final String TAG = "RecordUtil";
+    private static final DateFormat TIME_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss", Locale.CHINA);
 
     /**
      * 保存到文件夹
@@ -121,8 +122,7 @@ public class RecordUtil {
      */
     private static File loadSaveDir(Date startTime, Date endTime) {
         File recordDir = FileUtils.getSubDir("records");
-        DateFormat format = new SimpleDateFormat("MM月dd日HH:mm:ss", Locale.CHINA);
-        File saveFolder = new File(recordDir, format.format(startTime) + "-" + format.format(endTime));
+        File saveFolder = new File(recordDir, TIME_FORMAT.format(startTime) + "_" + TIME_FORMAT.format(endTime));
         saveFolder.mkdir();
         return saveFolder;
     }

@@ -29,7 +29,9 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import com.alipay.hulu.BuildConfig;
 import com.alipay.hulu.R;
+import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.constant.Constant;
 import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
@@ -98,8 +100,26 @@ public class SettingsActivity extends BaseActivity {
     private View mHightlightSettingWrapper;
     private TextView mHightlightSettingInfo;
 
+    private View mLanguageSettingWrapper;
+    private TextView mLanguageSettingInfo;
+
     private View mDisplaySystemAppSettingWrapper;
     private TextView mDisplaySystemAppSettingInfo;
+
+    private View mAutoReplaySettingWrapper;
+    private TextView mAutoReplaySettingInfo;
+
+    private View mSkipAccessibilitySettingWrapper;
+    private TextView mSkipAccessibilitySettingInfo;
+
+    private View mMaxWaitSettingWrapper;
+    private TextView mMaxWaitSettingInfo;
+
+    private View mDefaultRotationSettingWrapper;
+    private TextView mDefaultRotationSettingInfo;
+
+    private View mChangeRotationSettingWrapper;
+    private TextView mChangeRotationSettingInfo;
 
     private View mCheckUpdateSettingWrapper;
     private TextView mCheckUpdateSettingInfo;
@@ -153,6 +173,57 @@ public class SettingsActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 showGlobalParamEdit();
+            }
+        });
+
+        mDefaultRotationSettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AlertDialog.Builder(SettingsActivity.this, R.style.SimpleDialogTheme)
+                        .setItems(R.array.default_screen_rotation, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String item = getResources().getStringArray(R.array.default_screen_rotation)[which];
+                                SPService.putInt(SPService.KEY_SCREEN_FACTOR_ROTATION, which);
+                                if (which == 1 || which == 3) {
+                                    SPService.putBoolean(SPService.KEY_SCREEN_ROTATION, true);
+                                    mChangeRotationSettingInfo.setText(R.string.constant__yes);
+                                } else {
+                                    SPService.putBoolean(SPService.KEY_SCREEN_ROTATION, false);
+                                    mChangeRotationSettingInfo.setText(R.string.constant__no);
+                                }
+                                mDefaultRotationSettingInfo.setText(item);
+                            }
+                        })
+                        .setTitle(R.string.setting__set_screen_orientation)
+                        .setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
+            }
+        });
+
+        mChangeRotationSettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AlertDialog.Builder(SettingsActivity.this, R.style.SimpleDialogTheme)
+                        .setMessage(R.string.setting__change_screen_axis)
+                        .setPositiveButton(R.string.constant__yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SPService.putBoolean(SPService.KEY_SCREEN_ROTATION, true);
+                                mChangeRotationSettingInfo.setText(R.string.constant__yes);
+                            }
+                        }).setNegativeButton(R.string.constant__no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SPService.putBoolean(SPService.KEY_SCREEN_ROTATION, false);
+                        mChangeRotationSettingInfo.setText(R.string.constant__no);
+                    }
+                }).show();
             }
         });
 
@@ -240,6 +311,36 @@ public class SettingsActivity extends BaseActivity {
         });
 
 
+        mLanguageSettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AlertDialog.Builder(SettingsActivity.this, R.style.SimpleDialogTheme)
+                        .setTitle(R.string.settings__language)
+                        .setItems(R.array.language, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SPService.putInt(SPService.KEY_USE_LANGUAGE, which);
+                                LauncherApplication.getInstance().setApplicationLanguage();
+
+                                mLanguageSettingInfo.setText(getResources().getStringArray(R.array.language)[which]);
+                                // 重启服务
+                                LauncherApplication.getInstance().restartAllServices();
+
+                                Intent intent = new Intent(SettingsActivity.this, SplashActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                                finish();
+                            }
+                        })
+                        .setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).show();
+            }
+        });
+
         mDisplaySystemAppSettingWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -262,6 +363,68 @@ public class SettingsActivity extends BaseActivity {
                         dialog.dismiss();
                     }
                 }).show();
+            }
+        });
+
+        mAutoReplaySettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AlertDialog.Builder(SettingsActivity.this, R.style.SimpleDialogTheme)
+                        .setMessage(R.string.setting__auto_replay)
+                        .setPositiveButton(R.string.constant__yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SPService.putBoolean(SPService.KEY_REPLAY_AUTO_START, true);
+                                mAutoReplaySettingInfo.setText(R.string.constant__yes);
+                                dialog.dismiss();
+                            }
+                        }).setNegativeButton(R.string.constant__no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SPService.putBoolean(SPService.KEY_REPLAY_AUTO_START, false);
+                        mAutoReplaySettingInfo.setText(R.string.constant__no);
+                        dialog.dismiss();
+                    }
+                }).show();
+            }
+        });
+
+        mSkipAccessibilitySettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AlertDialog.Builder(SettingsActivity.this, R.style.SimpleDialogTheme)
+                        .setMessage(R.string.setting__skip_accessibility)
+                        .setPositiveButton(R.string.constant__yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SPService.putBoolean(SPService.KEY_SKIP_ACCESSIBILITY, true);
+                                mSkipAccessibilitySettingInfo.setText(R.string.constant__yes);
+                                dialog.dismiss();
+                            }
+                        }).setNegativeButton(R.string.constant__no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SPService.putBoolean(SPService.KEY_SKIP_ACCESSIBILITY, false);
+                        mSkipAccessibilitySettingInfo.setText(R.string.constant__no);
+                        dialog.dismiss();
+                    }
+                }).show();
+            }
+        });
+
+        mMaxWaitSettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMultipleEditDialog(SettingsActivity.this, new OnDialogResultListener() {
+                    @Override
+                    public void onDialogPositive(List<String> data) {
+                        if (data.size() == 1) {
+                            String time = data.get(0);
+                            SPService.putLong(SPService.KEY_MAX_WAIT_TIME, Long.parseLong(time));
+                            mMaxWaitSettingInfo.setText(time + "ms");
+                        }
+                    }
+                }, getString(R.string.settings__max_wait_time), Collections.singletonList(new Pair<>(getString(R.string.setting__max_wait_time), Long.toString(SPService.getLong(SPService.KEY_MAX_WAIT_TIME, 10000)))));
             }
         });
 
@@ -326,7 +489,7 @@ public class SettingsActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 List<Pair<String, String>> data = new ArrayList<>(2);
-                data.add(new Pair<>("图像查找截图分辨率", "" + SPService.getInt(SPService.KEY_SCREENSHOT_RESOLUTION, 720)));
+                data.add(new Pair<>(getString(R.string.settings__screenshot_resolution), "" + SPService.getInt(SPService.KEY_SCREENSHOT_RESOLUTION, 720)));
                 showMultipleEditDialog(SettingsActivity.this, new DialogUtils.OnDialogResultListener() {
                     @Override
                     public void onDialogPositive(List<String> data) {
@@ -339,7 +502,7 @@ public class SettingsActivity extends BaseActivity {
                         SPService.putInt(SPService.KEY_SCREENSHOT_RESOLUTION, Integer.parseInt(data.get(0)));
                         mResolutionSettingInfo.setText(data.get(0) + "P");
                     }
-                }, "图像查找截图设置", data);
+                }, getString(R.string.settings__screenshot_setting), data);
             }
         });
 
@@ -347,7 +510,7 @@ public class SettingsActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 new AlertDialog.Builder(SettingsActivity.this, R.style.SimpleDialogTheme)
-                        .setMessage("回放时是否高亮待操作控件？")
+                        .setMessage(R.string.settings__highlight_node)
                         .setPositiveButton(R.string.constant__yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -550,6 +713,18 @@ public class SettingsActivity extends BaseActivity {
         }
         mGlobalParamSettingWrapper = findViewById(R.id.global_param_setting_wrapper);
 
+        mDefaultRotationSettingWrapper = findViewById(R.id.default_screen_rotation_setting_wrapper);
+        mDefaultRotationSettingInfo = _findViewById(R.id.default_screen_rotation_setting_info);
+        int defaultRotation = SPService.getInt(SPService.KEY_SCREEN_FACTOR_ROTATION, 0);
+        String[] arrays = getResources().getStringArray(R.array.default_screen_rotation);
+        mDefaultRotationSettingInfo.setText(arrays[defaultRotation]);
+
+        mChangeRotationSettingWrapper = findViewById(R.id.change_rotation_setting_wrapper);
+        mChangeRotationSettingInfo = _findViewById(R.id.change_rotation_setting_info);
+        boolean changeRotation = SPService.getBoolean(SPService.KEY_SCREEN_ROTATION, false);
+        mChangeRotationSettingInfo.setText(changeRotation? R.string.constant__yes: R.string.constant__no);
+
+
         mOutputCharsetSettingWrapper = findViewById(R.id.output_charset_setting_wrapper);
         mOutputCharsetSettingInfo = (TextView) findViewById(R.id.output_charset_setting_info);
         mOutputCharsetSettingInfo.setText(SPService.getString(SPService.KEY_OUTPUT_CHARSET, "GBK"));
@@ -562,6 +737,16 @@ public class SettingsActivity extends BaseActivity {
         mHightlightSettingInfo = (TextView) findViewById(R.id.replay_highlight_setting_info);
         mHightlightSettingInfo.setText(SPService.getBoolean(SPService.KEY_HIGHLIGHT_REPLAY_NODE, true)? R.string.constant__yes: R.string.constant__no);
 
+        mLanguageSettingWrapper = findViewById(R.id.language_setting_wrapper);
+        mLanguageSettingInfo = (TextView) findViewById(R.id.language_setting_info);
+        int pos = SPService.getInt(SPService.KEY_USE_LANGUAGE, 0);
+        String[] availableLanguages = getResources().getStringArray(R.array.language);
+        if (availableLanguages != null && availableLanguages.length > pos) {
+            mLanguageSettingInfo.setText(availableLanguages[pos]);
+        } else {
+            mLanguageSettingInfo.setText(availableLanguages[0]);
+        }
+
         mDisplaySystemAppSettingWrapper = findViewById(R.id.display_system_app_setting_wrapper);
         mDisplaySystemAppSettingInfo = (TextView) findViewById(R.id.display_system_app_setting_info);
         boolean displaySystemApp = SPService.getBoolean(SPService.KEY_DISPLAY_SYSTEM_APP, false);
@@ -570,6 +755,29 @@ public class SettingsActivity extends BaseActivity {
         } else {
             mDisplaySystemAppSettingInfo.setText(R.string.constant__no);
         }
+
+        mAutoReplaySettingWrapper = findViewById(R.id.auto_replay_setting_wrapper);
+        mAutoReplaySettingInfo = (TextView) findViewById(R.id.auto_replay_setting_info);
+        boolean autoReplay = SPService.getBoolean(SPService.KEY_REPLAY_AUTO_START, false);
+        if (autoReplay) {
+            mAutoReplaySettingInfo.setText(R.string.constant__yes);
+        } else {
+            mAutoReplaySettingInfo.setText(R.string.constant__no);
+        }
+
+        mSkipAccessibilitySettingWrapper = findViewById(R.id.skip_accessibility_setting_wrapper);
+        mSkipAccessibilitySettingInfo = (TextView) findViewById(R.id.skip_accessibility_setting_info);
+        boolean skipAccessibility = SPService.getBoolean(SPService.KEY_SKIP_ACCESSIBILITY, true);
+        if (displaySystemApp) {
+            mDisplaySystemAppSettingInfo.setText(R.string.constant__yes);
+        } else {
+            mDisplaySystemAppSettingInfo.setText(R.string.constant__no);
+        }
+
+        mMaxWaitSettingWrapper = findViewById(R.id.max_wait_setting_wrapper);
+        mMaxWaitSettingInfo = (TextView) findViewById(R.id.max_wait_setting_info);
+        long maxWaitTime = SPService.getLong(SPService.KEY_MAX_WAIT_TIME, 10000L);
+        mMaxWaitSettingInfo.setText(maxWaitTime + "ms");
 
         mCheckUpdateSettingWrapper = findViewById(R.id.check_update_setting_wrapper);
         mCheckUpdateSettingInfo = (TextView) findViewById(R.id.check_update_setting_info);

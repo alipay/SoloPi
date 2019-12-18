@@ -88,6 +88,7 @@ public class MiuiUtils {
             goToMiuiPermissionActivity_V8(context);
         } else {
             Log.e(TAG, "this is a special MIUI rom version, its version code " + versionCode);
+            goToMiuiPermissionActivity_V8(context);
         }
     }
 

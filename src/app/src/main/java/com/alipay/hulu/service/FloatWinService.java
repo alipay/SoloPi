@@ -27,12 +27,14 @@ import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.support.v7.app.AlertDialog;
+import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -794,7 +796,7 @@ public class FloatWinService extends BaseService {
 				return false;
 			}
 
-			// 看下是否点到Soloπ图标
+			// 看下是否点到SoloPi图标
 			FloatWinService service = floatWinServiceRef.get();
 			Rect rect = new Rect();
 			service.view.getDrawingRect(rect);
@@ -803,6 +805,19 @@ public class FloatWinService extends BaseService {
 			Rect r = new Rect();
 			service.view.getWindowVisibleDisplayFrame(r);
 			WindowManager.LayoutParams params = (WindowManager.LayoutParams) service.view.getLayoutParams();
+
+			// Android 10 尺寸获取问题
+			if (Build.VERSION.SDK_INT >= 29) {
+				DisplayMetrics metrics = new DisplayMetrics();
+				service.wm.getDefaultDisplay().getRealMetrics(metrics);
+				r.right = metrics.widthPixels;
+				Point smallP = new Point();
+				service.view.getDisplay().getCurrentSizeRange(smallP, new Point());
+				int decoSize = metrics.heightPixels - smallP.y;
+				if (r.top > decoSize) {
+					r.top = decoSize;
+				}
+			}
 
 			int x = r.left + params.x;
 			int y = r.top + params.y;

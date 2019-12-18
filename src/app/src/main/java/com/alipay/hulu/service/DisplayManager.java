@@ -267,10 +267,10 @@ public class DisplayManager {
                     File folder = RecordUtil.saveToFile(result);
 
                     // 显示提示框
-                    LauncherApplication.getInstance().showDialog(binder.loadServiceContext(), "录制数据已经保存到\"" + folder.getPath() + "\"下" , "确定", null);
+                    LauncherApplication.getInstance().showDialog(binder.loadServiceContext(), StringUtil.getString(R.string.performance__record_save, folder.getPath()) , StringUtil.getString(R.string.constant__confirm), null);
                 } else {
                     String response = RecordUtil.uploadData(uploadUrl, result);
-                    LauncherApplication.getInstance().showDialog(binder.loadServiceContext(), "录制数据已经上传至\"" + uploadUrl + "\"，响应结果: " + response , "确定", null);
+                    LauncherApplication.getInstance().showDialog(binder.loadServiceContext(), StringUtil.getString(R.string.performance__record_upload,  uploadUrl, response), StringUtil.getString(R.string.constant__confirm), null);
                 }
             }
         });

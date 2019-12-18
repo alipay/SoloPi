@@ -157,8 +157,10 @@ public class CaseReplayResultActivity extends BaseActivity {
         mStartTime.setText(getString(R.string.case_replay_result__start_time, format.format(result.getStartTime())));
         mEndTime.setText(getString(R.string.case_replay_result__end_time, format.format(result.getEndTime())));
         try {
-            SpannableString textSpanned1 = new SpannableString(getString(R.string.case_replay_result__running_result, result.getExceptionMessage() != null? "失败" : "成功"));
-            textSpanned1.setSpan(new ForegroundColorSpan(result.getExceptionMessage() != null ? 0xfff76262 : 0xff65c0ba), 5, 7, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            String status = getString(result.getExceptionMessage() != null? R.string.constant__fail : R.string.constant__success);
+            String displayContent = getString(R.string.case_replay_result__running_result, status);
+            SpannableString textSpanned1 = new SpannableString(displayContent);
+            textSpanned1.setSpan(new ForegroundColorSpan(result.getExceptionMessage() != null ? 0xfff76262 : 0xff65c0ba), displayContent.length() - status.length(), displayContent.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
             mStatus.setText(textSpanned1);
         } catch (Exception e) {
             LogUtil.e(TAG, e.getMessage(), e);

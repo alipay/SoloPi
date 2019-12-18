@@ -26,6 +26,8 @@ import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
+import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.shared.R;
 import com.alipay.hulu.shared.display.items.base.DisplayItem;
 import com.alipay.hulu.shared.display.items.base.Displayable;
 import com.alipay.hulu.shared.display.items.base.FixedLengthCircularArray;
@@ -134,9 +136,9 @@ public class CPUTools implements Displayable{
 			try {
 				float[] result = getPidsUsage(new int[]{pid});
 				if (result.length == 1) {
-					return "全局:" +df.format(result[0]) + "%";
+					return StringUtil.getString(R.string.constant__global) + ':' +df.format(result[0]) + '%';
 				} else if (result.length == 2) {
-					return "应用:" + df.format(result[0]) + "% 全局:" + df.format(result[1]) + "%";
+					return StringUtil.getString(R.string.constant__app) + ':' + df.format(result[0]) + '%' + StringUtil.getString(R.string.constant__global) + ':' + df.format(result[1]) + '%';
 				}
 				return "-";
 			} catch (Exception e) {
@@ -148,7 +150,7 @@ public class CPUTools implements Displayable{
         if (result < 0) {
             return "-";
         }
-		return "全局:" + df.format(result) + "%";
+		return StringUtil.getString(R.string.constant__global) + ':' + df.format(result) + '%';
 	}
 
 	@Override

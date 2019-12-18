@@ -436,6 +436,15 @@ public class CmdTools {
     }
 
     /**
+     * 执行点击操作
+     * @param x
+     * @param y
+     */
+    public static void execClick(int x, int y) {
+        execAdbCmd("input tap " + x + " " + y, 0);
+    }
+
+    /**
      * 执行Adb命令，对外<br/>
      * <b>注意：主线程执行的话超时时间会强制设置为5S以内，防止ANR</b>
      * @param cmd 对应命令
@@ -1204,6 +1213,45 @@ public class CmdTools {
             return execAdbCmd("dumpsys SurfaceFlinger --list | grep '" + app + "'", 0);
         }
     }
+
+    /**
+     * 切换到输入法
+     * @param ime
+     */
+    public static void switchToIme(final String ime) {
+        // 主线程的话走Callable
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            Callable<Boolean> callable = new Callable<Boolean>() {
+                @Override
+                public Boolean call() {
+                    _switchToIme(ime);
+                    return true;
+                }
+            };
+            Future<Boolean> result = cachedExecutor.submit(callable);
+
+            // 等待执行完毕
+            try {
+                result.get();
+            } catch (InterruptedException e) {
+                LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
+            } catch (ExecutionException e) {
+                LogUtil.e(TAG, "Catch java.util.concurrent.ExecutionException: " + e.getMessage(), e);
+            }
+            return;
+        }
+        _switchToIme(ime);
+    }
+
+    /**
+     * 真正切换输入法
+     * @param ime
+     */
+    private static void _switchToIme(String ime) {
+        execHighPrivilegeCmd("ime enable " + ime);
+        execHighPrivilegeCmd("ime set " + ime);
+    }
+
 
     /**
      * 判断文件是否存在

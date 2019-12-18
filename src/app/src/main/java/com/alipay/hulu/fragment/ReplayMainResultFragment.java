@@ -77,12 +77,12 @@ public class ReplayMainResultFragment extends Fragment {
 
         contents = new ArrayList<>();
 
-        contents.add(new Pair<>("设备信息", DeviceInfoUtil.generateDeviceInfo().toString()));
+        contents.add(new Pair<>(getString(R.string.ui__device_info), DeviceInfoUtil.generateDeviceInfo().toString()));
 
         List<OperationStep> operations = resultBean.getCurrentOperationLog();
 
         // 拼接流程信息
-        StringBuilder operationString = new StringBuilder("总步骤数:").append(operations.size()).append("\n\n");
+        StringBuilder operationString = new StringBuilder(getString(R.string.ui__total_steps)).append(operations.size()).append("\n\n");
         for (int i = 0; i < operations.size(); i++) {
             OperationStep currentOperation = operations.get(i);
             operationString.append(i + 1).append(" ").append(currentOperation.getOperationMethod().getActionEnum().getDesc());
@@ -105,13 +105,13 @@ public class ReplayMainResultFragment extends Fragment {
             operationString.append("\n");
         }
 
-        contents.add(new Pair<>("用例流程", operationString.toString()));
+        contents.add(new Pair<>(getString(R.string.ui__case_steps), operationString.toString()));
 
         // 如果回访失败，显示故障相关信息
         if (!StringUtil.isEmpty(resultBean.getExceptionMessage())) {
-            contents.add(new Pair<>("故障步骤", Integer.toString(resultBean.getExceptionStep() + 1)));
+            contents.add(new Pair<>(getString(R.string.ui__error_step), Integer.toString(resultBean.getExceptionStep() + 1)));
 
-            contents.add(new Pair<>("故障原因", resultBean.getExceptionMessage()));
+            contents.add(new Pair<>(getString(R.string.ui__error_reason), resultBean.getExceptionMessage()));
         }
     }
 

@@ -29,6 +29,7 @@ import com.alipay.hulu.activity.BatchExecutionActivity;
 import com.alipay.hulu.adapter.BatchExecutionListAdapter;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.utils.PermissionUtil;
+import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.replay.BatchStepProvider;
 import com.alipay.hulu.service.CaseReplayManager;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
@@ -58,7 +59,7 @@ public class BatchExecutionFragment extends BaseFragment {
     }
 
     public static String getTypeName(int type) {
-        return "本地";
+        return StringUtil.getString(R.string.replay_list__local);
     }
 
     public static BatchExecutionFragment newInstance(int type) {

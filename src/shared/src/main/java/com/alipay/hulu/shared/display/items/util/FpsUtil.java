@@ -131,7 +131,12 @@ public class FpsUtil {
     /**
      * 帧标准间隔
      */
-    private static final double fpsPeriod = 16666D;
+    private static Double FPS_PERIOD = null;
+
+    /**
+     * 标准帧数
+     */
+    private static int FRAME_PER_SECOND = 60;
 
 
     @Subscriber(@Param(SubscribeParamEnum.APP))
@@ -261,6 +266,9 @@ public class FpsUtil {
     private FpsDataWrapper loadFpsDataForProc(String activity, String processName) {
         String result;
         long startTime = System.currentTimeMillis();
+        if (FPS_PERIOD == null) {
+            loadDeviceScreenInfo();
+        }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
@@ -374,16 +382,16 @@ public class FpsUtil {
                 LogUtil.e(TAG, "Catch NumberFormatException: " + e.getMessage(), e);
             }
             float maxJank = 0;
-            int leftFrame = 60;
+            int leftFrame = FRAME_PER_SECOND;
             int jankFrame = 0;
             int totalCount = 0;
             int jankCount = 0;
 
-            // 从最后一位向上计数，直到耗时满足60帧
+            // 从最后一位向上计数，直到耗时满足满帧
             for (int position = jankList.size() - 1; position > -1; position--) {
                 float jankTime = jankList.get(position);
                 totalCount++;
-                int count = (int) Math.ceil(jankTime * 1000 / fpsPeriod);
+                int count = (int) Math.ceil(jankTime * 1000 / FPS_PERIOD);
                 if (jankTime > maxJank) {
                     maxJank = jankTime;
                 }
@@ -406,7 +414,7 @@ public class FpsUtil {
                 return new FpsDataWrapper(processName, activity, 0, 0, 0, 0, null, null);
             }
 
-            return new FpsDataWrapper(processName, activity, 60 - jankFrame, jankCount, (int) maxJank, jankCount / (float) totalCount * 100, null, null);
+            return new FpsDataWrapper(processName, activity, FRAME_PER_SECOND - jankFrame, jankCount, (int) maxJank, jankCount / (float) totalCount * 100, null, null);
         } else {
             result = CmdTools.execAdbCmd("dumpsys gfxinfo " + processName + " framestats| grep '" + activity + "' -A280", 1000);
 
@@ -492,11 +500,11 @@ public class FpsUtil {
             int jankVsyncCount = 0;
 
             int position;
-            // 从最后一位向上计数，直到耗时满足60帧
+            // 从最后一位向上计数，直到耗时满足满帧
             for (position = lastPos; position > -1 && startRenderTimes.get(position) > filter; position--) {
                 long jankTime = endRenderTimes.get(position) - startRenderTimes.get(position);
                 totalCount++;
-                int count = (int) Math.ceil(jankTime / fpsPeriod);
+                int count = (int) Math.ceil(jankTime / FPS_PERIOD);
                 if (jankTime > maxJank) {
                     maxJank = jankTime;
                 }
@@ -507,9 +515,31 @@ public class FpsUtil {
             }
 
             // 可能存在只有一部分数据的情况
-            int fps = jankVsyncCount < 60?  60 - jankVsyncCount + totalCount: totalCount;
+            int fps = jankVsyncCount < FRAME_PER_SECOND?  FRAME_PER_SECOND - jankVsyncCount + totalCount: totalCount;
 
             return new FpsDataWrapper(processName, activity, fps, jankCount, (int) Math.ceil(maxJank / 1000F), jankCount / (float) totalCount * 100, startRenderTimes, endRenderTimes);
+        }
+    }
+
+    /**
+     * 加载设备屏幕信息
+     */
+    private static void loadDeviceScreenInfo() {
+        String result = CmdTools.execHighPrivilegeCmd("dumpsys SurfaceFlinger --latency com.alipay.hulu");
+        if (!StringUtil.isEmpty(result)) {
+            String firstLine = result.split("\n")[0];
+            try {
+                long frameTime = Long.parseLong(firstLine.trim());
+                FPS_PERIOD = frameTime / 1000D;
+                FRAME_PER_SECOND = (int) (1000000000 / frameTime);
+            } catch (NumberFormatException e) {
+                LogUtil.e(TAG, "Can't resolve text: " + firstLine, e);
+                FPS_PERIOD = 16666D;
+                FRAME_PER_SECOND = 60;
+            }
+        } else {
+            FPS_PERIOD = 16666D;
+            FRAME_PER_SECOND = 60;
         }
     }
 

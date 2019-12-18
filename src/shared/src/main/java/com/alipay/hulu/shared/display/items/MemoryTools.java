@@ -27,10 +27,12 @@ import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.utils.LogUtil;
+import com.alipay.hulu.shared.R;
 import com.alipay.hulu.shared.display.items.base.DisplayItem;
 import com.alipay.hulu.shared.display.items.base.Displayable;
 import com.alipay.hulu.shared.display.items.base.FixedLengthCircularArray;
 import com.alipay.hulu.shared.display.items.base.RecordPattern;
+import com.alipay.hulu.shared.display.items.util.FinalR;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +41,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-@DisplayItem(name = "内存")
+@DisplayItem(nameRes = FinalR.MEMORY)
 public class MemoryTools implements Displayable{
 
 	private static String TAG = "MemoryTools";

@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.util.Pair;
 
 import com.alipay.hulu.common.application.LauncherApplication;
@@ -34,10 +35,10 @@ import com.alipay.hulu.common.injector.provider.ParamReference;
 import com.alipay.hulu.common.injector.provider.Provider;
 import com.alipay.hulu.common.injector.provider.ProviderInfo;
 import com.alipay.hulu.common.injector.provider.WeakInjectItem;
-import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.service.base.ExportService;
 import com.alipay.hulu.common.service.base.LocalService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
+import com.alipay.hulu.common.utils.Callback;
 import com.alipay.hulu.common.utils.ClassUtil;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
@@ -77,6 +78,11 @@ public class InjectorService implements ExportService {
     private Queue<Pair<ProviderInfo, WeakInjectItem>> providers;
 
     /**
+     * 临时等待队列
+     */
+    private Map<String, Queue<Callback>> paramWaitMap;
+
+    /**
      * 消息队列
      */
     private MessageProcessHandler messageHandler;
@@ -110,6 +116,7 @@ public class InjectorService implements ExportService {
     public void onCreate(Context context) {
         referenceMap = new ConcurrentHashMap<>();
         providers = new ConcurrentLinkedQueue<>();
+        paramWaitMap = new ConcurrentHashMap<>();
         cache = new ClassInfoCache();
 
         // 消息分发线程
@@ -288,6 +295,18 @@ public class InjectorService implements ExportService {
 
         // 判断是否消息合法
         if (reference.messageValid(value, true)) {
+            // 如果有等待消息队列
+            Queue<Callback> callbacks = paramWaitMap.remove(targetParam.getName());
+            if (callbacks != null) {
+                for (Callback callback: callbacks) {
+                    try {
+                        callback.onResult(value);
+                    } catch (Exception e) {
+                        LogUtil.e(TAG, "Callback fail", e);
+                    }
+                }
+            }
+
             if (enqueue) {
                 // 通过handler处理
                 Message message = messageHandler.obtainMessage(MessageProcessHandler.message);
@@ -357,6 +376,28 @@ public class InjectorService implements ExportService {
         }
 
         return (T) reference.getCurrentValue();
+    }
+
+    /**
+     *
+     * @param name
+     * @param callable
+     * @param <T>
+     */
+    public <T> void waitForMessage(@NonNull String name, @NonNull Callback<T> callable) {
+        InjectParam param = InjectParamTypeCache.getCacheInstance().getExistsParamType(name);
+        if (param == null) {
+            LogUtil.e(TAG, "Unregistered param %s, failed to wait", name);
+            callable.onFailed();
+            return;
+        }
+
+        Queue<Callback> waitQueue = paramWaitMap.get(name);
+        if (waitQueue == null) {
+            waitQueue = new ConcurrentLinkedQueue<>();
+            paramWaitMap.put(name, waitQueue);
+        }
+        waitQueue.add(callable);
     }
 
     /**

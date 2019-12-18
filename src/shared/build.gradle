@@ -54,7 +54,7 @@ dependencies {
     compileOnly 'com.alibaba:fastjson:1.2.62'
     compileOnly 'com.android.support:appcompat-v7:25.4.0'
     compileOnly 'com.android.support:support-v4:25.4.0'
-    compileOnly 'com.liulishuo.filedownloader:library:1.7.6'
+    compileOnly 'com.liulishuo.filedownloader:library:1.7.7'
     compileOnly 'com.squareup.okhttp3:okhttp:3.12.3'
     compileOnly 'org.greenrobot:greendao:3.2.2'
 

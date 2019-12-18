@@ -17,21 +17,24 @@ package com.alipay.hulu.util;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.PointF;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatSpinner;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,17 +42,17 @@ import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.alipay.hulu.R;
-import com.alipay.hulu.bean.CaseParamBean;
 import com.alipay.hulu.common.application.LauncherApplication;
-import com.alipay.hulu.common.injector.InjectorService;
-import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
+import com.alipay.hulu.common.service.ScreenCaptureService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
+import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.ContextUtil;
+import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
+import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.node.OperationService;
 import com.alipay.hulu.shared.node.action.Constant;
@@ -60,18 +63,18 @@ import com.alipay.hulu.shared.node.action.RunningModeEnum;
 import com.alipay.hulu.shared.node.action.provider.ActionProviderManager;
 import com.alipay.hulu.shared.node.action.provider.ViewLoadCallback;
 import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
+import com.alipay.hulu.shared.node.utils.BitmapUtil;
 import com.alipay.hulu.shared.node.utils.LogicUtil;
 import com.alipay.hulu.tools.HighLightService;
 import com.alipay.hulu.ui.CheckableRelativeLayout;
 import com.alipay.hulu.ui.FlowRadioGroup;
+import com.alipay.hulu.ui.GesturePadView;
 import com.alipay.hulu.ui.TwoLevelSelectLayout;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 /**
@@ -251,6 +254,9 @@ public class FunctionSelectUtil {
             return true;
         } else if (action == PerformActionEnum.IF) {
             method.putParam(LogicUtil.CHECK_PARAM, "");
+        } else if (action == PerformActionEnum.GESTURE || action == PerformActionEnum.GLOBAL_GESTURE) {
+            captureAndShowGesture(action, node, context, listener);
+            return true;
         }
 
         return false;
@@ -1058,6 +1064,139 @@ public class FunctionSelectUtil {
         dialog.setCanceledOnTouchOutside(false);
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         dialog.show();
+    }
+
+    /**
+     * 展示登录信息框
+     * @param action
+     * @param context
+     */
+    private static void captureAndShowGesture(final PerformActionEnum action, final AbstractNodeTree target, Context context, final FunctionListener listener) {
+        try {
+            View v = LayoutInflater.from(ContextUtil.getContextThemeWrapper(context, R.style.AppDialogTheme)).inflate(R.layout.dialog_node_gesture, null);
+            final GesturePadView gesturePadView = (GesturePadView) v.findViewById(R.id.node_gesture_gesture_view);
+            final RadioGroup group = (RadioGroup) v.findViewById(R.id.node_gesture_time_filter);
+            group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(RadioGroup group, int checkedId) {
+                    int targetTime;
+                    switch (checkedId) {
+                        case R.id.node_gesture_time_filter_25:
+                            targetTime = 25;
+                            break;
+                        case R.id.node_gesture_time_filter_50:
+                            targetTime = 50;
+                            break;
+                        case R.id.node_gesture_time_filter_200:
+                            targetTime = 200;
+                            break;
+                        case R.id.node_gesture_time_filter_100:
+                        default:
+                            targetTime = 100;
+                            break;
+                    }
+                    gesturePadView.setGestureFilter(targetTime);
+                    gesturePadView.clear();
+                }
+            });
+            Bitmap nodeBitmap;
+            if (target != null) {
+                String capture = target.getCapture();
+                if (StringUtil.isEmpty(capture)) {
+                    File captureFile = new File(FileUtils.getSubDir("tmp"), "test.jpg");
+                    Bitmap bitmap = capture(captureFile);
+                    if (bitmap == null) {
+                        LauncherApplication.getInstance().showToast(context.getString(R.string.action_gesture__capture_screen_failed));
+                        listener.onCancel();
+                        return;
+                    }
+
+                    Rect displayRect = target.getNodeBound();
+
+                    nodeBitmap = Bitmap.createBitmap(bitmap, displayRect.left,
+                            displayRect.top, displayRect.width(),
+                            displayRect.height());
+                    target.setCapture(BitmapUtil.bitmapToBase64(nodeBitmap));
+                } else {
+                    nodeBitmap = BitmapUtil.base64ToBitmap(capture);
+                }
+            } else {
+                File captureFile = new File(FileUtils.getSubDir("tmp"), "test.jpg");
+                nodeBitmap = capture(captureFile);
+                if (nodeBitmap == null) {
+                    LauncherApplication.getInstance().showToast(context.getString(R.string.action_gesture__capture_screen_failed));
+                    listener.onCancel();
+                    return;
+                }
+            }
+
+            gesturePadView.setTargetImage(new BitmapDrawable(nodeBitmap));
+
+            AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
+                    .setTitle(R.string.gesture__please_record_gesture)
+                    .setView(v)
+                    .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            LogUtil.i(TAG, "Positive " + which);
+                            List<PointF> path = gesturePadView.getGesturePath();
+                            int gestureFilter = gesturePadView.getGestureFilter();
+                            // 拼装参数
+                            // 拼装参数
+                            OperationMethod method = new OperationMethod(action);
+                            method.putParam(OperationExecutor.GESTURE_PATH, JSON.toJSONString(path));
+                            method.putParam(OperationExecutor.GESTURE_FILTER, Integer.toString(gestureFilter));
+
+                            // 隐藏Dialog
+                            dialog.dismiss();
+
+                            listener.onProcessFunction(method, target);
+                        }
+                    }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            LogUtil.i(TAG, "Negative " + which);
+
+                            dialog.dismiss();
+                            listener.onCancel();
+                        }
+                    }).create();
+            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            dialog.setCanceledOnTouchOutside(false);                                   //点击外面区域不会让dialog消失
+            dialog.setCancelable(false);
+            dialog.show();
+
+            dialog.getWindow().setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT);
+
+        } catch (Exception e) {
+            LogUtil.e(TAG, "Login info dialog throw exception: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 截图
+     * @param captureFile 截图保留文件
+     * @return
+     */
+    private static Bitmap capture(File captureFile) {
+        DisplayMetrics metrics = new DisplayMetrics();
+        ((WindowManager) LauncherApplication.getInstance().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRealMetrics(metrics);
+
+        ScreenCaptureService captureService = LauncherApplication.service(ScreenCaptureService.class);
+        Bitmap bitmap = captureService.captureScreen(captureFile, metrics.widthPixels, metrics.heightPixels,
+                metrics.widthPixels, metrics.heightPixels);
+        // 原有截图方案失败
+        if (bitmap == null) {
+            String path = FileUtils.getPathInShell(captureFile);
+            CmdTools.execHighPrivilegeCmd("screencap -p \"" + path + "\"");
+            MiscUtil.sleep(1000);
+            bitmap = BitmapFactory.decodeFile(captureFile.getPath());
+            // 长宽不对
+            if (bitmap != null && bitmap.getWidth() != metrics.widthPixels) {
+                bitmap = Bitmap.createScaledBitmap(bitmap, metrics.widthPixels, metrics.heightPixels, false);
+            }
+        }
+        return bitmap;
     }
 
     /**

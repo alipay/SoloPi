@@ -15,6 +15,10 @@
  */
 package com.alipay.hulu.shared.display.items.base;
 
+import android.support.annotation.StringRes;
+
+import com.alipay.hulu.shared.display.items.util.FinalR;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,7 +35,10 @@ public @interface DisplayItem {
      * 显示名称
      * @return
      */
-    String name();
+    String name() default "";
+
+//    @StringRes
+    FinalR nameRes() default FinalR.NULL;
 
     /**
      * 需动态申请权限

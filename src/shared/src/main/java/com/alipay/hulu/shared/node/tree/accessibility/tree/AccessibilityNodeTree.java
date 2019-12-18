@@ -22,6 +22,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.service.SPService;
+import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.StringUtil;
@@ -256,10 +257,10 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             if (!StringUtil.containsChinese(content)) {
                 Rect rect = getNodeBound();
-                opContext.executor.executeCmdSync("input tap " + rect.centerX() + " " + rect.centerY(), 0);
+                opContext.executor.executeClick(rect.centerX(), rect.centerY());
                 MiscUtil.sleep(500);
 
-                opContext.executor.executeCmd("input text " + content);
+                opContext.executor.executeCmd("input text '" + content + "'");
                 MiscUtil.sleep(500);
 
                 opContext.notifyOnFinish(new Runnable() {
@@ -276,10 +277,10 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
                         LogUtil.e(TAG, "Start Input");
                         try {
                             String defaultIme = opContext.executor.executeCmdSync("settings get secure default_input_method");
-                            opContext.executor.executeCmdSync("settings put secure default_input_method com.alipay.hulu/.tools.AdbIME", 0);
+                            CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
                             Rect rect = getNodeBound();
 
-                            opContext.executor.executeCmdSync("input tap " + rect.centerX() + " " + rect.centerY(), 0);
+                            opContext.executor.executeClick(rect.centerX(), rect.centerY());
                             MiscUtil.sleep(1500);
                             opContext.executor.executeCmdSync("am broadcast -a ADB_INPUT_TEXT --es msg '" + content + "' --es default '" + StringUtil.trim(defaultIme) + "'", 0);
                         } catch (Exception e) {
@@ -310,10 +311,10 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
                         LogUtil.e(TAG, "Start Input");
                         try {
                             String defaultIme = opContext.executor.executeCmdSync("settings get secure default_input_method");
-                            opContext.executor.executeCmdSync("settings put secure default_input_method com.alipay.hulu/.tools.AdbIME", 0);
+                            CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
                             Rect rect = getNodeBound();
 
-                            opContext.executor.executeCmdSync("input tap " + rect.centerX() + " " + rect.centerY(), 0);
+                            opContext.executor.executeClick(rect.centerX(), rect.centerY());
                             MiscUtil.sleep(1500);
                             opContext.executor.executeCmdSync("am broadcast -a ADB_INPUT_TEXT --es msg '" + content + "' --es default '" + StringUtil.trim(defaultIme) + "'", 0);
 

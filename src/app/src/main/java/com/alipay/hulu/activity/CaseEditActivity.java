@@ -32,6 +32,7 @@ import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
+import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.fragment.CaseDescEditFragment;
 import com.alipay.hulu.fragment.CaseStepEditFragment;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
@@ -132,13 +133,13 @@ public class CaseEditActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         if (shouldSave && !saved) {
-            LauncherApplication.getInstance().showDialog(this, "是否保存用例", "是", new Runnable() {
+            LauncherApplication.getInstance().showDialog(this, getString(R.string.case_edit__should_save_case), getString(R.string.constant__yes), new Runnable() {
                 @Override
                 public void run() {
                     updateLocalCase();
                     finish();
                 }
-            }, "否", new Runnable() {
+            }, getString(R.string.constant__no), new Runnable() {
                 @Override
                 public void run() {
                     finish();
@@ -220,7 +221,7 @@ public class CaseEditActivity extends BaseActivity {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return position == 1? "用例信息": "用例步骤";
+            return position == 1? StringUtil.getString(R.string.case_edit__info): StringUtil.getString(R.string.case_edit__steps);
         }
         @Override
         public int getCount() {

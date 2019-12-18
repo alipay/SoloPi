@@ -24,6 +24,7 @@ import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.input.InputManager;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
@@ -36,9 +37,12 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.alibaba.fastjson.JSON;
 import com.alipay.hulu.R;
 import com.alipay.hulu.activity.NewRecordActivity;
 import com.alipay.hulu.activity.QRScanActivity;
+import com.alipay.hulu.bean.AdvanceCaseSetting;
+import com.alipay.hulu.bean.CaseParamBean;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.bean.DeviceInfo;
 import com.alipay.hulu.common.injector.InjectorService;
@@ -49,6 +53,7 @@ import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.injector.provider.Provider;
 import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.service.ScreenCaptureService;
+import com.alipay.hulu.common.service.TouchService;
 import com.alipay.hulu.common.service.base.ExportService;
 import com.alipay.hulu.common.service.base.LocalService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
@@ -306,6 +311,17 @@ public class CaseRecordManager implements ExportService {
         processors.add(AccessibilityNodeProcessor.class);
         operationService.configProcessors(processors);
         operationService.configProvider(AccessibilityProvider.class);
+        operationService.initParams();
+        AdvanceCaseSetting setting = JSON.parseObject(caseInfo.getAdvanceSettings(), AdvanceCaseSetting.class);
+        if (setting != null && setting.getParams() != null) {
+            Map<String, String> params = new HashMap<>(setting.getParams().size() + 1);
+            for (CaseParamBean caseParam: setting.getParams()) {
+                params.put(caseParam.getParamName(), caseParam.getParamDefaultValue());
+            }
+
+            // 设置参数
+            operationService.putAllRuntimeParamAtTop(params);
+        }
 
         // 查找package信息
         PackageInfo pkgInfo = ContextUtil.getPackageInfoByName(LauncherApplication.getContext()
@@ -317,12 +333,7 @@ public class CaseRecordManager implements ExportService {
         BackgroundExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                boolean result = PrepareUtil.doPrepareWork(app);
-                if (result) {
-                    AppUtil.forceStopApp(app);
-                    MiscUtil.sleep(1000);
-                    AppUtil.startApp(app);
-                }
+                PrepareUtil.doPrepareWork(app);
             }
         });
     }
@@ -335,8 +346,12 @@ public class CaseRecordManager implements ExportService {
         displayDialog = true;
 
         // 初始化
-        operationService.initParams();
         operationStepService.startRecord(caseInfo);
+
+        TouchService touchService = LauncherApplication.service(TouchService.class);
+        if (touchService != null) {
+            touchService.start();
+        }
 
         // 刷新数据导出
         if (stepProvider == null) {
@@ -362,7 +377,18 @@ public class CaseRecordManager implements ExportService {
      * 进入触摸屏蔽模式
      */
     protected void setServiceToTouchBlockMode() {
-        // 延迟500ms
+        LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setServiceToTouchBlockModeNoDelay();
+            }
+        }, 500);
+    }
+
+    /**
+     * 进入触摸屏蔽模式
+     */
+    protected void setServiceToTouchBlockModeNoDelay() {
         LogUtil.d(TAG, "进入触摸阻塞模式");
         touchBlockMode = true;
         injectorService.pushMessage(com.alipay.hulu.shared.event.constant.Constant.EVENT_ACCESSIBILITY_MODE, AccessibilityServiceImpl.MODE_BLOCK);
@@ -404,9 +430,9 @@ public class CaseRecordManager implements ExportService {
 
         LogUtil.i(TAG, "Start notify Touch Event at (%d, %d)", x, y);
 
-        // 看下是否点到Soloπ图标
+        // 看下是否点到SoloPi图标
         if (binder.checkInFloat(point)) {
-            LogUtil.i(TAG, "点到了Soloπ");
+            LogUtil.i(TAG, "点到了SoloPi");
             showFunctionView(null);
             return;
         }
@@ -486,7 +512,7 @@ public class CaseRecordManager implements ExportService {
         updateFloatIcon(R.drawable.solopi_running);
 
         // 如果是控件操作，需要记录操作控件信息
-        if (target != null && !(target instanceof CaptureTree) && captureService != null) {
+        if (target != null && !(target instanceof CaptureTree) && captureService != null && target.getCapture() == null) {
             DisplayMetrics metrics = new DisplayMetrics();
             windowManager.getDefaultDisplay().getRealMetrics(metrics);
 
@@ -506,8 +532,9 @@ public class CaseRecordManager implements ExportService {
             if (capture != null) {
                 // 截取区域
                 Rect rect = target.getNodeBound();
-                Rect scaledRect = RectUtil.safetyScale(rect, radio, capture.getWidth(),
-                        capture.getHeight());
+                // 多截取一些区域，防止查找时缺乏信息
+                Rect scaledRect = RectUtil.safetyExpend(RectUtil.safetyScale(rect, radio, capture.getWidth(),
+                        capture.getHeight()), 10, capture.getWidth(), capture.getHeight());
 
                 Bitmap crop = Bitmap.createBitmap(capture, scaledRect.left,
                         scaledRect.top, scaledRect.width(),
@@ -533,12 +560,19 @@ public class CaseRecordManager implements ExportService {
                     isExecuting = false;
                     if (!forceStopBlocking) {
                         setServiceToTouchBlockMode();
+                        notifyDialogDismiss(100);
                     }
                     updateFloatIcon(R.drawable.solopi_float);
                 }
             });
         } catch (Exception e) {
             LogUtil.e(TAG, "doRecord action throw : " + e.getMessage(), e);
+            isExecuting = false;
+            if (!forceStopBlocking) {
+                setServiceToTouchBlockMode();
+                notifyDialogDismiss(100);
+            }
+            updateFloatIcon(R.drawable.solopi_float);
         }
 
         if (step == null) {
@@ -602,6 +636,7 @@ public class CaseRecordManager implements ExportService {
         scrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.SCROLL_TO_TOP));
         scrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.SCROLL_TO_LEFT));
         scrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.SCROLL_TO_RIGHT));
+        scrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GESTURE));
         NODE_ACTION_MAP.put(R.string.function_group__scroll, scrollActions);
 
         NODE_KEYS.add(R.string.function_group__assert);
@@ -648,6 +683,9 @@ public class CaseRecordManager implements ExportService {
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_SCROLL_TO_TOP));
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_SCROLL_TO_LEFT));
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_SCROLL_TO_RIGHT));
+        gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_PINCH_OUT));
+        gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_PINCH_IN));
+        gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_GESTURE));
         GLOBAL_ACTION_MAP.put(R.string.function_group__scroll, gScrollActions);
 
         GLOBAL_KEYS.add(R.string.function_group__info);
@@ -732,7 +770,7 @@ public class CaseRecordManager implements ExportService {
                                 public void run() {
                                     captureTree.resetBound();
 
-                                    setServiceToTouchBlockMode();
+                                    setServiceToTouchBlockModeNoDelay();
                                     notifyDialogDismiss();
                                 }
                             });
@@ -789,7 +827,7 @@ public class CaseRecordManager implements ExportService {
                                 boolean processResult = processAction(method, node, context);
 
                                 // 进行后续处理
-                                if (processResult) {
+                                if (!processResult) {
                                     setServiceToTouchBlockMode();
                                     notifyDialogDismiss();
                                 }
@@ -804,7 +842,7 @@ public class CaseRecordManager implements ExportService {
                             ((CaptureTree) node).resetBound();
                         }
 
-                        setServiceToTouchBlockMode();
+                        setServiceToTouchBlockModeNoDelay();
                         notifyDialogDismiss();
                     }
                 });
@@ -858,6 +896,11 @@ public class CaseRecordManager implements ExportService {
             // 初始化运行环境
             operationService.initParams();
 
+            TouchService touchService = LauncherApplication.service(TouchService.class);
+            if (touchService != null) {
+                touchService.stop();
+            }
+
             boolean processed = operationStepService.stopRecord(context);
 
             eventService.stopTrackAccessibilityEvent();
@@ -877,7 +920,7 @@ public class CaseRecordManager implements ExportService {
             } else {
                 LauncherApplication.getInstance().stopServiceByName(CaseRecordManager.class.getName());
             }
-            return false;
+            return true;
         } else if (action == PerformActionEnum.PAUSE) {
             setServiceToNormalMode();
             displayDialog = true;
@@ -890,7 +933,7 @@ public class CaseRecordManager implements ExportService {
                     binder.registerFloatClickListener(DEFAULT_FLOAT_LISTENER);
                 }
             });
-            return false;
+            return true;
         } else if (action == PerformActionEnum.JUMP_TO_PAGE
                 || action == PerformActionEnum.LOAD_PARAM) {
             if (!StringUtil.equals(method.getParam("scan"), "1")) {
@@ -912,8 +955,9 @@ public class CaseRecordManager implements ExportService {
             }
         } else {
             operationAndRecord(method, node);
+            return true;
         }
-        return true;
+        return false;
     }
 
     @Subscriber(@Param(value = "FloatClickMethod", sticky = false))

@@ -107,7 +107,7 @@ public class ReplayListFragment extends BaseFragment {
     }
 
     public static String getTypeName(int type) {
-        return "本地";
+        return StringUtil.getString(R.string.replay_list__local);
     }
 
     @Override

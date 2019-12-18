@@ -16,12 +16,18 @@
 package com.alipay.hulu.common.utils.activity;
 
 import android.Manifest;
+import android.accessibilityservice.AccessibilityService;
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.LocaleList;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -44,17 +50,23 @@ import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
 import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.tools.CmdTools;
+import com.alipay.hulu.common.utils.Callback;
 import com.alipay.hulu.common.utils.ContextUtil;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.android.permission.FloatWindowManager;
+import com.android.permission.rom.MiuiUtils;
+import com.android.permission.rom.RomUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by qiaoruikai on 2018/10/15 5:20 PM.
@@ -76,6 +88,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
     public static final int PERMISSION_RECORD = 7;
     public static final int PERMISSION_ANDROID = 8;
     public static final int PERMISSION_DYNAMIC = 9;
+    public static final int PERMISSION_BACKGROUND = 10;
 
     public static volatile boolean runningStatus = false;
 
@@ -234,6 +247,9 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                 case "screenRecord":
                     group = PERMISSION_RECORD;
                     break;
+                case "background":
+                    group = PERMISSION_BACKGROUND;
+                    break;
                 default:
                     if (permission.startsWith("Android=")) {
                         group = PERMISSION_ANDROID;
@@ -332,6 +348,11 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                 break;
             case PERMISSION_DYNAMIC:
                 if (!processDynamicPermission(permission)) {
+                    return;
+                }
+                break;
+            case PERMISSION_BACKGROUND:
+                if (!processBackgroundPermission()) {
                     return;
                 }
                 break;
@@ -498,7 +519,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
      */
     private boolean processUsagePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && !PermissionUtil.isUsageStatPermissionOn(this)) {
-            showAction(StringUtil.getString(R.string.device_usage_permission), getString(R.string.permission__i_open), new Runnable() {
+            showAction(StringUtil.getString(R.string.device_usage_permission), getString(R.string.permission__i_grant), new Runnable() {
                 @Override
                 public void run() {
                     if (PermissionUtil.isUsageStatPermissionOn(PermissionDialogActivity.this)) {
@@ -529,29 +550,76 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
 
         // 没有注册上AccessibilityService，需要开辅助功能
         if (service.getMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, null) == null) {
-            showAction(StringUtil.getString(R.string.accessibility_permission), getString(R.string.permission__i_open), new Runnable() {
-                @Override
-                public void run() {
-                    if (service.getMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, null) != null) {
-                        processedAction();
-                    } else {
-                        LauncherApplication.toast(R.string.permission__valid_fail);
+            if (SPService.getBoolean(SPService.KEY_SKIP_ACCESSIBILITY, true)) {
+                CmdTools.execHighPrivilegeCmd("settings put secure enabled_accessibility_services com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
+                CmdTools.execHighPrivilegeCmd("settings put secure accessibility_enabled 1");
+                final CountDownLatch latch = new CountDownLatch(1);
+                InjectorService.g().waitForMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, new Callback<AccessibilityService>() {
+                    @Override
+                    public void onResult(AccessibilityService item) {
+                        latch.countDown();
                     }
-                }
-            }, getString(R.string.constant__confirm), new Runnable() {
-                @Override
-                public void run() {
-                    Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                    // | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivityForResult(intent, ACCESSIBILITY_REQUEST);
-                }
-            });
+
+                    @Override
+                    public void onFailed() {
+                        latch.countDown();
+                    }
+                });
+
+                BackgroundExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            latch.await(2000, TimeUnit.MILLISECONDS);
+                        } catch (InterruptedException e) {
+                            LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
+                        }
+                        LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (service.getMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, null) != null) {
+                                    processedAction();
+                                } else {
+                                    processAccessibilityByHand(service);
+                                }
+                            }
+                        });
+                    }
+                });
+            } else {
+                processAccessibilityByHand(service);
+            }
+
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * 手动处理辅助功能问题
+     * @param service
+     */
+    private void processAccessibilityByHand(final InjectorService service) {
+        showAction(StringUtil.getString(R.string.accessibility_permission), getString(R.string.permission__i_grant), new Runnable() {
+            @Override
+            public void run() {
+                if (service.getMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, null) != null) {
+                    processedAction();
+                } else {
+                    LauncherApplication.toast(R.string.permission__valid_fail);
+                }
+            }
+        }, getString(R.string.constant__confirm), new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                // | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivityForResult(intent, ACCESSIBILITY_REQUEST);
+            }
+        });
     }
 
     /**
@@ -586,7 +654,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                 startActivityForResult(intent, MEDIA_PROJECTION_REQUEST);
             }
 
-            showAction(StringUtil.getString(R.string.record_screen_permission), getString(R.string.permission__i_permit), new Runnable() {
+            showAction(StringUtil.getString(R.string.record_screen_permission), getString(R.string.permission__i_grant), new Runnable() {
                 @Override
                 public void run() {
                     if (injectorService.getMessage(Constant.EVENT_RECORD_SCREEN_CODE, Intent.class) != null) {
@@ -636,6 +704,32 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
             return false;
         }
 
+        return true;
+    }
+
+    /**
+     * 处理后台弹出界面权限
+     * @return
+     */
+    private boolean processBackgroundPermission() {
+        if (RomUtils.checkIsMiuiRom()) {
+            final String content = getString(R.string.permission__open_background_permission);
+            if (!SPService.getBoolean(content, false)) {
+                showAction(content, getString(R.string.permission__opened), new Runnable() {
+                    @Override
+                    public void run() {
+                        SPService.putBoolean(content, true);
+                        processedAction();
+                    }
+                }, getString(R.string.permission__go_to_open), new Runnable() {
+                    @Override
+                    public void run() {
+                        MiuiUtils.applyMiuiPermission(PermissionDialogActivity.this);
+                    }
+                });
+                return false;
+            }
+        }
         return true;
     }
 
@@ -808,6 +902,27 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
 
             processedAction();
         }
+    }
+
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            newBase = updateResources(newBase);
+        }
+        super.attachBaseContext(newBase);
+    }
+
+    @TargetApi(Build.VERSION_CODES.N)
+    private static Context updateResources(Context context) {
+
+        Resources resources = context.getResources();
+        Locale locale = LauncherApplication.getInstance().getLanguageLocale();
+
+        Configuration configuration = resources.getConfiguration();
+        configuration.setLocale(locale);
+        configuration.setLocales(new LocaleList(locale));
+        return context.createConfigurationContext(configuration);
     }
 
     /**

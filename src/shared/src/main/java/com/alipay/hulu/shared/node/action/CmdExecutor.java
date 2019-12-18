@@ -17,13 +17,16 @@ package com.alipay.hulu.shared.node.action;
 
 import android.os.Looper;
 
+import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.bean.ContinueGesture;
+import com.alipay.hulu.common.service.TouchService;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.MiscUtil;
+import com.alipay.hulu.shared.event.touch.CmdTouchService;
 import com.android.permission.rom.RomUtils;
 
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +36,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class CmdExecutor {
     private ExecutorService executorService;
+    private TouchService touchService;
 
     private int clickType = OperationExecutor.CLICK_TYPE_ADB_TAP;
     private String touchDevice;
@@ -89,6 +93,7 @@ public class CmdExecutor {
         this.executorService = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
                 0, TimeUnit.MILLISECONDS,
                 new SynchronousQueue<Runnable>());
+        touchService = LauncherApplication.service(TouchService.class);
     }
 
     public void setClickType(int clickType) {
@@ -105,6 +110,53 @@ public class CmdExecutor {
 
     public void setFactorY(float factorY) {
         this.factorY = factorY;
+    }
+
+    /**
+     * 执行缩放
+     * @param x 中心X
+     * @param y 中心Y
+     * @param fromDis 起始距离
+     * @param toDis 重点距离
+     * @param duration 耗时
+     * @return
+     */
+    public boolean executePinch(int x, int y, int fromDis, int toDis, int duration) {
+        if (touchService.supportGesture()) {
+            touchService.pinch(x, y, fromDis, toDis, duration);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * 是否支持手势操作
+     * @return
+     */
+    public boolean supportGesture() {
+        return touchService.supportGesture();
+    }
+
+    /**
+     * 执行手势操作
+     * @param gesture
+     */
+    public boolean executeGesture(ContinueGesture gesture) {
+        if (touchService.supportGesture()) {
+            touchService.gesture(gesture);
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean executePress(int x, int y, int duration) {
+        if (touchService.supportGesture()) {
+            touchService.press(x, y, duration);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -125,15 +177,42 @@ public class CmdExecutor {
     }
 
     /**
+     * 执行滑动
+     * @param fromX
+     * @param fromY
+     * @param toX
+     * @param toY
+     * @param duration
+     */
+    public void executeScroll(int fromX, int fromY, int toX, int toY, int duration) {
+        touchService.scroll(fromX, fromY, toX, toY, duration);
+    }
+
+    /**
+     * 执行滑动
+     * @param fromX
+     * @param fromY
+     * @param toX
+     * @param toY
+     * @param duration
+     */
+    public void executeScrollSync(int fromX, int fromY, int toX, int toY, int duration) {
+        touchService.scroll(fromX, fromY, toX, toY, duration);
+    }
+
+    /**
      * 执行点击操作
      * @param x
      * @param y
      */
     public void executeClick(int x, int y) {
+        if (!(touchService instanceof CmdTouchService)) {
+            touchService.click(x, y);
+            return;
+        }
         String cmd;
         if (clickType == OperationExecutor.CLICK_TYPE_ADB_TAP) {
-            cmd = "input tap " + x + " " + y;
-            executeCmd(cmd);
+            touchService.click(x, y);
         } else {
             int realX = (int) (x / factorX);
             int realY = (int) (y / factorY);
@@ -168,20 +247,13 @@ public class CmdExecutor {
      * @param x
      * @param y
      */
-    public void executeClickAsync(int x, int y) {
-        String cmd;
-        if (clickType == OperationExecutor.CLICK_TYPE_ADB_TAP) {
-            cmd = "input tap " + x + " " + y;
-        } else {
-            int realX = (int) (x / factorX);
-            int realY = (int) (y / factorY);
-            cmd = String.format(Locale.CHINA,
-                    "sendevent %1$s 1 330 1 && sendevent %1$s 3 53 %2$d &&" +
-                            " sendevent %1$s 3 54 %3$d && sendevent %1$s 0 0 0 &&" +
-                            " sendevent %1$s 1 330 0 &&  sendevent %1$s 0 0 0", touchDevice, realX, realY);
-        }
-
-        executeCmdAsync(cmd);
+    public void executeClickAsync(final int x, final int y) {
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                executeClick(x, y);
+            }
+        });
     }
 
     /**

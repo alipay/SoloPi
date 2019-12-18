@@ -36,8 +36,10 @@ import com.alipay.hulu.shared.node.utils.AssetsManager;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import okhttp3.Call;
@@ -73,7 +75,7 @@ public class PatchRequest {
         }
 
         // 替换ABI参数
-        String realUrl = StringUtil.patternReplace(storedUrl, "<abi>", DeviceInfoUtil.getCPUABI());
+        String realUrl = StringUtil.patternReplace(storedUrl, "<abi>", filterAcceptAbi(DeviceInfoUtil.getCPUABI()));
 
         LogUtil.i(TAG, "Start request patch list on: " + realUrl);
 
@@ -88,7 +90,7 @@ public class PatchRequest {
             public void onFailure(Call call, IOException e) {
                 LogUtil.e(TAG, "抛出IO异常，" + e.getMessage(), e);
                 if (activity != null) {
-                    activity.toastLong("Patch 更新异常,可能是cpu架构不支持 " + e.getMessage());
+                    activity.toastLong(activity.getString(R.string.constant__plugin_load_fail) + e.getMessage());
                 }
             }
         });
@@ -210,5 +212,25 @@ public class PatchRequest {
 
         // 更新本地插件版本
         ClassUtil.updateAvailablePatches(patchMap);
+    }
+
+    private static final Set<String> ACCEPT_ABI = new HashSet<String>() {
+        {
+            add("armeabi");
+            add("armeabi-v7a");
+            add("arm64-v8a");
+        }
+    };
+
+    /**
+     * 过滤可用ABI
+     * @param abi
+     * @return
+     */
+    private static String filterAcceptAbi(String abi) {
+        if (ACCEPT_ABI.contains(abi)) {
+            return abi;
+        }
+        return "armeabi-v7a";
     }
 }

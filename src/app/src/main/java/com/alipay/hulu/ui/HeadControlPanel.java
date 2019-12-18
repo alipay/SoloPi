@@ -72,8 +72,8 @@ public class HeadControlPanel extends RelativeLayout {
             real = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
 
-        // 保证右侧16DP间距
-        real.setMarginEnd(ContextUtil.dip2px(getContext(), 16));
+        // 保证右侧4DP间距
+        real.setMarginEnd(ContextUtil.dip2px(getContext(), 8));
         v.setLayoutParams(real);
 
         headMenuLayout.addView(v, 0);
@@ -96,8 +96,8 @@ public class HeadControlPanel extends RelativeLayout {
             real = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
 
-        // 保证左侧16DP间距
-        real.setMarginStart(ContextUtil.dip2px(getContext(), 16));
+        // 保证左侧4DP间距
+        real.setMarginStart(ContextUtil.dip2px(getContext(), 8));
         v.setLayoutParams(real);
 
         headMenuLayout.addView(v);
@@ -111,6 +111,12 @@ public class HeadControlPanel extends RelativeLayout {
 
 	public void setBackIconClickListener(OnClickListener listener) {
 		backIcon.setImageResource(R.drawable.back_angel);
+		backIcon.setVisibility(VISIBLE);
+		backIcon.setOnClickListener(listener);
+	}
+
+	public void setLeftIconClickListener(int drawableId, OnClickListener listener) {
+		backIcon.setImageResource(drawableId);
 		backIcon.setVisibility(VISIBLE);
 		backIcon.setOnClickListener(listener);
 	}

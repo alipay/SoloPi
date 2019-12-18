@@ -24,16 +24,18 @@ import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
+import com.alipay.hulu.shared.R;
 import com.alipay.hulu.shared.display.items.base.DisplayItem;
 import com.alipay.hulu.shared.display.items.base.Displayable;
 import com.alipay.hulu.shared.display.items.base.RecordPattern;
+import com.alipay.hulu.shared.display.items.util.FinalR;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@DisplayItem(name = "网络", trigger = "清零")
+@DisplayItem(nameRes = FinalR.NETWORK, trigger = "清零")
 public class NetworkTools implements Displayable{
 
 	private static final float KB_MILLION_SECOND = 1000 / 1024f;

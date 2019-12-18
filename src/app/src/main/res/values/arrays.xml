@@ -14,14 +14,7 @@
   ~ limitations under the License.
 -->
 <resources>
-
-
-    <string-array name="remoteMode">
-        <item>从机模式</item>
-        <item>主机模式</item>
-    </string-array>
-
-    <string-array name="video_resolutions">
+    <string-array name="video_resolutions" translatable="false">
         <item>720x480</item>
         <item>480x360</item>
         <item>256x144</item>
@@ -30,7 +23,7 @@
         <item>3860x2160</item>
     </string-array>
 
-    <string-array name="video_bitrates">
+    <string-array name="video_bitrates" translatable="false">
         <item>2500</item>
         <item>800</item>
         <item>1200</item>
@@ -44,7 +37,7 @@
         <item>25000</item>
     </string-array>
 
-    <string-array name="video_framerates">
+    <string-array name="video_framerates" translatable="false">
         <item>60</item>
         <item>15</item>
         <item>25</item>
@@ -52,7 +45,7 @@
         <item>90</item>
         <item>120</item>
     </string-array>
-    <string-array name="video_except_diff">
+    <string-array name="video_except_diff" translatable="false">
         <item>2</item>
         <item>1</item>
         <item>0.5</item>
@@ -62,7 +55,19 @@
     </string-array>
 
     <string-array name="whileMode">
-        <item>次数循环</item>
-        <item>指令循环</item>
+        <item>@string/constant__while_mode_count</item>
+        <item>@string/constant__while_mode_condition</item>
+    </string-array>
+    <string-array name="default_screen_rotation">
+        <item>@string/rotation_0</item>
+        <item>@string/rotation_90</item>
+        <item>@string/rotation_180</item>
+        <item>@string/rotation_270</item>
+    </string-array>
+
+    <string-array name="language" translatable="false">
+        <item>@string/language__default</item>
+        <item>中文</item>
+        <item>English</item>
     </string-array>
 </resources>

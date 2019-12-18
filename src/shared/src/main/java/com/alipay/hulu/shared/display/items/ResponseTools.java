@@ -26,10 +26,12 @@ import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.shared.R;
 import com.alipay.hulu.shared.display.items.base.DisplayItem;
 import com.alipay.hulu.shared.display.items.base.Displayable;
 import com.alipay.hulu.shared.display.items.base.RecordPattern;
 import com.alipay.hulu.shared.display.items.data.EventsResponseType;
+import com.alipay.hulu.shared.display.items.util.FinalR;
 import com.alipay.hulu.shared.event.EventService;
 import com.alipay.hulu.shared.event.bean.UniversalEventBean;
 import com.alipay.hulu.shared.event.constant.Constant;
@@ -43,8 +45,9 @@ import java.util.Map;
  * Created by cathor on 17/7/25.
  */
 
-@DisplayItem(name = "响应耗时", permissions = {Settings.ACTION_ACCESSIBILITY_SETTINGS})
+@DisplayItem(nameRes = FinalR.RESPONSE_TIME, permissions = {Settings.ACTION_ACCESSIBILITY_SETTINGS})
 public class ResponseTools implements Displayable {
+    public static final int RES = 1;
     private static final String TAG = "ResponseTools";
 
     private EventsResponseType eventResponse = new EventsResponseType();

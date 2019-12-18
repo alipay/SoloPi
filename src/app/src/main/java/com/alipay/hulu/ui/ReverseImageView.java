@@ -123,7 +123,7 @@ public class ReverseImageView extends AppCompatImageView {
      */
     private static Bitmap getBitmap(Context context,int vectorDrawableId) {
         Bitmap bitmap;
-        if (Build.VERSION.SDK_INT>Build.VERSION_CODES.LOLLIPOP){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
             Drawable vectorDrawable = context.getDrawable(vectorDrawableId);
             bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
                     vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);

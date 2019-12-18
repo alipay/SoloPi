@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Created by qiaoruikai on 2018/10/15 2:27 PM.
  */
 @LocalService
-public class DisplayProvider implements ExportService{
+public class DisplayProvider implements ExportService {
     private static final String TAG = "DisplayProvider";
 
     public static final int DISPLAY_MODE = 0;

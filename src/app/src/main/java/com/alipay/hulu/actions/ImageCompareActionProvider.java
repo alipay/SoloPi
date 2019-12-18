@@ -157,7 +157,7 @@ public class ImageCompareActionProvider implements ActionProvider {
                     }, 1000);
 
                     // 执行adb命令
-                    CmdTools.execAdbCmd("input tap " + target.centerX() + " " + target.centerY(), 2000);
+                    context.executor.executeClick(target.centerX(), target.centerY());
 
                     // 等500ms
                     MiscUtil.sleep(500);
@@ -255,8 +255,8 @@ public class ImageCompareActionProvider implements ActionProvider {
         Map<String, String> actionMap = new HashMap<>(2);
 
         // 配置功能项
-        actionMap.put(ACTION_ASSERT_SCREENSHOT, "截图断言");
-        actionMap.put(ACTION_CLICK_BY_SCREENSHOT, "根据截图点击");
+        actionMap.put(ACTION_ASSERT_SCREENSHOT, StringUtil.getString(R.string.image_compare__screenshot_assert));
+        actionMap.put(ACTION_CLICK_BY_SCREENSHOT, StringUtil.getString(R.string.image_compare__screenshot_click));
 
         return actionMap;
     }

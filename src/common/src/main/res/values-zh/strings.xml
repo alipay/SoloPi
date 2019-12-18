@@ -1,0 +1,54 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<resources>
+    <string name="app_name">SoloPi</string>
+    <string name="permission_default">检查权限中</string>
+    <string name="scheme_app_desc">自动化测试工具</string>
+    <string name="android_version_error">此项功能依赖Android SDK版本%d,当前版本为%d</string>
+    <string name="request_dynamic_permission">SoloPi需要申请%s，共%d项权限，请点击确定进行授权</string>
+    <string name="record_screen_permission">SoloPi需要申请屏幕录制权限，请点击确定以允许SoloPi使用屏幕录制功能</string>
+    <string name="record_screen_android_version_error">屏幕录制需要Android SDK版本不小于21, 当前版本为%d</string>
+    <string name="accessibility_permission">SoloPi需要使用辅助功能，请点击确定前往开启SoloPi辅助功能，如果系统提示已开启，请尝试关闭后重新开启</string>
+    <string name="adb_permission"><![CDATA[SoloPi需要申请ADB权限，请连接电脑并在电脑输入\"adb tcpip 5555\"后点击确定进行连接\n<b style=\'color:red\'>请注意保护设备的隐私安全，开启ADB权限有可能导致设备被他人恶意侵入</b>]]></string>
+    <string name="root_permission">SoloPi需要申请Root权限，请Root后使用</string>
+    <string name="float_permission">SoloPi需要悬浮窗权限，请点击确定前往授权</string>
+    <string name="permission_list_error">权限申请异常</string>
+    <string name="device_usage_permission">SoloPi需要访问设备使用情况，请点击确定前往开启</string>
+    <string name="adb_open_advice">如有ADB连接电脑提示弹窗，请点击允许</string>
+    <string name="open_adb_permission_failed">开启ADB权限失败，请连接电脑并在命令行输入\"adb tcpip 5555\"后再点击重试</string>
+    <string name="constant__start_execution">开始执行</string>
+    <string name="cmd__adb_break">ADB连接中断，请尝试重新开启调试端口</string>
+    <string name="constant__sure">好的</string>
+    <string name="constant__cancel">取消</string>
+    <string name="constant__global">全局</string>
+    <string name="constant__app">应用</string>
+    <string name="constant__confirm">确定</string>
+    <string name="permission__request_permission">权限申请(</string>
+    <string name="constant__no_inform">不再提示</string>
+    <string name="file_choose__create_folder">创建新文件夹</string>
+    <string name="device_info__to_string">型号：%s\n品牌：%s\n制造商：%s\n产品名：%s\n系统版本号：%s\nSDK NO：%d\nSN：%s\n屏幕物理尺寸：%s\n屏幕显示尺寸：%s\n屏幕密度：%s\n屏幕密度DPI：%d\nIP：%s\nMAC：%s\nRAM：%dGB\nCPU ABI：%s</string>
+    <string name="permission__no_float_permission">悬浮窗权限未获取</string>
+    <string name="permission__i_grant">我已授权</string>
+    <string name="permission__i_know">我知道了</string>
+    <string name="permission__valid_fail">校验失败</string>
+    <string name="permission__no_record_info">未获取录屏信息</string>
+    <string name="permission__splash">/</string>
+    <string name="permission__right_parentheses">)</string>
+    <string name="file_choose__select_dir">选择目录</string>
+    <string name="permission__open_background_permission">MIUI请开启后台弹出界面权限</string>
+    <string name="permission__opened">我已开启</string>
+    <string name="permission__go_to_open">前往开启</string>
+</resources>

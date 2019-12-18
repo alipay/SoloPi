@@ -15,9 +15,15 @@
  */
 package com.alipay.hulu.activity;
 
+import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.LocaleList;
+import android.support.annotation.IdRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
@@ -30,11 +36,12 @@ import android.widget.Toast;
 
 import com.alipay.hulu.R;
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.utils.DeviceInfoUtil;
 import com.alipay.hulu.common.utils.LogUtil;
-import com.alipay.hulu.common.utils.StringUtil;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -73,6 +80,25 @@ public abstract class BaseActivity extends AppCompatActivity {
             getScreenSizeInfo();
             initializeScreenInfo = true;
         }
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            newBase = updateResources(newBase);
+        }
+        super.attachBaseContext(newBase);
+    }
+
+    @TargetApi(Build.VERSION_CODES.N)
+    private static Context updateResources(Context context) {
+        Resources resources = context.getResources();
+        Locale locale = LauncherApplication.getInstance().getLanguageLocale();
+
+        Configuration configuration = resources.getConfiguration();
+        configuration.setLocale(locale);
+        configuration.setLocales(new LocaleList(locale));
+        return context.createConfigurationContext(configuration);
     }
 
     @Override
@@ -147,7 +173,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (toast == null) {
-                    toast = Toast.makeText(MyApplication.getContext(), msg, Toast.LENGTH_SHORT);
+                    toast = Toast.makeText(LauncherApplication.getInstance(), msg, Toast.LENGTH_SHORT);
                 } else {
                     toast.setText(msg);
                 }
@@ -190,7 +216,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (toast == null) {
-                    toast = Toast.makeText(MyApplication.getContext(), msg, Toast.LENGTH_LONG);
+                    toast = Toast.makeText(LauncherApplication.getInstance(), msg, Toast.LENGTH_LONG);
                 } else {
                     toast.setText(msg);
                 }
@@ -220,7 +246,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     public void dismissProgressDialog() {
         runOnUiThread(new Runnable() {
             public void run() {
-                if (progressDialog != null) {
+                if (progressDialog != null && progressDialog.isShowing()) {
                     progressDialog.dismiss();
                 }
             }
@@ -273,5 +299,9 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
 
         return null;
+    }
+
+    protected   <T extends View> T _findViewById(@IdRes int resId) {
+        return (T) findViewById(resId);
     }
 }

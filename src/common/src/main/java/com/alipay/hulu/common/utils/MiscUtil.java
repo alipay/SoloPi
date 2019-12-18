@@ -39,14 +39,6 @@ public class MiscUtil {
         }
     }
 
-    public static String generateSwipeCmd(int fromX, int fromY, int toX, int toY, long duration) {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            return "input swipe " + fromX + " " + fromY + " " + toX + " " + toY;
-        } else {
-            return "input swipe " + fromX + " " + fromY + " " + toX + " " + toY + " " + duration;
-        }
-    }
-
     public static String stackTraceToString(StackTraceElement[] stackTraceElements) {
         if (stackTraceElements == null || stackTraceElements.length <= 0) {
             return "";

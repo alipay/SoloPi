@@ -150,23 +150,23 @@ public class OperationUtil {
                     Rect bound = operationNode.getNodeBound();
                     Point screenSize = DeviceInfoUtil.realScreenSize;
                     LogUtil.d(TAG, "控件空间属性：%s, 屏幕属性：%s",  bound, screenSize);
-                    if (bound.bottom <= 5) {
-                        CmdTools.execHighPrivilegeCmd(MiscUtil.generateSwipeCmd(screenSize.x / 2, screenSize.y / 5, screenSize.x / 2, screenSize.y / 2, 1000));
+                    if (bound.top <= 5 && bound.bottom <= 5) {
+                        service.doSomeAction(new OperationMethod(PerformActionEnum.GLOBAL_SCROLL_TO_BOTTOM), null);
                         MiscUtil.sleep(2500);
                         scrollCount ++;
                         service.invalidRoot();
                     } else if (bound.top >= screenSize.y - 5) {
-                        CmdTools.execHighPrivilegeCmd(MiscUtil.generateSwipeCmd(screenSize.x / 2, screenSize.y / 5 * 4, screenSize.x / 2, screenSize.y / 2, 1000));
+                        service.doSomeAction(new OperationMethod(PerformActionEnum.GLOBAL_SCROLL_TO_TOP), null);
                         MiscUtil.sleep(2500);
                         scrollCount ++;
                         service.invalidRoot();
                     } else if (bound.centerX() <= 5) {
-                        CmdTools.execHighPrivilegeCmd(MiscUtil.generateSwipeCmd(screenSize.x / 5, screenSize.y / 2, screenSize.x / 2, screenSize.y / 2, 1000));
+                        service.doSomeAction(new OperationMethod(PerformActionEnum.GLOBAL_SCROLL_TO_RIGHT), null);
                         MiscUtil.sleep(2500);
                         scrollCount ++;
                         service.invalidRoot();
                     } else if (bound.centerX() >= screenSize.x - 5) {
-                        CmdTools.execHighPrivilegeCmd(MiscUtil.generateSwipeCmd(screenSize.x / 5 * 4, screenSize.y / 2, screenSize.x / 2, screenSize.y / 2, 1000));
+                        service.doSomeAction(new OperationMethod(PerformActionEnum.GLOBAL_SCROLL_TO_LEFT), null);
                         MiscUtil.sleep(2500);
                         scrollCount ++;
                         service.invalidRoot();

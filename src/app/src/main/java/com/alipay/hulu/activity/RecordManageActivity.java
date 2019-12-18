@@ -31,9 +31,11 @@ import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.ui.HeadControlPanel;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -42,6 +44,11 @@ import java.util.regex.Pattern;
  */
 public class RecordManageActivity extends BaseActivity {
     private static final String TAG = "RecordManageActivity";
+
+    private static Pattern newPattern = Pattern.compile("\\d{14}_\\d{14}");
+    private static Pattern midPattern = Pattern.compile("\\d{2}月\\d{2}日\\d{2}:\\d{2}:\\d{2}-\\d{2}月\\d{2}日\\d{2}:\\d{2}:\\d{2}");
+    private static Pattern oldPattern = Pattern.compile("\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}_\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}");
+
 
     // Views
     private HeadControlPanel headPanel;
@@ -179,20 +186,28 @@ public class RecordManageActivity extends BaseActivity {
      */
     private void refreshRecords() {
         if (recordDir != null && recordDir.exists() && recordDir.isDirectory()) {
-            File[] files = recordDir.listFiles();
-            recordFolderNames.clear();
-            LogUtil.i(TAG, "get files " +  StringUtil.hide(files));
-
-            Pattern newPattern = Pattern.compile("\\d{2}月\\d{2}日\\d{2}:\\d{2}:\\d{2}-\\d{2}月\\d{2}日\\d{2}:\\d{2}:\\d{2}");
-            Pattern oldPattern = Pattern.compile("\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}_\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}");
-
-            // 记录所有文件夹
-            for (File file : files) {
-                if (file.isDirectory() && (newPattern.matcher(file.getName()).matches() || oldPattern.matcher(file.getName()).matches())) {
-                    recordFolderNames.add(file.getName());
+            // 记录所有相关文件夹
+            File[] list = recordDir.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File file) {
+                    return file.isDirectory() && (newPattern.matcher(file.getName()).matches() || midPattern.matcher(file.getName()).matches() || oldPattern.matcher(file.getName()).matches());
                 }
+            });
+            LogUtil.i(TAG, "get files " +  StringUtil.hide(list));
+
+            // 修改顺序排序
+            Arrays.sort(list, new Comparator<File>() {
+                @Override
+                public int compare(File o1, File o2) {
+                    return Long.valueOf(o2.lastModified()).compareTo(o1.lastModified());
+                }
+            });
+
+            recordFolderNames.clear();
+            for (File f: list) {
+                recordFolderNames.add(f.getName());
             }
-            Collections.sort(recordFolderNames);
+
             LogUtil.i(TAG, "get folders: " + recordFolderNames.size());
         }
     }

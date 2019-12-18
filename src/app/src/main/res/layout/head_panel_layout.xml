@@ -22,9 +22,10 @@
 
     <ImageView
         android:id="@+id/back_icon"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
-        android:layout_marginStart="16dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="8dp"
+        android:layout_marginStart="8dp"
         android:layout_alignParentLeft="true"
         android:scaleType="centerInside"
         android:layout_centerVertical="true" />
@@ -43,7 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="8dp"
         android:layout_centerVertical="true"
         android:gravity="center_vertical"
         android:orientation="horizontal">
@@ -51,8 +52,9 @@
         <ImageView
             android:visibility="gone"
             android:id="@+id/info_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
             android:scaleType="centerInside" />
 
     </LinearLayout>

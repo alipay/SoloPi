@@ -233,9 +233,9 @@ public class RecordScreenActionProvider implements ActionProvider {
 
         Map<String, String> desc = new HashMap<>(2);
         if (!isRecording) {
-            desc.put(ACTION_START_RECORD_SCREEN, "开始响应耗时计算");
+            desc.put(ACTION_START_RECORD_SCREEN, StringUtil.getString(R.string.record_screen__start_launch_time));
         } else {
-            desc.put(ACTION_STOP_RECORD_SCREEN, "结束响应耗时计算");
+            desc.put(ACTION_STOP_RECORD_SCREEN, StringUtil.getString(R.string.record_screen__stop_launch_time));
         }
 
         return desc;

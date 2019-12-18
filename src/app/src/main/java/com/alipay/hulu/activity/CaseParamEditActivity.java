@@ -140,13 +140,13 @@ public class CaseParamEditActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         if (!saved) {
-            LauncherApplication.getInstance().showDialog(this, "是否保存用例", "是", new Runnable() {
+            LauncherApplication.getInstance().showDialog(this, getString(R.string.case_edit__should_save_case), getString(R.string.constant__yes), new Runnable() {
                 @Override
                 public void run() {
                     saveCase();
                     finish();
                 }
-            }, "否", new Runnable() {
+            }, getString(R.string.constant__no), new Runnable() {
                 @Override
                 public void run() {
                     finish();

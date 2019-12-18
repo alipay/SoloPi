@@ -64,6 +64,10 @@ public class CaseParamUnionFragment extends CaseParamEditActivity.CaseParamFragm
     public void setAdvanceCaseSetting(@NonNull AdvanceCaseSetting advanceCaseSetting) {
         storedParams = null;
         presetParams = advanceCaseSetting.getParams();
+        if (presetParams == null) {
+            presetParams = new ArrayList<>();
+        }
+
         runningParam = advanceCaseSetting.getRunningParam();
         if (runningParam == null) {
             runningParam = new CaseRunningParam();

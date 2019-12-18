@@ -23,6 +23,16 @@
         >
         <activity android:name=".utils.activity.PermissionDialogActivity"
             android:theme="@style/PermissionAppDialogTheme"/>
+        <activity android:name=".scheme.SchemeActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <data android:scheme="solopi" android:host="startaction" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+            </intent-filter>
+        </activity>
+
         <activity android:name=".utils.activity.FileChooseDialogActivity"
             android:theme="@style/PermissionAppDialogTheme" />
     </application>

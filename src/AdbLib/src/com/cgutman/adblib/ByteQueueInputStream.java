@@ -31,9 +31,7 @@ package com.cgutman.adblib;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * 参照ByteArrayInputStream实现，支持使用byte[]队列作为数据源
@@ -49,14 +47,12 @@ class ByteQueueInputStream extends InputStream {
     /**
      * 数据源
      */
-    protected final Queue<byte[]> readQueue;
+    protected final LinkedBlockingQueue<byte[]> readQueue;
 
     /**
      * 当前读取列表
      */
     private byte[] currentBytes;
-
-    private AtomicBoolean waitingAdd = new AtomicBoolean(false);
 
     /**
      * The index of the next character to read from the input stream buffer.
@@ -111,9 +107,11 @@ class ByteQueueInputStream extends InputStream {
      *
      */
     public ByteQueueInputStream() {
-        this.readQueue = new ConcurrentLinkedQueue<>();
+        this.readQueue = new LinkedBlockingQueue<>();
         this.pos = 0;
         this.count = 0;
+
+        // 最大20K
         this.currentBytes = null;
         this.isRunning = true;
     }
@@ -124,9 +122,6 @@ class ByteQueueInputStream extends InputStream {
 
     public void closeSocketForwardingMode() {
         this.socketForward = false;
-        synchronized (addLock) {
-            addLock.notifyAll();
-        }
     }
 
     /**
@@ -134,30 +129,42 @@ class ByteQueueInputStream extends InputStream {
      * @param bytes
      */
     public void addBytes(byte[] bytes) {
+        long startTime = System.currentTimeMillis();
         this.readQueue.add(bytes);
-
-        if (socketForward) {
-            synchronized (addLock) {
-                addLock.notifyAll();
-            }
-        }
     }
 
     /**
      * 加载数据，直到当前bytes非空或者队列为空
      */
     private void pollToAvailable() {
-        while (pos >= count) {
-            currentBytes = this.readQueue.poll();
+        if (pos >= count) {
+            synchronized (lock) {
+                while (pos >= count) {
+                    // 非forward模式，不强制poll
+                    if (!socketForward) {
+                        if (readQueue.isEmpty()) {
+                            pos = 0;
+                            count = 0;
+                            return;
+                        }
+                    }
 
-            // 重设
-            if (currentBytes != null) {
-                pos = 0;
-                count = currentBytes.length;
-            } else {
-                pos = 0;
-                count = 0;
-                break;
+                    try {
+                        currentBytes = this.readQueue.take();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    // 重设
+                    if (currentBytes != null) {
+                        pos = 0;
+                        count = currentBytes.length;
+                    } else {
+                        pos = 0;
+                        count = 0;
+                        break;
+                    }
+                }
             }
         }
     }
@@ -183,29 +190,8 @@ class ByteQueueInputStream extends InputStream {
 
         synchronized (addLock) {
             pollToAvailable();
+            return (pos < count) ? currentBytes[pos++] & 0xff : -1;
         }
-
-        boolean available = pos < count;
-
-        if (!available && socketForward) {
-            synchronized (addLock) {
-                // 等待添加数据
-                try {
-                    addLock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-
-//                    addLock.notifyAll();
-                }
-            }
-
-            synchronized (lock) {
-                // 当位置大于等于计数（读完或者未读取）
-                pollToAvailable();
-            }
-        }
-
-        return (pos < count) ? currentBytes[pos++] & 0xff : -1;
     }
     /**
      * Reads up to <code>len</code> bytes of data into an array of bytes
@@ -246,45 +232,21 @@ class ByteQueueInputStream extends InputStream {
             return -1;
         }
 
-        int availableCount = 0;
-        synchronized (lock) {
-            // 首先移动到可用bytes
-            pollToAvailable();
-            availableCount = count - pos;
-        }
-
         // 初始计数
-        int realCount = 0;
+        int realCount = -1;
 
-        if (availableCount == 0) {
-            if (socketForward) {
-                try {
-                    synchronized (addLock) {
-                        // 等待添加数据
-                        addLock.wait();
-                    }
-
-
-                    synchronized (lock) {
-                        pollToAvailable();
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                return -1;
-            }
-        }
-
-        synchronized (lock) {
+        synchronized (addLock) {
             // 只填充一次数据，不需要按照len填充
-            if (availableCount > 0) {
-                int toCopy = Math.min(availableCount, len);
-                System.arraycopy(currentBytes, pos, b, off + realCount, toCopy);
+            pollToAvailable();
+
+            if (count - pos > 0) {
+                int toCopy = Math.min(count - pos, len);
+                System.arraycopy(currentBytes, pos, b, off, toCopy);
 
                 pos += toCopy;
-                realCount += toCopy;
+                realCount = toCopy;
             }
+
             return realCount;
         }
     }
@@ -303,7 +265,7 @@ class ByteQueueInputStream extends InputStream {
      */
     @Override
     public long skip(long n) {
-        synchronized (lock) {
+        synchronized (addLock) {
             // 首先移动到可用bytes
             pollToAvailable();
 
@@ -417,5 +379,4 @@ class ByteQueueInputStream extends InputStream {
     public void close() throws IOException {
         isRunning = false;
     }
-
 }

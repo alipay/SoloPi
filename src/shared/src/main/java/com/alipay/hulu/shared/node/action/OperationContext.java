@@ -30,6 +30,8 @@ public class OperationContext {
                 } catch (Throwable e) {
                     LogUtil.e("OperationContext", "execute background action throw " + e.getMessage(), e);
                 } finally {
+                    // 清理当前结构
+                    opExecutor.invalidRoot();
                     notifyOperationFinish();
                 }
             }

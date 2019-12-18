@@ -201,7 +201,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
     }
 
     /**
-     * 获取Soloπ子目录
+     * 获取SoloPi子目录
      * @return
      */
     public static File getSubDir(String name) {
@@ -214,7 +214,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
     }
 
     /**
-     * 获取SoloπCache目录
+     * 获取SoloPiCache目录
      * @param name
      * @return
      */
@@ -251,7 +251,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
     }
 
     /**
-     * 获取Soloπ子目录
+     * 获取SoloPi子目录
      * @return
      */
     public static File getInnerSubDir(String name) {

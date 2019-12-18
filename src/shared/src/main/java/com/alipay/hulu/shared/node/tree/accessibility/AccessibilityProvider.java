@@ -86,7 +86,7 @@ public class AccessibilityProvider implements AbstractProvider {
                 if (root == null) {
                     continue;
                 }
-                // 如果是Soloπ自己的window，就不处理
+                // 如果是SoloPi自己的window，就不处理
                 if (StringUtil.equals(root.getPackageName(), "com.alipay.hulu")) {
                     LogUtil.d(TAG, "自己的Windows，不处理");
                     continue;

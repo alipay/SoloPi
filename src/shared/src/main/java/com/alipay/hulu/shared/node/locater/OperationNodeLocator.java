@@ -75,7 +75,7 @@ public class OperationNodeLocator {
     public static final int FLAG_PARENT = 0x00010000;
 
     /**
-     * 通过类名查找，目前仅对WebView才用这个
+     * 通过类名查找，目前仅对EditText才用这个
      */
     public static final int FLAG_CLASS_NAME = 0x00100000;
 
@@ -96,10 +96,15 @@ public class OperationNodeLocator {
 
         // 对于Accessibility Node
         if (AccessibilityNodeTree.class.getSimpleName().equals(operationNode.getNodeType())) {
-            return OperationNodeLocator.findAbstractNode(root, operationNode,
-                    OperationNodeLocator.FLAG_XPATH | OperationNodeLocator.FLAG_RESOURCE_ID |
-                            OperationNodeLocator.FLAG_SELF | OperationNodeLocator.FLAG_EXTRA |
-                            OperationNodeLocator.FLAG_TEXT | OperationNodeLocator.FLAG_CHILDNODE);
+            int flags = OperationNodeLocator.FLAG_XPATH | OperationNodeLocator.FLAG_RESOURCE_ID |
+                    OperationNodeLocator.FLAG_SELF | OperationNodeLocator.FLAG_EXTRA |
+                    OperationNodeLocator.FLAG_TEXT | OperationNodeLocator.FLAG_CHILDNODE;
+            // EditText可以通过ClassName查找
+            if (StringUtil.equals(operationNode.getClassName(), "android.widget.EditText")) {
+                flags |= FLAG_CLASS_NAME;
+            }
+
+            return OperationNodeLocator.findAbstractNode(root, operationNode, flags);
         } else if (CaptureTree.class.getSimpleName().equals(operationNode.getNodeType())) {
             if (!(root instanceof CaptureTree)) {
                 return null;

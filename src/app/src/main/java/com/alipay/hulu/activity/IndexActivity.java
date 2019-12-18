@@ -15,6 +15,7 @@
  */
 package com.alipay.hulu.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -49,6 +50,7 @@ import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.event.ScanSuccessEvent;
 import com.alipay.hulu.ui.ColorFilterRelativeLayout;
 import com.alipay.hulu.ui.HeadControlPanel;
 import com.alipay.hulu.upgrade.PatchRequest;
@@ -208,6 +210,19 @@ public class IndexActivity extends BaseActivity {
                 return o1.index - o2.index;
             }
         });
+        mPanel.setLeftIconClickListener(R.drawable.icon_scan, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PermissionUtil.requestPermissions(Collections.singletonList(Manifest.permission.CAMERA), IndexActivity.this, new PermissionUtil.OnPermissionCallback() {
+                    @Override
+                    public void onPermissionResult(boolean result, String reason) {
+                        Intent intent = new Intent(IndexActivity.this, QRScanActivity.class);
+                        intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_OTHER);
+                        startActivity(intent);
+                    }
+                });
+            }
+        });
 
         CustomAdapter adapter = new CustomAdapter(this, entries);
         if (entries.size() <= 3) {
@@ -358,7 +373,7 @@ public class IndexActivity extends BaseActivity {
         public Entry(EntryActivity activity, Class<? extends Activity> target) {
             this.iconId = activity.icon();
             String name = activity.name();
-            if (activity.nameRes() > 0) {
+            if (activity.nameRes() != 0) {
                 name = StringUtil.getString(activity.nameRes());
             }
             this.name = name;
@@ -468,6 +483,8 @@ public class IndexActivity extends BaseActivity {
 
             if (item.saturation != 1F) {
                 viewHolder.background.setSaturation(item.saturation);
+            } else {
+                viewHolder.background.setSaturation(1);
             }
 
             convertView.setOnClickListener(new View.OnClickListener() {

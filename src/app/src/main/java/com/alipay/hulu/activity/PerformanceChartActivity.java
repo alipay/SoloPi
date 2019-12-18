@@ -45,9 +45,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,13 +72,14 @@ public class PerformanceChartActivity extends BaseActivity {
     private static final String TAG = "PerfChartAct";
 
     private static final FileFilter folderFilter = new FileFilter() {
-        Pattern newPattern = Pattern.compile("\\d{2}月\\d{2}日\\d{2}:\\d{2}:\\d{2}-\\d{2}月\\d{2}日\\d{2}:\\d{2}:\\d{2}");
+        Pattern newPattern = Pattern.compile("\\d{14}_\\d{14}");
+        Pattern midPattern = Pattern.compile("\\d{2}月\\d{2}日\\d{2}:\\d{2}:\\d{2}-\\d{2}月\\d{2}日\\d{2}:\\d{2}:\\d{2}");
         Pattern oldPattern = Pattern.compile("\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}_\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}");
         @Override
         public boolean accept(File file) {
 
             // 记录所有文件夹
-            return file.isDirectory() && (newPattern.matcher(file.getName()).matches() || oldPattern.matcher(file.getName()).matches());
+            return file.isDirectory() && (newPattern.matcher(file.getName()).matches() || midPattern.matcher(file.getName()).matches() || oldPattern.matcher(file.getName()).matches());
         }
     };
 
@@ -402,12 +405,21 @@ public class PerformanceChartActivity extends BaseActivity {
         }
 
         titles.clear();
-        String[] sortedTimeKeys = records.keySet().toArray(new String[records.size()]);
-        // 时间从小到大排序
-        Arrays.sort(sortedTimeKeys);
-        // 反过来从大到小取时间
-        for (int i = sortedTimeKeys.length - 1; i > -1; i--) {
-            String key = sortedTimeKeys[i];
+        // 按修改时间从大到小排序
+        Collections.sort(folders, new Comparator<File>() {
+            @Override
+            public int compare(File o1, File o2) {
+                return Long.valueOf(o2.lastModified()).compareTo(o1.lastModified());
+            }
+        });
+
+        // 按顺序保存
+        for (File f: folders) {
+            String key = f.getName();
+            if (!records.containsKey(key)) {
+                continue;
+            }
+
             Map<String, String> item = new HashMap<>(1);
             item.put("title", key);
             titles.add(item);
@@ -496,6 +508,6 @@ public class PerformanceChartActivity extends BaseActivity {
             averange = 0f;
         }
 
-        summaryText.setText(String.format("∫f(x): %.2f 平均值: %.2f 最小值: %.2f 最大值: %.2f", total, averange / count, min, max));
+        summaryText.setText(String.format(Locale.CHINA, getString(R.string.performance__summary), total, averange / count, min, max));
     }
 }

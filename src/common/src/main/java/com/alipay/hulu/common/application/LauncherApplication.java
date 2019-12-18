@@ -26,10 +26,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.Build;
 import android.os.Handler;
+import android.os.LocaleList;
 import android.os.Looper;
 import android.support.annotation.StringRes;
 import android.support.multidex.MultiDex;
+import android.util.DisplayMetrics;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -37,6 +41,8 @@ import com.alipay.hulu.common.R;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.logger.DiskLogStrategy;
 import com.alipay.hulu.common.logger.SimpleFormatStrategy;
+import com.alipay.hulu.common.scheme.SchemeActionResolver;
+import com.alipay.hulu.common.scheme.SchemeResolver;
 import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.service.base.ExportService;
 import com.alipay.hulu.common.service.base.LocalService;
@@ -44,6 +50,7 @@ import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.utils.ClassUtil;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
+import com.alipay.hulu.common.utils.SortedList;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.common.utils.patch.PatchLoadResult;
 import com.mdit.library.Enhancer;
@@ -57,9 +64,11 @@ import com.orhanobut.logger.Logger;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Stack;
@@ -79,6 +88,13 @@ public abstract class LauncherApplication extends Application {
 
     public static final String SHOW_LOADING_DIALOG = "showLoadingDialog";
     public static final String DISMISS_LOADING_DIALOG = "dismissLoadingDialog";
+
+    private Map<String, SortedList<SchemeActionResolver>> schemeResolver;
+
+    /**
+     * Android系统默认语言
+     */
+    public final Locale DEFAULT_LOCALE;
 
     /**
      * 屏幕方向监控
@@ -100,6 +116,10 @@ public abstract class LauncherApplication extends Application {
     public static boolean DEBUG = false;
 
     private volatile boolean accessibilityRegistered = false;
+
+    public LauncherApplication() {
+        DEFAULT_LOCALE = getSystemLocale();
+    }
 
     /**
      * 获取AccessibilityService是否注册
@@ -148,6 +168,8 @@ public abstract class LauncherApplication extends Application {
 
         finishInit = false;
         super.onCreate();
+        SPService.init(this);
+        setApplicationLanguage();
 
         // 是否是DEBUG模式
         ApplicationInfo info = getApplicationInfo();
@@ -172,6 +194,13 @@ public abstract class LauncherApplication extends Application {
                     init();
 
                     finishInit = true;
+
+                    BackgroundExecutor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            initActionResolvers();
+                        }
+                    }, 10000);
                 } catch (Throwable e) {
                     LogUtil.e(TAG, "无法处理", e);
                     // 解决不了
@@ -182,7 +211,6 @@ public abstract class LauncherApplication extends Application {
 
         // 主线程初始化
         initInMain();
-        SPService.init(this);
     }
 
     @Override
@@ -220,7 +248,28 @@ public abstract class LauncherApplication extends Application {
     protected abstract void init();
 
     protected void initInMain() {
-        SPService.init(this);
+    }
+
+
+
+    /**
+     * 设置应用默认语言
+     */
+    public void setApplicationLanguage() {
+        Resources resources = getApplicationContext().getResources();
+        DisplayMetrics dm = resources.getDisplayMetrics();
+        Configuration config = resources.getConfiguration();
+        Locale locale = getLanguageLocale();
+        config.locale = locale;
+        Locale.setDefault(locale);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            LocaleList localeList = new LocaleList(locale);
+            LocaleList.setDefault(localeList);
+            config.setLocales(localeList);
+            getApplicationContext().createConfigurationContext(config);
+        }
+        resources.updateConfiguration(config, dm);
     }
 
     /**
@@ -282,6 +331,18 @@ public abstract class LauncherApplication extends Application {
     // 主线程借助
     private volatile boolean MAIN_THREAD_WAIT = false;
     private Queue<Runnable> MAIN_THREAD_RUNNABLES = new ConcurrentLinkedQueue<>();
+
+    public void restartAllServices() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                for (ServiceReference ref: registeredService.values()) {
+                    ref.onDestroy(LauncherApplication.this);
+                }
+            }
+        });
+
+    }
 
     /**
      * 主线程等待
@@ -622,6 +683,43 @@ public abstract class LauncherApplication extends Application {
     }
 
     /**
+     * 加载Scheme解析器
+     * @return
+     */
+    public synchronized void initActionResolvers() {
+        if (schemeResolver != null) {
+            return;
+        }
+
+        List<Class<? extends SchemeActionResolver>> actionResolvers = ClassUtil.findSubClass(SchemeActionResolver.class, SchemeResolver.class);
+        if (actionResolvers == null) {
+            setSchemeResolver(Collections.<String, SortedList<SchemeActionResolver>>emptyMap());
+            return;
+        }
+
+        Map<String, SortedList<SchemeActionResolver>> resolvers = new HashMap<>(actionResolvers.size() + 1);
+        for (Class<? extends SchemeActionResolver> cls: actionResolvers) {
+            SchemeActionResolver resolver = ClassUtil.constructClass(cls);
+            if (resolver != null) {
+                SchemeResolver annotation = cls.getAnnotation(SchemeResolver.class);
+                String name = annotation.value();
+                int index = annotation.index();
+                SortedList<SchemeActionResolver> sortedList;
+                if (resolvers.containsKey(name)) {
+                    sortedList = resolvers.get(name);
+                } else {
+                    sortedList = new SortedList<>(true);
+                    resolvers.put(name, sortedList);
+                }
+
+                sortedList.add(resolver, index);
+            }
+        }
+
+        setSchemeResolver(resolvers);
+    }
+
+    /**
      * 获取当前屏幕显示的Activity
      * @return
      */
@@ -859,7 +957,37 @@ public abstract class LauncherApplication extends Application {
     }
 
     /**
-     * 返回Soloπ
+     *
+     * @return
+     */
+    public Locale getLanguageLocale() {
+        switch (SPService.getInt(SPService.KEY_USE_LANGUAGE, 0)) {
+            case 1:
+                return Locale.CHINESE;
+            case 2:
+                return Locale.ENGLISH;
+            default:
+                return DEFAULT_LOCALE;
+        }
+    }
+
+    /**
+     * 获取系统的locale
+     *
+     * @return Locale对象
+     */
+    private Locale getSystemLocale() {
+        Locale locale;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            locale = LocaleList.getDefault().get(0);
+        } else {
+            locale = Locale.getDefault();
+        }
+        return locale;
+    }
+
+    /**
+     * 返回SoloPi
      */
     public void moveSelfToFront() {
         int contextFrom = 0;
@@ -941,6 +1069,14 @@ public abstract class LauncherApplication extends Application {
      */
     public boolean isRunningForeground(Context context) {
         return loadActivityOnTop() != null;
+    }
+
+    public Map<String, SortedList<SchemeActionResolver>> getSchemeResolver() {
+        return schemeResolver;
+    }
+
+    private void setSchemeResolver(Map<String, SortedList<SchemeActionResolver>> schemeResolver) {
+        this.schemeResolver = schemeResolver;
     }
 
     /**

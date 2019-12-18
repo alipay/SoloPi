@@ -23,7 +23,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatSpinner;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,13 +42,11 @@ import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
-import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.ClassUtil;
 import com.alipay.hulu.common.utils.GlideUtil;
 import com.alipay.hulu.common.utils.LogUtil;
-import com.alipay.hulu.common.utils.PatchProcessUtil;
 import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.common.utils.patch.PatchLoadResult;
@@ -59,13 +56,12 @@ import com.alipay.hulu.shared.node.utils.AssetsManager;
 import com.alipay.hulu.shared.node.utils.PrepareUtil;
 import com.alipay.hulu.ui.HeadControlPanel;
 
-import java.io.File;
 import java.util.List;
 
 /**
  * Created by lezhou.wyl on 2018/1/28.
  */
-@EntryActivity(icon = R.drawable.icon_xingneng, nameRes = R.string.activity__performance_test, permissions = {"adb", "float"}, index = 2)
+@EntryActivity(icon = R.drawable.icon_xingneng, nameRes = R.string.activity__performance_test, permissions = {"adb", "float", "background"}, index = 2)
 public class PerformanceActivity extends BaseActivity {
     private String TAG = "PerformanceFragment";
 
@@ -214,7 +210,7 @@ public class PerformanceActivity extends BaseActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // 全局特殊处理
                 if (position == 0) {
-                    ((MyApplication)getApplication()).updateAppAndName("-", getString(R.string.constant__gloabl));
+                    ((MyApplication)getApplication()).updateAppAndName("-", getString(com.alipay.hulu.common.R.string.constant__global));
                 } else {
                     ApplicationInfo info = listPack.get(position - 1);
                     LogUtil.i(TAG, "Select info: " + StringUtil.hide(info.packageName));

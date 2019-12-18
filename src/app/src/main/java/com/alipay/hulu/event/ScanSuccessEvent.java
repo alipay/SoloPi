@@ -26,6 +26,7 @@ public class ScanSuccessEvent implements Parcelable {
 
     public static final int SCAN_TYPE_SCHEME = 1;
     public static final int SCAN_TYPE_PARAM = 6;
+    public static final int SCAN_TYPE_OTHER = 7;
     private int type;
     private String content;
 

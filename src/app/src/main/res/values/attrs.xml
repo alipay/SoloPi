@@ -38,4 +38,16 @@
         <attr name="css_lineWidth" format="dimension" />
         <attr name="css_triangleWidth" format="dimension" />
     </declare-styleable>
+
+    <declare-styleable name="GesturePadView" >
+        <attr name="gpv_backgroundRes" format="reference" />
+        <attr name="gpv_lineColor" format="color" />
+        <attr name="gpv_lineWidth" format="dimension" />
+        <attr name="gpv_pointRadius" format="dimension" />
+        <attr name="gpv_clearBtn" format="reference" />
+        <attr name="gpv_clearBtnSize" format="dimension" />
+        <attr name="gpv_targetImgRes" format="reference" />
+        <attr name="gpv_padding" format="dimension" />
+        <attr name="gpv_gestureFilter" format="integer" />
+    </declare-styleable>
 </resources>

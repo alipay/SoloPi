@@ -81,7 +81,7 @@ public class PrepareUtil {
                     public int compare(Class<? extends PrepareWorker> o1, Class<? extends PrepareWorker> o2) {
                         PrepareWorker.PrepareTool o1T = o1.getAnnotation(PrepareWorker.PrepareTool.class);
                         PrepareWorker.PrepareTool o2T = o2.getAnnotation(PrepareWorker.PrepareTool.class);
-                        return o2T.priority() - o1T.priority();
+                        return o2T.priority() < o1T.priority()? -1: ((o2T.priority() == o1T.priority())? 0: 1);
                     }
                 });
 

@@ -21,6 +21,7 @@ import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
+import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.shared.event.bean.UniversalEventBean;
@@ -35,9 +36,12 @@ public class ContentChangeWatcher {
 
     private long filterTime = 1000L;
 
+    private long maxWaitCount = 100;
+
     public void start() {
         InjectorService injector = LauncherApplication.getInstance().findServiceByName(InjectorService.class.getName());
         injector.register(this);
+        maxWaitCount = SPService.getLong(SPService.KEY_MAX_WAIT_TIME, 10000) / 100;
     }
 
     public void stop() {
@@ -76,7 +80,7 @@ public class ContentChangeWatcher {
         long start = System.currentTimeMillis();
 
         // 每100ms查看一次，直到窗口不再变化
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < maxWaitCount; i++) {
             MiscUtil.sleep(100);
 
             // 等待窗口变化结束

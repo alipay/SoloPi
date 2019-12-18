@@ -24,7 +24,9 @@
         android:id="@+id/case_edit_tab_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:tabMode="scrollable"/>
+        app:tabGravity="fill"
+        app:tabMode="fixed"
+        app:tabMaxWidth="0dp"/>
     <View
         android:layout_width="match_parent"
         android:layout_height="1px"

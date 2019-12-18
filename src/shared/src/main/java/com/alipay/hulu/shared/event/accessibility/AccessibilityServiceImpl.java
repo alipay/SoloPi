@@ -123,7 +123,7 @@ public class AccessibilityServiceImpl extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        // Soloπ的窗口事件，不处理
+        // SoloPi的窗口事件，不处理
         if (StringUtil.equals(event.getPackageName(), getPackageName())) {
             return;
         }

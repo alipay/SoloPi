@@ -135,9 +135,9 @@ public class PerformanceActionProvider implements ActionProvider {
 
         // 配置功能项
         if (isRecording) {
-            actionMap.put(ACTION_STOP_RECORD, "停止性能录制");
+            actionMap.put(ACTION_STOP_RECORD, StringUtil.getString(R.string.performance__stop_record));
         } else {
-            actionMap.put(ACTION_START_RECORD, "开始性能录制");
+            actionMap.put(ACTION_START_RECORD, StringUtil.getString(R.string.performance__start_record));
         }
 
         return actionMap;

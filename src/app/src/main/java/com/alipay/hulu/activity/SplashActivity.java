@@ -19,6 +19,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -53,7 +54,7 @@ public class SplashActivity extends BaseActivity {
 		// 免责弹窗
 		boolean showDisplay = SPService.getBoolean(DISPLAY_ALERT_INFO, true);
 		if (showDisplay) {
-			new AlertDialog.Builder(this).setTitle(R.string.index__disclaimer)
+			AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.index__disclaimer)
 					.setMessage(R.string.disclaimer)
 					.setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
 						@Override
@@ -68,7 +69,9 @@ public class SplashActivity extends BaseActivity {
 					processPemission();
 					dialog.dismiss();
 				}
-			}).show();
+			}).setCancelable(false).create();
+			dialog.setCanceledOnTouchOutside(false);
+			dialog.show();
 		} else {
 			processPemission();
 		}
@@ -77,10 +80,13 @@ public class SplashActivity extends BaseActivity {
 	/**
 	 * 写权限后续步骤
 	 */
-	private void afterWritePermission() {
+	private void afterWritePermission(boolean noStart) {
 		FileUtils.getSolopiDir();
 
 		Intent intent = new Intent(SplashActivity.this, IndexActivity.class);
+		if (noStart) {
+			intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+		}
 		// 已经初始化完毕过了，直接进入主页
 		if (LauncherApplication.getInstance().hasFinishInit()) {
 			startActivity(intent);
@@ -119,7 +125,12 @@ public class SplashActivity extends BaseActivity {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			// 如果不存储在/sdcard/solopi，说明已经降级到外置私有目录下了
 			if (!StringUtil.equals(SPService.getString(SPService.KEY_SOLOPI_PATH_NAME, "solopi"), "solopi")) {
-				afterWritePermission();
+				afterWritePermission(true);
+				return;
+			}
+
+			if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+				afterWritePermission(true);
 				return;
 			}
 
@@ -128,7 +139,7 @@ public class SplashActivity extends BaseActivity {
 				@Override
 				public void onPermissionResult(boolean result, String reason) {
 					if (result) {
-						afterWritePermission();
+						afterWritePermission(false);
 					} else {
 						// 再申请一次
 						PermissionUtil.requestPermissions(Arrays.asList(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE), SplashActivity.this, new PermissionUtil.OnPermissionCallback() {
@@ -139,14 +150,14 @@ public class SplashActivity extends BaseActivity {
 									FileUtils.fallBackToExternalDir(SplashActivity.this);
 								}
 
-								afterWritePermission();
+								afterWritePermission(false);
 							}
 						});
 					}
 				}
 			});
 		} else {
-			afterWritePermission();
+			afterWritePermission(true);
 		}
 	}
 

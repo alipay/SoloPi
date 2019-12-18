@@ -180,13 +180,13 @@ public class AdbIME extends InputMethodService {
                 if (defaultIme == null) {
                     defaultIme = MyApplication.getCurSysInputMethod();
                 }
-                if (!StringUtil.isEmpty(defaultIme)) {
+                if (!StringUtil.isEmpty(defaultIme) && !StringUtil.equals(defaultIme, "com.alipay.hulu/.tools.AdbIME")) {
                     final String finalDefaultIme = defaultIme;
                     // 两秒后切回原始输入法
                     BackgroundExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
-                            CmdTools.execAdbCmd("settings put secure default_input_method " + finalDefaultIme, 2000);
+                            CmdTools.switchToIme(finalDefaultIme);
                             OperationService service = LauncherApplication.getInstance().findServiceByName(OperationService.class.getName());
 
                             MiscUtil.sleep(1000);

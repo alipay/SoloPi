@@ -22,22 +22,16 @@
         android:id="@+id/head_layout"
         layout="@layout/head_panel_layout"/>
 
-    <LinearLayout
+    <TextView
+        android:background="@color/default_background_color"
         android:layout_width="match_parent"
         android:layout_height="30dp"
-        android:orientation="horizontal"
-        android:background="@color/default_background_color">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/record_chart__select_data"
-            android:textSize="14dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginBottom="2dp"
-            android:layout_gravity="bottom"
-            android:textColor="#a3a3a3"/>
-    </LinearLayout>
-
+        android:text="@string/record_chart__select_data"
+        android:textSize="14dp"
+        android:paddingLeft="8dp"
+        android:paddingBottom="2dp"
+        android:gravity="bottom"
+        android:textColor="#a3a3a3"/>
     <include layout="@layout/divider" />
     <LinearLayout
         android:background="@color/white"
@@ -45,44 +39,32 @@
         android:paddingLeft="16dp"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-        <LinearLayout
-            android:padding="5dp"
+        <android.support.v7.widget.AppCompatSpinner
+            android:layout_margin="5dp"
+            android:spinnerMode="dialog"
             android:layout_width="match_parent"
-            android:layout_height="44dp">
-            <android.support.v7.widget.AppCompatSpinner
-                android:spinnerMode="dialog"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/record_spinner"/>
-        </LinearLayout>
+            android:layout_height="44dp"
+            android:id="@+id/record_spinner"/>
         <include layout="@layout/divider" />
-        <LinearLayout
-            android:padding="5dp"
+        <android.support.v7.widget.AppCompatSpinner
+            android:layout_margin="5dp"
+            android:id="@+id/record_item_spinner"
             android:layout_width="match_parent"
-            android:layout_height="44dp">
-            <android.support.v7.widget.AppCompatSpinner
-                android:id="@+id/record_item_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-        </LinearLayout>
+            android:layout_height="44dp"/>
     </LinearLayout>
     <include layout="@layout/divider" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
         android:layout_height="36dp"
-        android:orientation="horizontal"
-        android:background="@color/default_background_color">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/record_chart__data_display"
-            android:textSize="14dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginBottom="2dp"
-            android:layout_gravity="bottom"
-            android:textColor="#a3a3a3"/>
-    </LinearLayout>
+        android:layout_width="match_parent"
+        android:background="@color/default_background_color"
+        android:text="@string/record_chart__data_display"
+        android:textSize="14dp"
+        android:gravity="bottom"
+        android:paddingLeft="8dp"
+        android:paddingBottom="2dp"
+        android:layout_gravity="bottom"
+        android:textColor="#a3a3a3"/>
     <include layout="@layout/divider" />
     <LinearLayout
         android:background="@color/white"
@@ -112,5 +94,4 @@
             android:layout_height="match_parent"
             android:id="@+id/record_chart"/>
     </LinearLayout>
-
 </LinearLayout>

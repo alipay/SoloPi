@@ -46,10 +46,10 @@ public class OperationLogHandler implements OperationStepProcessor {
 
     private static final String TAG = "OperationLogHandler";
 
-    private RecordCaseInfo caseInfo;
+    protected RecordCaseInfo caseInfo;
 
-    private GeneralOperationLogBean generalOperation;
-    private PriorityQueue<Pair<Integer, OperationStep>> generalPriorityQueue;
+    protected GeneralOperationLogBean generalOperation;
+    protected PriorityQueue<Pair<Integer, OperationStep>> generalPriorityQueue;
 
     private ExecutorService dbOperationExecutor = Executors.newSingleThreadExecutor();
 

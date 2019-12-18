@@ -118,15 +118,16 @@ public class AssetsManager {
                     .setPath(targetFile.getAbsolutePath())
                     .setCallbackProgressTimes(50)
                     .setAutoRetryTimes(3)
+                    .addHeader("Accept", "*/*")
                     .setListener(new FileDownloadSampleListener() {
                         @Override
                         protected void completed(BaseDownloadTask task) {
                             super.completed(task);
                             if (status != null) {
-                                status.currentStatus(100, 100, "资源下载完毕", true);
+                                status.currentStatus(100, 100, StringUtil.getString(R.string.assets_downloaded), true);
                             }
-                            finishFileDownload.set(true);
                             success.set(true);
+                            finishFileDownload.set(true);
                         }
 
                         @Override
@@ -137,7 +138,7 @@ public class AssetsManager {
 
                             if (status != null) {
                                 status.currentStatus(downloadedKB, totalKB,
-                                        String.format("资源下载中\n%dKB/%dKB", downloadedKB, totalKB), true);
+                                        String.format(StringUtil.getString(R.string.downloading__assets), downloadedKB, totalKB), true);
                             }
                         }
 
@@ -155,7 +156,7 @@ public class AssetsManager {
                             if (status != null) {
                                 long downloadedKB = 0;
                                 long totalKB = 100;
-                                status.currentStatus((int) downloadedKB, (int) totalKB, "资源准备下载", true);
+                                status.currentStatus((int) downloadedKB, (int) totalKB, StringUtil.getString(R.string.assets_to_download), true);
                             }
                         }
 
@@ -167,8 +168,9 @@ public class AssetsManager {
 
                             if (status != null) {
                                 status.currentStatus((int) downloadedKB, (int) totalKB,
-                                        "资源下载失败，" + e.getMessage(), false);
+                                        StringUtil.getString(R.string.assets_download_fail) + e.getMessage(), false);
                             }
+                            LogUtil.e(TAG, "Download failed: " + e.getMessage(), e);
                             finishFileDownload.set(true);
                         }
                     }).start();

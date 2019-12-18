@@ -134,4 +134,11 @@ class PerformActionMethodMaps {
             put(ActionProviderManager.KEY_TARGET_ACTION, R.string.action_param__target_action);
         }
     };
+
+    public static Map<String, Integer> GESTURE_PARAMS = new HashMap<String, Integer>(GLOBAL_PARAMS) {
+        {
+            put(OperationExecutor.GESTURE_PATH, R.string.action_param__gesture_path);
+            put(OperationExecutor.GESTURE_FILTER, R.string.action_param__gesture_filter);
+        }
+    };
 }

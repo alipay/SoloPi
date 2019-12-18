@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.support.annotation.NonNull;
 
+import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.ClassUtil;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
@@ -161,16 +162,12 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
             case LONG_CLICK:
                 // 如果有配置长按时间信息
                 String longClickTime = method.getParam(OperationExecutor.INPUT_TEXT_KEY);
-                long clickDuration = 2000;
+                int clickDuration = 2000;
                 if (StringUtil.isNumeric(longClickTime)) {
-                    clickDuration = Long.parseLong(longClickTime);
+                    clickDuration = Integer.parseInt(longClickTime);
                 }
 
-                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                    context.executor.executeCmd(MiscUtil.generateSwipeCmd(x, y, x + 1, y + 1, clickDuration));
-                } else {
-                    context.executor.executeCmd(MiscUtil.generateSwipeCmd(x, y, x, y, clickDuration));
-                }
+                context.executor.executePress(x, y, clickDuration);
                 break;
             case ASSERT:
                 LogUtil.i(TAG, "Start Assert");
@@ -189,8 +186,8 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
                         LogUtil.e(TAG, "Start Input");
                         try {
                             String defaultIme = context.executor.executeCmdSync("settings get secure default_input_method");
-                            context.executor.executeCmdSync("settings put secure default_input_method com.alipay.hulu/.tools.AdbIME", 0);
-                            context.executor.executeCmdSync("input tap " + rect.centerX() + " " + rect.centerY(), 0);
+                            CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
+                            context.executor.executeClick(rect.centerX(), rect.centerY());
                             MiscUtil.sleep(1500);
                             context.executor.executeCmdSync("am broadcast -a ADB_SEARCH_TEXT --es msg '" + text + "' --es default '" + StringUtil.trim(defaultIme) + "'", 0);
                         } catch (Exception e) {
@@ -249,7 +246,7 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
                 if (toHeight < 40) {
                     toHeight = 40;
                 }
-                context.executor.executeCmdSync(MiscUtil.generateSwipeCmd(x, fromHeight, x, toHeight, 300));
+                context.executor.executeScroll(x, fromHeight, x, toHeight, 300);;
                 break;
             case SCROLL_TO_BOTTOM:
                 LogUtil.i(TAG, "Start ADB scroll " + x + "," + y);
@@ -280,7 +277,7 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
                     toHeight = screenHeight - 40;
                 }
 
-                context.executor.executeCmdSync(MiscUtil.generateSwipeCmd(x, y, x, toHeight, 300));
+                context.executor.executeScrollSync(x, y, x, toHeight, 300);
                 break;
             case SCROLL_TO_RIGHT:
                 LogUtil.i(TAG, "Start ADB scroll " + x + "," + y);
@@ -308,7 +305,7 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
                 if (toX > screenWidth - 10) {
                     toX = screenWidth - 10;
                 }
-                context.executor.executeCmdSync(MiscUtil.generateSwipeCmd(fromX, y, toX, y, 300));
+                context.executor.executeScrollSync(fromX, y, toX, y, 300);
                 break;
             case SCROLL_TO_LEFT:
                 LogUtil.i(TAG, "Start ADB scroll " + x + "," + y);
@@ -336,7 +333,7 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
                 if (toX < 10) {
                     toX = 10;
                 }
-                context.executor.executeCmdSync(MiscUtil.generateSwipeCmd(fromX, y, toX, y, 300));
+                context.executor.executeScrollSync(fromX, y, toX, y, 300);
                 break;
         }
 

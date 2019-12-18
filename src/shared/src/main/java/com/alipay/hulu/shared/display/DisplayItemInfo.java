@@ -15,9 +15,11 @@
  */
 package com.alipay.hulu.shared.display;
 
+import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.R;
 import com.alipay.hulu.shared.display.items.base.DisplayItem;
 import com.alipay.hulu.shared.display.items.base.Displayable;
+import com.alipay.hulu.shared.display.items.util.FinalR;
 
 import java.util.Arrays;
 import java.util.List;
@@ -64,7 +66,12 @@ public class DisplayItemInfo {
 
     public DisplayItemInfo(DisplayItem displayItem, Class<? extends Displayable> targetClass) {
         this.targetClass = targetClass;
-        this.name = displayItem.name();
+        FinalR nameRes = displayItem.nameRes();
+        if (nameRes != FinalR.NULL) {
+            this.name = StringUtil.getString(nameRes.getRealVal());
+        } else {
+            this.name = displayItem.name();
+        }
         this.permissions = Arrays.asList(displayItem.permissions());
         this.tip = displayItem.tip();
         if (displayItem.icon() != 0) {

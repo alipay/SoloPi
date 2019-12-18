@@ -45,6 +45,7 @@ public enum PerformActionEnum {
     SCROLL_TO_TOP("scrollToTop", R.string.action_scroll_to_top, 1, 0, R.drawable.dialog_action_drawable_scroll_down, SCROLL_PARAMS),
     SCROLL_TO_RIGHT("scrollToRight", R.string.action__scroll_to_right, 1, 0, R.drawable.dialog_action_drawable_scroll_left, SCROLL_PARAMS),
     SCROLL_TO_LEFT("scrollToLeft", R.string.action__scroll_to_left, 1, 0, R.drawable.dialog_action_drawable_scroll_right, SCROLL_PARAMS),
+    GESTURE("gesture", R.string.action__gesture, 1, 0, R.drawable.dialog_action_drawable_gesture, GESTURE_PARAMS),
     ASSERT("assert", R.string.action__assert, 1, 0, R.drawable.dialog_action_drawable_assert, ASSERT_PARAMS),
     SLEEP_UNTIL("sleepUntil", R.string.action__sleep_until, 1, 0, R.drawable.dialog_action_drawable_sleep, SLEEP_UNTIL_PARAMS),
     OTHER_NODE("otherNode", R.string.action__other_node, 1, 0, R.drawable.dialog_action_drawable_extra, OTHER_PARAMS),
@@ -59,6 +60,9 @@ public enum PerformActionEnum {
     GLOBAL_SCROLL_TO_TOP("globalScrollToTop", R.string.action__global_scroll_up, 2, 0, R.drawable.dialog_action_drawable_scroll_down),
     GLOBAL_SCROLL_TO_RIGHT("globalScrollToRight", R.string.action__global_scroll_right, 2, 0, R.drawable.dialog_action_drawable_scroll_left),
     GLOBAL_SCROLL_TO_LEFT("globalScrollToLeft", R.string.action__global_scroll_left, 2, 0, R.drawable.dialog_action_drawable_scroll_right),
+    GLOBAL_PINCH_OUT("globalPinchOut", R.string.action__pinch_out, 2, 0, R.drawable.dialog_action_drawable_pinch_out),
+    GLOBAL_PINCH_IN("globalPinchIn", R.string.action__pinch_in, 2, 0, R.drawable.dialog_action_drawable_pinch_in),
+    GLOBAL_GESTURE("globalGesture", R.string.action__gesture, 2, 0, R.drawable.dialog_action_drawable_gesture, GESTURE_PARAMS),
     GOTO_INDEX("goToIndex", R.string.action__goto_index, 2, 0, R.drawable.dialog_action_drawable_goto_index),
     CLEAR_DATA("clearData", R.string.action__clear_data, 2, 0, R.drawable.dialog_action_drawable_app_operation),
 

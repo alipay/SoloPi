@@ -191,7 +191,7 @@ public class PermissionUtil {
                     CmdTools.generateConnection();
                 }
             });
-            LauncherApplication.toast(R.string.permission__no_root_need_adb);
+            LauncherApplication.toast(R.string.open_adb_permission_failed);
             return false;
         }
         return true;

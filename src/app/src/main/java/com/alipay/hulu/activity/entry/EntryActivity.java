@@ -15,6 +15,8 @@
  */
 package com.alipay.hulu.activity.entry;
 
+import android.support.annotation.StringRes;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,6 +45,7 @@ public @interface EntryActivity {
      * name string res
      * @return
      */
+    @StringRes
     int nameRes() default 0;
 
     /**

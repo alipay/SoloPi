@@ -185,7 +185,7 @@ public class AccessibilityEventTracker {
                         public void run() {
                             Rect pos = new Rect();
                             targetNode.getBoundsInScreen(pos);
-                            CmdTools.execAdbCmd("input tap " + pos.centerX() + " " + pos.centerY(), 0);
+                            CmdTools.execClick(pos.centerX(), pos.centerY());
 
                             // 点击了确定，需要cancel
                             operationRef.get().invalidRoot();
@@ -217,7 +217,7 @@ public class AccessibilityEventTracker {
                         if (button != null && button.size() > 0) {
                             Rect pos = new Rect();
                             button.get(0).getBoundsInScreen(pos);
-                            CmdTools.execAdbCmd("input tap " + pos.centerX() + " " + pos.centerY(), 0);
+                            CmdTools.execClick(pos.centerX(), pos.centerY());
 
                             operationRef.get().invalidRoot();
                         }
@@ -231,7 +231,7 @@ public class AccessibilityEventTracker {
                 if (nodeInfos != null && nodeInfos.size() == 1 && StringUtil.contains(nodeInfos.get(0).getText(), "允许")) {
                     Rect pos = new Rect();
                     nodeInfos.get(0).getBoundsInScreen(pos);
-                    CmdTools.execAdbCmd("input tap " + pos.centerX() + " " + pos.centerY(), 0);
+                    CmdTools.execClick(pos.centerX(), pos.centerY());
 
                     operationRef.get().invalidRoot();
                 }

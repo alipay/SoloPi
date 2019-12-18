@@ -24,6 +24,37 @@ import android.support.annotation.NonNull;
  */
 public class RectUtil {
     /**
+     * 安全扩展区域
+     *
+     * @param origin
+     * @param pixel
+     * @param maxWidth
+     * @param maxHeight
+     * @return
+     */
+    public static Rect safetyExpend(@NonNull Rect origin, int pixel, int maxWidth, int maxHeight) {
+        return ensureBound(
+                new Rect(origin.left - pixel, origin.top - pixel,
+                        origin.right + pixel, origin.bottom + pixel),
+                maxWidth, maxHeight);
+    }
+
+    /**
+     * 安全扩展区域
+     * @param origin
+     * @param pixel
+     * @param maxWidth
+     * @param maxHeight
+     * @return
+     */
+    public static RectF safetyExpend(@NonNull RectF origin, float pixel, int maxWidth, int maxHeight) {
+        return ensureBound(
+                new RectF(origin.left - pixel, origin.top - pixel,
+                        origin.right + pixel, origin.bottom + pixel),
+                maxWidth, maxHeight);
+    }
+
+    /**
      * 安全缩放
      * @param origin
      * @param scale
@@ -88,9 +119,8 @@ public class RectUtil {
      * @return
      */
     public static Rect ensureBound(@NonNull Rect target, int maxWidth, int maxHeight) {
-        return new Rect(target.left < 0 ? 0 : target.left, target.top < 0 ? 0 : target.top,
-                target.right > maxWidth ? maxWidth : target.right,
-                target.bottom > maxHeight ? maxHeight : target.bottom);
+        return new Rect(Math.max(target.left, 0), Math.max(target.top, 0),
+                Math.min(target.right, maxWidth), Math.min(target.bottom, maxHeight));
     }
 
     /**
@@ -101,8 +131,7 @@ public class RectUtil {
      * @return
      */
     public static RectF ensureBound(@NonNull RectF target, float maxWidth, float maxHeight) {
-        return new RectF(target.left < 0 ? 0 : target.left, target.top < 0 ? 0 : target.top,
-                target.right > maxWidth ? maxWidth : target.right,
-                target.bottom > maxHeight ? maxHeight : target.bottom);
+        return new RectF(Math.max(target.left, 0), Math.max(target.top, 0),
+                Math.min(target.right, maxWidth), Math.min(target.bottom, maxHeight));
     }
 }

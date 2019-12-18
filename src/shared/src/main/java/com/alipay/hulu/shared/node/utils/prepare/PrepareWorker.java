@@ -15,6 +15,8 @@
  */
 package com.alipay.hulu.shared.node.utils.prepare;
 
+import android.support.annotation.IntRange;
+
 import com.alipay.hulu.shared.node.utils.PrepareUtil;
 
 import java.lang.annotation.ElementType;
@@ -31,6 +33,10 @@ public interface PrepareWorker {
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.RUNTIME)
     @interface PrepareTool {
+        /**
+         * 准备器优先级，从小到大执行
+         */
+        @IntRange(from = 0)
         int priority() default 1;
     }
 }
