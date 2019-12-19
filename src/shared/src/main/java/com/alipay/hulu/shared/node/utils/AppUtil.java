@@ -20,8 +20,12 @@ import android.content.pm.ResolveInfo;
 
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.tools.CmdTools;
+import com.alipay.hulu.common.utils.LogUtil;
+
+import java.util.List;
 
 public class AppUtil {
+    private static final String TAG = "AppUtil";
     /**
      * 通过adb启动应用
      * @param appPackage
@@ -31,12 +35,16 @@ public class AppUtil {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
         intent.setPackage(appPackage);
-        ResolveInfo resolveInfo = LauncherApplication.getContext().getPackageManager().resolveActivity(intent, 0);
-        if (resolveInfo == null) {
+        List<ResolveInfo> resolveInfos = LauncherApplication.getContext().getPackageManager().queryIntentActivities(intent, 0);
+        if (resolveInfos == null || resolveInfos.size() == 0) {
             return false;
         }
 
-        String targetActivity = resolveInfo.activityInfo.name;
+        // 多Launcher情景
+        for (ResolveInfo resolveInfo : resolveInfos) {
+            LogUtil.d(TAG, "resolveInfo:" + resolveInfo);
+        }
+        String targetActivity = resolveInfos.get(0).activityInfo.name;
         CmdTools.execAdbCmd("am start -n '" + appPackage + "/" + targetActivity + "'", 2000);
         return true;
     }
