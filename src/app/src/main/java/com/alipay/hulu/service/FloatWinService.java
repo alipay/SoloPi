@@ -842,12 +842,12 @@ public class FloatWinService extends BaseService {
 	private void hideFloatWin() {
 		cardView.setVisibility(View.GONE);
 		Display screenDisplay = ((WindowManager)FloatWinService.this.getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
-		Point size = new Point();
-		screenDisplay.getSize(size);
-		x = size.x;
+		DisplayMetrics metrics = new DisplayMetrics();
+		screenDisplay.getRealMetrics(metrics);
+		x = metrics.widthPixels;
 
 		//y = (size.y - statusBarHeight) / 2;
-		y = size.y / 2 - 4 * statusBarHeight;
+		y = metrics.heightPixels / 2 - 4 * statusBarHeight;
 		updateViewPosition();
 		// handler.removeCallbacks(task);
 		backgroundIcon.setVisibility(View.VISIBLE);
