@@ -362,8 +362,11 @@ public class CaseRecordManager implements ExportService {
             eventService.startTrackTouch();
         }
 
+        // 重载下当前界面
+        operationService.invalidRoot();
+
         // 通知进入触摸屏蔽模式
-        setServiceToTouchBlockMode();
+        setServiceToTouchBlockModeNoDelay();
 
         // 1秒后再监听
         notifyDialogDismiss(1000);
@@ -1134,16 +1137,27 @@ public class CaseRecordManager implements ExportService {
 
             dialog.getWindow().setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT);
 
+            // timeout fix
             if (timeout > 0) {
-                long sleepCount = timeout > 500? timeout - 500: timeout;
-                LauncherApplication.getInstance().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        displayDialog = false;
-                        forceStopBlocking = false;
-                        dialog.dismiss();
-                    }
-                }, sleepCount);
+                if (timeout > 500) {
+                    LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            displayDialog = false;
+                            forceStopBlocking = false;
+                            dialog.dismiss();
+                        }
+                    }, timeout - 500);
+                } else {
+                    displayDialog = false;
+                    forceStopBlocking = false;
+                    LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            dialog.dismiss();
+                        }
+                    }, timeout);
+                }
             }
         } catch (Exception e) {
             LogUtil.e(TAG, "显示设备信息出现异常", e);

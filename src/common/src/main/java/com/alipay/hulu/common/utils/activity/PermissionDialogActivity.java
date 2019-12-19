@@ -119,31 +119,31 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
     /**
      * 权限名称映射表
      */
-    public static final Map<String, String> PERMISSION_NAMES = new HashMap<String, String>() {
+    public static Map<String, Integer> PERMISSION_NAMES = new HashMap<String, Integer>() {
         {
-            put(Manifest.permission.READ_CALENDAR, "读取日历");
-            put(Manifest.permission.WRITE_CALENDAR, "写入日历");
-            put(Manifest.permission.CAMERA, "相机");
-            put(Manifest.permission.READ_CONTACTS, "读取联系人");
-            put(Manifest.permission.WRITE_CONTACTS, "写入联系人");
-            put(Manifest.permission.GET_ACCOUNTS, "获取账户");
-            put(Manifest.permission.ACCESS_FINE_LOCATION, "获取精确定位");
-            put(Manifest.permission.ACCESS_COARSE_LOCATION, "获取粗略定位");
-            put(Manifest.permission.RECORD_AUDIO, "录音");
-            put(Manifest.permission.READ_PHONE_STATE, "读取电话状态");
-            put(Manifest.permission.CALL_PHONE, "拨打电话");
-            put(Manifest.permission.READ_CALL_LOG, "读取通话记录");
-            put(Manifest.permission.WRITE_CALL_LOG, "写入通话记录");
-            put(Manifest.permission.ADD_VOICEMAIL, "添加语音邮箱");
-            put(Manifest.permission.USE_SIP, "使用SIP");
-            put(Manifest.permission.BODY_SENSORS, "获取传感器数据");
-            put(Manifest.permission.SEND_SMS, "发送短信");
-            put(Manifest.permission.RECEIVE_SMS, "接收短信");
-            put(Manifest.permission.READ_SMS, "获取短信信息");
-            put(Manifest.permission.RECEIVE_WAP_PUSH, "接收Wap Push");
-            put(Manifest.permission.RECEIVE_MMS, "接收MMS");
-            put(Manifest.permission.READ_EXTERNAL_STORAGE, "读取外部存储");
-            put(Manifest.permission.WRITE_EXTERNAL_STORAGE, "写入外部存储");
+            put(Manifest.permission.READ_CALENDAR, R.string.permission__read_calendar);
+            put(Manifest.permission.WRITE_CALENDAR, R.string.permission__write_calendar);
+            put(Manifest.permission.CAMERA, R.string.permission__camera);
+            put(Manifest.permission.READ_CONTACTS, R.string.permission__read_contacts);
+            put(Manifest.permission.WRITE_CONTACTS, R.string.permission__write_contacts);
+            put(Manifest.permission.GET_ACCOUNTS, R.string.permission__get_accounts);
+            put(Manifest.permission.ACCESS_FINE_LOCATION, R.string.permission__access_fine_location);
+            put(Manifest.permission.ACCESS_COARSE_LOCATION, R.string.permission__access_coarse_location);
+            put(Manifest.permission.RECORD_AUDIO, R.string.permission__record_audio);
+            put(Manifest.permission.READ_PHONE_STATE, R.string.permission__read_phone_state);
+            put(Manifest.permission.CALL_PHONE, R.string.permission__call_phone);
+            put(Manifest.permission.READ_CALL_LOG, R.string.permission__read_call_log);
+            put(Manifest.permission.WRITE_CALL_LOG, R.string.permission__write_call_log);
+            put(Manifest.permission.ADD_VOICEMAIL, R.string.permission__add_voicemail);
+            put(Manifest.permission.USE_SIP, R.string.permission__use_sip);
+            put(Manifest.permission.BODY_SENSORS, R.string.permission__body_sensors);
+            put(Manifest.permission.SEND_SMS, R.string.permission__send_sms);
+            put(Manifest.permission.RECEIVE_SMS, R.string.permission__receive_sms);
+            put(Manifest.permission.READ_SMS, R.string.permission__read_sms);
+            put(Manifest.permission.RECEIVE_WAP_PUSH, R.string.permission__receive_wap_push);
+            put(Manifest.permission.RECEIVE_MMS, R.string.permission__receive_mms);
+            put(Manifest.permission.READ_EXTERNAL_STORAGE, R.string.permission__read_external_storage);
+            put(Manifest.permission.WRITE_EXTERNAL_STORAGE, R.string.permission__write_external_storage);
 
         }
     };
@@ -757,9 +757,9 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
             if (ungrantedPermissions != null && ungrantedPermissions.size() > 0) {
                 List<String> mappedName = new ArrayList<>();
                 for (String dynPermission: ungrantedPermissions) {
-                    String mapName = PERMISSION_NAMES.get(dynPermission);
+                    Integer mapName = PERMISSION_NAMES.get(dynPermission);
                     if (mapName != null) {
-                        mappedName.add(mapName);
+                        mappedName.add(StringUtil.getString(mapName));
                     } else {
                         mappedName.add(dynPermission);
                     }

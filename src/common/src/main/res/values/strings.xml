@@ -18,7 +18,7 @@
     <string name="permission_default">Check Permissions</string>
     <string name="scheme_app_desc">Automation Testing Tools</string>
     <string name="android_version_error">Android api %d is required, current: %d</string>
-    <string name="request_dynamic_permission">SoloPi require permissions %s, total %d, please permit</string>
+    <string name="request_dynamic_permission">SoloPi require permissions: \'%s\', total %d, please allow</string>
     <string name="record_screen_permission">SoloPi require screen record permission, please permit</string>
     <string name="record_screen_android_version_error">Screen record require Android API 21+, current: %d</string>
     <string name="accessibility_permission">SoloPi require accessibility service, click \'OK\' to grant.(If accessibility is on, please close and reopen it.)</string>
@@ -51,4 +51,27 @@
     <string name="permission__open_background_permission">Please grant \"Display pop-up window\" permission in MIUI</string>
     <string name="permission__go_to_open">Go to Grant</string>
     <string name="permission__opened">Granted</string>
+    <string name="permission__read_calendar">Read Calendar</string>
+    <string name="permission__write_calendar">Write Calendar</string>
+    <string name="permission__camera">Camera</string>
+    <string name="permission__read_contacts">Read Contacts</string>
+    <string name="permission__write_contacts">Write Contacts</string>
+    <string name="permission__get_accounts">Get Accounts</string>
+    <string name="permission__access_fine_location">Access Find Location</string>
+    <string name="permission__access_coarse_location">Access Coarse Location</string>
+    <string name="permission__record_audio">Record Audio</string>
+    <string name="permission__read_phone_state">Read Phone State</string>
+    <string name="permission__call_phone">Call Phone</string>
+    <string name="permission__read_call_log">Read Call Log</string>
+    <string name="permission__write_call_log">Write Call Log</string>
+    <string name="permission__add_voicemail">Add VoiceMail</string>
+    <string name="permission__use_sip">Use SIP</string>
+    <string name="permission__body_sensors">Body Sensors</string>
+    <string name="permission__send_sms">Send SMS</string>
+    <string name="permission__receive_sms">Receive SMS</string>
+    <string name="permission__read_sms">Read SMS</string>
+    <string name="permission__receive_wap_push">Receive Wap Push</string>
+    <string name="permission__receive_mms">Receive MMS</string>
+    <string name="permission__read_external_storage">Read External Storage</string>
+    <string name="permission__write_external_storage">Write External Storage</string>
 </resources>

@@ -672,20 +672,24 @@ public class OperationExecutor {
 
                 // sleep加一个悬浮窗，防止误操作
                 try {
-                    final long count = Long.parseLong(sleepTime);
+                    long count = Long.parseLong(sleepTime);
+                    if (count < 500) {
+                        count = 500;
+                    }
                     UIOperationMessage message = new UIOperationMessage();
                     message.eventType = UIOperationMessage.TYPE_COUNT_DOWN;
                     message.putParam("time", count);
                     injectorService.pushMessage(null, message, true);
 
+                    final long finalCount = count;
                     opContext.notifyOnFinish(new Runnable() {
                         @Override
                         public void run() {
                             long startTime = System.currentTimeMillis();
                             long sleeper;
                             // 防止sleep不够
-                            while ((sleeper = System.currentTimeMillis() - startTime) < count - 10) {
-                                MiscUtil.sleep(count - sleeper);
+                            while ((sleeper = System.currentTimeMillis() - startTime) < finalCount - 10) {
+                                MiscUtil.sleep(finalCount - sleeper);
                             }
                         }
                     });

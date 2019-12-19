@@ -51,4 +51,27 @@
     <string name="permission__open_background_permission">MIUI请开启后台弹出界面权限</string>
     <string name="permission__opened">我已开启</string>
     <string name="permission__go_to_open">前往开启</string>
+    <string name="permission__read_calendar">读取日历</string>
+    <string name="permission__write_calendar">写入日历</string>
+    <string name="permission__camera">相机</string>
+    <string name="permission__read_contacts">读取联系人</string>
+    <string name="permission__write_contacts">写入联系人</string>
+    <string name="permission__get_accounts">获取账户</string>
+    <string name="permission__access_fine_location">获取精确定位</string>
+    <string name="permission__access_coarse_location">获取粗略定位</string>
+    <string name="permission__record_audio">录音</string>
+    <string name="permission__read_phone_state">读取电话状态</string>
+    <string name="permission__call_phone">拨打电话</string>
+    <string name="permission__read_call_log">读取通话记录</string>
+    <string name="permission__write_call_log">写入通话记录</string>
+    <string name="permission__add_voicemail">添加语音邮箱</string>
+    <string name="permission__use_sip">使用SIP</string>
+    <string name="permission__body_sensors">获取传感器数据</string>
+    <string name="permission__send_sms">发送短信</string>
+    <string name="permission__receive_sms">接收短信</string>
+    <string name="permission__read_sms">获取短信信息</string>
+    <string name="permission__receive_wap_push">接收Wap Push</string>
+    <string name="permission__receive_mms">接收MMS</string>
+    <string name="permission__read_external_storage">读取外部存储</string>
+    <string name="permission__write_external_storage">写入外部存储</string>
 </resources>
