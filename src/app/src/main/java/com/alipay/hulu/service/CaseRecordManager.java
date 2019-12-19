@@ -466,14 +466,10 @@ public class CaseRecordManager implements ExportService {
      * @param method
      * @param target
      */
-    protected void operationAndRecord(OperationMethod method, AbstractNodeTree target) {
+    protected boolean operationAndRecord(OperationMethod method, AbstractNodeTree target) {
         OperationStep step = doAndRecordAction(method, target);
 
         if (step == null) {
-            if (!forceStopBlocking && !displayDialog) {
-                setServiceToTouchBlockMode();
-            }
-
             PerformActionEnum action = method.getActionEnum();
             String desc;
             if (action == PerformActionEnum.OTHER_GLOBAL || action == PerformActionEnum.OTHER_NODE) {
@@ -491,13 +487,14 @@ public class CaseRecordManager implements ExportService {
             }
 
             LauncherApplication.getInstance().showToast(binder.loadServiceContext(), StringUtil.getString(R.string.record__execute_fail, desc));
-            return;
+            return false;
         }
 
         OperationStepMessage message = new OperationStepMessage();
         message.setStepIdx(step.getOperationIndex());
         message.setGeneralOperationStep(step);
         injectorService.pushMessage(OperationStepService.NOTIFY_OPERATION_STEP, message, true);
+        return true;
     }
 
     /**
@@ -822,7 +819,7 @@ public class CaseRecordManager implements ExportService {
                         LauncherApplication.getInstance().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                // 返回是否需要恢复阻塞
+                                // 返回是否处理完毕
                                 boolean processResult = processAction(method, node, context);
 
                                 // 进行后续处理
@@ -953,8 +950,7 @@ public class CaseRecordManager implements ExportService {
                 }
             }
         } else {
-            operationAndRecord(method, node);
-            return true;
+            return operationAndRecord(method, node);
         }
         return false;
     }
