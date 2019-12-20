@@ -20,6 +20,12 @@
             "version": 6,
             "type": "base",
             "name": "minicap"
+        },
+        {
+            "url": "https://raw.githubusercontent.com/alipay/SoloPi/master/plugins/scrcpytouch.zip",
+            "version": 2,
+            "type": "base",
+            "name": "scrcpytouch"
         }
     ]
 }
