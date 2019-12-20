@@ -122,7 +122,7 @@ public class AccessibilityEventTracker {
                         method.setActionEnum(PerformActionEnum.HANDLE_PERMISSION_ALERT);
                         operationRef.get().doSomeAction(method, null);
                     }
-                });
+                }, 10);
             // Vivo的悬浮窗比较特殊
             } else if (RomUtils.isVivoSystem() && StringUtil.equals(event.getPackageName(), "android")
                     && StringUtil.equals(event.getClassName(), "android.app.AlertDialog")
@@ -137,7 +137,7 @@ public class AccessibilityEventTracker {
                             method.setActionEnum(PerformActionEnum.HANDLE_PERMISSION_ALERT);
                             operationRef.get().doSomeAction(method, null);
                         }
-                    });
+                    }, 10);
                 }
             // 小米的权限弹窗
             } else if (RomUtils.checkIsMiuiRom() && StringUtil.equals(event.getPackageName(), "com.lbe.security.miui")) {
@@ -148,7 +148,7 @@ public class AccessibilityEventTracker {
                         method.setActionEnum(PerformActionEnum.HANDLE_PERMISSION_ALERT);
                         operationRef.get().doSomeAction(method, null);
                     }
-                });
+                }, 10);
             // 锤子的悬浮窗
             } else if (RomUtils.isSmartisanSystem() && StringUtil.equals(event.getClassName(), "com.android.server.SmtPermissionDialog")) {
                 BackgroundExecutor.execute(new Runnable() {
@@ -158,7 +158,7 @@ public class AccessibilityEventTracker {
                         method.setActionEnum(PerformActionEnum.HANDLE_PERMISSION_ALERT);
                         operationRef.get().doSomeAction(method, null);
                     }
-                });
+                }, 10);
             // Sony的悬浮窗
             } else if (RomUtils.isSonySystem() && StringUtil.equals(event.getPackageName(), "com.sonymobile.cta")
                     &&StringUtil.contains(event.getClassName(), "GrantPermissionsActivity")) {
@@ -169,7 +169,7 @@ public class AccessibilityEventTracker {
                         method.setActionEnum(PerformActionEnum.HANDLE_PERMISSION_ALERT);
                         operationRef.get().doSomeAction(method, null);
                     }
-                });
+                }, 10);
             // 三星的权限提示框
             } else if (RomUtils.isSamSungSystem() && StringUtil.equals(event.getPackageName(), "com.samsung.android.packageinstaller")
                     && event.getSource() != null) {
@@ -204,7 +204,18 @@ public class AccessibilityEventTracker {
                         method.setActionEnum(PerformActionEnum.HANDLE_ALERT);
                         operationRef.get().doSomeAction(method, null);
                     }
-                });
+                }, 10);
+            // Android Q 权限处理
+            } else if (Build.VERSION.SDK_INT >= 29 && StringUtil.equals(event.getPackageName(), "com.android.permissioncontroller")) {
+                // 就是个Dialog，直接用HandleAlert处理掉
+                BackgroundExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        OperationMethod method = new OperationMethod();
+                        method.setActionEnum(PerformActionEnum.HANDLE_ALERT);
+                        operationRef.get().doSomeAction(method, null);
+                    }
+                }, 10);
             }
 
             // Android 9.0的私有API弹窗
