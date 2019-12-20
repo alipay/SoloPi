@@ -499,7 +499,7 @@ public class TouchEventTracker {
                 count ++;
             }
 
-            // adb完全挂了，stream无法恢复，等10s，看看葫芦娃的15s的adb保活是否有用
+            // adb完全挂了，stream无法恢复，等10s，看看SoloPi的15s的adb保活是否有用
             if (cmdLine == null || cmdLine.isClosed()) {
                 LogUtil.e(TAG, "Stream can't recover from dead");
                 return false;

@@ -408,7 +408,7 @@ public class RecordScreenActionProvider implements ActionProvider {
 
             LogUtil.d(TAG, "Receive event: " + actionEnum);
 
-            // 主机模式需要监控葫芦点击事件
+            // 主机模式需要监控点击事件
             if (inMasterMode) {
                 LogUtil.d(TAG, "主机模式，控制悬浮窗点击");
                 injectorService.pushMessage("FloatClickMethod", new Callable<OperationMethod>() {
