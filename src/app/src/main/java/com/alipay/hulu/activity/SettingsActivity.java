@@ -768,10 +768,10 @@ public class SettingsActivity extends BaseActivity {
         mSkipAccessibilitySettingWrapper = findViewById(R.id.skip_accessibility_setting_wrapper);
         mSkipAccessibilitySettingInfo = (TextView) findViewById(R.id.skip_accessibility_setting_info);
         boolean skipAccessibility = SPService.getBoolean(SPService.KEY_SKIP_ACCESSIBILITY, true);
-        if (displaySystemApp) {
-            mDisplaySystemAppSettingInfo.setText(R.string.constant__yes);
+        if (skipAccessibility) {
+            mSkipAccessibilitySettingInfo.setText(R.string.constant__yes);
         } else {
-            mDisplaySystemAppSettingInfo.setText(R.string.constant__no);
+            mSkipAccessibilitySettingInfo.setText(R.string.constant__no);
         }
 
         mMaxWaitSettingWrapper = findViewById(R.id.max_wait_setting_wrapper);
