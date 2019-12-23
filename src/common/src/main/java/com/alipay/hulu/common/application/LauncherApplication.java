@@ -184,9 +184,13 @@ public abstract class LauncherApplication extends Application {
             @Override
             public void run() {
                 try {
-                    // 搜索下内部类
-                    ClassUtil.initClasses(LauncherApplication.this, null);
-
+                    try {
+                        // 搜索下内部类
+                        ClassUtil.initClasses(LauncherApplication.this, null);
+                    } catch (Throwable t) {
+                        LogUtil.e(TAG, "加载类失败, " + t.getMessage(), t);
+                    }
+                    
                     // 初始化基础服务
                     registerServices();
 
