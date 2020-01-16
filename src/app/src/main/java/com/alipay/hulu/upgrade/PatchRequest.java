@@ -170,7 +170,9 @@ public class PatchRequest {
                         @Override
                         public void run() {
                             Pair<String, String> assetInfo = new Pair<>(data.getName() + ".zip", data.getUrl());
-                            File f = AssetsManager.getAssetFile(assetInfo, null, true);
+
+                            // Use FileDownloader fail？？？
+                            File f = AssetsManager.getAssetFileWithOkHttp(assetInfo, null, true);
 
                             // 下载失败
                             if (f == null) {
@@ -179,9 +181,9 @@ public class PatchRequest {
                                 return;
                             }
                             try {
-                                PatchLoadResult result = PatchProcessUtil.dynamicLoadPatch(f);
-                                if (result != null) {
-                                    ClassUtil.installPatch(result);
+                                PatchLoadResult patchResult = PatchProcessUtil.dynamicLoadPatch(f);
+                                if (patchResult != null) {
+                                    ClassUtil.installPatch(patchResult);
                                 }
                             } catch (Throwable e) {
                                 LogUtil.e(TAG, "更新插件异常", e);

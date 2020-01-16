@@ -60,10 +60,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
 import cn.dreamtobe.filedownloader.OkHttp3Connection;
-import okhttp3.OkHttpClient;
 
 public class MyApplication extends LauncherApplication {
     private static final String TAG = "MyApplication";
@@ -493,7 +491,7 @@ public class MyApplication extends LauncherApplication {
 
     private void initLibraries() {
         initGreenDao();
-        initFileDownloader();
+//        initFileDownloader();
 
         curSysInputMethod = Settings.Secure.getString(getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
 
