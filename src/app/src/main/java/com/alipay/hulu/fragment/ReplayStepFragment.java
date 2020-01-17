@@ -276,12 +276,15 @@ public class ReplayStepFragment extends Fragment {
                 LogUtil.e("ReplayStepFrag", "配置控件截图信息失败", e);
             }
 
-            // 如果有设置截图信息
-            if (captureFlag) {
+            if (node != null) {
                 mNodeRow.setVisibility(View.VISIBLE);
-                mCaptureRow.setVisibility(View.VISIBLE);
             } else {
                 mNodeRow.setVisibility(View.GONE);
+            }
+            // 如果有设置截图信息
+            if (captureFlag) {
+                mCaptureRow.setVisibility(View.VISIBLE);
+            } else {
                 mCaptureRow.setVisibility(View.GONE);
             }
         }
