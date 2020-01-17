@@ -16,8 +16,10 @@
 package com.alipay.hulu.shared.event.accessibility;
 
 import android.accessibilityservice.AccessibilityService;
+import android.app.Notification;
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Parcelable;
 import android.os.SystemClock;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -27,10 +29,12 @@ import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
+import com.alipay.hulu.common.injector.provider.Provider;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.shared.event.constant.Constant;
 import com.alipay.hulu.shared.node.OperationService;
 import com.alipay.hulu.shared.node.action.OperationMethod;
 import com.alipay.hulu.shared.node.action.PerformActionEnum;
@@ -42,6 +46,7 @@ import java.util.List;
 /**
  * Created by qiaoruikai on 2018/10/9 4:05 PM.
  */
+@Provider(@Param(value = Constant.EVENT_TOAST_MSG, type = String.class))
 public class AccessibilityEventTracker {
     private static final String TAG ="AccessEventTracker";
 
@@ -246,6 +251,21 @@ public class AccessibilityEventTracker {
 
                     operationRef.get().invalidRoot();
                 }
+            }
+        }
+
+        if(event.getEventType() == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {
+            //获取消息来源
+            String sourcePackageName = (String) event.getPackageName();
+            //获取事件具体信息
+            Parcelable parcelable = event.getParcelableData();
+            //如果是下拉通知栏消息
+            if (!(parcelable instanceof Notification)) {
+                //其它通知信息，包括Toast
+                String toastMsg = (String) event.getText().get(0);
+                String log = "Latest Toast Message: " + toastMsg + " [Source: " + sourcePackageName + "]";
+                LogUtil.i(TAG, log);
+                InjectorService.g().pushMessage(Constant.EVENT_TOAST_MSG, toastMsg);
             }
         }
 

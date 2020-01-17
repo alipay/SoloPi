@@ -56,6 +56,7 @@ import com.alipay.hulu.shared.node.tree.capture.CaptureProcessor;
 import com.alipay.hulu.shared.node.tree.capture.CaptureProvider;
 import com.alipay.hulu.shared.node.utils.AppUtil;
 import com.alipay.hulu.shared.node.utils.LogicUtil;
+import com.alipay.hulu.shared.node.utils.NodeTreeUtil;
 import com.alipay.hulu.shared.node.utils.OperationUtil;
 import com.alipay.hulu.shared.node.utils.PrepareUtil;
 import com.android.permission.rom.RomUtils;
@@ -664,6 +665,16 @@ public class OperationExecutor {
                     }
                 });
                 return true;
+            case ASSERT_TOAST:
+                String toastMsg = InjectorService.g().getMessage(com.alipay.hulu.shared.event.constant.Constant.EVENT_TOAST_MSG, String.class);
+                if (toastMsg == null) {
+                    return false;
+                }
+
+                if (!NodeTreeUtil.assertText(toastMsg, method)) {
+                    return false;
+                }
+                break;
             case SLEEP:
                 String sleepTime = method.getParam(INPUT_TEXT_KEY);
                 if (StringUtil.isEmpty(sleepTime)) {

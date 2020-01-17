@@ -669,6 +669,7 @@ public class CaseRecordManager implements ExportService {
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.JUMP_TO_PAGE));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.KILL_PROCESS));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.CLEAR_DATA));
+        gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.ASSERT_TOAST));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.RELOAD));
         GLOBAL_ACTION_MAP.put(R.string.function_group__app, gAppActions);
 

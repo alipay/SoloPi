@@ -95,6 +95,16 @@ public class NodeTreeUtil {
         }
 
         String matchTxt = matchTxtBuilder.toString();
+        return assertText(matchTxt, method);
+    }
+
+    /**
+     *
+     * @param matchTxt
+     * @param method
+     * @return
+     */
+    public static boolean assertText(String matchTxt, OperationMethod method) {
         method.putParam(OperationExecutor.ASSERT_CONTENT, matchTxt);
         String mode = method.getParam(OperationExecutor.ASSERT_MODE);
         String inputContent = method.getParam(OperationExecutor.ASSERT_INPUT_CONTENT);

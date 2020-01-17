@@ -35,6 +35,7 @@
     <string name="action__scroll_to_right">右滑</string>
     <string name="action__scroll_to_left">左滑</string>
     <string name="action__assert">断言</string>
+    <string name="action__assert_toast">Toast断言</string>
     <string name="action__sleep_until">等待节点出现</string>
     <string name="action__other_node">附加功能</string>
     <string name="action__back">返回</string>

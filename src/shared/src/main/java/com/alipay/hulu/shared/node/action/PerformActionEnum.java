@@ -65,6 +65,7 @@ public enum PerformActionEnum {
     GLOBAL_GESTURE("globalGesture", R.string.action__gesture, 2, 0, R.drawable.dialog_action_drawable_gesture, GESTURE_PARAMS),
     GOTO_INDEX("goToIndex", R.string.action__goto_index, 2, 0, R.drawable.dialog_action_drawable_goto_index),
     CLEAR_DATA("clearData", R.string.action__clear_data, 2, 0, R.drawable.dialog_action_drawable_app_operation),
+    ASSERT_TOAST("assertToast", R.string.action__assert_toast, 2, 0, R.drawable.dialog_action_drawable_assert, ASSERT_PARAMS),
 
     KILL_PROCESS("killProcess", R.string.action__kill_process, 2, 0, R.drawable.dialog_action_drawable_kill_process),
     SLEEP("sleep", R.string.action__sleep, 2, 0, R.drawable.dialog_action_drawable_sleep, SLEEP_PARAMS),

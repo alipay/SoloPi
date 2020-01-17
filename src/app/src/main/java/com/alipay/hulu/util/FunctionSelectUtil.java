@@ -46,6 +46,7 @@ import android.widget.TextView;
 import com.alibaba.fastjson.JSON;
 import com.alipay.hulu.R;
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.service.ScreenCaptureService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.tools.CmdTools;
@@ -236,8 +237,9 @@ public class FunctionSelectUtil {
                 || action == PerformActionEnum.EXECUTE_SHELL) {
             showEditView(node, method, context, listener);
             return true;
-        } else if (action == PerformActionEnum.ASSERT) {
-            chooseAssertMode(node, PerformActionEnum.ASSERT, context, listener);
+        } else if (action == PerformActionEnum.ASSERT
+                || action == PerformActionEnum.ASSERT_TOAST) {
+            chooseAssertMode(node, action, context, listener);
             return true;
         } else if (action == PerformActionEnum.LET_NODE) {
             chooseLetMode(node, context, listener);
@@ -582,10 +584,14 @@ public class FunctionSelectUtil {
 
             // 判断当前内容是否是数字
             StringBuilder matchTxtBuilder = new StringBuilder();
-            for (AbstractNodeTree item : node) {
-                if (!TextUtils.isEmpty(item.getText())) {
-                    matchTxtBuilder.append(item.getText());
+            if (action == PerformActionEnum.ASSERT) {
+                for (AbstractNodeTree item : node) {
+                    if (!TextUtils.isEmpty(item.getText())) {
+                        matchTxtBuilder.append(item.getText());
+                    }
                 }
+            } else if (action == PerformActionEnum.ASSERT_TOAST) {
+                matchTxtBuilder.append(InjectorService.g().getMessage(com.alipay.hulu.shared.event.constant.Constant.EVENT_TOAST_MSG, String.class));
             }
 
             final int[] selectNumIndex = new int[1];

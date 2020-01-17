@@ -65,6 +65,11 @@ public class Constant {
     public static final String EVENT_ACCESSIBILITY_MODE = "accessibilityMode";
 
     /**
+     * Toast消息
+     */
+    public static final String EVENT_TOAST_MSG = "accessibilityToastMsg";
+
+    /**
      * 辅助功能节点
      */
     public static final String KEY_ACCESSIBILITY_NODE = "accessibilityNode";

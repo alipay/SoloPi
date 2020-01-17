@@ -35,6 +35,7 @@
     <string name="action__scroll_to_right">SCROLL RIGHT</string>
     <string name="action__scroll_to_left">SCROLL LEFT</string>
     <string name="action__assert">ASSERT</string>
+    <string name="action__assert_toast">ASSERT TOAST</string>
     <string name="action__sleep_until">WAIT NODE</string>
     <string name="action__other_node">EXTRA</string>
     <string name="action__back">BACK</string>
