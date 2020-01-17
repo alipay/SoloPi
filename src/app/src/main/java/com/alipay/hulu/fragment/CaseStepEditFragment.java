@@ -679,12 +679,20 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
 
                         CaseStepAdapter.MyDataWrapper wrapper = new CaseStepAdapter.MyDataWrapper(step, currentIdx.getAndIncrement());
 
-                        // if和while设置下scope
+                        // if和while设置下scope，不要在最后一位
                         if (method.getActionEnum() == PerformActionEnum.IF || method.getActionEnum() == PerformActionEnum.WHILE) {
-                            wrapper.scopeTo = wrapper.idx;
+                            if (dragEntities.size() > 0) {
+                                CaseStepAdapter.MyDataWrapper last = dragEntities.get(dragEntities.size() - 1);
+                                wrapper.scopeTo = last.idx;
+                                dragEntities.add(dragEntities.size() - 1, wrapper);
+                            } else {
+                                wrapper.scopeTo = wrapper.idx;
+                                dragEntities.add( wrapper);
+                            }
+                        } else {
+                            dragEntities.add(wrapper);
                         }
 
-                        dragEntities.add(wrapper);
 
                         adapter.notifyDataSetChanged();
                     }
