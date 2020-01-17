@@ -21,6 +21,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.support.v7.app.AlertDialog;
@@ -73,6 +74,7 @@ import com.alipay.hulu.ui.GesturePadView;
 import com.alipay.hulu.ui.TwoLevelSelectLayout;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -259,8 +261,13 @@ public class FunctionSelectUtil {
         } else if (action == PerformActionEnum.GESTURE || action == PerformActionEnum.GLOBAL_GESTURE) {
             captureAndShowGesture(action, node, context, listener);
             return true;
+        } else if (action == PerformActionEnum.GLOBAL_SCROLL_TO_BOTTOM
+                || action == PerformActionEnum.GLOBAL_SCROLL_TO_TOP
+                || action == PerformActionEnum.GLOBAL_SCROLL_TO_LEFT
+                || action == PerformActionEnum.GLOBAL_SCROLL_TO_RIGHT) {
+            showScrollControlView(method, context, listener);
+            return true;
         }
-
         return false;
     }
 
@@ -309,6 +316,91 @@ public class FunctionSelectUtil {
         } catch (Exception e) {
             e.printStackTrace();
 
+            listener.onCancel();
+        }
+    }
+
+
+    /**
+     * 展示滑动控制
+     * @param context
+     */
+    private static void showScrollControlView(final OperationMethod method, Context context, final FunctionListener listener) {
+        try {
+            LayoutInflater inflater =  LayoutInflater.from(ContextUtil.getContextThemeWrapper(
+                    context, R.style.AppDialogTheme));
+
+            ScrollView v = (ScrollView) inflater.inflate(R.layout.dialog_setting, null);
+            LinearLayout view = (LinearLayout) v.getChildAt(0);
+
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+            // 对每一个字段添加EditText
+            View editField = inflater.inflate(R.layout.item_edit_field, null);
+
+            final EditText distance = (EditText) editField.findViewById(R.id.item_edit_field_edit);
+            TextView distanceName = (TextView) editField.findViewById(R.id.item_edit_field_name);
+
+            // 配置字段
+            distance.setHint("滑动距离(%)");
+            distanceName.setText("滑动距离(%)");
+            distance.setInputType(InputType.TYPE_CLASS_NUMBER);
+            distance.setText("40");
+
+            // 设置其他参数
+            distance.setTextColor(context.getResources().getColor(R.color.primaryText));
+            distance.setHintTextColor(context.getResources().getColor(R.color.secondaryText));
+            distance.setTextSize(18);
+            distance.setHighlightColor(context.getResources().getColor(R.color.colorAccent));
+            view.addView(editField, layoutParams);
+
+
+            editField = inflater.inflate(R.layout.item_edit_field, null);
+            final EditText time = (EditText) editField.findViewById(R.id.item_edit_field_edit);
+            TextView timeName = (TextView) editField.findViewById(R.id.item_edit_field_name);
+
+            // 配置字段
+            time.setHint("滑动时间(ms)");
+            timeName.setText("滑动时间(ms)");
+            time.setText("1000");
+            time.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+            // 设置其他参数
+            time.setTextColor(context.getResources().getColor(R.color.primaryText));
+            time.setHintTextColor(context.getResources().getColor(R.color.secondaryText));
+            time.setTextSize(18);
+            time.setHighlightColor(context.getResources().getColor(R.color.colorAccent));
+            view.addView(editField, layoutParams);
+
+            // 显示Dialog
+            AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
+                    .setTitle("设置滑动参数")
+                    .setView(v)
+                    .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // 获取每个编辑框的文字
+                            dialog.dismiss();
+
+                            method.putParam(OperationExecutor.SCROLL_DISTANCE, distance.getText().toString());
+                            method.putParam(OperationExecutor.SCROLL_TIME, time.getText().toString());
+                            listener.onProcessFunction(method, null);
+                        }
+                    }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    listener.onCancel();
+                }
+            }).create();
+
+            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+
+            dialog.show();
+        } catch (Exception e) {
+            LogUtil.e(TAG, "Throw exception: " + e.getMessage(), e);
             listener.onCancel();
         }
     }

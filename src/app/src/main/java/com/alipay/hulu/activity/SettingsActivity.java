@@ -440,7 +440,7 @@ public class SettingsActivity extends BaseActivity {
         mAesSeedSettingWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showMultipleEditDialog(SettingsActivity.this, new DialogUtils.OnDialogResultListener() {
+                showMultipleEditDialog(SettingsActivity.this, new OnDialogResultListener() {
                     @Override
                     public void onDialogPositive(List<String> data) {
                         if (data.size() == 1) {
@@ -490,7 +490,7 @@ public class SettingsActivity extends BaseActivity {
             public void onClick(View v) {
                 List<Pair<String, String>> data = new ArrayList<>(2);
                 data.add(new Pair<>(getString(R.string.settings__screenshot_resolution), "" + SPService.getInt(SPService.KEY_SCREENSHOT_RESOLUTION, 720)));
-                showMultipleEditDialog(SettingsActivity.this, new DialogUtils.OnDialogResultListener() {
+                showMultipleEditDialog(SettingsActivity.this, new OnDialogResultListener() {
                     @Override
                     public void onDialogPositive(List<String> data) {
                         if (data.size() != 2) {

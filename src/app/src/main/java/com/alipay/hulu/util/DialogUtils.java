@@ -44,6 +44,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.alipay.hulu.R;
+import com.alipay.hulu.activity.SettingsActivity;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.utils.ContextUtil;
 import com.alipay.hulu.common.utils.GlideApp;

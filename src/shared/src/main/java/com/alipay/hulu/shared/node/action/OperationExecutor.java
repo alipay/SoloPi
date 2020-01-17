@@ -50,8 +50,8 @@ import com.alipay.hulu.shared.node.OperationService;
 import com.alipay.hulu.shared.node.locater.OperationNodeLocator;
 import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
 import com.alipay.hulu.shared.node.tree.accessibility.AccessibilityNodeProcessor;
-import com.alipay.hulu.shared.node.tree.accessibility.tree.AccessibilityNodeTree;
 import com.alipay.hulu.shared.node.tree.accessibility.AccessibilityProvider;
+import com.alipay.hulu.shared.node.tree.accessibility.tree.AccessibilityNodeTree;
 import com.alipay.hulu.shared.node.tree.capture.CaptureProcessor;
 import com.alipay.hulu.shared.node.tree.capture.CaptureProvider;
 import com.alipay.hulu.shared.node.utils.AppUtil;
@@ -65,8 +65,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,6 +93,9 @@ public class OperationExecutor {
     public static final String GESTURE_PATH = "gesturePath";
     public static final String GESTURE_FILTER = "gestureFilter";
 
+
+    public static final String SCROLL_DISTANCE = "scrollDistance";
+    public static final String SCROLL_TIME = "ScrollTime";
 
     /**
      * 点击操作类型
@@ -527,36 +528,70 @@ public class OperationExecutor {
                 operationManagerRef.get().refreshCurrentRoot();
                 break;
             case GLOBAL_SCROLL_TO_BOTTOM:
-                int x = width / 2;
-                int y = height / 3;
-                int toBottom = height * 2 / 3;
-                LogUtil.i(TAG, "Start ADB scroll " + x + "," + y);
-                executor.executeScroll(x, y, x, toBottom, 300);
-                break;
             case GLOBAL_SCROLL_TO_TOP:
-                x = width / 2;
-                y = height * 2 / 3;
-                int toTop = height / 3;
-                LogUtil.i(TAG, "Start ADB scroll " + x + "," + y);
-                executor.executeScroll(x, y, x, toTop, 300);
-                break;
             case GLOBAL_SCROLL_TO_LEFT:
-                x = width / 4 * 3;
-                y = height / 2;
-                int toLeft = width / 4;
-                LogUtil.i(TAG, "Start ADB scroll " + x + "," + y);
-                executor.executeScroll(x, y, toLeft, y, 300);
-                break;
             case GLOBAL_SCROLL_TO_RIGHT:
-                x = width / 4;
-                y = height / 2;
-                int toRight = width * 3 / 4;
-                LogUtil.i(TAG, "Start ADB scroll " + x + "," + y);
-                executor.executeScroll(x, y, toRight, y, 300);
-                break;
+                String distanceStr = method.getParam(SCROLL_DISTANCE);
+                String timeStr = method.getParam(SCROLL_TIME);
+                float distance = 0.4F;
+                int time = 300;
+                if (StringUtil.isInteger(distanceStr)) {
+                    distance = Integer.parseInt(distanceStr);
+                    if (distance <= 0 || distance >= 100) {
+                        distance = 0.4F;
+                    } else if (distance >= 90) {
+                        distance = 0.9F;
+                    } else if (distance <= 10) {
+                        distance = 0.1F;
+                    } else {
+                        distance = distance / 100F;
+                    }
+                }
+
+                if (StringUtil.isInteger(timeStr)) {
+                    time = Integer.parseInt(timeStr);
+                    if (time <= 0) {
+                        time = 300;
+                    }
+                }
+                final int fromX, fromY, toX, toY;
+                int centerX = width / 2;
+                int centerY = height / 2;
+                int heightDis = (int) (distance * height);
+                int widthDis = (int) (distance * width);
+
+                if (actionEnum == PerformActionEnum.GLOBAL_SCROLL_TO_LEFT) {
+                    fromX = centerX + widthDis / 2;
+                    toX = fromX - widthDis;
+                    toY = fromY = centerY;
+                } else if (actionEnum == PerformActionEnum.GLOBAL_SCROLL_TO_RIGHT) {
+                    fromX = centerX - widthDis / 2;
+                    toX = fromX + widthDis;
+                    toY = fromY = centerY;
+                } else if (actionEnum == PerformActionEnum.GLOBAL_SCROLL_TO_TOP) {
+                    fromY = centerY + heightDis / 2;
+                    toY = fromY - heightDis;
+                    toX = fromX = centerX;
+                } else if (actionEnum == PerformActionEnum.GLOBAL_SCROLL_TO_BOTTOM) {
+                    fromY = centerY - heightDis / 2;
+                    toY = fromY + heightDis;
+                    toX = fromX = centerX;
+                } else {
+                    return false;
+                }
+
+                LogUtil.i(TAG, "Start ADB scroll from (" + fromX + ',' + fromY + ") to (" + toX + ',' + toY + ')');
+                final int finalTime = time;
+                opContext.notifyOnFinish(new Runnable() {
+                    @Override
+                    public void run() {
+                        executor.executeScroll(fromX, fromY, toX, toY, finalTime);
+                    }
+                });
+                return true;
             case GLOBAL_PINCH_IN:
-                x = width / 2;
-                y = height / 2;
+                int x = width / 2;
+                int y = height / 2;
                 int from = width / 2;
                 int to = width / 6;
                 LogUtil.w(TAG, "Start minitouch pinch " + x + "," + y);
