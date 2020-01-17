@@ -304,4 +304,10 @@ public class PerformanceActivity extends BaseActivity {
         mStressListView.setHeaderDividersEnabled(false);
 
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mPerfStressAdapter.stop();
+    }
 }

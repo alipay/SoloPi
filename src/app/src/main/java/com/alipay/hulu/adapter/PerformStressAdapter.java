@@ -27,6 +27,9 @@ import android.widget.Toast;
 
 import com.alipay.hulu.R;
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.injector.InjectorService;
+import com.alipay.hulu.common.injector.param.Subscriber;
+import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.shared.display.items.MemoryTools;
 import com.alipay.hulu.tools.PerformStressImpl;
@@ -40,13 +43,57 @@ public class PerformStressAdapter extends BaseAdapter {
 	protected static final String TAG = "PerformStressAdapter";
 	private LayoutInflater mInflater;
 	private List<Map<String, Object>> mData;
-	private Map<Integer, Boolean> isSelected;
 	Context cx;
+
+	private int cpuCount = 1;
+	private int cpuPercent = 0;
+	private int memory = 0;
+
+	@Subscriber(@Param(PerformStressImpl.PERFORMANCE_STRESS_CPU_COUNT))
+	public void receiveCpuCount(int count) {
+		if (count == cpuCount) {
+			return;
+		}
+
+		// CPU变了
+		cpuCount = count;
+		notifyDataSetChanged();
+	}
+
+	@Subscriber(@Param(PerformStressImpl.PERFORMANCE_STRESS_CPU_PERCENT))
+	public void receiveCpuPercent(int percent) {
+		if (cpuPercent == percent) {
+			return;
+		}
+
+		// CPU占比变了
+		cpuPercent = percent;
+		notifyDataSetChanged();
+	}
+
+
+	@Subscriber(@Param(PerformStressImpl.PERFORMANCE_STRESS_MEMORY))
+	public void receiveMemory(int memory) {
+		if (memory == this.memory) {
+			return;
+		}
+
+		// 内存变了
+		this.memory = memory;
+		notifyDataSetChanged();
+	}
+
 
 	public PerformStressAdapter(Context context) {
 		this.cx = context;
 		mInflater = LayoutInflater.from(context);
 		init();
+		InjectorService.g().register(this);
+		LauncherApplication.service(PerformStressImpl.class);
+	}
+
+	public void stop() {
+		InjectorService.g().unregister(this);
 	}
 
 	// 初始化
@@ -57,22 +104,19 @@ public class PerformStressAdapter extends BaseAdapter {
 
 		map.put("img", android.R.drawable.ic_menu_crop);
 		map.put("title", cx.getString(R.string.stress__cpu_load));
-		map.put("process", 0);
 		map.put("max", 100);
 		mData.add(map);
 
 		map = new HashMap<String, Object>();
 		map.put("img", android.R.drawable.ic_menu_crop);
 		map.put("title", cx.getString(R.string.stress__cpu_core));
-		map.put("process", 1);
 		map.put("max", getCpuCoreNum());
 		mData.add(map);
 
 		map = new HashMap<String, Object>();
 		map.put("img", android.R.drawable.ic_menu_crop);
 		map.put("title", cx.getString(R.string.stress__memory));
-		map.put("process", 0);
-		map.put("max", MemoryTools.getAvailMemory(cx).intValue());
+		map.put("max", MemoryTools.getTotalMemory(cx).intValue());
 
 		mData.add(map);
 	}
@@ -119,7 +163,19 @@ public class PerformStressAdapter extends BaseAdapter {
 			@Override
 			public void onProgressChanged(SeekBar arg0, int progress, boolean fromUser) {
 				if (fromUser) {
-					mData.get(position).put("process", progress);
+					switch (position) {
+						case 0:
+							cpuPercent = progress;
+							break;
+						case 1:
+							cpuCount = progress;
+							break;
+						case 2:
+							memory = progress;
+							break;
+						default:
+							return;
+					}
 					finalHolder.data.setText(String.valueOf(progress));
 				}
 			}
@@ -134,25 +190,17 @@ public class PerformStressAdapter extends BaseAdapter {
 				LogUtil.i(TAG,
 						"progress:" + (Integer) mData.get(position).get("process") + ";max:"
 								+ (Integer) mData.get(position).get("max"));
-
-				PerformStressImpl performStressImpl = PerformStressImpl.getInstanceImpl();
 				// TODO 改成接口定义通用加压方法
 				switch (position) {
 				case 0:// CPU占用率
+                    InjectorService.g().pushMessage(PerformStressImpl.PERFORMANCE_STRESS_CPU_PERCENT, cpuPercent);
+                    break;
 				case 1:// CPU多核
-					performStressImpl.performCpuStressByCount((int) mData.get(0).get("process"), (int) mData.get(1)
-							.get("process"));
+					InjectorService.g().pushMessage(PerformStressImpl.PERFORMANCE_STRESS_CPU_COUNT, cpuCount);
 					break;
 				case 2:// 内存占用
-					try {
-						int allocMemory = MemoryTools.dummyMem((int) mData.get(2).get("process"));
-						if (allocMemory != seekBar.getProgress()) {
-							seekBar.setProgress(allocMemory);
-						}
-					} catch (OutOfMemoryError e) {
-						LauncherApplication.toast(R.string.stress__insufficient_memory, e.getMessage());
-					}
-					break;
+                    InjectorService.g().pushMessage(PerformStressImpl.PERFORMANCE_STRESS_MEMORY, memory);
+                    break;
 				default:
 					break;
 				}
@@ -160,8 +208,21 @@ public class PerformStressAdapter extends BaseAdapter {
 		});
 
 		holder.sBar.setMax((Integer) mData.get(position).get("max"));
-		holder.sBar.setProgress((Integer) mData.get(position).get("process"));
-		holder.data.setText("0");
+
+		switch (position) {
+			case 0:
+				holder.sBar.setProgress(cpuPercent);
+				holder.data.setText(Integer.toString(cpuPercent));
+				break;
+			case 1:
+				holder.sBar.setProgress(cpuCount);
+				holder.data.setText(Integer.toString(cpuCount));
+				break;
+			case 2:
+				holder.sBar.setProgress(memory);
+				holder.data.setText(Integer.toString(memory));
+				break;
+		}
 		return convertView;
 	}
 

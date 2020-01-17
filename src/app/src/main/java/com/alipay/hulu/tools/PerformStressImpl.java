@@ -15,47 +15,82 @@
  */
 package com.alipay.hulu.tools;
 
+import android.content.Context;
+import android.widget.Toast;
+
+import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.injector.InjectorService;
+import com.alipay.hulu.common.injector.param.Subscriber;
+import com.alipay.hulu.common.injector.provider.Param;
+import com.alipay.hulu.common.service.base.ExportService;
+import com.alipay.hulu.common.service.base.LocalService;
 import com.alipay.hulu.common.utils.LogUtil;
+import com.alipay.hulu.shared.display.items.MemoryTools;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class PerformStressImpl implements IPerformStress {
+@LocalService
+public class PerformStressImpl implements IPerformStress, ExportService {
+	public static final String PERFORMANCE_STRESS_CPU_COUNT = "performanceStressCpuCount";
+	public static final String PERFORMANCE_STRESS_CPU_PERCENT = "performanceStressCpuPercent";
+	public static final String PERFORMANCE_STRESS_MEMORY = "performanceStressMemory";
 
 	private static final String TAG = "PerformStressImpl";
-	private static PerformStressImpl instance;
-
-	public static PerformStressImpl getInstanceImpl() {
-		if (instance == null) {
-			synchronized (PerformStressImpl.class) {
-				if (instance == null) {
-					instance = new PerformStressImpl();
-				}
-			}
-		}
-		return instance;
-	}
 
 	ExecutorService cachedThreadPool;
 	private AtomicInteger currentCount = new AtomicInteger();
 	private volatile int targetCount = 0;
 	private int stress = 0;
+	private int memory = 0;
 
-	PerformStressImpl() {
-		cachedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+	@Subscriber(@Param(PERFORMANCE_STRESS_CPU_COUNT))
+	public void setTargetCount(int targetCount) {
+		if (targetCount == this.targetCount) {
+			return;
+		}
+		this.targetCount = targetCount;
+		performCpuStressByCount();
 	}
+
+	@Subscriber(@Param(PERFORMANCE_STRESS_CPU_PERCENT))
+	public void setStress(int stress) {
+		if (stress == this.stress) {
+			return;
+		}
+		this.stress = stress;
+		performCpuStressByCount();
+	}
+
+	@Subscriber(@Param(PERFORMANCE_STRESS_MEMORY))
+	public void setMemory(int memory) {
+		if (memory == this.memory) {
+			return;
+		}
+		this.memory = memory;
+        performMemoryStress();
+    }
+
+    @Override
+    public void onCreate(Context context) {
+        cachedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        InjectorService.g().register(this);
+    }
+
+    @Override
+    public void onDestroy(Context context) {
+        cachedThreadPool.shutdownNow();
+        InjectorService.g().unregister(this);
+    }
 
 	public void addOrReduceToTargetThread(int count) {
 
 	}
 
-	public synchronized void performCpuStressByCount(final int stress, int count) {
-		this.stress = stress;
-		this.targetCount = count;
-
-		if (count > currentCount.get()) {
-			for (int i = currentCount.get() + 1; i <= count; i++) {
+    public void performCpuStressByCount() {
+        if (targetCount > currentCount.get()) {
+            for (int i = 0; i < targetCount - currentCount.get(); i++) {
 				LogUtil.d(TAG, "新建一个线程");
                 final int finalI = i;
                 cachedThreadPool.execute(new Runnable() {
@@ -65,7 +100,7 @@ public class PerformStressImpl implements IPerformStress {
 					}
 				});
 			}
-			currentCount.set(count);
+            currentCount.set(targetCount);
 		}
 
 	}
@@ -98,6 +133,20 @@ public class PerformStressImpl implements IPerformStress {
 		}
 		LogUtil.d(TAG, "释放一个线程");
 		currentCount.decrementAndGet();
+	}
+
+	/**
+	 * 开始性能加压
+	 */
+	void performMemoryStress() {
+		try {
+			this.memory = MemoryTools.dummyMem(memory);
+			InjectorService.g().pushMessage(PERFORMANCE_STRESS_MEMORY, memory);
+		} catch (OutOfMemoryError e) {
+			LauncherApplication.getInstance().showToast("内存不足:" + e.getMessage());
+			LogUtil.e(TAG, "Alloc memory throw oom: " + e.getMessage(), e);
+		}
+
 	}
 
 	@Override
