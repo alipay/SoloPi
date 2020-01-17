@@ -172,11 +172,10 @@ public abstract class BaseActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (toast == null) {
-                    toast = Toast.makeText(LauncherApplication.getInstance(), msg, Toast.LENGTH_SHORT);
-                } else {
-                    toast.setText(msg);
+                if (toast != null) {
+                    toast.cancel();
                 }
+                toast = Toast.makeText(MyApplication.getContext(), msg, Toast.LENGTH_SHORT);
                 toast.show();
             }
         });
@@ -215,11 +214,10 @@ public abstract class BaseActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (toast == null) {
-                    toast = Toast.makeText(LauncherApplication.getInstance(), msg, Toast.LENGTH_LONG);
-                } else {
-                    toast.setText(msg);
+                if (toast != null) {
+                    toast.cancel();
                 }
+                toast = Toast.makeText(MyApplication.getContext(), msg, Toast.LENGTH_LONG);
                 toast.show();
             }
         });

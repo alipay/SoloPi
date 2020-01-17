@@ -95,11 +95,10 @@ public class BaseFragment extends Fragment {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (toast == null) {
-                    toast = Toast.makeText(MyApplication.getContext(), msg, Toast.LENGTH_SHORT);
-                } else {
-                    toast.setText(msg);
+                if (toast != null) {
+                    toast.cancel();
                 }
+                toast = Toast.makeText(MyApplication.getContext(), msg, Toast.LENGTH_SHORT);
                 toast.show();
             }
         });
@@ -133,11 +132,10 @@ public class BaseFragment extends Fragment {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (toast == null) {
-                    toast = Toast.makeText(MyApplication.getContext(), msg, Toast.LENGTH_LONG);
-                } else {
-                    toast.setText(msg);
+                if (toast != null) {
+                    toast.cancel();
                 }
+                toast = Toast.makeText(MyApplication.getContext(), msg, Toast.LENGTH_LONG);
                 toast.show();
             }
         });
