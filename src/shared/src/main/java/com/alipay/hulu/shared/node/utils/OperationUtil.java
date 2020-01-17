@@ -85,6 +85,7 @@ public class OperationUtil {
         map.put("我知道啦", 4);
         map.put("立即删除", 5);
         map.put("清除", 5);
+        map.put("跳过", 5);
         map.put("立即清理", 6);
         map.put("忽略风险", 7);
         alertContentMap = Collections.unmodifiableMap(map);

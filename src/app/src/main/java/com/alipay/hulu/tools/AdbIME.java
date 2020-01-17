@@ -188,10 +188,7 @@ public class AdbIME extends InputMethodService {
                         public void run() {
                             CmdTools.switchToIme(finalDefaultIme);
                             OperationService service = LauncherApplication.getInstance().findServiceByName(OperationService.class.getName());
-
                             MiscUtil.sleep(1000);
-                            // 1.5s后检查下是否需要隐藏输入法
-                            service.doSomeAction(new OperationMethod(PerformActionEnum.HIDE_INPUT_METHOD), null);
                         }
                     }, 500);
                 }

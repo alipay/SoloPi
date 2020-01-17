@@ -183,6 +183,7 @@ public class CaptureTree extends AbstractNodeTree {
                     opContext.executor.executeCmdSync("input text " + text);
                 }
                 LogUtil.e(TAG, "Finish Input");
+                waitInputMethodHide();
             }
         });
     }

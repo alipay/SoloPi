@@ -261,15 +261,8 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
                 MiscUtil.sleep(500);
 
                 opContext.executor.executeCmd("input text '" + content + "'");
-                MiscUtil.sleep(500);
 
-                opContext.notifyOnFinish(new Runnable() {
-                    @Override
-                    public void run() {
-                        OperationService service = LauncherApplication.getInstance().findServiceByName(OperationService.class.getName());
-                        service.doSomeAction(new OperationMethod(PerformActionEnum.HIDE_INPUT_METHOD), null);
-                    }
-                });
+                waitInputMethodHide();
             } else {
                 opContext.notifyOnFinish(new Runnable() {
                     @Override
@@ -287,6 +280,7 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
                             LogUtil.e(TAG, "Input throw Exception：" + e.getLocalizedMessage(), e);
                         }
                         LogUtil.e(TAG, "Finish Input");
+                        waitInputMethodHide();
                     }
                 });
             }
@@ -295,8 +289,6 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
                 textData.putString(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, content);
                 currentNode.performAction(AccessibilityNodeInfo.ACTION_FOCUS, null);
                 currentNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, textData);
-                MiscUtil.sleep(500);
-
                 opContext.notifyOnFinish(new Runnable() {
                     @Override
                     public void run() {
@@ -325,32 +317,6 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
                         LogUtil.e(TAG, "Finish Input");
                     }
                 });
-            }
-        }
-    }
-
-
-
-    /**
-     * 等待输入法隐藏
-     */
-    protected void waitInputMethodHide() {
-        OperationService service = LauncherApplication.getInstance().findServiceByName(OperationService.class.getName());
-
-        final CountDownLatch waitForHide = new CountDownLatch(1);
-        boolean result = service.doSomeAction(new OperationMethod(PerformActionEnum.HIDE_INPUT_METHOD), null, new OperationContext.OperationListener() {
-            @Override
-            public void notifyOperationFinish() {
-                waitForHide.countDown();
-            }
-        });
-
-        if (result) {
-            // 等待输入完成
-            try {
-                waitForHide.await();
-            } catch (InterruptedException e) {
-                LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
             }
         }
     }
