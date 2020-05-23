@@ -51,7 +51,7 @@ greendao{
 }
 
 dependencies {
-    compileOnly 'com.alibaba:fastjson:1.2.62'
+    compileOnly 'com.alibaba:fastjson:1.2.68'
     compileOnly 'com.android.support:appcompat-v7:25.4.0'
     compileOnly 'com.android.support:support-v4:25.4.0'
     compileOnly 'com.liulishuo.filedownloader:library:1.7.7'
