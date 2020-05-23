@@ -60,7 +60,7 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:25.4.0'
     implementation 'com.android.support:design:25.4.0'
     implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'
-    implementation 'com.alibaba:fastjson:1.2.62'
+    implementation 'com.alibaba:fastjson:1.2.68'
     implementation 'org.greenrobot:greendao:3.2.2'
     implementation 'com.squareup.okhttp3:okhttp:3.12.3'
     implementation 'com.dlazaro66.qrcodereaderview:qrcodereaderview:2.0.3'
