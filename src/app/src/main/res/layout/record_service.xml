@@ -13,14 +13,14 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
 -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/white"
     android:orientation="vertical">
 
-    <LinearLayout android:layout_width="120dp"
+    <LinearLayout android:layout_width="140dp"
                   android:layout_height="wrap_content"
                   android:orientation="horizontal"
                   android:gravity="center_vertical">
@@ -31,32 +31,71 @@
             android:layout_weight="1"
             android:gravity="center"
             android:id="@+id/record_btn"
-            android:padding="10dp"
+            android:padding="8dp"
             android:text="@string/record_float__start_record"
             android:textSize="15dp"
-            android:textColor="@color/black"/>
+            android:textColor="@color/primaryText"/>
+
+        <View
+            android:layout_width="1px"
+            android:layout_height="match_parent"
+            android:background="@color/divider_color"/>
 
         <ImageView
             android:id="@+id/close_btn"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginRight="8dp"
+            android:layout_marginLeft="8dp"
             android:src="@drawable/close_icon" />
 
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/result"
+    <View
         android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:gravity="center"
-        android:textSize="14dp"
-        android:textColor="@color/black"
-        android:text="@string/record_float__calculating"
-        android:ellipsize="end"
-        android:visibility="gone">
-    </TextView>
+        android:layout_height="1px"
+        android:background="@color/divider_color"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/record_kill_current"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:gravity="center"
+            android:padding="4dp"
+            android:text="杀当前进程"
+            android:textColor="@color/colorAccent"
+            android:textSize="12dp" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/divider_color"/>
+
+    <ListView
+        android:id="@+id/record_session_result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@drawable/slim_divider"
+        android:footerDividersEnabled="true"
+        tools:listitem="@layout/item_screen_result"
+        />
+
+    <ImageView
+        android:id="@+id/record_session_hide"
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:padding="2dp"
+        android:rotation="180"
+        android:src="@drawable/angel"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/divider_color"/>
 </LinearLayout>
 
 

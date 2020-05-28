@@ -35,6 +35,8 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.alipay.hulu.R;
@@ -43,17 +45,26 @@ import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
+import com.alipay.hulu.common.tools.BackgroundExecutor;
+import com.alipay.hulu.common.tools.CmdLine;
+import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
+import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.event.EventService;
 import com.alipay.hulu.shared.event.bean.UniversalEventBean;
 import com.alipay.hulu.shared.event.constant.Constant;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @TargetApi(value = Build.VERSION_CODES.LOLLIPOP)
 public class RecordService extends Service {
@@ -77,7 +88,10 @@ public class RecordService extends Service {
     private View view;
     private TextView recordBtn;
     private ImageView closeBtn;
-    private TextView resultView;
+    private ListView resultList;
+    private TextView killCurrent;
+    private SimpleAdapter adapter;
+    private ImageView resultHide;
 
     private float mTouchStartX;
     private float mTouchStartY;
@@ -87,6 +101,9 @@ public class RecordService extends Service {
     private int statusBarHeight = 0;
 
     private long lastMotionDownTime;
+
+    private List<Long> results;
+    private List<Map<String, String>> displayDataSource;
 
     private String mCodec;
     private int mFrameRate;
@@ -107,6 +124,8 @@ public class RecordService extends Service {
     private boolean isCalculating = false;
     private VideoEncodeConfig mVideo;
 
+    private boolean hideResult = false;
+
     private Handler mHandler;
     private MediaProjection mMediaProjection;
 
@@ -121,6 +140,7 @@ public class RecordService extends Service {
     public void onCreate() {
         super.onCreate();
         LogUtil.d(TAG, "onCreate");
+        results = new ArrayList<>();
         createView();
 
         mMediaProjectionManager = (MediaProjectionManager)getSystemService(Context.MEDIA_PROJECTION_SERVICE);
@@ -146,8 +166,52 @@ public class RecordService extends Service {
         recordBtn = (TextView) view.findViewById(R.id.record_btn);
         recordBtn.setText(R.string.record__start_record);
         closeBtn = (ImageView) view.findViewById(R.id.close_btn);
-        resultView = (TextView) view.findViewById(R.id.result);
-        resultView.setVisibility(View.GONE);
+        resultList = (ListView) view.findViewById(R.id.record_session_result);
+        killCurrent = (TextView) view.findViewById(R.id.record_kill_current);
+
+        displayDataSource = new ArrayList<>();
+        adapter = new SimpleAdapter(this, displayDataSource, R.layout.item_screen_result, new String[] {"title", "value"}, new int[] {R.id.screen_result_title, R.id.screen_result_value});
+        resultList.setAdapter(adapter);
+
+        killCurrent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BackgroundExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (CmdTools.isInitialized()) {
+                            String[] pA = CmdTools.getTopPkgAndActivity();
+                            if (pA == null || pA.length != 2) {
+                                LauncherApplication.getInstance().showToast("获取当前应用失败");
+                                return;
+                            }
+                            LogUtil.i(TAG, "当前应用: %s, 当前Activity: %s", pA[0], pA[1]);
+
+                            // 杀两遍
+                            CmdTools.execHighPrivilegeCmd("am force-stop " + pA[0]);
+                            CmdTools.execHighPrivilegeCmd("am force-stop " + pA[0]);
+                        } else {
+                            // 申请ADB
+                            requestAdb();
+                        }
+                    }
+                });
+            }
+        });
+
+        resultHide.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideResult = !hideResult;
+                if (hideResult) {
+                    resultList.setVisibility(View.GONE);
+                    resultHide.setRotation(0);
+                } else {
+                    resultList.setVisibility(View.VISIBLE);
+                    resultHide.setRotation(180);
+                }
+            }
+        });
 
         if (statusBarHeight == 0) {
             try {
@@ -241,6 +305,31 @@ public class RecordService extends Service {
         });
 
         view.setAlpha(0.8f);
+    }
+
+    private void requestAdb() {
+        LauncherApplication.getInstance().showDialog(RecordService.this, "ADB连接尚未开启，是否开启？", "开启", new Runnable() {
+            @Override
+            public void run() {
+                BackgroundExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean result;
+                        try {
+                            result = CmdTools.generateConnection();
+                        } catch (Exception e) {
+                            LogUtil.e(TAG, "连接adb异常", e);
+                            result = false;
+                        }
+                        if (result) {
+                            LauncherApplication.getInstance().showToast("开启成功");
+                        } else {
+                            LauncherApplication.getInstance().showToast("开启失败");
+                        }
+                    }
+                });
+            }
+        }, "取消", null);
     }
 
     private void onRecordBtnClicked() {
@@ -343,6 +432,36 @@ public class RecordService extends Service {
         return file;
     }
 
+    /**
+     * 增加结果列
+     * @param result
+     */
+    private void addResultValue(long result) {
+        results.add(result);
+        displayDataSource.clear();
+        long total = 0;
+        for (int i = 0; i < results.size(); i++) {
+            long val = results.get(i);
+            total += val;
+            Map<String, String> display = new HashMap<>(3);
+            display.put("title", "第" + (i + 1) + "次");
+            display.put("value", val + "ms");
+            displayDataSource.add(display);
+        }
+
+        Map<String, String> display = new HashMap<>(3);
+        display.put("title", "平均值");
+        display.put("value", (total / results.size()) + "ms");
+        displayDataSource.add(display);
+
+        LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adapter.notifyDataSetChanged();
+            }
+        });
+    }
+
     @Override
     public void onDestroy() {
         LogUtil.d(TAG, "onDestroy");
@@ -374,8 +493,7 @@ public class RecordService extends Service {
                         isRecording = false;
                         isCalculating = true;
                         recordBtn.setText(R.string.record__calculating);
-                        resultView.setText(R.string.record__please_wait);
-                        resultView.setVisibility(View.VISIBLE);
+                        LauncherApplication.getInstance().showToast(getString(R.string.record__please_wait));
                     }
                 });
                 mHandler.postDelayed(new Runnable() {
@@ -391,9 +509,9 @@ public class RecordService extends Service {
                                                 isCalculating = false;
                                                 recordBtn.setText(R.string.record__start_record);
                                                 if (result <= 0) {
-                                                    resultView.setText(R.string.record__operation_fast);
+                                                    LauncherApplication.getInstance().showToast(getString(R.string.record__operation_fast));
                                                 } else {
-                                                    resultView.setText(getString(R.string.record_service__cost_time, result));
+                                                    addResultValue(result);
                                                 }
                                             }
                                         });
@@ -406,7 +524,7 @@ public class RecordService extends Service {
                                             public void run() {
                                                 isCalculating = false;
                                                 recordBtn.setText(R.string.record__start_record);
-                                                resultView.setText(msg);
+                                                LauncherApplication.getInstance().showToast(msg);
                                             }
                                         });
                                     }
@@ -430,7 +548,6 @@ public class RecordService extends Service {
                         isRecording = true;
                         hasClicked = false;
                         recordBtn.setText(R.string.record__stop_record);
-                        resultView.setVisibility(View.GONE);
                         mNotifications.recording(0);
                     }
                 });
