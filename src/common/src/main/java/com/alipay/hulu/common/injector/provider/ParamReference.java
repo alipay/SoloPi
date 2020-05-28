@@ -15,13 +15,13 @@
  */
 package com.alipay.hulu.common.injector.provider;
 
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 
 import com.alipay.hulu.common.injector.param.InjectParam;
 import com.alipay.hulu.common.injector.param.RunningThread;
 import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.utils.LogUtil;
-import com.alipay.hulu.common.utils.StringUtil;
 import com.mdit.library.Const;
 
 import java.lang.reflect.Method;
@@ -36,6 +36,26 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ParamReference {
     private static String TAG = "ParamReference";
+
+    public static final String PREFIX_PERSISTENT_PARAM = "PERSISTENT_PARAM_";
+
+    /**
+     * 消息合法
+     */
+    public static final int MESSAGE_VALID = 0;
+
+    /**
+     * 消息重复
+     */
+    public static final int MESSAGE_REPEAT = 1;
+
+    /**
+     * 消息不合法
+     */
+    public static final int MESSAGE_TYPE_INVALID = 2;
+
+    @IntDef({MESSAGE_VALID, MESSAGE_REPEAT, MESSAGE_TYPE_INVALID})
+    public @interface MESSAGE_VALIDATION {}
 
     private InjectParam targetParam;
 
@@ -52,6 +72,14 @@ public class ParamReference {
     public ParamReference(InjectParam targetParam) {
         this.targetParam = targetParam;
         this.referenceItems = new ConcurrentHashMap<>();
+
+        // 持久化参数
+        if (targetParam.isPersistent()) {
+            currentValue = SPService.get(PREFIX_PERSISTENT_PARAM + targetParam.getName(), targetParam.getType());
+            if (currentValue != null) {
+                initialized = true;
+            }
+        }
     }
 
     /**
@@ -59,32 +87,31 @@ public class ParamReference {
      * @param value
      * @param force
      */
-    public boolean messageValid(Object value, boolean force) {
+    @MESSAGE_VALIDATION
+    public int messageValid(Object value, boolean force) {
         if (!force) {
             // 空注入值
             if (value == null && targetParam.getType() == Void.class) {
-                return true;
+                return MESSAGE_VALID;
             }
 
             // 当原值与新值均为空，不更新
             if (value == null && this.currentValue == null) {
-                LogUtil.w(TAG, "推送空消息【ParamType=%s】", targetParam);
-                return false;
+                LogUtil.i(TAG, "推送空消息【ParamType=%s】", targetParam);
+                return MESSAGE_REPEAT;
             }
             // 当原值与新值都不为空且相等
             if (value != null && this.currentValue != null && (this.currentValue == value || this.currentValue.equals(value))) {
-                LogUtil.d(TAG, "推送重复消息【ParamType=%s，value=%s】", targetParam,
-                        StringUtil.hide(value));
-                return false;
+//                LogUtil.d(TAG, "推送重复消息【ParamType=%s，value=%s】", targetParam, value);
+                return MESSAGE_REPEAT;
             }
         }
 
         if (!targetParam.isValueValid(value)) {
-            LogUtil.e(TAG, "消息格式不合法【ParamType=%s，value=%s】", targetParam,
-                    StringUtil.hide(value));
-            return false;
+            LogUtil.e(TAG, "消息格式不合法【ParamType=%s，value=%s】", targetParam, value);
+            return MESSAGE_TYPE_INVALID;
         }
-        return true;
+        return MESSAGE_VALID;
     }
 
     /**
@@ -133,9 +160,9 @@ public class ParamReference {
                 return false;
             }
 
-            // 防止重复添加
+            // 重复添加直接成功
             if (referenceItems.containsKey(invoke)) {
-                return false;
+                return true;
             }
 
             this.referenceItems.put(invoke, 0);
@@ -164,6 +191,13 @@ public class ParamReference {
             initialized = true;
             currentValue = value;
         }
+
+        // 持久化存储
+        if (targetParam.isPersistent()) {
+            LogUtil.i(TAG, "持久化存储字段【%s】，保存值为：%s", targetParam.getName(), value);
+            SPService.put(PREFIX_PERSISTENT_PARAM + targetParam.getName(), (Object) value);
+        }
+
         Iterator<WeakInjectItem> iterator = referenceItems.keySet().iterator();
         // 遍历所有引用对象，调用注入方法改变依赖值
         while (iterator.hasNext()) {

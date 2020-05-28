@@ -99,6 +99,7 @@ public class InjectParam {
     private String name;
     private Class type;
     private boolean sticky = true;
+    private boolean persistent = false;
 
     private InjectParam(@NonNull String name, @NonNull Class type) {
         this.name = name;
@@ -109,7 +110,7 @@ public class InjectParam {
         }
     }
 
-    private InjectParam(@NonNull String name, @NonNull Class type, boolean sticky) {
+    private InjectParam(@NonNull String name, @NonNull Class type, boolean sticky, boolean persistent) {
         this.name = name;
         if (type.isPrimitive()) {
             this.type = Const.getPackedType(type);
@@ -118,6 +119,7 @@ public class InjectParam {
         }
 
         this.sticky = sticky;
+        this.persistent = persistent;
     }
 
     /**
@@ -145,13 +147,17 @@ public class InjectParam {
         return sticky;
     }
 
+    public boolean isPersistent() {
+        return persistent;
+    }
+
     /**
      * 获取InjectParamType实例
      * @param name
      * @param type
      * @return
      */
-    public static InjectParam newInjectParamType(String name, Class<?> type, boolean sticky) {
+    public static InjectParam newInjectParamType(String name, Class<?> type, boolean sticky, boolean persistent) {
         if (type == null) {
             return null;
         }
@@ -163,7 +169,7 @@ public class InjectParam {
         // 查找缓存的参数信息
         InjectParam result = InjectParamTypeCache.getCacheInstance().getExistsParamType(name);
         if (result == null) {
-            result = new InjectParam(name, type, sticky);
+            result = new InjectParam(name, type, sticky, persistent);
             InjectParamTypeCache.getCacheInstance().addCache(result);
         } else {
             if (result.getType() != type) {
@@ -177,8 +183,10 @@ public class InjectParam {
 
     @Override
     public String toString() {
-        return "InjectParam{" + "name='" + name + '\'' +
-                ", type=" + type.getSimpleName() +
-                '}';
+        final StringBuffer sb = new StringBuffer("InjectParam{");
+        sb.append("name='").append(name).append('\'');
+        sb.append(", type=").append(type.getSimpleName());
+        sb.append('}');
+        return sb.toString();
     }
 }

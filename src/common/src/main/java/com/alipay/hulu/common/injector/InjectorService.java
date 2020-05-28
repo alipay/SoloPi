@@ -16,13 +16,10 @@
 package com.alipay.hulu.common.injector;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.util.Pair;
 
+import com.alipay.hulu.common.BuildConfig;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.injector.cache.ClassInfo;
 import com.alipay.hulu.common.injector.cache.ClassInfoCache;
@@ -35,6 +32,7 @@ import com.alipay.hulu.common.injector.provider.ParamReference;
 import com.alipay.hulu.common.injector.provider.Provider;
 import com.alipay.hulu.common.injector.provider.ProviderInfo;
 import com.alipay.hulu.common.injector.provider.WeakInjectItem;
+import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.service.base.ExportService;
 import com.alipay.hulu.common.service.base.LocalService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
@@ -55,8 +53,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.alipay.hulu.common.injector.provider.ParamReference.PREFIX_PERSISTENT_PARAM;
 
 /**
  * 消息注入管理器
@@ -66,6 +71,11 @@ public class InjectorService implements ExportService {
     public static final int REGISTER_SUCCESS = 0;
     public static final int REGISTER_NULL_OBJECT = 1;
     public static final int REGISTER_FAILED = 2;
+
+    public static final int SEND_MESSAGE_LOCAL = 0x00000001;
+    public static final int SEND_MESSAGE_IPC   = 0x00000010;
+
+    private boolean LOG_ENABLE = BuildConfig.DEBUG;
 
     private static final String TAG = "InjectorService";
     private static ClassInfoCache cache;
@@ -78,6 +88,11 @@ public class InjectorService implements ExportService {
     private Queue<Pair<ProviderInfo, WeakInjectItem>> providers;
 
     /**
+     * 消息队列
+     */
+    private LinkedBlockingQueue<Pair<String, Object>> msgQueue;
+
+    /**
      * 临时等待队列
      */
     private Map<String, Queue<Callback>> paramWaitMap;
@@ -85,12 +100,7 @@ public class InjectorService implements ExportService {
     /**
      * 消息队列
      */
-    private MessageProcessHandler messageHandler;
-
-    /**
-     * 消息分发线程
-     */
-    private HandlerThread messageHandleThread;
+    private ThreadPoolExecutor msgExecutor;
 
     /**
      * 内容更新计划
@@ -117,12 +127,22 @@ public class InjectorService implements ExportService {
         referenceMap = new ConcurrentHashMap<>();
         providers = new ConcurrentLinkedQueue<>();
         paramWaitMap = new ConcurrentHashMap<>();
+        msgQueue = new LinkedBlockingQueue<>();
         cache = new ClassInfoCache();
+        msgExecutor = new ThreadPoolExecutor(5, 5, 0, TimeUnit.HOURS, new SynchronousQueue<Runnable>(), new ThreadFactory() {
+            private AtomicInteger counter = new AtomicInteger(1);
+            @Override
+            public Thread newThread(@NonNull Runnable r) {
+                Thread t = new Thread(r);
+                t.setName("MessageHandle-" + counter.getAndIncrement());
+                return t;
+            }
+        });
 
         // 消息分发线程
-        messageHandleThread = new HandlerThread("MessageHandle");
-        messageHandleThread.start();
-        messageHandler = new MessageProcessHandler(this, messageHandleThread.getLooper());
+        msgExecutor.execute(new MessageProcessHandler(this));
+        msgExecutor.execute(new MessageProcessHandler(this));
+        msgExecutor.execute(new MessageProcessHandler(this));
 
         LogUtil.i(TAG, "启动定时注入!!!");
 
@@ -186,8 +206,8 @@ public class InjectorService implements ExportService {
         }
         dispatchMessageExecutor = null;
 
-        if (messageHandleThread != null && messageHandleThread.isAlive()) {
-            messageHandleThread.interrupt();
+        if (msgExecutor != null && !msgExecutor.isTerminated()) {
+            msgExecutor.shutdownNow();
         }
 
     }
@@ -281,42 +301,48 @@ public class InjectorService implements ExportService {
             return;
         }
 
-        LogUtil.d(TAG, "开始发送消息name=%s,type=%s", targetParam.getName(), targetParam.getType());
+        if (LOG_ENABLE) {
+            LogUtil.d(TAG, "开始发送消息name=%s,type=%s", targetParam.getName(), targetParam.getType());
+        }
+
 
         ParamReference reference = referenceMap.get(targetParam.getName());
         // 没有注册项，生成新的队列
         if (reference == null) {
-            LogUtil.w(TAG, "【name=%s】未找到引用项", targetParam.getName());
+            LogUtil.i(TAG, "【name=%s】未找到引用项", targetParam.getName());
             reference = new ParamReference(targetParam);
             referenceMap.put(targetParam.getName(), reference);
         }
 
-        LogUtil.d(TAG, "向引用队列【%s】发送【%s】，接收数量【%d】", targetParam.getName(), value, reference.countReference());
-
-        // 判断是否消息合法
-        if (reference.messageValid(value, true)) {
-            // 如果有等待消息队列
-            Queue<Callback> callbacks = paramWaitMap.remove(targetParam.getName());
-            if (callbacks != null) {
-                for (Callback callback: callbacks) {
-                    try {
-                        callback.onResult(value);
-                    } catch (Exception e) {
-                        LogUtil.e(TAG, "Callback fail", e);
-                    }
+        // 如果有等待消息队列
+        Queue<Callback> callbacks = paramWaitMap.remove(targetParam.getName());
+        if (callbacks != null) {
+            for (Callback callback: callbacks) {
+                try {
+                    callback.onResult(value);
+                } catch (Exception e) {
+                    LogUtil.e(TAG, "Callback fail", e);
                 }
             }
+        }
 
+        if (LOG_ENABLE) {
+            LogUtil.d(TAG, "向引用队列【%s】发送【%s】，接收数量【%d】", targetParam.getName(), value, reference.countReference());
+        }
+
+        // 判断是否消息合法
+        int messageValid = reference.messageValid(value, true);
+        if (messageValid == ParamReference.MESSAGE_VALID) {
             if (enqueue) {
                 // 通过handler处理
-                Message message = messageHandler.obtainMessage(MessageProcessHandler.message);
-                message.obj = new Pair<>(targetParam.getName(), value);
-                messageHandler.sendMessageDelayed(message, delay);
+                msgQueue.add(new Pair<>(targetParam.getName(), value));
             } else {
                 reference.updateParam(value);
             }
+        } else if (messageValid == ParamReference.MESSAGE_TYPE_INVALID) {
+            LogUtil.w(TAG, "消息【%s】不合法", value);
         } else {
-            LogUtil.w(TAG, "消息【%s】不合法", StringUtil.hide(value));
+//            LogUtil.d(TAG, "消息【%s】重复", value);
         }
     }
 
@@ -372,6 +398,11 @@ public class InjectorService implements ExportService {
         ParamReference reference = referenceMap.get(param.getName());
         if (reference == null) {
             LogUtil.w(TAG, "参数【%s】尚未注册值", param.getName());
+            // 如果是持久化的，可以从缓存里找一下值
+            if (param.isPersistent()) {
+                return SPService.get(PREFIX_PERSISTENT_PARAM + param.getName(), targetType);
+            }
+
             return null;
         }
 
@@ -479,41 +510,44 @@ public class InjectorService implements ExportService {
     /**
      * 消息分发
      */
-    private static class MessageProcessHandler extends Handler {
+    private static class MessageProcessHandler implements Runnable {
         WeakReference<InjectorService> serviceRef;
 
-        MessageProcessHandler(InjectorService service, Looper looper) {
-            super(looper);
+        MessageProcessHandler(InjectorService service) {
             serviceRef = new WeakReference<>(service);
         }
 
-        private static final int message = 1;
         @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
+        public void run() {
             InjectorService service = serviceRef.get();
             if (service == null) {
                 LogUtil.e(TAG, "服务为空，无法分发消息");
                 return;
             }
 
-            if (msg.what == message) {
-                Pair<String, Object> param = (Pair<String, Object>) msg.obj;
-                if (param == null) {
-                    LogUtil.e(TAG, "无法更新空对象");
-                    return;
+            while (true) {
+                Pair<String, Object> param = null;
+                try {
+                    param = service.msgQueue.take();
+                    if (param == null) {
+                        LogUtil.w(TAG, "无法更新空对象");
+                        continue;
+                    }
+
+                    ParamReference reference = service.referenceMap.get(param.first);
+
+                    // 非空判断
+                    if (reference == null) {
+                        InjectParam typeParam = InjectParamTypeCache.getCacheInstance().getExistsParamType(param.first);
+                        reference = new ParamReference(typeParam);
+                        service.referenceMap.put(param.first, reference);
+                    }
+
+                    reference.updateParam(param.second);
+
+                } catch (InterruptedException e) {
+                    LogUtil.w(TAG, "message process interrupt", e);
                 }
-
-                ParamReference reference = service.referenceMap.get(param.first);
-
-                // 非空判断
-                if (reference == null) {
-                    InjectParam typeParam = InjectParamTypeCache.getCacheInstance().getExistsParamType(param.first);
-                    reference = new ParamReference(typeParam);
-                    service.referenceMap.put(param.first, reference);
-                }
-
-                reference.updateParam(param.second);
             }
         }
     }
@@ -590,16 +624,17 @@ public class InjectorService implements ExportService {
                             reference = new ParamReference(provideItem.getKey());
                             service.referenceMap.put(provideItem.getKey().getName(), reference);
                         }
-                        if (reference.messageValid(provideItem.getValue(), providerInfo.isForce())) {
-                            //LogUtil.d(TAG, "Update param " + provideItem.getKey().getName() + " to " + provideItem.getValue());
 
-                            Message msg = service.messageHandler.obtainMessage(MessageProcessHandler.message);
-                            msg.obj = new Pair<>(provideItem.getKey().getName(), provideItem.getValue());
-
-                            service.messageHandler.sendMessage(msg);
-                            LogUtil.i(TAG, "消息【%s::%s】注入成功", provideItem.getKey(), StringUtil.hide(provideItem.getValue()));
+                        int valid = reference.messageValid(provideItem.getValue(), providerInfo.isForce());
+                        if (valid == ParamReference.MESSAGE_VALID) {
+                            //LogUtil.i(TAG, "Update param " + provideItem.getKey().getName() + " to " + provideItem.getValue());
+                            Pair<String, Object> msg = new Pair<>(provideItem.getKey().getName(), provideItem.getValue());
+                            service.msgQueue.add(msg);
+                            LogUtil.i(TAG, "消息【%s::%s】注入成功", provideItem.getKey(), provideItem.getValue());
+                        } else if (valid == ParamReference.MESSAGE_TYPE_INVALID){
+                            LogUtil.w(TAG, "消息【%s::%s】不合法，无法注入", provideItem.getKey(), provideItem.getValue());
                         } else {
-                            LogUtil.d(TAG, "消息【%s::%s】不合法，无法注入", provideItem.getKey(), StringUtil.hide(provideItem.getValue()));
+//                            LogUtil.d(TAG, "消息【%s::%s】重复", provideItem.getKey(), provideItem.getValue());
                         }
                     }
                     break;
