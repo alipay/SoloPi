@@ -54,6 +54,8 @@ import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -294,7 +296,7 @@ public class CmdTools {
             try {
                 Process p;
                 if (filter != null && filter.length() > 0) {
-                    p = Runtime.getRuntime().exec(new String[]{"sh", "-c", "ps | grep \"" + filter + "\""});
+                    p = Runtime.getRuntime().exec(new String[]{"sh", "-c", "ps | grep '" + filter + "'"});
                 } else {
                     p = Runtime.getRuntime().exec(new String[]{"sh", "-c", "ps"});
                 }
@@ -315,7 +317,7 @@ public class CmdTools {
             // Android 7.0, 7.1无法通过应用权限获取所有进程
             if (isRooted()) {
                 if (filter != null && filter.length() > 0) {
-                    return execRootCmd("ps | grep \"" + filter + "\"", null, true, null).toString().split("\n");
+                    return execRootCmd("ps | grep '" + filter + "'", null, true, null).toString().split("\n");
                 } else {
                     return execRootCmd("ps", null, true, null).toString().split("\n");
                 }
@@ -323,28 +325,45 @@ public class CmdTools {
                 if (filter != null && filter.length() > 0) {
 
                     // 存在ps命令调用超时情况
-                    return execAdbCmd("ps | grep \"" + filter + "\"", 2500).split("\n");
+                    return execAdbCmd("ps | grep '" + filter + "'", 2500).split("\n");
                 } else {
                     return execAdbCmd("ps", 2500).split("\n");
                 }
             }
         } else {
+            String[] result;
             // Android O ps为toybox实现，功能与标准ps命令基本相同，需要-A参数获取全部进程
             if (isRooted()) {
                 if (filter != null && filter.length() > 0) {
-                    return execRootCmd("ps -A | grep \"" + filter + "\"", null, true, null).toString().split("\n");
+                    result = execRootCmd("ps -ef | grep '" + filter + "'", null, true, null).toString().split("\n");
                 } else {
-                    return execRootCmd("ps -A", null, true, null).toString().split("\n");
+                    result = execRootCmd("ps -ef", null, true, null).toString().split("\n");
                 }
             } else {
                 if (filter != null && filter.length() > 0) {
 
                     // 存在ps命令调用超时情况
-                    return execAdbCmd("ps -A | grep \"" + filter + "\"", 2500).split("\n");
+                    result = execAdbCmd("ps -A | grep \"" + filter + "\"", 2500).split("\n");
                 } else {
-                    return execAdbCmd("ps -A", 2500).split("\n");
+                    result = execAdbCmd("ps -A", 2500).split("\n");
                 }
             }
+
+            if (result == null || result.length == 0) {
+                return new String[0];
+            }
+
+            List<String> filtered =  new ArrayList<>(result.length + 1);
+            for (String line: result) {
+                if (StringUtil.contains(line, "grep " + filter )) {
+                    continue;
+                } else if (StringUtil.contains(line, "grep '" + filter )) {
+                    continue;
+                }
+                filtered.add(line);
+            }
+            return filtered.toArray(new String[0]);
+
         }
     }
 
@@ -380,6 +399,36 @@ public class CmdTools {
             return execRootCmd(cmd, maxTime).toString();
         }
         return execAdbCmd(cmd, maxTime);
+    }
+
+    /**
+     * 获取顶部包名和activity
+     * @return
+     */
+    public static String[] getTopPkgAndActivity() {
+        String result = execHighPrivilegeCmd("dumpsys activity activities | grep 'Running' -A3 | grep 'Run #'");
+        if (StringUtil.isEmpty(result)) {
+            return null;
+        }
+        result = result.trim();
+
+        // 目标区分
+        String target = result.split("\n")[0].trim();
+        String[] split = target.split("\\s+");
+        if (split.length < 5) {
+            return null;
+        }
+        String[] pA = split[split.length - 2].split("/");
+        if (pA.length != 2) {
+            return null;
+        }
+
+        // .开头优化
+        if (pA[1].startsWith(".")) {
+            pA[1] = pA[0] + pA[1];
+        }
+        LogUtil.i(TAG, "Get top pkg and activity::" + Arrays.toString(pA));
+        return pA;
     }
 
     public static String execAdbExtCmd(final  String cmd, final  int wait) {
