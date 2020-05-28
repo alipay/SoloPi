@@ -40,7 +40,6 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alipay.hulu.common.R;
 import com.alipay.hulu.common.application.LauncherApplication;
@@ -53,6 +52,7 @@ import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.Callback;
 import com.alipay.hulu.common.utils.ContextUtil;
 import com.alipay.hulu.common.utils.LogUtil;
+import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.android.permission.FloatWindowManager;
@@ -67,6 +67,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by qiaoruikai on 2018/10/15 5:20 PM.
@@ -550,45 +552,58 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
 
         // 没有注册上AccessibilityService，需要开辅助功能
         if (service.getMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, null) == null) {
-            if (SPService.getBoolean(SPService.KEY_SKIP_ACCESSIBILITY, true)) {
-                CmdTools.execHighPrivilegeCmd("settings put secure enabled_accessibility_services com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
-                CmdTools.execHighPrivilegeCmd("settings put secure accessibility_enabled 1");
-                final CountDownLatch latch = new CountDownLatch(1);
-                InjectorService.g().waitForMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, new Callback<AccessibilityService>() {
-                    @Override
-                    public void onResult(AccessibilityService item) {
-                        latch.countDown();
-                    }
-
-                    @Override
-                    public void onFailed() {
-                        latch.countDown();
-                    }
-                });
-
-                BackgroundExecutor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            latch.await(2000, TimeUnit.MILLISECONDS);
-                        } catch (InterruptedException e) {
-                            LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
+            BackgroundExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    final CountDownLatch latch = new CountDownLatch(1);
+                    InjectorService.g().waitForMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, new Callback<AccessibilityService>() {
+                        @Override
+                        public void onResult(AccessibilityService item) {
+                            latch.countDown();
                         }
-                        LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void onFailed() {
+                            latch.countDown();
+                        }
+                    });
+                    CmdTools.execHighPrivilegeCmd("settings put secure enabled_accessibility_services com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
+                    CmdTools.execHighPrivilegeCmd("settings put secure accessibility_enabled 1");
+
+                    try {
+                        latch.await(2000, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
+                    }
+
+                    // 可能是因为UIAutomator、Instrument等工具影响，清理掉
+                    if (InjectorService.g().getMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, AccessibilityService.class) == null) {
+                        showAction(getString(R.string.permission__try_kil_uiautomator), getString(R.string.constant__cancel), new Runnable() {
                             @Override
                             public void run() {
-                                if (service.getMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, null) != null) {
-                                    processedAction();
-                                } else {
-                                    processAccessibilityByHand(service);
-                                }
+                                finish();
+                                PermissionUtil.onPermissionResult(currentPermissionIdx, false, "User cancel");
                             }
                         });
+                        restartAccessibilityService();
                     }
-                });
-            } else {
-                processAccessibilityByHand(service);
-            }
+                    LauncherApplication.getInstance().showToast(getString(R.string.permission__open_accessibility));
+
+                    // 等2秒，确定消息发过来了
+                    MiscUtil.sleep(2000);
+
+                    LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (service.getMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, null) != null) {
+                                processedAction();
+                            } else {
+                                processAccessibilityByHand(injectorService);
+                            }
+                        }
+                    });
+                }
+            });
 
             return false;
         }
@@ -731,6 +746,106 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
             }
         }
         return true;
+    }
+
+
+
+    /**
+     * 关闭Instrument和UIAutomator
+     */
+    public void cleanInstrumentationAndUiAutomator() {
+        String allActions = CmdTools.execHighPrivilegeCmd("ps -ef | grep shell");
+        LogUtil.i(TAG, "Let me see::::" + allActions);
+
+        // 关闭Instrument
+        String result = CmdTools.execHighPrivilegeCmd("pm list instrumentation");
+        String[] lines = StringUtil.split(result, "\n");
+        Pattern pattern = Pattern.compile("\\(target=(.*)\\)");
+        String targetApp = InjectorService.g().getMessage(SubscribeParamEnum.APP, String.class);
+
+        for(String line: lines) {
+            Matcher matcher = pattern.matcher(line);
+            if (matcher.find()) {
+                String instPkg = matcher.group(1);
+                if (StringUtil.equals(instPkg, "com.alipay.hulu")) {
+                    continue;
+                }
+                // 不杀目标应用
+                if (StringUtil.equals(instPkg, targetApp)) {
+                    continue;
+                }
+
+                LauncherApplication.getInstance().showToast(getString(R.string.permission__kill_app, instPkg));
+                LogUtil.i(TAG, "Find instrumentation package and killing \"" + instPkg + "\"");
+                String exeRes = CmdTools.execHighPrivilegeCmd("am force-stop " + instPkg);
+                LogUtil.i(TAG, "force-stop result:::" + exeRes);
+                CmdTools.execHighPrivilegeCmd("am force-stop " + instPkg);
+            }
+        }
+
+        // 关闭UIAutomator
+        String[] pids = CmdTools.ps("uiautomator");
+        for (String pid: pids) {
+            LogUtil.i(TAG, "Get uiautomator pid line: " + pid);
+            String[] columns = pid.split("\\s+");
+            if (columns.length > 2) {
+                pid = columns[1];
+                CmdTools.execHighPrivilegeCmd("kill " + pid);
+            }
+        }
+
+        // 杀掉Monkey
+        pids = CmdTools.ps("monkey");
+        for (String pid: pids) {
+            // 只杀掉shell用户开启的monkey
+            if (!StringUtil.contains(pid, "shell")) {
+                continue;
+            }
+            LogUtil.i(TAG, "Get Monkey pid line: " + pid);
+            String[] columns = pid.split("\\s+");
+            if (columns.length > 2) {
+                pid = columns[1];
+                CmdTools.execHighPrivilegeCmd("kill " + pid);
+            }
+        }
+    }
+
+
+    /**
+     * 重启辅助功能
+     */
+    private void restartAccessibilityService() {
+        LauncherApplication.getInstance().showToast(getString(R.string.permission__restarting_accessibility));
+        // 关uiautomator
+        cleanInstrumentationAndUiAutomator();
+
+        // 提前点准备
+        final CountDownLatch latch = new CountDownLatch(1);
+        InjectorService.g().waitForMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, new Callback<AccessibilityService>() {
+            @Override
+            public void onResult(AccessibilityService item) {
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailed() {
+                latch.countDown();
+            }
+        });
+
+        // 切换回TalkBack
+        CmdTools.execHighPrivilegeCmd("settings put secure enabled_accessibility_services com.android.talkback/com.google.android.marvin.talkback.TalkBackService");
+        // 等2秒
+        MiscUtil.sleep(2000);
+
+        CmdTools.execHighPrivilegeCmd("settings put secure enabled_accessibility_services com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
+
+        // 等待辅助功能重新激活
+        try {
+            latch.await(20000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
+        }
     }
 
     @Override
