@@ -34,4 +34,5 @@ public class Constant {
     public static final String ASSERT_EQUAL = "assert_equal";
     public static final String ASSERT_XIAOYU = "assert_xiaoyu";
     public static final String ASSERT_XIAOYUANDEQUAL = "assert_xiaoyuAndEqual";
+    public static final String KEY_CURRENT_MODE = "KEY_CURRENT_MODE";
 }

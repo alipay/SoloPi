@@ -15,6 +15,7 @@
  */
 package com.alipay.hulu.service;
 
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -38,6 +39,7 @@ import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 import com.alipay.hulu.R;
+import com.alipay.hulu.activity.MyApplication;
 import com.alipay.hulu.activity.NewRecordActivity;
 import com.alipay.hulu.activity.QRScanActivity;
 import com.alipay.hulu.bean.AdvanceCaseSetting;
@@ -109,6 +111,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static android.accessibilityservice.AccessibilityService.GESTURE_SWIPE_UP;
+import static com.alipay.hulu.shared.event.constant.Constant.KEY_TOUCH_POINT;
 
 /**
  * 操作录制服务
@@ -124,8 +127,8 @@ public class CaseRecordManager implements ExportService {
     private Pair<Float, Float> localClickPos = null;
 
     protected HighLightService highLightService;
-    private String currentRecordId;
-    private AtomicInteger operationIdx = new AtomicInteger(1);
+    protected String currentRecordId;
+    protected AtomicInteger operationIdx = new AtomicInteger(1);
     protected boolean isRecording = false;
 
     private volatile boolean touchBlockMode = false;
@@ -136,6 +139,11 @@ public class CaseRecordManager implements ExportService {
     protected OperationStepService operationStepService;
 
     protected volatile boolean displayDialog = false;
+
+    /**
+     * 暂停
+     */
+    protected volatile boolean pauseFlag = false;
 
     protected volatile boolean nodeLoading = false;
 
@@ -164,6 +172,11 @@ public class CaseRecordManager implements ExportService {
     protected FloatWinService.FloatBinder binder;
     private FloatClickListener listener;
     private FloatStopListener stopListener;
+
+    /**
+     * 录制前的输入法
+     */
+    protected String defaultIme;
 
     // 截图服务
     private ScreenCaptureService captureService;
@@ -318,6 +331,7 @@ public class CaseRecordManager implements ExportService {
             // 设置参数
             operationService.putAllRuntimeParamAtTop(params);
         }
+        operationService.putRuntimeParam(com.alipay.hulu.shared.node.action.Constant.KEY_CURRENT_MODE, "record");
 
         // 查找package信息
         PackageInfo pkgInfo = ContextUtil.getPackageInfoByName(LauncherApplication.getContext()
@@ -326,10 +340,37 @@ public class CaseRecordManager implements ExportService {
             return;
         }
 
+        final ProgressDialog progressDialog = DialogUtils.showProgressDialog(ContextUtil.getContextThemeWrapper(LauncherApplication.getContext(), R.style.AppDialogTheme), "准备运行环境中");
         BackgroundExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                PrepareUtil.doPrepareWork(app);
+                try {
+                    PrepareUtil.doPrepareWork(app, new PrepareUtil.PrepareStatus() {
+                        @Override
+                        public void currentStatus(final int progress, final int total, final String message, boolean status) {
+                            if (progressDialog != null && progressDialog.isShowing()) {
+                                LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        progressDialog.setProgress(progress);
+                                        progressDialog.setMax(total);
+                                        progressDialog.setMessage(message);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } finally {
+                    if (progressDialog != null && progressDialog.isShowing()) {
+                        LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressDialog.dismiss();
+                            }
+                        });
+                    }
+                }
+
             }
         });
     }
@@ -340,6 +381,10 @@ public class CaseRecordManager implements ExportService {
     public void startRecord() {
         isRecording = true;
         displayDialog = true;
+
+        // 先记录下默认输入法
+        defaultIme = CmdTools.execHighPrivilegeCmd("settings get secure default_input_method");
+        MyApplication.getInstance().updateDefaultIme("com.alipay.hulu/.tools.AdbIME");
 
         // 初始化
         operationStepService.startRecord(caseInfo);
@@ -388,6 +433,9 @@ public class CaseRecordManager implements ExportService {
      * 进入触摸屏蔽模式
      */
     protected void setServiceToTouchBlockModeNoDelay() {
+        if (pauseFlag) {
+            return;
+        }
         LogUtil.d(TAG, "进入触摸阻塞模式");
         touchBlockMode = true;
         injectorService.pushMessage(com.alipay.hulu.shared.event.constant.Constant.EVENT_ACCESSIBILITY_MODE, AccessibilityServiceImpl.MODE_BLOCK);
@@ -405,7 +453,7 @@ public class CaseRecordManager implements ExportService {
 
     @Subscriber(value = @Param(com.alipay.hulu.shared.event.constant.Constant.EVENT_TOUCH_POSITION), thread = RunningThread.BACKGROUND)
     public void receiveTouchPosition(UniversalEventBean eventBean) {
-        Point point = eventBean.getParam(com.alipay.hulu.shared.event.constant.Constant.KEY_TOUCH_POINT);
+        Point point = eventBean.getParam(KEY_TOUCH_POINT);
         if (point == null) {
             LogUtil.w(TAG, "收到空触摸消息【%s】", eventBean);
             return;
@@ -423,7 +471,7 @@ public class CaseRecordManager implements ExportService {
         int y = point.y;
 
         // 只针对显示dialog的情况
-        if (displayDialog || nodeLoading || isExecuting || !isRecording) {
+        if (displayDialog || pauseFlag || nodeLoading || isExecuting || !isRecording) {
             return;
         }
 
@@ -583,7 +631,7 @@ public class CaseRecordManager implements ExportService {
      * 更新悬浮窗图标
      * @param res
      */
-    private void updateFloatIcon(final int res) {
+    public void updateFloatIcon(final int res) {
         LauncherApplication.getInstance().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -709,7 +757,11 @@ public class CaseRecordManager implements ExportService {
      *
      * @param node
      */
-    private void showFunctionView(final AbstractNodeTree node) {
+    private synchronized void showFunctionView(final AbstractNodeTree node) {
+        if (displayDialog || pauseFlag) {
+            return;
+        }
+
         // 没有操作
         displayDialog = true;
         final List<Integer> keys;
@@ -767,7 +819,7 @@ public class CaseRecordManager implements ExportService {
                                 public void run() {
                                     captureTree.resetBound();
 
-                                    setServiceToTouchBlockModeNoDelay();
+                                    setServiceToTouchBlockMode();
                                     notifyDialogDismiss();
                                 }
                             });
@@ -809,12 +861,17 @@ public class CaseRecordManager implements ExportService {
             return;
         }
 
+        // 先切换到默认输入法
+        CmdTools.switchToIme(defaultIme);
         // 处理方法
         FunctionSelectUtil.showFunctionView(context, node, keys, icons, secondLevel,
                 highLightService, operationService, getLocalClickPos(), new FunctionSelectUtil.FunctionListener() {
                     @Override
                     public void onProcessFunction(final OperationMethod method, final AbstractNodeTree node) {
                         LogUtil.d(TAG, "悬浮窗消失");
+
+                        // 切换回葫芦娃输入法
+                        CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
 
                         // 等悬浮窗消失了再操作
                         LauncherApplication.getInstance().runOnUiThread(new Runnable() {
@@ -829,7 +886,7 @@ public class CaseRecordManager implements ExportService {
                                     notifyDialogDismiss();
                                 }
                             }
-                        });
+                        }, 50);
                     }
 
                     @Override
@@ -886,6 +943,11 @@ public class CaseRecordManager implements ExportService {
     protected boolean processAction(OperationMethod method, AbstractNodeTree node, final Context context) {
         PerformActionEnum action = method.getActionEnum();
         if (action == PerformActionEnum.FINISH) {
+
+            // 切换回默认输入法
+            MyApplication.getInstance().updateDefaultIme(defaultIme);
+            CmdTools.switchToIme(defaultIme);
+
             isRecording = false;
             displayDialog = false;
             isExecuting = false;
@@ -921,15 +983,24 @@ public class CaseRecordManager implements ExportService {
         } else if (action == PerformActionEnum.PAUSE) {
             setServiceToNormalMode();
             displayDialog = true;
+            pauseFlag = true;
             binder.registerFloatClickListener(new FloatWinService.OnFloatListener() {
                 @Override
                 public void onFloatClick(boolean hide) {
+                    pauseFlag = false;
                     setServiceToTouchBlockMode();
                     operationService.invalidRoot();
                     notifyDialogDismiss(1000);
                     binder.registerFloatClickListener(DEFAULT_FLOAT_LISTENER);
                 }
             });
+            return true;
+        } else if (action == PerformActionEnum.RESUME) {
+            pauseFlag = false;
+            setServiceToTouchBlockMode();
+            operationService.invalidRoot();
+            notifyDialogDismiss(1000);
+            binder.registerFloatClickListener(DEFAULT_FLOAT_LISTENER);
             return true;
         } else if (action == PerformActionEnum.JUMP_TO_PAGE
                 || action == PerformActionEnum.LOAD_PARAM) {
@@ -939,6 +1010,7 @@ public class CaseRecordManager implements ExportService {
                 if (action == PerformActionEnum.JUMP_TO_PAGE) {
                     Intent intent = new Intent(context, QRScanActivity.class);
                     intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_SCHEME);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
                     setServiceToTouchBlockMode();
@@ -1007,7 +1079,7 @@ public class CaseRecordManager implements ExportService {
 
         Integer gestureId;
         if (gestureEvent != null && (gestureId = gestureEvent.getParam(com.alipay.hulu.shared.event.constant.Constant.KEY_GESTURE_TYPE)) != null) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP && gestureId == GESTURE_SWIPE_UP && !displayDialog && !nodeLoading) {
+            if (gestureId == GESTURE_SWIPE_UP && !displayDialog && !pauseFlag && !nodeLoading) {
                 showFunctionView(null);
             }
         }
@@ -1264,7 +1336,7 @@ public class CaseRecordManager implements ExportService {
      * @param actionEnum
      * @return
      */
-    private static TwoLevelSelectLayout.SubMenuItem convertPerformActionToSubMenu(PerformActionEnum actionEnum) {
+    protected static TwoLevelSelectLayout.SubMenuItem convertPerformActionToSubMenu(PerformActionEnum actionEnum) {
         return new TwoLevelSelectLayout.SubMenuItem(actionEnum.getDesc(),
                 actionEnum.getCode(), actionEnum.getIcon());
     }

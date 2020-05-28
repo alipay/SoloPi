@@ -77,6 +77,7 @@ public enum PerformActionEnum {
     EXECUTE_SHELL("executeShell", R.string.action__exe_shell, 2, 0, R.drawable.dialog_action_drawable_cmdline, SHELL_PARAMS),
 
     PAUSE("pause", R.string.action__pause, 3, 2, R.drawable.dialog_action_drawable_cancel),
+    RESUME("resume", R.string.action__resume, 3, 2, R.drawable.dialog_action_drawable_cancel),
     OTHER_GLOBAL("otherGlobal", R.string.action__other_gloabl, 3, 0, R.drawable.dialog_action_drawable_extra, OTHER_PARAMS),
     FINISH("finish", R.string.action__finish, 4, 0, R.drawable.dialog_action_drawable_finish),
     FOCUS("focus", R.string.action__focus, 0, 0, R.drawable.dialog_action_drawable_long_click),

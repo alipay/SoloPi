@@ -119,4 +119,5 @@
     <string name="action_param__gesture_filter">Gesture interval</string>
     <string name="running_mode__accessibility_mode">Accessibility Mode</string>
     <string name="running_mode__capture_mode">Screenshot Mode</string>
+    <string name="action__resume">Resume</string>
 </resources>
