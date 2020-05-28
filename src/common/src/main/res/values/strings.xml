@@ -74,4 +74,8 @@
     <string name="permission__receive_mms">Receive MMS</string>
     <string name="permission__read_external_storage">Read External Storage</string>
     <string name="permission__write_external_storage">Write External Storage</string>
+    <string name="permission__restarting_accessibility">重启辅助功能中，请耐心等待</string>
+    <string name="permission__kill_app">杀死应用: %s</string>
+    <string name="permission__open_accessibility">开启辅助功能</string>
+    <string name="permission__try_kil_uiautomator">尝试关闭现有UIAutomator与Instrument进程</string>
 </resources>
