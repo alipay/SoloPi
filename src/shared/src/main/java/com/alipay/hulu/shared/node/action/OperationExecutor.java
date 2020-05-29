@@ -491,11 +491,10 @@ public class OperationExecutor {
             public void run() {
                 LogUtil.e(TAG, "Start Input");
                 try {
-                    String defaultIme = executor.executeCmdSync("settings get secure default_input_method");
                     CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
                     executor.executeClick(rect.centerX(), rect.centerY());
                     MiscUtil.sleep(1500);
-                    executor.executeCmdSync("am broadcast -a ADB_INPUT_TEXT --es msg '" + text + "' --es default '" + StringUtil.trim(defaultIme) + "'", 0);
+                    InjectorService.g().pushMessage("ADB_INPUT_TEXT", text);
                 } catch (Exception e) {
                     LogUtil.e(TAG, "Input throw Exception：" + e.getLocalizedMessage(), e);
                 }

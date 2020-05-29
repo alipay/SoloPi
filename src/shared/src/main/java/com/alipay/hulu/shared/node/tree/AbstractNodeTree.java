@@ -21,6 +21,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.ClassUtil;
 import com.alipay.hulu.common.utils.LogUtil;
@@ -188,11 +189,10 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
                     public void run() {
                         LogUtil.e(TAG, "Start Input");
                         try {
-                            String defaultIme = context.executor.executeCmdSync("settings get secure default_input_method");
                             CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
                             context.executor.executeClick(rect.centerX(), rect.centerY());
                             MiscUtil.sleep(1500);
-                            context.executor.executeCmdSync("am broadcast -a ADB_SEARCH_TEXT --es msg '" + text + "' --es default '" + StringUtil.trim(defaultIme) + "'", 0);
+                            InjectorService.g().pushMessage("ADB_SEARCH_TEXT", text);
                         } catch (Exception e) {
                             LogUtil.e(TAG, "Input throw Exception：" + e.getLocalizedMessage(), e);
                         }

@@ -90,6 +90,10 @@ public class NetworkTools implements Displayable{
 	@Override
 	public String getCurrentInfo() {
 		if (currentProcess != null && currentProcess.getPid() > 0) {
+            if (triggerReload) {
+                appRecords.clear();
+                triggerReload = false;
+            }
 			float[] value = getProcessData(new int[] {currentProcess.getPid()});
 			return String.format("%s:下%.1fK/累计%.1fK\n%s:上%.1fK/累计%.1fK", currentProcess.getProcessName(), value[0], value[1], currentProcess.getProcessName(), value[2], value[3]);
 		}

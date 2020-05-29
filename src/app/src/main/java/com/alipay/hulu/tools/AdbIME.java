@@ -22,6 +22,7 @@ import android.content.IntentFilter;
 import android.inputmethodservice.InputMethodService;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -29,6 +30,10 @@ import android.view.inputmethod.InputMethodManager;
 import com.alipay.hulu.R;
 import com.alipay.hulu.activity.MyApplication;
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.injector.InjectorService;
+import com.alipay.hulu.common.injector.param.RunningThread;
+import com.alipay.hulu.common.injector.param.Subscriber;
+import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.MiscUtil;
@@ -42,19 +47,123 @@ import com.alipay.hulu.shared.node.action.PerformActionEnum;
  */
 public class AdbIME extends InputMethodService {
     private static final String TAG = "AdbIME";
+    public static final String MSG_HIDE_INPUT =  "MSG_HIDE_INPUT";
 
-    private String IME_MESSAGE = "ADB_INPUT_TEXT";
-    private String IME_SEARCH_MESSAGE = "ADB_SEARCH_TEXT";
-    private String IME_CHARS = "ADB_INPUT_CHARS";
-    private String IME_KEYCODE = "ADB_INPUT_CODE";
-    private String IME_EDITORCODE = "ADB_EDITOR_CODE";
+    public static final String IME_MESSAGE = "ADB_INPUT_TEXT";
+    public static final String IME_SEARCH_MESSAGE = "ADB_SEARCH_TEXT";
+    public static final String IME_CHARS = "ADB_INPUT_CHARS";
+    public static final String IME_KEYCODE = "ADB_INPUT_CODE";
+    public static final String IME_EDITORCODE = "ADB_EDITOR_CODE";
     private BroadcastReceiver mReceiver = null;
     private InputMethodManager manager;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // System Alert类型，不影响背景显示
+        getWindow().getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+
         this.manager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        BackgroundExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                while (!LauncherApplication.getInstance().hasFinishInit()) {
+                    MiscUtil.sleep(50);
+                }
+
+                // 初始化好后再注册
+                InjectorService.g().register(AdbIME.this);
+            }
+        });
+    }
+
+    @Subscriber(value = @Param(value = MSG_HIDE_INPUT, sticky = false), thread = RunningThread.MAIN_THREAD)
+    public void hideInput() {
+        requestHideSelf(0);
+    }
+
+    @Subscriber(value = @Param(value = IME_MESSAGE, sticky = false), thread = RunningThread.MAIN_THREAD)
+    public boolean inputText(String text) {
+        if (text != null) {
+            InputConnection ic = getCurrentInputConnection();
+            if (ic != null) {
+                ic.commitText(text, 1);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Subscriber(value = @Param(value = IME_SEARCH_MESSAGE, sticky = false), thread = RunningThread.MAIN_THREAD)
+    public boolean inputSearchText(String text) {
+        if (text != null) {
+            InputConnection ic = getCurrentInputConnection();
+            if (ic != null) {
+                ic.commitText(text, 1);
+
+                // 需要额外点击发送
+                EditorInfo editorInfo = getCurrentInputEditorInfo();
+                if (editorInfo != null) {
+                    int options = editorInfo.imeOptions;
+                    final int actionId = options & EditorInfo.IME_MASK_ACTION;
+
+                    switch (actionId) {
+                        case EditorInfo.IME_ACTION_SEARCH:
+                            sendDefaultEditorAction(true);
+                            break;
+                        case EditorInfo.IME_ACTION_GO:
+                            sendDefaultEditorAction(true);
+                            break;
+                        case EditorInfo.IME_ACTION_SEND:
+                            sendDefaultEditorAction(true);
+                            break;
+                        default:
+                            ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Subscriber(value = @Param(value = IME_CHARS, sticky = false), thread = RunningThread.MAIN_THREAD)
+    public boolean inputChars(int[] chars) {
+        if (chars != null) {
+            String msg = new String(chars, 0, chars.length);
+            InputConnection ic = getCurrentInputConnection();
+            if (ic != null){
+                ic.commitText(msg, 1);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Subscriber(value = @Param(value = IME_KEYCODE, sticky = false), thread = RunningThread.MAIN_THREAD)
+    public boolean inputKeyCode(int code) {
+        if (code != -1) {
+            InputConnection ic = getCurrentInputConnection();
+            if (ic != null) {
+                ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, code));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Subscriber(value = @Param(value = IME_EDITORCODE, sticky = false), thread = RunningThread.MAIN_THREAD)
+    public boolean inputEditorCode(int code) {
+        if (code != -1) {
+            InputConnection ic = getCurrentInputConnection();
+            if (ic != null) {
+                ic.performEditorAction(code);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -97,101 +206,25 @@ public class AdbIME extends InputMethodService {
 
             if (intent.getAction().equals(IME_MESSAGE)) {
                 String msg = intent.getStringExtra("msg");
-                if (msg != null) {
-                    InputConnection ic = getCurrentInputConnection();
-                    if (ic != null) {
-                        ic.commitText(msg, 1);
-                        sendFlag = true;
-                    }
-                }
-            }
-
-            // 输入并搜索
-            if (intent.getAction().equals(IME_SEARCH_MESSAGE)) {
+                sendFlag = inputText(msg);
+            } else if (intent.getAction().equals(IME_SEARCH_MESSAGE)) {
+                // 输入并搜索
                 String msg = intent.getStringExtra("msg");
-                if (msg != null) {
-                    InputConnection ic = getCurrentInputConnection();
-                    if (ic != null) {
-                        sendFlag = true;
-
-                        ic.commitText(msg, 1);
-
-                        // 需要额外点击发送
-                        EditorInfo editorInfo = getCurrentInputEditorInfo();
-                        if (editorInfo != null) {
-                            int options = editorInfo.imeOptions;
-                            final int actionId = options & EditorInfo.IME_MASK_ACTION;
-
-                            switch (actionId) {
-                                case EditorInfo.IME_ACTION_SEARCH:
-                                    sendDefaultEditorAction(true);
-                                    break;
-                                case EditorInfo.IME_ACTION_GO:
-                                    sendDefaultEditorAction(true);
-                                    break;
-                                case EditorInfo.IME_ACTION_SEND:
-                                    sendDefaultEditorAction(true);
-                                    break;
-                                default:
-                                    ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (intent.getAction().equals(IME_CHARS)) {
+                sendFlag = inputSearchText(msg);
+            } else if (intent.getAction().equals(IME_CHARS)) {
                 int[] chars = intent.getIntArrayExtra("chars");
-                if (chars != null) {
-                    String msg = new String(chars, 0, chars.length);
-                    InputConnection ic = getCurrentInputConnection();
-                    if (ic != null){
-                        ic.commitText(msg, 1);
-                        sendFlag = true;
-                    }
-                }
-            }
-
-            if (intent.getAction().equals(IME_KEYCODE)) {
+                sendFlag = inputChars(chars);
+            } else if (intent.getAction().equals(IME_KEYCODE)) {
                 int code = intent.getIntExtra("code", -1);
-                if (code != -1) {
-                    InputConnection ic = getCurrentInputConnection();
-                    if (ic != null) {
-                        ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, code));
-                        sendFlag = true;
-                    }
-                }
-            }
-
-            if (intent.getAction().equals(IME_EDITORCODE)) {
+                sendFlag = inputKeyCode(code);
+            } else if (intent.getAction().equals(IME_EDITORCODE)) {
                 int code = intent.getIntExtra("code", -1);
-                if (code != -1) {
-                    InputConnection ic = getCurrentInputConnection();
-                    if (ic != null) {
-                        ic.performEditorAction(code);
-                        sendFlag = true;
-                    }
-                }
+                sendFlag = inputEditorCode(code);
             }
 
             // 进行了输入，发广播通知切换回原始输入法
             if (sendFlag) {
-                String defaultIme = intent.getStringExtra("default");
-                if (defaultIme == null) {
-                    defaultIme = MyApplication.getCurSysInputMethod();
-                }
-                if (!StringUtil.isEmpty(defaultIme) && !StringUtil.equals(defaultIme, "com.alipay.hulu/.tools.AdbIME")) {
-                    final String finalDefaultIme = defaultIme;
-                    // 两秒后切回原始输入法
-                    BackgroundExecutor.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            CmdTools.switchToIme(finalDefaultIme);
-                            OperationService service = LauncherApplication.getInstance().findServiceByName(OperationService.class.getName());
-                            MiscUtil.sleep(1000);
-                        }
-                    }, 500);
-                }
+                hideInput();
             }
         }
     }

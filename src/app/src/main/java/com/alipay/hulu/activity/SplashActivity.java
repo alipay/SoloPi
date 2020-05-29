@@ -90,7 +90,7 @@ public class SplashActivity extends BaseActivity {
 		// 已经初始化完毕过了，直接进入主页
 		if (LauncherApplication.getInstance().hasFinishInit()) {
 			startActivity(intent);
-			finish();
+			laterFinish();
 		} else {
 			// 新启动进闪屏页2s
 			waitForAppInitialize();
@@ -114,7 +114,7 @@ public class SplashActivity extends BaseActivity {
 						Intent intent = new Intent(SplashActivity.this,
 								IndexActivity.class);
 						startActivity(intent);
-						SplashActivity.this.finish();
+						laterFinish();
 					}
 				});
 			}
@@ -177,8 +177,20 @@ public class SplashActivity extends BaseActivity {
 				Intent intent = new Intent(SplashActivity.this,
 						IndexActivity.class);
 				startActivity(intent);
-				SplashActivity.this.finish();
+				laterFinish();
 			}
 		}, 1000);
+	}
+
+	/**
+	 * 稍后结束
+	 */
+	private void laterFinish() {
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				SplashActivity.this.finish();
+			}
+		}, 500);
 	}
 }

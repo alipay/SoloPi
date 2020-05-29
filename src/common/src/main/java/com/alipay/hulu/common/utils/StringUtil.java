@@ -488,6 +488,18 @@ public class StringUtil {
     }
 
     /**
+     * 替换SHELL中的特殊字符
+     * @param content
+     * @return
+     */
+    public static String escapeShellText(String content) {
+        return content.replace("$", "\\$")
+                .replace("\"", "\\\"")
+                .replace("`", "\\`")
+                .replace("\\", "\\\\");
+    }
+
+    /**
      * 计数字符串中数字个数
      * @param origin
      * @return

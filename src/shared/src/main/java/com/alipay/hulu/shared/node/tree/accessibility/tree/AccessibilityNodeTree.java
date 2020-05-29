@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
@@ -260,7 +261,7 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
                 opContext.executor.executeClick(rect.centerX(), rect.centerY());
                 MiscUtil.sleep(500);
 
-                opContext.executor.executeCmd("input text '" + content + "'");
+                opContext.executor.executeCmd("input text \"" + StringUtil.escapeShellText(content) + "\"");
 
                 waitInputMethodHide();
             } else {
@@ -269,13 +270,12 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
                     public void run() {
                         LogUtil.e(TAG, "Start Input");
                         try {
-                            String defaultIme = opContext.executor.executeCmdSync("settings get secure default_input_method");
                             CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
                             Rect rect = getNodeBound();
 
                             opContext.executor.executeClick(rect.centerX(), rect.centerY());
                             MiscUtil.sleep(1500);
-                            opContext.executor.executeCmdSync("am broadcast -a ADB_INPUT_TEXT --es msg '" + content + "' --es default '" + StringUtil.trim(defaultIme) + "'", 0);
+                            InjectorService.g().pushMessage("ADB_INPUT_TEXT", content);
                         } catch (Exception e) {
                             LogUtil.e(TAG, "Input throw Exception：" + e.getLocalizedMessage(), e);
                         }
@@ -302,15 +302,12 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
                     public void run() {
                         LogUtil.e(TAG, "Start Input");
                         try {
-                            String defaultIme = opContext.executor.executeCmdSync("settings get secure default_input_method");
                             CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
                             Rect rect = getNodeBound();
 
                             opContext.executor.executeClick(rect.centerX(), rect.centerY());
                             MiscUtil.sleep(1500);
-                            opContext.executor.executeCmdSync("am broadcast -a ADB_INPUT_TEXT --es msg '" + content + "' --es default '" + StringUtil.trim(defaultIme) + "'", 0);
-
-                            waitInputMethodHide();
+                            InjectorService.g().pushMessage("ADB_INPUT_TEXT", content);
                         } catch (Exception e) {
                             LogUtil.e(TAG, "Input throw Exception：" + e.getLocalizedMessage(), e);
                         }
