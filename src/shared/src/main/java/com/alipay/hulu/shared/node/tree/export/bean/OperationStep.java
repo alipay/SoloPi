@@ -18,6 +18,7 @@ package com.alipay.hulu.shared.node.tree.export.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.node.action.OperationMethod;
 import com.alipay.hulu.shared.node.tree.OperationNode;
 
@@ -47,6 +48,9 @@ public class OperationStep implements Parcelable {
      */
     private String operationId;
 
+    private String stepId;
+
+
 
     @Override
     public int describeContents() {
@@ -59,6 +63,7 @@ public class OperationStep implements Parcelable {
         dest.writeParcelable(operationMethod, flags);
         dest.writeInt(operationIndex);
         dest.writeString(operationId);
+        dest.writeString(stepId);
     }
 
     public static final Creator<OperationStep> CREATOR = new Creator<OperationStep>() {
@@ -73,13 +78,16 @@ public class OperationStep implements Parcelable {
         }
     };
 
-    public OperationStep(){}
+    public OperationStep(){
+        stepId = StringUtil.generateRandomString(10);
+    }
 
     private OperationStep(Parcel in) {
         operationNode = in.readParcelable(OperationNode.class.getClassLoader());
         operationMethod = in.readParcelable(OperationMethod.class.getClassLoader());
         operationIndex = in.readInt();
         operationId = in.readString();
+        stepId = in.readString();
     }
 
     /**
@@ -154,4 +162,11 @@ public class OperationStep implements Parcelable {
         this.operationId = operationId;
     }
 
+    public String getStepId() {
+        return stepId;
+    }
+
+    public void setStepId(String stepId) {
+        this.stepId = stepId;
+    }
 }
