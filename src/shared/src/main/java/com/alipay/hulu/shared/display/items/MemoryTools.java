@@ -18,6 +18,7 @@ package com.alipay.hulu.shared.display.items;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.content.Context;
+import android.os.Build;
 import android.os.Debug;
 
 import com.alipay.hulu.common.application.LauncherApplication;
@@ -26,8 +27,9 @@ import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
+import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
-import com.alipay.hulu.shared.R;
+import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.display.items.base.DisplayItem;
 import com.alipay.hulu.shared.display.items.base.Displayable;
 import com.alipay.hulu.shared.display.items.base.FixedLengthCircularArray;
@@ -75,6 +77,7 @@ public class MemoryTools implements Displayable{
 	}
 
 	private ProcessInfo pid = null;
+	private String app;
 
 	private static int cacheLength = 10;
 
@@ -92,6 +95,11 @@ public class MemoryTools implements Displayable{
 			preserveCount = cacheLength;
 			this.pid = pid;
 		}
+	}
+
+	@Subscriber(@Param(SubscribeParamEnum.APP))
+	public void setApp(String app) {
+		this.app = app;
 	}
 
 	private List<ProcessInfo> pids = null;
@@ -148,19 +156,15 @@ public class MemoryTools implements Displayable{
 	@Override
 	public void record() {
 		if (pids != null && pids.size() > 0 && pid != null) {
-			int[] realPids = new int[pids.size()];
 			String[] processNames = new String[pids.size()];
 			for (int i = 0; i < pids.size(); i++) {
-				realPids[i] = pids.get(i).getPid();
-				processNames[i] = pids.get(i).getProcessName() + "-" + realPids[i];
+				processNames[i] = pids.get(i).getProcessName() + "-" + pids.get(i).getPid();
 			}
 
-			Debug.MemoryInfo[] memInfos = activityManager.getProcessMemoryInfo(realPids);
-			if (memInfos != null && memInfos.length == pids.size()) {
-				for (int i = 0; i < realPids.length; i++) {
-					int pid = realPids[i];
-					Debug.MemoryInfo pidMemoryInfo = memInfos[i];
-
+			int[] results = getPssAndPDList(pids);
+			if (results != null && results.length == pids.size() * 2) {
+				for (int i = 0; i < pids.size(); i++) {
+					int pid = pids.get(i).getPid();
 					FixedLengthCircularArray<RecordPattern.RecordItem> pssCache;
 					FixedLengthCircularArray<RecordPattern.RecordItem> pDCache;
 					if ((pssCache = pssCachedData.get(processNames[i])) == null) {
@@ -174,8 +178,8 @@ public class MemoryTools implements Displayable{
 
 					// 当前记录
 					RecordPattern.RecordItem[] record = new RecordPattern.RecordItem[]{
-							new RecordPattern.RecordItem(System.currentTimeMillis(), pidMemoryInfo.getTotalPss() / 1024f, ""),
-							new RecordPattern.RecordItem(System.currentTimeMillis(), pidMemoryInfo.getTotalPrivateDirty() / 1024f, "")};
+							new RecordPattern.RecordItem(System.currentTimeMillis(), results[2 * i] / 1024f, ""),
+							new RecordPattern.RecordItem(System.currentTimeMillis(), results[2 * i + 1] / 1024f, "")};
 
 					// 如果是当前pid
 					if (pid == this.pid.getPid()) {
@@ -226,6 +230,50 @@ public class MemoryTools implements Displayable{
 		usedMemory.add(new RecordPattern.RecordItem(System.currentTimeMillis(), (float)(totalMemory - getAvailMemory(context)), ""));
 	}
 
+	/**
+	 * 获取进程内存信息，兼容Android Q
+	 * @param processes
+	 * @return
+	 */
+	private int[] getPssAndPDList(List<ProcessInfo> processes) {
+		if (processes == null || processes.size() == 0) {
+			return null;
+		}
+
+		int[] result = new int[processes.size() * 2];
+		if (Build.VERSION.SDK_INT < 29) {
+			int[] pids = new int[processes.size()];
+			int idx = 0;
+			for (ProcessInfo processInfo: processes) {
+				pids[idx++] = processInfo.getPid();
+			}
+
+			Debug.MemoryInfo[] memInfos = activityManager.getProcessMemoryInfo(pids);
+			for (int i = 0; i < memInfos.length; i++) {
+				result[2 * i] = memInfos[i].getTotalPss();
+				result[2 * i + 1] = memInfos[i].getTotalPrivateDirty();
+			}
+		} else {
+			for (int i = 0; i < processes.size(); i++) {
+				ProcessInfo processInfo = processes.get(i);
+				String content = CmdTools.execHighPrivilegeCmd("dumpsys meminfo " + processInfo.getPid() + " | grep TOTAL");
+				if (StringUtil.isEmpty(content)) {
+					return null;
+				}
+
+				LogUtil.d(TAG, "Get memory info::" + content);
+
+				String[] group = content.trim().split("\\s+");
+				if (group.length > 4) {
+					result[2 * i] = Integer.parseInt(group[1]);
+					result[2 * i + 1] = Integer.parseInt(group[2]);
+				}
+			}
+		}
+
+		return result;
+	}
+
 	@Override
 	public Map<RecordPattern, List<RecordPattern.RecordItem>> stopRecord() {
 		Long endTime = System.currentTimeMillis();
@@ -258,10 +306,9 @@ public class MemoryTools implements Displayable{
 	@Override
 	public String getCurrentInfo() {
 		if (pid != null && pid.getPid() > 0) {
-			Debug.MemoryInfo[] memInfos = activityManager.getProcessMemoryInfo(new int[]{pid.getPid()});
-			if (memInfos != null && memInfos.length > 0) {
-				Debug.MemoryInfo info = memInfos[0];
-				return String.format(Locale.CHINA, "pss:%.2fMB/privateDirty:%.2fMB", info.getTotalPss() / 1024f, info.getTotalPrivateDirty() / 1024f);
+			int[] result = getPssAndPDList(Collections.singletonList(pid));
+			if (result != null && result.length == 2) {
+				return String.format(Locale.CHINA, "pss:%.2fMB/privateDirty:%.2fMB", result[0] / 1024f, result[1] / 1024f);
 			}
 		}
 		if (totalMemory == null) {
@@ -272,6 +319,9 @@ public class MemoryTools implements Displayable{
 
 	@Override
 	public long getRefreshFrequency() {
+		if (Build.VERSION.SDK_INT >= 29) {
+			return 1000;
+		}
 		return 10;
 	}
 

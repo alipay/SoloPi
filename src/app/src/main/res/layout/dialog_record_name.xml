@@ -22,14 +22,40 @@
     android:orientation="vertical"
     android:paddingBottom="20dp">
 
-    <EditText
-        android:id="@+id/dialog_record_edit"
-        android:textColor="@color/primaryText"
-        android:textColorHint="@color/secondaryText"
-        android:textColorHighlight="@color/colorAccent"
+    <LinearLayout
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="18sp" />
+        android:layout_height="wrap_content" >
+        <EditText
+            android:id="@+id/dialog_record_edit"
+            android:textColor="@color/primaryText"
+            android:textColorHint="@color/secondaryText"
+            android:textColorHighlight="@color/colorAccent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:id="@+id/dialog_record_edit_hide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:layout_marginLeft="8dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:gravity="center"
+            android:foreground="?attr/selectableItemBackground">
+            <TextView
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/attention__hide_ime"
+                android:textColor="@color/colorAccent"/>
+        </LinearLayout>
+    </LinearLayout>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

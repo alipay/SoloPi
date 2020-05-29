@@ -36,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -1284,6 +1285,13 @@ public class FunctionSelectUtil {
             String title = StringUtil.getString(R.string.function__input_title);
             View v = LayoutInflater.from(ContextUtil.getContextThemeWrapper(context, R.style.AppDialogTheme)).inflate(R.layout.dialog_record_name, null);
             final EditText edit = (EditText) v.findViewById(R.id.dialog_record_edit);
+            View hide = v.findViewById(R.id.dialog_record_edit_hide);
+            hide.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    hideInput(edit);
+                }
+            });
             final Pattern textPattern;
             if (action == PerformActionEnum.SLEEP) {
                 edit.setHint(R.string.function__sleep_time);
@@ -1397,6 +1405,15 @@ public class FunctionSelectUtil {
             LogUtil.e(TAG, "Throw exception: " + e.getMessage(), e);
 
         }
+    }
+
+    /**
+     * 隐藏输入法
+     * @param editText
+     */
+    private static void hideInput(EditText editText) {
+        InputMethodManager inputMethodManager = (InputMethodManager) editText.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(editText.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
     /**

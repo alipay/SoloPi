@@ -753,7 +753,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
     /**
      * 关闭Instrument和UIAutomator
      */
-    public void cleanInstrumentationAndUiAutomator() {
+    public static void cleanInstrumentationAndUiAutomator() {
         String allActions = CmdTools.execHighPrivilegeCmd("ps -ef | grep shell");
         LogUtil.i(TAG, "Let me see::::" + allActions);
 
@@ -775,7 +775,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                     continue;
                 }
 
-                LauncherApplication.getInstance().showToast(getString(R.string.permission__kill_app, instPkg));
+                LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.permission__kill_app, instPkg));
                 LogUtil.i(TAG, "Find instrumentation package and killing \"" + instPkg + "\"");
                 String exeRes = CmdTools.execHighPrivilegeCmd("am force-stop " + instPkg);
                 LogUtil.i(TAG, "force-stop result:::" + exeRes);

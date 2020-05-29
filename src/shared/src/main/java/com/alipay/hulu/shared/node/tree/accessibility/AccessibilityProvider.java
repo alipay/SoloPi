@@ -27,9 +27,13 @@ import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
+import com.alipay.hulu.common.service.SPService;
+import com.alipay.hulu.common.tools.CmdTools;
+import com.alipay.hulu.common.utils.Callback;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl;
 import com.alipay.hulu.shared.node.AbstractProvider;
 import com.alipay.hulu.shared.node.tree.FakeNodeTree;
 import com.alipay.hulu.shared.node.tree.MetaTree;
@@ -41,6 +45,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static com.alipay.hulu.common.utils.activity.PermissionDialogActivity.cleanInstrumentationAndUiAutomator;
 
 /**
  * Created by qiaoruikai on 2018/10/8 12:46 PM.
@@ -69,10 +77,13 @@ public class AccessibilityProvider implements AbstractProvider {
 
     /**
      * 获取根节点
-     * @param service
      * @return
      */
-    private MetaTree getRootInWindows(AccessibilityService service) {
+    private MetaTree getRootInWindows() {
+        AccessibilityService service = accessibilityServiceRef.get();
+        if (service == null) {
+            return null;
+        }
         if (Build.VERSION.SDK_INT >= 21) {
             // 构建Windows树
             List<AccessibilityWindowInfo> windowInfos = service.getWindows();
@@ -225,7 +236,7 @@ public class AccessibilityProvider implements AbstractProvider {
         // 重试三次
         while (root == null && retryCount < 3) {
             try {
-                root = loadMetaTree(service);
+                root = loadMetaTree();
                 retryCount++;
             } catch (Exception e) {
                 LogUtil.e(TAG, "Load accessibility tree throw exception: " + e.getMessage(), e);
@@ -237,20 +248,22 @@ public class AccessibilityProvider implements AbstractProvider {
 
     /**
      * 加载Meta树
-     * @param service
      * @return
      */
-    private MetaTree loadMetaTree(AccessibilityService service) {
-        MetaTree rootNode = getRootInWindows(service);
+    private MetaTree loadMetaTree() {
+        MetaTree rootNode = getRootInWindows();
         int retryCount = 0;
         while ((rootNode == null || rootNode.getCurrentNode() == null) && retryCount < 3) {
             MiscUtil.sleep(500);
             retryCount ++;
-            rootNode = getRootInWindows(service);
+            rootNode = getRootInWindows();
         }
 
         if (rootNode == null || rootNode.getCurrentNode() == null) {
             LogUtil.e(TAG, "根节点为空");
+
+            // 重启辅助功能
+            restartAccessibilityService();
             return null;
         }
 
@@ -305,6 +318,44 @@ public class AccessibilityProvider implements AbstractProvider {
         }
 
         return rootNode;
+    }
+
+    /**
+     * 重启辅助功能
+     */
+    private void restartAccessibilityService() {
+        LauncherApplication.getInstance().showToast("重启辅助功能中，请耐心等待");
+        // 关uiautomator
+        cleanInstrumentationAndUiAutomator();
+
+        // 切换回TalkBack
+        CmdTools.execHighPrivilegeCmd("settings put secure enabled_accessibility_services com.android.talkback/com.google.android.marvin.talkback.TalkBackService");
+        // 等2秒
+        MiscUtil.sleep(2000);
+
+        CmdTools.execHighPrivilegeCmd("settings put secure enabled_accessibility_services com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        InjectorService.g().waitForMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, new Callback<AccessibilityService>() {
+            @Override
+            public void onResult(AccessibilityService item) {
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailed() {
+                latch.countDown();
+            }
+        });
+
+        CmdTools.execHighPrivilegeCmd("settings put secure enabled_accessibility_services com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
+
+        // 等待辅助功能重新激活
+        try {
+            latch.await(20000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
+        }
     }
 
     @Override
