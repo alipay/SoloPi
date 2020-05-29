@@ -19,6 +19,8 @@
 
 SoloPi拥有录制操作的能力，用户只需要通过SoloPi执行用例步骤，SoloPi就能够将用户的操作记录下来，并且支持在各个设备上进行回放，这一切都能够在手机上独立完成。详见[录制回放](../../wikis/RecordCase)一篇。
 
+SoloPi JSON 可以转化为其他自动化脚本，目前支持 Appium 和 Macaca ，可以前往 https://github.com/soloPi/SoloPi-Convertor 下载体验，欢迎Watch、Star、Fork 三连。
+
 #### 性能工具
 
 ![性能工具](assets/performance.gif)
