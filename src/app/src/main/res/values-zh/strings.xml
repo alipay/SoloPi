@@ -379,7 +379,11 @@
     <string name="setting__set_screen_orientation">请选择屏幕默认选择方向</string>
     <string name="setting__change_screen_axis">是否切换屏幕横纵比？</string>
     <string name="batch__execution_list">执行序列</string>
-    <string name="setting__action_block_mode">录制/主机模式</string>
-    <string name="setting__conver_mode">覆盖模式</string>
-    <string name="setting__choose_action_block_mode">录制模式选择</string>
+    <string name="action_let_cur_value">当前值：%s</string>
+    <string name="action_let_cur_value_null">当前值：-</string>
+    <string name="create_node_classname_title">ClassName(*表示匹配所有类型，一般不需要修改)</string>
+    <string name="create_node_classname_match_all">*</string>
+    <string name="create_node_text_title">文本信息(可选)</string>
+    <string name="create_node_res_id_title">ResourceId(可选)</string>
+    <string name="create_node_xpath_title">XPath(可选)</string>
 </resources>

@@ -120,4 +120,5 @@
     <string name="running_mode__accessibility_mode">通用模式</string>
     <string name="running_mode__capture_mode">图像查找模式</string>
     <string name="action__resume">恢复</string>
+    <string name="performance__process_status">进程状态</string>
 </resources>

@@ -20,6 +20,8 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 
 import com.alipay.hulu.common.bean.DeviceInfo;
+import com.alipay.hulu.common.service.SPService;
+import com.alipay.hulu.common.tools.CmdTools;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -63,6 +65,9 @@ public class DeviceInfoUtil {
     }
 
     public static String getSerialNo() {
+        if (CmdTools.DEVICE_ID != null) return CmdTools.DEVICE_ID;
+        String serialId = SPService.getString(SPService.KEY_SERIAL_ID);
+        if (!StringUtil.isEmpty(serialId)) return serialId;
         return Build.SERIAL;
     }
 

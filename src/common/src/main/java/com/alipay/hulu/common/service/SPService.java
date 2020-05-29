@@ -43,6 +43,7 @@ public class SPService {
     public static final String KEY_USE_LANGUAGE = "KEY_USE_LANGUAGE";
     public static final String KEY_SCREEN_FACTOR_ROTATION = "KEY_SCREEN_FACTOR_ROTATION";
     public static final String KEY_SCREEN_ROTATION = "KEY_SCREEN_ROTATION";
+    public static final String KEY_SERIAL_ID = "KEY_SERIAL_ID";
 
     public static final String KEY_SCREENSHOT_RESOLUTION = "KEY_SCREENSHOT_RESOLUTION";
     public static final String KEY_HIGHLIGHT_REPLAY_NODE = "KEY_HIGHLIGHT_REPLAY_NODE";

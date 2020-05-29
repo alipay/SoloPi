@@ -32,6 +32,7 @@ import com.alipay.hulu.common.injector.param.RunningThread;
 import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
+import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
@@ -96,6 +97,8 @@ public class CmdTools {
     private static volatile AdbConnection connection;
 
     private static Boolean isRoot = null;
+
+    public static String DEVICE_ID = null;
 
     private static List<Process> processes = new ArrayList<>();
 
@@ -926,6 +929,11 @@ public class CmdTools {
         }
         connection = conn;
         LogUtil.i(TAG, "ADB connected");
+
+        if (DEVICE_ID == null) {
+            DEVICE_ID = StringUtil.trim(execHighPrivilegeCmd("getprop ro.serialno"));
+            SPService.putString(SPService.KEY_SERIAL_ID, DEVICE_ID);
+        }
 
         // ADB成功连接后，开启ADB状态监测
         startAdbStatusCheck();
