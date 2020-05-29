@@ -535,8 +535,8 @@ public class DialogUtils {
                 DisplayMetrics metrics = new DisplayMetrics();
                 wm.getDefaultDisplay().getMetrics(metrics);
 
-                // 高度450dp, 宽度260dp
-                int pix = ContextUtil.dip2px(context, 440);
+                // 高度400dp, 宽度260dpa
+                int pix = ContextUtil.dip2px(context, 400);
                 int width = ContextUtil.dip2px(context, 270);
                 if (metrics.heightPixels < pix) {
                     if (metrics.widthPixels < width) {
