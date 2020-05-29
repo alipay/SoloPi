@@ -66,7 +66,7 @@ public class PatchRequest {
     /**
      * 更新Patch列表
      */
-    public static void updatePatchList(final BaseActivity activity) {
+    public static void updatePatchList(final LoadPatchCallback callback) {
         String storedUrl = SPService.getString(SPService.KEY_PATCH_URL, "https://raw.githubusercontent.com/alipay/SoloPi/master/<abi>.json");
         // 地址为空
         if (StringUtil.isEmpty(storedUrl)) {
@@ -84,13 +84,17 @@ public class PatchRequest {
             @Override
             public void onResponse(Call call, PatchResponse item) throws IOException {
                 doUpgradePatch(item);
+                if (callback != null) {
+                    callback.onLoaded();
+                }
             }
 
             @Override
             public void onFailure(Call call, IOException e) {
                 LogUtil.e(TAG, "抛出IO异常，" + e.getMessage(), e);
-                if (activity != null) {
-                    activity.toastLong(activity.getString(R.string.constant__plugin_load_fail) + e.getMessage());
+                LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.constant__plugin_load_fail) + e.getMessage());
+                if (callback != null) {
+                    callback.onFailed();
                 }
             }
         });
@@ -100,7 +104,7 @@ public class PatchRequest {
      * 解析Patch列表
      * @param response
      */
-    private static void doUpgradePatch(PatchResponse response) {
+    public static void doUpgradePatch(PatchResponse response) {
         LogUtil.i(TAG, "接收patch列表" + response);
         if (response == null || !StringUtil.equals(response.getStatus(), "success")) {
             return;
@@ -236,5 +240,10 @@ public class PatchRequest {
             return abi;
         }
         return "armeabi-v7a";
+    }
+
+    public interface LoadPatchCallback {
+        void onLoaded();
+        void onFailed();
     }
 }

@@ -746,6 +746,7 @@ public class CaseRecordManager implements ExportService {
         GLOBAL_KEYS.add(R.string.function_group__extra);
         GLOBAL_ICONS.add(R.drawable.dialog_action_drawable_extra);
 
+        GLOBAL_KEYS.add(R.string.function_group__logic);
         GLOBAL_ICONS.add(R.drawable.dialog_action_drawable_logic);
         List<TwoLevelSelectLayout.SubMenuItem> gLoopActions = new ArrayList<>();
         gLoopActions.add(convertPerformActionToSubMenu(PerformActionEnum.LET));

@@ -472,6 +472,14 @@ public class ClassUtil {
     }
 
     /**
+     * 获取所有插件
+     * @return
+     */
+    public static List<PatchLoadResult> getAllPatches() {
+        return new ArrayList<>(mPatchInfo.values());
+    }
+
+    /**
      * 初始化依赖
      * @param patches
      */

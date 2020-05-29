@@ -21,7 +21,7 @@
     <string name="request_dynamic_permission">SoloPi需要申请%s，共%d项权限，请点击确定进行授权</string>
     <string name="record_screen_permission">SoloPi需要申请屏幕录制权限，请点击确定以允许SoloPi使用屏幕录制功能</string>
     <string name="record_screen_android_version_error">屏幕录制需要Android SDK版本不小于21, 当前版本为%d</string>
-    <string name="accessibility_permission">SoloPi需要使用辅助功能，请点击确定前往开启SoloPi辅助功能，如果系统提示已开启，请尝试关闭后重新开启</string>
+    <string name="accessibility_permission">SoloPi需要使用辅助功能，请点击确定前往开启SoloPi辅助功能，如果系统提示已开启，请尝试关闭后重新开启\n<![CDATA[<b style=\'color:red\'>如果重启辅助功能无效，请尝试强制关闭SoloPi</b>]]></string>
     <string name="adb_permission"><![CDATA[SoloPi需要申请ADB权限，请连接电脑并在电脑输入\"adb tcpip 5555\"后点击确定进行连接\n<b style=\'color:red\'>请注意保护设备的隐私安全，开启ADB权限有可能导致设备被他人恶意侵入</b>]]></string>
     <string name="root_permission">SoloPi需要申请Root权限，请Root后使用</string>
     <string name="float_permission">SoloPi需要悬浮窗权限，请点击确定前往授权</string>
@@ -78,4 +78,5 @@
     <string name="permission__kill_app">杀死应用: %s</string>
     <string name="permission__open_accessibility">开启辅助功能</string>
     <string name="permission__try_kil_uiautomator">尝试关闭现有UIAutomator与Instrument进程</string>
+    <string name="permission__force_stop">强制关闭</string>
 </resources>

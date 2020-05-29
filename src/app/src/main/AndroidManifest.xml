@@ -128,6 +128,7 @@
             />
         <activity android:name=".activity.CaseParamEditActivity"
             android:label="@string/activity__gen_param_case"/>
+        <activity android:name=".activity.PatchStatusActivity" />
 
         <service android:name=".service.FloatWinService"/>
 

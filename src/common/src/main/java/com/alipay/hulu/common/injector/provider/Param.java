@@ -24,4 +24,6 @@ public @interface Param {
     Class<?> type() default Void.class;
 
     boolean sticky() default true;
+
+    boolean persistent() default false;
 }

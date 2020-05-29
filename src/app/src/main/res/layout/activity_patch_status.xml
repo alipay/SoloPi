@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <include layout="@layout/head_panel_layout" android:id="@+id/patch_status_header" />
+
+    <ListView
+        android:id="@+id/patch_status_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@layout/item_patch_status"
+        android:divider="@color/divider_color"
+        android:dividerHeight="1px"
+        android:visibility="visible"
+        />
+
+    <RelativeLayout
+        android:id="@+id/patch_status_empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_centerInParent="true"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingBottom="100dp">
+
+            <ImageView
+                android:id="@+id/empty_image"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/not_found"
+                android:layout_marginBottom="20dp"/>
+
+            <TextView
+                android:id="@+id/empty_text"
+                android:gravity="center"
+                android:text="找不到已安装的插件"
+                android:textSize="22dp"
+                android:textColor="@color/secondaryText"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </RelativeLayout>
+</LinearLayout>

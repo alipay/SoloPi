@@ -282,7 +282,7 @@ public class SettingsActivity extends BaseActivity {
                                 mPatchListInfo.setText(path);
 
                                 // 更新patch列表
-                                PatchRequest.updatePatchList(SettingsActivity.this);
+                                PatchRequest.updatePatchList(null);
                             }
                         }
                     }
@@ -817,6 +817,14 @@ public class SettingsActivity extends BaseActivity {
         // 设置下引入地址
         TextView importPluginPath = (TextView) findViewById(R.id.import_patch_setting_path);
         importPluginPath.setText(FileUtils.getSubDir("patch").getAbsolutePath());
+
+
+        findViewById(R.id.plugin_list_setting_wrapper).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(SettingsActivity.this, PatchStatusActivity.class));
+            }
+        });
 
         int clearDays = SPService.getInt(SPService.KEY_AUTO_CLEAR_FILES_DAYS, 3);
         mClearFilesSettingInfo.setText(StringUtil.toString(clearDays));

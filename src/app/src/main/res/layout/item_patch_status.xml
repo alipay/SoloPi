@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <RelativeLayout
+        android:id="@+id/item_patch_delete"
+        android:layout_centerVertical="true"
+        android:layout_width="40dp"
+        android:layout_height="64dp"
+        android:layout_alignParentEnd="true"
+        android:background="?android:attr/selectableItemBackground">
+        <ImageView
+            android:layout_centerInParent="true"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:tint="@color/mainRed"
+            android:src="@drawable/head_icon_delete" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@id/item_patch_delete"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="8dp"
+        android:layout_width="match_parent">
+
+        <TextView
+            android:id="@+id/item_patch_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="minicap"
+            android:textSize="16dp"
+            android:textColor="@color/mainFont"
+            android:layout_alignParentTop="true"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <TextView
+            android:id="@+id/item_patch_version"
+            android:text="version: 6"
+            android:textSize="14dp"
+            android:textColor="@color/subFont"
+            android:layout_marginTop="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/item_patch_filter"
+            android:textSize="14dp"
+            android:textColor="@color/subFont"
+            android:layout_marginTop="2dp"
+            android:layout_width="wrap_content"
+            android:text="com.alipay.hulu.minicap"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

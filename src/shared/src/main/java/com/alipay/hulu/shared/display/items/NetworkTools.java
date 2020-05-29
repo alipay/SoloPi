@@ -272,11 +272,16 @@ public class NetworkTools implements Displayable{
 
 			String[] origin = appLines.split("\n");
 			float[] result = new float[4 * pids.length];
-			for (int i = 0; i < origin.length; i+=1) {
+
+			int pidPos = 0;
+			for (int i = 0; i < origin.length && pidPos < pids.length; i+=1) {
+				if (!origin[i].trim().startsWith("wlan0")) {
+					continue;
+				}
 				String[] group = origin[i].split("wlan0")[1].trim().split("\\s+");
 				long currentRx = Long.parseLong(group[1]);
 				long currentTx = Long.parseLong(group[9]);
-				long[] data = appRecords.get(pids[i]);
+				long[] data = appRecords.get(pids[pidPos++]);
 				if (data == null) {
 					data = new long[] {currentRx, currentRx, currentTx, currentTx, time};
 					appRecords.put(pids[i], data);

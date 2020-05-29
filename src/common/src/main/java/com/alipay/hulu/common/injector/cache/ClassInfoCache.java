@@ -144,12 +144,12 @@ public class ClassInfoCache {
                         continue;
                     }
 
-                    InjectParam paramType = InjectParam.newInjectParamType(provide.value(), provide.type(), provide.sticky());
+                    InjectParam paramType = InjectParam.newInjectParamType(provide.value(), provide.type(), provide.sticky(), provide.persistent());
                     if (paramType != null) {
                         realTypes.add(paramType);
                     }
                 } else if (realParam != null) {
-                    InjectParam paramType = InjectParam.newInjectParamType(provide.value(), realParam, provide.sticky());
+                    InjectParam paramType = InjectParam.newInjectParamType(provide.value(), realParam, provide.sticky(), provide.persistent());
                     if (paramType != null) {
                         realTypes.add(paramType);
                     }
@@ -160,7 +160,7 @@ public class ClassInfoCache {
                     if (cachedType != null) {
                         realTypes.add(cachedType);
                     } else {
-                        realTypes.add(InjectParam.newInjectParamType(provide.value(), Void.class, provide.sticky()));
+                        realTypes.add(InjectParam.newInjectParamType(provide.value(), Void.class, provide.sticky(), provide.persistent()));
                     }
                     LogUtil.w(TAG, "加载参数【%s】为类型【%s】", provide.value(), cachedType);
                 } else {
@@ -222,12 +222,12 @@ public class ClassInfoCache {
                     continue;
                 }
 
-                InjectParam paramType = InjectParam.newInjectParamType(param.value(), param.type(), param.sticky());
+                InjectParam paramType = InjectParam.newInjectParamType(param.value(), param.type(), param.sticky(), param.persistent());
                 if (paramType != null) {
                     paramTypes.add(paramType);
                 }
             } else if (realParam != null) {
-                InjectParam paramType = InjectParam.newInjectParamType(param.value(), realParam, param.sticky());
+                InjectParam paramType = InjectParam.newInjectParamType(param.value(), realParam, param.sticky(), param.persistent());
                 if (paramType != null) {
                     paramTypes.add(paramType);
                 }

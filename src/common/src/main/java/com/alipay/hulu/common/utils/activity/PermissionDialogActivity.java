@@ -107,6 +107,8 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
     private TextView positiveBtnText;
     private LinearLayout negativeButton;
     private TextView negativeBtnText;
+    private LinearLayout thirdButton;
+    private TextView thirdBtnText;
     private int currentIdx;
     private int totalIdx;
 
@@ -209,11 +211,14 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
         positiveBtnText = (TextView) positiveButton.getChildAt(0);
         negativeButton = (LinearLayout) findViewById(R.id.permission_negative_button);
         negativeBtnText = (TextView) negativeButton.getChildAt(0);
+        thirdButton = (LinearLayout) findViewById(R.id.permission_third_button);
+        thirdBtnText = (TextView) thirdButton.getChildAt(0);
     }
 
     private void initControl() {
         positiveButton.setOnClickListener(this);
         negativeButton.setOnClickListener(this);
+        thirdButton.setOnClickListener(this);
 
         currentPermissionIdx = getIntent().getIntExtra(PERMISSION_IDX_KEY, -1);
         groupPermissions();
@@ -634,6 +639,16 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                 // | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivityForResult(intent, ACCESSIBILITY_REQUEST);
             }
+        }, getString(R.string.permission__force_stop), new Runnable() {
+            @Override
+            public void run() {
+                BackgroundExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        CmdTools.execHighPrivilegeCmd("am force-stop com.alipay.hulu && am force-stop com.alipay.hulu");
+                    }
+                });
+            }
         });
     }
 
@@ -914,19 +929,31 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
 
     /**
      * 显示操作框
+     * @see #showAction(String, String, Runnable, String, Runnable, String, Runnable)
+     */
+    private void showAction(final String message, final String positiveText, final Runnable positiveAct,
+                            final String negativeText, final Runnable negativeAct) {
+        showAction(message, positiveText, positiveAct, negativeText, negativeAct, null, null);
+    }
+
+    /**
+     * 显示操作框
      * @param message 显示文案
      * @param positiveText 确定文案
      * @param positiveAct 确定动作
      * @param negativeText 取消文案
      * @param negativeAct 取消动作
+     * @param thirdText 第三操作文案
+     * @param thirdAct 第三操作
      */
     private void showAction(final String message, final String positiveText, final Runnable positiveAct,
-                            final String negativeText, final Runnable negativeAct) {
+                            final String negativeText, final Runnable negativeAct, final String thirdText, final Runnable thirdAct) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 positiveAction = positiveAct;
                 negativeAction = negativeAct;
+                thirdAction = thirdAct;
 
                 progressBar.setVisibility(View.GONE);
                 actionLayout.setVisibility(View.VISIBLE);
@@ -942,6 +969,13 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                     negativeBtnText.setText(negativeText);
                 } else {
                     negativeButton.setVisibility(View.GONE);
+                }
+
+                if (!StringUtil.isEmpty(thirdText)) {
+                    thirdButton.setVisibility(View.VISIBLE);
+                    thirdBtnText.setText(thirdText);
+                } else {
+                    thirdButton.setVisibility(View.GONE);
                 }
             }
         });
@@ -973,6 +1007,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
 
     private Runnable positiveAction;
     private Runnable negativeAction;
+    private Runnable thirdAction;
 
     @Override
     public void onClick(View v) {
@@ -983,6 +1018,10 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
         } else if (v == negativeButton) {
             if (negativeAction != null) {
                 negativeAction.run();
+            }
+        } else if (v == thirdButton) {
+            if (thirdAction != null) {
+                thirdAction.run();
             }
         }
     }
