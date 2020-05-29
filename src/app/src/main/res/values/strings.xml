@@ -314,11 +314,11 @@
     <string name="step_edit__prepare_env_fail">Environment preparing fail.</string>
     <string name="step_edit__node_info">Node Structure</string>
     <string name="step_edit__method_info">Method Param</string>
-    <string name="record__start_record">Record</string>
-    <string name="record__calculating">Calc…</string>
+    <string name="record__start_record">👉Record</string>
+    <string name="record__calculating">⏱Calc…</string>
     <string name="record__please_wait">Wait…</string>
     <string name="record__operation_fast">Operation too fast, try again.</string>
-    <string name="record__stop_record">Stop</string>
+    <string name="record__stop_record">✋Stop</string>
     <string name="batch__no_case">No Case.</string>
     <string name="function_group__click">CLICK</string>
     <string name="function_group__input">INPUT</string>

@@ -53,7 +53,7 @@ public class SimpleRecordService extends Service {
     public static final String INTENT_VIDEO_BITRATE =  "INTENT_VIDEO_BITRATE";
     public static final String INTENT_EXCEPT_DIFF =  "INTENT_EXCEPT_DIFF";
 
-    private static final String TAG = RecordService.class.getSimpleName();
+    private static final String TAG = SimpleRecordService.class.getSimpleName();
     private static final String VIDEO_DIR = "ScreenCaptures";
 
     private boolean isRecording;

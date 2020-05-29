@@ -549,6 +549,7 @@ public class FloatWinService extends BaseService {
 		// 清理定时任务
 		mInjectorService.unregister(this.provider);
 		this.provider = null;
+		stopForeground(true);
 
 		LogUtil.w(TAG, "FloatWin onDestroy");
 		writeFileData(fileName, "destroy recording:" + new Date());

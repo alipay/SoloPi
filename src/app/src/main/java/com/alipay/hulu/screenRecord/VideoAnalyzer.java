@@ -15,6 +15,7 @@
  */
 package com.alipay.hulu.screenRecord;
 
+import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.utils.ClassUtil;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.patch.PatchLoadResult;
@@ -49,12 +50,12 @@ public class VideoAnalyzer {
 
     }
 
-    public void doAnalyze(long t1, double exceptDiff,String path, AnalyzeListener listener) {
+    public void doAnalyze(final long t1, final double exceptDiff, final String path, final AnalyzeListener listener) {
         this.startTime = System.currentTimeMillis();
         this.t1 = t1;
         this.t2 = 0;
 
-        PatchLoadResult patch = ClassUtil.getPatchInfo(SCREEN_RECORD_PATCH);
+        final PatchLoadResult patch = ClassUtil.getPatchInfo(SCREEN_RECORD_PATCH);
 
         if (patch == null) {
             LogUtil.e("yuawen", "插件screenRecord不存在，无法处理");
@@ -64,39 +65,45 @@ public class VideoAnalyzer {
             return;
         }
 
-        try {
-            Class<?> mainClass = patch.classLoader.loadClass(patch.entryClass);
+        // 后台运算
+        BackgroundExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Class<?> mainClass = patch.classLoader.loadClass(patch.entryClass);
 
-            try {
-                Method methodWithStart = mainClass.getMethod("compVideoImageWithStart",
-                        String.class, double.class, long.class);
+                    try {
+                        Method methodWithStart = mainClass.getMethod("compVideoImageWithStart",
+                                String.class, double.class, long.class);
 
-                t2 = ((Double) methodWithStart.invoke(null, path, exceptDiff, t1)).intValue();
-            } catch (Exception e) {
-                LogUtil.e(TAG, "无法找到包含Start的函数", e);
+                        t2 = ((Double) methodWithStart.invoke(null, path, exceptDiff, t1)).intValue();
+                    } catch (Exception e) {
+                        LogUtil.e(TAG, "无法找到包含Start的函数", e);
 
-                // 降级到无起始时间的调用
-                Method targetMethod = mainClass.getMethod(patch.entryMethod, String.class, double.class);
+                        // 降级到无起始时间的调用
+                        Method targetMethod = mainClass.getMethod(patch.entryMethod, String.class, double.class);
 
-                t2 = ((Double) targetMethod.invoke(null, path, exceptDiff)).intValue();
+                        t2 = ((Double) targetMethod.invoke(null, path, exceptDiff)).intValue();
+                    }
+
+                    // 解析时间
+                    long decodeCostTime = (System.currentTimeMillis() - startTime);
+
+                    result = t2 - t1;
+
+                    LogUtil.i("yuawen",
+                            "path : " + path +
+                                    "解析耗时：" + decodeCostTime + " 毫秒\n" +
+                                    "\nT1时间为：" + t1 +
+                                    "\nT2时间为：" + t2 +
+                                    "\n计算耗时为：" + result);
+                    if (listener != null) {
+                        listener.onAnalyzeFinished(result);
+                    }
+                } catch (Exception e) {
+                    LogUtil.e(TAG, "Catch java.lang.Exception: " + e.getMessage(), e);
+                }
             }
-
-            // 解析时间
-            long decodeCostTime = (System.currentTimeMillis() - startTime);
-
-            result = t2 - t1;
-
-            LogUtil.i("yuawen",
-                    "path : " + path +
-                            "解析耗时：" + decodeCostTime + " 毫秒\n" +
-                            "\nT1时间为：" + t1 +
-                            "\nT2时间为：" + t2 +
-                            "\n计算耗时为：" + result);
-            if (listener != null) {
-                listener.onAnalyzeFinished(result);
-            }
-        } catch (Exception e) {
-            LogUtil.e(TAG, "Catch java.lang.Exception: " + e.getMessage(), e);
-        }
+        });
     }
 }

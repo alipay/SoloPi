@@ -30,10 +30,18 @@
         android:text=""/>
     <TextView
         android:id="@+id/screen_result_value"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:textSize="16dp"
         android:textColor="@color/colorAccent"
         android:gravity="center"
         android:text=""/>
+    <ImageView
+        android:id="@+id/screen_result_close"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:src="@drawable/simple_close"
+        android:tint="@color/colorAccent"
+        />
 </LinearLayout>

@@ -313,11 +313,11 @@
     <string name="step_edit__prepare_env_fail">环境准备失败</string>
     <string name="step_edit__node_info">节点信息</string>
     <string name="step_edit__method_info">参数配置</string>
-    <string name="record__start_record">开始录制</string>
-    <string name="record__calculating">正在计算</string>
+    <string name="record__start_record">👉开始录制</string>
+    <string name="record__calculating">⏱正在计算</string>
     <string name="record__please_wait">请稍候…</string>
     <string name="record__operation_fast">操作过快，请重试</string>
-    <string name="record__stop_record">结束录制</string>
+    <string name="record__stop_record">✋结束录制</string>
     <string name="batch__no_case">没有发现用例</string>
     <string name="function_group__click">点击</string>
     <string name="function_group__input">输入</string>
