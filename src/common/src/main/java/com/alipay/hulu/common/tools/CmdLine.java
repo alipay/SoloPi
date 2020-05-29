@@ -125,7 +125,11 @@ public class CmdLine implements AbstCmdLine, WrapSocket {
                 stream.flush();
             }
         } catch (Exception e) {
-            LogUtil.e(TAG, "Write command " + cmd + " failed", e);
+            if (cmd.length() > 100) {
+                LogUtil.e(TAG, "Write command " + cmd.substring(0, 100) + "... failed", e);
+            } else {
+                LogUtil.e(TAG, "Write command " + cmd + "... failed", e);
+            }
         }
     }
 
