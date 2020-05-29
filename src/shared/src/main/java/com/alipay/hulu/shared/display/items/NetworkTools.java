@@ -18,6 +18,7 @@ package com.alipay.hulu.shared.display.items;
 import android.net.TrafficStats;
 
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.bean.ProcessInfo;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
 import com.alipay.hulu.common.injector.param.Subscriber;
@@ -31,6 +32,7 @@ import com.alipay.hulu.shared.display.items.base.RecordPattern;
 import com.alipay.hulu.shared.display.items.util.FinalR;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +45,7 @@ public class NetworkTools implements Displayable{
 	private static final String TAG = "Network";
 
 	private InjectorService injectorService;
-	
+
 	private static long lastRxTime = 0;
 	private static long lastTxTime = 0;
 	private static long lastRx = 0;
@@ -54,44 +56,42 @@ public class NetworkTools implements Displayable{
 	private static long startRx = 0;
 	private static long startTx = 0;
 
+	private ProcessInfo currentProcess;
 
-	private static Long lastAppTime = 0L;
-	private static long lastAppRx = 0;
-	private static long lastAppTx = 0;
+	private List<ProcessInfo> allChildrenProcesses;
 
-	private static long startAppRx = 0;
-	private static long startAppTx = 0;
 
+	private static Map<Integer, long[]> appRecords = new HashMap<>();
 	private static Long startTime;
 
 	private static List<RecordPattern.RecordItem> downloadRecord;
 
 	private static List<RecordPattern.RecordItem> downloadRecordAll;
 
-	private static List<RecordPattern.RecordItem> downloadAppRecord;
-
-	private static List<RecordPattern.RecordItem> downloadAppRecordAll;
-
 	private static List<RecordPattern.RecordItem> uploadRecord;
 
 	private static List<RecordPattern.RecordItem> uploadRecordAll;
 
-	private static List<RecordPattern.RecordItem> uploadAppRecord;
+	private static Map<String, List<RecordPattern.RecordItem>> downloadSpeedProcessRecords;
+	private static Map<String, List<RecordPattern.RecordItem>> downloadSizeProcessRecords;
+	private static Map<String, List<RecordPattern.RecordItem>> uploadSpeedProcessRecords;
+	private static Map<String, List<RecordPattern.RecordItem>> uploadSizeProcessRecords;
 
-	private static List<RecordPattern.RecordItem> uploadAppRecordAll;
-
-	private Integer uid = 0;
-
-	@Subscriber(@Param(SubscribeParamEnum.UID))
-	public void setUid(Integer uid) {
-		this.uid = uid;
+	@Subscriber(@Param(SubscribeParamEnum.PID))
+	public void setCurrentProcess(ProcessInfo process) {
+		this.currentProcess = process;
 	}
+
+    @Subscriber(@Param(SubscribeParamEnum.PID_CHILDREN))
+    public void setChildrenProcesses(List<ProcessInfo> processes) {
+        this.allChildrenProcesses = processes;
+    }
 
 	@Override
 	public String getCurrentInfo() {
-		if (uid != null && uid > 0) {
-			float[] value = getAppResult(uid);
-			return String.format("app:下%.1fK/累计%.1fK\napp:上%.1fK/累计%.1fK", value[0], value[1], value[2], value[3]);
+		if (currentProcess != null && currentProcess.getPid() > 0) {
+			float[] value = getProcessData(new int[] {currentProcess.getPid()});
+			return String.format("%s:下%.1fK/累计%.1fK\n%s:上%.1fK/累计%.1fK", currentProcess.getProcessName(), value[0], value[1], currentProcess.getProcessName(), value[2], value[3]);
 		}
 
 		if (triggerReload) {
@@ -115,44 +115,66 @@ public class NetworkTools implements Displayable{
 		injectorService = null;
 	}
 
-	//	@TargetApi(Build.VERSION_CODES.M)
-//	public long getMAppRx() {
-//		NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
-//		networkStatsManager.queryDetailsForUid()
-//	}
-
 
 	@Override
 	public void startRecord() {
 		startTime = System.currentTimeMillis();
 		downloadRecord = new ArrayList<>();
 		downloadRecordAll = new ArrayList<>();
-		downloadAppRecordAll = new ArrayList<>();
-		downloadAppRecord = new ArrayList<>();
 
 		uploadRecord = new ArrayList<>();
 		uploadRecordAll = new ArrayList<>();
-		uploadAppRecordAll = new ArrayList<>();
-		uploadAppRecord = new ArrayList<>();
+
+		downloadSizeProcessRecords = new HashMap<>();
+		downloadSpeedProcessRecords = new HashMap<>();
+		uploadSizeProcessRecords = new HashMap<>();
+		uploadSpeedProcessRecords = new HashMap<>();
+		appRecords.clear();
 
 		startRx = 0;
-		startAppRx = 0;
-
 		startTx = 0;
-		startAppTx = 0;
 	}
 
 	@Override
 	public void record() {
-		if (uid != null && uid > 0) {
-			float[] results = getAppResult(uid);
-			downloadAppRecordAll.add(new RecordPattern.RecordItem(System.currentTimeMillis(), results[1], ""));
-			downloadAppRecord.add(new RecordPattern.RecordItem(System.currentTimeMillis(), results[0], ""));
-
-			uploadAppRecordAll.add(new RecordPattern.RecordItem(System.currentTimeMillis(), results[3], ""));
-			uploadAppRecord.add(new RecordPattern.RecordItem(System.currentTimeMillis(), results[2], ""));
-
+		if (allChildrenProcesses != null && allChildrenProcesses.size() > 0) {
+			List<ProcessInfo> processes = allChildrenProcesses;
+			int[] pids = new int[processes.size()];
+			int idx = 0;
+			for (ProcessInfo processInfo: processes) {
+				pids[idx++] = processInfo.getPid();
+			}
+			float[] results = getProcessData(pids);
+			for (int i = 0; i < processes.size(); i++) {
+				ProcessInfo process = processes.get(i);
+				String processName =  process.getProcessName() + "-" + process.getPid();
+				List<RecordPattern.RecordItem> downloadSpeed = downloadSpeedProcessRecords.get(processName);
+				if (downloadSpeed == null) {
+					downloadSpeed = new ArrayList<>();
+					downloadSpeedProcessRecords.put(processName, downloadSpeed);
+				}
+				downloadSpeed.add(new RecordPattern.RecordItem(System.currentTimeMillis(), results[4 * i], ""));
+				List<RecordPattern.RecordItem> downloadSize = downloadSizeProcessRecords.get(processName);
+				if (downloadSize == null) {
+					downloadSize = new ArrayList<>();
+					downloadSizeProcessRecords.put(processName, downloadSize);
+				}
+				downloadSize.add(new RecordPattern.RecordItem(System.currentTimeMillis(), results[4 * i + 1], ""));
+				List<RecordPattern.RecordItem> uploadSpeed = uploadSpeedProcessRecords.get(processName);
+				if (uploadSpeed == null) {
+					uploadSpeed = new ArrayList<>();
+					uploadSpeedProcessRecords.put(processName, uploadSpeed);
+				}
+				uploadSpeed.add(new RecordPattern.RecordItem(System.currentTimeMillis(), results[4 * i + 2], ""));
+				List<RecordPattern.RecordItem> uploadSize = uploadSizeProcessRecords.get(processName);
+				if (uploadSize == null) {
+					uploadSize = new ArrayList<>();
+					uploadSizeProcessRecords.put(processName, uploadSize);
+				}
+				uploadSize.add(new RecordPattern.RecordItem(System.currentTimeMillis(), results[4 * i + 3], ""));
+			}
 		}
+
 		downloadRecordAll.add(new RecordPattern.RecordItem(System.currentTimeMillis(), getRxAll(), ""));
 		downloadRecord.add(new RecordPattern.RecordItem(System.currentTimeMillis(), getRxTotal(), ""));
 
@@ -174,14 +196,23 @@ public class NetworkTools implements Displayable{
 		pattern.setEndTime(endTime);
 		pattern.setStartTime(startTime);
 		result.put(pattern, downloadRecord);
-		pattern = new RecordPattern("累计应用下行流量", "KB", "Network");
-		pattern.setEndTime(endTime);
-		pattern.setStartTime(startTime);
-		result.put(pattern, downloadAppRecordAll);
-		pattern = new RecordPattern("应用下行速率", "KB", "Network");
-		pattern.setEndTime(endTime);
-		pattern.setStartTime(startTime);
-		result.put(pattern, downloadAppRecord);
+		if (downloadSizeProcessRecords != null && downloadSizeProcessRecords.size() > 0) {
+			for (String name: downloadSizeProcessRecords.keySet()) {
+				pattern = new RecordPattern("进程下行流量-" + name, "KB", "Network");
+				pattern.setEndTime(endTime);
+				pattern.setStartTime(startTime);
+				result.put(pattern, downloadSizeProcessRecords.get(name));
+			}
+		}
+
+		if (downloadSpeedProcessRecords != null && downloadSpeedProcessRecords.size() > 0) {
+			for (String name: downloadSpeedProcessRecords.keySet()) {
+				pattern = new RecordPattern("进程下行速率-" + name, "KB/S", "Network");
+				pattern.setEndTime(endTime);
+				pattern.setStartTime(startTime);
+				result.put(pattern, downloadSpeedProcessRecords.get(name));
+			}
+		}
 
 		pattern = new RecordPattern("累计全局上行流量", "KB", "Network");
 		pattern.setEndTime(endTime);
@@ -191,75 +222,89 @@ public class NetworkTools implements Displayable{
 		pattern.setEndTime(endTime);
 		pattern.setStartTime(startTime);
 		result.put(pattern, uploadRecord);
-		pattern = new RecordPattern("累计应用上行流量", "KB", "Network");
-		pattern.setEndTime(endTime);
-		pattern.setStartTime(startTime);
-		result.put(pattern, uploadAppRecordAll);
-		pattern = new RecordPattern("应用上行速率", "KB", "Network");
-		pattern.setEndTime(endTime);
-		pattern.setStartTime(startTime);
-		result.put(pattern, uploadAppRecord);
-
-		downloadRecordAll = null;
-		downloadRecord = null;
-		downloadAppRecordAll = null;
-		downloadAppRecord = null;
-		uploadRecordAll = null;
-		uploadRecord = null;
-		uploadAppRecordAll = null;
-		uploadAppRecord = null;
-		return result;
-	}
-
-	public static float[] getAppResult(int uid) {
-		String[] cmds;
-		/**
-		 * /proc/net/xt_qtaguid/stats 记录各应用网络自开机使用情况
-		 * 每一行数据:
-		 * 26 wlan0 0x0 10039 0 10143 20 3061 27 10143 20 0 0 0 0 3061 27 0 0 0 0
-		 * 第一列为UID，第6和8列为 rx_bytes（接收数据）和tx_bytes（传输数据）
-		 */
-		cmds = CmdTools.execAdbCmd("cat /proc/net/xt_qtaguid/stats | grep " + uid, 0).split("\n");
-		Long currentTime = System.currentTimeMillis();
-		Long rxTotal = 0L;
-		Long txTotal = 0L;
-		for (String cmd: cmds) {
-			String[] data = cmd.trim().split("\\s+");
-			if (data.length > 8) {
-				rxTotal += Long.parseLong(data[5]);
-				txTotal += Long.parseLong(data[7]);
+		if (uploadSizeProcessRecords != null && uploadSizeProcessRecords.size() > 0) {
+			for (String name: uploadSizeProcessRecords.keySet()) {
+				pattern = new RecordPattern("进程上行流量-" + name, "KB", "Network");
+				pattern.setEndTime(endTime);
+				pattern.setStartTime(startTime);
+				result.put(pattern, uploadSizeProcessRecords.get(name));
+			}
+		}
+		if (uploadSpeedProcessRecords != null && uploadSpeedProcessRecords.size() > 0) {
+			for (String name: uploadSpeedProcessRecords.keySet()) {
+				pattern = new RecordPattern("进程上行速率-" + name, "KB/S", "Network");
+				pattern.setEndTime(endTime);
+				pattern.setStartTime(startTime);
+				result.put(pattern, uploadSpeedProcessRecords.get(name));
 			}
 		}
 
-		LogUtil.i(TAG, "get Total Rx: " + rxTotal + " | get Total Tx: " + txTotal);
+		downloadRecordAll = null;
+		downloadRecord = null;
+		uploadRecordAll = null;
+		uploadRecord = null;
 
-		float rxSpeed = (rxTotal - lastAppRx) * KB_MILLION_SECOND / (currentTime - lastAppTime);
-		if (rxSpeed >= 0) {
-			lastAppRx = rxTotal;
-		} else {
-			rxSpeed = 0F;
-		}
-		float txSpeed = (txTotal - lastAppTx) * KB_MILLION_SECOND / (currentTime - lastAppTime);
-		if (txSpeed >= 0) {
-			lastAppTx = txTotal;
-		} else {
-			txSpeed = 0F;
-		}
-		lastAppTime = currentTime;
-		LogUtil.d(TAG, "加载Rx: %f, Tx: %f", rxSpeed, txSpeed);
+		downloadSizeProcessRecords = null;
+		downloadSpeedProcessRecords = null;
+		uploadSizeProcessRecords = null;
+		uploadSpeedProcessRecords = null;
 
-		if (startAppRx == 0 || startAppTx == 0) {
-			startAppRx = lastAppRx;
-			startAppTx = lastAppTx;
-		}
+		return result;
+	}
 
-		if (triggerReload) {
-			startAppRx = lastAppRx;
-			startAppTx = lastAppTx;
-			triggerReload = false;
-		}
+    /**
+     * 加载多进程网络上下行数据
+     * @param pids
+     * @return
+     */
+    private static float[] getProcessData(int[] pids) {
+        try {
+            String appLines;
+            StringBuilder cmd = new StringBuilder("grep 'wlan0' ");
+            for (int pid: pids) {
+                cmd.append("/proc/").append(pid).append("/net/dev ");
+			}
 
-		return new float[]{rxSpeed, (lastAppRx - startAppRx) / 1024F, txSpeed, (lastAppTx - startAppTx) / 1024F};
+			LogUtil.d(TAG, "cmd: %s", cmd);
+			appLines = CmdTools.execAdbCmd(cmd.toString(), 0);
+			long time = System.currentTimeMillis();
+			LogUtil.d(TAG, "close reader, result: %s", appLines);
+
+			String[] origin = appLines.split("\n");
+			float[] result = new float[4 * pids.length];
+			for (int i = 0; i < origin.length; i+=1) {
+				String[] group = origin[i].split("wlan0")[1].trim().split("\\s+");
+				long currentRx = Long.parseLong(group[1]);
+				long currentTx = Long.parseLong(group[9]);
+				long[] data = appRecords.get(pids[i]);
+				if (data == null) {
+					data = new long[] {currentRx, currentRx, currentTx, currentTx, time};
+					appRecords.put(pids[i], data);
+					result[4 * i] = 0;
+					result[4 * i + 1] = 0;
+					result[4 * i + 2] = 0;
+					result[4 * i + 3] = 0;
+				} else {
+					long lastRx = data[0];
+					long firstRx = data[1];
+					long lastTx = data[2];
+					long firstTx = data[3];
+					long lastTime = data[4];
+					result[4 * i] = (currentRx - lastRx) * KB_MILLION_SECOND / (time - lastTime);;
+					result[4 * i + 1] = (currentRx - firstRx) / 1024F;
+					result[4 * i + 2] = (currentTx - lastTx) * KB_MILLION_SECOND / (time - lastTime);;
+					result[4 * i + 3] = (currentTx - firstTx) / 1024F;
+					data[0] = currentRx;
+					data[2] = currentTx;
+					data[4] = time;
+				}
+			}
+
+			return result;
+		} catch (Exception e) {
+			LogUtil.e(TAG, "Catch Exception: " + e.getMessage(), e);
+			return new float[0];
+		}
 	}
 
 	@Override
@@ -271,8 +316,7 @@ public class NetworkTools implements Displayable{
 	public void clear() {
 		downloadRecordAll = null;
 		downloadRecord = null;
-		downloadAppRecordAll = null;
-		downloadAppRecord = null;
+		appRecords.clear();
 	}
 
 	public static float getRxTotal()

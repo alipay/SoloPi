@@ -34,7 +34,7 @@ public @interface Subscriber {
      * 参数名称，注入参数可以是 <br/>
      * {@link SubscribeParamEnum#APP} 应用名称，类型 {@link String} <br/>
      * {@link SubscribeParamEnum#UID} 应用UID，类型 {@link Integer} <br/>
-     * {@link SubscribeParamEnum#PID} 应用PID，类型 {@link Integer} <br/>
+     * {@link SubscribeParamEnum#PID} 应用PID，类型 {@link com.alipay.hulu.common.bean.ProcessInfo} <br/>
      * {@link SubscribeParamEnum#EXTRA} 是否显示额外信息，类型 {@link Boolean} <br/>
      * {@link SubscribeParamEnum#PUID} ps获取的UID，类型 {@link String} <br/>
      * {@link SubscribeParamEnum#ACCESSIBILITY_SERVICE} Service上下文，类型 {@link android.content.Context}
