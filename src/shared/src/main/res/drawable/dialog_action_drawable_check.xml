@@ -1,0 +1,27 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+  <path
+      android:pathData="M518.83,763.73c-98.19,0 -177.78,-79.59 -177.78,-177.78s79.59,-177.78 177.78,-177.78 177.78,79.59 177.78,177.78 -79.59,177.78 -177.78,177.78zM518.83,664.18a78.22,78.22 0,1 0,0 -156.45,78.22 78.22,0 0,0 0,156.45z"
+      android:fillColor="#FF4081"/>
+  <path
+      android:pathData="M522.47,814.52c124.53,0 249.29,-73.24 374.36,-224.2C787.67,439.27 663.58,366.08 522.47,366.08c-141.26,0 -269.91,73.33 -387.57,224.28 133.57,150.8 262.87,224.16 387.57,224.16zM895.53,434.18c36.75,37.43 71.68,81.04 104.8,130.74l19.91,29.88 -22.09,28.33c-149.87,192.18 -308.45,290.93 -475.69,290.93 -166.68,0 -329.74,-98.18 -489.57,-289.66L8.15,594.77l22.57,-31.33c44.74,-62.12 91.82,-114.67 141.17,-157.48l-84.34,-89.83a35.56,35.56 0,1 1,51.84 -48.67l88.79,94.58c51.34,-35.73 104.96,-61.53 160.77,-77.23L345.87,183.14a35.56,35.56 0,1 1,65.48 -27.73l48.74,115a499.53,499.53 0,0 1,62.38 -3.87c36.51,0 72.01,3.88 106.48,11.62l56.95,-125.3a35.56,35.56 0,0 1,64.74 29.44l-53.11,116.82c51.04,19.91 99.61,48.94 145.62,86.9l103.94,-103.95a35.56,35.56 0,0 1,50.29 50.29L895.54,434.19z"
+      android:fillColor="#FF4081"/>
+</vector>

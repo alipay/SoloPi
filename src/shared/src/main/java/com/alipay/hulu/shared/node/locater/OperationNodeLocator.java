@@ -285,7 +285,7 @@ public class OperationNodeLocator {
                     public boolean isEqual(AbstractNodeTree item) {
 
                         // 包含子节点内容相同，resourceId相同，类名相同
-                        boolean findFlag = StringUtil.equals(item.getClassName(), node.getClassName())
+                        boolean findFlag = StringUtil.equalsOrMatch(node.getClassName(), item.getClassName())
                                 && StringUtil.equalsOrLeftBlank(node.getText(), item.getText())
                                 && StringUtil.equalsOrLeftBlank(node.getDescription(), item.getDescription())
                                 && StringUtil.equalsOrLeftBlank(node.getResourceId(), item.getResourceId());
@@ -302,7 +302,7 @@ public class OperationNodeLocator {
                                 }
                             }
 
-                            findFlag = StringUtil.equals(tmpNode.getClassName(), operationNode.getClassName());
+                            findFlag = StringUtil.equalsOrMatch(operationNode.getClassName(), tmpNode.getClassName());
                         }
 
                         return findFlag;
@@ -319,7 +319,7 @@ public class OperationNodeLocator {
                         }
 
                         // 每一个子节点都辅助定位下
-                        if (StringUtil.equals(current.getClassName(), operationNode.getClassName())) {
+                        if (StringUtil.equalsOrMatch(operationNode.getClassName(), current.getClassName())) {
                             findResult.addItem(current, 2);
                             findCount ++;
                         }
@@ -339,7 +339,7 @@ public class OperationNodeLocator {
                     return StringUtil.equalsOrLeftBlank(operationNode.getText(), item.getText()) &&
                             StringUtil.equalsOrLeftBlank(operationNode.getDescription(), item.getDescription())
                             && StringUtil.equalsOrLeftBlank(operationNode.getResourceId(), item.getResourceId()) &&
-                            StringUtil.equalsOrLeftBlank(operationNode.getClassName(), item.getClassName());
+                            StringUtil.equalsOrMatch(operationNode.getClassName(), item.getClassName());
                 }
             });
 

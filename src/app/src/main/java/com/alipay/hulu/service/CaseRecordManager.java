@@ -415,6 +415,8 @@ public class CaseRecordManager implements ExportService {
 
         // 1秒后再监听
         notifyDialogDismiss(1000);
+
+        operationService.invalidRoot();
     }
 
     /**
@@ -689,6 +691,7 @@ public class CaseRecordManager implements ExportService {
         assertActions.add(convertPerformActionToSubMenu(PerformActionEnum.ASSERT));
         assertActions.add(convertPerformActionToSubMenu(PerformActionEnum.SLEEP_UNTIL));
         assertActions.add(convertPerformActionToSubMenu(PerformActionEnum.LET_NODE));
+        assertActions.add(convertPerformActionToSubMenu(PerformActionEnum.CHECK_NODE));
         NODE_ACTION_MAP.put(R.string.function_group__assert, assertActions);
 
         NODE_KEYS.add(R.string.function_group__extra);
@@ -743,6 +746,12 @@ public class CaseRecordManager implements ExportService {
         GLOBAL_KEYS.add(R.string.function_group__extra);
         GLOBAL_ICONS.add(R.drawable.dialog_action_drawable_extra);
 
+        GLOBAL_ICONS.add(R.drawable.dialog_action_drawable_logic);
+        List<TwoLevelSelectLayout.SubMenuItem> gLoopActions = new ArrayList<>();
+        gLoopActions.add(convertPerformActionToSubMenu(PerformActionEnum.LET));
+        gLoopActions.add(convertPerformActionToSubMenu(PerformActionEnum.CHECK));
+        gLoopActions.add(convertPerformActionToSubMenu(PerformActionEnum.LOAD_PARAM));
+        GLOBAL_ACTION_MAP.put(R.string.function_group__logic, gLoopActions);
 
         GLOBAL_KEYS.add(R.string.function_group__control);
         GLOBAL_ICONS.add(R.drawable.dialog_action_drawable_finish);

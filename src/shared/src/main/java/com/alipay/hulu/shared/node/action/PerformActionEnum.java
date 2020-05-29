@@ -88,8 +88,8 @@ public enum PerformActionEnum {
     LET_NODE("letNode", R.string.action__let_node, 1, 1, R.drawable.dialog_action_drawable_variable, LET_PARAMS),
     LET("let", R.string.action__let, 4, 1, R.drawable.dialog_action_drawable_variable, LET_PARAMS),
     LOAD_PARAM("load", R.string.action__load_param, 4, 1, R.drawable.dialog_action_drawable_load_param, LOAD_PARAM_PARAMS),
-    CHECK_NODE("checkNode", R.string.action__check_node, 1, 1, R.drawable.dialog_action_drawable_cancel),
-    CHECK("check", R.string.action__check, 4, 1, R.drawable.dialog_action_drawable_cancel),
+    CHECK_NODE("checkNode", R.string.action__check_node, 1, 1, R.drawable.dialog_action_drawable_check, CHECK_PARAMS),
+    CHECK("check", R.string.action__check, 4, 1, R.drawable.dialog_action_drawable_check, CHECK_PARAMS),
 
     /**
      * 本地模式专用 5

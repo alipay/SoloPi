@@ -1,0 +1,115 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:text="@string/create_node_text_title"
+        android:textSize="12dp"
+        android:textColor="@color/colorAccent"
+        />
+    <EditText
+        android:paddingTop="6dp"
+        android:id="@+id/create_node_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/primaryText"
+        android:textSize="18dp"
+        android:text=""
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:focusable="true"
+        android:textColorHint="@color/secondaryText"
+        android:textColorHighlight="@color/colorAccent"
+        android:inputType="text" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:text="@string/create_node_res_id_title"
+        android:textSize="12dp"
+        android:textColor="@color/colorAccent"
+        />
+    <EditText
+        android:paddingTop="6dp"
+        android:id="@+id/create_node_res_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/primaryText"
+        android:textSize="18dp"
+        android:text=""
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:focusable="true"
+        android:textColorHint="@color/secondaryText"
+        android:textColorHighlight="@color/colorAccent"
+        android:inputType="text" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:text="@string/create_node_xpath_title"
+        android:textSize="12dp"
+        android:textColor="@color/colorAccent"
+        />
+    <EditText
+        android:paddingTop="6dp"
+        android:id="@+id/create_node_xpath"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/primaryText"
+        android:textSize="18dp"
+        android:text=""
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:focusable="true"
+        android:textColorHint="@color/secondaryText"
+        android:textColorHighlight="@color/colorAccent"
+        android:inputType="text" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:text="@string/create_node_classname_title"
+        android:textSize="12dp"
+        android:textColor="@color/colorAccent"
+        />
+    <EditText
+        android:paddingTop="6dp"
+        android:id="@+id/create_node_classname"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/primaryText"
+        android:textSize="18dp"
+        android:text="@string/create_node_classname_match_all"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:focusable="true"
+        android:textColorHint="@color/secondaryText"
+        android:textColorHighlight="@color/colorAccent"
+        android:inputType="text" />
+
+</LinearLayout>

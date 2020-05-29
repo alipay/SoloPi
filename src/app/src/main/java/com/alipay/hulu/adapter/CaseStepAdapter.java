@@ -68,12 +68,18 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
 
     private MyDataWrapper currentDragEntity;
 
+    private OnStepListener listener;
+
     public CaseStepAdapter(Context context, List<MyDataWrapper> data) {
         this.context = context;
         this.data = data;
         selectSet = new HashSet<>();
 
         reloadScope();
+    }
+
+    public void setListener(OnStepListener listener) {
+        this.listener = listener;
     }
 
     @Override
@@ -192,18 +198,24 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
 
         TextView title = (TextView) convertView.findViewById(R.id.case_step_edit_content_title);
         TextView param = (TextView) convertView.findViewById(R.id.case_step_edit_content_param);
-        ImageView icon = (ImageView) convertView.findViewById(R.id.case_step_edit_content_close);
+        View movement = convertView.findViewById(R.id.case_step_edit_content_movement);
         CheckBox select = (CheckBox) convertView.findViewById(R.id.case_step_edit_content_check);
         select.setTag(position);
 
+        ImageView moveTop = (ImageView) movement.findViewById(R.id.case_step_edit_content_move_top);
+        ImageView moveBottom = (ImageView) movement.findViewById(R.id.case_step_edit_content_move_bottom);
+        ImageView insert = (ImageView) convertView.findViewById(R.id.case_step_edit_content_insert);
+
         if (init) {
-            icon.setOnClickListener(this);
+            moveTop.setOnClickListener(this);
+            moveBottom.setOnClickListener(this);
             select.setOnCheckedChangeListener(this);
+            insert.setOnClickListener(this);
         }
 
         if (selectMode) {
             select.setVisibility(View.VISIBLE);
-            icon.setVisibility(View.GONE);
+            movement.setVisibility(View.GONE);
 
             if (selectSet.contains(data.get(position).idx)) {
                 select.setChecked(true);
@@ -212,9 +224,12 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
             }
         } else {
             select.setVisibility(View.GONE);
-            icon.setVisibility(View.VISIBLE);
+            movement.setVisibility(View.VISIBLE);
         }
-        icon.setTag(position);
+
+        moveTop.setTag(position);
+        moveBottom.setTag(position);
+        insert.setTag(position);
 
         // 如果是第一次加载，设置下ClickListener
         List<Integer> occurred = new ArrayList<>();
@@ -354,10 +369,34 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
     }
 
     @Override
-    public void onClick(View v) {
+    public void onClick(final View v) {
+        int id = v.getId();
         int position = (int) v.getTag();
-        data.remove(position);
-        notifyDataSetChanged();
+        if (id == R.id.case_step_edit_content_move_top) {
+            if (position == 0) {
+                return;
+            }
+            MyDataWrapper wrapper = data.remove(position);
+            data.add(position - 1, wrapper);
+            notifyDataSetChanged();
+            if (listener != null) {
+                listener.scroll(-ContextUtil.dip2px(v.getContext(), 72));
+            }
+        } else if (id == R.id.case_step_edit_content_move_bottom){
+            if (position == data.size() - 1) {
+                return;
+            }
+            MyDataWrapper wrapper = data.remove(position);
+            data.add(position + 1, wrapper);
+            notifyDataSetChanged();
+            if (listener != null) {
+                listener.scroll(-ContextUtil.dip2px(v.getContext(), 72));
+            }
+        } else if (id == R.id.case_step_edit_content_insert) {
+            if (listener != null) {
+                listener.insertAfter(position);
+            }
+        }
     }
 
     @Override
@@ -421,6 +460,11 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
     @Override
     public void onDragViewDown(int finalPosition) {
         data.set(finalPosition, currentDragEntity);
+    }
+
+    public interface OnStepListener {
+        void insertAfter(int position);
+        void scroll(int px);
     }
 }
 

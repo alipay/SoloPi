@@ -1,5 +1,6 @@
 package com.alipay.hulu.shared.node.utils;
 
+import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.node.OperationService;
@@ -114,27 +115,49 @@ public class LogicUtil {
         int allocType = Integer.parseInt(method.getParam(ALLOC_TYPE));
 
         // 确保临时变量不影响全局变量
+
+        String val = eval(allocValue, node, allocType, service);
+        if (val == null) {
+            LogUtil.w(TAG, "Fail to eval value (%s) for key %s", allocValue, allocKey);
+            return false;
+        }
+
+        service.putRuntimeParam(allocKey, val);
+        return true;
+    }
+
+    /**
+     * 计算值
+     * @param constant
+     * @param targetNode
+     * @param evalType
+     * @param service
+     * @return
+     */
+    public static String eval(String constant, AbstractNodeTree targetNode, int evalType, OperationService service) {
         try {
             // 设置临时变量
-            service.putTemporaryParam(NODE_NAME, node);
-            String realValue = getMappedContent(allocValue, service);
+            if (targetNode != null) {
+                service.putTemporaryParam(NODE_NAME, targetNode);
+            }
+            String realValue = getMappedContent(constant, service);
 
             // 根据声明类型解析
-            if (allocType == ALLOC_TYPE_INTEGER) {
+            if (evalType == ALLOC_TYPE_INTEGER) {
                 int evalValue = evalInt(realValue);
-                service.putRuntimeParam(allocKey, evalValue);
-            } else if (allocType == ALLOC_TYPE_STRING) {
-                String evalValue = evalStr(realValue);
-                service.putRuntimeParam(allocKey, evalValue);
+                return Integer.toString(evalValue);
+            } else if (evalType == ALLOC_TYPE_STRING) {
+                return evalStr(realValue);
             } else {
-                LogUtil.e(TAG, "Known eval type: " + allocType);
-                return false;
+                LogUtil.e(TAG, "Known eval type: " + evalType);
+                return null;
             }
-
-            return true;
         } catch (NumberFormatException e) {
             LogUtil.e(TAG, "do let throw FormatException: " + e.getMessage(), e);
-            return false;
+            return null;
+        } catch (Exception e) {
+            LogUtil.e(TAG, "do let throw Exception: " + e.getMessage(), e);
+            return null;
         } finally {
             service.removeTemporaryParam(NODE_NAME);
         }
@@ -162,7 +185,18 @@ public class LogicUtil {
             return service.doSomeAction(assertMethod, node);
         }
 
-        return evalCheck(argument);
+        if (node != null) {
+            service.putTemporaryParam(NODE_NAME, node);
+        }
+        String mappedValue = getMappedContent(argument, service);
+        service.removeTemporaryParam(NODE_NAME);
+        boolean checkResult = evalCheck(mappedValue);
+        if (checkResult) {
+            LauncherApplication.getInstance().showToast("检查通过");
+        } else {
+            LauncherApplication.getInstance().showToast("检查未通过");
+        }
+        return checkResult;
     }
 
     /**
@@ -171,7 +205,7 @@ public class LogicUtil {
      * @param service
      * @return
      */
-    private static String getMappedContent(String origin, final OperationService service) {
+    public static String getMappedContent(String origin, final OperationService service) {
         return StringUtil.patternReplace(origin, FILED_CALL_PATTERN, new StringUtil.PatternReplace() {
             @Override
             public String replacePattern(String origin) {
@@ -330,7 +364,7 @@ public class LogicUtil {
 
             return result;
         } else if (statement.contains("*")) {
-            String[] groups = statement.split("\\+");
+            String[] groups = statement.split("\\*");
             if (groups.length < 2) {
                 throw new NumberFormatException("parse '*' failed for " + statement);
             }

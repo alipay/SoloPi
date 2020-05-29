@@ -40,6 +40,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -244,7 +245,13 @@ public class FunctionSelectUtil {
             chooseAssertMode(node, action, context, listener);
             return true;
         } else if (action == PerformActionEnum.LET_NODE) {
-            chooseLetMode(node, context, listener);
+            chooseLetMode(node, context, listener, operationService);
+            return true;
+        } else if (action == PerformActionEnum.LET) {
+            chooseLetGlobalMode(context, listener, operationService);
+            return true;
+        } else if (action == PerformActionEnum.CHECK || action == PerformActionEnum.CHECK_NODE) {
+            chooseCheckMode(node, context, listener, operationService);
             return true;
         } else if (action == PerformActionEnum.JUMP_TO_PAGE
                 || action == PerformActionEnum.LOAD_PARAM) {
@@ -527,7 +534,7 @@ public class FunctionSelectUtil {
      * @param listener
      */
     private static void chooseLetMode(AbstractNodeTree node, final Context context,
-                                      final FunctionListener listener) {
+                                      final FunctionListener listener, final OperationService service) {
         if (node == null) {
             LogUtil.e(TAG, "Receive null node, can't let value");
 
@@ -573,6 +580,58 @@ public class FunctionSelectUtil {
                 R.id.dialog_action_let_other);
         final EditText valExpr = (EditText) otherWrapper.findViewById(R.id.dialog_action_let_other_value);
         final RadioGroup valType = (RadioGroup) otherWrapper.findViewById(R.id.dialog_action_let_other_type);
+        final TextView valVal = (TextView) otherWrapper.findViewById(R.id.dialog_action_let_other_value_val);
+        final AbstractNodeTree finalNode = node;
+        valType.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (service != null) {
+                    String expr = valExpr.getText().toString();
+                    if (StringUtil.isEmpty(expr)) {
+                        valVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                        return;
+                    }
+
+                    String val = LogicUtil.eval(expr, finalNode, checkedId == R.id.dialog_action_let_other_type_int ?
+                            LogicUtil.ALLOC_TYPE_INTEGER : LogicUtil.ALLOC_TYPE_STRING, service);
+                    if (val != null) {
+                        valVal.setText(context.getString(R.string.action_let_cur_value, val));
+                    } else {
+                        valVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                    }
+                }
+            }
+        });
+        valExpr.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (service != null) {
+                    String expr = s.toString();
+                    if (StringUtil.isEmpty(expr)) {
+                        valVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                        return;
+                    }
+
+                    String val = LogicUtil.eval(expr, finalNode, valType.getCheckedRadioButtonId() == R.id.dialog_action_let_other_type_int ?
+                            LogicUtil.ALLOC_TYPE_INTEGER : LogicUtil.ALLOC_TYPE_STRING, service);
+                    if (val != null) {
+                        valVal.setText(context.getString(R.string.action_let_cur_value, val));
+                    } else {
+                        valVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         final CheckableRelativeLayout[] previous = {textWrapper};
         final String[] valValue = { "${node.text}" };
@@ -621,7 +680,6 @@ public class FunctionSelectUtil {
 
         final EditText valName = (EditText) letView.findViewById(R.id.dialog_action_let_variable_name);
 
-        final AbstractNodeTree finalNode = node;
         AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
                 .setTitle(R.string.function__set_variable)
                 .setView(letView)
@@ -647,6 +705,330 @@ public class FunctionSelectUtil {
                         listener.onProcessFunction(method, finalNode);
                     }
                 }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        dialog.dismiss();
+                        listener.onCancel();
+                    }
+                }).create();
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.setCanceledOnTouchOutside(false);                                   //点击外面区域不会让dialog消失
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
+
+
+    /**
+     * 动态赋值选择框
+     * @param context
+     * @param listener
+     */
+    private static void chooseCheckMode(AbstractNodeTree node, final Context context,
+                                            final FunctionListener listener, final OperationService service) {
+
+        // 如果是TextView外面包装的一层，解析内部的TextView
+        if (node != null) {
+            if (node.getChildrenNodes() != null && node.getChildrenNodes().size() == 1) {
+                AbstractNodeTree child = node.getChildrenNodes().get(0);
+
+                if (StringUtil.equals(child.getClassName(), "android.widget.TextView")) {
+                    node = child;
+                }
+            }
+        }
+
+        final AbstractNodeTree finalNode = node;
+
+        // 获取页面
+        View checkView = LayoutInflater.from(ContextUtil.getContextThemeWrapper(context,
+                R.style.AppDialogTheme)).inflate(R.layout.dialog_action_check_global, null);
+        final EditText leftExpr = (EditText) checkView.findViewById(R.id.dialog_action_check_left_value);
+        final TextView leftVal = (TextView) checkView.findViewById(R.id.dialog_action_check_left_value_val);
+        final EditText rightExpr = (EditText) checkView.findViewById(R.id.dialog_action_check_right_value);
+        final TextView rightVal = (TextView) checkView.findViewById(R.id.dialog_action_check_right_value_val);
+
+        final RadioGroup valType = (RadioGroup) checkView.findViewById(R.id.dialog_action_check_type);
+        final RadioGroup compareType = (RadioGroup) checkView.findViewById(R.id.dialog_action_check_compare);
+
+        final RadioButton bigger = (RadioButton) compareType.findViewById(R.id.dialog_action_check_compare_bigger);
+        final RadioButton biggerEqual = (RadioButton) compareType.findViewById(R.id.dialog_action_check_compare_bigger_equal);
+        final RadioButton less = (RadioButton) compareType.findViewById(R.id.dialog_action_check_compare_less);
+        final RadioButton lessEqual = (RadioButton) compareType.findViewById(R.id.dialog_action_check_compare_less_equal);
+
+        valType.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (service != null) {
+                    String expr = leftExpr.getText().toString();
+                    if (StringUtil.isEmpty(expr)) {
+                        leftVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                    } else {
+                        String val = LogicUtil.eval(expr, finalNode, checkedId == R.id.dialog_action_check_type_int ?
+                                LogicUtil.ALLOC_TYPE_INTEGER : LogicUtil.ALLOC_TYPE_STRING, service);
+                        if (val != null) {
+                            leftVal.setText(context.getString(R.string.action_let_cur_value, val));
+                        } else {
+                            leftVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                        }
+                    }
+
+                    expr = rightExpr.getText().toString();
+                    if (StringUtil.isEmpty(expr)) {
+                        rightVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                    } else {
+                        String val = LogicUtil.eval(expr, finalNode, checkedId == R.id.dialog_action_check_type_int ?
+                                LogicUtil.ALLOC_TYPE_INTEGER : LogicUtil.ALLOC_TYPE_STRING, service);
+                        if (val != null) {
+                            rightVal.setText(context.getString(R.string.action_let_cur_value, val));
+                        } else {
+                            rightVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                        }
+                    }
+                }
+
+                if (checkedId == R.id.dialog_action_check_type_str) {
+                    bigger.setEnabled(false);
+                    biggerEqual.setEnabled(false);
+                    less.setEnabled(false);
+                    lessEqual.setEnabled(false);
+                } else {
+                    bigger.setEnabled(true);
+                    biggerEqual.setEnabled(true);
+                    less.setEnabled(true);
+                    lessEqual.setEnabled(true);
+                }
+
+            }
+        });
+        leftExpr.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (service != null) {
+                    String expr = s.toString();
+                    if (StringUtil.isEmpty(expr)) {
+                        leftVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                        return;
+                    }
+
+                    String val = LogicUtil.eval(expr, finalNode, valType.getCheckedRadioButtonId() == R.id.dialog_action_check_type_int ?
+                            LogicUtil.ALLOC_TYPE_INTEGER : LogicUtil.ALLOC_TYPE_STRING, service);
+                    if (val != null) {
+                        leftVal.setText(context.getString(R.string.action_let_cur_value, val));
+                    } else {
+                        leftVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        rightExpr.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (service != null) {
+                    String expr = s.toString();
+                    if (StringUtil.isEmpty(expr)) {
+                        rightVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                        return;
+                    }
+
+                    String val = LogicUtil.eval(expr, finalNode, valType.getCheckedRadioButtonId() == R.id.dialog_action_check_type_int ?
+                            LogicUtil.ALLOC_TYPE_INTEGER : LogicUtil.ALLOC_TYPE_STRING, service);
+                    if (val != null) {
+                        rightVal.setText(context.getString(R.string.action_let_cur_value, val));
+                    } else {
+                        rightVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
+                .setTitle("请设置比较内容")
+                .setView(checkView)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        LogUtil.i(TAG, "Positive " + which);
+                        String leftVal = leftExpr.getText().toString();
+                        String rightVal = rightExpr.getText().toString();
+                        int targetValType = valType.getCheckedRadioButtonId() == R.id.dialog_action_check_type_int?
+                                LogicUtil.ALLOC_TYPE_INTEGER: LogicUtil.ALLOC_TYPE_STRING;
+
+                        dialog.dismiss();
+                        OperationMethod method;
+                        if (finalNode != null) {
+                            method = new OperationMethod(PerformActionEnum.CHECK_NODE);
+                        } else {
+                            method = new OperationMethod(PerformActionEnum.CHECK);
+                        }
+
+                        String connector;
+                        if (targetValType == LogicUtil.ALLOC_TYPE_INTEGER) {
+                            switch (compareType.getCheckedRadioButtonId()) {
+                                case R.id.dialog_action_check_compare_equal:
+                                    connector = "==";
+                                    break;
+                                case R.id.dialog_action_check_compare_no_equal:
+                                    connector = "<>";
+                                    break;
+                                case R.id.dialog_action_check_compare_bigger:
+                                    connector = ">";
+                                    break;
+                                case R.id.dialog_action_check_compare_bigger_equal:
+                                    connector = ">=";
+                                    break;
+                                case R.id.dialog_action_check_compare_less:
+                                    connector = "<";
+                                    break;
+                                case R.id.dialog_action_check_compare_less_equal:
+                                    connector = "<=";
+                                    break;
+                                default:
+                                    LogUtil.w(TAG, "Can't recognize type " + targetValType);
+                                    listener.onCancel();
+                                    return;
+                            }
+                        } else {
+                            switch (compareType.getCheckedRadioButtonId()) {
+                                case R.id.dialog_action_check_compare_equal:
+                                    connector = "=";
+                                    break;
+                                case R.id.dialog_action_check_compare_no_equal:
+                                    connector = "!=";
+                                    break;
+                                default:
+                                    LogUtil.w(TAG, "Can't recognize type " + targetValType);
+                                    listener.onCancel();
+                                    return;
+                            }
+                        }
+                        method.putParam(LogicUtil.CHECK_PARAM, leftVal + connector + rightVal);
+                        listener.onProcessFunction(method, finalNode);
+                    }
+                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        dialog.dismiss();
+                        listener.onCancel();
+                    }
+                }).create();
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.setCanceledOnTouchOutside(false);                                   //点击外面区域不会让dialog消失
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
+    /**
+     * 动态赋值选择框
+     * @param context
+     * @param listener
+     */
+    private static void chooseLetGlobalMode(final Context context,
+                                      final FunctionListener listener, final OperationService service) {
+
+        // 获取页面
+        View letView = LayoutInflater.from(ContextUtil.getContextThemeWrapper(context,
+                R.style.AppDialogTheme)).inflate(R.layout.dialog_action_let_global, null);
+        final EditText valExpr = (EditText) letView.findViewById(R.id.dialog_action_let_other_value);
+        final RadioGroup valType = (RadioGroup) letView.findViewById(R.id.dialog_action_let_other_type);
+        final TextView valVal = (TextView) letView.findViewById(R.id.dialog_action_let_other_value_val);
+        valType.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (service != null) {
+                    String expr = valExpr.getText().toString();
+                    if (StringUtil.isEmpty(expr)) {
+                        valVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                        return;
+                    }
+
+                    String val = LogicUtil.eval(expr, null, checkedId == R.id.dialog_action_let_other_type_int ?
+                            LogicUtil.ALLOC_TYPE_INTEGER : LogicUtil.ALLOC_TYPE_STRING, service);
+                    if (val != null) {
+                        valVal.setText(context.getString(R.string.action_let_cur_value, val));
+                    } else {
+                        valVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                    }
+                }
+            }
+        });
+        valExpr.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (service != null) {
+                    String expr = s.toString();
+                    if (StringUtil.isEmpty(expr)) {
+                        valVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                        return;
+                    }
+
+                    String val = LogicUtil.eval(expr, null, valType.getCheckedRadioButtonId() == R.id.dialog_action_let_other_type_int ?
+                            LogicUtil.ALLOC_TYPE_INTEGER : LogicUtil.ALLOC_TYPE_STRING, service);
+                    if (val != null) {
+                        valVal.setText(context.getString(R.string.action_let_cur_value, val));
+                    } else {
+                        valVal.setText(context.getString(R.string.action_let_cur_value, "-"));
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        final EditText valName = (EditText) letView.findViewById(R.id.dialog_action_let_variable_name);
+
+        AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
+                .setTitle("请设置变量值")
+                .setView(letView)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        LogUtil.i(TAG, "Positive " + which);
+                        String targetValName = valName.getText().toString();
+                        String targetValValue = valExpr.getText().toString();
+                        int targetValType = valType.getCheckedRadioButtonId() == R.id.dialog_action_let_other_type_int?
+                                    LogicUtil.ALLOC_TYPE_INTEGER: LogicUtil.ALLOC_TYPE_STRING;
+
+                        dialog.dismiss();
+                        OperationMethod method = new OperationMethod(PerformActionEnum.LET);
+                        method.putParam(LogicUtil.ALLOC_TYPE, Integer.toString(targetValType));
+                        method.putParam(LogicUtil.ALLOC_VALUE_PARAM, targetValValue);
+                        method.putParam(LogicUtil.ALLOC_KEY_PARAM, targetValName);
+
+                        listener.onProcessFunction(method, null);
+                    }
+                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 

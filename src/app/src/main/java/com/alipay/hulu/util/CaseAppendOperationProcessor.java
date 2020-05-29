@@ -38,6 +38,8 @@ import java.util.List;
 public class CaseAppendOperationProcessor implements OperationStepProcessor {
     private RecordCaseInfo originCase;
     private List<OperationStep> recordSteps;
+    private List<OperationStep> subSteps;
+    private int insertPosition = -1;
 
     public CaseAppendOperationProcessor(@NonNull RecordCaseInfo originCase) {
         this.originCase = originCase;
@@ -51,6 +53,11 @@ public class CaseAppendOperationProcessor implements OperationStepProcessor {
         if (recordSteps == null) {
             recordSteps = new ArrayList<>();
         }
+        subSteps = new ArrayList<>();
+    }
+
+    public void setInsertPosition(int position) {
+        this.insertPosition = position;
     }
 
     @Override
@@ -61,6 +68,12 @@ public class CaseAppendOperationProcessor implements OperationStepProcessor {
     @Override
     public boolean onStopRecord(final Context context) {
         GeneralOperationLogBean operationLogBean = new GeneralOperationLogBean();
+        // 设置额外录制位置
+        if (insertPosition > -1) {
+            recordSteps.addAll(insertPosition, subSteps);
+        } else {
+            recordSteps.addAll(subSteps);
+        }
         operationLogBean.setSteps(recordSteps);
 
         originCase.setOperationLog(JSON.toJSONString(operationLogBean));
@@ -80,6 +93,6 @@ public class CaseAppendOperationProcessor implements OperationStepProcessor {
 
     @Override
     public void onOperationStep(int operationIdx, OperationStep step) {
-        recordSteps.add(step);
+        subSteps.add(step);
     }
 }

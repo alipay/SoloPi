@@ -26,6 +26,16 @@
         app:css_lineSpace="6dp"
         android:layout_height="match_parent" />
 
+    <ImageView
+        android:id="@+id/case_step_edit_content_insert"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="33dp"
+        android:layout_marginBottom="-2dp"
+        android:src="@drawable/case_step_insert_icon"
+        />
+
     <com.alipay.hulu.ui.ReverseImageView
         android:id="@+id/case_step_edit_content_icon"
         android:layout_centerVertical="true"
@@ -49,16 +59,37 @@
         android:layout_marginLeft="16dp"
         android:layout_height="40dp"/>
 
-    <ImageView
-        android:id="@+id/case_step_edit_content_close"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginRight="16dp"
-        android:scaleType="fitCenter"
-        android:tint="#747474"
-        android:src="@drawable/case_icon_close"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"/>
+        android:id="@+id/case_step_edit_content_movement"
+        android:layout_width="48dp"
+        android:layout_height="match_parent">
+        <ImageView
+            android:id="@+id/case_step_edit_content_move_top"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:padding="14dp"
+            android:rotation="180"
+            android:scaleType="fitCenter"
+            android:foreground="?attr/selectableItemBackground"
+            android:src="@drawable/angel"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="@color/divider_color"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            />
+        <ImageView
+            android:id="@+id/case_step_edit_content_move_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:padding="14dp"
+            android:scaleType="fitCenter"
+            android:foreground="?attr/selectableItemBackground"
+            android:src="@drawable/angel"/>
+    </LinearLayout>
 
     <CheckBox
         android:id="@+id/case_step_edit_content_check"
@@ -73,7 +104,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="24dp"
         android:layout_toRightOf="@id/case_step_edit_content_icon"
-        android:layout_toLeftOf="@id/case_step_edit_content_close"
+        android:layout_toLeftOf="@id/case_step_edit_content_movement"
         android:layout_width="match_parent"
         android:layout_centerVertical="true"
         android:layout_height="wrap_content"

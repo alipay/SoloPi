@@ -30,7 +30,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/custom__variable_name"
+            android:text="变量名"
             android:textColor="@color/primaryText"
             android:textSize="18dp"
             />
@@ -51,32 +51,8 @@
             />
     </LinearLayout>
     <include layout="@layout/divider" />
-    <include layout="@layout/dialog_action_let_item"
-        android:id="@+id/dialog_action_let_text"
-        />
-    <include layout="@layout/divider" />
 
-    <include layout="@layout/dialog_action_let_item"
-        android:id="@+id/dialog_action_let_description"
-        />
-    <include layout="@layout/divider" />
-
-    <include layout="@layout/dialog_action_let_item"
-        android:id="@+id/dialog_action_let_class_name"
-        />
-    <include layout="@layout/divider" />
-
-    <include layout="@layout/dialog_action_let_item"
-        android:id="@+id/dialog_action_let_xpath"
-        />
-    <include layout="@layout/divider" />
-
-    <include layout="@layout/dialog_action_let_item"
-        android:id="@+id/dialog_action_let_resource_id"
-        />
-    <include layout="@layout/divider" />
-
-    <com.alipay.hulu.ui.CheckableRelativeLayout
+    <RelativeLayout
         android:id="@+id/dialog_action_let_other"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
@@ -84,66 +60,43 @@
         android:paddingBottom="8dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp">
-        <android.support.v7.widget.AppCompatRadioButton
-            android:layout_marginRight="8dp"
-            android:layout_centerVertical="true"
-            android:id="@+id/dialog_action_let_item_radio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:textSize="14dp"
-            android:textColor="@color/secondaryText"
-            android:id="@+id/dialog_action_let_item_calc_type"
-            android:layout_toRightOf="@id/dialog_action_let_item_radio"
-            android:layout_below="@id/dialog_action_let_item_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:paddingTop="2dp"
-            android:text="计算方式"/>
 
         <RadioGroup
-            android:enabled="false"
             android:layout_marginLeft="8dp"
             android:orientation="horizontal"
             android:id="@+id/dialog_action_let_other_type"
-            android:layout_toRightOf="@id/dialog_action_let_item_calc_type"
-            android:layout_alignTop="@id/dialog_action_let_item_calc_type"
+            android:layout_toRightOf="@id/dialog_action_let_item_title"
             android:layout_width="wrap_content"
             android:layout_marginTop="-5dp"
             android:layout_height="wrap_content">
-
             <RadioButton
                 android:id="@+id/dialog_action_let_other_type_str"
                 android:checked="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/let__string"/>
+                android:text="字符串"/>
             <RadioButton
                 android:id="@+id/dialog_action_let_other_type_int"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/let__integer"/>
+                android:text="整数"/>
         </RadioGroup>
 
         <TextView
             android:textSize="18dp"
             android:textColor="@color/primaryText"
             android:id="@+id/dialog_action_let_item_title"
-            android:layout_toRightOf="@id/dialog_action_let_item_radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/let__custom"/>
+            android:text="运算类型"/>
         <EditText
             android:id="@+id/dialog_action_let_other_value"
-            android:enabled="false"
+            android:layout_marginTop="2dp"
             android:textSize="14dp"
-            android:hint="@string/let__custom_hint"
+            android:hint="${node.text}格式，可使用'+'与'*'"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/dialog_action_let_item_radio"
-            android:layout_below="@id/dialog_action_let_other_type"
+            android:layout_below="@id/dialog_action_let_item_title"
             />
         <TextView
             android:id="@+id/dialog_action_let_other_value_val"
@@ -153,9 +106,8 @@
             android:textColor="@color/secondaryText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/dialog_action_let_item_radio"
             android:layout_below="@id/dialog_action_let_other_value"
             />
 
-    </com.alipay.hulu.ui.CheckableRelativeLayout>
+    </RelativeLayout>
 </LinearLayout>

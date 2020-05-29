@@ -141,4 +141,11 @@ class PerformActionMethodMaps {
             put(OperationExecutor.GESTURE_FILTER, R.string.action_param__gesture_filter);
         }
     };
+
+
+    public static Map<String, Integer> CHECK_PARAMS = new HashMap<String, Integer>(GLOBAL_PARAMS) {
+        {
+            put(LogicUtil.CHECK_PARAM, R.string.action_param__check_field);
+        }
+    };
 }

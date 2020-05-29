@@ -26,8 +26,10 @@ import java.lang.Character.UnicodeBlock;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -244,6 +246,31 @@ public class StringUtil {
     }
 
     /**
+     * 比较字符串是否相等
+     * @param a
+     * @param b
+     * @return
+     */
+    public static boolean equalsOrMatch(CharSequence a, CharSequence b) {
+        // 两者都为空，相等
+        if (a == null && b == null) {
+            return true;
+        }
+
+        if (a != null && a.equals("*")) {
+            return true;
+        }
+
+        // 一个为空，不等
+        if (a == null || b == null) {
+            return false;
+        }
+
+        // 都不为空，直接比较
+        return a.toString().equals(b.toString());
+    }
+
+    /**
      * 比较字符串是否相等，忽略大小写
      * @param a
      * @param b
@@ -437,18 +464,50 @@ public class StringUtil {
      * @return 随机字符串
      */
     public static String generateRandomString(int length) {
+        if (length <= 0) {
+            return "";
+        }
+
         StringBuilder builder = new StringBuilder(length);
-        Random random = new Random(System.currentTimeMillis());
-        for (int i = 0; i < length; i++) {
-            int currentValue = random.nextInt(35);
-            if (currentValue < 10) {
-                builder.append(currentValue);
+
+        // UUID填充
+        int currentSize = 0;
+        while (currentSize < length) {
+            UUID uuid = UUID.randomUUID();
+            String tmp = uuid.toString().replace("-", "");
+            if (tmp.length() <= length - currentSize) {
+                builder.append(tmp);
+                currentSize += tmp.length();
             } else {
-                builder.append((char) ('a' + (currentValue - 10)));
+                builder.append(tmp, 0, length - currentSize);
+                currentSize = length;
             }
         }
+
         return builder.toString();
     }
+
+    /**
+     * 计数字符串中数字个数
+     * @param origin
+     * @return
+     */
+    public static int numberCount(String origin) {
+        if (isEmpty(origin)) {
+            return 0;
+        }
+
+        int count = 0;
+        for(int i = 0; i < origin.length(); i++){
+            char checkChar = origin.charAt(i);
+            if(checkChar >= '0' && checkChar <= '9'){
+                count++;
+            }
+        }
+
+        return count;
+    }
+
 
     /**
      * 判断是否包含中文
@@ -479,6 +538,31 @@ public class StringUtil {
             return true;
         }
         return false;
+    }
+
+    private static final HashSet<Character> REGEX_SPECIAL_CHARS = new HashSet<>(Arrays.asList('\\', '$', '(', ')', '*', '+', '.', '[', ']', '?', '^', '{', '}', '|'));
+
+    /**
+     * 处理正则特殊字符
+     * @param origin
+     * @return
+     */
+    public static String escapeRegex(String origin) {
+        if (isEmpty(origin)) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder(origin.length());
+        char[] charArray = origin.toCharArray();
+        for (char item: charArray) {
+            if (REGEX_SPECIAL_CHARS.contains(item)) {
+                sb.append("\\").append(item);
+            } else {
+                sb.append(item);
+            }
+        }
+
+        return sb.toString();
     }
 
     /**
