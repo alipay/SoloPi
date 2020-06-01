@@ -388,4 +388,5 @@
     <string name="create_node_res_id_title">ResourceId (optional)</string>
     <string name="create_node_xpath_title">XPath (optional)</string>
     <string name="attention__hide_ime">Hide\nIME</string>
+    <string name="patch__no_patch_installed">No patch installed</string>
 </resources>

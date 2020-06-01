@@ -387,4 +387,5 @@
     <string name="create_node_res_id_title">ResourceId(可选)</string>
     <string name="create_node_xpath_title">XPath(可选)</string>
     <string name="attention__hide_ime">隐藏\n输入法</string>
+    <string name="patch__no_patch_installed">找不到已安装的插件</string>
 </resources>
