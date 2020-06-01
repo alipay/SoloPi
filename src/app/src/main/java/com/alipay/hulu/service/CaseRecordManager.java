@@ -880,7 +880,7 @@ public class CaseRecordManager implements ExportService {
                     public void onProcessFunction(final OperationMethod method, final AbstractNodeTree node) {
                         LogUtil.d(TAG, "悬浮窗消失");
 
-                        // 切换回葫芦娃输入法
+                        // 切换回SoloPi输入法
                         CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
 
                         // 等悬浮窗消失了再操作
