@@ -25,6 +25,7 @@ import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
+import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.R;
 import com.alipay.hulu.shared.display.items.base.DisplayItem;
 import com.alipay.hulu.shared.display.items.base.Displayable;
@@ -279,34 +280,42 @@ public class NetworkTools implements Displayable{
 
 			int pidPos = 0;
 			for (int i = 0; i < origin.length && pidPos < pids.length; i+=1) {
-				if (!origin[i].trim().startsWith("wlan0")) {
+				String line = origin[i];
+				// 多选模式
+				if (StringUtil.contains(line, "net/dev:")) {
+					line = line.split("net/dev:")[1];
+				}
+
+				// 过滤非wlan0的数据
+				if (!line.trim().startsWith("wlan0")) {
 					continue;
 				}
-				String[] group = origin[i].split("wlan0")[1].trim().split("\\s+");
+				String[] group = line.split("wlan0")[1].trim().split("\\s+");
 				long currentRx = Long.parseLong(group[1]);
 				long currentTx = Long.parseLong(group[9]);
-				long[] data = appRecords.get(pids[pidPos++]);
+				long[] data = appRecords.get(pids[pidPos]);
 				if (data == null) {
 					data = new long[] {currentRx, currentRx, currentTx, currentTx, time};
-					appRecords.put(pids[i], data);
-					result[4 * i] = 0;
-					result[4 * i + 1] = 0;
-					result[4 * i + 2] = 0;
-					result[4 * i + 3] = 0;
+					appRecords.put(pids[pidPos], data);
+					result[4 * pidPos] = 0;
+					result[4 * pidPos + 1] = 0;
+					result[4 * pidPos + 2] = 0;
+					result[4 * pidPos + 3] = 0;
 				} else {
 					long lastRx = data[0];
 					long firstRx = data[1];
 					long lastTx = data[2];
 					long firstTx = data[3];
 					long lastTime = data[4];
-					result[4 * i] = (currentRx - lastRx) * KB_MILLION_SECOND / (time - lastTime);;
-					result[4 * i + 1] = (currentRx - firstRx) / 1024F;
-					result[4 * i + 2] = (currentTx - lastTx) * KB_MILLION_SECOND / (time - lastTime);;
-					result[4 * i + 3] = (currentTx - firstTx) / 1024F;
+					result[4 * pidPos] = (currentRx - lastRx) * KB_MILLION_SECOND / (time - lastTime);;
+					result[4 * pidPos + 1] = (currentRx - firstRx) / 1024F;
+					result[4 * pidPos + 2] = (currentTx - lastTx) * KB_MILLION_SECOND / (time - lastTime);;
+					result[4 * pidPos + 3] = (currentTx - firstTx) / 1024F;
 					data[0] = currentRx;
 					data[2] = currentTx;
 					data[4] = time;
 				}
+				pidPos++;
 			}
 
 			return result;

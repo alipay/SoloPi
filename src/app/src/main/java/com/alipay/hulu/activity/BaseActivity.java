@@ -36,7 +36,6 @@ import android.widget.Toast;
 
 import com.alipay.hulu.R;
 import com.alipay.hulu.common.application.LauncherApplication;
-import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.utils.DeviceInfoUtil;
 import com.alipay.hulu.common.utils.LogUtil;
 
@@ -245,7 +244,11 @@ public abstract class BaseActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             public void run() {
                 if (progressDialog != null && progressDialog.isShowing()) {
-                    progressDialog.dismiss();
+                    try {
+                        progressDialog.dismiss();
+                    } catch (Exception e) {
+                        LogUtil.w(getClass().getSimpleName(), "Remove progress dialog throw exception", e);
+                    }
                 }
             }
         });
