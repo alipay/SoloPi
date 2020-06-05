@@ -329,6 +329,10 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
 
         // 空项
         Menu controlMenu = new Menu(false, 1);
+        controlMenu.addItem(new MenuItem.Builder().setText("删除步骤").setTextColor(Color.WHITE)
+                .setWidth(dp64)
+                .setDirection(MenuItem.DIRECTION_RIGHT)
+                .setBackground(new ColorDrawable(colorDelete)).build());
 
         dragList.setMenu(menu, controlMenu);
         dragList.setDividerHeight(0);
