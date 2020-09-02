@@ -179,7 +179,7 @@ SoloPi支持通过操作一台主机设备来控制多台从机设备，不需�
 
 - 钉钉群（一群已满，请添加二群）：
 
-![group](https://gw.alipayobjects.com/mdn/rms_e29b5f/afts/img/A*K6wzRZfxDv8AAAAAAAAAAABkARQnAQ)
+![group](https://gw.alipayobjects.com/mdn/rms_e29b5f/afts/img/A*JrDwQ4qkVBcAAAAAAAAAAAAAARQnAQ)
 
 * 微信群：
 
