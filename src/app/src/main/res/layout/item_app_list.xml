@@ -17,23 +17,23 @@
               android:orientation="horizontal"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:paddingTop="15dp"
-              android:paddingBottom="15dp"
+              android:paddingTop="@dimen/control_dp16"
+              android:paddingBottom="@dimen/control_dp16"
                 android:gravity="center_vertical">
 
     <ImageView
         android:id="@+id/app_icon"
-        android:layout_marginLeft="25dp"
-        android:layout_width="25dp"
-        android:layout_height="25dp"/>
+        android:layout_marginLeft="@dimen/control_dp24"
+        android:layout_width="@dimen/control_dp24"
+        android:layout_height="@dimen/control_dp24"/>
 
     <TextView
         android:id="@+id/app_name"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp16"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="17dp"
+        android:textSize="@dimen/textsize_17"
         android:textColor="@color/mainFont"
         android:maxLines="1"
         android:ellipsize="end"/>
