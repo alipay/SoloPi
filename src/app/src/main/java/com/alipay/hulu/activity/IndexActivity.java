@@ -65,6 +65,7 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -371,10 +372,43 @@ public class IndexActivity extends BaseActivity {
         private Class<? extends Activity> targetActivity;
 
         public Entry(EntryActivity activity, Class<? extends Activity> target) {
-            this.iconId = activity.icon();
+            if (activity.icon() != -1) {
+                this.iconId = activity.icon();
+            } else if (!StringUtil.isEmpty(activity.iconName())) {
+                // 反射获取id
+                String name = activity.iconName();
+                int lastDotPos = name.lastIndexOf('.');
+                String clazz = name.substring(0, lastDotPos);
+                String field = name.substring(lastDotPos + 1);
+                try {
+                    Class RClass = ClassUtil.getClassByName(clazz);
+                    Field icon = RClass.getDeclaredField(field);
+                    this.iconId = icon.getInt(null);
+                } catch (Exception e) {
+                    LogUtil.e(TAG, "Fail to load icon result with id:" + name);
+                    this.iconId = R.drawable.solopi_main;
+                }
+            } else {
+                this.iconId = R.drawable.solopi_main;
+            }
             String name = activity.name();
             if (activity.nameRes() != 0) {
                 name = StringUtil.getString(activity.nameRes());
+            } else if (StringUtil.isNotEmpty(activity.nameResName())) {
+                int nameRes = 0;
+                String nameResName = activity.nameResName();
+                int lastDotPos = nameResName.lastIndexOf('.');
+                String clazz = nameResName.substring(0, lastDotPos);
+                String field = nameResName.substring(lastDotPos + 1);
+                try {
+                    Class<?> RClass = ClassUtil.getClassByName(clazz);
+                    Field nameResF = RClass.getDeclaredField(field);
+                    nameRes = nameResF.getInt(null);
+                } catch (Exception e) {
+                    LogUtil.e(TAG, "Fail to load name result with id:" + nameResName);
+                    nameRes = R.string.app_name;
+                }
+                name = StringUtil.getString(nameRes);
             }
             this.name = name;
             permissions = activity.permissions();

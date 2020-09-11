@@ -15,14 +15,14 @@
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:paddingStart="8dp"
-    android:paddingEnd="8dp"
-    android:paddingTop="4dp"
-    android:paddingBottom="4dp">
+    android:paddingStart="@dimen/control_dp8"
+    android:paddingEnd="@dimen/control_dp8"
+    android:paddingTop="@dimen/control_dp4"
+    android:paddingBottom="@dimen/control_dp4">
     <ImageView
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="@dimen/dp_48"
+        android:layout_height="@dimen/dp_48"
+        android:layout_marginStart="@dimen/control_dp8"
         android:scaleType="fitCenter"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
@@ -30,7 +30,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="@dimen/control_dp8"
         android:layout_toEndOf="@id/choose_icon"
         android:orientation="vertical"
         android:layout_centerVertical="true">
@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:textColor="@color/black"
-            android:textSize="20dp"
+            android:textSize="@dimen/textsize_20"
             android:layout_gravity="start"
             android:id="@+id/choose_title"/>
         <TextView
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:layout_gravity="start"
-            android:textSize="12dp"
+            android:textSize="@dimen/textsize_12"
             android:id="@+id/choose_activity"/>
     </LinearLayout>
 </RelativeLayout>

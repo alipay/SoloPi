@@ -886,43 +886,40 @@ public class FunctionSelectUtil {
                         }
 
                         String connector;
+                        int id = compareType.getCheckedRadioButtonId();
                         if (targetValType == LogicUtil.ALLOC_TYPE_INTEGER) {
-                            switch (compareType.getCheckedRadioButtonId()) {
-                                case R.id.dialog_action_check_compare_equal:
-                                    connector = "==";
-                                    break;
-                                case R.id.dialog_action_check_compare_no_equal:
-                                    connector = "<>";
-                                    break;
-                                case R.id.dialog_action_check_compare_bigger:
-                                    connector = ">";
-                                    break;
-                                case R.id.dialog_action_check_compare_bigger_equal:
-                                    connector = ">=";
-                                    break;
-                                case R.id.dialog_action_check_compare_less:
-                                    connector = "<";
-                                    break;
-                                case R.id.dialog_action_check_compare_less_equal:
-                                    connector = "<=";
-                                    break;
-                                default:
-                                    LogUtil.w(TAG, "Can't recognize type " + targetValType);
-                                    listener.onCancel();
-                                    return;
+                            if (id == R.id.dialog_action_check_compare_equal) {
+                                connector = "==";
+
+                            } else if (id == R.id.dialog_action_check_compare_no_equal) {
+                                connector = "<>";
+
+                            } else if (id == R.id.dialog_action_check_compare_bigger) {
+                                connector = ">";
+
+                            } else if (id == R.id.dialog_action_check_compare_bigger_equal) {
+                                connector = ">=";
+
+                            } else if (id == R.id.dialog_action_check_compare_less) {
+                                connector = "<";
+
+                            } else if (id == R.id.dialog_action_check_compare_less_equal) {
+                                connector = "<=";
+                            } else {
+                                LogUtil.w(TAG, "Can't recognize type " + targetValType);
+                                listener.onCancel();
+                                return;
                             }
                         } else {
-                            switch (compareType.getCheckedRadioButtonId()) {
-                                case R.id.dialog_action_check_compare_equal:
-                                    connector = "=";
-                                    break;
-                                case R.id.dialog_action_check_compare_no_equal:
-                                    connector = "!=";
-                                    break;
-                                default:
-                                    LogUtil.w(TAG, "Can't recognize type " + targetValType);
-                                    listener.onCancel();
-                                    return;
+                            if (id == R.id.dialog_action_check_compare_equal) {
+                                connector = "=";
+
+                            } else if (id == R.id.dialog_action_check_compare_no_equal) {
+                                connector = "!=";
+                            } else {
+                                LogUtil.w(TAG, "Can't recognize type " + targetValType);
+                                listener.onCancel();
+                                return;
                             }
                         }
                         method.putParam(LogicUtil.CHECK_PARAM, leftVal + connector + rightVal);
@@ -1081,22 +1078,16 @@ public class FunctionSelectUtil {
                 assertGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(RadioGroup group, int checkedId) {
-                        switch (checkedId) {
-                            case R.id.ch1:
-                                selectNumIndex[0] = 0;
-                                break;
-                            case R.id.ch2:
-                                selectNumIndex[0] = 1;
-                                break;
-                            case R.id.ch3:
-                                selectNumIndex[0] = 2;
-                                break;
-                            case R.id.ch4:
-                                selectNumIndex[0] = 3;
-                                break;
-                            case R.id.ch5:
-                                selectNumIndex[0] = 4;
-                                break;
+                       if (checkedId == R.id.ch1) {
+                            selectNumIndex[0] = 0;
+                        } else if (checkedId == R.id.ch2) {
+                            selectNumIndex[0] = 1;
+                        } else if (checkedId == R.id.ch3) {
+                            selectNumIndex[0] = 2;
+                        } else if (checkedId == R.id.ch4) {
+                            selectNumIndex[0] = 3;
+                        } else if (checkedId == R.id.ch5) {
+                            selectNumIndex[0] = 4;
                         }
                     }
                 });
@@ -1170,16 +1161,12 @@ public class FunctionSelectUtil {
                 assertGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(RadioGroup group, int checkedId) {
-                        switch (checkedId) {
-                            case R.id.ch1:
-                                selectIndex[0] = 0;
-                                break;
-                            case R.id.ch2:
-                                selectIndex[0] = 1;
-                                break;
-                            case R.id.ch3:
-                                selectIndex[0] = 2;
-                                break;
+                        if (checkedId == R.id.ch1) {
+                            selectIndex[0] = 0;
+                        } else if (checkedId == R.id.ch2) {
+                            selectIndex[0] = 1;
+                        } else if (checkedId == R.id.ch3) {
+                            selectIndex[0] = 2;
                         }
                     }
                 });
@@ -1577,20 +1564,14 @@ public class FunctionSelectUtil {
                 @Override
                 public void onCheckedChanged(RadioGroup group, int checkedId) {
                     int targetTime;
-                    switch (checkedId) {
-                        case R.id.node_gesture_time_filter_25:
-                            targetTime = 25;
-                            break;
-                        case R.id.node_gesture_time_filter_50:
-                            targetTime = 50;
-                            break;
-                        case R.id.node_gesture_time_filter_200:
-                            targetTime = 200;
-                            break;
-                        case R.id.node_gesture_time_filter_100:
-                        default:
-                            targetTime = 100;
-                            break;
+                    if (checkedId == R.id.node_gesture_time_filter_25) {
+                        targetTime = 25;
+                    } else if (checkedId == R.id.node_gesture_time_filter_50) {
+                        targetTime = 50;
+                    } else if (checkedId == R.id.node_gesture_time_filter_200) {
+                        targetTime = 200;
+                    } else {
+                        targetTime = 100;
                     }
                     gesturePadView.setGestureFilter(targetTime);
                     gesturePadView.clear();

@@ -33,18 +33,18 @@
         android:id="@+id/performance_upload_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginTop="10dp"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/bg_settings_item"
         android:gravity="center_vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone" />
 
         <TextView
@@ -56,7 +56,7 @@
             android:gravity="center"
             android:text="@string/settings__performance_upload_url"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="@dimen/textsize_16" />
 
         <TextView
             android:id="@+id/performance_upload_setting_info"
@@ -64,13 +64,13 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
-            android:maxWidth="120dp"
+            android:maxWidth="@dimen/capture_circle_min_size"
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
 
     </RelativeLayout>
 
@@ -78,18 +78,18 @@
         android:id="@+id/recordscreen_upload_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginTop="10dp"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/bg_settings_item"
         android:gravity="center_vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone" />
 
         <TextView
@@ -101,7 +101,7 @@
             android:gravity="center"
             android:text="@string/settings__response_upload_url"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="@dimen/textsize_16" />
 
         <TextView
             android:id="@+id/recordscreen_upload_setting_info"
@@ -109,31 +109,31 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
-            android:maxWidth="120dp"
+            android:maxWidth="@dimen/capture_circle_min_size"
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
     </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/patch_list_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginTop="10dp"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/bg_settings_item"
         android:gravity="center_vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone" />
 
         <TextView
@@ -145,7 +145,7 @@
             android:gravity="center"
             android:text="@string/settings__plugin_url"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="@dimen/textsize_16" />
 
         <TextView
             android:id="@+id/patch_list_setting_info"
@@ -153,31 +153,31 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
-            android:maxWidth="120dp"
+            android:maxWidth="@dimen/capture_circle_min_size"
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
     </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/aes_seed_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginTop="10dp"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/bg_settings_item"
         android:gravity="center_vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone" />
 
         <TextView
@@ -189,18 +189,18 @@
             android:gravity="center"
             android:text="@string/settings__encrept_key"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="@dimen/textsize_16" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"
+            android:layout_marginLeft="@dimen/control_dp16"
             android:layout_toRightOf="@id/aes_seed_setting_title"
             android:gravity="center"
             android:text=""
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
 
         <TextView
             android:id="@+id/aes_seed_setting_info"
@@ -208,13 +208,13 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
-            android:maxWidth="120dp"
+            android:maxWidth="@dimen/capture_circle_min_size"
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
 
     </RelativeLayout>
 
@@ -222,18 +222,18 @@
                 android:id="@+id/language_setting_wrapper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:layout_marginTop="10dp"
+                android:paddingTop="@dimen/control_dp8"
+                android:paddingBottom="@dimen/control_dp8"
+                android:layout_marginTop="@dimen/control_dp12"
                 android:background="@drawable/bg_settings_item"
                 android:gravity="center_vertical"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp">
+                android:paddingLeft="@dimen/control_dp16"
+                android:paddingRight="@dimen/control_dp16">
 
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="10dp"
+                    android:layout_marginRight="@dimen/control_dp12"
                     android:visibility="gone" />
 
                 <TextView
@@ -245,7 +245,7 @@
                     android:gravity="center"
                     android:text="@string/settings__language"
                     android:textColor="@color/black"
-                    android:textSize="16dp" />
+                    android:textSize="@dimen/textsize_16" />
 
                 <TextView
                     android:id="@+id/language_setting_info"
@@ -253,13 +253,13 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="5dp"
+                    android:layout_marginLeft="@dimen/control_dp6"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:maxLines="1"
-                    android:maxWidth="120dp"
+                    android:maxWidth="@dimen/capture_circle_min_size"
                     android:textColor="@color/gray"
-                    android:textSize="12dp" />
+                    android:textSize="@dimen/textsize_12" />
 
             </RelativeLayout>
 
@@ -267,18 +267,18 @@
         android:id="@+id/display_system_app_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginTop="10dp"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/bg_settings_item"
         android:gravity="center_vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone" />
 
         <TextView
@@ -290,7 +290,7 @@
             android:gravity="center"
             android:text="@string/settings__display_system_app"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="@dimen/textsize_16" />
 
         <TextView
             android:id="@+id/display_system_app_setting_info"
@@ -298,13 +298,13 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
-            android:maxWidth="120dp"
+            android:maxWidth="@dimen/capture_circle_min_size"
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
 
     </RelativeLayout>
 
@@ -312,18 +312,18 @@
         android:id="@+id/auto_replay_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginTop="10dp"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/bg_settings_item"
         android:gravity="center_vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone" />
 
         <TextView
@@ -335,7 +335,7 @@
             android:gravity="center"
             android:text="@string/settings__case_auto_replay"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="@dimen/textsize_16" />
 
         <TextView
             android:id="@+id/auto_replay_setting_info"
@@ -343,32 +343,32 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
-            android:maxWidth="120dp"
+            android:maxWidth="@dimen/capture_circle_min_size"
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
 
-    </RelativeLayout>
+        </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/skip_accessibility_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginTop="10dp"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/bg_settings_item"
         android:gravity="center_vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone" />
 
         <TextView
@@ -380,7 +380,7 @@
             android:gravity="center"
             android:text="@string/settings__skip_accessibility"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="@dimen/textsize_16" />
 
         <TextView
             android:id="@+id/skip_accessibility_setting_info"
@@ -388,13 +388,13 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
-            android:maxWidth="120dp"
+            android:maxWidth="@dimen/capture_circle_min_size"
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
 
     </RelativeLayout>
 
@@ -402,18 +402,18 @@
         android:id="@+id/max_wait_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginTop="10dp"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/bg_settings_item"
         android:gravity="center_vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone" />
 
         <TextView
@@ -425,7 +425,7 @@
             android:gravity="center"
             android:text="@string/settings__max_wait_time"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="@dimen/textsize_16" />
 
         <TextView
             android:id="@+id/max_wait_setting_info"
@@ -433,13 +433,95 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
-            android:maxWidth="120dp"
+            android:maxWidth="@dimen/capture_circle_min_size"
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
+
+    </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_marginTop="@dimen/control_dp12"
+                android:id="@+id/restart_app_setting_wrapper"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/control_dp40"
+                android:paddingLeft="@dimen/control_dp16"
+                android:paddingRight="@dimen/control_dp16"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_settings_item">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/control_dp12"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:textColor="@color/black"
+                    android:gravity="center"
+                    android:textSize="@dimen/control_dp16"
+                    android:text="@string/settings__restart_app_before_replay"/>
+
+                <TextView
+                    android:id="@+id/restart_app_setting_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:layout_marginLeft="@dimen/control_dp6"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textColor="@color/gray"
+                    android:textSize="@dimen/control_dp12"
+                    android:text="@string/constant__yes"/>
+
+            </RelativeLayout><RelativeLayout
+            android:layout_marginTop="@dimen/control_dp12"
+            android:id="@+id/replay_other_app_setting_wrapper"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/control_dp40"
+            android:paddingLeft="@dimen/control_dp16"
+            android:paddingRight="@dimen/control_dp16"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_settings_item">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/control_dp12"
+                android:visibility="gone"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:textColor="@color/black"
+                android:gravity="center"
+                android:textSize="@dimen/control_dp16"
+                android:text="@string/settings__allow_replay_in_other_app"/>
+
+            <TextView
+                android:id="@+id/replay_other_app_setting_info"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:layout_marginLeft="@dimen/control_dp6"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="@color/gray"
+                android:textSize="@dimen/control_dp12"
+                android:text="@string/constant__yes"/>
 
     </RelativeLayout>
 
@@ -447,18 +529,18 @@
         android:id="@+id/output_charset_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginTop="10dp"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/bg_settings_item"
         android:gravity="center_vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone" />
 
         <TextView
@@ -470,7 +552,7 @@
             android:gravity="center"
             android:text="@string/settings__output_charset"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="@dimen/textsize_16" />
 
         <TextView
             android:id="@+id/output_charset_setting_info"
@@ -478,13 +560,13 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
-            android:maxWidth="120dp"
+            android:maxWidth="@dimen/capture_circle_min_size"
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
 
     </RelativeLayout>
 
@@ -492,18 +574,18 @@
         android:id="@+id/base_dir_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginTop="10dp"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/bg_settings_item"
         android:gravity="center_vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone" />
 
         <TextView
@@ -515,7 +597,7 @@
             android:gravity="center"
             android:text="@string/settings__base_dir"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="@dimen/textsize_16" />
 
         <TextView
             android:id="@+id/base_dir_setting_info"
@@ -523,10 +605,10 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toRightOf="@id/base_dir_setting_title"
-            android:layout_marginLeft="16dp"
+            android:layout_marginLeft="@dimen/control_dp16"
             android:gravity="center_vertical"
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
 
     </RelativeLayout>
 
@@ -534,18 +616,18 @@
         android:id="@+id/clear_files_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginTop="10dp"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/bg_settings_item"
         android:gravity="center_vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone" />
 
         <TextView
@@ -557,19 +639,19 @@
             android:gravity="center"
             android:text="@string/settings__auto_clean_time"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="@dimen/textsize_16" />
 
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"
+            android:layout_marginLeft="@dimen/control_dp16"
             android:layout_toRightOf="@id/clear_files_setting_title"
             android:gravity="center"
             android:text="@string/settings__clear_file_over_days"
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
 
         <TextView
             android:id="@+id/clear_files_setting_info"
@@ -577,13 +659,13 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
-            android:maxWidth="120dp"
+            android:maxWidth="@dimen/capture_circle_min_size"
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
 
     </RelativeLayout>
 
@@ -591,18 +673,18 @@
                 android:id="@+id/check_update_setting_wrapper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:layout_marginTop="10dp"
+                android:paddingTop="@dimen/control_dp8"
+                android:paddingBottom="@dimen/control_dp8"
+                android:layout_marginTop="@dimen/control_dp12"
                 android:background="@drawable/bg_settings_item"
                 android:gravity="center_vertical"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp">
+                android:paddingLeft="@dimen/control_dp16"
+                android:paddingRight="@dimen/control_dp16">
 
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="10dp"
+                    android:layout_marginRight="@dimen/control_dp12"
                     android:visibility="gone" />
 
                 <TextView
@@ -614,7 +696,7 @@
                     android:gravity="center"
                     android:text="@string/settings__check_update"
                     android:textColor="@color/black"
-                    android:textSize="16dp" />
+                    android:textSize="@dimen/textsize_16" />
 
                 <TextView
                     android:id="@+id/check_update_setting_info"
@@ -622,30 +704,30 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="5dp"
+                    android:layout_marginLeft="@dimen/control_dp6"
                     android:ellipsize="end"
                     android:gravity="center"
                     android:maxLines="1"
-                    android:maxWidth="120dp"
+                    android:maxWidth="@dimen/capture_circle_min_size"
                     android:textColor="@color/gray"
-                    android:textSize="12dp" />
+                    android:textSize="@dimen/textsize_12" />
 
             </RelativeLayout>
 
     <RelativeLayout
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="@dimen/control_dp12"
         android:id="@+id/screenshot_resolution_setting_wrapper"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16"
         android:gravity="center_vertical"
         android:background="@drawable/bg_settings_item">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone"/>
 
         <TextView
@@ -655,7 +737,7 @@
             android:layout_centerVertical="true"
             android:textColor="@color/black"
             android:gravity="center"
-            android:textSize="16dp"
+            android:textSize="@dimen/textsize_16"
             android:text="@string/settings__screenshot_size"/>
 
         <TextView
@@ -665,29 +747,29 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:gravity="center"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:maxLines="1"
             android:ellipsize="end"
             android:textColor="@color/gray"
-            android:textSize="12dp"
+            android:textSize="@dimen/textsize_12"
             android:text="@string/settings__resolution_default"/>
 
     </RelativeLayout>
 
     <RelativeLayout
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="@dimen/control_dp12"
         android:id="@+id/default_screen_rotation_setting_wrapper"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16"
         android:gravity="center_vertical"
         android:background="@drawable/bg_settings_item">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone"/>
 
         <TextView
@@ -697,7 +779,7 @@
             android:layout_centerVertical="true"
             android:textColor="@color/black"
             android:gravity="center"
-            android:textSize="16dp"
+            android:textSize="@dimen/textsize_16"
             android:text="@string/settings__default_screen_orientation"/>
 
         <TextView
@@ -707,29 +789,29 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:gravity="center"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:maxLines="1"
             android:ellipsize="end"
             android:textColor="@color/gray"
-            android:textSize="12dp"
+            android:textSize="@dimen/textsize_12"
             android:text="0"/>
 
     </RelativeLayout>
 
     <RelativeLayout
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="@dimen/control_dp12"
         android:id="@+id/change_rotation_setting_wrapper"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16"
         android:gravity="center_vertical"
         android:background="@drawable/bg_settings_item">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone"/>
 
         <TextView
@@ -739,7 +821,7 @@
             android:layout_centerVertical="true"
             android:textColor="@color/black"
             android:gravity="center"
-            android:textSize="16dp"
+            android:textSize="@dimen/textsize_16"
             android:text="@string/settings__exchange_x_y"/>
 
         <TextView
@@ -749,29 +831,29 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:gravity="center"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:maxLines="1"
             android:ellipsize="end"
             android:textColor="@color/gray"
-            android:textSize="12dp"
+            android:textSize="@dimen/textsize_12"
             android:text="@string/constant__no"/>
 
     </RelativeLayout>
 
     <RelativeLayout
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="@dimen/control_dp12"
         android:id="@+id/global_param_setting_wrapper"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16"
         android:gravity="center_vertical"
         android:background="@drawable/bg_settings_item">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone"/>
 
         <TextView
@@ -781,25 +863,25 @@
             android:layout_centerVertical="true"
             android:textColor="@color/black"
             android:gravity="center"
-            android:textSize="16dp"
+            android:textSize="@dimen/textsize_16"
             android:text="@string/settings__global_param"/>
 
     </RelativeLayout>
 
     <RelativeLayout
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="@dimen/control_dp12"
         android:id="@+id/replay_highlight_setting_wrapper"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16"
         android:gravity="center_vertical"
         android:background="@drawable/bg_settings_item">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone"/>
 
         <TextView
@@ -809,7 +891,7 @@
             android:layout_centerVertical="true"
             android:textColor="@color/black"
             android:gravity="center"
-            android:textSize="16dp"
+            android:textSize="@dimen/textsize_16"
             android:text="@string/settings__replay_highlight"/>
 
         <TextView
@@ -819,11 +901,11 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:gravity="center"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:maxLines="1"
             android:ellipsize="end"
             android:textColor="@color/gray"
-            android:textSize="12dp"
+            android:textSize="@dimen/textsize_12"
             android:text="@string/constant__yes"/>
     </RelativeLayout>
 
@@ -831,18 +913,18 @@
         android:id="@+id/hide_log_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginTop="10dp"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/bg_settings_item"
         android:gravity="center_vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone" />
 
         <TextView
@@ -854,7 +936,7 @@
             android:gravity="center"
             android:text="@string/settings__whether_hide_node_info"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="@dimen/textsize_16" />
 
 
 
@@ -864,14 +946,14 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
             android:text="@string/constant__yes"
-            android:maxWidth="120dp"
+            android:maxWidth="@dimen/capture_circle_min_size"
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
 
     </RelativeLayout>
 
@@ -879,18 +961,18 @@
         android:id="@+id/import_case_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginTop="10dp"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/bg_settings_item"
         android:gravity="center_vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone" />
 
         <TextView
@@ -902,7 +984,7 @@
             android:gravity="center"
             android:text="@string/settings__to_load_external_case"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="@dimen/textsize_16" />
 
 
         <TextView
@@ -910,11 +992,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"
+            android:layout_marginLeft="@dimen/control_dp16"
             android:layout_toRightOf="@id/import_case_setting_title"
             android:gravity="center_vertical"
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
 
     </RelativeLayout>
 
@@ -922,18 +1004,18 @@
         android:id="@+id/import_patch_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginTop="10dp"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/bg_settings_item"
         android:gravity="center_vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone" />
 
         <TextView
@@ -945,7 +1027,7 @@
             android:gravity="center"
             android:text="@string/settings__load_patch_in_patches"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="@dimen/textsize_16" />
 
 
         <TextView
@@ -953,22 +1035,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"
+            android:layout_marginLeft="@dimen/control_dp16"
             android:layout_toRightOf="@id/import_patch_setting_title"
             android:gravity="center_vertical"
             android:text="@string/settings__default_patch_path"
             android:textColor="@color/gray"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_12" />
 
     </RelativeLayout>
 
     <RelativeLayout
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="@dimen/control_dp12"
         android:id="@+id/plugin_list_setting_wrapper"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16"
         android:gravity="center_vertical"
         android:background="@drawable/bg_settings_item">
 
@@ -979,7 +1061,7 @@
             android:layout_centerVertical="true"
             android:textColor="@color/black"
             android:gravity="center"
-            android:textSize="16dp"
+            android:textSize="@dimen/textsize_16"
             android:text="插件列表"/>
 
     </RelativeLayout>
@@ -989,19 +1071,19 @@
         android:id="@+id/about_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:layout_marginTop="10dp"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/bg_settings_item"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/control_dp12"
             android:visibility="gone" />
 
         <TextView
@@ -1010,7 +1092,7 @@
             android:gravity="center"
             android:text="@string/settings__about"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="@dimen/textsize_16" />
 
     </LinearLayout>
         </LinearLayout>

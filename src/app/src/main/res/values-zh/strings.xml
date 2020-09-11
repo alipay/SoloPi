@@ -388,4 +388,9 @@
     <string name="create_node_xpath_title">XPath(可选)</string>
     <string name="attention__hide_ime">隐藏\n输入法</string>
     <string name="patch__no_patch_installed">找不到已安装的插件</string>
+    <string name="settings__allow_replay_in_other_app">允许在其他应用回放用例</string>
+    <string name="settings__restart_app_before_replay">回放前重启应用</string>
+    <string name="settings__should_replay_in_other_app">是否允许在其他应用回放用例</string>
+    <string name="settings__should_restart_before_replay">是否在回放用例时重启应用</string>
+    <string name="select_app__target_app">目标应用</string>
 </resources>

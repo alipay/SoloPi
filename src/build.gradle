@@ -20,14 +20,14 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.3.1'
         classpath 'org.greenrobot:greendao-gradle-plugin:3.2.2'
     }
 
     ext {
-        setProperty('compileSdkVersion', 25)
-        setProperty('buildToolsVersion', "26.0.2")
-        setProperty('targetSdkVersion', 25)
+        setProperty('compileSdkVersion', 28)
+        setProperty('buildToolsVersion', "28.0.3")
+        setProperty('targetSdkVersion', 28)
     }
 }
 

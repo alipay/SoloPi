@@ -39,8 +39,10 @@ public class SPService {
     public static final String KEY_PATCH_URL = "KEY_PATCH_URL";
     public static final String KEY_AES_KEY = "KEY_AES_KEY";
     public static final String KEY_REPLAY_AUTO_START = "KEY_REPLAY_AUTO_START";
+    public static final String KEY_RESTART_APP_ON_PLAY = "KEY_RESTART_APP_ON_PLAY";
     public static final String KEY_SKIP_ACCESSIBILITY = "KEY_SKIP_ACCESSIBILITY";
     public static final String KEY_USE_LANGUAGE = "KEY_USE_LANGUAGE";
+    public static final String KEY_ALLOW_REPLAY_DIFFERENT_APP = "KEY_ALLOW_REPLAY_DIFFERENT_APP";
     public static final String KEY_SCREEN_FACTOR_ROTATION = "KEY_SCREEN_FACTOR_ROTATION";
     public static final String KEY_SCREEN_ROTATION = "KEY_SCREEN_ROTATION";
     public static final String KEY_SERIAL_ID = "KEY_SERIAL_ID";

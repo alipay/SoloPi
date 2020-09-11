@@ -267,7 +267,12 @@ public class ClassUtil {
             }
         }
 
-        return null;
+        try {
+            return Class.forName(name);
+        } catch (ClassNotFoundException e) {
+            LogUtil.e(TAG, "Fail to load class:" + name, e);
+            return null;
+        }
     }
 
 

@@ -24,20 +24,23 @@ import com.alipay.hulu.common.application.LauncherApplication;
  * Created by lezhou.wyl on 2018/1/21.
  */
 public class SystemUtil {
+    public static int VERSION_CODE = BuildConfig.VERSION_CODE;
+    public static String VERSION_NAME = BuildConfig.VERSION_NAME;
+
     private static final String TAG = "SystemUtil";
 
     public static boolean isUiThread() {
-        return Looper.getMainLooper().getThread() == Thread.currentThread();
+        return Looper.myLooper() == Looper.getMainLooper();
     }
 
     private static final String CURRENT_PACKAGE_NAME = LauncherApplication.getInstance().getPackageName();
 
     public static int getAppVersionCode() {
-        return BuildConfig.VERSION_CODE;
+        return VERSION_CODE;
     }
 
     public static String getAppVersionName() {
-        return BuildConfig.VERSION_NAME;
+        return VERSION_NAME;
     }
 
 }

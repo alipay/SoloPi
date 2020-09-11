@@ -20,6 +20,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -44,6 +45,7 @@ import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.service.CaseReplayManager;
 import com.alipay.hulu.shared.io.db.GreenDaoManager;
 import com.alipay.hulu.util.LargeObjectHolder;
+import com.alipay.hulu.util.SystemUtil;
 import com.liulishuo.filedownloader.FileDownloader;
 
 import java.io.File;
@@ -252,7 +254,6 @@ public class MyApplication extends LauncherApplication {
 
     @Override
     public void init() {
-
         sInstance = this;
 
         // 注册自身信息
@@ -282,6 +283,15 @@ public class MyApplication extends LauncherApplication {
     @Override
     protected void initInMain() {
         super.initInMain();
+        // 加载版本信息
+        try {
+            PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
+            SystemUtil.VERSION_NAME = pInfo.versionName;   //version name
+            SystemUtil.VERSION_CODE = pInfo.versionCode;      //version code
+        } catch (PackageManager.NameNotFoundException e) {
+            LogUtil.e(TAG, "Fail to load my app version info", e);
+        }
+
         registerLifecycleCallbacks();
     }
 

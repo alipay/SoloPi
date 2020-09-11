@@ -74,7 +74,7 @@ import java.util.List;
 /**
  * Created by lezhou.wyl on 2018/2/1.
  */
-@EntryActivity(icon = R.drawable.icon_luxiang, nameRes = R.string.activity__record, permissions = {"adb", "float", "background", "toast:请将SoloPi添加到后台白名单中"}, index = 1, cornerText = "New", cornerPersist = 3, cornerBg = 0xFFFF5900)
+@EntryActivity(iconName = "com.alipay.hulu.R$drawable.icon_luxiang", nameResName = "com.alipay.hulu.R$string.activity__record", permissions = {"adb", "float", "background", "toast:请将SoloPi添加到后台白名单中"}, index = 1, cornerText = "New", cornerPersist = 3, cornerBg = 0xFFFF5900)
 public class NewRecordActivity extends BaseActivity {
 
     private static final String TAG = NewRecordActivity.class.getSimpleName();
@@ -153,7 +153,7 @@ public class NewRecordActivity extends BaseActivity {
 
 
     private void initRecentCaseLayout() {
-        mRecentCaseListView = (ListView) findViewById(R.id.recent_case_list);
+        mRecentCaseListView = findViewById(R.id.recent_case_list);
         mEmptyView = findViewById(R.id.empty_hint);
         mCheckAllCasesBtn = findViewById(R.id.check_all_cases);
         mRecentCaseAdapter = new ReplayListAdapter(this);
@@ -232,7 +232,7 @@ public class NewRecordActivity extends BaseActivity {
                                     public void run() {
                                         dismissProgressDialog();
                                         CaseReplayUtil.startReplay(caseInfo);
-                                        startTargetApp(caseInfo.getTargetAppPackage());
+//                                        startTargetApp(caseInfo.getTargetAppPackage());
                                     }
                                 });
                             } else {

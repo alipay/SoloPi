@@ -61,7 +61,7 @@ import java.util.List;
 /**
  * Created by lezhou.wyl on 2018/1/28.
  */
-@EntryActivity(icon = R.drawable.icon_xingneng, nameRes = R.string.activity__performance_test, permissions = {"adb", "float", "background"}, index = 2)
+@EntryActivity(iconName = "com.alipay.hulu.R$drawable.icon_xingneng", nameResName = "com.alipay.hulu.R$string.activity__performance_test", permissions = {"adb", "float", "background"}, index = 2)
 public class PerformanceActivity extends BaseActivity {
     private String TAG = "PerformanceFragment";
 

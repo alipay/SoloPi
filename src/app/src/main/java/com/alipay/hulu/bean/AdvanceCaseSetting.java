@@ -25,7 +25,23 @@ public class AdvanceCaseSetting {
     private String descriptorMode;
     private int version;
     private List<CaseParamBean> params;
+    private String overrideApp;
     private CaseRunningParam runningParam;
+
+    public AdvanceCaseSetting() {
+
+    }
+
+    public AdvanceCaseSetting(AdvanceCaseSetting old) {
+        if (old == null) {
+            return;
+        }
+        this.overrideApp = old.overrideApp;
+        this.descriptorMode = old.descriptorMode;
+        this.params = old.params;
+        this.runningParam = old.runningParam;
+        this.version = old.version;
+    }
 
     public String getDescriptorMode() {
         return descriptorMode;
@@ -43,6 +59,13 @@ public class AdvanceCaseSetting {
         this.version = version;
     }
 
+    public String getOverrideApp() {
+        return overrideApp;
+    }
+
+    public void setOverrideApp(String overrideApp) {
+        this.overrideApp = overrideApp;
+    }
 
     public List<CaseParamBean> getParams() {
         return params;

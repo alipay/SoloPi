@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/control_dp8"
+    android:paddingBottom="@dimen/control_dp8"
+    android:paddingStart="@dimen/control_dp16"
+    android:paddingEnd="@dimen/control_dp16">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:text="@string/select_app__target_app"
+        android:textColor="@color/primaryText"
+        android:textSize="@dimen/textsize_18"/>
+
+    <ListView
+        android:id="@+id/dialog_jump_app_list"
+        android:layout_marginTop="@dimen/control_dp8"
+        android:padding="0dp"
+        android:layout_width="match_parent"
+        android:background="@drawable/bg_custom_input"
+        android:layout_height="@dimen/app_list_250dp"
+        tools:listitem="@layout/activity_choose_layout"/>
+</LinearLayout>

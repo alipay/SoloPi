@@ -32,8 +32,11 @@ public class InstallReceiver extends BroadcastReceiver {
     private static final String TAG = "InstallReceiver";
     @Override
     public void onReceive(Context context, Intent intent) {
+        if (intent == null) {
+            return;
+        }
 
-        if (intent.getAction().equals("android.intent.action.PACKAGE_ADDED")) {		// install
+        if ("android.intent.action.PACKAGE_ADDED".equals(intent.getAction())) {		// install
             String packageName = intent.getDataString();
 
             LogUtil.i(TAG, "安装了 :" + StringUtil.hide(packageName));
@@ -42,7 +45,7 @@ public class InstallReceiver extends BroadcastReceiver {
             MyApplication.getInstance().notifyAppChangeEvent();
         }
 
-        if (intent.getAction().equals("android.intent.action.PACKAGE_REMOVED")) {	// uninstall
+        if ("android.intent.action.PACKAGE_REMOVED".equals(intent.getAction())) {	// uninstall
             String packageName = intent.getDataString();
 
             LogUtil.i(TAG, "卸载了 :" + StringUtil.hide(packageName));

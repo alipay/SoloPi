@@ -24,12 +24,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.alipay.hulu.BuildConfig;
 import com.alipay.hulu.R;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.constant.Constant;
@@ -52,8 +50,8 @@ import com.alipay.hulu.shared.io.util.OperationStepUtil;
 import com.alipay.hulu.shared.node.action.OperationMethod;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
 import com.alipay.hulu.ui.HeadControlPanel;
-import com.alipay.hulu.util.DialogUtils;
 import com.alipay.hulu.upgrade.PatchRequest;
+import com.alipay.hulu.util.DialogUtils.OnDialogResultListener;
 import com.zhy.view.flowlayout.FlowLayout;
 import com.zhy.view.flowlayout.TagAdapter;
 import com.zhy.view.flowlayout.TagFlowLayout;
@@ -70,7 +68,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.alipay.hulu.util.DialogUtils.showMultipleEditDialog;
-import com.alipay.hulu.util.DialogUtils.OnDialogResultListener;
 
 /**
  * Created by lezhou.wyl on 01/01/2018.
@@ -91,6 +88,12 @@ public class SettingsActivity extends BaseActivity {
 
     private View mPatchListWrapper;
     private TextView mPatchListInfo;
+
+    private View mReplayOtherAppSettingWrapper;
+    private TextView mReplayOtherAppInfo;
+
+    private View mRestartAppSettingWrapper;
+    private TextView mRestartAppInfo;
 
     private View mGlobalParamSettingWrapper;
 
@@ -341,6 +344,52 @@ public class SettingsActivity extends BaseActivity {
             }
         });
 
+        mReplayOtherAppSettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AlertDialog.Builder(SettingsActivity.this, R.style.SimpleDialogTheme)
+                        .setMessage(R.string.settings__should_replay_in_other_app)
+                        .setPositiveButton(R.string.constant__yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SPService.putBoolean(SPService.KEY_ALLOW_REPLAY_DIFFERENT_APP, true);
+                                mReplayOtherAppInfo.setText(R.string.constant__yes);
+                                dialog.dismiss();
+                            }
+                        }).setNegativeButton(R.string.constant__no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SPService.putBoolean(SPService.KEY_ALLOW_REPLAY_DIFFERENT_APP, false);
+                        mReplayOtherAppInfo.setText(R.string.constant__no);
+                        dialog.dismiss();
+                    }
+                }).show();
+            }
+        });
+
+        mRestartAppSettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AlertDialog.Builder(SettingsActivity.this, R.style.SimpleDialogTheme)
+                        .setMessage(R.string.settings__should_restart_before_replay)
+                        .setPositiveButton(R.string.constant__yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SPService.putBoolean(SPService.KEY_RESTART_APP_ON_PLAY, true);
+                                mRestartAppInfo.setText(R.string.constant__yes);
+                                dialog.dismiss();
+                            }
+                        }).setNegativeButton(R.string.constant__no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SPService.putBoolean(SPService.KEY_RESTART_APP_ON_PLAY, false);
+                        mRestartAppInfo.setText(R.string.constant__no);
+                        dialog.dismiss();
+                    }
+                }).show();
+            }
+        });
+
         mDisplaySystemAppSettingWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -432,7 +481,7 @@ public class SettingsActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 FileChooseDialogActivity.startFileChooser(SettingsActivity.this,
-                        REQUEST_FILE_CHOOSE, StringUtil.getString(R.string.settings__base_dir), "solopi",
+                        REQUEST_FILE_CHOOSE, getString(R.string.settings__base_dir), "solopi",
                         FileUtils.getSolopiDir());
             }
         });
@@ -764,6 +813,17 @@ public class SettingsActivity extends BaseActivity {
         } else {
             mAutoReplaySettingInfo.setText(R.string.constant__no);
         }
+
+        mReplayOtherAppSettingWrapper = findViewById(R.id.replay_other_app_setting_wrapper);
+        mReplayOtherAppInfo = _findViewById(R.id.replay_other_app_setting_info);
+        boolean replayOtherApp = SPService.getBoolean(SPService.KEY_ALLOW_REPLAY_DIFFERENT_APP, false);
+        mReplayOtherAppInfo.setText(replayOtherApp? R.string.constant__yes: R.string.constant__no);
+
+        mRestartAppSettingWrapper = findViewById(R.id.restart_app_setting_wrapper);
+        mRestartAppInfo = _findViewById(R.id.restart_app_setting_info);
+        boolean restartApp = SPService.getBoolean(SPService.KEY_RESTART_APP_ON_PLAY, true);
+        mRestartAppInfo.setText(restartApp? R.string.constant__yes: R.string.constant__no);
+
 
         mSkipAccessibilitySettingWrapper = findViewById(R.id.skip_accessibility_setting_wrapper);
         mSkipAccessibilitySettingInfo = (TextView) findViewById(R.id.skip_accessibility_setting_info);

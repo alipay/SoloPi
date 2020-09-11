@@ -1,0 +1,118 @@
+<resources>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <dimen name="fab_margin">24dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+    <dimen name="bottombar_height">48dp</dimen>
+    <dimen name="bottombar_wechat_height">52dp</dimen>
+    <dimen name="textsize_16">16dip</dimen>
+    <dimen name="textsize_15">15dip</dimen>
+    <dimen name="textsize_14">14dip</dimen>
+    <dimen name="textsize_13">13dip</dimen>
+    <dimen name="textsize_12">12dip</dimen>
+    <dimen name="textsize_10">10dip</dimen>
+    <dimen name="dp_59">59dp</dimen>
+    <dimen name="dp_60">60dp</dimen>
+    <dimen name="dp_70">70dp</dimen>
+    <dimen name="dp_80">80dp</dimen>>
+    <dimen name="capture_circle_max_size">270dp</dimen>
+    <dimen name="capture_circle_min_size">120dp</dimen>
+
+    <!--悬浮窗尺寸-->
+    <dimen name="float_win_width">260dp</dimen>
+    <dimen name="float_win_height">440dp</dimen>
+    <dimen name="float_group_text_size">12dp</dimen>
+    <dimen name="float_group_icon_size">24dp</dimen>
+    <dimen name="float_group_icon_gap">16dp</dimen>
+    <dimen name="float_item_icon_size">24dp</dimen>
+    <dimen name="float_item_text_size">18sp</dimen>
+
+
+    <!--操作悬浮窗尺寸-->
+    <dimen name="control_float_icon_size">28dp</dimen>
+    <dimen name="control_float_card_width">240dp</dimen>
+    <dimen name="control_dp2">2dp</dimen>
+    <dimen name="control_dp4">4dp</dimen>
+    <dimen name="control_dp6">6dp</dimen>
+    <dimen name="control_dp8">8dp</dimen>
+    <dimen name="control_dp12">12dp</dimen>
+    <dimen name="control_dp16">16dp</dimen>
+    <dimen name="control_dp24">24dp</dimen>
+    <dimen name="control_dp32">32dp</dimen>
+    <dimen name="control_dp40">40dp</dimen>
+    <dimen name="control_float_card_icon_size">32dp</dimen>
+    <dimen name="control_float_close_icon_size">18dp</dimen>
+    <dimen name="control_float_home_icon_size">20dp</dimen>
+    <dimen name="control_float_record_icon_size">22dp</dimen>
+    <dimen name="control_float_icon_gap">12dp</dimen>
+    <dimen name="control_float_record_text_size">16sp</dimen>
+    <dimen name="control_float_title_width">280dp</dimen>
+    <dimen name="control_float_title_text_width">60dp</dimen>
+    <dimen name="control_float_title_text_size">14dp</dimen>
+    <dimen name="control_float_per_item_text_size">12dp</dimen>
+    <dimen name="control_float_per_item_trigger_text_size">13.5dp</dimen>
+    <dimen name="control_float_per_item_title_width">60dp</dimen>
+    <dimen name="control_float_per_item_info_width">180dp</dimen>
+    <dimen name="control_float_per_item_trigger_width">40dp</dimen>
+    <dimen name="control_float_expand_icon_height">20dp</dimen>
+
+    <dimen name="dialog_edit_title_size">12dp</dimen>
+    <dimen name="dialog_edit_input_size">18dp</dimen>
+    <dimen name="dialog_edit_hint_size">14dp</dimen>
+    <dimen name="dialog_btn_text_size">16dp</dimen>
+
+    <dimen name="permission_title_size">18dp</dimen>
+    <dimen name="permission_info_padding">32dp</dimen>
+    <dimen name="permission_progress_size">48dp</dimen>
+    <dimen name="permission_info_text_size">16dp</dimen>
+
+    <!-- LightHouse报告页相关 -->
+    <dimen name="lighthouse_catalog_text_size">18dp</dimen>
+    <dimen name="lighthouse_catalog_icon_size">20dp</dimen>
+    <dimen name="lighthouse_catalog_score_size">48dp</dimen>
+    <dimen name="lighthouse_catalog_score_stroke_width">4dp</dimen>
+    <dimen name="lighthouse_catalog_score_text_size">14dp</dimen>
+    <dimen name="lighthouse_catalog_bottom_line_height">1dp</dimen>
+    <dimen name="lighthouse_catalog_bottom_line_padding_left">12dp</dimen>
+    <dimen name="lighthouse_catalog_content_padding_left">18dp</dimen>
+
+    <dimen name="lighthouse_time_title_text_size">13dp</dimen>
+    <dimen name="lighthouse_time_score_text_size">16dp</dimen>
+    <dimen name="lighthouse_time_hint_text_size">11dp</dimen>
+
+    <dimen name="lighthouse_normal_title_text_size">16dp</dimen>
+    <dimen name="lighthouse_normal_result_text_size">14dp</dimen>
+    <dimen name="lighthouse_normal_hint_text_size">12dp</dimen>
+    <dimen name="lighthouse_normal_divider_height">1px</dimen>
+
+    <dimen name="lighthouse_detail_title_text_size">18dp</dimen>
+    <dimen name="lighthouse_detail_hint_text_size">16dp</dimen>
+    <dimen name="lighthouse_detail_hint_icon_size">24dp</dimen>
+    <dimen name="lighthouse_detail_hint_icon_padding">8dp</dimen>
+    <dimen name="lighthouse_detail_item_score_text_size">14dp</dimen>
+    <dimen name="lighthouse_detail_item_title_text_size">16dp</dimen>
+    <dimen name="lighthouse_detail_item_padding_left">8dp</dimen>
+    <dimen name="case_step_height">72dp</dimen>
+    <dimen name="case_step_status_width">55dp</dimen>
+    <dimen name="case_step_status_text_width">30dp</dimen>
+    <dimen name="case_step_insert_size">24dp</dimen>
+    <dimen name="case_step_insert_left_margin">33dp</dimen>
+    <dimen name="case_step_icon_size">40dp</dimen>
+    <dimen name="case_step_operation_width">48dp</dimen>
+    <dimen name="case_step_operation_half_height">36dp</dimen>
+    <dimen name="case_step_operation_padding">14dp</dimen>
+    <dimen name="case_step_title_size">16dp</dimen>
+    <dimen name="case_step_info_size">12dp</dimen>
+    <dimen name="textsize_18">18dp</dimen>
+    <dimen name="app_list_250dp">250dp</dimen>
+    <dimen name="dp_48">48dp</dimen>
+    <dimen name="textsize_20">20dp</dimen>
+    <dimen name="control_dp20">20dp</dimen>
+    <dimen name="record_float_width_dp140">140dp</dimen>
+    <dimen name="textsize_17">17dp</dimen>
+    <dimen name="control_dp30">30dp</dimen>
+
+</resources>

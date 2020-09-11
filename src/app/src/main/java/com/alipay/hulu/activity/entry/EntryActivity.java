@@ -32,7 +32,13 @@ public @interface EntryActivity {
      * 图标
      * @return
      */
-    int icon();
+    int icon() default -1;
+
+    /**
+     * 图标ID名称
+     * @return
+     */
+    String iconName() default "";
 
     /**
      * 显示名称
@@ -47,6 +53,12 @@ public @interface EntryActivity {
      */
     @StringRes
     int nameRes() default 0;
+
+    /**
+     * name string res
+     * @return
+     */
+    String nameResName() default "";
 
     /**
      * 依赖权限

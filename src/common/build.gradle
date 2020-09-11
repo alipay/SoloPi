@@ -16,13 +16,13 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "26.0.2"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
 
     defaultConfig {
         minSdkVersion 18
-        targetSdkVersion 25
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
 
@@ -35,9 +35,9 @@ android {
 }
 
 dependencies {
-    compileOnly 'com.android.support:appcompat-v7:25.4.0'
-    compileOnly 'com.android.support:support-v4:25.4.0'
-    compileOnly 'com.android.support:design:25.4.0'
+    compileOnly "com.android.support:appcompat-v7:${SUPPORT_LIBRARY_VERSION}"
+    compileOnly "com.android.support:support-v4:${SUPPORT_LIBRARY_VERSION}"
+    compileOnly "com.android.support:design:${SUPPORT_LIBRARY_VERSION}"
     compileOnly ('com.orhanobut:logger:2.2.0') {
         exclude group: "com.android.support"
     }

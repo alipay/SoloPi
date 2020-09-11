@@ -13,20 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "26.0.2"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
-        applicationId "com.alipay.hulu"
         minSdkVersion 18
-        targetSdkVersion 25
-        multiDexEnabled true
-    }
-    packagingOptions {
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/DEPENDENCIES'
+        targetSdkVersion rootProject.ext.targetSdkVersion
     }
     buildTypes {
         release {
@@ -39,26 +33,14 @@ android {
             versionNameSuffix "-" + new Date().format("yyMMddHHmm")
         }
     }
-
-
-    signingConfigs {
-        release {
-            v1SigningEnabled true
-            v2SigningEnabled true
-        }
-    }
-
-    dexOptions {
-        javaMaxHeapSize "4g"
-    }
 }
 
 dependencies {
-    implementation 'com.android.support:support-v4:25.4.0'
-    implementation 'com.android.support:support-core-utils:25.4.0'
-    implementation 'com.android.support:appcompat-v7:25.4.0'
-    implementation 'com.android.support:recyclerview-v7:25.4.0'
-    implementation 'com.android.support:design:25.4.0'
+    implementation "com.android.support:support-v4:${SUPPORT_LIBRARY_VERSION}"
+    implementation "com.android.support:support-core-utils:${SUPPORT_LIBRARY_VERSION}"
+    implementation "com.android.support:appcompat-v7:${SUPPORT_LIBRARY_VERSION}"
+    implementation "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}"
+    implementation "com.android.support:design:${SUPPORT_LIBRARY_VERSION}"
     implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'
     implementation 'com.alibaba:fastjson:1.2.68'
     implementation 'org.greenrobot:greendao:3.2.2'
@@ -80,6 +62,6 @@ dependencies {
     implementation ('com.orhanobut:logger:2.2.0') {
         exclude group: "com.android.support"
     }
-    implementation 'com.android.support:multidex:1.0.3'
+    compileOnly 'com.android.support:multidex:1.0.3'
     implementation project(':shared')
 }

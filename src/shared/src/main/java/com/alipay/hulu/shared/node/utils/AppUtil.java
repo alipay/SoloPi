@@ -15,14 +15,22 @@
  */
 package com.alipay.hulu.shared.node.utils;
 
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
+import com.alipay.hulu.common.utils.MiscUtil;
+import com.alipay.hulu.common.utils.StringUtil;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static android.content.Context.ACTIVITY_SERVICE;
 
 public class AppUtil {
     private static final String TAG = "AppUtil";
@@ -47,6 +55,49 @@ public class AppUtil {
         String targetActivity = resolveInfos.get(0).activityInfo.name;
         CmdTools.execAdbCmd("am start -n '" + appPackage + "/" + targetActivity + "'", 2000);
         return true;
+    }
+
+
+    private static final Pattern TASK_ID_PATTERN = Pattern.compile(".*\\s+#(\\d+)\\s+.*");
+
+    /**
+     * 启动目标应用
+     * @param packageName
+     */
+    public static void launchTargetApp(String packageName) {
+        //获得当前运行的task
+        String result = CmdTools.execHighPrivilegeCmd("dumpsys activity activities | grep '* TaskRecord.*A=" + packageName + '\'');
+
+        LogUtil.d(TAG,"task list Result: " + result);
+        if (!StringUtil.isEmpty(result) && result.contains(packageName)) {
+            String[] list = result.split("\n");
+            String targetLine = list[0];
+            Matcher matcher = TASK_ID_PATTERN.matcher(targetLine);
+            if (matcher.matches()) {
+                String matchRes = matcher.group(1);
+                try {
+                    final int taskId = Integer.parseInt(matchRes);
+                    final CountDownLatch latch = new CountDownLatch(1);
+                    LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ActivityManager mAm = (ActivityManager) LauncherApplication.getInstance().getSystemService(ACTIVITY_SERVICE);
+                            mAm.moveTaskToFront(taskId, 0);
+                            latch.countDown();
+                        }
+                    });
+
+                    latch.countDown();
+                    MiscUtil.sleep(2000);
+                    return;
+                } catch (NumberFormatException e) {
+                    LogUtil.e(TAG, "Can't format for content :" + matchRes, e);
+                }
+            }
+        }
+
+        // 没有目标应用进程，手动启动
+        startApp(packageName);
     }
 
     /**

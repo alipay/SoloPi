@@ -63,6 +63,15 @@ public class StringUtil {
     }
 
     /**
+     * 字符串是否非空
+     * @param origin
+     * @return
+     */
+    public static boolean isNotEmpty(CharSequence origin) {
+        return origin != null && origin.length() > 0;
+    }
+
+    /**
      * 是否为数字字符串
      * @param origin
      * @return
