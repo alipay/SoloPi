@@ -29,6 +29,7 @@ import com.alipay.hulu.common.injector.provider.Provider;
 import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
+import android.os.Build;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,8 +88,15 @@ public class AppInfoProvider {
             result.put(SubscribeParamEnum.UID, 0);
         }
 
-        String activity = CmdTools.execAdbCmd("dumpsys activity top | grep \"ACTIVITY " + appName + "\"", 1000);
-        int filterPid = findTopPid(result, activity);
+        int filterPid;
+        if (Build.VERSION.SDK_INT >= 29) {
+            String activity = CmdTools.execAdbCmd("dumpsys window windows | grep -e \"Window #.*" + appName + "\" -A1", 1000);
+            filterPid = findTopPidAfterQ(result, activity);
+        } else {
+            String activity = CmdTools.execAdbCmd("dumpsys activity top | grep \"ACTIVITY " + appName + "\"", 1000);
+            filterPid = findTopPid(result, activity);
+        }
+
 
         // 查询PID，针对该应用所有进程
         String[] pids = CmdTools.ps(appName);
@@ -104,6 +112,54 @@ public class AppInfoProvider {
         result.put(SubscribeParamEnum.PACKAGE_CHILDREN, childrenPackage);
 
         return result;
+    }
+
+    /**
+     * 通过顶层ACTIVITY查找pid
+     * Android Q 之后
+     * @param result
+     * @param activity
+     * @return
+     */
+    private int findTopPidAfterQ(Map<String, Object> result, String activity) {
+
+        // 当顶层ACTIVITY存在时，以顶层PID过滤
+        String trimmed;
+        if (activity != null && !StringUtil.isEmpty((trimmed = activity.trim()))) {
+            String[] pidContent = trimmed.split("\\s*\n+\\s*");
+            if (pidContent.length > 1 && pidContent[1].contains("Session{")) {
+                String[] originActivityName = pidContent[0].split("\\s+");
+                String[] topActivity = originActivityName[originActivityName.length - 1].split("/");
+
+                LogUtil.i(TAG, "Activity:" + Arrays.toString(topActivity));
+                if (topActivity.length > 1) {
+                    // 针对Activity是以"."开头的相对定位路径
+                    String mActivity = topActivity[1];
+                    // 尾缀fix
+                    if (mActivity.contains("}")) {
+                        mActivity = mActivity.split("\\}")[0];
+                    }
+
+                    if (StringUtil.startWith(mActivity, ".")) {
+                        mActivity = topActivity[0] + mActivity;
+                    }
+
+                    // 拼接会完整名称
+                    String activityName = topActivity[0] + "/" + mActivity;
+                    result.put(SubscribeParamEnum.TOP_ACTIVITY, activityName);
+
+                }
+
+                String pidStr = pidContent[1].split("\\s+")[3];
+                if (pidStr.contains(":")) {
+                    pidStr = pidStr.split("\\:")[0];
+                }
+                LogUtil.i(TAG, "Get pid info：" + pidStr) ;
+                // 记录过滤PID
+                return Integer.parseInt(pidStr);
+            }
+        }
+        return -1;
     }
 
     /**

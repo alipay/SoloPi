@@ -409,29 +409,57 @@ public class CmdTools {
      * @return
      */
     public static String[] getTopPkgAndActivity() {
-        String result = execHighPrivilegeCmd("dumpsys activity activities | grep 'Running' -A3 | grep 'Run #'");
-        if (StringUtil.isEmpty(result)) {
-            return null;
-        }
-        result = result.trim();
+        if (Build.VERSION.SDK_INT >= 29) {
+            String result = execHighPrivilegeCmd("dumpsys window visible-apps | grep \"mCurrentFocus\"");
+            if (StringUtil.isEmpty(result)) {
+                return null;
+            }
+            result = result.trim();
 
-        // 目标区分
-        String target = result.split("\n")[0].trim();
-        String[] split = target.split("\\s+");
-        if (split.length < 5) {
-            return null;
-        }
-        String[] pA = split[split.length - 2].split("/");
-        if (pA.length != 2) {
-            return null;
-        }
+            // 目标区分
+            String[] split = result.split("\\s+");
+            if (split.length < 3) {
+                return null;
+            }
+            String[] pA = split[split.length - 1].split("/");
+            if (pA.length != 2) {
+                return null;
+            }
 
-        // .开头优化
-        if (pA[1].startsWith(".")) {
-            pA[1] = pA[0] + pA[1];
+            // .开头优化
+            if (pA[1].startsWith(".")) {
+                pA[1] = pA[0] + pA[1];
+            }
+            if (pA[1].contains("}")) {
+                pA[1] = pA[1].split("\\}")[0];
+            }
+            LogUtil.i(TAG, "Get top pkg and activity::" + Arrays.toString(pA));
+            return pA;
+        } else {
+            String result = execHighPrivilegeCmd("dumpsys activity activities | grep 'Running' -A3 | grep 'Run #'");
+            if (StringUtil.isEmpty(result)) {
+                return null;
+            }
+            result = result.trim();
+
+            // 目标区分
+            String target = result.split("\n")[0].trim();
+            String[] split = target.split("\\s+");
+            if (split.length < 5) {
+                return null;
+            }
+            String[] pA = split[split.length - 2].split("/");
+            if (pA.length != 2) {
+                return null;
+            }
+
+            // .开头优化
+            if (pA[1].startsWith(".")) {
+                pA[1] = pA[0] + pA[1];
+            }
+            LogUtil.i(TAG, "Get top pkg and activity::" + Arrays.toString(pA));
+            return pA;
         }
-        LogUtil.i(TAG, "Get top pkg and activity::" + Arrays.toString(pA));
-        return pA;
     }
 
     public static String execAdbExtCmd(final  String cmd, final  int wait) {
@@ -1152,7 +1180,7 @@ public class CmdTools {
 
 
     public static String getActivityName() {
-        String result = execAdbCmd("dumpsys activity top | grep ACTIVITY | grep -o /[^[:space:]]*", 0);
+        String result = execAdbCmd("dumpsys activity top | grep ACTIVITY | grep -o /[^[:space:]]*", 1000);
 
         if (result.length() < 2) {
             return null;
@@ -1164,7 +1192,7 @@ public class CmdTools {
     }
 
     public static String getPageUrl() {
-        String result = execAdbCmd("dumpsys activity top | grep -o ' url=[^[:space:]]*'", 0).trim();
+        String result = execAdbCmd("dumpsys activity top | grep -o ' url=[^[:space:]]*'", 1000).trim();
 
         if (result.length() < 5) {
             return null;
@@ -1256,7 +1284,46 @@ public class CmdTools {
     }
 
     public static String getTopActivity() {
-        return execAdbCmd("dumpsys activity top | grep ACTIVITY", 0);
+        if (Build.VERSION.SDK_INT >= 29) {
+            return filterBackActivity(execAdbCmd("window visible-apps | grep \"Activity #\"", 1000));
+        } else {
+            return execAdbCmd("dumpsys activity top | grep ACTIVITY", 1000);
+        }
+    }
+
+    public static String getTopActivity(String pkg) {
+        if (Build.VERSION.SDK_INT >= 29) {
+            return filterBackActivity(execAdbCmd("window visible-apps | grep -e \"Activity #.*" + pkg + "\"", 1000));
+        } else {
+            return execAdbCmd("dumpsys activity top | grep 'ACTIVITY " + pkg + "'", 1000);
+        }
+    }
+
+    /**
+     * 过滤Window下重复activity
+     * @param origin
+     * @return
+     */
+    private static String filterBackActivity(String origin) {
+        Set<String> windows = new HashSet<>();
+        List<String> accept = new ArrayList<>();
+        String[] lines = origin.split("\\s*\\n\\s*");
+        for (String line: lines) {
+            String[] parts = line.split("\\s+");
+            if (parts.length < 8) {
+                continue;
+            }
+
+            // 每个Window只保留第一条
+            if (windows.contains(parts[parts.length - 1])) {
+                continue;
+            }
+
+            windows.add(parts[parts.length - 1]);
+            accept.add(line);
+        }
+
+        return StringUtil.join("\n", accept);
     }
 
     /**

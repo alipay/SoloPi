@@ -30,6 +30,7 @@ import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -201,49 +202,98 @@ public class FpsUtil {
      * @return 应用在顶层的Activity，不存在返回空字符串
      */
     private static String[] getTopActivityAndProcess(String app, List<ProcessInfo> childrenPids) {
-
-        String cmd = "dumpsys activity top | grep \"ACTIVITY " + app + "\"";
         String[] topActivityAndPackage;
-        // 每行一个Activity，切换界面时可能存在多个Activity，无法用上一行的task，可能是自定义的
-        topActivityAndPackage = CmdTools.execAdbCmd(cmd, 500).split("\n");
-
         String topActivity = "";
+        if (Build.VERSION.SDK_INT < 29) {
+            String cmd = "dumpsys activity top | grep \"ACTIVITY " + app + "\"";
+            // 每行一个Activity，切换界面时可能存在多个Activity，无法用上一行的task，可能是自定义的
+            topActivityAndPackage = CmdTools.execHighPrivilegeCmd(cmd, 500).split("\n");
 
-        // 当找到了数据
-        if (topActivityAndPackage.length > 0 && !StringUtil.isEmpty(topActivityAndPackage[0])) {
-            String[] contents = topActivityAndPackage[0].trim().split("\\s+");
-            String activity = contents[1];
+            // 当找到了数据
+            if (topActivityAndPackage.length > 0 && !StringUtil.isEmpty(topActivityAndPackage[0])) {
+                String[] contents = topActivityAndPackage[0].trim().split("\\s+");
+                String activity = contents[1];
 
-            String[] appAndAct = activity.split("/");
-            if (appAndAct.length > 1 && StringUtil.startWith(appAndAct[1], ".")) {
-                activity = appAndAct[0] + "/" + appAndAct[0] + appAndAct[1];
-            }
+                String[] appAndAct = activity.split("/");
+                if (appAndAct.length > 1 && StringUtil.startWith(appAndAct[1], ".")) {
+                    activity = appAndAct[0] + "/" + appAndAct[0] + appAndAct[1];
+                }
 
-            String packageName = app;
+                String packageName = app;
 
-            // 确定下pid
-            String pidInfo = contents[contents.length - 1];
-            int pid = 0;
-            if (StringUtil.startWith(pidInfo, "pid=")) {
-                pid = Integer.parseInt(pidInfo.substring(4));
-            }
+                // 确定下pid
+                String pidInfo = contents[contents.length - 1];
+                int pid = 0;
+                if (StringUtil.startWith(pidInfo, "pid=")) {
+                    pid = Integer.parseInt(pidInfo.substring(4));
+                }
 
-            // 通过pid找下实际的子进程，没找到就直接用主进程
-            if (childrenPids != null && childrenPids.size() > 0) {
-                for (ProcessInfo process: childrenPids) {
-                    if (process.getPid() == pid) {
-                        packageName = app + (StringUtil.equals(process.getProcessName(), "main") ? "" : ":" + process.getProcessName());
-                        break;
+                // 通过pid找下实际的子进程，没找到就直接用主进程
+                if (childrenPids != null && childrenPids.size() > 0) {
+                    for (ProcessInfo process : childrenPids) {
+                        if (process.getPid() == pid) {
+                            packageName = app + (StringUtil.equals(process.getProcessName(), "main") ? "" : ":" + process.getProcessName());
+                            break;
+                        }
                     }
                 }
+
+                LogUtil.d(TAG, "Target process: %s", packageName);
+
+                topActivityAndPackage = new String[]{activity, packageName};
+                topActivity = activity;
+
+            } else {
+                topActivityAndPackage = new String[0];
             }
-
-            LogUtil.d(TAG, "Target process: %s", packageName);
-
-            topActivityAndPackage = new String[]{activity, packageName};
-
         } else {
-            topActivityAndPackage = new String[0];
+            String cmd = "dumpsys window windows | grep \"ACTIVITY " + app + "\"";
+            // 每行一个Activity，切换界面时可能存在多个Activity，无法用上一行的task，可能是自定义的
+            String trimmed = CmdTools.execHighPrivilegeCmd(cmd, 500).trim();
+
+            String[] pidContent = trimmed.split("\\s*\n+\\s*");
+            if (pidContent.length > 1 && pidContent[1].contains("Session{")) {
+                String[] originActivityName = pidContent[0].split("\\s+");
+                String[] topActivityOrigin = originActivityName[originActivityName.length - 1].split("/");
+
+                LogUtil.i(TAG, "Activity:" + Arrays.toString(topActivityOrigin));
+                // 针对Activity是以"."开头的相对定位路径
+                String mActivity = topActivityOrigin[1];
+                // 尾缀fix
+                if (mActivity.contains("}")) {
+                    mActivity = mActivity.split("\\}")[0];
+                }
+
+                if (StringUtil.startWith(mActivity, ".")) {
+                    mActivity = topActivityOrigin[0] + mActivity;
+                }
+                String activity = topActivityOrigin[0] + "/" + mActivity;
+                String packageName = app;
+
+                String pidStr = pidContent[1].split("\\s+")[3];
+                if (pidStr.contains(":")) {
+                    pidStr = pidStr.split("\\:")[0];
+                }
+                LogUtil.i(TAG, "Get pid info：" + pidStr) ;
+                // 记录过滤PID
+                // 确定下pid
+                int pid = Integer.parseInt(pidStr);
+                // 通过pid找下实际的子进程，没找到就直接用主进程
+                if (childrenPids != null && childrenPids.size() > 0) {
+                    for (ProcessInfo process : childrenPids) {
+                        if (process.getPid() == pid) {
+                            packageName = app + (StringUtil.equals(process.getProcessName(), "main") ? "" : ":" + process.getProcessName());
+                            break;
+                        }
+                    }
+                }
+
+                // 拼接会完整名称
+                topActivity = activity;
+                topActivityAndPackage = new String[]{activity, packageName};
+            } else {
+                topActivityAndPackage = new String[0];
+            }
         }
 
         if (topActivityAndPackage.length == 2) {
