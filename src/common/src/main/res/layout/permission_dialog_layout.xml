@@ -16,60 +16,61 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minWidth="280dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
+    android:minWidth="@dimen/control_float_title_width"
+    android:paddingTop="@dimen/control_dp8"
+    android:paddingBottom="@dimen/control_dp8"
     >
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="24dp"
-        android:layout_marginRight="24dp"
+        android:layout_marginTop="@dimen/control_dp8"
+        android:layout_marginBottom="@dimen/control_dp8"
+        android:layout_marginLeft="@dimen/control_dp24"
+        android:layout_marginRight="@dimen/control_dp24"
         android:orientation="horizontal">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/permission__request_permission"
-            android:textSize="18dp"
+            android:textSize="@dimen/permission_title_size"
             android:textStyle="bold"
             android:layout_gravity="center_vertical"
             android:textColor="#212121"/>
         <TextView
-            android:layout_marginLeft="2dp"
-            android:layout_marginRight="2dp"
+            android:layout_marginLeft="@dimen/control_dp2"
+            android:layout_marginRight="@dimen/control_dp2"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:id="@+id/permission_success"
             android:textStyle="bold"
             android:textColor="#FF4081"
-            android:textSize="18dp"
+            android:textSize="@dimen/permission_title_size"
             android:layout_gravity="center_vertical"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/permission__splash"
-            android:textSize="18dp"
+            android:textSize="@dimen/permission_title_size"
             android:textStyle="bold"
             android:layout_gravity="center_vertical"
             android:textColor="#212121"/>
 
         <TextView
-            android:layout_marginLeft="2dp"
-            android:layout_marginRight="2dp"
+            android:layout_marginLeft="@dimen/control_dp2"
+            android:layout_marginRight="@dimen/control_dp2"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:id="@+id/permission_all"
             android:textColor="#212121"
             android:textStyle="bold"
             android:layout_gravity="center_vertical"
-            android:textSize="18dp"/>
+            android:textSize="@dimen/permission_title_size"
+            />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/permission__right_parentheses"
-            android:textSize="18dp"
+            android:textSize="@dimen/permission_title_size"
             android:textStyle="bold"
             android:layout_gravity="center_vertical"
             android:textColor="#212121"/>
@@ -77,18 +78,18 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="32dp"
-        android:layout_marginRight="32dp"
+        android:layout_marginTop="@dimen/control_dp8"
+        android:layout_marginBottom="@dimen/control_dp8"
+        android:layout_marginLeft="@dimen/permission_info_padding"
+        android:layout_marginRight="@dimen/permission_info_padding"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <ProgressBar
             android:id="@+id/permission_loading_progress"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/permission_progress_size"
+            android:layout_height="@dimen/permission_progress_size"
             android:layout_gravity="center_vertical"
-            android:layout_marginRight="8dp"
+            android:layout_marginRight="@dimen/control_dp8"
             style="@style/Widget.AppCompat.ProgressBar"
             android:indeterminateTint="#FF4081"
             android:visibility="visible"/>
@@ -99,7 +100,7 @@
             android:singleLine="false"
             android:textColor="#757575"
             android:layout_gravity="center_vertical"
-            android:textSize="16dp"
+            android:textSize="@dimen/permission_info_text_size"
             android:text="@string/permission_default"/>
     </LinearLayout>
 
@@ -108,23 +109,24 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="right"
-        android:layout_marginRight="8dp"
+        android:layout_marginRight="@dimen/control_dp8"
         android:visibility="visible">
         <LinearLayout
             android:id="@+id/permission_third_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
+            android:paddingLeft="@dimen/control_dp16"
+            android:paddingRight="@dimen/control_dp16"
+            android:paddingTop="@dimen/control_dp8"
             android:visibility="gone"
-            android:paddingTop="8dp"
             android:gravity="center"
-            android:paddingBottom="8dp"
+            android:paddingBottom="@dimen/control_dp8"
             android:foreground="?attr/selectableItemBackground"
-            android:layout_marginRight="8dp">
+            android:layout_marginRight="@dimen/control_dp8">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="@dimen/dialog_btn_text_size"
                 android:text="@string/constant__cancel"
                 android:textColor="#FF4081"/>
         </LinearLayout>
@@ -132,16 +134,17 @@
             android:id="@+id/permission_negative_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="8dp"
+            android:paddingLeft="@dimen/control_dp16"
+            android:paddingRight="@dimen/control_dp16"
+            android:paddingTop="@dimen/control_dp8"
             android:gravity="center"
-            android:paddingBottom="8dp"
+            android:paddingBottom="@dimen/control_dp8"
             android:foreground="?attr/selectableItemBackground"
-            android:layout_marginRight="8dp">
+            android:layout_marginRight="@dimen/control_dp8">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="@dimen/dialog_btn_text_size"
                 android:text="@string/constant__cancel"
                 android:textColor="#FF4081"/>
         </LinearLayout>
@@ -149,14 +152,15 @@
             android:id="@+id/permission_positive_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="8dp"
+            android:paddingLeft="@dimen/control_dp16"
+            android:paddingRight="@dimen/control_dp16"
+            android:paddingTop="@dimen/control_dp8"
             android:gravity="center"
-            android:paddingBottom="8dp"
+            android:paddingBottom="@dimen/control_dp8"
             android:foreground="?attr/selectableItemBackground">
             <TextView
                 android:layout_width="wrap_content"
+                android:textSize="@dimen/dialog_btn_text_size"
                 android:layout_height="wrap_content"
                 android:text="@string/constant__confirm"
                 android:textColor="#FF4081"

@@ -14,17 +14,17 @@
   ~ limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal" android:layout_width="140dp"
+    android:orientation="horizontal" android:layout_width="@dimen/screen_result_width"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
-    android:padding="4dp"
+    android:padding="@dimen/control_dp4"
     >
 
     <TextView
         android:id="@+id/screen_result_title"
-        android:layout_width="50dp"
+        android:layout_width="@dimen/dp_48"
         android:layout_height="wrap_content"
-        android:textSize="16dp"
+        android:textSize="@dimen/textsize_16"
         android:textColor="@color/primaryText"
         android:gravity="center"
         android:text=""/>
@@ -33,14 +33,14 @@
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:textSize="16dp"
+        android:textSize="@dimen/textsize_16"
         android:textColor="@color/colorAccent"
         android:gravity="center"
         android:text=""/>
     <ImageView
         android:id="@+id/screen_result_close"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:layout_width="@dimen/control_dp16"
+        android:layout_height="@dimen/control_dp16"
         android:src="@drawable/simple_close"
         android:tint="@color/colorAccent"
         />

@@ -255,7 +255,7 @@ public class DisplayManager {
         final Map<RecordPattern, List<RecordPattern.RecordItem>> result = provider.stopRecording();
 
         binder.provideDisplayView(provideMainView(binder.loadServiceContext()),
-                new LinearLayout.LayoutParams(ContextUtil.dip2px(binder.loadServiceContext(), 280),
+                new LinearLayout.LayoutParams(binder.loadServiceContext().getResources().getDimensionPixelSize(R.dimen.control_float_title_width),
                 ViewGroup.LayoutParams.WRAP_CONTENT));
 
         final String uploadUrl = SPService.getString(SPService.KEY_PERFORMANCE_UPLOAD, null);
@@ -330,7 +330,7 @@ public class DisplayManager {
 
             // 提供主界面
             binder.provideDisplayView(manager.provideMainView(context),
-                    new LinearLayout.LayoutParams(ContextUtil.dip2px(context, 280),
+                    new LinearLayout.LayoutParams(context.getResources().getDimensionPixelSize(R.dimen.control_float_title_width),
                             ViewGroup.LayoutParams.WRAP_CONTENT));
 
             // 提供扩展界面

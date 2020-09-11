@@ -16,17 +16,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="8dp"
-    android:paddingRight="8dp"
+    android:paddingLeft="@dimen/control_dp8"
+    android:paddingRight="@dimen/control_dp8"
     >
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginLeft="16dp"
+        android:textSize="@dimen/textsize_18"
+        android:layout_marginTop="@dimen/control_dp8"
+        android:layout_marginLeft="@dimen/control_dp16"
         android:textColor="@color/primaryText"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="@dimen/control_dp8"
         android:text="@string/crop__select_action_area"/>
     <com.theartofdev.edmodo.cropper.CropImageView
         xmlns:custom="http://schemas.android.com/apk/res-auto"

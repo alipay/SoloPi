@@ -394,4 +394,10 @@
     <string name="settings__should_replay_in_other_app">Should replay case in other app?</string>
     <string name="settings__should_restart_before_replay">Should restart app before replay case?</string>
     <string name="select_app__target_app">Target App</string>
+    <string name="settings__plugin_list">Plugin List</string>
+    <string name="patch_status__delete_plugin">Delete plugin %s ?</string>
+    <string name="patch_status__loading_plugin">Loading plugins…</string>
+    <string name="patch_status__load_success">Load success</string>
+    <string name="patch_status__load_failed">Load failed</string>
+    <string name="patch_status__version_code">version: %f</string>
 </resources>

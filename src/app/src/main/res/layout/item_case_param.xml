@@ -16,8 +16,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:gravity="center_vertical"
-    android:paddingLeft="16dp"
-    android:paddingTop="10dp"
+    android:paddingLeft="@dimen/control_dp16"
+    android:paddingTop="@dimen/control_dp12"
     android:layout_height="wrap_content">
     <LinearLayout
         android:id="@+id/param_item_title_group"
@@ -29,28 +29,28 @@
             android:layout_height="wrap_content"
             android:id="@+id/param_item_title"
             android:textColor="@color/primaryText"
-            android:textSize="16dp"/>
+            android:textSize="@dimen/textsize_16"/>
         <TextView
             android:id="@+id/param_item_desc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="@dimen/control_dp2"
             android:textColor="@color/secondaryText"
-            android:textSize="14dp"/>
+            android:textSize="@dimen/textsize_14"/>
     </LinearLayout>
 
     <TextView
         android:id="@+id/param_item_default_value"
-        android:layout_marginTop="6dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginTop="@dimen/control_dp6"
+        android:layout_marginRight="@dimen/control_dp16"
         android:layout_alignParentRight="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/primaryText"
-        android:textSize="12dp"
+        android:textSize="@dimen/textsize_12"
         />
     <View
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="@dimen/control_dp12"
         android:background="@drawable/divider"
         android:layout_below="@id/param_item_title_group"
         android:layout_width="match_parent"

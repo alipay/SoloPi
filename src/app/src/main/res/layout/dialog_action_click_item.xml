@@ -26,13 +26,13 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textColor="@color/primaryText"
-        android:textSize="18sp"
+        android:textSize="@dimen/float_item_text_size"
         android:layout_weight="1"
         />
     <ImageView
         android:id="@+id/dialog_action_icon"
-        android:layout_width="24dp"
+        android:layout_width="@dimen/float_item_icon_size"
         android:layout_marginLeft="8dp"
-        android:scaleType="centerInside"
-        android:layout_height="24dp" />
+        android:scaleType="fitCenter"
+        android:layout_height="@dimen/float_item_icon_size" />
 </LinearLayout>

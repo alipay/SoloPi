@@ -536,8 +536,8 @@ public class DialogUtils {
                 wm.getDefaultDisplay().getMetrics(metrics);
 
                 // 高度400dp, 宽度260dpa
-                int pix = ContextUtil.dip2px(context, 400);
-                int width = ContextUtil.dip2px(context, 270);
+                int pix = context.getResources().getDimensionPixelSize(R.dimen.float_win_height);
+                int width = context.getResources().getDimensionPixelSize(R.dimen.float_win_width);
                 if (metrics.heightPixels < pix) {
                     if (metrics.widthPixels < width) {
                         dialog.getWindow().setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT);

@@ -15,18 +15,18 @@
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
-              android:layout_height="64dp">
+              android:layout_height="@dimen/control_dp64">
     <RelativeLayout
         android:id="@+id/case_play"
         android:layout_centerVertical="true"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="@dimen/control_dp64"
+        android:layout_height="@dimen/control_dp64"
         android:layout_alignParentEnd="true"
         android:background="?android:attr/selectableItemBackground">
         <ImageView
             android:layout_centerInParent="true"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/control_dp24"
+            android:layout_height="@dimen/control_dp24"
             android:src="@drawable/case_play" />
     </RelativeLayout>
 
@@ -36,8 +36,8 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@id/case_play"
-        android:paddingLeft="16dp"
-        android:paddingRight="8dp"
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp8"
         android:layout_width="match_parent">
 
         <LinearLayout
@@ -50,7 +50,7 @@
                 android:id="@+id/case_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16dp"
+                android:textSize="@dimen/textsize_16"
                 android:textColor="@color/mainFont"
                 android:layout_alignParentTop="true"
                 android:maxLines="1"
@@ -58,7 +58,7 @@
 
             <TextView
                 android:id="@+id/case_desc"
-                android:textSize="14dp"
+                android:textSize="@dimen/textsize_14"
                 android:textColor="@color/subFont"
                 android:layout_marginTop="4dp"
                 android:layout_width="wrap_content"
@@ -67,11 +67,11 @@
 
         <TextView
             android:id="@+id/create_time"
-            android:textSize="12dp"
+            android:textSize="@dimen/textsize_12"
             android:textColor="@color/subFont"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"/>
+            android:layout_marginLeft="@dimen/control_dp6"/>
     </LinearLayout>
 
 

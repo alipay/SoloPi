@@ -61,7 +61,7 @@ public class PatchStatusActivity extends BaseActivity {
 
         patchList.setEmptyView(emptyView);
 
-        header.setMiddleTitle("插件列表");
+        header.setMiddleTitle(getString(R.string.settings__plugin_list));
 
 
         header.setBackIconClickListener(new View.OnClickListener() {
@@ -102,8 +102,8 @@ public class PatchStatusActivity extends BaseActivity {
                         public void onClick(View v) {
                             final PatchLoadResult patch = (PatchLoadResult) v.getTag();
                             new AlertDialog.Builder(PatchStatusActivity.this)
-                                    .setMessage("是否删除插件 " + patch.name)
-                                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                    .setMessage(getString(R.string.patch_status__delete_plugin, patch.name))
+                                    .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             ClassUtil.removePatch(patch.name);
@@ -111,7 +111,7 @@ public class PatchStatusActivity extends BaseActivity {
                                             reloadData();
                                         }
                                     })
-                                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                    .setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             dialog.dismiss();
@@ -129,7 +129,7 @@ public class PatchStatusActivity extends BaseActivity {
                 View delete = convertView.findViewById(R.id.item_patch_delete);
 
                 title.setText(patch.name);
-                version.setText("version: " + patch.version);
+                version.setText(getString(R.string.patch_status__version_code, patch.version));
                 filter.setText(patch.filter);
                 delete.setTag(patch);
 
@@ -141,12 +141,12 @@ public class PatchStatusActivity extends BaseActivity {
         header.setInfoIconClickListener(R.drawable.icon_reload, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showProgressDialog("加载插件中");
+                showProgressDialog(getString(R.string.patch_status__loading_plugin));
                 PatchRequest.updatePatchList(new PatchRequest.LoadPatchCallback() {
                     @Override
                     public void onLoaded() {
                         dismissProgressDialog();
-                        toastShort("加载成功");
+                        toastShort(R.string.patch_status__load_success);
 
                         // 避免过快插件还未加载完毕
                         LauncherApplication.getInstance().runOnUiThread(new Runnable() {
@@ -160,7 +160,7 @@ public class PatchStatusActivity extends BaseActivity {
                     @Override
                     public void onFailed() {
                         dismissProgressDialog();
-                        toastShort("加载失败");
+                        toastShort(R.string.patch_status__load_failed);
                     }
                 });
             }

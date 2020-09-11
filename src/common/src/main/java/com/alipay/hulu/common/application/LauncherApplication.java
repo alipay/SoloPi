@@ -77,6 +77,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import static android.content.DialogInterface.BUTTON_NEGATIVE;
+import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
 
@@ -849,11 +851,11 @@ public abstract class LauncherApplication extends Application {
     private DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            if (which == AlertDialog.BUTTON_POSITIVE) {
+            if (which == BUTTON_POSITIVE) {
                 if (positiveRunnable != null) {
                     positiveRunnable.run();
                 }
-            } else if (which == AlertDialog.BUTTON_NEGATIVE){
+            } else if (which == BUTTON_NEGATIVE){
                 if (negativeRunnable != null) {
                     negativeRunnable.run();
                 }

@@ -33,16 +33,16 @@
             android:background="@color/white">
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="30dp"
+                android:layout_height="@dimen/control_dp30"
                 android:orientation="horizontal"
                 android:background="@color/default_background_color">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/performance__target_app"
-                    android:textSize="14dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginBottom="2dp"
+                    android:textSize="@dimen/textsize_14"
+                    android:layout_marginLeft="@dimen/control_dp8"
+                    android:layout_marginBottom="@dimen/control_dp2"
                     android:layout_gravity="bottom"
                     android:textColor="#a3a3a3"/>
             </LinearLayout>
@@ -57,7 +57,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/column_app"
-                        android:padding="5dp"
+                        android:padding="@dimen/control_dp6"
                         android:layout_gravity="center_vertical" >
 
                         <android.support.v7.widget.AppCompatSpinner
@@ -71,16 +71,16 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="36dp"
+                android:layout_height="@dimen/control_dp36"
                 android:orientation="horizontal"
                 android:background="@color/default_background_color">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/performance__performance_data"
-                    android:textSize="14dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginBottom="2dp"
+                    android:textSize="@dimen/textsize_14"
+                    android:layout_marginLeft="@dimen/control_dp8"
+                    android:layout_marginBottom="@dimen/control_dp2"
                     android:layout_gravity="bottom"
                     android:textColor="#a3a3a3"/>
             </LinearLayout>
@@ -90,7 +90,7 @@
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="16dp">
+                android:paddingLeft="@dimen/control_dp16">
                     <com.alipay.hulu.ui.TotalMeasureListView
                         android:id="@+id/perform_float_list"
                         android:layout_width="match_parent"
@@ -107,16 +107,16 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="36dp"
+                android:layout_height="@dimen/control_dp36"
                 android:orientation="horizontal"
                 android:background="@color/default_background_color">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/performance__test_result"
-                    android:textSize="14dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginBottom="2dp"
+                    android:textSize="@dimen/textsize_14"
+                    android:layout_marginLeft="@dimen/control_dp8"
+                    android:layout_marginBottom="@dimen/control_dp2"
                     android:layout_gravity="bottom"
                     android:textColor="#a3a3a3"/>
             </LinearLayout>
@@ -128,16 +128,16 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="36dp"
+                android:layout_height="@dimen/control_dp36"
                 android:orientation="horizontal"
                 android:background="@color/default_background_color">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/performance__env_press"
-                    android:textSize="14dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginBottom="2dp"
+                    android:textSize="@dimen/textsize_14"
+                    android:layout_marginLeft="@dimen/control_dp8"
+                    android:layout_marginBottom="@dimen/control_dp2"
                     android:layout_gravity="bottom"
                     android:textColor="#a3a3a3"/>
             </LinearLayout>
@@ -146,7 +146,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingLeft="16dp">
+                android:paddingLeft="@dimen/control_dp16">
 
                     <com.alipay.hulu.ui.TotalMeasureListView
                         android:id="@+id/perform_stress_list"
@@ -159,7 +159,7 @@
             <include layout="@layout/divider" />
             <View
                 android:layout_width="match_parent"
-                android:layout_height="12dp"
+                android:layout_height="@dimen/control_dp12"
                 android:orientation="horizontal"
                 android:background="@color/default_background_color"/>
         </LinearLayout>

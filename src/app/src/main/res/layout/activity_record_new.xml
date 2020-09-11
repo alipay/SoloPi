@@ -51,9 +51,9 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:paddingLeft="15dp"
-                        android:paddingRight="15dp">
+                        android:layout_marginTop="@dimen/control_dp12"
+                        android:paddingLeft="@dimen/control_dp16"
+                        android:paddingRight="@dimen/control_dp16">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -62,94 +62,94 @@
                             android:layout_centerVertical="true"
                             android:text="@string/record__test_app"
                             android:textColor="@color/mainFont"
-                            android:textSize="16dp"/>
+                            android:textSize="@dimen/textsize_16"/>
 
                         <LinearLayout
                             android:id="@+id/switch_app"
                             android:layout_width="wrap_content"
-                            android:layout_height="24dp"
+                            android:layout_height="@dimen/control_dp24"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
                             android:layout_alignParentRight="true"
                             android:layout_centerVertical="true"
                             android:background="@drawable/bg_round_corner">
                             <ImageView
-                                android:layout_width="12dp"
-                                android:layout_height="12dp"
-                                android:layout_marginLeft="6dp"
-                                android:layout_marginRight="6dp"
+                                android:layout_width="@dimen/control_dp12"
+                                android:layout_height="@dimen/control_dp12"
+                                android:layout_marginLeft="@dimen/control_dp6"
+                                android:layout_marginRight="@dimen/control_dp6"
                                 android:scaleType="centerInside"
                                 android:src="@drawable/swap"/>
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/record__switch_app"
-                                android:textSize="12dp"
-                                android:layout_marginRight="7dp"
+                                android:textSize="@dimen/textsize_12"
+                                android:layout_marginRight="@dimen/control_dp6"
                                 android:textColor="@color/mainBlue"/>
                         </LinearLayout>
                     </RelativeLayout>
 
                     <ImageView
                         android:id="@+id/test_app_icon"
-                        android:layout_marginTop="12dp"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"/>
+                        android:layout_marginTop="@dimen/control_dp12"
+                        android:layout_width="@dimen/control_dp64"
+                        android:layout_height="@dimen/control_dp64"/>
                     <TextView
                         android:id="@+id/test_app_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="@dimen/control_dp8"
                         android:textColor="@color/mainFont"
-                        android:textSize="20dp"/>
+                        android:textSize="@dimen/textsize_20"/>
                     <TextView
                         android:id="@+id/test_app_pkg_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="@dimen/control_dp4"
                         android:textColor="@color/subFont"
-                        android:textSize="12dp"/>
+                        android:textSize="@dimen/textsize_12"/>
 
                     <EditText
                         android:id="@+id/case_name"
                         android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:padding="5dp"
-                        android:textSize="16dp"
+                        android:layout_height="@dimen/control_dp40"
+                        android:padding="@dimen/control_dp6"
+                        android:textSize="@dimen/textsize_16"
                         android:background="@drawable/bg_custom_input"
                         android:textColorHint="#aaaaaa"
                         android:hint="@string/record__input_case_name"
-                        android:layout_marginLeft="16dp"
-                        android:layout_marginRight="16dp"
-                        android:layout_marginTop="20dp"
+                        android:layout_marginLeft="@dimen/control_dp16"
+                        android:layout_marginRight="@dimen/control_dp16"
+                        android:layout_marginTop="@dimen/control_dp20"
                         android:textCursorDrawable="@null"/>
 
                     <EditText
                         android:id="@+id/case_desc"
                         android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:padding="5dp"
-                        android:textSize="16dp"
+                        android:layout_height="@dimen/control_dp40"
+                        android:padding="@dimen/control_dp6"
+                        android:textSize="@dimen/textsize_16"
                         android:background="@drawable/bg_custom_input"
                         android:textColorHint="#aaaaaa"
                         android:hint="@string/record__input_case_desc"
-                        android:layout_marginLeft="16dp"
-                        android:layout_marginRight="16dp"
-                        android:layout_marginTop="20dp"
+                        android:layout_marginLeft="@dimen/control_dp16"
+                        android:layout_marginRight="@dimen/control_dp16"
+                        android:layout_marginTop="@dimen/control_dp20"
                         android:textCursorDrawable="@null"/>
 
 
 
                     <Button
                         android:id="@+id/start_record"
-                        android:layout_width="174dp"
-                        android:layout_height="45dp"
-                        android:layout_marginTop="30dp"
-                        android:textSize="16dp"
+                        android:layout_width="@dimen/start_record_btn_width"
+                        android:layout_height="@dimen/dp_48"
+                        android:layout_marginTop="@dimen/control_dp30"
+                        android:textSize="@dimen/textsize_16"
                         android:text="@string/constant__start_execution"
                         android:textColor="@color/white"
                         android:background="@drawable/bg_solid_round_btn"
-                        android:layout_marginBottom="19dp"/>
+                        android:layout_marginBottom="@dimen/control_dp20"/>
 
                     <LinearLayout
                         android:id="@+id/recent_case_wrapper"
@@ -159,19 +159,19 @@
 
                         <View
                             android:layout_width="match_parent"
-                            android:layout_height="12dp"
+                            android:layout_height="@dimen/control_dp12"
                             android:background="@color/default_background_color"/>
 
                         <RelativeLayout
                             android:layout_width="match_parent"
-                            android:layout_height="44dp"
-                            android:paddingLeft="15dp"
-                            android:paddingRight="15dp">
+                            android:layout_height="@dimen/control_dp40"
+                            android:paddingLeft="@dimen/control_dp16"
+                            android:paddingRight="@dimen/control_dp16">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textSize="16dp"
+                                android:textSize="@dimen/textsize_16"
                                 android:textColor="@color/mainFont"
                                 android:text="@string/record__recent_record"
                                 android:layout_alignParentLeft="true"
@@ -181,7 +181,7 @@
                                 android:id="@+id/check_all_cases"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textSize="14dp"
+                                android:textSize="@dimen/textsize_14"
                                 android:textColor="@color/colorPrimary"
                                 android:text="@string/record__all_cases"
                                 android:layout_alignParentRight="true"
@@ -191,9 +191,9 @@
 
                         <View
                             android:layout_width="match_parent"
-                            android:layout_height="2dp"
-                            android:layout_marginRight="15dp"
-                            android:layout_marginLeft="15dp"
+                            android:layout_height="@dimen/control_dp2"
+                            android:layout_marginRight="@dimen/control_dp16"
+                            android:layout_marginLeft="@dimen/control_dp16"
                             android:background="#f6f6f6"/>
 
                         <FrameLayout
@@ -210,9 +210,10 @@
                                 android:id="@+id/empty_hint"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:textSize="@dimen/textsize_12"
                                 android:layout_gravity="center_horizontal"
-                                android:layout_marginTop="10dp"
-                                android:layout_marginBottom="10dp"
+                                android:layout_marginTop="@dimen/control_dp12"
+                                android:layout_marginBottom="@dimen/control_dp12"
                                 android:text="@string/record__no_local_case"/>
 
                         </FrameLayout>
@@ -227,7 +228,7 @@
 
     <LinearLayout
         android:id="@+id/app_list_container"
-        android:layout_width="303dp"
+        android:layout_width="@dimen/app_list_drawer_width"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:orientation="vertical"
@@ -236,17 +237,17 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
-            android:layout_marginLeft="25dp"
+            android:layout_marginTop="@dimen/control_dp24"
+            android:layout_marginLeft="@dimen/control_dp24"
             android:text="@string/record__switch_app"
-            android:textSize="19dp"
+            android:textSize="@dimen/textsize_20"
             android:textColor="@color/mainFont"/>
 
         <ListView
             android:id="@+id/app_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="17dp"
+            android:layout_marginTop="@dimen/control_dp16"
             android:scrollbars="none"
             android:overScrollMode="never"
             android:divider="@android:color/transparent"

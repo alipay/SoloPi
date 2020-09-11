@@ -393,4 +393,10 @@
     <string name="settings__should_replay_in_other_app">是否允许在其他应用回放用例</string>
     <string name="settings__should_restart_before_replay">是否在回放用例时重启应用</string>
     <string name="select_app__target_app">目标应用</string>
+    <string name="settings__plugin_list">插件列表</string>
+    <string name="patch_status__delete_plugin">是否删除插件"%s"？</string>
+    <string name="patch_status__loading_plugin">加载插件中</string>
+    <string name="patch_status__load_success">加载成功</string>
+    <string name="patch_status__load_failed">加载失败</string>
+    <string name="patch_status__version_code">version: %f</string>
 </resources>

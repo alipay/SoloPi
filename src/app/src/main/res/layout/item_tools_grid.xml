@@ -15,34 +15,34 @@
 -->
 <com.alipay.hulu.ui.ColorFilterRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="130dp"
+    android:layout_height="@dimen/index_icon_height"
     android:background="@drawable/bg_settings_item">
 
     <LinearLayout
-        android:layout_width="48dp"
-        android:layout_height="32dp"
+        android:layout_width="@dimen/dp_48"
+        android:layout_height="@dimen/control_dp32"
         android:orientation="horizontal">
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="16dp"
-                android:layout_marginLeft="-19dp"
+                android:layout_height="@dimen/control_dp16"
+                android:layout_marginLeft="@dimen/minus_dp19"
                 android:layout_gravity="center_vertical"
                 android:textStyle="bold"
                 android:gravity="right|center_vertical"
-                android:paddingLeft="15dp"
-                android:paddingRight="10dp"
+                android:paddingLeft="@dimen/control_dp16"
+                android:paddingRight="@dimen/control_dp12"
                 android:textColor="@color/white"
                 android:id="@+id/index_corner"
-                android:textSize="10dp" />
+                android:textSize="@dimen/textsize_10" />
     </LinearLayout>
 
     <!-- 标题拦 -->
     <ImageView
         android:id="@+id/img"
-        android:layout_width="55dp"
-        android:layout_height="55dp"
+        android:layout_width="@dimen/dp_56"
+        android:layout_height="@dimen/dp_56"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp"/>
+        android:layout_marginTop="@dimen/control_dp30"/>
 
     <TextView
         android:id="@+id/tv"
@@ -50,7 +50,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/img"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="12dp"
-        android:textSize="13dp" />
+        android:layout_marginTop="@dimen/control_dp12"
+        android:textSize="@dimen/textsize_13" />
 
 </com.alipay.hulu.ui.ColorFilterRelativeLayout>

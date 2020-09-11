@@ -16,6 +16,7 @@
     <dimen name="textsize_12">18dip</dimen>
     <dimen name="textsize_10">15dip</dimen>
     <dimen name="textsize_18">27dp</dimen>
+    <dimen name="dp_56">84dp</dimen>
     <dimen name="dp_59">88dp</dimen>
     <dimen name="dp_60">90dp</dimen>
     <dimen name="dp_70">105dp</dimen>
@@ -43,7 +44,10 @@
     <dimen name="control_dp16">24dp</dimen>
     <dimen name="control_dp24">36dp</dimen>
     <dimen name="control_dp32">48dp</dimen>
+    <dimen name="control_dp36">54dp</dimen>
     <dimen name="control_dp40">60dp</dimen>
+    <dimen name="control_dp48">72dp</dimen>
+    <dimen name="control_dp64">96dp</dimen>
     <dimen name="control_float_card_icon_size">48dp</dimen>
     <dimen name="control_float_close_icon_size">31dp</dimen>
     <dimen name="control_float_home_icon_size">33dp</dimen>
@@ -115,4 +119,17 @@
     <dimen name="record_float_width_dp140">210dp</dimen>
     <dimen name="textsize_17">25dp</dimen>
     <dimen name="control_dp30">45dp</dimen>
+    <dimen name="info_icon_size">144dp</dimen>
+    <dimen name="textsize_24">36dp</dimen>
+    <dimen name="header_height">75dp</dimen>
+    <dimen name="screen_result_width">210dp</dimen>
+    <dimen name="start_record_btn_width">270dp</dimen>
+    <dimen name="app_list_drawer_width">450dp</dimen>
+    <dimen name="dp_44">66dp</dimen>
+    <dimen name="index_icon_height">195dp</dimen>
+    <dimen name="minus_dp19">-28.5dp</dimen>
+
+    <dimen name="index_bandage_height">21.21dp</dimen>
+    <dimen name="remote_mode_start_btn_width">261dp</dimen>
+    <dimen name="batch_execute__scroll_height">150dp</dimen>
 </resources>

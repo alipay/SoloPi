@@ -17,35 +17,52 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp">
+                android:paddingLeft="@dimen/control_dp16"
+                android:paddingRight="@dimen/control_dp16"
+                android:paddingTop="@dimen/control_dp12"
+                android:paddingBottom="@dimen/control_dp12">
 
-    <TextView
-        android:id="@+id/item_scan"
-        android:drawableLeft="@drawable/item_scan"
-        android:drawablePadding="10dp"
-        android:text="@string/url_select__scan"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
-        android:textColor="@color/black"
-        android:textSize="20dp"/>
+        android:layout_marginTop="@dimen/control_dp12"
+        android:layout_marginBottom="@dimen/control_dp12"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="@dimen/control_dp24"
+            android:layout_height="@dimen/control_dp24"
+            android:src="@drawable/item_scan"/>
+        <TextView
+            android:id="@+id/item_scan"
+            android:text="@string/url_select__scan"
+            android:layout_marginLeft="@dimen/control_dp12"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:textSize="@dimen/textsize_20"/>
+    </LinearLayout>
 
-
-    <TextView
-        android:id="@+id/item_url"
-        android:drawableLeft="@drawable/item_url"
-        android:drawablePadding="10dp"
-        android:text="@string/url_select__input"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
-        android:textColor="@color/black"
-        android:textSize="20dp"/>
+        android:layout_marginTop="@dimen/control_dp12"
+        android:layout_marginBottom="@dimen/control_dp12"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="@dimen/control_dp24"
+            android:layout_height="@dimen/control_dp24"
+            android:src="@drawable/item_url"/>
+        <TextView
+            android:id="@+id/item_url"
+            android:text="@string/url_select__input"
+            android:layout_marginLeft="@dimen/control_dp12"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:textSize="@dimen/textsize_20"/>
+    </LinearLayout>
 
 
 </LinearLayout>

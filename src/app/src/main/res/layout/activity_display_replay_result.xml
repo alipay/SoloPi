@@ -23,13 +23,13 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="@dimen/control_dp16">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/case_result__case_name"
             android:id="@+id/case_name"
-            android:textSize="20dp"
+            android:textSize="@dimen/textsize_20"
             android:textColor="@color/primaryText"
             />
         
@@ -37,34 +37,34 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/case_name"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="@dimen/control_dp4"
             android:orientation="vertical">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/target_app"
-                android:textSize="14dp"
+                android:textSize="@dimen/textsize_14"
                 android:textColor="@color/secondaryText"
                 />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/start_time"
-                android:textSize="14dp"
+                android:textSize="@dimen/textsize_14"
                 android:textColor="@color/secondaryText"
                 />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/end_time"
-                android:textSize="14dp"
+                android:textSize="@dimen/textsize_14"
                 android:textColor="@color/secondaryText"
                 />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/case_status"
-                android:textSize="14dp"
+                android:textSize="@dimen/textsize_14"
                 />
 
         </LinearLayout>

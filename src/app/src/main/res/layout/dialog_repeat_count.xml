@@ -17,10 +17,10 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp">
+    android:paddingLeft="@dimen/control_dp16"
+    android:paddingRight="@dimen/control_dp16"
+    android:paddingTop="@dimen/control_dp12"
+    android:paddingBottom="@dimen/control_dp12">
 
     <EditText
         android:id="@+id/dialog_repeat_edit"
@@ -30,16 +30,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/repeat__repeat_count"
-        android:textSize="18sp" />
+        android:textSize="@dimen/textsize_18" />
 
     <CheckBox
         android:id="@+id/dialog_repeat_restart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="@dimen/control_dp20"
+        android:layout_marginRight="@dimen/control_dp20"
+        android:layout_marginTop="@dimen/control_dp6"
+        android:layout_marginBottom="@dimen/control_dp6"
+        android:textSize="@dimen/textsize_14"
         android:text="@string/repeat__restart_before_exec"
         android:checked="true"
         android:layout_gravity="right"/>

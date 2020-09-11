@@ -27,12 +27,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:horizontalSpacing="20dp"
+        android:horizontalSpacing="@dimen/control_dp20"
         android:numColumns="2"
-        android:padding="10dp"
+        android:padding="@dimen/control_dp12"
         android:clipToPadding="false"
         android:scrollbars="none"
         android:verticalScrollbarPosition="right"
-        android:verticalSpacing="10dp"
+        android:verticalSpacing="@dimen/control_dp12"
         android:overScrollMode="never"/>
 </LinearLayout>

@@ -76,10 +76,10 @@ public class TextSpinner extends LinearLayout {
                 android.R.style.TextAppearance_DeviceDefault_Medium);
         CharSequence title = a.getText(R.styleable.TextSpinner_name);
         mTitleView.setTextAppearance(context, textAppearance);
+        mTitleView.setTextSize(getResources().getDimension(R.dimen.textsize_16));
         setName(title);
         LayoutParams titleParams = generateDefaultLayoutParams();
-        float _16 = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, context.getResources().getDisplayMetrics());
-        titleParams.setMarginEnd(Math.round(_16));
+        titleParams.setMarginEnd(getResources().getDimensionPixelSize(R.dimen.control_dp16));
         addViewInLayout(mTitleView, -1, titleParams, true);
         addViewInLayout(mSpinner, -1, generateDefaultLayoutParams(), true);
 

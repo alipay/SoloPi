@@ -22,34 +22,34 @@
 	<LinearLayout
 		android:layout_centerHorizontal="true"
 		android:layout_alignParentBottom="true"
-		android:layout_marginBottom="64dp"
+		android:layout_marginBottom="@dimen/control_dp64"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:orientation="horizontal">
 		<android.support.v7.widget.AppCompatImageView
-			android:layout_width="64dp"
-			android:layout_height="64dp"
+			android:layout_width="@dimen/control_dp64"
+			android:layout_height="@dimen/control_dp64"
 			android:src="@drawable/solopi_main"
 			android:layout_gravity="center_vertical"/>
 		<LinearLayout
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:orientation="vertical"
-			android:layout_marginLeft="8dp">
+			android:layout_marginLeft="@dimen/control_dp8">
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/app_name"
 				android:textColor="@color/primaryText"
-				android:textSize="24dp"/>
+				android:textSize="@dimen/textsize_24"/>
 
 			<TextView
-				android:layout_marginTop="4dp"
+				android:layout_marginTop="@dimen/control_dp4"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/splash_app_desc"
 				android:textColor="@color/secondaryText"
-				android:textSize="18dp"/>
+				android:textSize="@dimen/textsize_18"/>
 		</LinearLayout>
 	</LinearLayout>
 

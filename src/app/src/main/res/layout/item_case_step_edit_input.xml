@@ -17,28 +17,28 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingTop="6dp"
-    android:paddingBottom="6dp">
+    android:paddingLeft="@dimen/control_dp16"
+    android:paddingRight="@dimen/control_dp16"
+    android:paddingTop="@dimen/control_dp6"
+    android:paddingBottom="@dimen/control_dp6">
     <TextView
         android:id="@+id/item_case_step_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="4dp"
-        android:textSize="12dp"
+        android:layout_marginLeft="@dimen/control_dp4"
+        android:textSize="@dimen/dialog_edit_title_size"
         android:textColor="@color/colorAccent"
         />
 
     <EditText
-        android:paddingTop="6dp"
-        android:paddingLeft="12dp"
-        android:paddingRight="12dp"
+        android:paddingTop="@dimen/control_dp6"
+        android:paddingLeft="@dimen/control_dp12"
+        android:paddingRight="@dimen/control_dp12"
         android:id="@+id/item_case_step_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/primaryText"
-        android:textSize="18dp"
+        android:textSize="@dimen/dialog_edit_input_size"
         android:text=""
         android:focusable="true"
         android:textColorHint="@color/secondaryText"
@@ -48,9 +48,10 @@
         android:id="@+id/item_case_step_create_param"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textSize="@dimen/dialog_edit_hint_size"
         android:textColor="@color/colorAccent"
         android:layout_gravity="right"
-        android:layout_marginRight="12dp"
+        android:layout_marginRight="@dimen/control_dp12"
         android:layout_marginTop="0dp"/>
 
 </LinearLayout>

@@ -58,16 +58,16 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="100dp">
+        android:layout_height="@dimen/batch_execute__scroll_height">
         <com.zhy.view.flowlayout.TagFlowLayout
             android:id="@+id/batch_execute_tag_group"
             app:max_select="1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp">
+            android:paddingTop="@dimen/control_dp8"
+            android:paddingBottom="@dimen/control_dp8"
+            android:paddingLeft="@dimen/control_dp8"
+            android:paddingRight="@dimen/control_dp8">
         </com.zhy.view.flowlayout.TagFlowLayout>
     </ScrollView>
 
@@ -79,15 +79,16 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <CheckBox
             android:layout_width="wrap_content"
             android:layout_centerVertical="true"
             android:checked="true"
+            android:textSize="@dimen/textsize_12"
             android:layout_height="wrap_content"
             android:id="@+id/batch_execute_restart"
             android:text="@string/repeat__restart_before_exec"/>
@@ -97,9 +98,12 @@
             android:layout_centerVertical="true"
             android:id="@+id/batch_execute_start_btn"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:paddingLeft="@dimen/control_dp12"
+            android:paddingRight="@dimen/control_dp12"
+            android:layout_height="@dimen/control_dp30"
             android:background="@drawable/bg_confirm_btn"
             android:text="@string/constant__start_execution"
+            android:textSize="@dimen/textsize_14"
             android:textColor="@color/white"/>
 
     </RelativeLayout>

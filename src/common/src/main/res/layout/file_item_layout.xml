@@ -2,15 +2,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="4dp">
+    android:padding="@dimen/control_dp4">
     <TextView
         android:id="@+id/file_item_name"
-        android:layout_marginLeft="16dp"
-        android:textSize="18dp"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:textSize="@dimen/textsize_18"
         android:textColor="#000000"
-        android:layout_marginRight="4dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginRight="@dimen/control_dp4"
+        android:layout_marginTop="@dimen/control_dp8"
+        android:layout_marginBottom="@dimen/control_dp8"
         android:layout_width="wrap_content"
         android:layout_centerVertical="true"
         android:layout_height="wrap_content" />
@@ -18,9 +18,9 @@
     <TextView
         android:id="@+id/file_item_desc"
         android:layout_centerVertical="true"
-        android:textSize="16dp"
+        android:textSize="@dimen/textsize_16"
         android:textColor="#FF4081"
-        android:layout_marginRight="16dp"
+        android:layout_marginRight="@dimen/control_dp16"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"/>

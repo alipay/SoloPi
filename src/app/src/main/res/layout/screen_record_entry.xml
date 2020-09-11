@@ -19,25 +19,25 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:clickable="true"
     android:foreground="?attr/selectableItemBackground"
-    android:layout_height="44dp"
-    android:paddingRight="8dp"
+    android:layout_height="@dimen/dp_44"
+    android:paddingRight="@dimen/control_dp8"
     android:gravity="center_vertical"
     android:orientation="horizontal">
 
     <ImageView
         android:id="@+id/img"
-        android:scaleType="centerInside"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:scaleType="fitCenter"
+        android:layout_width="@dimen/control_dp32"
+        android:layout_height="@dimen/control_dp32"
         android:src="@drawable/performance_icon"/>
 
     <TextView
         android:id="@+id/title"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:textSize="19dp"
+        android:textSize="@dimen/textsize_20"
         android:textColor="@color/primaryText"
-        android:layout_marginLeft="16dp"
+        android:layout_marginLeft="@dimen/control_dp16"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
         android:text="@string/performance__start_screen_record"
@@ -47,18 +47,18 @@
         android:id="@+id/tip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16dp"
-        android:padding="2dp"
+        android:textSize="@dimen/textsize_16"
+        android:padding="@dimen/control_dp2"
         android:textColor="@color/secondaryText"
         android:text="@string/performance__record_split"
-        android:layout_marginRight="8dp"/>
+        android:layout_marginRight="@dimen/control_dp8"/>
 
     <ImageView
         android:id="@+id/arrow"
-        android:layout_marginEnd="8dp"
-        android:layout_width="15dp"
-        android:layout_height="15dp"
-        android:scaleType="centerInside"
+        android:layout_marginEnd="@dimen/control_dp8"
+        android:layout_width="@dimen/control_dp16"
+        android:layout_height="@dimen/control_dp16"
+        android:scaleType="fitCenter"
         android:src="@drawable/angel"
         android:rotation="-90"
         android:clickable="false"

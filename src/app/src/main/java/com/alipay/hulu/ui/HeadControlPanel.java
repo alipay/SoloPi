@@ -33,7 +33,6 @@ public class HeadControlPanel extends RelativeLayout {
 	private ImageView infoIcon;
 	private ImageView backIcon;
 	private LinearLayout headMenuLayout;
-	private static final float middle_title_size = 20f;
 
 	public HeadControlPanel(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -72,8 +71,16 @@ public class HeadControlPanel extends RelativeLayout {
             real = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
 
+		// 限制为40dp
+		if (real.width > 0) {
+			real.width = getResources().getDimensionPixelSize(R.dimen.control_dp40);
+		}
+		if (real.height > 0) {
+			real.height = getResources().getDimensionPixelSize(R.dimen.control_dp40);
+		}
+
         // 保证右侧4DP间距
-        real.setMarginEnd(ContextUtil.dip2px(getContext(), 8));
+        real.setMarginEnd(getResources().getDimensionPixelSize(R.dimen.control_dp8));
         v.setLayoutParams(real);
 
         headMenuLayout.addView(v, 0);
@@ -96,8 +103,16 @@ public class HeadControlPanel extends RelativeLayout {
             real = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
 
+        // 限制为40dp
+        if (real.width > 0) {
+        	real.width = getResources().getDimensionPixelSize(R.dimen.control_dp40);
+		}
+		if (real.height > 0) {
+			real.height = getResources().getDimensionPixelSize(R.dimen.control_dp40);
+		}
+
         // 保证左侧4DP间距
-        real.setMarginStart(ContextUtil.dip2px(getContext(), 8));
+        real.setMarginStart(getResources().getDimensionPixelSize(R.dimen.control_dp8));
         v.setLayoutParams(real);
 
         headMenuLayout.addView(v);
@@ -106,7 +121,6 @@ public class HeadControlPanel extends RelativeLayout {
 
     public void setMiddleTitle(String s){
 		mMidleTitle.setText(s);
-		mMidleTitle.setTextSize(middle_title_size);
 	}
 
 	public void setBackIconClickListener(OnClickListener listener) {

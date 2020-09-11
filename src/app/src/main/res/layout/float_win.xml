@@ -20,8 +20,8 @@
     >
     <ImageView
         android:id="@+id/floatIcon"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
+        android:layout_width="@dimen/control_float_icon_size"
+        android:layout_height="@dimen/control_float_icon_size"
         android:visibility="gone"
         android:src="@drawable/solopi_float" />
 
@@ -29,55 +29,55 @@
         android:id="@+id/float_card"
         android:orientation="vertical"
         android:layout_width="wrap_content"
-        android:minWidth="240dp"
+        android:minWidth="@dimen/control_float_card_width"
         android:adjustViewBounds="true"
-        android:layout_margin="2dp"
-        android:padding="2dp"
+        android:layout_margin="@dimen/control_dp2"
+        android:padding="@dimen/control_dp2"
         android:background="@drawable/dialog_background"
         android:layout_height="wrap_content">
 
         <RelativeLayout
             android:id="@+id/float_head"
             android:layout_width="match_parent"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
+            android:paddingTop="@dimen/control_dp4"
+            android:paddingBottom="@dimen/control_dp4"
             android:layout_height="wrap_content">
             <ImageView
                 android:id="@+id/float_card_icon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/control_float_card_icon_size"
+                android:layout_height="@dimen/control_float_card_icon_size"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="@dimen/control_dp8"
                 android:src="@drawable/solopi_float" />
             <ImageView
                 android:id="@+id/closeIcon"
-                android:layout_width="18dp"
-                android:layout_height="18dp"
+                android:layout_width="@dimen/control_float_close_icon_size"
+                android:layout_height="@dimen/control_float_close_icon_size"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:layout_marginEnd="12dp"
+                android:layout_marginEnd="@dimen/control_float_icon_gap"
                 android:scaleType="centerInside"
                 android:src="@drawable/close_icon"
                 android:tint="@color/colorAccent"/>
             <ImageView
                 android:id="@+id/homeIcon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="@dimen/control_float_home_icon_size"
+                android:layout_height="@dimen/control_float_home_icon_size"
                 android:layout_centerVertical="true"
                 android:scaleType="centerCrop"
                 android:layout_toLeftOf="@id/closeIcon"
-                android:layout_marginEnd="12dp"
+                android:layout_marginEnd="@dimen/control_float_icon_gap"
                 android:src="@drawable/home"
                 android:tint="@color/yellow"/>
             <ImageView
                 android:id="@+id/recordIcon"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
+                android:layout_width="@dimen/control_float_record_icon_size"
+                android:layout_height="@dimen/control_float_record_icon_size"
                 android:layout_centerVertical="true"
                 android:scaleType="centerCrop"
                 android:layout_toLeftOf="@id/homeIcon"
-                android:layout_marginEnd="12dp"
+                android:layout_marginEnd="@dimen/control_float_icon_gap"
                 android:src="@drawable/start"
                 />
             <TextView
@@ -86,10 +86,10 @@
                 android:layout_height="wrap_content"
                 android:layout_toLeftOf="@+id/recordIcon"
                 android:layout_centerVertical="true"
-                android:layout_marginEnd="12dp"
+                android:layout_marginEnd="@dimen/control_float_icon_gap"
                 android:visibility="gone"
                 android:textColor="@color/colorAccent"
-                android:textSize="16sp" />
+                android:textSize="@dimen/control_float_record_text_size" />
 
 
         </RelativeLayout>
@@ -97,22 +97,22 @@
 
         <LinearLayout
             android:id="@+id/float_title"
-            android:layout_width="280dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
+            android:layout_width="@dimen/control_float_title_width"
+            android:paddingTop="@dimen/control_dp4"
+            android:paddingBottom="@dimen/control_dp4"
             android:orientation="horizontal"
             android:layout_height="wrap_content">
             <TextView
-                android:layout_width="60dp"
+                android:layout_width="@dimen/control_float_title_text_width"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
-                android:textSize="14dp"
+                android:textSize="@dimen/control_float_title_text_size"
                 android:textColor="@color/primaryText"
                 android:gravity="center"
                 android:text="@string/target_app"/>
             <TextView
                 android:id="@+id/float_title_app"
-                android:textSize="16dp"
+                android:textSize="@dimen/control_float_title_text_size"
                 android:textColor="@color/colorAccent"
                 android:layout_width="match_parent"
                 android:textAlignment="center"
@@ -138,7 +138,7 @@
         <LinearLayout
             android:id="@+id/float_expand_layout"
             android:layout_width="match_parent"
-            android:minWidth="240dp"
+            android:minWidth="@dimen/control_float_card_width"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:orientation="vertical">
@@ -146,7 +146,7 @@
             <ImageView
                 android:id="@+id/float_expand_icon"
                 android:layout_width="wrap_content"
-                android:layout_height="20dp"
+                android:layout_height="@dimen/control_float_expand_icon_height"
                 android:src="@drawable/angel"
                 android:tint="@color/divider_color"
                 android:clickable="false"

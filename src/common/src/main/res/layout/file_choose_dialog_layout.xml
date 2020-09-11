@@ -18,7 +18,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minWidth="280dp">
+    android:minWidth="@dimen/float_win_width">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,19 +27,19 @@
         <LinearLayout
             android:foreground="?attr/selectableItemBackground"
             android:id="@+id/file_choose_upper"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
+            android:paddingLeft="@dimen/control_dp8"
+            android:paddingRight="@dimen/control_dp8"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/control_dp32"
+                android:layout_height="@dimen/control_dp32"
                 android:src="@drawable/file_choose_upper_dir"
                 />
         </LinearLayout>
         <LinearLayout
-            android:layout_margin="8dp"
+            android:layout_margin="@dimen/control_dp8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -49,7 +49,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/file_choose__select_dir"
-                android:textSize="18dp"
+                android:textSize="@dimen/textsize_18"
                 android:textStyle="bold"
                 android:layout_gravity="center_vertical"
                 android:textColor="#212121"/>
@@ -58,21 +58,21 @@
                 android:id="@+id/file_choose_path"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16dp"
+                android:textSize="@dimen/textsize_16"
                 android:textColor="#757575"/>
         </LinearLayout>
 
         <LinearLayout
             android:foreground="?attr/selectableItemBackground"
             android:id="@+id/file_choose_create"
-            android:paddingRight="8dp"
-            android:paddingLeft="8dp"
+            android:paddingRight="@dimen/control_dp8"
+            android:paddingLeft="@dimen/control_dp8"
             android:gravity="center_vertical"
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/control_dp32"
+                android:layout_height="@dimen/control_dp32"
                 android:src="@drawable/file_choose_create"
                 />
         </LinearLayout>
@@ -100,24 +100,25 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="right"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
-        android:paddingRight="8dp"
+        android:paddingTop="@dimen/control_dp12"
+        android:paddingBottom="@dimen/control_dp12"
+        android:paddingRight="@dimen/control_dp8"
         android:visibility="visible">
         <LinearLayout
             android:id="@+id/file_choose_negative_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="8dp"
+            android:paddingLeft="@dimen/control_dp16"
+            android:paddingRight="@dimen/control_dp16"
+            android:paddingTop="@dimen/control_dp8"
             android:gravity="center"
-            android:paddingBottom="8dp"
+            android:paddingBottom="@dimen/control_dp8"
             android:foreground="?attr/selectableItemBackground"
-            android:layout_marginRight="8dp">
+            android:layout_marginRight="@dimen/control_dp8">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="@dimen/textsize_14"
                 android:text="@string/constant__cancel"
                 android:textColor="#FF4081"/>
         </LinearLayout>
@@ -125,16 +126,17 @@
             android:id="@+id/file_choose_positive_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="8dp"
+            android:paddingLeft="@dimen/control_dp16"
+            android:paddingRight="@dimen/control_dp16"
+            android:paddingTop="@dimen/control_dp8"
             android:gravity="center"
-            android:paddingBottom="8dp"
+            android:paddingBottom="@dimen/control_dp8"
             android:foreground="?attr/selectableItemBackground">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/constant__confirm"
+                android:textSize="@dimen/textsize_14"
                 android:textColor="#FF4081"
                 />
         </LinearLayout>

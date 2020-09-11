@@ -17,26 +17,26 @@
     android:orientation="horizontal" android:layout_width="wrap_content"
     style="@style/Widget.AppCompat.Button.Small"
     android:background="@drawable/primary_button_layer"
-    android:paddingTop="5dp"
+    android:paddingTop="@dimen/control_dp6"
 
-    android:paddingLeft="8dp"
-    android:paddingRight="8dp"
-    android:paddingBottom="5dp"
-    android:minHeight="33dp"
+    android:paddingLeft="@dimen/control_dp8"
+    android:paddingRight="@dimen/control_dp8"
+    android:paddingBottom="@dimen/control_dp6"
+    android:minHeight="@dimen/control_dp32"
     android:gravity="center_vertical"
     android:layout_height="wrap_content">
     <ImageView
         android:id="@+id/case_step_edit_tag_icon"
         android:scaleType="fitCenter"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:layout_width="@dimen/control_dp16"
+        android:layout_height="@dimen/control_dp16"
         android:tint="@color/white"/>
     <TextView
         android:id="@+id/case_step_edit_tag_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
+        android:layout_marginLeft="@dimen/control_dp4"
+        android:layout_marginRight="@dimen/control_dp4"
         android:textColor="@color/white"
-        android:textSize="12dp"/>
+        android:textSize="@dimen/textsize_12"/>
 </LinearLayout>

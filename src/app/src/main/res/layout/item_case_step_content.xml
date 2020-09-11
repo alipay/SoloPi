@@ -14,24 +14,24 @@
   ~ limitations under the License.
 -->
 <RelativeLayout android:layout_width="match_parent"
-    android:layout_height="72dp"
+    android:layout_height="@dimen/case_step_height"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="@color/white"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.alipay.hulu.ui.CaseStepStatusView
         android:id="@+id/case_step_edit_content_status"
-        android:layout_width="55dp"
-        app:css_textWidth="30dp"
-        app:css_lineSpace="6dp"
+        android:layout_width="@dimen/case_step_status_width"
+        app:css_textWidth="@dimen/case_step_status_text_width"
+        app:css_lineSpace="@dimen/control_dp6"
         android:layout_height="match_parent" />
 
     <ImageView
         android:id="@+id/case_step_edit_content_insert"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="@dimen/case_step_insert_size"
+        android:layout_height="@dimen/case_step_insert_size"
         android:layout_alignParentBottom="true"
-        android:layout_marginLeft="33dp"
+        android:layout_marginLeft="@dimen/case_step_insert_left_margin"
         android:layout_marginBottom="-2dp"
         android:src="@drawable/case_step_insert_icon"
         />
@@ -39,37 +39,37 @@
     <com.alipay.hulu.ui.ReverseImageView
         android:id="@+id/case_step_edit_content_icon"
         android:layout_centerVertical="true"
-        android:layout_width="40dp"
+        android:layout_width="@dimen/case_step_icon_size"
+        android:layout_height="@dimen/case_step_icon_size"
         android:layout_toRightOf="@id/case_step_edit_content_status"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginTop="@dimen/control_dp16"
+        android:layout_marginBottom="@dimen/control_dp16"
         android:scaleType="centerInside"
-        android:layout_marginLeft="16dp"
-        android:tint="@color/colorPrimarySecond"
-        android:layout_height="40dp" />
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:tint="@color/colorPrimarySecond" />
     <ImageView
         android:visibility="invisible"
         android:id="@+id/case_step_edit_content_capture"
         android:layout_centerVertical="true"
-        android:layout_width="40dp"
+        android:layout_width="@dimen/case_step_icon_size"
         android:layout_toRightOf="@id/case_step_edit_content_status"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginTop="@dimen/control_dp16"
+        android:layout_marginBottom="@dimen/control_dp16"
         android:scaleType="fitXY"
-        android:layout_marginLeft="16dp"
-        android:layout_height="40dp"/>
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_height="@dimen/case_step_icon_size"/>
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_alignParentRight="true"
         android:id="@+id/case_step_edit_content_movement"
-        android:layout_width="48dp"
+        android:layout_width="@dimen/case_step_operation_width"
         android:layout_height="match_parent">
         <ImageView
             android:id="@+id/case_step_edit_content_move_top"
             android:layout_width="match_parent"
-            android:layout_height="36dp"
-            android:padding="14dp"
+            android:layout_height="@dimen/case_step_operation_half_height"
+            android:padding="@dimen/case_step_operation_padding"
             android:rotation="180"
             android:scaleType="fitCenter"
             android:foreground="?attr/selectableItemBackground"
@@ -78,14 +78,14 @@
             android:layout_width="match_parent"
             android:layout_height="1px"
             android:background="@color/divider_color"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
+            android:layout_marginLeft="@dimen/control_dp4"
+            android:layout_marginRight="@dimen/control_dp4"
             />
         <ImageView
             android:id="@+id/case_step_edit_content_move_bottom"
             android:layout_width="match_parent"
-            android:layout_height="36dp"
-            android:padding="14dp"
+            android:layout_height="@dimen/case_step_operation_half_height"
+            android:padding="@dimen/case_step_operation_padding"
             android:scaleType="fitCenter"
             android:foreground="?attr/selectableItemBackground"
             android:src="@drawable/angel"/>
@@ -96,13 +96,13 @@
         android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="12dp"
+        android:layout_marginRight="@dimen/control_dp12"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true" />
 
     <LinearLayout
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="24dp"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp24"
         android:layout_toRightOf="@id/case_step_edit_content_icon"
         android:layout_toLeftOf="@id/case_step_edit_content_movement"
         android:layout_width="match_parent"
@@ -111,15 +111,15 @@
         android:orientation="vertical">
         <TextView
             android:id="@+id/case_step_edit_content_title"
-            android:textSize="16dp"
+            android:textSize="@dimen/case_step_title_size"
             android:textColor="@color/primaryText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/case_step_edit_content_param"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="@dimen/control_dp4"
             android:textColor="@color/secondaryText"
-            android:textSize="14dp"
+            android:textSize="@dimen/case_step_info_size"
             android:singleLine="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -131,6 +131,6 @@
         android:layout_height="1px"
         android:layout_toRightOf="@id/case_step_edit_content_icon"
         android:background="@color/divider_color"
-        android:layout_marginLeft="16dp"
+        android:layout_marginLeft="@dimen/control_dp16"
         />
 </RelativeLayout>

@@ -28,18 +28,18 @@
         android:orientation="vertical">
         <ImageView
             android:id="@+id/icon"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
+            android:layout_width="@dimen/info_icon_size"
+            android:layout_height="@dimen/info_icon_size"
             android:src="@drawable/solopi_main"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="@dimen/control_dp16"
             android:layout_gravity="center_horizontal"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/app_name"
-            android:layout_marginTop="16dp"
-            android:textSize="24sp"
+            android:layout_marginTop="@dimen/control_dp16"
+            android:textSize="@dimen/textsize_24"
             android:textColor="@color/primaryText"
             android:textAppearance="?attr/textAppearanceListItem"
             android:layout_gravity="center_horizontal"/>
@@ -50,16 +50,16 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:textColor="@color/secondaryText"
-            android:textSize="14sp"
-            android:layout_marginTop="2dp"/>
+            android:textSize="@dimen/textsize_14"
+            android:layout_marginTop="@dimen/control_dp2"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:textColor="@color/secondaryText"
-            android:textSize="18sp"
-            android:layout_marginTop="8dp"
+            android:textSize="@dimen/textsize_18"
+            android:layout_marginTop="@dimen/control_dp8"
             android:text="@string/app_desc"/>
         <TextView
             android:id="@+id/detail_text"
@@ -67,10 +67,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:singleLine="false"
-            android:textSize="14dp"
+            android:textSize="@dimen/textsize_14"
             android:gravity="center_horizontal"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginTop="@dimen/control_dp4"
+            android:layout_marginBottom="@dimen/control_dp16"
             />
 
         <include layout="@layout/divider" />
@@ -79,9 +79,9 @@
             android:id="@+id/info_license_text"
             android:layout_width="match_parent"
             android:foreground="?attr/selectableItemBackground"
-            android:layout_height="44dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="8dp"
+            android:layout_height="@dimen/control_dp40"
+            android:paddingLeft="@dimen/control_dp16"
+            android:paddingRight="@dimen/control_dp8"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -89,7 +89,7 @@
                 android:id="@+id/title"
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
-                android:textSize="19dp"
+                android:textSize="@dimen/textsize_18"
                 android:textColor="@color/primaryText"
                 android:layout_gravity="center_vertical"
                 android:text="@string/info__license_info"
@@ -98,9 +98,9 @@
 
             <ImageView
                 android:id="@+id/arrow"
-                android:layout_marginEnd="8dp"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
+                android:layout_marginEnd="@dimen/control_dp8"
+                android:layout_width="@dimen/control_dp16"
+                android:layout_height="@dimen/control_dp16"
                 android:layout_gravity="center_vertical"
                 android:scaleType="centerInside"
                 android:src="@drawable/angel"
@@ -118,18 +118,19 @@
         <LinearLayout
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="@dimen/control_dp16"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical">
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="@dimen/control_dp24"
+                android:layout_height="@dimen/control_dp24"
                 android:src="@drawable/solopi_gray"/>
             <TextView
-                android:layout_marginLeft="4dp"
+                android:layout_marginLeft="@dimen/control_dp4"
                 android:layout_width="wrap_content"
+                android:textSize="@dimen/textsize_16"
                 android:layout_height="wrap_content"
                 android:text="@string/app_name"
                 android:textColor="#a3a3a3"

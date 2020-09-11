@@ -15,19 +15,19 @@
 -->
 <com.alipay.hulu.ui.HeadControlPanel xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="50dp"
+    android:layout_height="@dimen/header_height"
     android:layout_alignParentTop="true"
-    android:elevation="3dp"
+    android:elevation="@dimen/control_dp2"
     android:tag="标题">
 
     <ImageView
         android:id="@+id/back_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:padding="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="@dimen/control_dp40"
+        android:layout_height="@dimen/control_dp40"
+        android:padding="@dimen/control_dp8"
+        android:layout_marginStart="@dimen/control_dp8"
         android:layout_alignParentLeft="true"
-        android:scaleType="centerInside"
+        android:scaleType="fitCenter"
         android:layout_centerVertical="true" />
 
     <!--标题区域-->
@@ -36,6 +36,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:textSize="@dimen/textsize_20"
         android:textColor="@android:color/white" />
 
     <!--右侧功能区域-->
@@ -44,7 +45,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="@dimen/control_dp8"
         android:layout_centerVertical="true"
         android:gravity="center_vertical"
         android:orientation="horizontal">
@@ -52,10 +53,10 @@
         <ImageView
             android:visibility="gone"
             android:id="@+id/info_icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:padding="8dp"
-            android:scaleType="centerInside" />
+            android:layout_width="@dimen/control_dp40"
+            android:layout_height="@dimen/control_dp40"
+            android:padding="@dimen/control_dp8"
+            android:scaleType="fitCenter" />
 
     </LinearLayout>
 </com.alipay.hulu.ui.HeadControlPanel>

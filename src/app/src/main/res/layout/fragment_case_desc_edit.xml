@@ -21,21 +21,21 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="24dp"
-        android:paddingRight="24dp"
+        android:paddingLeft="@dimen/control_dp24"
+        android:paddingRight="@dimen/control_dp24"
         >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="@dimen/control_dp12"
             android:gravity="center_vertical">
 
             <TextView
                 android:text="@string/case_edit__case_name"
-                android:textSize="16dp"
-                android:layout_width="80dp"
+                android:textSize="@dimen/textsize_16"
+                android:layout_width="@dimen/dp_80"
                 android:textColor="#000000"
                 android:layout_height="wrap_content"/>
 
@@ -43,8 +43,8 @@
                 android:id="@+id/case_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="5dp"
-                android:textSize="16dp"
+                android:padding="@dimen/control_dp6"
+                android:textSize="@dimen/textsize_16"
                 android:hint="@string/record__input_case_name"
                 android:background="@drawable/bg_custom_input"
                 android:textColorHint="#aaaaaa"/>
@@ -55,13 +55,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="@dimen/control_dp16"
             android:gravity="center_vertical">
 
             <TextView
                 android:text="@string/case_edit__case_desc"
-                android:textSize="16dp"
-                android:layout_width="80dp"
+                android:textSize="@dimen/textsize_16"
+                android:layout_width="@dimen/dp_80"
                 android:textColor="#000000"
                 android:layout_height="wrap_content"/>
 
@@ -69,8 +69,8 @@
                 android:id="@+id/case_desc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="5dp"
-                android:textSize="16dp"
+                android:padding="@dimen/control_dp6"
+                android:textSize="@dimen/textsize_16"
                 android:hint="@string/record__input_case_desc"
                 android:background="@drawable/bg_custom_input"
                 android:textColorHint="#aaaaaa"/>
@@ -81,17 +81,18 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:orientation="vertical"
-            android:layout_marginTop="16dp">
+            android:layout_marginTop="@dimen/control_dp16">
 
             <TextView
                 android:text="@string/case_edit__case_param"
-                android:textSize="16dp"
+                android:textSize="@dimen/textsize_16"
                 android:layout_width="wrap_content"
                 android:textColor="#000000"
                 android:layout_height="wrap_content"/>
             <com.alipay.hulu.ui.TotalMeasureListView
                 android:id="@+id/case_params"
                 android:divider="@null"
+                android:layout_marginTop="@dimen/control_dp4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:listitem="@layout/item_case_param"

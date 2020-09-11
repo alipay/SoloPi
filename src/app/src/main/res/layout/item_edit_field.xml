@@ -16,17 +16,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:paddingLeft="@dimen/control_dp16"
+    android:paddingRight="@dimen/control_dp16"
+    android:paddingTop="@dimen/control_dp8"
+    android:paddingBottom="@dimen/control_dp8">
 
     <TextView
         android:id="@+id/item_edit_field_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="4dp"
-        android:textSize="12dp"
+        android:layout_marginLeft="@dimen/control_dp4"
+        android:textSize="@dimen/dialog_edit_title_size"
         android:textColor="@color/colorAccent"
         />
 
@@ -35,7 +35,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/primaryText"
-        android:textSize="18dp"
+        android:textSize="@dimen/dialog_edit_input_size"
         android:focusable="true"
         android:textColorHint="@color/secondaryText"
         android:textColorHighlight="@color/colorAccent"
