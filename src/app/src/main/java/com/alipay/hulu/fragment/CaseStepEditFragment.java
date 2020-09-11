@@ -339,8 +339,21 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
                 .setTextSize(textSize13)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
                 .setBackground(new ColorDrawable(colorDelete)).build());
+        controlMenu.addItem(new MenuItem.Builder().setText("恢复步骤").setTextColor(Color.WHITE)
+                .setWidth(dp64)
+                .setTextSize(textSize13)
+                .setDirection(MenuItem.DIRECTION_RIGHT)
+                .setBackground(new ColorDrawable(colorIf)).build());
 
-        dragList.setMenu(menu, controlMenu);
+        // 空项
+        Menu controlSubMenu = new Menu(false, 2);
+        controlMenu.addItem(new MenuItem.Builder().setText("删除步骤").setTextColor(Color.WHITE)
+                .setWidth(dp64)
+                .setTextSize(textSize13)
+                .setDirection(MenuItem.DIRECTION_RIGHT)
+                .setBackground(new ColorDrawable(colorDelete)).build());
+
+        dragList.setMenu(menu, controlMenu, controlSubMenu);
         dragList.setDividerHeight(0);
         dragList.setAdapter(adapter);
         adapter.setListener(new CaseStepAdapter.OnStepListener() {
@@ -381,14 +394,30 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
                     PerformActionEnum origin = method.getActionEnum();
 
                     if (buttonPosition == 1) {
-                        method.setActionEnum(PerformActionEnum.IF);
-                        wrapper.scopeTo = wrapper.idx + 1;
+                        if (origin == PerformActionEnum.IF || origin == PerformActionEnum.WHILE) {
+                            String checkVal = method.getParam(LogicUtil.CHECK_PARAM);
+                            if (!StringUtil.startWith(checkVal, LogicUtil.ASSERT_ACTION_PREFIX)) {
+                                LauncherApplication.getInstance().showToast("无法转化为原始方法");
+                                return Menu.ITEM_SCROLL_BACK;
+                            }
+                            String originCode = checkVal.substring(LogicUtil.ASSERT_ACTION_PREFIX.length());
+                            PerformActionEnum action = PerformActionEnum.getActionEnumByCode(originCode);
+                            method.setActionEnum(action);
+                            wrapper.scopeTo = -1;
+                            method.removeParam(LogicUtil.CHECK_PARAM);
+                            method.removeParam(SCOPE);
+                        } else {
+                            method.setActionEnum(PerformActionEnum.IF);
+                            wrapper.scopeTo = wrapper.idx + 1;
+                            // 设置assert条件
+                            method.putParam(LogicUtil.CHECK_PARAM, LogicUtil.ASSERT_ACTION_PREFIX + origin.getCode());
+                        }
                     } else if (buttonPosition == 2) {
                         method.setActionEnum(PerformActionEnum.WHILE);
                         wrapper.scopeTo = wrapper.idx + 1;
+                        // 设置assert条件
+                        method.putParam(LogicUtil.CHECK_PARAM, LogicUtil.ASSERT_ACTION_PREFIX + origin.getCode());
                     }
-                    // 设置assert条件
-                    method.putParam(LogicUtil.CHECK_PARAM, LogicUtil.ASSERT_ACTION_PREFIX + origin.getCode());
                     adapter.notifyDataSetChanged();
 
                     return Menu.ITEM_SCROLL_BACK;

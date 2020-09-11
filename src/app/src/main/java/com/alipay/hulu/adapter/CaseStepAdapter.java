@@ -87,10 +87,11 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
         OperationMethod method = data.get(position).currentStep.getOperationMethod();
         // 逻辑操作项不支持继续添加
         if (method.getActionEnum() == PerformActionEnum.IF
-                || method.getActionEnum() == PerformActionEnum.WHILE
-                || method.getActionEnum() == PerformActionEnum.BREAK
-                || method.getActionEnum() == PerformActionEnum.CONTINUE) {
+                || method.getActionEnum() == PerformActionEnum.WHILE) {
             return 1;
+        } else if (method.getActionEnum() == PerformActionEnum.BREAK
+                || method.getActionEnum() == PerformActionEnum.CONTINUE) {
+            return 2;
         }
         return 0;
     }
@@ -161,7 +162,7 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
 
     @Override
     public int getViewTypeCount() {
-        return 2;
+        return 3;
     }
 
     @Override
