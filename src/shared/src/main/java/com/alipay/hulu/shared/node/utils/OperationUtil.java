@@ -61,6 +61,7 @@ public class OperationUtil {
         map.put("允许", 1);
         map.put("始终允许", 1);
         map.put("总是允许", 1);
+        map.put("仅在使用中允许", 1);
         map.put("安装", 1);
         map.put("重新安装", 1);
         map.put("继续安装", 1);
