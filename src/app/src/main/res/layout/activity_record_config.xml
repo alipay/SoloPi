@@ -26,20 +26,20 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp"
-        android:textSize="16dp"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp16"
+        android:layout_marginTop="@dimen/control_dp16"
+        android:textSize="@dimen/textsize_16"
         android:text="@string/record_config__title"/>
 
     <com.alipay.hulu.screenRecord.TextSpinner
         android:id="@+id/spinner_video_codec"
         app:name="@string/record_config__codec"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/control_dp20"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp16"
         android:fadeScrollbars="false">
 
     </com.alipay.hulu.screenRecord.TextSpinner>
@@ -48,20 +48,20 @@
         android:id="@+id/spinner_resolution"
         app:name="@string/record_config__resolution"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/control_dp8"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp16"
         app:entries="@array/video_resolutions"/>
 
     <com.alipay.hulu.screenRecord.TextSpinner
         android:id="@+id/spinner_video_bitrate"
         app:name="@string/record_config__bitrate"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/control_dp8"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp16"
         app:entries="@array/video_bitrates">
 
     </com.alipay.hulu.screenRecord.TextSpinner>
@@ -70,29 +70,32 @@
         android:id="@+id/spinner_framerate"
         app:name="@string/record_config__framerate"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/control_dp8"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp16"
         app:entries="@array/video_framerates"/>
 
     <com.alipay.hulu.screenRecord.TextSpinner
         android:id="@+id/spinner_except_diff"
         app:name="@string/record_config__expect_diff"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/control_dp8"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp16"
         app:entries="@array/video_except_diff"/>
 
     <Button
         android:id="@+id/btn_start"
-        android:layout_marginTop="24dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_width="150dp"
+        android:layout_marginTop="@dimen/control_dp24"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp16"
+        android:layout_width="@dimen/perf_records_btn_width"
         android:layout_height="wrap_content"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:textSize="@dimen/textsize_16"
         android:text="@string/record_config__start"
         android:textColor="@color/white"
         android:background="@drawable/bg_solid_round_btn"/>

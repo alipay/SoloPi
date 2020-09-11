@@ -390,8 +390,8 @@ public class RecorderConfigActivity extends BaseActivity {
     }
 
     private SpinnerAdapter createCodecsAdapter(MediaCodecInfo[] codecInfos) {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, codecInfoNames(codecInfos));
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.auto_size_spinner_item, codecInfoNames(codecInfos));
+        adapter.setDropDownViewResource(R.layout.auto_size_spinner_dropdown_item);
         return adapter;
     }
 

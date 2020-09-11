@@ -87,11 +87,9 @@ public class RecordService extends Service {
     private WindowManager wm = null;
     private WindowManager.LayoutParams wmParams = null;
 
-    private static int NOTIFICATION_ID = 1313;
-
     private View view;
     private TextView recordBtn;
-    private ImageView closeBtn;
+    private View closeBtn;
     private ListView resultList;
     private TextView killCurrent;
     private SimpleAdapter adapter;
@@ -169,7 +167,7 @@ public class RecordService extends Service {
 
         recordBtn = (TextView) view.findViewById(R.id.record_btn);
         recordBtn.setText(R.string.record__start_record);
-        closeBtn = (ImageView) view.findViewById(R.id.close_btn);
+        closeBtn = view.findViewById(R.id.close_btn);
         resultList = (ListView) view.findViewById(R.id.record_session_result);
         killCurrent = (TextView) view.findViewById(R.id.record_kill_current);
         resultHide  = (ImageView) view.findViewById(R.id.record_session_hide);
@@ -380,8 +378,8 @@ public class RecordService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         LogUtil.d(TAG, "onStart");
-        Notification notification = new Notification.Builder(this).setContentText(getString(R.string.float__toast_title)).setSmallIcon(R.drawable.solopi_main).build();
-        startForeground(NOTIFICATION_ID, notification);
+//        Notification notification = new Notification.Builder(this).setContentText(getString(R.string.float__toast_title)).setSmallIcon(R.drawable.solopi_main).build();
+//        startForeground(NOTIFICATION_ID, notification);
 
         if (intent == null) {
             return super.onStartCommand(intent, flags, startId);

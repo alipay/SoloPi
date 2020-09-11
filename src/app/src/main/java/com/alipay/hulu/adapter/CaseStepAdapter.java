@@ -380,7 +380,7 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
             data.add(position - 1, wrapper);
             notifyDataSetChanged();
             if (listener != null) {
-                listener.scroll(-ContextUtil.dip2px(v.getContext(), 72));
+                listener.scroll(-v.getContext().getResources().getDimensionPixelSize(R.dimen.dp_72));
             }
         } else if (id == R.id.case_step_edit_content_move_bottom){
             if (position == data.size() - 1) {
@@ -390,7 +390,7 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
             data.add(position + 1, wrapper);
             notifyDataSetChanged();
             if (listener != null) {
-                listener.scroll(-ContextUtil.dip2px(v.getContext(), 72));
+                listener.scroll(v.getContext().getResources().getDimensionPixelSize(R.dimen.dp_72));
             }
         } else if (id == R.id.case_step_edit_content_insert) {
             if (listener != null) {

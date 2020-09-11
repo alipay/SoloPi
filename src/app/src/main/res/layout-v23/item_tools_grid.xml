@@ -26,7 +26,7 @@
                 android:layout_width="@dimen/control_dp64"
                 android:layout_height="@dimen/index_bandage_height"
                 android:layout_marginLeft="@dimen/minus_dp19"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="@dimen/control_dp6"
                 android:textStyle="bold"
                 android:rotation="-45"
                 android:gravity="center"

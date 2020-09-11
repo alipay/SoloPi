@@ -20,8 +20,8 @@
     android:background="@color/white"
     android:orientation="vertical">
 
-    <LinearLayout android:layout_width="140dp"
-                  android:layout_height="wrap_content"
+    <LinearLayout android:layout_width="@dimen/record_float_width_dp140"
+        android:layout_height="@dimen/control_dp40"
                   android:orientation="horizontal"
                   android:gravity="center_vertical">
 
@@ -31,9 +31,8 @@
             android:layout_weight="1"
             android:gravity="center"
             android:id="@+id/record_btn"
-            android:padding="8dp"
             android:text="@string/record_float__start_record"
-            android:textSize="15dp"
+            android:textSize="@dimen/textsize_16"
             android:textColor="@color/primaryText"/>
 
         <View
@@ -41,14 +40,21 @@
             android:layout_height="match_parent"
             android:background="@color/divider_color"/>
 
-        <ImageView
+        <LinearLayout
             android:id="@+id/close_btn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginLeft="8dp"
-            android:src="@drawable/close_icon" />
-
+            android:layout_width="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/control_dp6"
+            android:paddingTop="@dimen/control_dp6"
+            android:paddingLeft="@dimen/control_dp4"
+            android:paddingRight="@dimen/control_dp4"
+            android:layout_height="match_parent">
+            <ImageView
+                android:layout_gravity="center"
+                android:layout_width="@dimen/control_dp24"
+                android:layout_height="@dimen/control_dp24"
+                android:src="@drawable/close_icon" />
+        </LinearLayout>
     </LinearLayout>
     <View
         android:layout_width="match_parent"
@@ -57,17 +63,17 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="24dp"
+        android:layout_height="@dimen/control_dp30"
         android:orientation="horizontal">
         <TextView
             android:id="@+id/record_kill_current"
             android:layout_width="match_parent"
-            android:layout_height="24dp"
+            android:layout_height="@dimen/control_dp30"
             android:gravity="center"
-            android:padding="4dp"
+            android:padding="@dimen/control_dp4"
             android:text="杀当前进程"
             android:textColor="@color/colorAccent"
-            android:textSize="12dp" />
+            android:textSize="@dimen/textsize_14" />
     </LinearLayout>
 
     <View
@@ -87,8 +93,9 @@
     <ImageView
         android:id="@+id/record_session_hide"
         android:layout_width="match_parent"
-        android:layout_height="16dp"
-        android:padding="2dp"
+        android:layout_height="@dimen/control_dp16"
+        android:padding="@dimen/control_dp2"
+        android:scaleType="fitCenter"
         android:rotation="180"
         android:src="@drawable/angel"/>
 

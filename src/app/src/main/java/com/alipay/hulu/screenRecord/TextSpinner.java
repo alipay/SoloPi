@@ -68,15 +68,15 @@ public class TextSpinner extends LinearLayout {
         final CharSequence[] entries = a.getTextArray(R.styleable.TextSpinner_entries);
         if (entries != null) {
             final ArrayAdapter<CharSequence> adapter = new ArrayAdapter<>(
-                    context, android.R.layout.simple_spinner_item, entries);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    context, R.layout.auto_size_spinner_item, entries);
+            adapter.setDropDownViewResource(R.layout.auto_size_spinner_dropdown_item);
             mSpinner.setAdapter(adapter);
         }
         int textAppearance = a.getResourceId(R.styleable.TextSpinner_textAppearance,
                 android.R.style.TextAppearance_DeviceDefault_Medium);
         CharSequence title = a.getText(R.styleable.TextSpinner_name);
         mTitleView.setTextAppearance(context, textAppearance);
-        mTitleView.setTextSize(getResources().getDimension(R.dimen.textsize_16));
+        mTitleView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.textsize_16));
         setName(title);
         LayoutParams titleParams = generateDefaultLayoutParams();
         titleParams.setMarginEnd(getResources().getDimensionPixelSize(R.dimen.control_dp16));

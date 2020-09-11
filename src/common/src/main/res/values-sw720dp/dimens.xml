@@ -35,6 +35,7 @@
     <dimen name="dp_59">118dp</dimen>
     <dimen name="dp_60">120dp</dimen>
     <dimen name="dp_70">140dp</dimen>
+    <dimen name="dp_72">144dp</dimen>
     <dimen name="dp_80">160dp</dimen>>
     <dimen name="capture_circle_max_size">540dp</dimen>
     <dimen name="capture_circle_min_size">240dp</dimen>

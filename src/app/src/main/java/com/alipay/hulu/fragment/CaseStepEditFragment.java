@@ -299,7 +299,8 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
         adapter.setCurrentMode(selectMode);
 
         // 设置菜单相关样式
-        int dp64 = ContextUtil.dip2px(getActivity(), 64);
+        int dp64 = getResources().getDimensionPixelSize(R.dimen.control_dp64);
+        int textSize13 = ContextUtil.px2sp(getActivity(), getResources().getDimensionPixelSize(R.dimen.textsize_14));
         int colorWhile;
         int colorIf;
         int colorDelete;
@@ -317,13 +318,17 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
         Menu menu = new Menu(true, 0);
         menu.addItem(new MenuItem.Builder().setText("删除步骤").setTextColor(Color.WHITE)
                 .setWidth(dp64)
+                .setTextSize(textSize13)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
                 .setBackground(new ColorDrawable(colorDelete)).build());
-        menu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__convert_if)).setTextColor(Color.WHITE).setWidth(dp64)
+        menu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__convert_if)).setTextColor(Color.WHITE)
+                .setWidth(dp64)
+                .setTextSize(textSize13)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
                 .setBackground(new ColorDrawable(colorIf)).build());
         menu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__convert_while)).setTextColor(Color.WHITE)
                 .setWidth(dp64)
+                .setTextSize(textSize13)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
                 .setBackground(new ColorDrawable(colorWhile)).build());
 
@@ -331,6 +336,7 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
         Menu controlMenu = new Menu(false, 1);
         controlMenu.addItem(new MenuItem.Builder().setText("删除步骤").setTextColor(Color.WHITE)
                 .setWidth(dp64)
+                .setTextSize(textSize13)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
                 .setBackground(new ColorDrawable(colorDelete)).build());
 
@@ -344,11 +350,11 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
             }
 
             @Override
-            public void scroll(int px) {
+            public void scroll(final int px) {
                 LauncherApplication.getInstance().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        dragList.smoothScrollBy(ContextUtil.dip2px(getActivity(), 72), 100);
+                        dragList.smoothScrollBy(px, 100);
                     }
                 }, 100);
             }
