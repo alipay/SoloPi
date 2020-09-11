@@ -22,6 +22,7 @@
         android:id="@+id/floatIcon"
         android:layout_width="@dimen/control_float_icon_size"
         android:layout_height="@dimen/control_float_icon_size"
+        android:scaleType="fitCenter"
         android:visibility="gone"
         android:src="@drawable/solopi_float" />
 
@@ -46,6 +47,7 @@
                 android:id="@+id/float_card_icon"
                 android:layout_width="@dimen/control_float_card_icon_size"
                 android:layout_height="@dimen/control_float_card_icon_size"
+                android:scaleType="fitCenter"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="@dimen/control_dp8"
@@ -57,7 +59,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="@dimen/control_float_icon_gap"
-                android:scaleType="centerInside"
+                android:scaleType="fitCenter"
                 android:src="@drawable/close_icon"
                 android:tint="@color/colorAccent"/>
             <ImageView
@@ -65,7 +67,7 @@
                 android:layout_width="@dimen/control_float_home_icon_size"
                 android:layout_height="@dimen/control_float_home_icon_size"
                 android:layout_centerVertical="true"
-                android:scaleType="centerCrop"
+                android:scaleType="fitCenter"
                 android:layout_toLeftOf="@id/closeIcon"
                 android:layout_marginEnd="@dimen/control_float_icon_gap"
                 android:src="@drawable/home"
@@ -75,7 +77,7 @@
                 android:layout_width="@dimen/control_float_record_icon_size"
                 android:layout_height="@dimen/control_float_record_icon_size"
                 android:layout_centerVertical="true"
-                android:scaleType="centerCrop"
+                android:scaleType="fitCenter"
                 android:layout_toLeftOf="@id/homeIcon"
                 android:layout_marginEnd="@dimen/control_float_icon_gap"
                 android:src="@drawable/start"
@@ -151,7 +153,7 @@
                 android:tint="@color/divider_color"
                 android:clickable="false"
                 android:focusable="false"
-                android:scaleType="centerInside"
+                android:scaleType="fitCenter"
                 android:layout_gravity="center_horizontal"/>
             <include layout="@layout/divider" />
         </LinearLayout>

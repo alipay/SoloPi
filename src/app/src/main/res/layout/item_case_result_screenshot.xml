@@ -22,19 +22,19 @@
         android:layout_height="match_parent">
         <View
             android:layout_alignParentLeft="true"
-            android:layout_width="2dp"
+            android:layout_width="@dimen/control_dp2"
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
             android:layout_alignParentBottom="true"
             android:background="#fc6b3f"
-            android:layout_marginLeft="19dp"
+            android:layout_marginLeft="@dimen/dp_19"
             />
 
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginLeft="8dp"
+            android:layout_width="@dimen/control_dp24"
+            android:layout_height="@dimen/control_dp24"
+            android:layout_marginLeft="@dimen/control_dp8"
             android:layout_centerVertical="true"
             android:src="@drawable/case_result_item_toggle"/>
 
@@ -44,44 +44,44 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="-32dp"
-        android:paddingRight="8dp"
+        android:layout_marginLeft="@dimen/minus_dp32"
+        android:paddingRight="@dimen/control_dp8"
         android:id="@+id/layout_case_result_wrapper"
-        android:paddingTop="8dp">
+        android:paddingTop="@dimen/control_dp8">
 
         <TextView
             android:id="@+id/text_case_result_screenshot"
-            android:layout_marginLeft="40dp"
+            android:layout_marginLeft="@dimen/control_dp40"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@color/primaryText"
-            android:textSize="18dp"/>
+            android:textSize="@dimen/textsize_18"/>
 
         <TextView
             android:id="@+id/text_case_result_screenshot_pos"
-            android:layout_marginLeft="40dp"
+            android:layout_marginLeft="@dimen/control_dp40"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/control_dp8"
             android:text=""
             android:singleLine="false"
             android:textColor="@color/secondaryText"
-            android:textSize="14dp"/>
+            android:textSize="@dimen/textsize_14"/>
         <ImageView
             android:id="@+id/img_case_result_screenshot"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginLeft="40dp"
-            android:layout_width="250dp"
+            android:layout_marginTop="@dimen/control_dp8"
+            android:layout_marginBottom="@dimen/control_dp8"
+            android:layout_marginLeft="@dimen/control_dp40"
+            android:layout_width="match_parent"
             android:src="@drawable/performance_icon"
             android:scaleType="fitCenter"
-            android:layout_height="250dp" />
+            android:layout_height="@dimen/app_list_250dp" />
         <View
             android:layout_width="match_parent"
             android:layout_height="1px"
             android:background="@color/divider_color"
             android:layout_alignParentBottom="true"
-            android:layout_marginLeft="21dp"/>
+            android:layout_marginLeft="@dimen/dp_21"/>
     </LinearLayout>
 </LinearLayout>

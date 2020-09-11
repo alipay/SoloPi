@@ -870,7 +870,7 @@ public class CaseReplayManager implements ExportService {
                             dialog.dismiss();
                         }
                     }).create();
-            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
             dialog.setCanceledOnTouchOutside(false);
             dialog.setCancelable(false);
             dialog.show();

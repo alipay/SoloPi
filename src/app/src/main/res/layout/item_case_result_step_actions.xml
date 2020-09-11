@@ -22,19 +22,19 @@
         android:layout_height="match_parent">
         <View
             android:layout_alignParentLeft="true"
-            android:layout_width="2dp"
+            android:layout_width="@dimen/control_dp2"
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
             android:layout_alignParentBottom="true"
             android:background="#fc6b3f"
-            android:layout_marginLeft="19dp"
+            android:layout_marginLeft="@dimen/dp_19"
             />
 
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginLeft="8dp"
+            android:layout_width="@dimen/control_dp24"
+            android:layout_height="@dimen/control_dp24"
+            android:layout_marginLeft="@dimen/control_dp8"
             android:layout_centerVertical="true"
             android:src="@drawable/case_result_item_toggle"/>
 
@@ -44,29 +44,29 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="-32dp"
-        android:paddingRight="8dp"
+        android:layout_marginLeft="@dimen/minus_dp32"
+        android:paddingRight="@dimen/control_dp8"
         android:id="@+id/layout_case_result_wrapper"
-        android:paddingTop="8dp">
+        android:paddingTop="@dimen/control_dp8">
 
         <TextView
             android:id="@+id/text_case_result_step_title"
-            android:layout_marginLeft="40dp"
+            android:layout_marginLeft="@dimen/control_dp40"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/primaryText"
-            android:textSize="18dp"/>
+            android:textSize="@dimen/textsize_18"/>
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginTop="8dp"
-            android:layout_marginLeft="40dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="@dimen/control_dp8"
+            android:layout_marginLeft="@dimen/control_dp40"
+            android:layout_marginBottom="@dimen/control_dp8"
             >
             <TableRow
-                android:paddingTop="2dp"
-                android:paddingBottom="2dp"
+                android:paddingTop="@dimen/control_dp2"
+                android:paddingBottom="@dimen/control_dp2"
                 android:id="@+id/row_case_result_step_param"
                 >
                 <TextView
@@ -74,23 +74,23 @@
                     android:gravity="center"
                     android:layout_gravity="right|center_vertical"
                     android:textColor="@color/primaryText"
-                    android:textSize="14dp"
+                    android:textSize="@dimen/textsize_14"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
                 <TextView
-                    android:padding="4dp"
-                    android:layout_marginLeft="8dp"
+                    android:padding="@dimen/control_dp4"
+                    android:layout_marginLeft="@dimen/control_dp8"
                     android:layout_weight="4"
                     android:id="@+id/text_case_result_step_param"
                     android:textColor="@color/secondaryText"
-                    android:textSize="14dp"
+                    android:textSize="@dimen/textsize_14"
                     android:text=""
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </TableRow>
             <TableRow
-                android:paddingTop="2dp"
-                android:paddingBottom="2dp"
+                android:paddingTop="@dimen/control_dp2"
+                android:paddingBottom="@dimen/control_dp2"
                 android:id="@+id/row_case_result_step_capture"
                 >
                 <TextView
@@ -98,32 +98,33 @@
                     android:gravity="center"
                     android:layout_gravity="right|center_vertical"
                     android:textColor="@color/primaryText"
-                    android:textSize="14dp"
+                    android:textSize="@dimen/textsize_14"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginLeft="8dp"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/dp_50"
+                    android:layout_marginLeft="@dimen/control_dp8"
                     android:orientation="horizontal">
                     <ImageView
                         android:layout_weight="1"
                         android:layout_width="0dp"
-                        android:layout_height="50dp"
+                        android:layout_height="@dimen/dp_50"
                         android:scaleType="fitCenter"
                         android:id="@+id/img_case_result_target"/>
                     <ImageView
-                        android:layout_marginLeft="8dp"
+                        android:layout_marginLeft="@dimen/control_dp8"
                         android:layout_weight="1"
                         android:id="@+id/img_case_result_find"
                         android:layout_width="0dp"
                         android:scaleType="fitCenter"
-                        android:layout_height="50dp" />
+                        android:layout_height="@dimen/dp_50" />
                 </LinearLayout>
             </TableRow>
             <TableRow
-                android:paddingTop="2dp"
-                android:paddingBottom="2dp"
+                android:paddingTop="@dimen/control_dp2"
+                android:paddingBottom="@dimen/control_dp2"
                 >
                 <TextView
                     android:layout_width="wrap_content"
@@ -131,23 +132,23 @@
                     android:textColor="@color/primaryText"
                     android:gravity="center"
                     android:layout_gravity="right|center_vertical"
-                    android:textSize="14dp"
+                    android:textSize="@dimen/textsize_14"
                     android:text="@string/step_result__status"/>
                 <TextView
                     android:layout_weight="4"
-                    android:padding="4dp"
-                    android:layout_marginLeft="8dp"
+                    android:padding="@dimen/control_dp4"
+                    android:layout_marginLeft="@dimen/control_dp8"
                     android:id="@+id/text_case_result_step_status"
                     android:textColor="@color/secondaryText"
-                    android:textSize="14dp"
+                    android:textSize="@dimen/textsize_14"
                     android:text=""
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </TableRow>
             <TableRow
                 android:id="@+id/row_case_result_step_prepare"
-                android:paddingTop="2dp"
-                android:paddingBottom="2dp"
+                android:paddingTop="@dimen/control_dp2"
+                android:paddingBottom="@dimen/control_dp2"
                 >
                 <TextView
                     android:layout_width="wrap_content"
@@ -155,23 +156,23 @@
                     android:textColor="@color/primaryText"
                     android:gravity="center"
                     android:layout_gravity="right|center_vertical"
-                    android:textSize="14dp"
+                    android:textSize="@dimen/textsize_14"
                     android:text="@string/step_result__prepare_actions"/>
                 <TextView
                     android:layout_weight="4"
-                    android:padding="4dp"
-                    android:layout_marginLeft="8dp"
+                    android:padding="@dimen/control_dp4"
+                    android:layout_marginLeft="@dimen/control_dp8"
                     android:id="@+id/text_case_result_step_prepare"
                     android:textColor="@color/secondaryText"
-                    android:textSize="14dp"
+                    android:textSize="@dimen/textsize_14"
                     android:text=""
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </TableRow>
             <TableRow
                 android:id="@+id/row_case_result_step_node"
-                android:paddingTop="2dp"
-                android:paddingBottom="2dp"
+                android:paddingTop="@dimen/control_dp2"
+                android:paddingBottom="@dimen/control_dp2"
                 >
                 <TextView
                     android:layout_width="wrap_content"
@@ -179,22 +180,22 @@
                     android:textColor="@color/primaryText"
                     android:layout_gravity="right|center_vertical"
                     android:gravity="center"
-                    android:textSize="14dp"
+                    android:textSize="@dimen/textsize_14"
                     android:text="@string/step_result__node_info"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="4"
-                    android:layout_marginLeft="8dp"
+                    android:layout_marginLeft="@dimen/control_dp8"
                     android:orientation="horizontal">
 
                     <RelativeLayout
                         android:layout_width="wrap_content"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"
-                        android:paddingLeft="8dp"
-                        android:paddingRight="8dp"
+                        android:paddingTop="@dimen/control_dp4"
+                        android:paddingBottom="@dimen/control_dp4"
+                        android:paddingLeft="@dimen/control_dp8"
+                        android:paddingRight="@dimen/control_dp8"
                         android:background="?android:attr/selectableItemBackground"
                         android:id="@+id/text_case_result_step_target_node"
                         android:layout_height="wrap_content">
@@ -203,16 +204,16 @@
                             android:layout_height="wrap_content"
                             android:text="@string/step_result__target_node"
                             android:textColor="@color/colorAccent"
-                            android:textSize="14dp" />
+                            android:textSize="@dimen/textsize_14" />
                     </RelativeLayout>
 
                     <RelativeLayout
                         android:layout_width="wrap_content"
-                        android:layout_marginLeft="16dp"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"
-                        android:paddingLeft="8dp"
-                        android:paddingRight="8dp"
+                        android:layout_marginLeft="@dimen/control_dp16"
+                        android:paddingTop="@dimen/control_dp4"
+                        android:paddingBottom="@dimen/control_dp4"
+                        android:paddingLeft="@dimen/control_dp8"
+                        android:paddingRight="@dimen/control_dp8"
                         android:layout_height="wrap_content"
                         android:id="@+id/text_case_result_step_find_node"
                         android:background="?android:attr/selectableItemBackground">
@@ -221,7 +222,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/step_result__find_node"
                             android:textColor="@color/colorAccent"
-                            android:textSize="14dp" />
+                            android:textSize="@dimen/textsize_14" />
                     </RelativeLayout>
                 </LinearLayout>
             </TableRow>
@@ -233,6 +234,6 @@
             android:layout_height="1px"
             android:background="@color/divider_color"
             android:layout_alignParentBottom="true"
-            android:layout_marginLeft="21dp"/>
+            android:layout_marginLeft="@dimen/dp_21"/>
     </LinearLayout>
 </LinearLayout>

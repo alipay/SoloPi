@@ -201,7 +201,7 @@ public class DialogUtils {
             public void run() {
                 ProgressDialog progressDialog = new ProgressDialog(context, R.style.SimpleDialogTheme);
                 progressDialog.setMessage(str);
-                progressDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                progressDialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
                 progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                 progressDialog.show();
                 dialogs[0] = progressDialog;
@@ -332,7 +332,7 @@ public class DialogUtils {
                 @Override
                 public void run() {
                     final AlertDialog dialog = builder.create();
-                    dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                    dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
                     dialog.setCanceledOnTouchOutside(true);                                   //点击外面区域不会让dialog消失
                     dialog.setCancelable(true);
 
@@ -455,7 +455,7 @@ public class DialogUtils {
 
         dialog.setTitle(null);
         dialog.setCanceledOnTouchOutside(false);
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
         dialog.show();
     }
 
@@ -505,7 +505,7 @@ public class DialogUtils {
                 AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppDialogTheme)
                         .setView(layout);
                 final AlertDialog dialog = builder.create();
-                dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
                 dialog.setCanceledOnTouchOutside(true);                                   //点击外面区域不会让dialog消失
                 dialog.setCancelable(true);
                 dialog.setCustomTitle(null);

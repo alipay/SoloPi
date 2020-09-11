@@ -71,12 +71,14 @@ public class HeadControlPanel extends RelativeLayout {
             real = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
 
-		// 限制为40dp
-		if (real.width > 0) {
-			real.width = getResources().getDimensionPixelSize(R.dimen.control_dp40);
-		}
-		if (real.height > 0) {
-			real.height = getResources().getDimensionPixelSize(R.dimen.control_dp40);
+		if (v instanceof ImageView) {
+			// 限制为40dp
+			if (real.width > 0) {
+				real.width = getResources().getDimensionPixelSize(R.dimen.control_dp40);
+			}
+			if (real.height > 0) {
+				real.height = getResources().getDimensionPixelSize(R.dimen.control_dp40);
+			}
 		}
 
         // 保证右侧4DP间距
@@ -103,12 +105,14 @@ public class HeadControlPanel extends RelativeLayout {
             real = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
 
-        // 限制为40dp
-        if (real.width > 0) {
-        	real.width = getResources().getDimensionPixelSize(R.dimen.control_dp40);
-		}
-		if (real.height > 0) {
-			real.height = getResources().getDimensionPixelSize(R.dimen.control_dp40);
+        if (v instanceof ImageView) {
+			// 限制为40dp
+			if (real.width > 0) {
+				real.width = getResources().getDimensionPixelSize(R.dimen.control_dp40);
+			}
+			if (real.height > 0) {
+				real.height = getResources().getDimensionPixelSize(R.dimen.control_dp40);
+			}
 		}
 
         // 保证左侧4DP间距

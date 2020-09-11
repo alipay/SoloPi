@@ -34,6 +34,12 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="alertDialogTheme">@style/AppDialogTheme</item>
+        <item name="alertDialogStyle">@style/defaultDialogTheme</item>
+        <item name="dialogTheme">@style/defaultDialogTheme</item>
+        <item name="buttonBarButtonStyle">@style/defaultBtnBarStyle</item>
+        <item name="android:windowTitleStyle">@style/windowTitleStyle</item>
+        <item name="android:textAppearanceMedium">@style/defaultMediumTextAppearance</item>
+        <item name="android:textAppearanceLarge">@style/defaultLargeTextAppearance</item>
 
         <!--背景颜色及和透明程度-->
         <item name="android:windowBackground">@color/default_background_color</item>
@@ -46,12 +52,18 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
+
+
     <style name="AppDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert" >
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="windowMinWidthMajor" type="dimen">50%</item>
         <item name="windowMinWidthMinor" type="dimen">40%</item>
+        <item name="buttonBarButtonStyle">@style/defaultBtnBarStyle</item>
+        <item name="android:windowTitleStyle">@style/windowTitleStyle</item>
+        <item name="android:textAppearanceMedium">@style/defaultMediumTextAppearance</item>
+        <item name="android:textAppearanceLarge">@style/defaultLargeTextAppearance</item>
 
         <!--背景颜色及和透明程度-->
         <item name="android:windowBackground">@drawable/dialog_background</item>
@@ -74,12 +86,39 @@
         <item name="android:divider">@color/divider_color</item>
     </style>
 
+    <style name="defaultDialogTheme" parent="ThemeOverlay.AppCompat.Dialog" >
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowMinWidthMajor">80%</item>
+        <item name="android:windowMinWidthMinor">70%</item>
+        <!--        <item name="android:windowTitleStyle">@style/windowTitleStyle</item>-->
+        <item name="buttonBarButtonStyle">@style/defaultBtnBarStyle</item>
+        <item name="android:textAppearanceMedium">@style/defaultMediumTextAppearance</item>
+        <item name="android:textAppearanceLarge">@style/defaultLargeTextAppearance</item>
+
+        <!--背景颜色及和透明程度-->
+        <item name="android:windowBackground">@color/white</item>
+        <!--是否去除标题 -->
+        <item name="android:windowNoTitle">true</item>
+        <!--是否去除边框-->
+        <item name="android:windowFrame">@null</item>
+        <!--是否浮现在activity之上-->
+        <item name="android:windowIsFloating">true</item>
+        <!--是否模糊-->
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
     <style name="SimpleDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert" >
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowMinWidthMajor">80%</item>
         <item name="android:windowMinWidthMinor">70%</item>
+<!--        <item name="android:windowTitleStyle">@style/windowTitleStyle</item>-->
+        <item name="buttonBarButtonStyle">@style/defaultBtnBarStyle</item>
+        <item name="android:textAppearanceMedium">@style/defaultMediumTextAppearance</item>
+        <item name="android:textAppearanceLarge">@style/defaultLargeTextAppearance</item>
 
         <!--背景颜色及和透明程度-->
         <item name="android:windowBackground">@color/white</item>
@@ -97,13 +136,17 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-
+        <item name="android:windowTitleStyle">@style/windowTitleStyle</item>
         <!--背景颜色及和透明程度-->
         <item name="android:windowBackground">@color/transparent</item>
         <!--是否去除标题 -->
         <item name="android:windowNoTitle">true</item>
         <!--是否去除边框-->
         <item name="android:windowFrame">@null</item>
+        <item name="android:textAppearanceMedium">@style/defaultMediumTextAppearance</item>
+        <item name="buttonBarButtonStyle">@style/defaultBtnBarStyle</item>
+        <item name="android:textAppearanceLarge">@style/defaultLargeTextAppearance</item>
+
         <!--是否浮现在activity之上-->
         <item name="android:windowIsFloating">true</item>
         <!--是否模糊-->
@@ -114,7 +157,29 @@
         <item name="android:textColor">?android:textColorHint</item>
         <item name="android:paddingBottom">0dp</item>
         <item name="android:paddingLeft">4dp</item>
+        <item name="android:textSize">@dimen/textsize_13</item>
         <item name="android:paddingRight">4dp</item>
     </style>
 
+    <style name="defaultTextAppearance">
+        <item name="android:textSize">@dimen/textsize_14</item>
+    </style>
+
+    <style name="defaultBtnTextAppearance" parent="TextAppearance.AppCompat.Widget.Button.Borderless.Colored" >
+        <item name="android:textSize">@dimen/textsize_12</item>
+    </style>
+
+    <style name="defaultMediumTextAppearance" parent="@style/TextAppearance.AppCompat.Medium">
+        <item name="android:textSize">@dimen/textsize_14</item>
+    </style>
+
+    <style name="defaultLargeTextAppearance" parent="@style/TextAppearance.AppCompat.Large">
+        <item name="android:textSize">@dimen/textsize_18</item>
+    </style>
+
+    <style name="defaultBtnBarStyle" parent="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textAppearance">@style/defaultBtnTextAppearance</item>
+        <item name="android:minWidth">@dimen/control_dp64</item>
+        <item name="android:minHeight">@dimen/dp_48</item>
+    </style>
 </resources>

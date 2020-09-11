@@ -15,7 +15,7 @@
 -->
 <ScrollView
     android:layout_width="match_parent"
-    android:layout_height="400dp"
+    android:layout_height="@dimen/dp_400"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <TableLayout
@@ -25,21 +25,21 @@
         android:divider="@drawable/divider"
         android:showDividers="middle|beginning|end">
         <TableRow
-            android:padding="2dp"
+            android:padding="@dimen/control_dp2"
             >
             <TextView
-                android:minWidth="56dp"
+                android:minWidth="@dimen/dp_56"
                 android:textColor="@color/primaryText"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="14dp"
+                android:textSize="@dimen/textsize_14"
                 android:maxLines="1"
                 android:layout_gravity="center"
                 android:text="@string/node_item__class"/>
             <TextView
                 android:textColor="@color/secondaryText"
                 android:layout_weight="3"
-                android:textSize="13dp"
+                android:textSize="@dimen/textsize_13"
                 android:id="@+id/text_node_classname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -47,20 +47,20 @@
 
         </TableRow>
         <TableRow
-            android:padding="2dp"
+            android:padding="@dimen/control_dp2"
             >
             <TextView
-                android:minWidth="56dp"
+                android:minWidth="@dimen/dp_56"
                 android:textColor="@color/primaryText"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:maxLines="1"
                 android:layout_gravity="center"
-                android:textSize="14dp"
+                android:textSize="@dimen/textsize_14"
                 android:text="@string/node_item__id"/>
             <TextView
                 android:textColor="@color/secondaryText"
-                android:textSize="13dp"
+                android:textSize="@dimen/textsize_13"
                 android:layout_weight="3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -68,20 +68,20 @@
 
         </TableRow>
         <TableRow
-            android:padding="2dp"
+            android:padding="@dimen/control_dp2"
             >
             <TextView
-                android:minWidth="56dp"
+                android:minWidth="@dimen/dp_56"
                 android:textColor="@color/primaryText"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:maxLines="1"
                 android:layout_gravity="center"
-                android:textSize="14dp"
+                android:textSize="@dimen/textsize_14"
                 android:text="@string/node_item__text"/>
             <TextView
                 android:textColor="@color/secondaryText"
-                android:textSize="13dp"
+                android:textSize="@dimen/textsize_13"
                 android:layout_weight="3"
                 android:id="@+id/text_node_text"
                 android:layout_width="wrap_content"
@@ -90,20 +90,20 @@
 
         </TableRow>
         <TableRow
-            android:padding="2dp"
+            android:padding="@dimen/control_dp2"
             >
             <TextView
-                android:minWidth="56dp"
+                android:minWidth="@dimen/dp_56"
                 android:textColor="@color/primaryText"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:layout_gravity="center"
-                android:textSize="14dp"
+                android:textSize="@dimen/textsize_14"
                 android:maxLines="1"
                 android:text="@string/node_item__desc"/>
             <TextView
                 android:textColor="@color/secondaryText"
-                android:textSize="13dp"
+                android:textSize="@dimen/textsize_13"
                 android:layout_weight="3"
                 android:id="@+id/text_node_description"
                 android:layout_width="wrap_content"
@@ -112,20 +112,20 @@
 
         </TableRow>
         <TableRow
-            android:padding="2dp"
+            android:padding="@dimen/control_dp2"
             >
             <TextView
-                android:minWidth="56dp"
+                android:minWidth="@dimen/dp_56"
                 android:textColor="@color/primaryText"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:layout_gravity="center"
-                android:textSize="14dp"
+                android:textSize="@dimen/textsize_14"
                 android:maxLines="1"
                 android:text="@string/node_item__xpath"/>
             <TextView
                 android:textColor="@color/secondaryText"
-                android:textSize="13dp"
+                android:textSize="@dimen/textsize_13"
                 android:id="@+id/text_node_xpath"
                 android:layout_weight="3"
                 android:layout_width="wrap_content"
@@ -134,19 +134,19 @@
 
         </TableRow>
         <TableRow
-            android:padding="2dp"
+            android:padding="@dimen/control_dp2"
             >
             <TextView
-                android:minWidth="56dp"
+                android:minWidth="@dimen/dp_56"
                 android:textColor="@color/primaryText"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:layout_gravity="center"
-                android:textSize="14dp"
+                android:textSize="@dimen/textsize_14"
                 android:text="@string/node_item__size"/>
             <TextView
                 android:textColor="@color/secondaryText"
-                android:textSize="13dp"
+                android:textSize="@dimen/textsize_13"
                 android:id="@+id/text_node_size"
                 android:layout_weight="3"
                 android:layout_width="wrap_content"
@@ -155,20 +155,20 @@
 
         </TableRow>
         <TableRow
-            android:padding="2dp"
+            android:padding="@dimen/control_dp2"
             >
             <TextView
-                android:minWidth="56dp"
+                android:minWidth="@dimen/dp_56"
                 android:textColor="@color/primaryText"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:layout_gravity="center"
-                android:textSize="14dp"
+                android:textSize="@dimen/textsize_14"
                 android:maxLines="1"
                 android:text="@string/node_item__depth"/>
             <TextView
                 android:textColor="@color/secondaryText"
-                android:textSize="13dp"
+                android:textSize="@dimen/textsize_13"
                 android:layout_weight="3"
                 android:id="@+id/text_node_depth"
                 android:layout_width="wrap_content"

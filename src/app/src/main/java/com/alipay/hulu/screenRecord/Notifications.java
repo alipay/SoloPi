@@ -17,6 +17,7 @@ package com.alipay.hulu.screenRecord;
 
 import android.annotation.TargetApi;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -34,6 +35,7 @@ import com.alipay.hulu.R;
  */
 @TargetApi(value = Build.VERSION_CODES.LOLLIPOP)
 public class Notifications extends ContextWrapper {
+    private static final String HULU_NOTIFICATIONS_CHANNEL_ID = "hulu-notifications";
     private static final int id = 0x1fff;
     private static final String ACTION_STOP = "com.hulu.alipay.ACTION_STOP";
 
@@ -62,7 +64,7 @@ public class Notifications extends ContextWrapper {
 
     private Notification.Builder getBuilder() {
         if (mBuilder == null) {
-            mBuilder = new Notification.Builder(this)
+            mBuilder = generateNotificationBuilder(this)
                     .setContentTitle("屏幕录制中")
                     .setOngoing(true)
                     .setLocalOnly(true)
@@ -73,6 +75,20 @@ public class Notifications extends ContextWrapper {
                     .setUsesChronometer(true);
         }
         return mBuilder;
+    }
+
+    public static Notification.Builder generateNotificationBuilder(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = HULU_NOTIFICATIONS_CHANNEL_ID;
+            NotificationChannel channel = new NotificationChannel(channelId, channelId, NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (nm.getNotificationChannel(channelId) == null) {
+                nm.createNotificationChannel(channel);
+            }
+            return new Notification.Builder(context, channelId);
+        } else {
+            return new Notification.Builder(context);
+        }
     }
 
     private Notification.Action stopAction() {

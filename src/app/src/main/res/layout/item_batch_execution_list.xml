@@ -24,15 +24,15 @@
         android:layout_weight="1"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginLeft="16dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp">
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:paddingTop="@dimen/control_dp6"
+        android:paddingBottom="@dimen/control_dp6">
 
         <TextView
             android:id="@+id/case_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16dp"
+            android:textSize="@dimen/textsize_16"
             android:text=""
             android:textColor="@color/mainFont"/>
 
@@ -40,8 +40,8 @@
             android:id="@+id/case_desc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12dp"
-            android:layout_marginTop="5dp"
+            android:textSize="@dimen/textsize_12"
+            android:layout_marginTop="@dimen/control_dp6"
             android:text=""
             android:textColor="@color/subFont"/>
 
@@ -49,8 +49,8 @@
             android:id="@+id/create_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12dp"
-            android:layout_marginTop="5dp"
+            android:textSize="@dimen/textsize_12"
+            android:layout_marginTop="@dimen/control_dp6"
             android:text=""
             android:textColor="@color/subFont"/>
 
@@ -59,15 +59,15 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:paddingRight="12dp"
+        android:paddingRight="@dimen/control_dp12"
         android:id="@+id/batch_item_add"
         android:foreground="?attr/selectableItemBackground"
-        android:paddingLeft="12dp"
+        android:paddingLeft="@dimen/control_dp12"
         android:gravity="center_vertical">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="32dp"
+            android:layout_width="@dimen/control_dp32"
+            android:layout_height="@dimen/control_dp32"
             android:src="@drawable/case_step_add"
             android:tint="@color/dark_gray"/>
     </LinearLayout>

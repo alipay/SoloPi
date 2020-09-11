@@ -1,4 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
 <resources>
 
 
@@ -128,8 +142,18 @@
     <dimen name="app_list_drawer_width">600dp</dimen>
     <dimen name="dp_44">88dp</dimen>
     <dimen name="index_icon_height">260dp</dimen>
+
+    <dimen name="minus_dp5">-10dp</dimen>
     <dimen name="minus_dp19">-38dp</dimen>
+    <dimen name="minus_dp32">-64dp</dimen>
     <dimen name="index_bandage_height">28.28dp</dimen>
     <dimen name="remote_mode_start_btn_width">348dp</dimen>
     <dimen name="batch_execute__scroll_height">200dp</dimen>
+    <dimen name="dp_100">200dp</dimen>
+    <dimen name="dp_19">38dp</dimen>
+    <dimen name="dp_50">100dp</dimen>
+    <dimen name="dp_21">42dp</dimen>
+    <dimen name="dp_400">800dp</dimen>
+    <dimen name="perf_records_btn_width">320dp</dimen>
+    <dimen name="perf_chart_min_height">600dp</dimen>
 </resources>

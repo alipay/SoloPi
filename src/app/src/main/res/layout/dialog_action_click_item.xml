@@ -16,10 +16,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:paddingLeft="@dimen/control_dp16"
+    android:paddingRight="@dimen/control_dp16"
+    android:paddingTop="@dimen/control_dp8"
+    android:paddingBottom="@dimen/control_dp8">
 
     <TextView
         android:id="@+id/dialog_action_title"
@@ -32,7 +32,7 @@
     <ImageView
         android:id="@+id/dialog_action_icon"
         android:layout_width="@dimen/float_item_icon_size"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="@dimen/control_dp8"
         android:scaleType="fitCenter"
         android:layout_height="@dimen/float_item_icon_size" />
 </LinearLayout>

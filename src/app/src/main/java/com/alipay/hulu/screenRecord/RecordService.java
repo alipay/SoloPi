@@ -246,7 +246,7 @@ public class RecordService extends Service {
 
         wm = (WindowManager) getApplicationContext().getSystemService(WINDOW_SERVICE);
         wmParams = ((MyApplication)getApplication()).getFloatWinParams();
-        wmParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+        wmParams.type = com.alipay.hulu.common.constant.Constant.TYPE_ALERT;
         wmParams.flags |= 8;
         wmParams.gravity = Gravity.LEFT | Gravity.TOP; // 调整悬浮窗口至左上角
         // 以屏幕左上角为原点，设置x、y初始值

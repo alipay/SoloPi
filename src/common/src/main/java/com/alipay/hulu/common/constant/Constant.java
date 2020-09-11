@@ -15,6 +15,9 @@
  */
 package com.alipay.hulu.common.constant;
 
+import android.os.Build;
+import android.view.WindowManager;
+
 public class Constant {
 
     public static final String OV_DEFAULT_PASSWORD = "a1234567";
@@ -28,5 +31,6 @@ public class Constant {
 
     public static final String HOTPATCH_NAME = "hulu_hotPatch";
     public static final int HOTPATCH_VERSION = 1;
+    public static final int TYPE_ALERT = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
 
 }

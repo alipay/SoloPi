@@ -15,12 +15,12 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:padding="8dp"
+    android:padding="@dimen/control_dp8"
     android:layout_height="wrap_content">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="14sp"
+        android:textSize="@dimen/textsize_14"
         android:textColor="@color/black"
         android:id="@+id/record_time_select_title"
         android:layout_gravity="center_horizontal"/>

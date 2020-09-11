@@ -16,10 +16,10 @@
 <com.alipay.hulu.ui.CheckableRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp"
-    android:paddingLeft="16dp"
+    android:padding="@dimen/control_dp8"
+    android:paddingLeft="@dimen/control_dp16"
     android:duplicateParentState="true"
-    android:paddingRight="16dp">
+    android:paddingRight="@dimen/control_dp16">
 
     <android.support.v7.widget.AppCompatCheckBox
         android:layout_alignParentRight="true"
@@ -40,5 +40,5 @@
         android:id="@+id/record_name"
         android:gravity="left|center_vertical"
         android:textColor="@color/secondaryText"
-        android:textSize="16dp"/>
+        android:textSize="@dimen/textsize_16"/>
 </com.alipay.hulu.ui.CheckableRelativeLayout>

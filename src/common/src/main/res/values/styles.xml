@@ -32,4 +32,25 @@
         <!--是否模糊-->
         <item name="android:backgroundDimEnabled">true</item>
     </style>
+
+    <style name="TabLayoutTextStyle" parent="Theme.AppCompat.Dialog">
+        <item name="android:textSize">@dimen/textsize_14</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/primaryText</item>
+    </style>
+
+    <style name="windowTitleTextStyle" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textSize">@dimen/textsize_18</item>
+<!--        <item name="android:textAllCaps">false</item>-->
+<!--        <item name="android:textColor">@color/primaryText</item>-->
+<!--        <item name="android:textStyle">bold</item>-->
+<!--        <item name="android:paddingLeft">@dimen/control_dp16</item>-->
+<!--        <item name="android:paddingRight">@dimen/control_dp16</item>-->
+<!--        <item name="android:paddingTop">@dimen/control_dp8</item>-->
+<!--        <item name="android:paddingBottom">@dimen/control_dp8</item>-->
+    </style>
+
+    <style name="windowTitleStyle" parent="RtlOverlay.DialogWindowTitle.AppCompat" >
+        <item name="android:textAppearance">@style/windowTitleTextStyle</item>
+    </style>
 </resources>

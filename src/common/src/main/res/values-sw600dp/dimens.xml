@@ -1,4 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
 <resources>
 
     <!-- Default screen margins, per the Android Design guidelines. -->
@@ -127,9 +141,19 @@
     <dimen name="app_list_drawer_width">450dp</dimen>
     <dimen name="dp_44">66dp</dimen>
     <dimen name="index_icon_height">195dp</dimen>
+
+    <dimen name="minus_dp5">-7.5dp</dimen>
     <dimen name="minus_dp19">-28.5dp</dimen>
+    <dimen name="minus_dp32">-48dp</dimen>
 
     <dimen name="index_bandage_height">21.21dp</dimen>
     <dimen name="remote_mode_start_btn_width">261dp</dimen>
     <dimen name="batch_execute__scroll_height">150dp</dimen>
+    <dimen name="dp_100">150dp</dimen>
+    <dimen name="dp_19">28.5dp</dimen>
+    <dimen name="dp_50">75dp</dimen>
+    <dimen name="dp_21">31.5dp</dimen>
+    <dimen name="dp_400">600dp</dimen>
+    <dimen name="perf_records_btn_width">240dp</dimen>
+    <dimen name="perf_chart_min_height">450dp</dimen>
 </resources>

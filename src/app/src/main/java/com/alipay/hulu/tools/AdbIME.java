@@ -22,25 +22,20 @@ import android.content.IntentFilter;
 import android.inputmethodservice.InputMethodService;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 
 import com.alipay.hulu.R;
-import com.alipay.hulu.activity.MyApplication;
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.constant.Constant;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.RunningThread;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
-import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.StringUtil;
-import com.alipay.hulu.shared.node.OperationService;
-import com.alipay.hulu.shared.node.action.OperationMethod;
-import com.alipay.hulu.shared.node.action.PerformActionEnum;
 
 /**
  * Created by lezhou.wyl on 2018/2/8.
@@ -62,7 +57,7 @@ public class AdbIME extends InputMethodService {
         super.onCreate();
 
         // System Alert类型，不影响背景显示
-        getWindow().getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        getWindow().getWindow().setType(Constant.TYPE_ALERT);
 
         this.manager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         BackgroundExecutor.execute(new Runnable() {

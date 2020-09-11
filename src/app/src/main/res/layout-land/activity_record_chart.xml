@@ -32,73 +32,73 @@
             <TextView
                 android:background="@color/default_background_color"
                 android:layout_width="match_parent"
-                android:layout_height="30dp"
+                android:layout_height="@dimen/control_dp30"
                 android:text="@string/record_chart__select_data"
-                android:textSize="14dp"
-                android:paddingLeft="8dp"
-                android:paddingBottom="2dp"
+                android:textSize="@dimen/textsize_14"
+                android:paddingLeft="@dimen/control_dp8"
+                android:paddingBottom="@dimen/control_dp2"
                 android:gravity="bottom"
                 android:textColor="#a3a3a3"/>
             <include layout="@layout/divider" />
             <LinearLayout
                 android:background="@color/white"
                 android:layout_width="match_parent"
-                android:paddingLeft="16dp"
+                android:paddingLeft="@dimen/control_dp16"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
                 <android.support.v7.widget.AppCompatSpinner
-                    android:layout_margin="5dp"
+                    android:layout_margin="@dimen/control_dp6"
                     android:spinnerMode="dialog"
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
+                    android:layout_height="@dimen/dp_44"
                     android:id="@+id/record_spinner"/>
                 <include layout="@layout/divider" />
                 <android.support.v7.widget.AppCompatSpinner
-                    android:layout_margin="5dp"
+                    android:layout_margin="@dimen/control_dp6"
                     android:id="@+id/record_item_spinner"
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"/>
+                    android:layout_height="@dimen/dp_44"/>
             </LinearLayout>
             <include layout="@layout/divider" />
 
             <TextView
-                android:layout_height="36dp"
+                android:layout_height="@dimen/control_dp36"
                 android:layout_width="match_parent"
                 android:background="@color/default_background_color"
                 android:text="@string/record_chart__data_display"
-                android:textSize="14dp"
+                android:textSize="@dimen/textsize_14"
                 android:gravity="bottom"
-                android:paddingLeft="8dp"
-                android:paddingBottom="2dp"
+                android:paddingLeft="@dimen/control_dp8"
+                android:paddingBottom="@dimen/control_dp2"
                 android:layout_gravity="bottom"
                 android:textColor="#a3a3a3"/>
             <include layout="@layout/divider" />
             <LinearLayout
                 android:background="@color/white"
                 android:layout_width="match_parent"
-                android:padding="8dp"
+                android:padding="@dimen/control_dp8"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_marginStart="16dp"
+                    android:layout_marginStart="@dimen/control_dp16"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/textsize_14"
                     android:minLines="2"
                     android:textColor="@color/colorAccent"
                     android:id="@+id/record_summary"
                     />
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_marginStart="16dp"
+                    android:layout_marginStart="@dimen/control_dp16"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/textsize_14"
                     android:textColor="@color/colorAccent"
                     android:id="@+id/record_label"
                     android:textAlignment="center"/>
                 <com.alipay.hulu.ui.linechart.CheckableLineChartView
                     android:layout_width="match_parent"
-                    android:minHeight="300dp"
+                    android:minHeight="@dimen/perf_chart_min_height"
                     android:layout_height="match_parent"
                     android:id="@+id/record_chart"/>
             </LinearLayout>

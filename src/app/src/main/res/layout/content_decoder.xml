@@ -36,8 +36,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:padding="16dp"
-        android:textSize="14sp"
+        android:padding="@dimen/control_dp16"
+        android:textSize="@dimen/textsize_14"
         android:textColor="#ffffff"/>
 
 </RelativeLayout>

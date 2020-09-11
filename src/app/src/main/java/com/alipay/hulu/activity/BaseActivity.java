@@ -17,7 +17,10 @@ package com.alipay.hulu.activity;
 
 import android.annotation.TargetApi;
 import android.app.ProgressDialog;
+import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
@@ -36,6 +39,7 @@ import android.widget.Toast;
 
 import com.alipay.hulu.R;
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.utils.ClassUtil;
 import com.alipay.hulu.common.utils.DeviceInfoUtil;
 import com.alipay.hulu.common.utils.LogUtil;
 
@@ -132,6 +136,20 @@ public abstract class BaseActivity extends AppCompatActivity {
     public void showInputMethod() {
         InputMethodManager imManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imManager.toggleSoftInput(0, InputMethodManager.SHOW_FORCED);
+    }
+
+    @Override
+    public ComponentName startService(Intent service) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && service.getComponent() != null) {
+            String className = service.getComponent().getClassName();
+            Class<?> clazz = ClassUtil.getClassByName(className);
+            if (Service.class.isAssignableFrom(clazz)) {
+                if (LauncherApplication.getInstance().isServiceForeGround((Class<? extends Service>) clazz)) {
+                    return super.startForegroundService(service);
+                }
+            }
+        }
+        return super.startService(service);
     }
 
     //隐藏输入法

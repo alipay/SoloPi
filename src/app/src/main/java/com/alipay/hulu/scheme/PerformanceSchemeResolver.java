@@ -30,6 +30,7 @@ import com.alipay.hulu.common.scheme.SchemeResolver;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.screenRecord.Notifications;
 import com.alipay.hulu.shared.display.DisplayProvider;
 import com.alipay.hulu.shared.display.items.base.RecordPattern;
 import com.alipay.hulu.util.RecordUtil;
@@ -116,7 +117,7 @@ public class PerformanceSchemeResolver implements SchemeActionResolver {
                             displayProvider.startDisplay(name);
                         }
                         displayProvider.startRecording();
-                        notification = new Notification.Builder(context)
+                        notification = Notifications.generateNotificationBuilder(context)
                                 .setContentTitle(context.getString(R.string.performance__recording))
                                 .setOngoing(true)
                                 .setOnlyAlertOnce(true)

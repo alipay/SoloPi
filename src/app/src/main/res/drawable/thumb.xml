@@ -17,6 +17,6 @@
     android:shape="oval">
     <solid android:color="@color/colorAccent" />
     <size
-        android:width="12dp"
-        android:height="12dp" />
+        android:width="@dimen/control_dp12"
+        android:height="@dimen/control_dp12" />
 </shape>

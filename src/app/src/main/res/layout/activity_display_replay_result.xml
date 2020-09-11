@@ -74,7 +74,12 @@
     <android.support.design.widget.TabLayout
         android:id="@+id/tab_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/control_dp48"
+        app:tabTextAppearance="@style/TabLayoutTextStyle"
+        app:tabPaddingTop="@dimen/control_dp8"
+        app:tabPaddingBottom="@dimen/control_dp8"
+        app:tabPaddingStart="@dimen/control_dp16"
+        app:tabPaddingEnd="@dimen/control_dp16"
         app:tabGravity="fill"
         app:tabMode="fixed"
         app:tabMaxWidth="0dp"/>

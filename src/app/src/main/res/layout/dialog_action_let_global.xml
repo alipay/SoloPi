@@ -30,9 +30,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="变量名"
+            android:text="@string/let_global__variable_name"
             android:textColor="@color/primaryText"
-            android:textSize="18dp"
+            android:textSize="@dimen/textsize_18"
             />
         <TextView
             android:layout_width="wrap_content"
@@ -40,12 +40,12 @@
             android:text="*"
             android:textStyle="bold"
             android:textColor="@color/red"
-            android:textSize="18dp"
+            android:textSize="@dimen/textsize_18"
             />
         <EditText
-            android:textSize="16dp"
+            android:textSize="@dimen/textsize_16"
             android:id="@+id/dialog_action_let_variable_name"
-            android:layout_marginLeft="16dp"
+            android:layout_marginLeft="@dimen/control_dp16"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />
@@ -56,53 +56,53 @@
         android:id="@+id/dialog_action_let_other"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
 
         <RadioGroup
-            android:layout_marginLeft="8dp"
+            android:layout_marginLeft="@dimen/control_dp8"
             android:orientation="horizontal"
             android:id="@+id/dialog_action_let_other_type"
             android:layout_toRightOf="@id/dialog_action_let_item_title"
             android:layout_width="wrap_content"
-            android:layout_marginTop="-5dp"
+            android:layout_marginTop="@dimen/minus_dp5"
             android:layout_height="wrap_content">
             <RadioButton
                 android:id="@+id/dialog_action_let_other_type_str"
                 android:checked="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="字符串"/>
+                android:text="@string/let_global__string"/>
             <RadioButton
                 android:id="@+id/dialog_action_let_other_type_int"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="整数"/>
+                android:text="@string/let_global__integer"/>
         </RadioGroup>
 
         <TextView
-            android:textSize="18dp"
+            android:textSize="@dimen/textsize_18"
             android:textColor="@color/primaryText"
             android:id="@+id/dialog_action_let_item_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="运算类型"/>
+            android:text="@string/let_global__calc_type"/>
         <EditText
             android:id="@+id/dialog_action_let_other_value"
             android:layout_marginTop="2dp"
-            android:textSize="14dp"
-            android:hint="${node.text}格式，可使用'+'与'*'"
+            android:textSize="@dimen/textsize_14"
+            android:hint="@string/let_global__node_text_pattern"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/dialog_action_let_item_title"
             />
         <TextView
             android:id="@+id/dialog_action_let_other_value_val"
-            android:textSize="12dp"
+            android:textSize="@dimen/textsize_12"
             android:text="@string/action_let_cur_value_null"
-            android:layout_marginLeft="8dp"
+            android:layout_marginLeft="@dimen/control_dp8"
             android:textColor="@color/secondaryText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

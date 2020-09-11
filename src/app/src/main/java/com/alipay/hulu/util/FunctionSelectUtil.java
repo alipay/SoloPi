@@ -317,7 +317,7 @@ public class FunctionSelectUtil {
                     });
 
             AlertDialog dialog = builder.create();
-            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
             dialog.setCanceledOnTouchOutside(false);
             dialog.setCancelable(false);
             dialog.show();
@@ -350,15 +350,14 @@ public class FunctionSelectUtil {
             TextView distanceName = (TextView) editField.findViewById(R.id.item_edit_field_name);
 
             // 配置字段
-            distance.setHint("滑动距离(%)");
-            distanceName.setText("滑动距离(%)");
+            distance.setHint(R.string.scroll_setting__scroll_distense);
+            distanceName.setText(R.string.scroll_setting__scroll_distense);
             distance.setInputType(InputType.TYPE_CLASS_NUMBER);
             distance.setText("40");
 
             // 设置其他参数
             distance.setTextColor(context.getResources().getColor(R.color.primaryText));
             distance.setHintTextColor(context.getResources().getColor(R.color.secondaryText));
-            distance.setTextSize(18);
             distance.setHighlightColor(context.getResources().getColor(R.color.colorAccent));
             view.addView(editField, layoutParams);
 
@@ -368,21 +367,20 @@ public class FunctionSelectUtil {
             TextView timeName = (TextView) editField.findViewById(R.id.item_edit_field_name);
 
             // 配置字段
-            time.setHint("滑动时间(ms)");
-            timeName.setText("滑动时间(ms)");
+            time.setHint(R.string.scroll_setting__scroll_time);
+            timeName.setText(R.string.scroll_setting__scroll_time);
             time.setText("1000");
             time.setInputType(InputType.TYPE_CLASS_NUMBER);
 
             // 设置其他参数
             time.setTextColor(context.getResources().getColor(R.color.primaryText));
             time.setHintTextColor(context.getResources().getColor(R.color.secondaryText));
-            time.setTextSize(18);
             time.setHighlightColor(context.getResources().getColor(R.color.colorAccent));
             view.addView(editField, layoutParams);
 
             // 显示Dialog
             AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
-                    .setTitle("设置滑动参数")
+                    .setTitle(R.string.scroll_setting__set_scroll_param)
                     .setView(v)
                     .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
                         @Override
@@ -402,7 +400,7 @@ public class FunctionSelectUtil {
                 }
             }).create();
 
-            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
             dialog.setCanceledOnTouchOutside(false);
             dialog.setCancelable(false);
 
@@ -435,7 +433,7 @@ public class FunctionSelectUtil {
                             listener.onCancel();
                         }
                     }).create();
-            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
             dialog.setCanceledOnTouchOutside(false);                                   //点击外面区域不会让dialog消失
             dialog.setCancelable(false);
 
@@ -522,7 +520,7 @@ public class FunctionSelectUtil {
                         listener.onCancel();
                     }
                 }).create();
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
         dialog.setCanceledOnTouchOutside(false);                                   //点击外面区域不会让dialog消失
         dialog.setCancelable(false);
         dialog.show();
@@ -713,7 +711,7 @@ public class FunctionSelectUtil {
                         listener.onCancel();
                     }
                 }).create();
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
         dialog.setCanceledOnTouchOutside(false);                                   //点击外面区域不会让dialog消失
         dialog.setCancelable(false);
         dialog.show();
@@ -933,7 +931,7 @@ public class FunctionSelectUtil {
                         listener.onCancel();
                     }
                 }).create();
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
         dialog.setCanceledOnTouchOutside(false);                                   //点击外面区域不会让dialog消失
         dialog.setCancelable(false);
         dialog.show();
@@ -1034,7 +1032,7 @@ public class FunctionSelectUtil {
                         listener.onCancel();
                     }
                 }).create();
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
         dialog.setCanceledOnTouchOutside(false);                                   //点击外面区域不会让dialog消失
         dialog.setCancelable(false);
         dialog.show();
@@ -1143,7 +1141,7 @@ public class FunctionSelectUtil {
                         });
                     }
                 });
-                dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
                 dialog.setCanceledOnTouchOutside(false);
                 dialog.setCancelable(false);
                 dialog.show();
@@ -1223,7 +1221,7 @@ public class FunctionSelectUtil {
                         });
                     }
                 });
-                dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
                 dialog.setCanceledOnTouchOutside(false);
                 dialog.setCancelable(false);
                 dialog.show();
@@ -1353,7 +1351,7 @@ public class FunctionSelectUtil {
                         }
                     }).create();
 
-            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
             dialog.setCanceledOnTouchOutside(false);                                   //点击外面区域不会让dialog消失
             dialog.setCancelable(false);
             dialog.show();
@@ -1477,7 +1475,7 @@ public class FunctionSelectUtil {
                     }
                 }).create();
 
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
         dialog.setCanceledOnTouchOutside(false);                                   //点击外面区域不会让dialog消失
         dialog.setCancelable(false);
         dialog.show();
@@ -1546,7 +1544,7 @@ public class FunctionSelectUtil {
 
         dialog.setTitle(null);
         dialog.setCanceledOnTouchOutside(false);
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
         dialog.show();
     }
 
@@ -1639,7 +1637,7 @@ public class FunctionSelectUtil {
                             listener.onCancel();
                         }
                     }).create();
-            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
             dialog.setCanceledOnTouchOutside(false);                                   //点击外面区域不会让dialog消失
             dialog.setCancelable(false);
             dialog.show();

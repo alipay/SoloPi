@@ -18,11 +18,11 @@
     android:layout_height="wrap_content">
     <LinearLayout
         android:id="@+id/dialog_content"
-        android:paddingLeft="10dp"
+        android:paddingLeft="@dimen/control_dp12"
         android:orientation="vertical"
-        android:paddingRight="10dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"
+        android:paddingRight="@dimen/control_dp12"
+        android:paddingTop="@dimen/control_dp20"
+        android:paddingBottom="@dimen/control_dp20"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 

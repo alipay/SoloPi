@@ -400,4 +400,12 @@
     <string name="patch_status__load_success">Load success</string>
     <string name="patch_status__load_failed">Load failed</string>
     <string name="patch_status__version_code">version: %f</string>
+    <string name="let_global__node_text_pattern">use type ${node.text}, \'+\' and \'*\' are usable</string>
+    <string name="let_global__calc_type">Calculation Type</string>
+    <string name="let_global__integer">Integer</string>
+    <string name="let_global__string">String</string>
+    <string name="let_global__variable_name">Variable Name</string>
+    <string name="scroll_setting__scroll_distense">Scroll Distence(%)</string>
+    <string name="scroll_setting__scroll_time">Scroll Timing(ms)</string>
+    <string name="scroll_setting__set_scroll_param">Scroll Params</string>
 </resources>

@@ -211,7 +211,8 @@ public class AccessibilityEventTracker {
                     }
                 }, 10);
             // Android Q 权限处理
-            } else if (Build.VERSION.SDK_INT >= 29 && StringUtil.equals(event.getPackageName(), "com.android.permissioncontroller")) {
+            } else if (Build.VERSION.SDK_INT >= 29 && (StringUtil.equals(event.getPackageName(), "com.android.permissioncontroller")
+                        || StringUtil.equals(event.getPackageName(), "com.google.android.permissioncontroller"))) {
                 // 就是个Dialog，直接用HandleAlert处理掉
                 BackgroundExecutor.execute(new Runnable() {
                     @Override

@@ -28,19 +28,19 @@
             <TextView
                 android:id="@+id/text_replay_too_long"
                 android:text="@string/to_long_template"
-                android:textSize="16dp"
+                android:textSize="@dimen/textsize_16"
                 android:visibility="gone"
                 android:textColor="@color/colorAccent"
-                android:padding="8dp"
+                android:padding="@dimen/control_dp8"
                 android:gravity="center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
             <TextView
-                android:padding="8dp"
+                android:padding="@dimen/control_dp8"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="14dp"
+                android:textSize="@dimen/textsize_14"
                 android:textColor="@color/secondaryText"
                 android:id="@+id/text_replay_result"/>
         </LinearLayout>

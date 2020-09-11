@@ -399,4 +399,12 @@
     <string name="patch_status__load_success">加载成功</string>
     <string name="patch_status__load_failed">加载失败</string>
     <string name="patch_status__version_code">version: %f</string>
+    <string name="let_global__node_text_pattern">${node.text}格式，可使用\'+\'与\'*\'</string>
+    <string name="let_global__calc_type">运算类型</string>
+    <string name="let_global__integer">整数</string>
+    <string name="let_global__string">字符串</string>
+    <string name="let_global__variable_name">变量名</string>
+    <string name="scroll_setting__scroll_distense">滑动距离(%)</string>
+    <string name="scroll_setting__scroll_time">滑动时间(ms)</string>
+    <string name="scroll_setting__set_scroll_param">设置滑动参数</string>
 </resources>

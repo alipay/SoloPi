@@ -23,23 +23,23 @@
         android:id="@+id/head_layout" />
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="@dimen/control_dp30"
         android:orientation="horizontal"
         android:background="@color/default_background_color">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/record_manage__data_list"
-            android:textSize="14dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginBottom="2dp"
+            android:textSize="@dimen/textsize_14"
+            android:layout_marginLeft="@dimen/control_dp8"
+            android:layout_marginBottom="@dimen/control_dp2"
             android:layout_gravity="bottom"
             android:textColor="#a3a3a3"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/control_dp16"
         android:orientation="vertical">
 
         <include layout="@layout/divider" />
@@ -57,14 +57,14 @@
 
         <Button
             android:id="@+id/record_manage_button_delete"
-            android:layout_width="160dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/perf_records_btn_width"
+            android:layout_height="@dimen/control_dp40"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
-            android:textSize="14dp"
+            android:layout_marginTop="@dimen/control_dp20"
+            android:textSize="@dimen/textsize_14"
             android:text="@string/record_manage__delete_data"
             android:textColor="@color/white"
             android:background="@drawable/bg_solid_round_btn"
-            android:layout_marginBottom="19dp"/>
+            android:layout_marginBottom="@dimen/dp_19"/>
     </LinearLayout>
 </LinearLayout>

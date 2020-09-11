@@ -66,11 +66,13 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
@@ -145,6 +147,23 @@ public abstract class LauncherApplication extends Application {
      */
     public static LauncherApplication getInstance() {
         return appInstance;
+    }
+
+    public Set<String> foregroundServiceClasses = new HashSet<>();
+
+    /**
+     * 注册自身为前台服务
+     * @param serviceClz
+     */
+    public void registerSelfAsForegroundService(Class<? extends Service> serviceClz) {
+        foregroundServiceClasses.add(serviceClz.getName());
+    }
+
+    public boolean isServiceForeGround(Class<? extends Service> serviceClz) {
+        if (serviceClz == null) {
+            return false;
+        }
+        return foregroundServiceClasses.contains(serviceClz.getName());
     }
 
     /**
@@ -948,7 +967,7 @@ public abstract class LauncherApplication extends Application {
                     });
                 }
                 AlertDialog dialog = builder.create();
-                dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
                 dialog.setCanceledOnTouchOutside(false);                                   //点击外面区域不会让dialog消失
                 dialog.setCancelable(false);
 

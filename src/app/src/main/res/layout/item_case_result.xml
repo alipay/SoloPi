@@ -16,10 +16,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
+    android:paddingLeft="@dimen/control_dp16"
+    android:paddingRight="@dimen/control_dp16"
+    android:paddingTop="@dimen/control_dp8"
+    android:paddingBottom="@dimen/control_dp8"
     >
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,20 +29,20 @@
         android:id="@+id/layout_case_result_item_title">
         <ImageView
             android:id="@+id/toggle_case_result"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="@dimen/control_dp20"
+            android:layout_height="@dimen/control_dp20"
             android:src="@drawable/case_result_item_toggle"
-            android:scaleType="centerInside"
+            android:scaleType="fitCenter"
             />
         <TextView
             android:id="@+id/text_case_result_item_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="1"
-            android:layout_marginLeft="12dp"
+            android:layout_marginLeft="@dimen/control_dp12"
             android:layout_toRightOf="@id/toggle_case_result"
             android:layout_alignBaseline="@id/toggle_case_result"
-            android:textSize="16dp"
+            android:textSize="@dimen/textsize_16"
             android:textColor="@color/primaryText"
             />
     </LinearLayout>
@@ -50,11 +50,11 @@
         android:id="@+id/text_case_result_item_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/control_dp8"
         android:textColor="@color/secondaryText"
-        android:textSize="14dp"
+        android:textSize="@dimen/textsize_14"
         android:layout_below="@id/layout_case_result_item_title"
-        android:layout_marginLeft="32dp"
+        android:layout_marginLeft="@dimen/control_dp32"
         />
 
 </RelativeLayout>
