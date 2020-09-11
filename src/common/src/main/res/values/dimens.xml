@@ -156,4 +156,5 @@
     <dimen name="dp_400">400dp</dimen>
     <dimen name="perf_records_btn_width">160dp</dimen>
     <dimen name="perf_chart_min_height">300dp</dimen>
+    <dimen name="remote_record_win_width">330dp</dimen>
 </resources>
