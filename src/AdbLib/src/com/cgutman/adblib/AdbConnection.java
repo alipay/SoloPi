@@ -105,8 +105,15 @@ public class AdbConnection implements Closeable {
 
 		/* Disable Nagle because we're sending tiny packets */
 		socket.setTcpNoDelay(true);
+
+		// 写入缓冲区16K
+		socket.setSendBufferSize(16 * 1024);
+
+		// 读取缓冲区64K
+		socket.setReceiveBufferSize(64 * 1024);
 		socket.setTrafficClass(0x10);
-		socket.setPerformancePreferences(1, 3, 2);
+
+		socket.setPerformancePreferences(0, 2, 1);
 		return newConn;
 	}
 	
