@@ -21,6 +21,8 @@ import android.os.Parcelable;
 
 import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.shared.node.OperationService;
+import com.alipay.hulu.shared.node.action.OperationExecutor;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -151,6 +153,14 @@ public class OperationNode implements Parcelable {
 
     public OperationNode() {}
 
+    public OperationNode(OperationNode old, OperationService service) {
+        if (service == null) {
+            initCopy(old);
+        } else {
+            initWithService(old, service);
+        }
+    }
+
     /**
      * Parcel生成
      * @param in
@@ -168,6 +178,36 @@ public class OperationNode implements Parcelable {
         assistantNodes = in.readArrayList(AssistantNode.class.getClassLoader());
         extra = in.readHashMap(String.class.getClassLoader());
         nodeType = in.readString();
+    }
+
+    private void initCopy(OperationNode node) {
+        className = node.className;
+        packageName = node.packageName;
+        text = node.text;
+        resourceId = node.resourceId;
+        description = node.description;
+        xpath = node.xpath;
+        id = node.id;
+        depth = node.depth;
+        nodeBound = node.nodeBound;
+        assistantNodes = node.assistantNodes;
+        extra = node.extra;
+        nodeType = node.nodeType;
+    }
+
+    private void initWithService(OperationNode node, OperationService service) {
+        className = OperationExecutor.getMappedContent(node.className, service);
+        packageName = OperationExecutor.getMappedContent(node.packageName, service);
+        text = OperationExecutor.getMappedContent(node.text, service);
+        resourceId = OperationExecutor.getMappedContent(node.resourceId, service);
+        description = OperationExecutor.getMappedContent(node.description, service);
+        xpath = OperationExecutor.getMappedContent(node.xpath, service);
+        id = OperationExecutor.getMappedContent(node.id, service);
+        depth = node.depth;
+        nodeBound = node.nodeBound;
+        assistantNodes = node.assistantNodes;
+        extra = node.extra;
+        nodeType = node.nodeType;
     }
 
     /**

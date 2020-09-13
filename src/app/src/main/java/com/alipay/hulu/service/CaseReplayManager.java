@@ -597,6 +597,8 @@ public class CaseReplayManager implements ExportService {
 
         // 对于需要操作节点的记录
         if (operation.getOperationNode() != null) {
+            // 解析Node数据
+            OperationNode origin = new OperationNode(operation.getOperationNode(), operationService);
             if (operation.getOperationMethod().getActionEnum() != PerformActionEnum.CLICK_QUICK) {
                 watcher.sleepUntilContentDontChange();
             } else {
@@ -607,17 +609,17 @@ public class CaseReplayManager implements ExportService {
 
             AbstractNodeTree node = null;
             if (operation.getOperationMethod().getActionEnum() == PerformActionEnum.CLICK_IF_EXISTS) {
-                node = OperationUtil.findAbstractNodeWithoutScroll(operation.getOperationNode(), operationService, prepareActions);
+                node = OperationUtil.findAbstractNodeWithoutScroll(origin, operationService, prepareActions);
 
                 if (node == null) {
-                    LogUtil.d(TAG, "未查找到节点【%s】，不进行操作", operation.getOperationNode());
+                    LogUtil.i(TAG, "未查找到节点【%s】，不进行操作", origin);
                     return null;
                 }
             } else if (operation.getOperationMethod().getActionEnum() == PerformActionEnum.CHECK_NODE) {
-                node = OperationUtil.findAbstractNodeWithoutScroll(operation.getOperationNode(), operationService, prepareActions);
+                node = OperationUtil.findAbstractNodeWithoutScroll(origin, operationService, prepareActions);
 
                 if (node == null) {
-                    LogUtil.i(TAG, "未查找到节点【%s】，不进行操作", operation.getOperationNode());
+                    LogUtil.i(TAG, "未查找到节点【%s】，不进行操作", origin);
                     return "节点未查找到";
                 }
             } else if (operation.getOperationMethod().getActionEnum() == PerformActionEnum.SLEEP_UNTIL) {
@@ -628,7 +630,7 @@ public class CaseReplayManager implements ExportService {
 
                     long start = System.currentTimeMillis();
                     while ((System.currentTimeMillis() - start) < time) {
-                        node = OperationUtil.scrollToScreen(operation.getOperationNode(), operationService);
+                        node = OperationUtil.scrollToScreen(origin, operationService);
 
                         // 如果找到了，直接break
                         if (node != null) {
@@ -642,7 +644,7 @@ public class CaseReplayManager implements ExportService {
 
                     // 没找到
                     if (node == null) {
-                        LogUtil.w(TAG, "未查找到节点【%s】", operation.getOperationNode());
+                        LogUtil.w(TAG, "未查找到节点【%s】", origin);
                         return "节点未查找到";
                     }
                 } catch (NumberFormatException e) {
@@ -650,9 +652,9 @@ public class CaseReplayManager implements ExportService {
                     return "参数错误";
                 }
             } else {
-                node = OperationUtil.findAbstractNode(operation.getOperationNode(), operationService, prepareActions);
+                node = OperationUtil.findAbstractNode(origin, operationService, prepareActions);
                 if (node == null) {
-                    LogUtil.w(TAG, "未查找到节点【%s】，无法进行操作", operation.getOperationNode());
+                    LogUtil.w(TAG, "未查找到节点【%s】，无法进行操作", origin);
                     return "节点未查找到";
                 }
             }
