@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
 -->
-<android.support.v7.widget.RecyclerView android:id="@+id/float_recycler_view"
+<androidx.recyclerview.widget.RecyclerView android:id="@+id/float_recycler_view"
     android:layout_width="@dimen/control_float_title_width"
     android:layout_height="wrap_content"
     android:clickable="true"

@@ -39,14 +39,14 @@
         android:paddingLeft="@dimen/control_dp16"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-        <android.support.v7.widget.AppCompatSpinner
+        <androidx.appcompat.widget.AppCompatSpinner
             android:layout_margin="@dimen/control_dp6"
             android:spinnerMode="dialog"
             android:layout_width="match_parent"
             android:layout_height="@dimen/dp_44"
             android:id="@+id/record_spinner"/>
         <include layout="@layout/divider" />
-        <android.support.v7.widget.AppCompatSpinner
+        <androidx.appcompat.widget.AppCompatSpinner
             android:layout_margin="@dimen/control_dp6"
             android:id="@+id/record_item_spinner"
             android:layout_width="match_parent"

@@ -16,10 +16,9 @@
 package com.alipay.hulu.common.utils;
 
 import android.content.Context;
-import android.support.annotation.StringRes;
+import androidx.annotation.StringRes;
 
 import com.alipay.hulu.common.application.LauncherApplication;
-import com.alipay.hulu.common.constant.Constant;
 import com.alipay.hulu.common.service.SPService;
 
 import java.lang.Character.UnicodeBlock;
@@ -28,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -15,8 +15,8 @@
  */
 package com.alipay.hulu.common.injector.provider;
 
-import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 
 import com.alipay.hulu.common.injector.param.InjectParam;
 import com.alipay.hulu.common.injector.param.RunningThread;

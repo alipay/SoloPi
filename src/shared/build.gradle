@@ -51,12 +51,12 @@ greendao{
 }
 
 dependencies {
-    compileOnly 'com.alibaba:fastjson:1.2.68'
-    compileOnly "com.android.support:appcompat-v7:${SUPPORT_LIBRARY_VERSION}"
-    compileOnly "com.android.support:support-v4:${SUPPORT_LIBRARY_VERSION}"
+    compileOnly 'com.alibaba:fastjson:1.2.73'
+    compileOnly 'androidx.appcompat:appcompat:1.0.0'
+    compileOnly 'androidx.legacy:legacy-support-v4:1.0.0'
     compileOnly 'com.liulishuo.filedownloader:library:1.7.7'
     compileOnly 'com.squareup.okhttp3:okhttp:3.12.3'
-    compileOnly 'org.greenrobot:greendao:3.2.2'
+    compileOnly 'org.greenrobot:greendao:3.3.0'
 
     compileOnly group: 'commons-io', name: 'commons-io', version: '2.6'
     api project(':common')

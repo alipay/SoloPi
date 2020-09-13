@@ -36,14 +36,14 @@ android {
 }
 
 dependencies {
-    implementation "com.android.support:support-v4:${SUPPORT_LIBRARY_VERSION}"
-    implementation "com.android.support:support-core-utils:${SUPPORT_LIBRARY_VERSION}"
-    implementation "com.android.support:appcompat-v7:${SUPPORT_LIBRARY_VERSION}"
-    implementation "com.android.support:recyclerview-v7:${SUPPORT_LIBRARY_VERSION}"
-    implementation "com.android.support:design:${SUPPORT_LIBRARY_VERSION}"
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.legacy:legacy-support-core-utils:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
     implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'
-    implementation 'com.alibaba:fastjson:1.2.68'
-    implementation 'org.greenrobot:greendao:3.2.2'
+    implementation 'com.alibaba:fastjson:1.2.73'
+    implementation 'org.greenrobot:greendao:3.3.0'
     implementation 'com.squareup.okhttp3:okhttp:3.12.3'
     implementation 'com.dlazaro66.qrcodereaderview:qrcodereaderview:2.0.3'
     implementation 'com.liulishuo.filedownloader:library:1.7.7'
@@ -55,13 +55,13 @@ dependencies {
     implementation('com.theartofdev.edmodo:android-image-cropper:2.5.1') {
         exclude group: "com.android.support"
     }
-    implementation('com.github.bumptech.glide:glide:4.9.0') {
+    implementation('com.github.bumptech.glide:glide:4.11.0') {
         exclude group: "com.android.support"
     }
     implementation 'commons-io:commons-io:2.6'
     implementation ('com.orhanobut:logger:2.2.0') {
         exclude group: "com.android.support"
     }
-    compileOnly 'com.android.support:multidex:1.0.3'
+    compileOnly 'androidx.multidex:multidex:2.0.0'
     implementation project(':shared')
 }

@@ -17,9 +17,8 @@ package com.alipay.hulu.replay;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.view.View;
-import android.view.WindowManager;
 
 import com.alipay.hulu.R;
 import com.alipay.hulu.bean.ReplayResultBean;

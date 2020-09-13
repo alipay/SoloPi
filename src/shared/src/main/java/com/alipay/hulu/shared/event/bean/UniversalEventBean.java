@@ -15,13 +15,11 @@
  */
 package com.alipay.hulu.shared.event.bean;
 
-import android.support.annotation.NonNull;
-import android.support.v4.util.ArrayMap;
+import androidx.annotation.NonNull;
+import androidx.collection.ArrayMap;
 
-import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.utils.StringUtil;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 

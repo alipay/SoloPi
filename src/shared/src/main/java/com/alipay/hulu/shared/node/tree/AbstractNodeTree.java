@@ -17,17 +17,15 @@ package com.alipay.hulu.shared.node.tree;
 
 
 import android.graphics.Rect;
-import android.os.Build;
-import android.support.annotation.NonNull;
 
-import com.alipay.hulu.common.application.LauncherApplication;
+import androidx.annotation.NonNull;
+
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.ClassUtil;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.StringUtil;
-import com.alipay.hulu.shared.node.OperationService;
 import com.alipay.hulu.shared.node.action.OperationContext;
 import com.alipay.hulu.shared.node.action.OperationExecutor;
 import com.alipay.hulu.shared.node.action.OperationMethod;
@@ -41,7 +39,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * 抽象节点树

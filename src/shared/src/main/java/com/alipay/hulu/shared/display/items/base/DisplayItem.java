@@ -15,7 +15,7 @@
  */
 package com.alipay.hulu.shared.display.items.base;
 
-import android.support.annotation.StringRes;
+import androidx.annotation.StringRes;
 
 import com.alipay.hulu.shared.display.items.util.FinalR;
 

@@ -35,21 +35,21 @@ android {
 }
 
 dependencies {
-    compileOnly "com.android.support:appcompat-v7:${SUPPORT_LIBRARY_VERSION}"
-    compileOnly "com.android.support:support-v4:${SUPPORT_LIBRARY_VERSION}"
-    compileOnly "com.android.support:design:${SUPPORT_LIBRARY_VERSION}"
+    compileOnly 'androidx.appcompat:appcompat:1.0.0'
+    compileOnly 'androidx.legacy:legacy-support-v4:1.0.0'
+    compileOnly 'com.google.android.material:material:1.0.0'
     compileOnly ('com.orhanobut:logger:2.2.0') {
         exclude group: "com.android.support"
     }
     compileOnly 'com.squareup.okhttp3:okhttp:3.12.3'
-    compileOnly('com.github.bumptech.glide:glide:4.9.0')
+    compileOnly('com.github.bumptech.glide:glide:4.11.0')
     {
         exclude group: "com.android.support"
     }
-    compileOnly 'com.alibaba:fastjson:1.2.68'
+    compileOnly 'com.alibaba:fastjson:1.2.73'
     compileOnly group: 'commons-io', name: 'commons-io', version: '2.6'
-    compileOnly 'com.android.support:multidex:1.0.3'
-    annotationProcessor ('com.github.bumptech.glide:compiler:4.9.0')
+    compileOnly 'androidx.multidex:multidex:2.0.0'
+    annotationProcessor ('com.github.bumptech.glide:compiler:4.11.0')
     {
         exclude group: "com.android.support"
     }

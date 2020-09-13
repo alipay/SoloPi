@@ -85,10 +85,6 @@ native <methods>;
 -keep public class * extends android.preference.Preference
 -keep public class * extends android.view.View
 -keep public class * extends android.database.sqlite.SQLiteOpenHelper{*;}
-# 如果有引用android-support-v4.jar包，可以添加下面这行
--keep public class com.null.test.ui.fragment.** {*;}
-#如果引用了v4或者v7包
--dontwarn android.support.**
 # 保留Activity中的方法参数是view的方法，
 -keepclassmembers class * extends android.app.Activity {
 public void * (android.view.View);
@@ -246,8 +242,6 @@ public com.alipay.hulu.common.utils.patch.PatchContext getContext();
 
 -keep interface ** extends com.alipay.hulu.common.service.base.ExportService { *; }
 
--dontwarn android.support.v4.**
--keep class android.support.** {*;}
 -keepattributes Exceptions,InnerClasses,Signature
 
 #fastjson
@@ -265,18 +259,6 @@ public com.alipay.hulu.common.utils.patch.PatchContext getContext();
 
 -keepnames class * extends android.view.View
 -keep class * extends android.app.Fragment {
-public void setUserVisibleHint(boolean);
-public void onHiddenChanged(boolean);
-public void onResume();
-public void onPause();
-}
--keep class android.support.v4.app.Fragment {
-public void setUserVisibleHint(boolean);
-public void onHiddenChanged(boolean);
-public void onResume();
-public void onPause();
-}
--keep class * extends android.support.v4.app.Fragment {
 public void setUserVisibleHint(boolean);
 public void onHiddenChanged(boolean);
 public void onResume();

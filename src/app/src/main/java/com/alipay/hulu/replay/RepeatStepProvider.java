@@ -15,7 +15,7 @@
  */
 package com.alipay.hulu.replay;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.alipay.hulu.bean.ReplayResultBean;
 import com.alipay.hulu.bean.ReplayStepInfoBean;

@@ -10,7 +10,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
     }
     buildTypes {
@@ -24,5 +24,5 @@ android {
 dependencies {
     implementation 'com.linkedin.dexmaker:dexmaker:2.19.1'
 
-    compileOnly "com.android.support:appcompat-v7:${SUPPORT_LIBRARY_VERSION}"
+    compileOnly 'androidx.appcompat:appcompat:1.0.0'
 }

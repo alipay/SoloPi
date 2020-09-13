@@ -16,7 +16,7 @@
 package com.alipay.hulu.fragment;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,10 +34,8 @@ import com.alipay.hulu.common.injector.param.RunningThread;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.utils.LogUtil;
-import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
 
-import java.util.Collections;
 import java.util.List;
 
 public class CaseDescEditFragment extends BaseFragment implements CaseEditActivity.OnCaseSaveListener {

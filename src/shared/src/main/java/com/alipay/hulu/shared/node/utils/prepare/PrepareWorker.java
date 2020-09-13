@@ -15,7 +15,7 @@
  */
 package com.alipay.hulu.shared.node.utils.prepare;
 
-import android.support.annotation.IntRange;
+import androidx.annotation.IntRange;
 
 import com.alipay.hulu.shared.node.utils.PrepareUtil;
 

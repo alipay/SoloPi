@@ -38,7 +38,7 @@
         android:layout_gravity="center_vertical"/>
 
     
-    <android.support.v7.widget.AppCompatSeekBar
+    <androidx.appcompat.widget.AppCompatSeekBar
         android:paddingStart="@dimen/control_dp12"
         android:paddingEnd="@dimen/control_dp12"
         android:id="@+id/sb"

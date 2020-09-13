@@ -15,7 +15,7 @@
  */
 package com.alipay.hulu.activity.entry;
 
-import android.support.annotation.StringRes;
+import androidx.annotation.StringRes;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

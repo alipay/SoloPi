@@ -26,7 +26,7 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:orientation="horizontal">
-		<android.support.v7.widget.AppCompatImageView
+		<androidx.appcompat.widget.AppCompatImageView
 			android:layout_width="@dimen/control_dp64"
 			android:layout_height="@dimen/control_dp64"
 			android:src="@drawable/solopi_main"

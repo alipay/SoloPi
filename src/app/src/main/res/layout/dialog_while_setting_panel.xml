@@ -29,7 +29,7 @@
         android:textColor="@color/secondaryText"
         android:textSize="14dp"
         />
-    <android.support.v7.widget.AppCompatSpinner
+    <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/spinner_while_mode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

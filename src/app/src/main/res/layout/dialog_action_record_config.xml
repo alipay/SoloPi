@@ -19,20 +19,20 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/dialog_action_record_title_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/control_dp12"
         android:layout_marginRight="@dimen/control_dp16"
         >
-        <android.support.design.widget.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
             android:hint="@string/record_config__report_title"
             android:textSize="@dimen/textsize_16"
             android:id="@+id/dialog_action_record_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <com.alipay.hulu.screenRecord.TextSpinner
         android:id="@+id/dialog_action_record_resolution"

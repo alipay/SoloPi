@@ -16,22 +16,18 @@
 package com.alipay.hulu.fragment;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alipay.hulu.R;
 import com.alipay.hulu.activity.BatchExecutionActivity;
 import com.alipay.hulu.adapter.BatchExecutionListAdapter;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
-import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
-import com.alipay.hulu.replay.BatchStepProvider;
-import com.alipay.hulu.service.CaseReplayManager;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
 import com.alipay.hulu.shared.io.db.GreenDaoManager;
 import com.alipay.hulu.shared.io.db.RecordCaseInfoDao;

@@ -15,7 +15,7 @@
  */
 package com.alipay.hulu.common.utils;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Created by qiaoruikai on 2019/11/8 11:40 PM.

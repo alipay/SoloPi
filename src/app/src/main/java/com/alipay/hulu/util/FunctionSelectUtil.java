@@ -21,11 +21,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.AppCompatSpinner;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatSpinner;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -76,7 +75,6 @@ import com.alipay.hulu.ui.GesturePadView;
 import com.alipay.hulu.ui.TwoLevelSelectLayout;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

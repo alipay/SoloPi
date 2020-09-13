@@ -21,7 +21,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Looper;
-import android.support.annotation.IntRange;
+import androidx.annotation.IntRange;
 import android.util.Base64;
 
 import com.alipay.hulu.common.R;
@@ -56,7 +56,6 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;

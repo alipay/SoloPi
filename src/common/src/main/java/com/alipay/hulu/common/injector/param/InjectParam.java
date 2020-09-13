@@ -18,7 +18,7 @@ package com.alipay.hulu.common.injector.param;
 import android.accessibilityservice.AccessibilityService;
 import android.app.Service;
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.alipay.hulu.common.bean.ProcessInfo;
 import com.alipay.hulu.common.injector.cache.InjectParamTypeCache;

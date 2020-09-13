@@ -29,7 +29,7 @@
         android:text="@string/case_step_edit__scope"
         style="@style/TextView.InputLabel"
         />
-    <android.support.v7.widget.AppCompatSpinner
+    <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/case_step_edit_select_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
         tools:listitem="@layout/item_case_step"
         style="@style/Widget.AppCompat.Spinner.Underlined"
         >
-    </android.support.v7.widget.AppCompatSpinner>
+    </androidx.appcompat.widget.AppCompatSpinner>
 
 
 </LinearLayout>

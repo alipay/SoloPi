@@ -84,7 +84,7 @@
         android:paddingBottom="8dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp">
-        <android.support.v7.widget.AppCompatRadioButton
+        <androidx.appcompat.widget.AppCompatRadioButton
             android:layout_marginRight="8dp"
             android:layout_centerVertical="true"
             android:id="@+id/dialog_action_let_item_radio"

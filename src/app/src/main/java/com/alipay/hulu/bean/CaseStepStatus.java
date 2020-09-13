@@ -1,6 +1,6 @@
 package com.alipay.hulu.bean;
 
-import android.support.annotation.StringRes;
+import androidx.annotation.StringRes;
 
 import com.alipay.hulu.R;
 import com.alipay.hulu.common.utils.StringUtil;

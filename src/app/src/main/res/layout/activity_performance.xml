@@ -60,7 +60,7 @@
                         android:padding="@dimen/control_dp6"
                         android:layout_gravity="center_vertical" >
 
-                        <android.support.v7.widget.AppCompatSpinner
+                        <androidx.appcompat.widget.AppCompatSpinner
                             android:id="@+id/perform_param_spinner"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"

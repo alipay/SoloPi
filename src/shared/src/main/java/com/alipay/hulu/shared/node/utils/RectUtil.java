@@ -17,7 +17,7 @@ package com.alipay.hulu.shared.node.utils;
 
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Created by qiaoruikai on 2019-05-07 17:04.

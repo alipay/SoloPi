@@ -15,7 +15,7 @@
  */
 package com.alipay.hulu.shared.node.action;
 
-import android.support.annotation.StringRes;
+import androidx.annotation.StringRes;
 
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.R;

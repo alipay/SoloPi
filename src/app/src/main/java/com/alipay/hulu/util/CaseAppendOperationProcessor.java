@@ -17,7 +17,7 @@ package com.alipay.hulu.util;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.alibaba.fastjson.JSON;
 import com.alipay.hulu.activity.CaseEditActivity;
