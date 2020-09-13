@@ -19,7 +19,6 @@ import android.annotation.TargetApi;
 import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.media.MediaCodecInfo;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
@@ -27,17 +26,11 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import android.view.Gravity;
-import android.view.View;
 import android.view.WindowManager;
 
 import com.alipay.hulu.R;
-import com.alipay.hulu.activity.MyApplication;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.injector.InjectorService;
-import com.alipay.hulu.common.utils.ContextUtil;
 import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.service.BaseService;
@@ -48,6 +41,9 @@ import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -65,7 +61,7 @@ public class SimpleRecordService extends BaseService {
     public static final String INTENT_EXCEPT_DIFF =  "INTENT_EXCEPT_DIFF";
     public static final String VIDEO_DIR = "ScreenCaptures";
 
-    private static final String TAG = RecordService.class.getSimpleName();
+    private static final String TAG = SimpleRecordService.class.getSimpleName();
     private static final int NOTIFICATION_ID = 19222;
 
     private static final int TYPE_TOAST = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY: WindowManager.LayoutParams.TYPE_TOAST;
@@ -76,11 +72,9 @@ public class SimpleRecordService extends BaseService {
 
     private boolean isRecording;
     private MediaProjectionManager mMediaProjectionManager;
-    private WindowManager wm;
     private ScreenRecorder mRecorder;
     private Notifications mNotifications;
     private Handler mHandler;
-    private View view;
 
 
     private String lastVideoPath;
@@ -101,12 +95,6 @@ public class SimpleRecordService extends BaseService {
         LogUtil.d(TAG, "onCreate");
         InjectorService.g().register(this);
 
-        try {
-            initView();
-        } catch (Throwable e) {
-            LogUtil.e(TAG, "Fail to create one pixel point", e);
-        }
-
         mMediaProjectionManager = (MediaProjectionManager)getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         mNotifications = new Notifications(getApplicationContext());
     }
@@ -123,29 +111,6 @@ public class SimpleRecordService extends BaseService {
 //        stopForeground(false);
 
         return super.onStartCommand(intent, flags, startId);
-    }
-
-    private void initView() {
-        // 获取WindowManager
-        wm = (WindowManager) getApplicationContext().getSystemService(WINDOW_SERVICE);
-        // 设置LayoutParams(全局变量）相关参数
-        WindowManager.LayoutParams wmParams = ((MyApplication) getApplication()).getFloatWinParams();
-        wmParams.type = TYPE_TOAST;
-        wmParams.flags |= 8;
-        wmParams.gravity = Gravity.LEFT | Gravity.TOP; // 调整悬浮窗口至左上角
-        // 以屏幕左上角为原点，设置x、y初始值
-        wmParams.x = 0;
-        wmParams.y = 0;
-        // 设置悬浮窗口长宽数据
-        wmParams.width = 1;
-        wmParams.height = 1;
-        wmParams.format = 1;
-        wmParams.alpha = 1F;
-
-        view = new View(ContextUtil.getContextThemeWrapper(this, R.style.AppDialogTheme));
-        view.setBackgroundColor(Color.RED);
-
-        wm.addView(view, wmParams);
     }
 
     private File initRecorder(Intent intent) {
@@ -203,7 +168,6 @@ public class SimpleRecordService extends BaseService {
         stopForeground(false);
 
         LogUtil.d(TAG, "onDestroy");
-        wm.removeView(view);
     }
 
 

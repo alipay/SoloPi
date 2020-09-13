@@ -33,7 +33,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import androidx.appcompat.app.AlertDialog;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Gravity;
@@ -69,6 +68,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+
+import androidx.appcompat.app.AlertDialog;
 
 import static android.view.Surface.ROTATION_0;
 
@@ -266,7 +267,7 @@ public class FloatWinService extends BaseService {
 		mInjectorService.register(this);
 
 		if (provider == null) {
-			provider = new AppInfoProvider();
+			provider = AppInfoProvider.getInstance();
 			mInjectorService.register(provider);
 		}
 
@@ -540,10 +541,14 @@ public class FloatWinService extends BaseService {
 	 */
 	private void updateViewPosition() {
 		// 更新浮动窗口位置参数
-		wmParams.x = (int) (x - mTouchStartX);
-		wmParams.y = (int) (y - mTouchStartY);
-		wmParams.alpha = 1F;
-		wm.updateViewLayout(view, wmParams);
+		try {
+			wmParams.x = (int) (x - mTouchStartX);
+			wmParams.y = (int) (y - mTouchStartY);
+			wmParams.alpha = 1F;
+			wm.updateViewLayout(view, wmParams);
+		} catch (Throwable t) {
+			LogUtil.e(TAG, "Fail update View layout", t);
+		}
 	}
 
 	@Override
