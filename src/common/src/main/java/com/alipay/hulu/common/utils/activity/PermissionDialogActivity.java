@@ -784,53 +784,61 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
 
         // 关闭Instrument
         String result = CmdTools.execHighPrivilegeCmd("pm list instrumentation");
-        String[] lines = StringUtil.split(result, "\n");
-        Pattern pattern = Pattern.compile("\\(target=(.*)\\)");
-        String targetApp = InjectorService.g().getMessage(SubscribeParamEnum.APP, String.class);
+        if (StringUtil.isEmpty(result)) {
+            LogUtil.e(TAG, "fail to kill instrument apps");
+        } else {
+            String[] lines = StringUtil.split(result, "\n");
+            Pattern pattern = Pattern.compile("\\(target=(.*)\\)");
+            String targetApp = InjectorService.g().getMessage(SubscribeParamEnum.APP, String.class);
 
-        for(String line: lines) {
-            Matcher matcher = pattern.matcher(line);
-            if (matcher.find()) {
-                String instPkg = matcher.group(1);
-                if (StringUtil.equals(instPkg, "com.alipay.hulu")) {
-                    continue;
-                }
-                // 不杀目标应用
-                if (StringUtil.equals(instPkg, targetApp)) {
-                    continue;
-                }
+            for (String line : lines) {
+                Matcher matcher = pattern.matcher(line);
+                if (matcher.find()) {
+                    String instPkg = matcher.group(1);
+                    if (StringUtil.equals(instPkg, "com.alipay.hulu")) {
+                        continue;
+                    }
+                    // 不杀目标应用
+                    if (StringUtil.equals(instPkg, targetApp)) {
+                        continue;
+                    }
 
-                LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.permission__kill_app, instPkg));
-                LogUtil.i(TAG, "Find instrumentation package and killing \"" + instPkg + "\"");
-                String exeRes = CmdTools.execHighPrivilegeCmd("am force-stop " + instPkg);
-                LogUtil.i(TAG, "force-stop result:::" + exeRes);
-                CmdTools.execHighPrivilegeCmd("am force-stop " + instPkg);
+                    LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.permission__kill_app, instPkg));
+                    LogUtil.i(TAG, "Find instrumentation package and killing \"" + instPkg + "\"");
+                    String exeRes = CmdTools.execHighPrivilegeCmd("am force-stop " + instPkg);
+                    LogUtil.i(TAG, "force-stop result:::" + exeRes);
+                    CmdTools.execHighPrivilegeCmd("am force-stop " + instPkg);
+                }
             }
         }
 
         // 关闭UIAutomator
         String[] pids = CmdTools.ps("uiautomator");
-        for (String pid: pids) {
-            LogUtil.i(TAG, "Get uiautomator pid line: " + pid);
-            String[] columns = pid.split("\\s+");
-            if (columns.length > 2) {
-                pid = columns[1];
-                CmdTools.execHighPrivilegeCmd("kill " + pid);
+        if (pids != null && pids.length > 0) {
+            for (String pid : pids) {
+                LogUtil.i(TAG, "Get uiautomator pid line: " + pid);
+                String[] columns = pid.split("\\s+");
+                if (columns.length > 2) {
+                    pid = columns[1];
+                    CmdTools.execHighPrivilegeCmd("kill " + pid);
+                }
             }
         }
 
         // 杀掉Monkey
         pids = CmdTools.ps("monkey");
-        for (String pid: pids) {
-            // 只杀掉shell用户开启的monkey
-            if (!StringUtil.contains(pid, "shell")) {
-                continue;
-            }
-            LogUtil.i(TAG, "Get Monkey pid line: " + pid);
-            String[] columns = pid.split("\\s+");
-            if (columns.length > 2) {
-                pid = columns[1];
-                CmdTools.execHighPrivilegeCmd("kill " + pid);
+        if (pids != null && pids.length > 0) {
+            for (String pid : pids) {
+                // 只杀掉shell用户开启的monkey
+                if (!StringUtil.contains(pid, "shell")) {
+                    continue;
+                }
+                LogUtil.i(TAG, "Get Monkey pid line: " + pid);
+                String[] columns = pid.split("\\s+");
+                if (columns.length > 2) {
+                    pid = columns[1];
+                    CmdTools.execHighPrivilegeCmd("kill " + pid);
+                }
             }
         }
     }
