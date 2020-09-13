@@ -301,14 +301,17 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
         int colorWhile;
         int colorIf;
         int colorDelete;
+        int colorExtra;
         if (Build.VERSION.SDK_INT >= 23) {
             colorWhile = getActivity().getColor(R.color.colorStatusBlue);
             colorIf = getActivity().getColor(R.color.colorStatusYellow);
             colorDelete = getActivity().getColor(R.color.colorStatusRed);
+            colorExtra = getActivity().getColor(R.color.colorStatusGay);
         } else {
             colorWhile = getResources().getColor(R.color.colorStatusBlue);
             colorIf = getResources().getColor(R.color.colorStatusYellow);
             colorDelete = getResources().getColor(R.color.colorStatusRed);
+            colorExtra = getResources().getColor(R.color.colorStatusGay);
         }
 
         // 转换模式
@@ -350,7 +353,52 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
                 .setDirection(MenuItem.DIRECTION_RIGHT)
                 .setBackground(new ColorDrawable(colorDelete)).build());
 
-        dragList.setMenu(menu, controlMenu, controlSubMenu);
+        // 转换模式
+        Menu clickMenu = new Menu(true, 3);
+        clickMenu.addItem(new MenuItem.Builder().setText("删除步骤").setTextColor(Color.WHITE)
+                .setWidth(dp64)
+                .setTextSize(textSize13)
+                .setDirection(MenuItem.DIRECTION_RIGHT)
+                .setBackground(new ColorDrawable(colorDelete)).build());
+        clickMenu.addItem(new MenuItem.Builder().setText("转换为IF").setTextColor(Color.WHITE).setWidth(dp64)
+                .setDirection(MenuItem.DIRECTION_RIGHT)
+                .setTextSize(textSize13)
+                .setBackground(new ColorDrawable(colorIf)).build());
+        clickMenu.addItem(new MenuItem.Builder().setText("转换为WHILE").setTextColor(Color.WHITE)
+                .setWidth(dp64)
+                .setDirection(MenuItem.DIRECTION_RIGHT)
+                .setTextSize(textSize13)
+                .setBackground(new ColorDrawable(colorWhile)).build());
+        clickMenu.addItem(new MenuItem.Builder().setText("转化为发现则点击").setTextColor(Color.WHITE)
+                .setWidth(dp64)
+                .setTextSize(textSize13)
+                .setDirection(MenuItem.DIRECTION_RIGHT)
+                .setBackground(new ColorDrawable(colorExtra)).build());
+
+
+        // 转换模式
+        Menu clickIfMenu = new Menu(true, 4);
+        clickIfMenu.addItem(new MenuItem.Builder().setText("删除步骤").setTextColor(Color.WHITE)
+                .setWidth(dp64)
+                .setTextSize(textSize13)
+                .setDirection(MenuItem.DIRECTION_RIGHT)
+                .setBackground(new ColorDrawable(colorDelete)).build());
+        clickIfMenu.addItem(new MenuItem.Builder().setText("转换为IF").setTextColor(Color.WHITE).setWidth(dp64)
+                .setDirection(MenuItem.DIRECTION_RIGHT)
+                .setTextSize(textSize13)
+                .setBackground(new ColorDrawable(colorIf)).build());
+        clickIfMenu.addItem(new MenuItem.Builder().setText("转换为WHILE").setTextColor(Color.WHITE)
+                .setWidth(dp64)
+                .setDirection(MenuItem.DIRECTION_RIGHT)
+                .setTextSize(textSize13)
+                .setBackground(new ColorDrawable(colorWhile)).build());
+        clickIfMenu.addItem(new MenuItem.Builder().setText("转化为点击").setTextColor(Color.WHITE)
+                .setWidth(dp64)
+                .setTextSize(textSize13)
+                .setDirection(MenuItem.DIRECTION_RIGHT)
+                .setBackground(new ColorDrawable(colorExtra)).build());
+
+        dragList.setMenu(menu, controlMenu, controlSubMenu, clickMenu, clickIfMenu);
         dragList.setDividerHeight(0);
         dragList.setAdapter(adapter);
         adapter.setListener(new CaseStepAdapter.OnStepListener() {
@@ -382,6 +430,24 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
                             }
                         }, "取消", null);
                         return Menu.ITEM_NOTHING;
+                    } else if (buttonPosition == 3) {
+                        CaseStepAdapter.MyDataWrapper wrapper = dragEntities.get(itemPosition);
+                        OperationMethod method = wrapper.currentStep.getOperationMethod();
+                        PerformActionEnum origin = method.getActionEnum();
+                        if (origin == PerformActionEnum.CLICK) {
+                            method.setActionEnum(PerformActionEnum.CLICK_IF_EXISTS);
+                            adapter.notifyDataSetChanged();
+                            return Menu.ITEM_SCROLL_BACK;
+                        } else if (origin == PerformActionEnum.CLICK_IF_EXISTS) {
+                            method.setActionEnum(PerformActionEnum.CLICK);
+                            adapter.notifyDataSetChanged();
+                            return Menu.ITEM_SCROLL_BACK;
+                        } else {
+                            CaseStepEditFragment.this.toastShort("不支持转化步骤: " + origin.getDesc());
+                            return Menu.ITEM_SCROLL_BACK;
+                        }
+
+
                     }
 
                     // 全部操作均支持转化

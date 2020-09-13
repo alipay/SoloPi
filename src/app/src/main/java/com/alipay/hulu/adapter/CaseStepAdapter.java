@@ -92,6 +92,10 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
         } else if (method.getActionEnum() == PerformActionEnum.BREAK
                 || method.getActionEnum() == PerformActionEnum.CONTINUE) {
             return 2;
+        } else if (method.getActionEnum() == PerformActionEnum.CLICK) {
+            return 3;
+        } else if (method.getActionEnum() == PerformActionEnum.CLICK_IF_EXISTS) {
+            return 4;
         }
         return 0;
     }
@@ -162,7 +166,7 @@ public class CaseStepAdapter extends BaseAdapter implements View.OnClickListener
 
     @Override
     public int getViewTypeCount() {
-        return 3;
+        return 5;
     }
 
     @Override
