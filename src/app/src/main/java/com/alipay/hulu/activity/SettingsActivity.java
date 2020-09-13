@@ -142,6 +142,9 @@ public class SettingsActivity extends BaseActivity {
     private View mHideLogSettingWrapper;
     private TextView mHideLogSettingInfo;
 
+    private View mAdbServerSettingWrapper;
+    private TextView mAdbServerSettingInfo;
+
     private View mImportCaseSettingWrapper;
 
     private View mImportPluginSettingWrapper;
@@ -602,6 +605,25 @@ public class SettingsActivity extends BaseActivity {
             }
         });
 
+        // adb调试地址
+        mAdbServerSettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMultipleEditDialog(SettingsActivity.this, new DialogUtils.OnDialogResultListener() {
+                            @Override
+                            public void onDialogPositive(List<String> data) {
+                                if (data.size() == 1) {
+                                    String server = data.get(0);
+                                    SPService.putString(SPService.KEY_ADB_SERVER, server);
+                                    mAdbServerSettingInfo.setText(server);
+                                }
+                            }
+                        }, getString(R.string.settings__adb_server),
+                        Collections.singletonList(new Pair<>(getString(R.string.settings__adb_server),
+                                SPService.getString(SPService.KEY_ADB_SERVER, "localhost:5555"))));
+            }
+        });
+
         mHideLogSettingWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -824,6 +846,9 @@ public class SettingsActivity extends BaseActivity {
         boolean restartApp = SPService.getBoolean(SPService.KEY_RESTART_APP_ON_PLAY, true);
         mRestartAppInfo.setText(restartApp? R.string.constant__yes: R.string.constant__no);
 
+        mAdbServerSettingWrapper = findViewById(R.id.adb_server_setting_wrapper);
+        mAdbServerSettingInfo = _findViewById(R.id.adb_server_setting_info);
+        mAdbServerSettingInfo.setText(SPService.getString(SPService.KEY_ADB_SERVER, "localhost:5555"));
 
         mSkipAccessibilitySettingWrapper = findViewById(R.id.skip_accessibility_setting_wrapper);
         mSkipAccessibilitySettingInfo = (TextView) findViewById(R.id.skip_accessibility_setting_info);

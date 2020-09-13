@@ -410,4 +410,6 @@
     <string name="scroll_setting__set_scroll_param">Scroll Params</string>
     <string name="service_notification__solopi_record_running">SoloPi Screen Record Window is Running</string>
     <string name="node_info__image">Capture</string>
+    <string name="setting__adb_server">ADB debug address</string>
+    <string name="settings__adb_server">ADB Debug Address</string>
 </resources>

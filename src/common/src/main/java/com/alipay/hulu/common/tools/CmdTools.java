@@ -942,7 +942,10 @@ public class CmdTools {
         // 开始连接adb
         LogUtil.i(TAG, "Socket connecting...");
         try {
-            sock = new Socket("localhost", 5555);
+            String server = SPService.getString(SPService.KEY_ADB_SERVER, "localhost:5555");
+            String[] split = server.split(":");
+            sock = new Socket(split[0], Integer.parseInt(split[1]));
+            sock.setReuseAddress(true);
         } catch (IOException e) {
             LogUtil.e(TAG, "Throw IOException", e);
             return false;

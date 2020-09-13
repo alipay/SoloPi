@@ -958,6 +958,51 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/adb_server_setting_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:layout_marginTop="@dimen/control_dp12"
+        android:background="@drawable/bg_settings_item"
+        android:gravity="center_vertical"
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/control_dp12"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:text="@string/setting__adb_server"
+            android:textColor="@color/black"
+            android:textSize="@dimen/control_dp16" />
+
+        <TextView
+            android:id="@+id/adb_server_setting_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="5dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:maxWidth="120dp"
+            android:textColor="@color/gray"
+            android:textSize="@dimen/control_dp12" />
+
+    </RelativeLayout>
+
+
+            <RelativeLayout
         android:id="@+id/import_case_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

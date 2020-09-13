@@ -409,4 +409,6 @@
     <string name="scroll_setting__set_scroll_param">设置滑动参数</string>
     <string name="service_notification__solopi_record_running">SoloPi录屏悬浮窗正在运行</string>
     <string name="node_info__image">截图信息</string>
+    <string name="setting__adb_server">设备ADB调试地址</string>
+    <string name="settings__adb_server">设备ADB调试地址</string>
 </resources>

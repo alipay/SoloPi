@@ -55,6 +55,7 @@ public class SPService {
     public static final String KEY_AUTO_CLEAR_FILES_DAYS = "KEY_AUTO_CLEAR_FILES_DAYS";
 
     public static final String KEY_INDEX_RECORD = "KEY_INDEX_RECORD";
+    public static final String KEY_ADB_SERVER = "KEY_ADB_SERVER";
 
     private static SharedPreferences preferences;
 
