@@ -408,4 +408,5 @@
     <string name="scroll_setting__scroll_time">滑动时间(ms)</string>
     <string name="scroll_setting__set_scroll_param">设置滑动参数</string>
     <string name="service_notification__solopi_record_running">SoloPi录屏悬浮窗正在运行</string>
+    <string name="node_info__image">截图信息</string>
 </resources>

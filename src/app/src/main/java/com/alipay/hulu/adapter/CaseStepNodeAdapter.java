@@ -15,15 +15,15 @@
  */
 package com.alipay.hulu.adapter;
 
+import android.graphics.Bitmap;
 import android.graphics.Rect;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
@@ -32,10 +32,14 @@ import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.node.tree.OperationNode;
 import com.alipay.hulu.shared.node.tree.export.OperationStepExporter;
+import com.alipay.hulu.shared.node.utils.BitmapUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by qiaoruikai on 2019/2/20 8:05 PM.
@@ -51,19 +55,23 @@ public class CaseStepNodeAdapter extends RecyclerView.Adapter<CaseStepNodeAdapte
     }
 
     @Override
+    public int getItemViewType(int position) {
+        return StringUtil.equals(properties.get(position), OperationStepExporter.CAPTURE_IMAGE_BASE64)? 1: 0;
+    }
+
+    @Override
     public NodePropertyHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (parent == null) {
             return null;
         }
 
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_case_step_edit_input, parent, false);
-
-        return new NodePropertyHolder(view, node);
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        return StringUtil.equals(properties.get(position), OperationStepExporter.CAPTURE_IMAGE_BASE64)? 1: 0;
+        if (viewType == 0) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_case_step_edit_input, parent, false);
+            return new TextPropertyHolder(view, node);
+        } else {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_case_step_edit_image_picker, parent, false);
+            return new ImagePropertyHolder(view, node);
+        }
     }
 
     @Override
@@ -78,7 +86,15 @@ public class CaseStepNodeAdapter extends RecyclerView.Adapter<CaseStepNodeAdapte
         return properties.size();
     }
 
-    public static class NodePropertyHolder extends RecyclerView.ViewHolder implements TextWatcher {
+    static abstract class NodePropertyHolder extends RecyclerView.ViewHolder {
+        NodePropertyHolder(View itemView) {
+            super(itemView);
+        }
+
+        abstract void wrapData(String key, String value);
+    }
+
+    public static class TextPropertyHolder extends NodePropertyHolder implements TextWatcher {
         private String key;
 
         private TextView title;
@@ -86,7 +102,7 @@ public class CaseStepNodeAdapter extends RecyclerView.Adapter<CaseStepNodeAdapte
         private TextView infoText;
         private OperationNode node;
 
-        public NodePropertyHolder(View itemView, OperationNode node) {
+        public TextPropertyHolder(View itemView, OperationNode node) {
             super(itemView);
             this.node = node;
 
@@ -97,7 +113,7 @@ public class CaseStepNodeAdapter extends RecyclerView.Adapter<CaseStepNodeAdapte
             infoText.setText("");
         }
 
-        private void wrapData(String key, String value) {
+        void wrapData(String key, String value) {
             this.key = key;
 
             editText.setText(value);
@@ -122,6 +138,21 @@ public class CaseStepNodeAdapter extends RecyclerView.Adapter<CaseStepNodeAdapte
             } else {
                 infoText.setText("");
             }
+        }
+    }
+
+    public static class ImagePropertyHolder extends NodePropertyHolder {
+        private ImageView imageView;
+
+        public ImagePropertyHolder(View itemView, OperationNode node) {
+            super(itemView);
+            imageView = itemView.findViewById(R.id.case_step_edit_image_view);
+        }
+
+        @Override
+        void wrapData(final String key, String value) {
+            Bitmap img = BitmapUtil.base64ToBitmap(value);
+            imageView.setImageBitmap(img);
         }
     }
 

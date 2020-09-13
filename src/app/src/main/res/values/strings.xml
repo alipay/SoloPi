@@ -409,4 +409,5 @@
     <string name="scroll_setting__scroll_time">Scroll Timing(ms)</string>
     <string name="scroll_setting__set_scroll_param">Scroll Params</string>
     <string name="service_notification__solopi_record_running">SoloPi Screen Record Window is Running</string>
+    <string name="node_info__image">Capture</string>
 </resources>
