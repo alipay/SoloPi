@@ -391,6 +391,20 @@ public class CmdTools {
     }
 
     /**
+     * 激活辅助功能
+     * @param key
+     * @param value
+     * @return
+     */
+    public static String putAccessibility(String key, String value) {
+        String cmd = "content call --uri content://settings/secure --method PUT_secure --arg " + key + "  --extra _user:i:0 --extra value:s:" + value;
+        if (isRooted()) {
+            return execRootCmd(cmd, null, true, null).toString();
+        }
+        return execAdbCmd(cmd, 0);
+    }
+
+    /**
      * 带超时的高权限命令执行
      * @param cmd shell命令（shell之后的部分）
      * @param maxTime 最长执行时间

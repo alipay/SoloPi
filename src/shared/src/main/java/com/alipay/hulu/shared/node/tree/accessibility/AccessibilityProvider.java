@@ -329,7 +329,7 @@ public class AccessibilityProvider implements AbstractProvider {
         cleanInstrumentationAndUiAutomator();
 
         // 切换回TalkBack
-        CmdTools.execHighPrivilegeCmd("settings put secure enabled_accessibility_services com.android.talkback/com.google.android.marvin.talkback.TalkBackService");
+        CmdTools.putAccessibility("enabled_accessibility_services", "com.android.talkback/com.google.android.marvin.talkback.TalkBackService");
         // 等2秒
         MiscUtil.sleep(2000);
 
@@ -348,7 +348,7 @@ public class AccessibilityProvider implements AbstractProvider {
             }
         });
 
-        CmdTools.execHighPrivilegeCmd("settings put secure enabled_accessibility_services com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
+        CmdTools.putAccessibility("enabled_accessibility_services", "com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
 
         // 等待辅助功能重新激活
         try {
