@@ -42,7 +42,14 @@ public class ActionProviderManager {
     private List<ActionProvider> mProviders;
     private Map<String, Integer> actionMap = new HashMap<>();
 
-    public ActionProviderManager(final Context context) {
+    public ActionProviderManager() {
+    }
+
+    /**
+     * 启动
+     * @param context
+     */
+    public void start(final Context context) {
         List<ActionProvider> providers = new ArrayList<>();
 
         // 注册所有Provider
@@ -59,7 +66,6 @@ public class ActionProviderManager {
 
         this.mProviders = providers;
         if (mProviders.size() > 0) {
-
             // ActionProvider初始化
             LauncherApplication.getInstance().runOnUiThread(new Runnable() {
                 @Override
@@ -67,6 +73,21 @@ public class ActionProviderManager {
                     for (ActionProvider provider: mProviders) {
                         provider.onCreate(context);
                     }
+                }
+            });
+        }
+    }
+
+    public void stop(final Context context) {
+        if (this.mProviders != null && this.mProviders.size() > 0) {
+            LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    for (ActionProvider provider: mProviders) {
+                        provider.onDestroy(context);
+                    }
+
+                    mProviders.clear();
                 }
             });
         }
@@ -140,20 +161,5 @@ public class ActionProviderManager {
 
         ActionProvider provider = mProviders.get(idx);
         provider.provideView(context, action, method, node, callback);
-    }
-
-    public void onDestroy(final Context context) {
-        if (this.mProviders != null && this.mProviders.size() > 0) {
-            LauncherApplication.getInstance().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    for (ActionProvider provider: mProviders) {
-                        provider.onDestroy(context);
-                    }
-
-                    mProviders.clear();
-                }
-            });
-        }
     }
 }

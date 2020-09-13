@@ -16,6 +16,7 @@
 package com.alipay.hulu.screenRecord;
 
 import android.annotation.TargetApi;
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -55,6 +56,7 @@ import static android.app.Activity.RESULT_OK;
  */
 @TargetApi(value = Build.VERSION_CODES.LOLLIPOP)
 public class SimpleRecordService extends BaseService {
+    private static final int RECORD_SERVICE_NOTIFICATION_ID = 36231;
 
     public static final String INTENT_WIDTH =  "INTENT_WIDTH";
     public static final String INTENT_HEIGHT =  "INTENT_HEIGHT";
@@ -91,6 +93,10 @@ public class SimpleRecordService extends BaseService {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        Notification notification = generateNotificationBuilder().setContentText(getString(R.string.service_notification__solopi_record_running)).setSmallIcon(R.drawable.solopi_main).build();
+        startForeground(RECORD_SERVICE_NOTIFICATION_ID, notification);
+
         mHandler = new Handler();
         LogUtil.d(TAG, "onCreate");
         InjectorService.g().register(this);
@@ -194,6 +200,8 @@ public class SimpleRecordService extends BaseService {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        stopForeground(false);
+
         LogUtil.d(TAG, "onDestroy");
         wm.removeView(view);
     }

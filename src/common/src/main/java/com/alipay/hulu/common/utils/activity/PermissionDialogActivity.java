@@ -581,6 +581,16 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                         LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
                     }
 
+                    if (InjectorService.g().getMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, AccessibilityService.class) == null) {
+                        CmdTools.execHighPrivilegeCmd("settings put secure enabled_accessibility_services com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
+                        CmdTools.execHighPrivilegeCmd("settings put secure accessibility_enabled 1");
+                    }
+                    try {
+                        latch.await(2000, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
+                    }
+
                     // 可能是因为UIAutomator、Instrument等工具影响，清理掉
                     if (InjectorService.g().getMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, AccessibilityService.class) == null) {
                         showAction(getString(R.string.permission__try_kil_uiautomator), getString(R.string.constant__cancel), new Runnable() {
@@ -856,8 +866,9 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
         CmdTools.putAccessibility("enabled_accessibility_services", "com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
 
         // 等待辅助功能重新激活
+        LauncherApplication.getInstance().showToast("尝试重启辅助功能，等待10秒");
         try {
-            latch.await(20000, TimeUnit.MILLISECONDS);
+            latch.await(10000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
         }

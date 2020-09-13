@@ -70,6 +70,9 @@
     <color name = "colorStatusRed" >#ff4b2d</color >
     <color name = "colorStatusGay" >#54b3e4</color >
 
+    <color name="lightYellow">#FBFFEA</color>
+    <color name="lineColor">#979797</color>
+
     <color name="divideBgColor">#c9c9c9</color> <!-- 分割线的背景色, 中灰 -->
     <color name="item_pressed">#D8D8D8</color> <!-- listview中item的按下效果, 中灰 -->
     <color name="textColorDeepGray">#333333</color> <!-- 深灰色 -->

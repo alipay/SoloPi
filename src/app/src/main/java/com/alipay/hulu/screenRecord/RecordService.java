@@ -16,6 +16,7 @@
 package com.alipay.hulu.screenRecord;
 
 import android.annotation.TargetApi;
+import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -48,9 +49,11 @@ import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.tools.CmdTools;
+import com.alipay.hulu.common.utils.ContextUtil;
 import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
+import com.alipay.hulu.service.BaseService;
 import com.alipay.hulu.shared.event.EventService;
 import com.alipay.hulu.shared.event.bean.UniversalEventBean;
 import com.alipay.hulu.shared.event.constant.Constant;
@@ -65,7 +68,8 @@ import java.util.Locale;
 import java.util.Map;
 
 @TargetApi(value = Build.VERSION_CODES.LOLLIPOP)
-public class RecordService extends Service {
+public class RecordService extends BaseService {
+    public static final int RECORD_SERVICE_NOTIFICATION_ID = 26543;
 
     public static final String INTENT_RESULT_CODE =  "INTENT_RESULT_CODE";
     public static final String INTENT_VIDEO_CODEC =  "INTENT_VIDEO_CODEC";
@@ -141,6 +145,10 @@ public class RecordService extends Service {
         results = new ArrayList<>();
         createView();
 
+        Notification notification = generateNotificationBuilder().setContentText(getString(R.string.service_notification__solopi_record_running)).setSmallIcon(R.drawable.solopi_main).build();
+        startForeground(RECORD_SERVICE_NOTIFICATION_ID, notification);
+
+
         mMediaProjectionManager = (MediaProjectionManager)getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         mNotifications = new Notifications(getApplicationContext());
         mHandler = new Handler();
@@ -159,7 +167,7 @@ public class RecordService extends Service {
 
 
     private void createView() {
-        view = LayoutInflater.from(this).inflate(R.layout.record_service, null);
+        view = LayoutInflater.from(ContextUtil.getContextThemeWrapper(this, R.style.AppTheme)).inflate(R.layout.record_service, null);
 
         recordBtn = (TextView) view.findViewById(R.id.record_btn);
         recordBtn.setText(R.string.record__start_record);
@@ -261,7 +269,7 @@ public class RecordService extends Service {
             @Override
             public void run() {
                 closeBtn.getHitRect(closeRect);
-                recordBtn.getGlobalVisibleRect(recordRect);
+                recordBtn.getHitRect(recordRect);
             }
         }, 500);
 

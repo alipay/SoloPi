@@ -25,9 +25,9 @@ buildscript {
     }
 
     ext {
-        setProperty('compileSdkVersion', 28)
-        setProperty('buildToolsVersion', "28.0.3")
-        setProperty('targetSdkVersion', 28)
+        setProperty('compileSdkVersion', 29)
+        setProperty('buildToolsVersion', "29.0.2")
+        setProperty('targetSdkVersion', 29)
     }
 }
 

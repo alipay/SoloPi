@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
 -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!--
         Base application theme, dependent on API level. This theme is replaced
@@ -40,6 +40,7 @@
         <item name="android:windowTitleStyle">@style/windowTitleStyle</item>
         <item name="android:textAppearanceMedium">@style/defaultMediumTextAppearance</item>
         <item name="android:textAppearanceLarge">@style/defaultLargeTextAppearance</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">true</item>
 
         <!--背景颜色及和透明程度-->
         <item name="android:windowBackground">@color/default_background_color</item>
@@ -75,6 +76,7 @@
         <item name="android:windowIsFloating">true</item>
         <!--是否模糊-->
         <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">true</item>
     </style>
 
     <style name="selectListView" parent="Widget.AppCompat.ListView">
@@ -130,6 +132,7 @@
         <item name="android:windowIsFloating">true</item>
         <!--是否模糊-->
         <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">true</item>
     </style>
 
     <style name="ShadowDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert" >
@@ -151,6 +154,7 @@
         <item name="android:windowIsFloating">true</item>
         <!--是否模糊-->
         <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">true</item>
     </style>
 
     <style name="TextView.InputLabel" parent="TextAppearance.AppCompat.Caption">

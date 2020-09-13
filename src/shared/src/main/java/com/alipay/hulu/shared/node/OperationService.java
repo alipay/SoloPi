@@ -90,7 +90,7 @@ public class OperationService implements ExportService {
         }
 
         // 加载Provider
-        actionProviderMng = new ActionProviderManager(context);
+        actionProviderMng = new ActionProviderManager();
 
         InjectorService.g().register(this);
     }
@@ -101,7 +101,23 @@ public class OperationService implements ExportService {
         processorMap.clear();
 
         // 终止各个Provider
-        actionProviderMng.onDestroy(context);
+        if (actionProviderMng != null) {
+            actionProviderMng.stop(context);
+        }
+    }
+
+    /**
+     * 开始扩展操作处理
+     */
+    public void startExtraActionHandle() {
+        actionProviderMng.start(LauncherApplication.getContext());
+    }
+
+    /**
+     * 停止扩展功能处理
+     */
+    public void stopExtraActionHandle() {
+        actionProviderMng.stop(LauncherApplication.getContext());
     }
 
     @Subscriber(@Param(LauncherApplication.SCREEN_ORIENTATION))

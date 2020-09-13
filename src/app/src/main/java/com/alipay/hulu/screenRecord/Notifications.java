@@ -49,17 +49,17 @@ public class Notifications extends ContextWrapper {
     }
 
     public void recording(long timeMs) {
-        if (SystemClock.elapsedRealtime() - mLastFiredTime < 1000) {
-            return;
-        }
-
-        //隐藏所有消息
-        getNotificationManager().cancelAll();
-        Notification notification = getBuilder()
-                .setContentText("Length: " + DateUtils.formatElapsedTime(timeMs / 1000))
-                .build();
-        getNotificationManager().notify(id, notification);
-        mLastFiredTime = SystemClock.elapsedRealtime();
+//        if (SystemClock.elapsedRealtime() - mLastFiredTime < 1000) {
+//            return;
+//        }
+//
+//        //隐藏所有消息
+//        getNotificationManager().cancelAll();
+//        Notification notification = getBuilder()
+//                .setContentText("Length: " + DateUtils.formatElapsedTime(timeMs / 1000))
+//                .build();
+//        getNotificationManager().notify(id, notification);
+//        mLastFiredTime = SystemClock.elapsedRealtime();
     }
 
     private Notification.Builder getBuilder() {

@@ -233,6 +233,9 @@ public class CaseRecordManager implements ExportService {
         stopListener = new FloatStopListener();
 
         context.bindService(new Intent(context, FloatWinService.class), connection, Context.BIND_AUTO_CREATE);
+
+        // 开始扩展功能处理
+        operationService.startExtraActionHandle();
     }
 
 
@@ -1105,6 +1108,8 @@ public class CaseRecordManager implements ExportService {
         }
         listener = null;
         stopListener = null;
+
+        operationService.stopExtraActionHandle();
 
         injectorService.unregister(this);
     }

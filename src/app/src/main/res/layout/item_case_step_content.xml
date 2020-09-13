@@ -23,6 +23,8 @@
         android:id="@+id/case_step_edit_content_status"
         android:layout_width="@dimen/case_step_status_width"
         app:css_textWidth="@dimen/case_step_status_text_width"
+        app:css_backgroundColor="@color/lightYellow"
+        app:css_lineColor="@color/lineColor"
         app:css_lineSpace="@dimen/control_dp6"
         android:layout_height="match_parent" />
 

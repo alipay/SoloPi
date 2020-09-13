@@ -237,6 +237,8 @@ public class CaseReplayManager implements ExportService {
         captureService = app.findServiceByName(ScreenCaptureService.class.getName());
 
         windowManager = (WindowManager) app.getSystemService(Context.WINDOW_SERVICE);
+
+        operationService.startExtraActionHandle();
     }
 
     /**
@@ -308,6 +310,8 @@ public class CaseReplayManager implements ExportService {
             connection = null;
             binder = null;
         }
+
+        operationService.stopExtraActionHandle();
 
         runningExecutor.shutdownNow();
         LauncherApplication.getInstance().stopServiceByName(HighLightService.class.getName());

@@ -293,7 +293,7 @@ public class FloatWinService extends BaseService {
 	 * 初始化界面
 	 */
 	private void createView() {
-		view = LayoutInflater.from(this).inflate(R.layout.float_win, null);
+		view = LayoutInflater.from(ContextUtil.getContextThemeWrapper(this, R.style.AppTheme)).inflate(R.layout.float_win, null);
 		// 关闭按钮
 		close = (ImageView) view.findViewById(R.id.closeIcon);
 		// 录制开关

@@ -13,13 +13,14 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
 -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <style name="PermissionAppDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert" >
         <item name="colorPrimary">#03A9F4</item>
         <item name="colorPrimaryDark">#0288D1</item>
         <item name="colorAccent">#FF4081</item>
         <item name="windowMinWidthMajor" type="dimen">50%</item>
         <item name="windowMinWidthMinor" type="dimen">40%</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">true</item>
 
         <!--背景颜色及和透明程度-->
         <item name="android:windowBackground">@drawable/common_dialog_background</item>
