@@ -43,6 +43,23 @@ public class AppInfoProvider {
 
     private String appName;
 
+    private volatile static AppInfoProvider _PROVIDER_INSTANCE;
+
+    public static AppInfoProvider getInstance() {
+        if (_PROVIDER_INSTANCE == null) {
+            synchronized (AppInfoProvider.class) {
+                if (_PROVIDER_INSTANCE == null) {
+                    _PROVIDER_INSTANCE = new AppInfoProvider();
+                }
+            }
+        }
+
+        return _PROVIDER_INSTANCE;
+    }
+
+    private AppInfoProvider() {
+    }
+
     @Subscriber(@Param(SubscribeParamEnum.APP))
     public void setAppName(String appName) {
         this.appName = appName;

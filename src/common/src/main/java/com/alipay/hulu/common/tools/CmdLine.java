@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -258,5 +259,60 @@ public class CmdLine implements AbstCmdLine, WrapSocket {
     public void disconnect() {
         ((ByteQueueInputStream) inputStream).closeSocketForwardingMode();
         LogUtil.i(TAG, "Wrap Connection disconnect");
+    }
+
+    /**
+     * 获取命令行读取器
+     * @return
+     */
+    public CmdLineReader getReader() {
+        return new CmdLineReader(this);
+    }
+
+    public String getCmdTag() {
+        return cmdTag;
+    }
+
+    public static class CmdLineReader {
+        private CmdLine cmdLine;
+        private Queue<String> outputQueue;
+        private int curPos;
+        private CmdLineReader(CmdLine cmdLine) {
+            this.cmdLine = cmdLine;
+            outputQueue = new LinkedList<>();
+            curPos = 0;
+        }
+
+        public String readLine() {
+            StringBuilder buffer = new StringBuilder();
+            boolean eol = false;
+            while (!eol) {
+                if (outputQueue.isEmpty()) {
+                    String newContent = cmdLine.readUntilSomething();
+                    if (newContent == null) {
+                        return buffer.toString();
+                    }
+                    outputQueue.add(newContent);
+                    curPos = 0;
+                }
+
+                String first = outputQueue.peek();
+                if (first == null) {
+                    continue;
+                }
+                int nextEol = -1;
+                if ((nextEol = first.indexOf('\n', curPos)) < 0) {
+                    buffer.append(first, curPos, first.length());
+                    outputQueue.poll();
+                    curPos = 0;
+                } else {
+                    buffer.append(first, curPos, nextEol);
+                    eol = true;
+                    curPos = nextEol + 1;
+                }
+            }
+
+            return buffer.toString();
+        }
     }
 }

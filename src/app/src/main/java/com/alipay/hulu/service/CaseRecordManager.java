@@ -70,6 +70,7 @@ import com.alipay.hulu.event.ScanSuccessEvent;
 import com.alipay.hulu.shared.event.EventService;
 import com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl;
 import com.alipay.hulu.shared.event.bean.UniversalEventBean;
+import com.alipay.hulu.shared.event.constant.Constant;
 import com.alipay.hulu.shared.io.OperationStepService;
 import com.alipay.hulu.shared.io.bean.OperationStepMessage;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
@@ -232,7 +233,7 @@ public class CaseRecordManager implements ExportService {
         listener = new FloatClickListener(this);
         stopListener = new FloatStopListener();
 
-        context.bindService(new Intent(context, FloatWinService.class), connection, Context.BIND_AUTO_CREATE);
+        context.getApplicationContext().bindService(new Intent(context.getApplicationContext(), FloatWinService.class), connection, Context.BIND_AUTO_CREATE);
 
         // 开始扩展功能处理
         operationService.startExtraActionHandle();
@@ -456,7 +457,21 @@ public class CaseRecordManager implements ExportService {
         injectorService.pushMessage(com.alipay.hulu.shared.event.constant.Constant.EVENT_ACCESSIBILITY_MODE, AccessibilityServiceImpl.MODE_NORMAL, 200);
     }
 
-    @Subscriber(value = @Param(com.alipay.hulu.shared.event.constant.Constant.EVENT_TOUCH_POSITION), thread = RunningThread.BACKGROUND)
+    private UniversalEventBean touchPos;
+
+    @Subscriber(value = @Param(Constant.EVENT_TOUCH_POSITION), thread = RunningThread.BACKGROUND)
+    public void receiveTouchPos(UniversalEventBean eventBean) {
+        this.touchPos = eventBean;
+    }
+
+    @Subscriber(value = @Param(Constant.EVENT_TOUCH_UP), thread = RunningThread.BACKGROUND)
+    public void receiveTouchUp(UniversalEventBean event) {
+        if (touchPos != null) {
+            receiveTouchPosition(touchPos);
+            touchPos = null;
+        }
+    }
+
     public void receiveTouchPosition(UniversalEventBean eventBean) {
         Point point = eventBean.getParam(KEY_TOUCH_POINT);
         if (point == null) {

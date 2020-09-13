@@ -469,8 +469,9 @@ public class TouchEventTracker {
 
             // 解析当前触摸事件
             String content;
-            while ((content = cmdLine.readUntilSomething()) != null) {
-                doContentParse(content, tracker);
+            CmdLine.CmdLineReader reader = cmdLine.getReader();
+            while ((content = reader.readLine()) != null) {
+                parseSingleLine(content, tracker);
             }
         }
 
@@ -518,99 +519,112 @@ public class TouchEventTracker {
                 // 只有在stream还能存在的情况才会进行读取
                 String[] lines = result.split("\n");
 
+
                 for (String line : lines) {
-                    if (line.contains("ABS_MT_TRACKING_ID")) {
-                        // 抬起事件
-                        if (line.contains("ffffff")) {
-                            // 防止重复触发事件
-                            long upTime = getEventMicroSecond(line);
-                            // 防止重复触发事件
-                            if (upTime - lastUpActionTime < WAIT_TOUCH_FILTER) {
-                                continue;
-                            }
-
-                            lastUpActionTime = upTime;
-
-                            LogUtil.w(TAG, "Tracking line: " + line);
-                            tracker.receiveTouchUp(upTime);
-                        } else {
-                            // 根据DOWN消息来确定是否有点击
-                            // 出现DOWN消息后找ABS_MS_POSITION_X 和 ABS_MT_POSITION_Y来获取点击位置
-                            // OnePlus A3010点击是BTN_TOOL_FINGER...
-                            long downTime = getEventMicroSecond(line);
-                            // 防止重复触发事件
-                            if (downTime - lastDownActionTime < WAIT_TOUCH_FILTER) {
-                                continue;
-                            }
-
-                            lastDownActionTime = downTime;
-
-                            if (xFactor == 0f || yFactor == 0f) {
-                                reloadFactor(line);
-                            }
-                            LogUtil.i(TAG, line);
-                            waitForXY = new boolean[]{true, true};
-                            tracker.receiveTouchDown(downTime);
-                        }
-                    } else if (line.contains("BTN_TOUCH")) {
-                        if (line.contains("UP")) {
-                            // 防止重复触发事件
-                            long upTime = getEventMicroSecond(line);
-                            // 防止重复触发事件
-                            if (upTime - lastUpActionTime < WAIT_TOUCH_FILTER) {
-                                continue;
-                            }
-
-                            lastUpActionTime = upTime;
-
-                            LogUtil.w(TAG, "Tracking line: " + line);
-                            tracker.receiveTouchUp(upTime);
-                        } else if (line.contains("DOWN")) {
-                            long downTime = getEventMicroSecond(line);
-                            // 防止重复触发事件
-                            if (downTime - lastDownActionTime < WAIT_TOUCH_FILTER) {
-                                continue;
-                            }
-
-                            lastDownActionTime = downTime;
-
-                            if (xFactor == 0f || yFactor == 0f) {
-                                reloadFactor(line);
-                            }
-                            LogUtil.i(TAG, line);
-                            waitForXY = new boolean[]{true, true};
-                            tracker.receiveTouchDown(downTime);
-                        }
-                    } else if (waitForXY[0] && line.contains("ABS_MT_POSITION_X")) {
-                        LogUtil.i(TAG, line);
-                        String[] splited = line.split("ABS_MT_POSITION_X");
-                        String x = splited[splited.length - 1].trim();
-                        xy[0] = (int) (Integer.parseInt(x, 16) * xFactor);
-                        waitForXY[0] = false;
-
-                        LogUtil.w("lezhou", "xfactor:" + xFactor);
-
-                        LogUtil.w("lezhou", "x: " + (xy[0]));
-
-                        // 如果xy都找到了，发送消息
-                        sendIfPossible(line);
-                    } else if (waitForXY[1] && line.contains("ABS_MT_POSITION_Y")) {
-                        LogUtil.i(TAG, line);
-                        String[] splited = line.split("ABS_MT_POSITION_Y");
-                        String y = splited[splited.length - 1].trim();
-                        xy[1] = (int) (Integer.parseInt(y, 16) * yFactor);
-                        waitForXY[1] = false;
-
-                        LogUtil.w("lezhou", "y: " + xy[1]);
-
-                        // 如果xy都找到了，发送消息
-                        sendIfPossible(line);
-                    }
+                    parseSingleLine(line, tracker);
                 }
-
                 //LogUtil.i(TAG, "Touch Manager Cost time " + (System.currentTimeMillis() - startTime));
             } catch (Throwable t) {
                 LogUtil.e(TAG, "监听抛出异常，需要检查", t);
+            }
+        }
+
+        /**
+         * 解析单行数据
+         * @param line
+         * @param tracker
+         */
+        private void parseSingleLine(String line, TouchEventTracker tracker) {
+            try {
+                if (line.contains("ABS_MT_TRACKING_ID")) {
+                    // 抬起事件
+                    if (line.contains("ffffff")) {
+                        // 防止重复触发事件
+                        long upTime = getEventMicroSecond(line);
+                        // 防止重复触发事件
+                        if (upTime - lastUpActionTime < WAIT_TOUCH_FILTER) {
+                            return;
+                        }
+
+                        lastUpActionTime = upTime;
+
+                        LogUtil.w(TAG, "Tracking line: " + line);
+                        tracker.receiveTouchUp(upTime);
+                    } else {
+                        // 根据DOWN消息来确定是否有点击
+                        // 出现DOWN消息后找ABS_MS_POSITION_X 和 ABS_MT_POSITION_Y来获取点击位置
+                        // OnePlus A3010点击是BTN_TOOL_FINGER...
+                        long downTime = getEventMicroSecond(line);
+                        // 防止重复触发事件
+                        if (downTime - lastDownActionTime < WAIT_TOUCH_FILTER) {
+                            return;
+                        }
+
+                        lastDownActionTime = downTime;
+
+                        if (xFactor == 0f || yFactor == 0f) {
+                            reloadFactor(line);
+                        }
+                        LogUtil.i(TAG, line);
+                        waitForXY = new boolean[]{true, true};
+                        tracker.receiveTouchDown(downTime);
+                    }
+                } else if (line.contains("BTN_TOUCH")) {
+                    if (line.contains("UP")) {
+                        // 防止重复触发事件
+                        long upTime = getEventMicroSecond(line);
+                        // 防止重复触发事件
+                        if (upTime - lastUpActionTime < WAIT_TOUCH_FILTER) {
+                            return;
+                        }
+
+                        lastUpActionTime = upTime;
+
+                        LogUtil.w(TAG, "Tracking line: " + line);
+                        tracker.receiveTouchUp(upTime);
+                    } else if (line.contains("DOWN")) {
+                        long downTime = getEventMicroSecond(line);
+                        // 防止重复触发事件
+                        if (downTime - lastDownActionTime < WAIT_TOUCH_FILTER) {
+                            return;
+                        }
+
+                        lastDownActionTime = downTime;
+
+                        if (xFactor == 0f || yFactor == 0f) {
+                            reloadFactor(line);
+                        }
+                        LogUtil.i(TAG, line);
+                        waitForXY = new boolean[]{true, true};
+                        tracker.receiveTouchDown(downTime);
+                    }
+                } else if (waitForXY[0] && line.contains("ABS_MT_POSITION_X")) {
+                    LogUtil.i(TAG, line);
+                    String[] splited = line.split("ABS_MT_POSITION_X");
+                    String x = splited[splited.length - 1].trim();
+                    xy[0] = (int) (Integer.parseInt(x, 16) * xFactor);
+                    waitForXY[0] = false;
+
+                    LogUtil.w("lezhou", "xfactor:" + xFactor);
+
+                    LogUtil.w("lezhou", "x: " + (xy[0]));
+
+                    // 如果xy都找到了，发送消息
+                    sendIfPossible(line);
+                } else if (waitForXY[1] && line.contains("ABS_MT_POSITION_Y")) {
+                    LogUtil.i(TAG, line);
+                    String[] splited = line.split("ABS_MT_POSITION_Y");
+                    String y = splited[splited.length - 1].trim();
+                    xy[1] = (int) (Integer.parseInt(y, 16) * yFactor);
+                    waitForXY[1] = false;
+
+                    LogUtil.w("lezhou", "y: " + xy[1]);
+
+                    // 如果xy都找到了，发送消息
+                    sendIfPossible(line);
+                }
+            } catch (Throwable t) {
+                LogUtil.e(TAG, "Fail to parse line " + line, t);
             }
         }
 
