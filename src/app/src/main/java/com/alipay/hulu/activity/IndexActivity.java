@@ -44,6 +44,7 @@ import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.constant.Constant;
 import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
+import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.ClassUtil;
 import com.alipay.hulu.common.utils.ContextUtil;
 import com.alipay.hulu.common.utils.FileUtils;
@@ -124,7 +125,7 @@ public class IndexActivity extends BaseActivity {
                                     "margin-left:30px;" +
                                     "margin-top:30px;" +
                                     "font-size:" + px + "px;" +
-                                    "word-wrap:break-word;"+
+                                    "word-wrap:break-word;" +
                                     "}" +
                                     "</style></header>";
                             final String content = css + renderer.render(document) + "</html>";
@@ -241,11 +242,14 @@ public class IndexActivity extends BaseActivity {
      * 加载其他信息
      */
     private void loadOthers() {
-        // 检查是否需要上报故障日志
         BackgroundExecutor.execute(new Runnable() {
             @Override
             public void run() {
+                // 检查是否需要上报故障日志
                 checkErrorLog();
+
+                // 读取外部的ADB秘钥
+                readOuterAdbKey();
             }
         });
     }
@@ -356,6 +360,26 @@ public class IndexActivity extends BaseActivity {
                 }
             }
         });
+    }
+
+    /**
+     * 读取外部ADB配置文件
+     */
+    private void readOuterAdbKey() {
+        File root = FileUtils.getSubDir("adb");
+        final File adbKey = new File(root, "adbkey");
+        final File pubKey = new File(root, "adbkey.pub");
+        if (!adbKey.exists() || !pubKey.exists()) {
+            return;
+        }
+
+        boolean result = CmdTools.readOuterAdbKey(adbKey, pubKey);
+        if (!result) {
+            toastShort("拷贝ADB Key失败");
+        } else {
+            adbKey.delete();
+            pubKey.delete();
+        }
     }
 
     public static class Entry {

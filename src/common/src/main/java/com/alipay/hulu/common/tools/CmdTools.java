@@ -44,6 +44,7 @@ import com.cgutman.adblib.AdbCrypto;
 import com.cgutman.adblib.AdbStream;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -51,8 +52,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.math.BigInteger;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1530,6 +1541,115 @@ public class CmdTools {
         return newPath;
     }
 
+
+    /**
+     * 读取外部ADB KEY信息
+     */
+    public static boolean readOuterAdbKey(File privKey, File pubKey) {
+        if (!privKey.exists() || !pubKey.exists()) {
+            LauncherApplication.getInstance().showToast("adb key文件不存在，请确认后重新导入");
+            return false;
+        }
+
+        if (connection != null && connection.isFine()) {
+            try {
+                connection.close();
+            } catch (IOException e1) {
+                LogUtil.e(TAG, "Read outer adb key throw exception", e1);
+            } finally {
+                connection = null;
+            }
+        }
+
+        try {
+            String content = FileUtils.readFile(privKey);
+            content = content.replace("-----BEGIN PRIVATE KEY-----\n", "");
+            content = content.replace("-----END PRIVATE KEY-----", "");
+            byte[] decoded = Base64.decode(content, Base64.DEFAULT);
+            PKCS8EncodedKeySpec encodedKeySpec = new PKCS8EncodedKeySpec(decoded);
+            File targetFile = new File(LauncherApplication.getInstance().getFilesDir(), "privKey");
+            FileOutputStream stream = new FileOutputStream(targetFile);
+            stream.write(encodedKeySpec.getEncoded());
+            stream.flush();
+            stream.close();
+        } catch (Exception e) {
+            LogUtil.e(TAG, "Copy Private Key failed", e);
+            return false;
+        }
+
+        try {
+            String content = FileUtils.readFile(pubKey);
+            if (StringUtil.isEmpty(content)) {
+                LauncherApplication.getInstance().showToast("Public Key为空");
+                return false;
+            }
+
+            PublicKey publicKey = parseAndroidPubKey(content);
+
+            File targetFile = new File(LauncherApplication.getInstance().getFilesDir(), "pubKey");
+            FileOutputStream stream = new FileOutputStream(targetFile);
+            stream.write(publicKey.getEncoded());
+            stream.flush();
+            stream.close();
+        } catch (Exception e) {
+            LogUtil.e(TAG, "Copy Private Key failed", e);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * parse android public key
+     * @param inputKey
+     * @return
+     */
+    public static PublicKey parseAndroidPubKey(String inputKey) {
+        BufferedReader bufferedReader = new BufferedReader(new StringReader(inputKey));
+        String line = null;
+        try {
+            line = bufferedReader.readLine();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        line = line.replaceAll(" .*@.*", "");
+        byte[] raw = Base64.decode(line, Base64.NO_WRAP);
+        ByteBuffer bb = ByteBuffer.wrap(raw);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+        IntBuffer intBuffer = bb.asIntBuffer();
+        int len = intBuffer.get();
+        BigInteger n0Inv = BigInteger.valueOf(intBuffer.get());
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(len*4);
+        int[] dst = new int[len];
+        intBuffer.get(dst);
+        reverse(dst);
+        for (int i = 0; i < len; i++) {
+            int value = dst[i];
+            byte[] convertedBytes = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(value).array();
+            byteArrayOutputStream.write(convertedBytes, 0, convertedBytes.length);
+        }
+        byte[] n = byteArrayOutputStream.toByteArray();
+        byteArrayOutputStream.reset();
+        dst = new int[len];
+        intBuffer.get(dst);
+        reverse(dst);
+        for (int i = 0; i < len; i++) {
+            int value = dst[i];
+            byte[] convertedBytes = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(value).array();
+            byteArrayOutputStream.write(convertedBytes, 0, convertedBytes.length);
+        }
+        int e = intBuffer.get();
+
+        RSAPublicKey publicKey;
+        try {
+            publicKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(new BigInteger(1, n), BigInteger.valueOf(e)));
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        return publicKey;
+    }
+
+
     /**
      * 拷贝可执行文件
      * @param sourceF 源文件
@@ -1548,6 +1668,56 @@ public class CmdTools {
         execHighPrivilegeCmd(cmd);
 
         return exec;
+    }
+
+
+    /**
+     * <p>Reverses the order of the given array.</p>
+     *
+     * <p>This method does nothing for a {@code null} input array.</p>
+     *
+     * @param array  the array to reverse, may be {@code null}
+     */
+    public static void reverse(final int[] array) {
+        if (array == null) {
+            return;
+        }
+        reverse(array, 0, array.length);
+    }
+
+    /**
+     * <p>
+     * Reverses the order of the given array in the given range.
+     * </p>
+     *
+     * <p>
+     * This method does nothing for a {@code null} input array.
+     * </p>
+     *
+     * @param array
+     *            the array to reverse, may be {@code null}
+     * @param startIndexInclusive
+     *            the starting index. Undervalue (&lt;0) is promoted to 0, overvalue (&gt;array.length) results in no
+     *            change.
+     * @param endIndexExclusive
+     *            elements up to endIndex-1 are reversed in the array. Undervalue (&lt; start index) results in no
+     *            change. Overvalue (&gt;array.length) is demoted to array length.
+     * @since 3.2
+     */
+    public static void reverse(final int[] array, int startIndexInclusive, int endIndexExclusive) {
+        if (array == null) {
+            return;
+        }
+        int i = startIndexInclusive < 0 ? 0 : startIndexInclusive;
+        int j = Math.min(array.length, endIndexExclusive) - 1;
+        int tmp;
+        while (j > i) {
+            tmp = array[j];
+            array[j] = array[i];
+            array[i] = tmp;
+            j--;
+            i++;
+        }
     }
 
     public interface GrantHighPrivPermissionCallback {
