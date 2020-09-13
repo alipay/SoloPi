@@ -16,7 +16,7 @@
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeAllMask"  
     android:accessibilityFeedbackType="feedbackAllMask"
-    android:notificationTimeout="100"
+    android:notificationTimeout="1000"
     android:canRetrieveWindowContent="true"
 	android:canRequestFilterKeyEvents="true"
 	android:description="@string/accessibility_description"

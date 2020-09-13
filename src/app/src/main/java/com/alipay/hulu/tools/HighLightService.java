@@ -54,7 +54,7 @@ public class HighLightService implements ExportService, View.OnTouchListener {
 	private WindowManager wm;
 	public Handler mHandler;
 
-	public View unvisiableView;
+	public View invisibleView;
 
 	@Override
 	public void onCreate(Context context) {
@@ -63,14 +63,14 @@ public class HighLightService implements ExportService, View.OnTouchListener {
 
 		mHandler = new Handler();
 
-		unvisiableView = new View(cx);
+		invisibleView = new View(cx);
 		int targetColor;
 		if (Build.VERSION.SDK_INT >= 23) {
 			targetColor = context.getColor(R.color.colorAccent);
 		} else {
 			targetColor = context.getResources().getColor(R.color.colorAccent);
 		}
-		unvisiableView.setBackgroundColor(targetColor);
+		invisibleView.setBackgroundColor(targetColor);
 		WindowManager.LayoutParams params = new WindowManager.LayoutParams();
 		//创建非模态、不可碰触
 		params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -84,12 +84,12 @@ public class HighLightService implements ExportService, View.OnTouchListener {
 		params.type = WINDOW_LEVEL;
 
 		try {
-			wm.addView(unvisiableView, params);
+			wm.addView(invisibleView, params);
 		} catch (WindowManager.BadTokenException e) {
 			LogUtil.e(TAG, e, "无法使用Window type = %d, 降级", WINDOW_LEVEL);
 			WINDOW_LEVEL = TYPE_TOAST;
 			params.type = WINDOW_LEVEL;
-			wm.addView(unvisiableView, params);
+			wm.addView(invisibleView, params);
 		}
 	}
 
@@ -165,7 +165,7 @@ public class HighLightService implements ExportService, View.OnTouchListener {
 
 		// 记录下状态栏高度
 		int[] xAndY = new int[] {0, 0};
-		unvisiableView.getLocationOnScreen(xAndY);
+		invisibleView.getLocationOnScreen(xAndY);
 
 		// 设置下windowParam
 		WindowManager.LayoutParams wmParams = ((MyApplication) cx.getApplicationContext()).getMywmParams();

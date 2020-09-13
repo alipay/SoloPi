@@ -149,7 +149,7 @@ public class InjectorService implements ExportService {
         if (updateExecutor != null && !updateExecutor.isShutdown()) {
             updateExecutor.shutdownNow();
         }
-        updateExecutor = Executors.newSingleThreadScheduledExecutor();
+        updateExecutor = Executors.newScheduledThreadPool(3);
 
         if (loadProviderExecutor != null && !loadProviderExecutor.isShutdown()) {
             loadProviderExecutor.shutdownNow();
@@ -284,7 +284,7 @@ public class InjectorService implements ExportService {
      * @param paramName
      * @param value
      */
-    public void pushMessage(String paramName, Object value, boolean enqueue, long delay) {
+    public void pushMessage(String paramName, final Object value, final boolean enqueue, long delay) {
         InjectParam targetParam = null;
         if (!StringUtil.isEmpty(paramName)) {
             targetParam = InjectParamTypeCache.getCacheInstance().getExistsParamType(paramName);
@@ -301,6 +301,31 @@ public class InjectorService implements ExportService {
             return;
         }
 
+        if (delay <= 0) {
+            doPushMessage(targetParam, value, enqueue);
+        } else {
+            final InjectParam finalTargetParam = targetParam;
+            updateExecutor.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    msgExecutor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            doPushMessage(finalTargetParam, value, enqueue);
+                        }
+                    });
+                }
+            }, delay, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    /**
+     * 实际推送消息
+     * @param targetParam
+     * @param value
+     * @param enqueue
+     */
+    private void doPushMessage(InjectParam targetParam, Object value, boolean enqueue) {
         if (LOG_ENABLE) {
             LogUtil.d(TAG, "开始发送消息name=%s,type=%s", targetParam.getName(), targetParam.getType());
         }
@@ -314,17 +339,7 @@ public class InjectorService implements ExportService {
             referenceMap.put(targetParam.getName(), reference);
         }
 
-        // 如果有等待消息队列
-        Queue<Callback> callbacks = paramWaitMap.remove(targetParam.getName());
-        if (callbacks != null) {
-            for (Callback callback: callbacks) {
-                try {
-                    callback.onResult(value);
-                } catch (Exception e) {
-                    LogUtil.e(TAG, "Callback fail", e);
-                }
-            }
-        }
+        notifyWaitQueue(targetParam.getName(), value);
 
         if (LOG_ENABLE) {
             LogUtil.d(TAG, "向引用队列【%s】发送【%s】，接收数量【%d】", targetParam.getName(), value, reference.countReference());
@@ -407,6 +422,26 @@ public class InjectorService implements ExportService {
         }
 
         return (T) reference.getCurrentValue();
+    }
+
+    /**
+     * 通知等待队列
+     * @param name
+     * @param value
+     */
+    private void notifyWaitQueue(String name, Object value) {
+        // 如果有等待消息队列
+        Queue<Callback> callbacks = paramWaitMap.remove(name);
+        if (callbacks != null) {
+            LogUtil.i(TAG, "Target param has callback queue, count: " + callbacks.size());
+            for (Callback callback: callbacks) {
+                try {
+                    callback.onResult(value);
+                } catch (Exception e) {
+                    LogUtil.e(TAG, "Callback fail", e);
+                }
+            }
+        }
     }
 
     /**
@@ -533,6 +568,8 @@ public class InjectorService implements ExportService {
                         LogUtil.w(TAG, "无法更新空对象");
                         continue;
                     }
+
+                    service.notifyWaitQueue(param.first, param.second);
 
                     ParamReference reference = service.referenceMap.get(param.first);
 

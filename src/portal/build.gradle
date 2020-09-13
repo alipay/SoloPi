@@ -65,3 +65,7 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.0'
     implementation project(':app')
 }
+
+android.defaultConfig.versionCode = rootProject.ext.appVersionCode
+android.defaultConfig.versionName = rootProject.ext.appVersionName
+android.defaultConfig.versionNameSuffix = rootProject.ext.appVersionNameSuffix

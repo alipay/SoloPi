@@ -129,7 +129,7 @@ public class PermissionUtil {
                 _callback.onPermissionResult(result, reason);
 
             }
-        }, 1);
+        }, 10);
     }
 
     /**
