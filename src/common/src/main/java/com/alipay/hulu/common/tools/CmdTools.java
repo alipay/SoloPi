@@ -305,78 +305,83 @@ public class CmdTools {
      * @return 分行结果
      */
     public static String[] ps(String filter) {
-        if (!RomUtils.isOppoSystem() && Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
-            try {
-                Process p;
-                if (filter != null && filter.length() > 0) {
-                    p = Runtime.getRuntime().exec(new String[]{"sh", "-c", "ps | grep '" + filter + "'"});
-                } else {
-                    p = Runtime.getRuntime().exec(new String[]{"sh", "-c", "ps"});
-                }
-                BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                String line;
-                List<String> results = new ArrayList<>();
-                while ((line = br.readLine()) != null) {
+        try {
+            if (!RomUtils.isOppoSystem() && Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+                try {
+                    Process p;
+                    if (filter != null && filter.length() > 0) {
+                        p = Runtime.getRuntime().exec(new String[]{"sh", "-c", "ps | grep '" + filter + "'"});
+                    } else {
+                        p = Runtime.getRuntime().exec(new String[]{"sh", "-c", "ps"});
+                    }
+                    BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                    String line;
+                    List<String> results = new ArrayList<>();
+                    while ((line = br.readLine()) != null) {
 //            		LogUtil.d(TAG, "ERR************" + line);
-                    results.add(line);
+                        results.add(line);
+                    }
+                    return results.toArray(new String[results.size()]);
+                } catch (IOException e) {
+                    LogUtil.e(TAG, "Read ps content failed", e);
+                    return new String[0];
                 }
-                return results.toArray(new String[results.size()]);
-            } catch (IOException e) {
-                LogUtil.e(TAG, "Read ps content failed", e);
-                return new String[0];
-            }
-        } else if (Build.VERSION.SDK_INT <= 25) {
-
-            // Android 7.0, 7.1无法通过应用权限获取所有进程
-            if (isRooted()) {
-                if (filter != null && filter.length() > 0) {
-                    return execRootCmd("ps | grep '" + filter + "'", null, true, null).toString().split("\n");
+            } else if (Build.VERSION.SDK_INT <= 25) {
+                // Android 7.0, 7.1无法通过应用权限获取所有进程
+                if (isRooted()) {
+                    if (filter != null && filter.length() > 0) {
+                        return execRootCmd("ps | grep '" + filter + "'", null, true, null).toString().split("\n");
+                    } else {
+                        return execRootCmd("ps", null, true, null).toString().split("\n");
+                    }
                 } else {
-                    return execRootCmd("ps", null, true, null).toString().split("\n");
+                    if (filter != null && filter.length() > 0) {
+
+                        // 存在ps命令调用超时情况
+                        return execAdbCmd("ps | grep '" + filter + "'", 2500).split("\n");
+                    } else {
+                        return execAdbCmd("ps", 2500).split("\n");
+                    }
                 }
             } else {
-                if (filter != null && filter.length() > 0) {
-
-                    // 存在ps命令调用超时情况
-                    return execAdbCmd("ps | grep '" + filter + "'", 2500).split("\n");
+                String[] result;
+                // Android O ps为toybox实现，功能与标准ps命令基本相同，需要-A参数获取全部进程
+                if (isRooted()) {
+                    if (filter != null && filter.length() > 0) {
+                        result = execRootCmd("ps -ef | grep '" + filter + "'", null, true, null).toString().split("\n");
+                    } else {
+                        result = execRootCmd("ps -ef", null, true, null).toString().split("\n");
+                    }
                 } else {
-                    return execAdbCmd("ps", 2500).split("\n");
-                }
-            }
-        } else {
-            String[] result;
-            // Android O ps为toybox实现，功能与标准ps命令基本相同，需要-A参数获取全部进程
-            if (isRooted()) {
-                if (filter != null && filter.length() > 0) {
-                    result = execRootCmd("ps -ef | grep '" + filter + "'", null, true, null).toString().split("\n");
-                } else {
-                    result = execRootCmd("ps -ef", null, true, null).toString().split("\n");
-                }
-            } else {
-                if (filter != null && filter.length() > 0) {
+                    if (filter != null && filter.length() > 0) {
 
-                    // 存在ps命令调用超时情况
-                    result = execAdbCmd("ps -A | grep \"" + filter + "\"", 2500).split("\n");
-                } else {
-                    result = execAdbCmd("ps -A", 2500).split("\n");
+                        // 存在ps命令调用超时情况
+                        result = execAdbCmd("ps -ef | grep '" + filter + "'", 2500).split("\n");
+                    } else {
+                        result = execAdbCmd("ps -ef", 2500).split("\n");
+                    }
                 }
-            }
 
-            if (result == null || result.length == 0) {
-                return new String[0];
-            }
-
-            List<String> filtered =  new ArrayList<>(result.length + 1);
-            for (String line: result) {
-                if (StringUtil.contains(line, "grep " + filter )) {
-                    continue;
-                } else if (StringUtil.contains(line, "grep '" + filter )) {
-                    continue;
+                if (StringUtil.isEmpty(filter)) {
+                    return result;
                 }
-                filtered.add(line);
-            }
-            return filtered.toArray(new String[0]);
 
+                // 过滤 grep XXXX 的内容
+                ArrayList<String> filtered = new ArrayList<>(result.length);
+                for (String line : result) {
+                    if (StringUtil.contains(line, "grep " + filter)) {
+                        continue;
+                    } else if (StringUtil.contains(line, "grep '" + filter)) {
+                        continue;
+                    }
+                    filtered.add(line);
+                }
+
+                return filtered.toArray(new String[]{});
+            }
+        } catch (Exception e) {
+            LogUtil.e(TAG, "Fail to execute ps func", e);
+            return new String[0];
         }
     }
 

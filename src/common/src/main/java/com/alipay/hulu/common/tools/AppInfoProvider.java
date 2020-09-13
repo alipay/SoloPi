@@ -106,8 +106,8 @@ public class AppInfoProvider {
         }
 
         int filterPid;
-        if (Build.VERSION.SDK_INT >= 29) {
-            String activity = CmdTools.execAdbCmd("dumpsys window windows | grep -e \"Window #.*" + appName + "\" -A1", 1000);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            String activity = CmdTools.execAdbCmd("dumpsys window windows | grep -e \"Window #.*" + appName + "\" -A3", 1000);
             filterPid = findTopPidAfterQ(result, activity);
         } else {
             String activity = CmdTools.execAdbCmd("dumpsys activity top | grep \"ACTIVITY " + appName + "\"", 1000);
@@ -142,39 +142,52 @@ public class AppInfoProvider {
 
         // 当顶层ACTIVITY存在时，以顶层PID过滤
         String trimmed;
-        if (activity != null && !StringUtil.isEmpty((trimmed = activity.trim()))) {
+        if (activity != null && StringUtil.isNotEmpty((trimmed = activity.trim()))) {
             String[] pidContent = trimmed.split("\\s*\n+\\s*");
-            if (pidContent.length > 1 && pidContent[1].contains("Session{")) {
-                String[] originActivityName = pidContent[0].split("\\s+");
-                String[] topActivity = originActivityName[originActivityName.length - 1].split("/");
-
-                LogUtil.i(TAG, "Activity:" + Arrays.toString(topActivity));
-                if (topActivity.length > 1) {
-                    // 针对Activity是以"."开头的相对定位路径
-                    String mActivity = topActivity[1];
-                    // 尾缀fix
-                    if (mActivity.contains("}")) {
-                        mActivity = mActivity.split("\\}")[0];
-                    }
-
-                    if (StringUtil.startWith(mActivity, ".")) {
-                        mActivity = topActivity[0] + mActivity;
-                    }
-
-                    // 拼接会完整名称
-                    String activityName = topActivity[0] + "/" + mActivity;
-                    result.put(SubscribeParamEnum.TOP_ACTIVITY, activityName);
-
+            String targetLine = null;
+            for (String line : pidContent) {
+                if (line.contains("Session{")) {
+                    targetLine = line;
+                    break;
                 }
-
-                String pidStr = pidContent[1].split("\\s+")[3];
-                if (pidStr.contains(":")) {
-                    pidStr = pidStr.split("\\:")[0];
-                }
-                LogUtil.i(TAG, "Get pid info：" + pidStr) ;
-                // 记录过滤PID
-                return Integer.parseInt(pidStr);
             }
+            String[] originActivityName = pidContent[0].split("\\s+");
+            String[] topActivity = originActivityName[originActivityName.length - 1].split("/");
+
+            LogUtil.i(TAG, "Activity:" + Arrays.toString(topActivity));
+            if (topActivity.length > 1) {
+                // 针对Activity是以"."开头的相对定位路径
+                String mActivity = topActivity[1];
+                // 尾缀fix
+                if (mActivity.contains("}")) {
+                    mActivity = mActivity.split("\\}")[0];
+                }
+
+                if (StringUtil.startWith(mActivity, ".")) {
+                    mActivity = topActivity[0] + mActivity;
+                }
+
+                // 拼接会完整名称
+                String activityName = topActivity[0] + "/" + mActivity;
+                result.put(SubscribeParamEnum.TOP_ACTIVITY, activityName);
+
+            }
+
+            if (targetLine != null) {
+                String[] pidStrs = targetLine.split("\\s+");
+                String targetPidInfo = null;
+                for (String pidStr: pidStrs) {
+                    if (pidStr.contains(":")) {
+                        targetPidInfo = pidStr.split("\\:")[0];
+                    }
+                }
+
+                LogUtil.i(TAG, "Get pid info：" + targetPidInfo);
+                return targetPidInfo != null? Integer.parseInt(targetPidInfo): -1;
+            }
+
+            return -1;
+            // 记录过滤PID
         }
         return -1;
     }
