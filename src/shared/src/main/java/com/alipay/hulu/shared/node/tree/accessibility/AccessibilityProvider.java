@@ -83,7 +83,7 @@ public class AccessibilityProvider implements AbstractProvider {
         if (service == null) {
             return;
         }
-        if (Build.VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // 必须要能拿到顶层应用
             boolean waitToFind = false;
             String topPkg = null;
@@ -116,6 +116,11 @@ public class AccessibilityProvider implements AbstractProvider {
 
             // 如果找不到顶层Activity所在window，说明当前AccessibilityService有问题，重启一下
             if (waitToFind) {
+                simpleRestartAccessibilityService();
+            }
+        } else {
+            // 如果获取ActiveWindow失败，也进行重启
+            if (service.getRootInActiveWindow() == null) {
                 simpleRestartAccessibilityService();
             }
         }
