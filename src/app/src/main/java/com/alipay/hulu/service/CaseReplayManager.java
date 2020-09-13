@@ -25,6 +25,7 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Environment;
 import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -512,6 +513,13 @@ public class CaseReplayManager implements ExportService {
         watcher.sleepUntilContentDontChange();
         if (touchService != null) {
             touchService.stop();
+        }
+
+        // 删除临时图片
+        File targetDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        targetDir = new File(targetDir, "solopi");
+        if (targetDir.exists()) {
+            FileUtils.deleteFile(targetDir);
         }
 
         // 切换回默认输入法

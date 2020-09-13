@@ -41,6 +41,7 @@ import com.alipay.hulu.common.R;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.logger.DiskLogStrategy;
 import com.alipay.hulu.common.logger.SimpleFormatStrategy;
+import com.alipay.hulu.common.logger.ThreadInfoLoggerPrinter;
 import com.alipay.hulu.common.scheme.SchemeActionResolver;
 import com.alipay.hulu.common.scheme.SchemeResolver;
 import com.alipay.hulu.common.service.SPService;
@@ -549,6 +550,7 @@ public abstract class LauncherApplication extends Application {
             // 调试模式走SimpleFormat
             SimpleFormatStrategy formatStrategy = new SimpleFormatStrategy();
             LogUtil.LOG_LEVEL = Logger.VERBOSE;
+            Logger.printer(new ThreadInfoLoggerPrinter());
             Logger.addLogAdapter(new AndroidLogAdapter(formatStrategy) {
                 @Override
                 public boolean isLoggable(int priority, String tag) {
@@ -1101,6 +1103,7 @@ public abstract class LauncherApplication extends Application {
     }
 
     private void setSchemeResolver(Map<String, SortedList<SchemeActionResolver>> schemeResolver) {
+        LogUtil.i(TAG, "配置Scheme处理器，数量: " + (schemeResolver == null? 0: schemeResolver.size()));
         this.schemeResolver = schemeResolver;
     }
 

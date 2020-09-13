@@ -15,17 +15,36 @@
  */
 package com.alipay.hulu.shared.node.utils;
 
+import android.content.ContentValues;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Base64;
 
+import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.utils.LogUtil;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Base64和Bitmap相互转换类
  */
 public class BitmapUtil {
+    private static final String TAG = BitmapUtil.class.getSimpleName();
 
     /**
      * bitmap转为base64
@@ -120,6 +139,67 @@ public class BitmapUtil {
             return null;
         }
         return BitmapFactory.decodeByteArray(base64, 0, base64.length);
+    }
+
+    /**
+     * 通知新图片文件
+     * @param file
+     */
+    public static void notifyNewImage(final File file) {
+        final Intent intent1 = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri uri = Uri.fromFile(file);
+        intent1.setData(uri);
+        LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Images.Media.DATA, file.getAbsolutePath());
+                values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpg");
+                Uri uri = LauncherApplication.getContext().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                LogUtil.i(TAG, "Insert result: " + uri);
+                LauncherApplication.getInstance().sendBroadcast(intent1);
+            }
+        });
+    }
+
+    /**
+     * 生成二维码图片
+     * @param qrCode
+     * @param size
+     * @return
+     */
+    public static Bitmap generateQrCode(String qrCode, int size, int backgroundColor, int foregroundColor) {
+        LogUtil.i(TAG, "为码值【%s】生成二维码", qrCode);
+        QRCodeWriter writer = new QRCodeWriter();
+        Map<EncodeHintType, Object> hints = new HashMap<>();
+        hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
+
+        //容错级别
+        hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
+
+        // 边框
+        hints.put(EncodeHintType.MARGIN, 2);
+
+        BitMatrix matrix;
+        try {
+            matrix = writer.encode(qrCode, BarcodeFormat.QR_CODE, size, size, hints);
+        } catch (WriterException e) {
+            LogUtil.e(TAG, "Catch com.google.zxing.WriterException: " + e.getMessage(), e);
+            return null;
+        }
+
+        int realHeight = matrix.getHeight();
+        int realWidth = matrix.getWidth();
+
+        // 二维码图片
+        final Bitmap bitmap = Bitmap.createBitmap(realWidth, realHeight, Bitmap.Config.ARGB_4444);
+        for (int x = 0; x < realWidth; x++) {
+            for (int y = 0; y < realHeight; y++) {
+                bitmap.setPixel(x, y, matrix.get(x, y) ? foregroundColor : backgroundColor);
+            }
+        }
+
+        return bitmap;
     }
 
     /**

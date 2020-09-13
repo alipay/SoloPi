@@ -55,6 +55,7 @@ public enum PerformActionEnum {
     HANDLE_ALERT("handleAlert", R.string.action__handle_alert, 2, 0, R.drawable.dialog_action_drawable_handle_alert),
     JUMP_TO_PAGE("jumpToPage", R.string.action__scheme_jump, 2, 0, R.drawable.dialog_action_drawable_scheme, JUMP_PAGE_PARAMS),
     CHANGE_MODE("changeMode", R.string.action__change_mode, 4, 0, R.drawable.dialog_action_drawable_change_mode, CHANGE_MODE_PARAMS),
+    GENERATE_QR_CODE("generateQrCode", R.string.action__generate_qr_code, 2, 0, R.drawable.dialog_action_drawable_qr_code, QR_CODE_PARAMS),
 
     GLOBAL_SCROLL_TO_BOTTOM("globalScrollToBottom", R.string.action__global_scroll_down, 2, 0, R.drawable.dialog_action_drawable_scroll_up),
     GLOBAL_SCROLL_TO_TOP("globalScrollToTop", R.string.action__global_scroll_up, 2, 0, R.drawable.dialog_action_drawable_scroll_down),

@@ -100,6 +100,8 @@ public class HighLightService implements ExportService, View.OnTouchListener {
 		}
 		this.cx = null;
 		this.mHandler = null;
+
+		wm.removeViewImmediate(invisibleView);
 	}
 
 	/**

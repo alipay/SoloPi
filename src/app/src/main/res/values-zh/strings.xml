@@ -411,4 +411,6 @@
     <string name="node_info__image">截图信息</string>
     <string name="setting__adb_server">设备ADB调试地址</string>
     <string name="settings__adb_server">设备ADB调试地址</string>
+    <string name="function__please_input_qr_code">QR码值</string>
+    <string name="function__input_qr_code">请输入QR码值</string>
 </resources>

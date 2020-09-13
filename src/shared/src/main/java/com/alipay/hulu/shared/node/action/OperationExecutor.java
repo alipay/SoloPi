@@ -18,10 +18,11 @@ package com.alipay.hulu.shared.node.action;
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Build;
-import androidx.annotation.NonNull;
+import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -52,6 +53,7 @@ import com.alipay.hulu.shared.node.tree.accessibility.tree.AccessibilityNodeTree
 import com.alipay.hulu.shared.node.tree.capture.CaptureProcessor;
 import com.alipay.hulu.shared.node.tree.capture.CaptureProvider;
 import com.alipay.hulu.shared.node.utils.AppUtil;
+import com.alipay.hulu.shared.node.utils.BitmapUtil;
 import com.alipay.hulu.shared.node.utils.LogicUtil;
 import com.alipay.hulu.shared.node.utils.NodeTreeUtil;
 import com.alipay.hulu.shared.node.utils.OperationUtil;
@@ -59,6 +61,7 @@ import com.alipay.hulu.shared.node.utils.PrepareUtil;
 import com.android.permission.rom.RomUtils;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -68,6 +71,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+
+import androidx.annotation.NonNull;
 
 /**
  * Created by qiaoruikai on 2018/10/8 8:46 PM.
@@ -654,6 +659,36 @@ public class OperationExecutor {
 
                 executor.executeCmdSync("am start '" + scheme + "'");
                 break;
+            case GENERATE_QR_CODE:
+                final String qrCode = method.getParam(SCHEME_KEY);
+                if (StringUtil.isEmpty(qrCode)) {
+                    return false;
+                }
+
+                opContext.notifyOnFinish(new Runnable() {
+                    @Override
+                    public void run() {
+                        // 生成二维码
+                        Bitmap bitmap = BitmapUtil.generateQrCode(qrCode, 512, Color.WHITE, Color.BLACK);
+
+                        File targetDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+                        targetDir = new File(targetDir, "solopi");
+                        targetDir.mkdir();
+                        File saveImg = new File(targetDir, "image-" + System.currentTimeMillis() + ".jpg");
+                        try {
+                            FileOutputStream stream = new FileOutputStream(saveImg);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+                            stream.flush();
+                            stream.close();
+                        } catch (IOException e) {
+                            LogUtil.e(TAG, "Fail to export to " + saveImg);
+                        }
+
+                        BitmapUtil.notifyNewImage(saveImg);
+                        MiscUtil.sleep(500);
+                    }
+                });
+                return true;
             case GOTO_INDEX:
                 opContext.notifyOnFinish(new Runnable() {
                         @Override

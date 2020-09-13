@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Environment;
 import android.os.IBinder;
 import androidx.appcompat.app.AlertDialog;
 import android.text.TextUtils;
@@ -246,6 +247,14 @@ public class CaseRecordManager implements ExportService {
             case ScanSuccessEvent.SCAN_TYPE_SCHEME:
                 // 向handler发送请求
                 OperationMethod method = new OperationMethod(PerformActionEnum.JUMP_TO_PAGE);
+                method.putParam(OperationExecutor.SCHEME_KEY, event.getContent());
+
+                // 录制模式需要记录下
+                operationAndRecord(method, null);
+                break;
+            case ScanSuccessEvent.SCAN_TYPE_QR_CODE:
+                // 向handler发送请求
+                method = new OperationMethod(PerformActionEnum.GENERATE_QR_CODE);
                 method.putParam(OperationExecutor.SCHEME_KEY, event.getContent());
 
                 // 录制模式需要记录下
@@ -736,6 +745,7 @@ public class CaseRecordManager implements ExportService {
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.GOTO_INDEX));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.CHANGE_MODE));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.JUMP_TO_PAGE));
+        gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.GENERATE_QR_CODE));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.KILL_PROCESS));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.CLEAR_DATA));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.ASSERT_TOAST));
@@ -972,6 +982,13 @@ public class CaseRecordManager implements ExportService {
         PerformActionEnum action = method.getActionEnum();
         if (action == PerformActionEnum.FINISH) {
 
+            // 删除临时图片
+            File targetDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+            targetDir = new File(targetDir, "solopi");
+            if (targetDir.exists()) {
+                FileUtils.deleteFile(targetDir);
+            }
+
             // 切换回默认输入法
             MyApplication.getInstance().updateDefaultIme(defaultIme);
             CmdTools.switchToIme(defaultIme);
@@ -1031,6 +1048,7 @@ public class CaseRecordManager implements ExportService {
             binder.registerFloatClickListener(DEFAULT_FLOAT_LISTENER);
             return true;
         } else if (action == PerformActionEnum.JUMP_TO_PAGE
+                || action == PerformActionEnum.GENERATE_QR_CODE
                 || action == PerformActionEnum.LOAD_PARAM) {
             if (!StringUtil.equals(method.getParam("scan"), "1")) {
                 operationAndRecord(method, node);
@@ -1039,6 +1057,11 @@ public class CaseRecordManager implements ExportService {
                     Intent intent = new Intent(context, QRScanActivity.class);
                     intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_SCHEME);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
+                    setServiceToTouchBlockMode();
+                }  else if (action == PerformActionEnum.GENERATE_QR_CODE) {
+                    Intent intent = new Intent(context, QRScanActivity.class);
+                    intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_QR_CODE);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
                     setServiceToTouchBlockMode();

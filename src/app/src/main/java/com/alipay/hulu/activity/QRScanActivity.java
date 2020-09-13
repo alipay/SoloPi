@@ -159,7 +159,8 @@ public class QRScanActivity extends BaseActivity
 
         lastReadTime = curTime;
 
-        if (curScanType == ScanSuccessEvent.SCAN_TYPE_SCHEME) {
+        if (curScanType == ScanSuccessEvent.SCAN_TYPE_SCHEME
+                || curScanType == ScanSuccessEvent.SCAN_TYPE_QR_CODE) {
             notifyScanSuccess(text);
         } else if (curScanType == ScanSuccessEvent.SCAN_TYPE_PARAM) {
             if (StringUtil.startWith(text, "http://") || StringUtil.startWith(text, "https://")) {

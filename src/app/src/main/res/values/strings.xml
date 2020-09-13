@@ -412,4 +412,6 @@
     <string name="node_info__image">Capture</string>
     <string name="setting__adb_server">ADB debug address</string>
     <string name="settings__adb_server">ADB Debug Address</string>
+    <string name="function__please_input_qr_code">QR code value</string>
+    <string name="function__input_qr_code">Set QR code value</string>
 </resources>

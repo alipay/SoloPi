@@ -198,6 +198,31 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
                 // 录制模式需要记录下
 
                 break;
+
+            case ScanSuccessEvent.SCAN_TYPE_QR_CODE:
+                // 向handler发送请求
+                method = new OperationMethod(PerformActionEnum.GENERATE_QR_CODE);
+                method.putParam(OperationExecutor.SCHEME_KEY, event.getContent());
+
+                // 录制模式需要记录下
+                step = new OperationStep();
+                step.setOperationMethod(method);
+                step.setOperationIndex(currentIdx.get());
+                step.setOperationId(stepList.get(stepList.size() - 1).getOperationId());
+
+                wrapper = new CaseStepAdapter.MyDataWrapper(step, currentIdx.getAndIncrement());
+
+                if (tmpPosition != -1) {
+                    dragEntities.add(tmpPosition, wrapper);
+                    tmpPosition = -1;
+                } else {
+                    dragEntities.add(wrapper);
+                }
+
+                adapter.notifyDataSetChanged();
+
+                // 录制模式需要记录下
+                break;
             default:
                 break;
         }
@@ -924,6 +949,7 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
                         public void onProcessFunction(OperationMethod method, AbstractNodeTree node) {
                             PerformActionEnum action = method.getActionEnum();
                             if (action == PerformActionEnum.JUMP_TO_PAGE
+                                    || action == PerformActionEnum.GENERATE_QR_CODE
                                     || action == PerformActionEnum.LOAD_PARAM) {
 
                                 if (StringUtil.equals(method.getParam("scan"), "1")) {
@@ -935,6 +961,8 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
                                     Intent intent = new Intent(getActivity(), QRScanActivity.class);
                                     if (action == PerformActionEnum.JUMP_TO_PAGE) {
                                         intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_SCHEME);
+                                    } else if (action == PerformActionEnum.GENERATE_QR_CODE) {
+                                        intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_QR_CODE);
                                     } else if (action == PerformActionEnum.LOAD_PARAM) {
                                         intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_PARAM);
                                     }
@@ -1062,6 +1090,7 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.GOTO_INDEX));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.CHANGE_MODE));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.JUMP_TO_PAGE));
+        gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.GENERATE_QR_CODE));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.KILL_PROCESS));
         GLOBAL_ACTION_MAP.put(R.string.function_group__app, gAppActions);
 

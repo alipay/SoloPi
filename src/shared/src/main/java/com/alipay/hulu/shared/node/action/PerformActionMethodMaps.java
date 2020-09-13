@@ -95,6 +95,11 @@ class PerformActionMethodMaps {
         JUMP_PAGE_PARAMS.put(OperationExecutor.SCHEME_KEY, R.string.action_param__jump_scheme);
     }
 
+    public static Map<String, Integer> QR_CODE_PARAMS = new HashMap<>(GLOBAL_PARAMS);
+    static {
+        QR_CODE_PARAMS.put(OperationExecutor.SCHEME_KEY, R.string.action_param__qr_code_value);
+    }
+
     public static Map<String, Integer> LOAD_PARAM_PARAMS = new HashMap<>(GLOBAL_PARAMS);
     static {
         LOAD_PARAM_PARAMS.put(OperationExecutor.APP_URL_KEY, R.string.action_param__param_download);

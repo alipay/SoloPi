@@ -121,4 +121,6 @@
     <string name="running_mode__capture_mode">图像查找模式</string>
     <string name="action__resume">恢复</string>
     <string name="performance__process_status">进程状态</string>
+    <string name="action__generate_qr_code">生成QR码</string>
+    <string name="action_param__qr_code_value">QR码值</string>
 </resources>
