@@ -452,10 +452,6 @@ public class AccessibilityProvider implements AbstractProvider {
             LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
         }
         LogUtil.i(TAG, "等待辅助功能恢复完成，耗时: " + (System.currentTimeMillis() - startTime));
-        // 可选CoverMode
-        if (!SPService.getBoolean(SPService.KEY_RECORD_COVER_MODE, false)) {
-            InjectorService.g().pushMessage(com.alipay.hulu.shared.event.constant.Constant.EVENT_ACCESSIBILITY_MODE, AccessibilityServiceImpl.MODE_NORMAL, 200);
-        }
     }
 
     @Override

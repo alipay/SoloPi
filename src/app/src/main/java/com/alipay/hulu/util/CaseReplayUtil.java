@@ -131,7 +131,6 @@ public class CaseReplayUtil {
             return;
         }
 
-        //如果是支付宝，点击后通过scheme跳到首页
         BackgroundExecutor.execute(new Runnable() {
             @Override
             public void run() {

@@ -50,7 +50,6 @@ public class ConfigSchemeResolver implements SchemeActionResolver {
             case KEY_HIGHLIGHT_REPLAY_NODE:
             case KEY_REPLAY_AUTO_START:
             case KEY_SCREEN_ROTATION:
-            case KEY_RECORD_COVER_MODE:
                 if (StringUtil.equalsIgnoreCase(value, "true")) {
                     LogUtil.i(TAG, "Update Config " + key + " to value " + true);
                     SPService.putBoolean(key, true);
@@ -69,7 +68,6 @@ public class ConfigSchemeResolver implements SchemeActionResolver {
                 LogUtil.i(TAG, "Update Config " + key + " to value " + obj);
                 SPService.putString(key, obj.toJSONString());
                 break;
-            case KEY_OV_PASSWORD:
             case KEY_ADB_SERVER:
             case KEY_PATCH_URL:
             case KEY_PERFORMANCE_UPLOAD:

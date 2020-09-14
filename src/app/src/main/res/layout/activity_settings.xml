@@ -719,6 +719,8 @@
         android:id="@+id/screenshot_resolution_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
         android:paddingLeft="@dimen/control_dp16"
         android:paddingRight="@dimen/control_dp16"
         android:gravity="center_vertical"
@@ -761,6 +763,8 @@
         android:id="@+id/default_screen_rotation_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
         android:paddingLeft="@dimen/control_dp16"
         android:paddingRight="@dimen/control_dp16"
         android:gravity="center_vertical"
@@ -805,6 +809,8 @@
         android:layout_height="wrap_content"
         android:paddingLeft="@dimen/control_dp16"
         android:paddingRight="@dimen/control_dp16"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
         android:gravity="center_vertical"
         android:background="@drawable/bg_settings_item">
 
@@ -847,6 +853,8 @@
         android:layout_height="wrap_content"
         android:paddingLeft="@dimen/control_dp16"
         android:paddingRight="@dimen/control_dp16"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
         android:gravity="center_vertical"
         android:background="@drawable/bg_settings_item">
 
@@ -875,6 +883,8 @@
         android:layout_height="wrap_content"
         android:paddingLeft="@dimen/control_dp16"
         android:paddingRight="@dimen/control_dp16"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
         android:gravity="center_vertical"
         android:background="@drawable/bg_settings_item">
 
@@ -991,7 +1001,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="@dimen/control_dp6"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
@@ -1096,6 +1106,8 @@
         android:layout_height="wrap_content"
         android:paddingLeft="@dimen/control_dp16"
         android:paddingRight="@dimen/control_dp16"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
         android:gravity="center_vertical"
         android:background="@drawable/bg_settings_item">
 
