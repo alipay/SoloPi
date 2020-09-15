@@ -303,13 +303,6 @@ public class LogicUtil {
             }
 
             return evalInt(leftRight[0]) != evalInt(leftRight[1]);
-        } else if (StringUtil.contains(content, "=")) {
-            String[] leftRight = content.split("=");
-            if (leftRight.length != 2) {
-                throw new NumberFormatException("Can't parse '=' for statement " + content);
-            }
-
-            return StringUtil.equals(evalStr(leftRight[0]), evalStr(leftRight[1]));
         } else if (StringUtil.contains(content, "!=")) {
             String[] leftRight = content.split("!=");
             if (leftRight.length != 2) {
@@ -317,6 +310,13 @@ public class LogicUtil {
             }
 
             return !StringUtil.equals(evalStr(leftRight[0]), evalStr(leftRight[1]));
+        } else if (StringUtil.contains(content, "=")) {
+            String[] leftRight = content.split("=");
+            if (leftRight.length != 2) {
+                throw new NumberFormatException("Can't parse '=' for statement " + content);
+            }
+
+            return StringUtil.equals(evalStr(leftRight[0]), evalStr(leftRight[1]));
         } else {
             throw new NumberFormatException("Can't parse statement, unknown statement " + content);
         }
