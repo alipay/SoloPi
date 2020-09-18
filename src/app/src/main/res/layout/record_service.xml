@@ -71,7 +71,7 @@
             android:layout_height="@dimen/control_dp30"
             android:gravity="center"
             android:padding="@dimen/control_dp4"
-            android:text="杀当前进程"
+            android:text="@string/record_float__kill_process"
             android:textColor="@color/colorAccent"
             android:textSize="@dimen/textsize_14" />
     </LinearLayout>

@@ -464,13 +464,13 @@ public class RecordService extends BaseService {
             long val = results.get(i);
             total += val;
             Map<String, String> display = new HashMap<>(3);
-            display.put("title", "第" + (i + 1) + "次");
+            display.put("title", getString(R.string.record_float__nth_time, i + 1));
             display.put("value", val + "ms");
             displayDataSource.add(display);
         }
 
         Map<String, String> display = new HashMap<>(3);
-        display.put("title", "平均值");
+        display.put("title", getString(R.string.record_float__average));
         display.put("value", (total / results.size()) + "ms");
         displayDataSource.add(display);
 

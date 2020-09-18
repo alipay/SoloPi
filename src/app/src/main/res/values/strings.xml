@@ -419,4 +419,9 @@
     <string name="activity_local_replay_result_title">Local Replay Result</string>
     <string name="local_result__running_time">Run Time: </string>
     <string name="local_result__target_app">Test App: </string>
+    <string name="toast_message__add_solopi_background">Please Turn On \"Display pop-up windows while running in the background\" Permission</string>
+    <string name="replay_result__delete_item">Delete replay result?</string>
+    <string name="record_float__kill_process">Kill Process</string>
+    <string name="record_float__average">AVG</string>
+    <string name="record_float__nth_time">%dth</string>
 </resources>

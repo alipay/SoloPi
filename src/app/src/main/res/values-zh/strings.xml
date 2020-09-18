@@ -418,4 +418,9 @@
     <string name="activity_local_replay_result_title">本地回放结果</string>
     <string name="local_result__running_time">运行时间: </string>
     <string name="local_result__target_app">目标应用: </string>
+    <string name="toast_message__add_solopi_background">请将SoloPi添加到后台白名单中</string>
+    <string name="replay_result__delete_item">是否删除回放结果？</string>
+    <string name="record_float__kill_process">杀当前进程</string>
+    <string name="record_float__average">平均值</string>
+    <string name="record_float__nth_time">第%d次</string>
 </resources>

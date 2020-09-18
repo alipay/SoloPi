@@ -50,6 +50,7 @@ import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.Callback;
+import com.alipay.hulu.common.utils.ClassUtil;
 import com.alipay.hulu.common.utils.ContextUtil;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
@@ -59,6 +60,7 @@ import com.android.permission.FloatWindowManager;
 import com.android.permission.rom.MiuiUtils;
 import com.android.permission.rom.RomUtils;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -119,7 +121,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
 
     private List<GroupPermission> allPermissions;
     private int currentPermissionIdx;
-
+    private static final Pattern FILED_CALL_PATTERN = Pattern.compile("\\$\\{[^}\\s]+\\.?[^}\\s]*\\}");
     /**
      * 权限名称映射表
      */
@@ -492,11 +494,13 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
     private boolean processToastPermission(GroupPermission permissionG) {
         List<String> permissions = permissionG.permissions;
         final List<String> real = new ArrayList<>(permissions.size() + 1);
+        final List<String> sources = new ArrayList<>();
 
         for (String p: permissions) {
             String permission = p.substring(6);
-            if (!SPService.getBoolean(permission, false)) {
-                real.add(permission);
+            if (!isToastHandled(permission)) {
+                sources.add(permission);
+                real.add(getToastMessage(permission));
             }
         }
 
@@ -509,15 +513,70 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
             }, getString(R.string.constant__no_inform), new Runnable() {
                 @Override
                 public void run() {
-                    for (String p: real) {
-                        SPService.putBoolean(p, true);
-                    }
+                    handleToast(sources);
                     processedAction();
                 }
             });
             return false;
         }
         return true;
+    }
+
+    private static final String HANDLED_PERMISSIONS = "handledPermissions";
+
+    /**
+     * 确认toast是否处理过
+     * @param origin
+     * @return
+     */
+    private boolean isToastHandled(String origin) {
+        List<String> permissions = SPService.get(HANDLED_PERMISSIONS, List.class);
+        if (permissions != null && permissions.contains(origin)) {
+            return true;
+        }
+
+        return SPService.getBoolean(origin, false);
+    }
+
+    /**
+     * 处理权限
+     * @param toasts
+     */
+    private void handleToast(List<String> toasts) {
+        List<String> permissions = SPService.get(HANDLED_PERMISSIONS, List.class);
+        if (permissions == null) {
+            permissions = new ArrayList<>();
+        }
+
+        permissions.addAll(toasts);
+        SPService.put(HANDLED_PERMISSIONS, permissions);
+    }
+
+    /**
+     * 获取toast实际消息
+     * @param source
+     * @return
+     */
+    private String getToastMessage(String source) {
+        return StringUtil.patternReplace(source, FILED_CALL_PATTERN, new StringUtil.PatternReplace() {
+            @Override
+            public String replacePattern(String origin) {
+                String content = origin.substring(2, origin.length() - 1);
+                int nameRes = 0;
+                int lastDotPos = content.lastIndexOf('.');
+                String clazz = content.substring(0, lastDotPos);
+                String field = content.substring(lastDotPos + 1);
+                try {
+                    Class<?> RClass = ClassUtil.getClassByName(clazz);
+                    Field nameResF = RClass.getDeclaredField(field);
+                    nameRes = nameResF.getInt(null);
+                } catch (Exception e) {
+                    LogUtil.e(TAG, "Fail to load name result with id:" + content);
+                    nameRes = R.string.app_name;
+                }
+                return getString(nameRes);
+            }
+        });
     }
 
     /**

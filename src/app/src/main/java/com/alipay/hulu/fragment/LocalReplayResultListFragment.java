@@ -230,14 +230,14 @@ public class LocalReplayResultListFragment extends BaseFragment {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
                 new AlertDialog.Builder(getActivity())
-                        .setMessage("是否删除回放结果？")
-                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        .setMessage(R.string.replay_result__delete_item)
+                        .setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
                             }
                         })
-                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 deleteResult(position);

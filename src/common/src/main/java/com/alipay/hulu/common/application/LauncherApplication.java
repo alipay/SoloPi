@@ -550,7 +550,7 @@ public abstract class LauncherApplication extends Application {
             // 调试模式走SimpleFormat
             SimpleFormatStrategy formatStrategy = new SimpleFormatStrategy();
             LogUtil.LOG_LEVEL = Logger.VERBOSE;
-            Logger.printer(new ThreadInfoLoggerPrinter());
+//            Logger.printer(new ThreadInfoLoggerPrinter());
             Logger.addLogAdapter(new AndroidLogAdapter(formatStrategy) {
                 @Override
                 public boolean isLoggable(int priority, String tag) {

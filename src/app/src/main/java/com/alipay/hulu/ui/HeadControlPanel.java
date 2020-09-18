@@ -25,9 +25,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alipay.hulu.R;
-import com.alipay.hulu.common.utils.ContextUtil;
 
 public class HeadControlPanel extends RelativeLayout {
+	public static final int POSITION_CENTER = 0;
+	public static final int POSITION_LEFT = 1;
+	public static final int POSITION_RIGHT = 2;
 
 	private TextView mMidleTitle;
 	private ImageView infoIcon;
@@ -122,6 +124,35 @@ public class HeadControlPanel extends RelativeLayout {
         headMenuLayout.addView(v);
     }
 
+
+	/**
+	 * 设置标题位置
+	 * @param position
+	 */
+	public void setTitlePosition(int position) {
+		if (position == POSITION_LEFT) {
+			RelativeLayout.LayoutParams layoutParams = (LayoutParams) mMidleTitle.getLayoutParams();
+			layoutParams.removeRule(CENTER_IN_PARENT);
+			layoutParams.removeRule(LEFT_OF);
+			layoutParams.addRule(CENTER_VERTICAL);
+			layoutParams.addRule(RIGHT_OF, R.id.back_icon);
+			mMidleTitle.setLayoutParams(layoutParams);
+		} else if (position == POSITION_CENTER) {
+			RelativeLayout.LayoutParams layoutParams = (LayoutParams) mMidleTitle.getLayoutParams();
+			layoutParams.addRule(CENTER_IN_PARENT);
+			layoutParams.removeRule(CENTER_VERTICAL);
+			layoutParams.removeRule(LEFT_OF);
+			layoutParams.removeRule(RIGHT_OF);
+			mMidleTitle.setLayoutParams(layoutParams);
+		} else if (position == POSITION_RIGHT) {
+			RelativeLayout.LayoutParams layoutParams = (LayoutParams) mMidleTitle.getLayoutParams();
+			layoutParams.removeRule(CENTER_IN_PARENT);
+			layoutParams.removeRule(RIGHT_OF);
+			layoutParams.addRule(CENTER_VERTICAL);
+			layoutParams.addRule(LEFT_OF, R.id.head_info_menu_layout);
+			mMidleTitle.setLayoutParams(layoutParams);
+		}
+	}
 
     public void setMiddleTitle(String s){
 		mMidleTitle.setText(s);

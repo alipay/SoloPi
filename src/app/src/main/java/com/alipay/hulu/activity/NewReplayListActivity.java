@@ -93,6 +93,7 @@ public class NewReplayListActivity extends BaseActivity {
         mHeadPanel.addMenuFromLeft(rightTitle);
 
         mHeadPanel.setMiddleTitle(getString(R.string.activity__case_list));
+        mHeadPanel.setTitlePosition(HeadControlPanel.POSITION_LEFT);
         mHeadPanel.setBackIconClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
