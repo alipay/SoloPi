@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import com.alipay.hulu.R;
 import com.alipay.hulu.bean.ReplayResultBean;
+import com.alipay.hulu.common.bean.DeviceInfo;
 import com.alipay.hulu.common.utils.DeviceInfoUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
@@ -77,7 +78,11 @@ public class ReplayMainResultFragment extends Fragment {
 
         contents = new ArrayList<>();
 
-        contents.add(new Pair<>(getString(R.string.ui__device_info), DeviceInfoUtil.generateDeviceInfo().toString()));
+        DeviceInfo deviceInfo = resultBean.getDeviceInfo();
+        if (deviceInfo == null) {
+            deviceInfo = DeviceInfoUtil.generateDeviceInfo();
+        }
+        contents.add(new Pair<>(getString(R.string.ui__device_info), deviceInfo.toString()));
 
         List<OperationStep> operations = resultBean.getCurrentOperationLog();
 

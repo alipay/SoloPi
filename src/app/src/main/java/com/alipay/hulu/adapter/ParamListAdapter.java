@@ -49,11 +49,11 @@ public class ParamListAdapter extends SoloBaseAdapter<CaseParamBean> implements 
 
         convertView.setTag(position);
 
-        TextView title = (TextView) convertView.findViewById(R.id.param_item_title);
-        TextView desc = (TextView) convertView.findViewById(R.id.param_item_desc);
-        TextView defaultValue = (TextView) convertView.findViewById(R.id.param_item_default_value);
+        TextView title = convertView.findViewById(R.id.param_item_title);
+        TextView desc = convertView.findViewById(R.id.param_item_desc);
+        TextView defaultValue = convertView.findViewById(R.id.param_item_default_value);
 
-        CaseParamBean param = (CaseParamBean) getItem(position);
+        CaseParamBean param = getItem(position);
         title.setText(param.getParamName());
         desc.setText(param.getParamDesc());
         defaultValue.setText(param.getParamDefaultValue());
@@ -64,7 +64,7 @@ public class ParamListAdapter extends SoloBaseAdapter<CaseParamBean> implements 
     @Override
     public void onClick(View v) {
         int position = (int) v.getTag();
-        final CaseParamBean param = (CaseParamBean) getItem(position);
+        final CaseParamBean param = getItem(position);
 
         DialogUtils.showMultipleEditDialog(context, new DialogUtils.OnDialogResultListener() {
                     @Override

@@ -16,6 +16,7 @@
 package com.alipay.hulu.adapter;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.widget.BaseAdapter;
 
 import java.util.ArrayList;
@@ -27,11 +28,13 @@ import java.util.List;
 
 public abstract class SoloBaseAdapter<T> extends BaseAdapter {
 
+    protected LayoutInflater mInflater;
     protected Context mContext;
     protected List<T> mData = new ArrayList<>();
 
     public SoloBaseAdapter(Context context) {
         mContext = context;
+        mInflater = LayoutInflater.from(context);
     }
 
     @Override
@@ -40,7 +43,7 @@ public abstract class SoloBaseAdapter<T> extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int position) {
+    public T getItem(int position) {
         return mData.get(position);
     }
 

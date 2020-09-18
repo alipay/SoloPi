@@ -78,8 +78,8 @@
         app:tabTextAppearance="@style/TabLayoutTextStyle"
         app:tabPaddingTop="@dimen/control_dp8"
         app:tabPaddingBottom="@dimen/control_dp8"
-        app:tabPaddingStart="@dimen/control_dp16"
-        app:tabPaddingEnd="@dimen/control_dp16"
+        app:tabPaddingStart="@dimen/control_dp8"
+        app:tabPaddingEnd="@dimen/control_dp8"
         app:tabGravity="fill"
         app:tabMode="fixed"
         app:tabMaxWidth="0dp"/>

@@ -121,6 +121,6 @@
     <string name="running_mode__capture_mode">Screenshot Mode</string>
     <string name="action__resume">Resume</string>
     <string name="performance__process_status">Process Status</string>
-    <string name="action__generate_qr_code">Generate QR Code</string>
+    <string name="action__generate_qr_code">GENERATE QR CODE</string>
     <string name="action_param__qr_code_value">QR Code Value</string>
 </resources>

@@ -60,7 +60,7 @@
     <string name="batch_replay_result__success_count">成功数： %d</string>
     <string name="batch_replay_result__failed_count">失败数： %d</string>
     <string name="constant_global">全局</string>
-    <string name="constant__batch_replay">批量回放</string>
+    <string name="constant__batch_replay">批量\n回放</string>
     <string name="activity__case_list">用例列表</string>
     <string name="constant__not_config">未设置</string>
     <string name="settings__performance_upload_url">性能数据上传地址</string>
@@ -413,4 +413,9 @@
     <string name="settings__adb_server">设备ADB调试地址</string>
     <string name="function__please_input_qr_code">QR码值</string>
     <string name="function__input_qr_code">请输入QR码值</string>
+    <string name="result_item__app_name_version">%s (%s)</string>
+    <string name="replay_icon__history">历史\n记录</string>
+    <string name="activity_local_replay_result_title">本地回放结果</string>
+    <string name="local_result__running_time">运行时间: </string>
+    <string name="local_result__target_app">目标应用: </string>
 </resources>

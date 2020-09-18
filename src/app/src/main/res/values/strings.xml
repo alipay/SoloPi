@@ -61,7 +61,7 @@
     <string name="batch_replay_result__success_count">Success： %d</string>
     <string name="batch_replay_result__failed_count">Fail： %d</string>
     <string name="constant_global">Global</string>
-    <string name="constant__batch_replay">Batch Replay</string>
+    <string name="constant__batch_replay">Batch\nReplay</string>
     <string name="activity__case_list">Case List</string>
     <string name="constant__not_config">Unset</string>
     <string name="settings__performance_upload_url">Performance Data Upload</string>
@@ -414,4 +414,9 @@
     <string name="settings__adb_server">ADB Debug Address</string>
     <string name="function__please_input_qr_code">QR code value</string>
     <string name="function__input_qr_code">Set QR code value</string>
+    <string name="result_item__app_name_version">%s (%s)</string>
+    <string name="replay_icon__history">History</string>
+    <string name="activity_local_replay_result_title">Local Replay Result</string>
+    <string name="local_result__running_time">Run Time: </string>
+    <string name="local_result__target_app">Test App: </string>
 </resources>

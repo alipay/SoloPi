@@ -135,6 +135,7 @@
         <activity android:name=".activity.CaseParamEditActivity"
             android:label="@string/activity__gen_param_case"/>
         <activity android:name=".activity.PatchStatusActivity" />
+        <activity android:name=".activity.LocalReplayResultActivity" />
 
         <service android:name=".service.FloatWinService"/>
 

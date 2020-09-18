@@ -56,6 +56,7 @@ import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.RequestOptions;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -665,6 +666,16 @@ public class DialogUtils {
     /**
      * 显示图像Dialog
      * @param context
+     * @param content uri
+     */
+    public static void showImageDialog(Context context, URL content) {
+        ImageDialog dialog = new ImageDialog(context, content);
+        dialog.show();
+    }
+
+    /**
+     * 显示图像Dialog
+     * @param context
      * @param bitmap
      */
     public static void showImageDialog(Context context, Bitmap bitmap) {
@@ -688,6 +699,7 @@ public class DialogUtils {
         private Integer id;
         private String path;
         private Uri uri;
+        private URL url;
         private Bitmap bitmap;
         private byte[] data;
 
@@ -714,6 +726,11 @@ public class DialogUtils {
         public ImageDialog(@NonNull Context context, Uri uri) {
             super(context, R.style.ShadowDialogTheme);
             this.uri = uri;
+        }
+
+        public ImageDialog(@NonNull Context context, URL url) {
+            super(context, R.style.ShadowDialogTheme);
+            this.url = url;
         }
 
         public ImageDialog(@NonNull Context context, byte[] data) {
@@ -769,6 +786,8 @@ public class DialogUtils {
                 request = manager.load(path);
             } else if (uri != null) {
                 request = manager.load(uri);
+            } else if (url != null) {
+                request = manager.load(url);
             } else if (bitmap != null){
                 request = manager.load(bitmap);
             } else if (data != null){

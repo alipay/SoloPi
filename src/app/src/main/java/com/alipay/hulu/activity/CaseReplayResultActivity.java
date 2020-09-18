@@ -18,12 +18,6 @@ package com.alipay.hulu.activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import com.google.android.material.tabs.TabLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -47,13 +41,23 @@ import com.alipay.hulu.fragment.ReplayMainResultFragment;
 import com.alipay.hulu.fragment.ReplayScreenShotFragment;
 import com.alipay.hulu.fragment.ReplayStepFragment;
 import com.alipay.hulu.ui.HeadControlPanel;
+import com.google.android.material.tabs.TabLayout;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 public class CaseReplayResultActivity extends BaseActivity {
     private static final String TAG = "CaseActivity";
@@ -84,14 +88,14 @@ public class CaseReplayResultActivity extends BaseActivity {
 
     private void initView() {
         setContentView(R.layout.activity_display_replay_result);
-        mPager = (ViewPager) findViewById(R.id.pager);
-        mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
-        mHeadPanel = (HeadControlPanel) findViewById(R.id.head_replay_result);
-        mCaseName = (TextView) findViewById(R.id.case_name);
-        mTargetApp = (TextView) findViewById(R.id.target_app);
-        mStartTime = (TextView) findViewById(R.id.start_time);
-        mEndTime = (TextView) findViewById(R.id.end_time);
-        mStatus = (TextView) findViewById(R.id.case_status);
+        mPager = findViewById(R.id.pager);
+        mTabLayout = findViewById(R.id.tab_layout);
+        mHeadPanel = findViewById(R.id.head_replay_result);
+        mCaseName = findViewById(R.id.case_name);
+        mTargetApp = findViewById(R.id.target_app);
+        mStartTime = findViewById(R.id.start_time);
+        mEndTime = findViewById(R.id.end_time);
+        mStatus = findViewById(R.id.case_status);
     }
 
     private void initData() {
@@ -142,15 +146,19 @@ public class CaseReplayResultActivity extends BaseActivity {
         mTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
         mTabLayout.setTabMode(TabLayout.MODE_FIXED);
         mTabLayout.setSelectedTabIndicatorColor(getResources().getColor(R.color.mainBlue));
-        mTabLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                setIndicator(mTabLayout, 0, 0);
-            }
-        });
+//        mTabLayout.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                setIndicator(mTabLayout, 0, 0);
+//            }
+//        });
 
         mCaseName.setText(getString(R.string.case_replay_result__case_name, result.getCaseName()));
-        mTargetApp.setText(getString(R.string.case_replay_result__targe_app, result.getTargetApp()));
+        String targetApp = getString(R.string.case_replay_result__targe_app, result.getTargetApp());
+        if (!StringUtil.isEmpty(result.getTargetAppVersion())) {
+            targetApp += " (" + result.getTargetAppVersion() + ")";
+        }
+        mTargetApp.setText(targetApp);
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         mStartTime.setText(getString(R.string.case_replay_result__start_time, format.format(result.getStartTime())));
@@ -185,10 +193,44 @@ public class CaseReplayResultActivity extends BaseActivity {
         JSONObject infoObj = new JSONObject();
         infoObj.put("caseName", result.getCaseName());
         infoObj.put("targetApp", result.getTargetApp());
+        infoObj.put("targetAppPkg", result.getTargetAppPkg());
+        infoObj.put("targetAppVersion", result.getTargetAppVersion());
         infoObj.put("startTime", result.getStartTime());
         infoObj.put("endTime", result.getEndTime());
         infoObj.put("exceptionMessage", result.getExceptionMessage());
         infoObj.put("exceptionStep", result.getExceptionStep());
+        infoObj.put("exceptionStepId", result.getExceptionStepId());
+        infoObj.put("platform", result.getPlatform());
+        infoObj.put("platformVersion", result.getPlatformVersion());
+
+        // 截图保存
+        Map<String, String> screenshotFiles = result.getScreenshotFiles();
+        if (screenshotFiles != null) {
+            List<ScreenshotBean> screenshots = new ArrayList<>();
+            File screenshotDir = FileUtils.getSubDir("screenshots");
+
+            // 组装各项
+            for (Map.Entry<String, String> entry : screenshotFiles.entrySet()) {
+                File targetFile = new File(screenshotDir, entry.getValue() + ".png");
+                if (targetFile.exists()) {
+                    File copyTo = new File(root, entry.getValue() + ".png");
+                    try {
+                        FileUtils.copyFile(targetFile, copyTo);
+
+                        // 记录拷贝成功的截图信息
+                        ScreenshotBean bean = new ScreenshotBean();
+                        bean.name = entry.getKey();
+                        bean.file = copyTo.getName();
+                        screenshots.add(bean);
+                    } catch (IOException e) {
+                        LogUtil.e(TAG, "拷贝截图文件失败", e);
+                    }
+                }
+            }
+
+            infoObj.put("screenshots", screenshots);
+        }
+
         try {
             JSON.writeJSONStringTo(infoObj, new FileWriter(info));
         } catch (IOException e) {
@@ -209,7 +251,17 @@ public class CaseReplayResultActivity extends BaseActivity {
             LogUtil.e(TAG, "输出步骤信息失败", e);
         }
 
+        if (result.getDeviceInfo() != null) {
+            File deviceFile = new File(root, "device.json");
+            try {
+                JSON.writeJSONString(new FileWriter(deviceFile), result.getDeviceInfo());
+            } catch (IOException e) {
+                LogUtil.e(TAG, "输出设备信息失败", e);
+            }
+        }
+
         File actionsFile = new File(root, "actions.json");
+
         try {
             JSON.writeJSONStringTo(result.getActionLogs(), new FileWriter(actionsFile));
         } catch (IOException e) {
@@ -289,6 +341,31 @@ public class CaseReplayResultActivity extends BaseActivity {
                     return StringUtil.getString(R.string.replay__case_screenshot);
             }
             return "";
+        }
+    }
+
+
+    /**
+     * 截图信息
+     */
+    public static class ScreenshotBean {
+        private String name;
+        private String file;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getFile() {
+            return file;
+        }
+
+        public void setFile(String file) {
+            this.file = file;
         }
     }
 }

@@ -42,7 +42,7 @@
     <dimen name="float_win_width">260dp</dimen>
     <dimen name="float_win_height">440dp</dimen>
     <dimen name="float_group_text_size">12dp</dimen>
-    <dimen name="float_group_icon_size">24dp</dimen>
+    <dimen name="float_group_icon_size">26dp</dimen>
     <dimen name="float_group_icon_gap">16dp</dimen>
     <dimen name="float_item_icon_size">24dp</dimen>
     <dimen name="float_item_text_size">18sp</dimen>
@@ -158,4 +158,5 @@
     <dimen name="perf_records_btn_width">160dp</dimen>
     <dimen name="perf_chart_min_height">300dp</dimen>
     <dimen name="remote_record_win_width">330dp</dimen>
+    <dimen name="textsize_9">9dp</dimen>
 </resources>

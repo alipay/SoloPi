@@ -31,11 +31,14 @@ import com.alipay.hulu.R;
 import com.alipay.hulu.bean.ReplayResultBean;
 import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
+import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.util.DialogUtils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +54,7 @@ public class ReplayScreenShotFragment extends Fragment {
     private RecyclerView recyclerView;
 
     private ReplayResultBean resultBean;
-    List<Pair<String, File>> screenshots;
+    List<Pair<String, Object>> screenshots;
 
     public static ReplayScreenShotFragment newInstance(ReplayResultBean data) {
         ReplayScreenShotFragment fragment = new ReplayScreenShotFragment();
@@ -79,20 +82,40 @@ public class ReplayScreenShotFragment extends Fragment {
         Map<String, String> screenshotFiles = resultBean.getScreenshotFiles();
 
         if (screenshotFiles != null) {
-            List<Pair<String, File>> screenshots = new ArrayList<>();
+            List<Pair<String, Object>> screenshots = new ArrayList<>();
             File screenshotDir = FileUtils.getSubDir("screenshots");
 
             // 组装各项
             for (Map.Entry<String, String> entry : screenshotFiles.entrySet()) {
-                File targetFile = new File(screenshotDir, entry.getValue() + ".png");
-                Pair<String, File> target;
-                if (targetFile.exists()) {
-                    target = new Pair<>(entry.getKey(), targetFile);
-                } else {
-                    target = new Pair<>(entry.getKey(), null);
-                }
+                String path = entry.getValue();
+                if (StringUtil.startWith(path, "https://") || StringUtil.startWith(path, "http://")) {
+                    try {
+                        URL url = new URL(path);
+                        screenshots.add(new Pair<String, Object>(entry.getKey(), url));
+                    } catch (MalformedURLException e) {
+                        LogUtil.w(TAG, "Fail to load url " + path, e);
+                    }
+                } else if (StringUtil.startWith(path, "/")) {
+                    File targetFile = new File(path);
+                    Pair<String, Object> target;
+                    if (targetFile.exists()) {
+                        target = new Pair<String, Object>(entry.getKey(), targetFile);
+                    } else {
+                        target = new Pair<>(entry.getKey(), null);
+                    }
 
-                screenshots.add(target);
+                    screenshots.add(target);
+                } else {
+                    File targetFile = new File(screenshotDir, entry.getValue() + ".png");
+                    Pair<String, Object> target;
+                    if (targetFile.exists()) {
+                        target = new Pair<String, Object>(entry.getKey(), targetFile);
+                    } else {
+                        target = new Pair<>(entry.getKey(), null);
+                    }
+
+                    screenshots.add(target);
+                }
             }
 
             this.screenshots = screenshots;
@@ -132,8 +155,13 @@ public class ReplayScreenShotFragment extends Fragment {
                 }
 
                 // 加载内容
-                Pair<String, File> screenshot = screenshots.get(position);
-                holder.loadData(screenshot.first, screenshot.second);
+                Pair<String, Object> screenshot = screenshots.get(position);
+                Object target = screenshot.second;
+                if (target instanceof File) {
+                    holder.loadData(screenshot.first, (File) target);
+                } else if (target instanceof URL) {
+                    holder.loadData(screenshot.first, (URL) target);
+                }
             }
 
             @Override
@@ -151,6 +179,7 @@ public class ReplayScreenShotFragment extends Fragment {
         private TextView locationText;
         private ImageView img;
         private File previousFile;
+        private URL previousOnlineImg;
 
         public ScreenshotHolder(View itemView) {
             super(itemView);
@@ -180,10 +209,22 @@ public class ReplayScreenShotFragment extends Fragment {
             }
         }
 
+        private void loadData(String name, URL target) {
+            nameText.setText(name);
+            locationText.setText(target.toString());
+            Glide.with(img.getContext())
+                    .load(target)
+                    .apply(RequestOptions.fitCenterTransform())
+                    .into(img);
+            previousOnlineImg = target;
+        }
+
         @Override
         public void onClick(View v) {
             if (previousFile != null) {
                 DialogUtils.showImageDialog(img.getContext(), previousFile);
+            } else if (previousOnlineImg != null) {
+                DialogUtils.showImageDialog(img.getContext(), previousOnlineImg);
             }
         }
 

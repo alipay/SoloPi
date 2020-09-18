@@ -18,8 +18,13 @@ package com.alipay.hulu.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.alibaba.fastjson.JSON;
+import com.alipay.hulu.activity.CaseReplayResultActivity;
+import com.alipay.hulu.common.bean.DeviceInfo;
+import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
 
+import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +45,16 @@ public class ReplayResultBean implements Parcelable {
      * 目标应用
      */
     private String targetApp;
+
+    /**
+     * 目标应用包名
+     */
+    private String targetAppPkg;
+
+    /**
+     * 目标应用版本号
+     */
+    private String targetAppVersion;
 
     /**
      * 开始时间
@@ -77,9 +92,36 @@ public class ReplayResultBean implements Parcelable {
     private int exceptionStep;
 
     /**
+     * 故障步骤ID
+     */
+    private String exceptionStepId;
+
+    private DeviceInfo deviceInfo;
+
+    /**
+     * 平台
+     */
+    private String platform;
+
+    /**
+     * 平台版本
+     */
+    private String platformVersion;
+
+    /**
      * 截图文件
      */
     private Map<String, String> screenshotFiles;
+
+    /**
+     * （仅用于本地结果）结果截图列表
+     */
+    private List<CaseReplayResultActivity.ScreenshotBean> screenshots;
+
+    /**
+     * （仅用于本地结果）结果目录
+     */
+    private File baseDir;
 
     public String getCaseName() {
         return caseName;
@@ -95,6 +137,22 @@ public class ReplayResultBean implements Parcelable {
 
     public void setTargetApp(String targetApp) {
         this.targetApp = targetApp;
+    }
+
+    public String getTargetAppPkg() {
+        return targetAppPkg;
+    }
+
+    public void setTargetAppPkg(String targetAppPkg) {
+        this.targetAppPkg = targetAppPkg;
+    }
+
+    public String getTargetAppVersion() {
+        return targetAppVersion;
+    }
+
+    public void setTargetAppVersion(String targetAppVersion) {
+        this.targetAppVersion = targetAppVersion;
     }
 
     public Date getStartTime() {
@@ -137,6 +195,22 @@ public class ReplayResultBean implements Parcelable {
         this.currentOperationLog = currentOperationLog;
     }
 
+    public List<CaseReplayResultActivity.ScreenshotBean> getScreenshots() {
+        return screenshots;
+    }
+
+    public void setScreenshots(List<CaseReplayResultActivity.ScreenshotBean> screenshots) {
+        this.screenshots = screenshots;
+    }
+
+    public File getBaseDir() {
+        return baseDir;
+    }
+
+    public void setBaseDir(File baseDir) {
+        this.baseDir = baseDir;
+    }
+
     public String getExceptionMessage() {
         return exceptionMessage;
     }
@@ -153,12 +227,44 @@ public class ReplayResultBean implements Parcelable {
         this.exceptionStep = exceptionStep;
     }
 
+    public String getExceptionStepId() {
+        return exceptionStepId;
+    }
+
+    public void setExceptionStepId(String exceptionStepId) {
+        this.exceptionStepId = exceptionStepId;
+    }
+
     public Map<String, String> getScreenshotFiles() {
         return screenshotFiles;
     }
 
     public void setScreenshotFiles(Map<String, String> screenshotFiles) {
         this.screenshotFiles = screenshotFiles;
+    }
+
+    public DeviceInfo getDeviceInfo() {
+        return deviceInfo;
+    }
+
+    public void setDeviceInfo(DeviceInfo deviceInfo) {
+        this.deviceInfo = deviceInfo;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(String platform) {
+        this.platform = platform;
+    }
+
+    public String getPlatformVersion() {
+        return platformVersion;
+    }
+
+    public void setPlatformVersion(String platformVersion) {
+        this.platformVersion = platformVersion;
     }
 
     public ReplayResultBean() {}
@@ -175,6 +281,8 @@ public class ReplayResultBean implements Parcelable {
         dest.writeLong(this.endTime != null ? this.endTime.getTime() : -1);
         dest.writeString(this.logFile);
         dest.writeString(this.targetApp);
+        dest.writeString(this.targetAppPkg);
+        dest.writeString(this.targetAppVersion);
         if (this.actionLogs == null) {
             dest.writeInt(-1);
         } else {
@@ -187,6 +295,7 @@ public class ReplayResultBean implements Parcelable {
         dest.writeList(this.currentOperationLog);
         dest.writeString(this.exceptionMessage);
         dest.writeInt(this.exceptionStep);
+        dest.writeString(this.exceptionStepId);
         if (this.screenshotFiles == null) {
             dest.writeInt(-1);
         } else {
@@ -196,6 +305,14 @@ public class ReplayResultBean implements Parcelable {
                 dest.writeString(entry.getValue());
             }
         }
+        DeviceInfo deviceInfo = this.deviceInfo;
+        if (deviceInfo == null) {
+            dest.writeString("");
+        } else {
+            dest.writeString(JSON.toJSONString(deviceInfo));
+        }
+        dest.writeString(this.platform);
+        dest.writeString(this.platformVersion);
     }
 
     protected ReplayResultBean(Parcel in) {
@@ -206,6 +323,8 @@ public class ReplayResultBean implements Parcelable {
         this.endTime = tmpEndTime == -1 ? null : new Date(tmpEndTime);
         this.logFile = in.readString();
         this.targetApp = in.readString();
+        this.targetAppPkg = in.readString();
+        this.targetAppVersion = in.readString();
         int actionLogsSize = in.readInt();
         if (actionLogsSize > -1) {
             this.actionLogs = new HashMap<>(actionLogsSize);
@@ -218,6 +337,7 @@ public class ReplayResultBean implements Parcelable {
         this.currentOperationLog = in.readArrayList(OperationStep.class.getClassLoader());
         this.exceptionMessage = in.readString();
         this.exceptionStep = in.readInt();
+        this.exceptionStepId = in.readString();
         int screenshotFilesSize = in.readInt();
         if (screenshotFilesSize > -1) {
             this.screenshotFiles = new HashMap<>(screenshotFilesSize + 1);
@@ -227,6 +347,12 @@ public class ReplayResultBean implements Parcelable {
                 this.screenshotFiles.put(key, value);
             }
         }
+        String deviceInfo = in.readString();
+        if (!StringUtil.isEmpty(deviceInfo)) {
+            this.deviceInfo = JSON.parseObject(deviceInfo, DeviceInfo.class);
+        }
+        this.platform = in.readString();
+        this.platformVersion = in.readString();
     }
 
     public static final Creator<ReplayResultBean> CREATOR = new Creator<ReplayResultBean>() {

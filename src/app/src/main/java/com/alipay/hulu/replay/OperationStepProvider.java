@@ -15,6 +15,8 @@
  */
 package com.alipay.hulu.replay;
 
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.text.TextUtils;
 
 import com.alibaba.fastjson.JSON;
@@ -73,6 +75,8 @@ public class OperationStepProvider extends AbstractStepProvider {
     protected Map<String, String> screenshotFiles;
 
     protected String targetApp;
+    protected String targetAppPkg;
+    protected String targetAppVersionName;
 
     protected RecordCaseInfo caseInfo;
 
@@ -103,6 +107,7 @@ public class OperationStepProvider extends AbstractStepProvider {
     protected int checkIdx = -1;
 
     private String errorReason;
+    protected String errorStepId;
 
     protected int currentIdx;
 
@@ -219,6 +224,17 @@ public class OperationStepProvider extends AbstractStepProvider {
         operationService.putAllRuntimeParamAtTop(initParams);
 
         targetApp = caseInfo.getTargetAppLabel();
+        targetAppPkg = caseInfo.getTargetAppPackage();
+        targetAppVersionName = null;
+
+        try {
+            PackageInfo info = LauncherApplication.getInstance().getPackageManager().getPackageInfo(targetAppPkg, 0);
+            if (info != null) {
+                targetAppVersionName = info.versionName;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            LogUtil.w(TAG, "Fail to load pkg " + targetApp, e);
+        }
     }
 
     public void loadOperation(String content) {
@@ -450,6 +466,7 @@ public class OperationStepProvider extends AbstractStepProvider {
                 loopParams.pop();
             } else {
                 this.errorReason = reason + "\n" + StringUtil.join("\n", stack);
+                errorStepId = step.getStepId();
                 takeScreenshot();
                 return true;
             }
@@ -459,6 +476,7 @@ public class OperationStepProvider extends AbstractStepProvider {
         }
 
         this.errorReason = reason + "\n" + StringUtil.join("\n", stack);
+        errorStepId = step.getStepId();
         takeScreenshot();
         return true;
     }
@@ -510,20 +528,24 @@ public class OperationStepProvider extends AbstractStepProvider {
         if (resultBeans.size() >= 1) {
             ReplayResultBean resultBean = resultBeans.get(0);
             // 终止adb日志
-            File appLogFile = CmdTools.stopAppLog();
+            File adbLogFile = CmdTools.stopAppLog();
 
-            if (appLogFile != null && appLogFile.exists()) {
-                resultBean.setLogFile(appLogFile.getAbsolutePath());
+            if (adbLogFile != null && adbLogFile.exists()) {
+                resultBean.setLogFile(adbLogFile.getAbsolutePath());
             }
 
             resultBean.setScreenshotFiles(screenshotFiles);
             resultBean.setTargetApp(targetApp);
+            resultBean.setTargetAppPkg(targetAppPkg);
+            resultBean.setTargetAppVersion(targetAppVersionName);
+
             resultBean.setCurrentOperationLog(stepList);
 
             resultBean.setActionLogs(currentStepInfo);
             resultBean.setCaseName(caseInfo.getCaseName());
             if (errorReason != null) {
                 resultBean.setExceptionStep(currentIdx - 1);
+                resultBean.setExceptionStepId(errorStepId);
                 resultBean.setExceptionMessage(errorReason);
             }
         }

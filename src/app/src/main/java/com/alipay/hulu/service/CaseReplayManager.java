@@ -528,6 +528,16 @@ public class CaseReplayManager implements ExportService {
 
         // 汇报结果
         final List<ReplayResultBean> resultBeans = provider.genReplayResult();
+        if (resultBeans != null && resultBeans.size() > 0) {
+            DeviceInfo deviceInfo = DeviceInfoUtil.generateDeviceInfo();
+            for (ReplayResultBean result: resultBeans) {
+                result.setDeviceInfo(deviceInfo);
+                result.setPlatform("Android");
+                result.setPlatformVersion(deviceInfo.getSystemVersion());
+            }
+        }
+
+
         // 先restore再stop
         binder.restoreFloat();
         binder.stopFloat();
