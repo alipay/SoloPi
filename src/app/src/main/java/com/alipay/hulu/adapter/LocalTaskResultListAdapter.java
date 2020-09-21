@@ -67,7 +67,7 @@ public class LocalTaskResultListAdapter extends SoloBaseAdapter<ReplayResultBean
             holder.deviceInfo.setVisibility(View.GONE);
         }
 
-        if (result.getExceptionStep() > -1) {
+        if (result.getExceptionMessage() != null) {
             holder.status.setTextColor(0xfff76262);
             holder.status.setText(R.string.constant__fail);
         } else {

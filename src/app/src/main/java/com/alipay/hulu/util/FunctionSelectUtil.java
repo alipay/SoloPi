@@ -423,7 +423,7 @@ public class FunctionSelectUtil {
             View itemScan = customView.findViewById(R.id.item_scan);
             TextView itemUrl = customView.findViewById(R.id.item_url);
             if (actionEnum == PerformActionEnum.GENERATE_QR_CODE) {
-                itemUrl.setText("输入码值");
+                itemUrl.setText(R.string.function__input_code);
             }
             final AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
                     .setView(customView)

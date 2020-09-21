@@ -423,4 +423,16 @@
     <string name="record_float__kill_process">杀当前进程</string>
     <string name="record_float__average">平均值</string>
     <string name="record_float__nth_time">第%d次</string>
+    <string name="step_edit__remove">删除步骤</string>
+    <string name="step_edit__restore_step">恢复步骤</string>
+    <string name="step_edit__convert_click_if_exist">转化为发现则点击</string>
+    <string name="step_edit__convert_click">转化为点击</string>
+    <string name="replay_result__no_history">您还没有保存过用例回放结果哦</string>
+    <string name="function__input_code">输入码值</string>
+    <string name="case_step_edit__select_add_action">请选择要添加的操作类型</string>
+    <string name="case_step_edit__node_action">控件操作</string>
+    <string name="case_step_edit__global_action">全局操作</string>
+    <string name="case_step_edit__record_add_action">录制添加操作</string>
+    <string name="case_step_edit__select_action">选择操作</string>
+    <string name="case_step_edit__set_node_info">设置控件信息</string>
 </resources>

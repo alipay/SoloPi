@@ -33,6 +33,7 @@ import com.alipay.hulu.common.utils.Callback;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.shared.R;
 import com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl;
 import com.alipay.hulu.shared.node.AbstractProvider;
 import com.alipay.hulu.shared.node.tree.FakeNodeTree;
@@ -379,7 +380,7 @@ public class AccessibilityProvider implements AbstractProvider {
      * 重启辅助功能
      */
     private void restartAccessibilityService() {
-        LauncherApplication.getInstance().showToast("重启辅助功能中，请耐心等待");
+        LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.permission__restarting_accessibility));
         // 关uiautomator
         cleanInstrumentationAndUiAutomator();
 
@@ -418,7 +419,7 @@ public class AccessibilityProvider implements AbstractProvider {
      * 重启辅助功能
      */
     private void simpleRestartAccessibilityService() {
-        LauncherApplication.getInstance().showToast("简易重启辅助功能中，请耐心等待");
+        LauncherApplication.getInstance().showToast(R.string.permission__restarting_accessibility);
 
         // 切换回TalkBack
         CmdTools.putAccessibility("enabled_accessibility_services", "com.android.talkback/com.google.android.marvin.talkback.TalkBackService");

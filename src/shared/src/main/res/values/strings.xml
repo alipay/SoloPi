@@ -27,7 +27,7 @@
     <string name="action__long_click">LONG PRESS</string>
     <string name="action__input">INPUT</string>
     <string name="action__multi_click">REPEAT CLICK</string>
-    <string name="action__find_click">FIND AND CLICK</string>
+    <string name="action__find_click">CLICK IF EXISTS</string>
     <string name="action__quick_click">QUICK CLICK</string>
     <string name="action__input_search">INPUT AND SEARCH</string>
     <string name="action__scroll_to_bottom">SCROLL DOWN</string>

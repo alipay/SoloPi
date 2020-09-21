@@ -934,6 +934,14 @@ public abstract class LauncherApplication extends Application {
     }
 
     /**
+     * 显示Toast
+     * @param res 文字资源
+     */
+    public void showToast(int res, Object... args) {
+        showToast(getContext(), getContext().getString(res, args));
+    }
+
+    /**
      * 展示加载框
      *
      * @param message

@@ -419,9 +419,21 @@
     <string name="activity_local_replay_result_title">Local Replay Result</string>
     <string name="local_result__running_time">Run Time: </string>
     <string name="local_result__target_app">Test App: </string>
-    <string name="toast_message__add_solopi_background">Please Turn On \"Display pop-up windows while running in the background\" Permission</string>
+    <string name="toast_message__add_solopi_background">Please make sure SoloPi in background cleanup whitelist</string>
     <string name="replay_result__delete_item">Delete replay result?</string>
     <string name="record_float__kill_process">Kill Process</string>
     <string name="record_float__average">AVG</string>
     <string name="record_float__nth_time">%dth</string>
+    <string name="step_edit__remove">Remove Step</string>
+    <string name="step_edit__restore_step">Restore Step</string>
+    <string name="step_edit__convert_click_if_exist">Convert to ClickIfExists</string>
+    <string name="step_edit__convert_click">Convert to Click</string>
+    <string name="replay_result__no_history">No case replay result found</string>
+    <string name="function__input_code">Input Code Value</string>
+    <string name="case_step_edit__select_add_action">Please select action type</string>
+    <string name="case_step_edit__node_action">Node Operation</string>
+    <string name="case_step_edit__global_action">Global Operation</string>
+    <string name="case_step_edit__record_add_action">Record Steps</string>
+    <string name="case_step_edit__select_action">Next</string>
+    <string name="case_step_edit__set_node_info">Set Node Info.</string>
 </resources>

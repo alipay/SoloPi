@@ -45,7 +45,7 @@
     <dimen name="float_win_height">800dp</dimen>
     <dimen name="float_group_text_size">24dp</dimen>
     <dimen name="float_group_icon_size">52dp</dimen>
-    <dimen name="float_group_icon_gap">32dp</dimen>
+    <dimen name="float_group_icon_gap">36dp</dimen>
     <dimen name="float_item_icon_size">48dp</dimen>
     <dimen name="float_item_text_size">30sp</dimen>
 

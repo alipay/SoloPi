@@ -933,7 +933,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
         CmdTools.putAccessibility("enabled_accessibility_services", "com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
 
         // 等待辅助功能重新激活
-        LauncherApplication.getInstance().showToast("尝试重启辅助功能，等待10秒");
+        LauncherApplication.getInstance().showToast(R.string.permission__restarting_accessibility);
         try {
             latch.await(10000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {

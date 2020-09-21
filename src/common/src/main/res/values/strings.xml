@@ -74,7 +74,7 @@
     <string name="permission__receive_mms">Receive MMS</string>
     <string name="permission__read_external_storage">Read External Storage</string>
     <string name="permission__write_external_storage">Write External Storage</string>
-    <string name="permission__restarting_accessibility">Restarting Accessibility Service...</string>
+    <string name="permission__restarting_accessibility">Restarting Accessibility Service…s</string>
     <string name="permission__kill_app">Kill App: %s</string>
     <string name="permission__open_accessibility">Starting Accessibility Service</string>
     <string name="permission__try_kil_uiautomator">Try to kill uiautomator and instrument processes</string>

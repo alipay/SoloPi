@@ -33,7 +33,6 @@ android {
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
         }
-        versionNameSuffix "-inner"
     }
 
     buildTypes {
@@ -52,8 +51,10 @@ android {
     }
 
     packagingOptions {
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/**'
+        exclude 'lib/x86/**'
+        exclude 'lib/armeabi/**'
+        /*exclude 'assets/lineDashTexture.png'*/
     }
 
     dexOptions {

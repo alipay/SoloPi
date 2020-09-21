@@ -36,7 +36,6 @@ import com.alipay.hulu.bean.CaseStepHolder;
 import com.alipay.hulu.bean.ReplayResultBean;
 import com.alipay.hulu.bean.ReplayStepInfoBean;
 import com.alipay.hulu.common.bean.DeviceInfo;
-import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
@@ -273,7 +272,7 @@ public class LocalReplayResultListFragment extends BaseFragment {
     private void initEmptyView(View view) {
         mEmptyView = view.findViewById(R.id.empty_view_container);
         mEmptyTextView = view.findViewById(R.id.empty_text);
-        mEmptyTextView.setText("您还没有回放过用例哦");
+        mEmptyTextView.setText(R.string.replay_result__no_history);
     }
 
     /**

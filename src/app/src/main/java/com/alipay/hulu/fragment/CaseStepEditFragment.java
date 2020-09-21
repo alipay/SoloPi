@@ -341,7 +341,7 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
 
         // 转换模式
         Menu menu = new Menu(true, 0);
-        menu.addItem(new MenuItem.Builder().setText("删除步骤").setTextColor(Color.WHITE)
+        menu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__remove)).setTextColor(Color.WHITE)
                 .setWidth(dp64)
                 .setTextSize(textSize13)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
@@ -359,12 +359,12 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
 
         // 空项
         Menu controlMenu = new Menu(false, 1);
-        controlMenu.addItem(new MenuItem.Builder().setText("删除步骤").setTextColor(Color.WHITE)
+        controlMenu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__remove)).setTextColor(Color.WHITE)
                 .setWidth(dp64)
                 .setTextSize(textSize13)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
                 .setBackground(new ColorDrawable(colorDelete)).build());
-        controlMenu.addItem(new MenuItem.Builder().setText("恢复步骤").setTextColor(Color.WHITE)
+        controlMenu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__restore_step)).setTextColor(Color.WHITE)
                 .setWidth(dp64)
                 .setTextSize(textSize13)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
@@ -372,7 +372,7 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
 
         // 空项
         Menu controlSubMenu = new Menu(false, 2);
-        controlMenu.addItem(new MenuItem.Builder().setText("删除步骤").setTextColor(Color.WHITE)
+        controlSubMenu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__remove)).setTextColor(Color.WHITE)
                 .setWidth(dp64)
                 .setTextSize(textSize13)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
@@ -380,21 +380,21 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
 
         // 转换模式
         Menu clickMenu = new Menu(true, 3);
-        clickMenu.addItem(new MenuItem.Builder().setText("删除步骤").setTextColor(Color.WHITE)
+        clickMenu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__remove)).setTextColor(Color.WHITE)
                 .setWidth(dp64)
                 .setTextSize(textSize13)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
                 .setBackground(new ColorDrawable(colorDelete)).build());
-        clickMenu.addItem(new MenuItem.Builder().setText("转换为IF").setTextColor(Color.WHITE).setWidth(dp64)
+        clickMenu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__convert_if)).setTextColor(Color.WHITE).setWidth(dp64)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
                 .setTextSize(textSize13)
                 .setBackground(new ColorDrawable(colorIf)).build());
-        clickMenu.addItem(new MenuItem.Builder().setText("转换为WHILE").setTextColor(Color.WHITE)
+        clickMenu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__convert_while)).setTextColor(Color.WHITE)
                 .setWidth(dp64)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
                 .setTextSize(textSize13)
                 .setBackground(new ColorDrawable(colorWhile)).build());
-        clickMenu.addItem(new MenuItem.Builder().setText("转化为发现则点击").setTextColor(Color.WHITE)
+        clickMenu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__convert_click_if_exist)).setTextColor(Color.WHITE)
                 .setWidth(dp64)
                 .setTextSize(textSize13)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
@@ -403,21 +403,21 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
 
         // 转换模式
         Menu clickIfMenu = new Menu(true, 4);
-        clickIfMenu.addItem(new MenuItem.Builder().setText("删除步骤").setTextColor(Color.WHITE)
+        clickIfMenu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__remove)).setTextColor(Color.WHITE)
                 .setWidth(dp64)
                 .setTextSize(textSize13)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
                 .setBackground(new ColorDrawable(colorDelete)).build());
-        clickIfMenu.addItem(new MenuItem.Builder().setText("转换为IF").setTextColor(Color.WHITE).setWidth(dp64)
+        clickIfMenu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__convert_if)).setTextColor(Color.WHITE).setWidth(dp64)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
                 .setTextSize(textSize13)
                 .setBackground(new ColorDrawable(colorIf)).build());
-        clickIfMenu.addItem(new MenuItem.Builder().setText("转换为WHILE").setTextColor(Color.WHITE)
+        clickIfMenu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__convert_while)).setTextColor(Color.WHITE)
                 .setWidth(dp64)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
                 .setTextSize(textSize13)
                 .setBackground(new ColorDrawable(colorWhile)).build());
-        clickIfMenu.addItem(new MenuItem.Builder().setText("转化为点击").setTextColor(Color.WHITE)
+        clickIfMenu.addItem(new MenuItem.Builder().setText(getString(R.string.step_edit__convert_click)).setTextColor(Color.WHITE)
                 .setWidth(dp64)
                 .setTextSize(textSize13)
                 .setDirection(MenuItem.DIRECTION_RIGHT)
@@ -821,9 +821,11 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
      * 展示选择添加步骤模式
      */
     private void showSelectModeAction(final int position) {
-        final String[] actions = new String[]{"控件操作", "全局操作", "录制添加操作"};
+        final String[] actions = new String[]{getString(R.string.case_step_edit__node_action),
+                getString(R.string.case_step_edit__global_action),
+                getString(R.string.case_step_edit__record_add_action)};
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppDialogTheme)
-                .setTitle("请选择要添加的操作类型")
+                .setTitle(R.string.case_step_edit__select_add_action)
                 .setSingleChoiceItems(actions, -1, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -841,7 +843,7 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
                             addRecordCases(position);
                         }
                     }
-                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                }).setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -866,7 +868,7 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
         final EditText xpath = (EditText) createNodeView.findViewById(R.id.create_node_xpath);
 
         final AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                .setView(createNodeView).setPositiveButton("选择操作", new DialogInterface.OnClickListener() {
+                .setView(createNodeView).setPositiveButton(R.string.case_step_edit__select_action, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         OperationNode node = new OperationNode();
@@ -904,8 +906,8 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
                         showAddFunctionView(node, position);
                     }
                 })
-                .setNegativeButton("取消", null)
-                .setTitle("设置控件信息").create();
+                .setNegativeButton(R.string.constant__cancel, null)
+                .setTitle(R.string.case_step_edit__set_node_info).create();
         dialog.show();
 
         // 选择第一个
