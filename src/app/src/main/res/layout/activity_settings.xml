@@ -1119,7 +1119,7 @@
             android:textColor="@color/black"
             android:gravity="center"
             android:textSize="@dimen/textsize_16"
-            android:text="插件列表"/>
+            android:text="@string/settings__plugin_list"/>
 
     </RelativeLayout>
 

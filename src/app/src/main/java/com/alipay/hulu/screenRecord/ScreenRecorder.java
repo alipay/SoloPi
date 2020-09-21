@@ -28,6 +28,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 
+import com.alipay.hulu.BuildConfig;
 import com.alipay.hulu.common.utils.LogUtil;
 
 import java.io.IOException;
@@ -41,7 +42,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @TargetApi(value = Build.VERSION_CODES.LOLLIPOP)
 public class ScreenRecorder {
     private static final String TAG = "ScreenRecorder";
-    private static final boolean VERBOSE = false;
+    private static final boolean VERBOSE = BuildConfig.DEBUG;
     private static final int INVALID_INDEX = -1;
     public static final String VIDEO_AVC = MediaFormat.MIMETYPE_VIDEO_AVC; // H.264 Advanced Video Coding
     private int mWidth;

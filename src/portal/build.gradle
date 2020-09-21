@@ -69,4 +69,3 @@ dependencies {
 
 android.defaultConfig.versionCode = rootProject.ext.appVersionCode
 android.defaultConfig.versionName = rootProject.ext.appVersionName
-android.defaultConfig.versionNameSuffix = rootProject.ext.appVersionNameSuffix

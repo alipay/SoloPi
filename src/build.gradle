@@ -28,9 +28,8 @@ buildscript {
         compileSdkVersion = 29
         buildToolsVersion = "29.0.2"
         targetSdkVersion = 29
-        appVersionCode = 44
-        appVersionName = '0.10.20090801'
-        appVersionNameSuffix = '-inner'
+        appVersionCode = 32
+        appVersionName = '0.11.1'
     }
 }
 
