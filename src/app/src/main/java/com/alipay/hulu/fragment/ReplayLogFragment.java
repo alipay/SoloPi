@@ -16,8 +16,6 @@
 package com.alipay.hulu.fragment;
 
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +30,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 public class ReplayLogFragment extends Fragment {
     public static final String LOG_FILE_PATH_TAG = "logFilePath";
@@ -101,9 +102,11 @@ public class ReplayLogFragment extends Fragment {
                     String line;
 
                     int readCount = 0;
-                    while ((line = reader.readLine()) != null && readCount < 301) {
+                    final boolean readEmpty = (line = reader.readLine()) == null;
+                    while (line != null && readCount < 301) {
                         sb.append(line).append('\n');
                         readCount++;
+                        line = reader.readLine();
                     }
 
                     final boolean tooLong = readCount > 300;
@@ -115,6 +118,9 @@ public class ReplayLogFragment extends Fragment {
                             if (tooLong) {
                                 tooLoneText.setVisibility(View.VISIBLE);
                                 tooLoneText.setText(String.format(getString(R.string.to_long_template), adbPath));
+                            } else if (readEmpty) {
+                                tooLoneText.setVisibility(View.VISIBLE);
+                                tooLoneText.setText(String.format(getString(R.string.log__read_fail_template), adbPath));
                             }
                         }
                     });

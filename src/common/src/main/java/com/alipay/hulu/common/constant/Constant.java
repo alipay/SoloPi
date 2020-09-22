@@ -24,7 +24,7 @@ public class Constant {
 
     public static final String AES_KEY = "com.alipay.hulu";
 
-    public static final String MAIL_ADDERSS = "ruikai.qrk@antfin.com";
+    public static final String MAIL_ADDERSS = "ruikai.qrk@antgroup.com";
 
 
     public static final String EVENT_RECORD_SCREEN_CODE = "recordScreenCode";

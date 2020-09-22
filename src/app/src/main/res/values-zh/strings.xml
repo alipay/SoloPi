@@ -19,7 +19,7 @@
     <string name="more_setting">更多设置</string>
     <string name="collapse_setting">收起</string>
     <string name="target_app">目标应用</string>
-    <string name="help_text"><![CDATA[问题或建议请通过邮箱联系<a href=\"mailto:ruikai.qrk@antfin.com\">ruikai.qrk@antfin.com</a>]]></string>
+    <string name="help_text"><![CDATA[问题或建议请通过邮箱联系<a href=\"mailto:ruikai.qrk@antgroup.com\">ruikai.qrk@antgroup.com</a>]]></string>
     <string name="app_desc">Android自动化工具</string>
     <string name="default_scroll_percentage">50</string>
     <string name="default_long_click_time">2000</string>
@@ -435,4 +435,5 @@
     <string name="case_step_edit__record_add_action">录制添加操作</string>
     <string name="case_step_edit__select_action">选择操作</string>
     <string name="case_step_edit__set_node_info">设置控件信息</string>
+    <string name="log__read_fail_template">文件读取失败，请手动打开%s</string>
 </resources>

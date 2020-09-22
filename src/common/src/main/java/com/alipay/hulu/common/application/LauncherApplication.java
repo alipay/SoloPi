@@ -283,19 +283,18 @@ public abstract class LauncherApplication extends Application {
      */
     public void setApplicationLanguage() {
         Resources resources = getApplicationContext().getResources();
-        DisplayMetrics dm = resources.getDisplayMetrics();
         Configuration config = resources.getConfiguration();
         Locale locale = getLanguageLocale();
-        config.locale = locale;
+        config.setLocale(locale);
         Locale.setDefault(locale);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             LocaleList localeList = new LocaleList(locale);
             LocaleList.setDefault(localeList);
             config.setLocales(localeList);
-            getApplicationContext().createConfigurationContext(config);
+//            getApplicationContext().createConfigurationContext(config);
         }
-        resources.updateConfiguration(config, dm);
+        resources.updateConfiguration(config, null);
     }
 
     /**

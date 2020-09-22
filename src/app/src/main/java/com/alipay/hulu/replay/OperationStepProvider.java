@@ -490,9 +490,8 @@ public class OperationStepProvider extends AbstractStepProvider {
 
         // 生成文件名
         Date now = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmssSSS_" +
-                StringUtil.getString(R.string.step_provider__error_step, currentIdx), Locale.CHINA);
-        String newFileName = format.format(now);
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmssSSS_", Locale.CHINA);
+        String newFileName = format.format(now) + StringUtil.getString(R.string.step_provider__error_step, currentIdx);
         method.putParam(OperationExecutor.INPUT_TEXT_KEY, newFileName);
         screenshotFiles.put(StringUtil.getString(R.string.step_provider__error_step, currentIdx), newFileName);
 

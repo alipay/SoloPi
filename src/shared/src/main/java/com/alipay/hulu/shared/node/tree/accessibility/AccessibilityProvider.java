@@ -444,7 +444,7 @@ public class AccessibilityProvider implements AbstractProvider {
         LogUtil.i(TAG, "等待辅助功能重新激活");
         long startTime = System.currentTimeMillis();
 
-        LauncherApplication.getInstance().showToast("辅助功能重新启动");
+        LauncherApplication.getInstance().showToast(R.string.permission__starting_accessibility_service);
 
         // 等待辅助功能重新激活
         try {

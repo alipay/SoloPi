@@ -25,13 +25,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.LocaleList;
-import androidx.annotation.IdRes;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -44,8 +37,14 @@ import com.alipay.hulu.common.utils.DeviceInfoUtil;
 import com.alipay.hulu.common.utils.LogUtil;
 
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Set;
+
+import androidx.annotation.IdRes;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 /**
  * Created by lezhou.wyl on 2018/1/28.
@@ -87,20 +86,28 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(createLocaleContext(newBase));
+    }
+
+
+    public static Context createLocaleContext(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            newBase = updateResources(newBase);
+            //7.0及以后
+            return updateResourcesForAndroidN(context);
+        } else {
+            //7.0之前
+            Configuration configuration = context.getResources().getConfiguration();
+            configuration.locale = LauncherApplication.getInstance().getLanguageLocale();
+            context.getResources().updateConfiguration(configuration, null);
+            return context;
         }
-        super.attachBaseContext(newBase);
     }
 
     @TargetApi(Build.VERSION_CODES.N)
-    private static Context updateResources(Context context) {
+    private static Context updateResourcesForAndroidN(Context context) {
         Resources resources = context.getResources();
-        Locale locale = LauncherApplication.getInstance().getLanguageLocale();
-
         Configuration configuration = resources.getConfiguration();
-        configuration.setLocale(locale);
-        configuration.setLocales(new LocaleList(locale));
+        configuration.setLocale(LauncherApplication.getInstance().getLanguageLocale());
         return context.createConfigurationContext(configuration);
     }
 

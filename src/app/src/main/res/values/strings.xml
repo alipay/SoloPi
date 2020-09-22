@@ -20,7 +20,7 @@
     <string name="more_setting">More</string>
     <string name="collapse_setting">Collapse</string>
     <string name="target_app">Target</string>
-    <string name="help_text"><![CDATA[Any question or suggestion, please contact <a href=\"mailto:ruikai.qrk@antfin.com\">ruikai.qrk@antfin.com</a>]]></string>
+    <string name="help_text"><![CDATA[Any question or suggestion, please contact <a href=\"mailto:ruikai.qrk@antgroup.com\">ruikai.qrk@antgroup.com</a>]]></string>
     <string name="app_desc">Android Automation Tools</string>
     <string name="default_scroll_percentage">50</string>
     <string name="default_long_click_time">2000</string>
@@ -436,4 +436,5 @@
     <string name="case_step_edit__record_add_action">Record Steps</string>
     <string name="case_step_edit__select_action">Next</string>
     <string name="case_step_edit__set_node_info">Set Node Info.</string>
+    <string name="log__read_fail_template">Fail to read %s</string>
 </resources>

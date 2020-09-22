@@ -977,7 +977,8 @@ public class OperationExecutor {
                         || StringUtil.equals("允许", node.getText())
                         || StringUtil.equals("总是允许", node.getText())
                         || StringUtil.equals("好的", node.getText())
-                        || StringUtil.equals("仅在使用中允许", node.getText())) {
+                        || StringUtil.equals("仅在使用中允许", node.getText())
+                        || StringUtil.equals("仅在使用该应用时允许", node.getText())) {
                     target = node;
                     break;
                 }
