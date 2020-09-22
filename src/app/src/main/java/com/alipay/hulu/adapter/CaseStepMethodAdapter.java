@@ -15,7 +15,7 @@
  */
 package com.alipay.hulu.adapter;
 
-import androidx.recyclerview.widget.RecyclerView;
+import android.graphics.Bitmap;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Pair;
@@ -25,16 +25,19 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.alipay.hulu.R;
+import com.alipay.hulu.actions.ImageCompareActionProvider;
 import com.alipay.hulu.bean.CaseParamBean;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.node.action.OperationExecutor;
 import com.alipay.hulu.shared.node.action.OperationMethod;
+import com.alipay.hulu.shared.node.utils.BitmapUtil;
 import com.alipay.hulu.util.DialogUtils;
 
 import java.util.ArrayList;
@@ -42,6 +45,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import static com.alipay.hulu.shared.node.utils.LogicUtil.SCOPE;
 
@@ -82,7 +87,12 @@ public class CaseStepMethodAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemViewType(int position) {
-        return StringUtil.equals(keys.get(position), SCOPE)? 1: 0;
+        String key = keys.get(position);
+        if (StringUtil.equals(ImageCompareActionProvider.KEY_TARGET_IMAGE, key)) {
+            return 2;
+        }
+
+        return StringUtil.equals(key, SCOPE) ? 1 : 0;
     }
 
     @Override
@@ -94,6 +104,9 @@ public class CaseStepMethodAdapter extends RecyclerView.Adapter {
         if (viewType == 1) {
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_case_step_edit_select, parent, false);
             return new SelectAdapter(v, method);
+        } else if (viewType == 2) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_case_step_edit_image_picker, parent, false);
+            return new ImageParamHolder(view, method);
         } else {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_case_step_edit_input, parent, false);
             return new CaseStepParamHolder(view, method);
@@ -107,6 +120,10 @@ public class CaseStepMethodAdapter extends RecyclerView.Adapter {
             String desc = paramKeyMap.containsKey(key)? paramKeyMap.get(key): key;
             String value = method.getParam(key);
             ((CaseStepParamHolder) holder).bindData(key, desc, value);
+        } else if (holder instanceof ImageParamHolder) {
+            String key = keys.get(position);
+            String value = method.getParam(key);
+            ((ImageParamHolder) holder).wrapData(key, value);
         } else {
             ((SelectAdapter) holder).wrapData(laterList, method.getParam(keys.get(position)));
         }
@@ -262,6 +279,23 @@ public class CaseStepMethodAdapter extends RecyclerView.Adapter {
                 }
             }, "配置参数", Arrays.asList(new Pair<>("参数名", ""), new Pair<>("参数描述", ""),
                     new Pair<>("默认值", value)));
+        }
+    }
+
+
+
+    public static class ImageParamHolder extends RecyclerView.ViewHolder {
+        private ImageView imageView;
+
+        public ImageParamHolder(View itemView, OperationMethod method) {
+            super(itemView);
+
+            imageView = itemView.findViewById(R.id.case_step_edit_image_view);
+        }
+
+        void wrapData(final String key, String value) {
+            Bitmap img = BitmapUtil.base64ToBitmap(value);
+            imageView.setImageBitmap(img);
         }
     }
 }
