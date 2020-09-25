@@ -21,9 +21,6 @@ import android.content.pm.PackageManager;
 import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.core.app.ActivityCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -38,8 +35,13 @@ import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.event.HandlePermissionEvent;
 import com.alipay.hulu.event.ScanSuccessEvent;
-import com.dlazaro66.qrcodereaderview.QRCodeReaderView;
-import com.dlazaro66.qrcodereaderview.QRCodeReaderView.OnQRCodeReadListener;
+import com.alipay.hulu.shared.scan.ScanCodeType;
+import com.alipay.hulu.ui.AnyCodeReaderView;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.zxing.BarcodeFormat;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 
 
 /**
@@ -48,7 +50,7 @@ import com.dlazaro66.qrcodereaderview.QRCodeReaderView.OnQRCodeReadListener;
 @Provider({@Param(type = ScanSuccessEvent.class, sticky = false),
         @Param(type = HandlePermissionEvent.class, sticky = false)})
 public class QRScanActivity extends BaseActivity
-        implements ActivityCompat.OnRequestPermissionsResultCallback, OnQRCodeReadListener {
+        implements ActivityCompat.OnRequestPermissionsResultCallback, AnyCodeReaderView.OnCodeReadListener {
     private static final String TAG = "QRScanActivity";
 
     public static final String KEY_SCAN_TYPE = "KEY_SCAN_TYPE";
@@ -58,7 +60,8 @@ public class QRScanActivity extends BaseActivity
     private ViewGroup mainLayout;
 
     private TextView resultTextView;
-    private QRCodeReaderView qrCodeReaderView;
+    private TextView resultTypeText;
+    private AnyCodeReaderView anyCodeReaderView;
     private volatile boolean isQRCodeReadListenerEnabled = false;
 
     private InjectorService injectorService;
@@ -98,18 +101,18 @@ public class QRScanActivity extends BaseActivity
     }
 
     private void enableQRCodeReadListener() {
-        if (qrCodeReaderView != null) {
+        if (anyCodeReaderView != null) {
             isQRCodeReadListenerEnabled = true;
-            qrCodeReaderView.startCamera();
-            qrCodeReaderView.setOnQRCodeReadListener(this);
+            anyCodeReaderView.startCamera();
+            anyCodeReaderView.setOnCodeReadListener(this);
         }
     }
 
     private void disableQRCodeReadListener() {
-        if (qrCodeReaderView != null) {
+        if (anyCodeReaderView != null) {
             isQRCodeReadListenerEnabled = false;
-            qrCodeReaderView.stopCamera();
-            qrCodeReaderView.setOnQRCodeReadListener(null);
+            anyCodeReaderView.stopCamera();
+            anyCodeReaderView.setOnCodeReadListener(null);
         }
     }
 
@@ -136,13 +139,22 @@ public class QRScanActivity extends BaseActivity
     }
 
     @Override
-    public void onQRCodeRead(String text, PointF[] points) {
+    public void onCodeRead(BarcodeFormat format, String text, PointF[] points) {
         LogUtil.d(TAG, "OnQrCodeRead");
         if (!isQRCodeReadListenerEnabled) {
             return;
         }
 
         resultTextView.setText(text);
+        resultTypeText.setText(format.toString());
+
+        // 过滤不可用的类型
+        ScanCodeType acceptType = ScanCodeType.getByFormat(format);
+        if (acceptType == null) {
+            LogUtil.w(TAG, "Can't process code of type::" + format);
+            enableQRCodeReadListener();
+            return;
+        }
 
         disableQRCodeReadListener();
 
@@ -160,11 +172,12 @@ public class QRScanActivity extends BaseActivity
         lastReadTime = curTime;
 
         if (curScanType == ScanSuccessEvent.SCAN_TYPE_SCHEME
-                || curScanType == ScanSuccessEvent.SCAN_TYPE_QR_CODE) {
-            notifyScanSuccess(text);
+                || curScanType == ScanSuccessEvent.SCAN_TYPE_QR_CODE
+                || curScanType == ScanSuccessEvent.SCAN_TYPE_BAR_CODE) {
+            notifyScanSuccess(text, acceptType);
         } else if (curScanType == ScanSuccessEvent.SCAN_TYPE_PARAM) {
             if (StringUtil.startWith(text, "http://") || StringUtil.startWith(text, "https://")) {
-                notifyScanSuccess(text);
+                notifyScanSuccess(text, acceptType);
             } else {
                 resultTextView.setText(getString(R.string.qr_scan__url_not_support, text));
                 enableQRCodeReadListener();
@@ -197,12 +210,11 @@ public class QRScanActivity extends BaseActivity
 
     /**
      * 发送成功消息
-     *
-     * @param content
      */
-    public void notifyScanSuccess(String content) {
+    public void notifyScanSuccess(String text, ScanCodeType codeType) {
         ScanSuccessEvent event = new ScanSuccessEvent();
-        event.setContent(content);
+        event.setContent(text);
+        event.setCodeType(codeType);
         event.setType(curScanType);
         injectorService.pushMessage(null, event);
         finish();
@@ -231,13 +243,14 @@ public class QRScanActivity extends BaseActivity
     private void initQRCodeReaderView() {
         View content = getLayoutInflater().inflate(R.layout.content_decoder, mainLayout, true);
 
-        qrCodeReaderView = (QRCodeReaderView) content.findViewById(R.id.qrdecoderview);
+        anyCodeReaderView = content.findViewById(R.id.anydecoderview);
         resultTextView = (TextView) content.findViewById(R.id.result_text_view);
+        resultTypeText = content.findViewById(R.id.result_type_text);
 
-        qrCodeReaderView.setAutofocusInterval(2000L);
-        qrCodeReaderView.setOnQRCodeReadListener(this);
-        qrCodeReaderView.setBackCamera();
-        qrCodeReaderView.startCamera();
+        anyCodeReaderView.setAutofocusInterval(2000L);
+        anyCodeReaderView.setOnCodeReadListener(this);
+        anyCodeReaderView.setBackCamera();
+        anyCodeReaderView.startCamera();
 
         enableQRCodeReadListener();
     }

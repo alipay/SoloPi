@@ -19,7 +19,6 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Base64;
@@ -28,14 +27,13 @@ import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -169,8 +167,18 @@ public class BitmapUtil {
      * @return
      */
     public static Bitmap generateQrCode(String qrCode, int size, int backgroundColor, int foregroundColor) {
-        LogUtil.i(TAG, "为码值【%s】生成二维码", qrCode);
-        QRCodeWriter writer = new QRCodeWriter();
+        return generateCode(qrCode, BarcodeFormat.QR_CODE, size, backgroundColor, foregroundColor);
+    }
+
+    /**
+     * 生成码图片
+     * @param qrCode
+     * @param size
+     * @return
+     */
+    public static Bitmap generateCode(String qrCode, BarcodeFormat format, int size, int backgroundColor, int foregroundColor) {
+        LogUtil.i(TAG, "为码值【%s】生成%s码", qrCode, format);
+        MultiFormatWriter writer = new MultiFormatWriter();
         Map<EncodeHintType, Object> hints = new HashMap<>();
         hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
 
@@ -182,7 +190,7 @@ public class BitmapUtil {
 
         BitMatrix matrix;
         try {
-            matrix = writer.encode(qrCode, BarcodeFormat.QR_CODE, size, size, hints);
+            matrix = writer.encode(qrCode, format, size, size, hints);
         } catch (WriterException e) {
             LogUtil.e(TAG, "Catch com.google.zxing.WriterException: " + e.getMessage(), e);
             return null;

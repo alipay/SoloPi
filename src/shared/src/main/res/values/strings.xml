@@ -125,4 +125,5 @@
     <string name="action_param__qr_code_value">QR Code Value</string>
     <string name="toast_message__turn_on_gfx_info">Please turn on \"Profile HWUI rendering\" in \"Developer options\"</string>
     <string name="permission__starting_accessibility_service">Starting Accessibility Service</string>
+    <string name="action__generate_bar_code">GENERATE BAR CODE</string>
 </resources>

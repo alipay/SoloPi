@@ -254,6 +254,7 @@ public class FunctionSelectUtil {
             return true;
         } else if (action == PerformActionEnum.JUMP_TO_PAGE
                 || action == PerformActionEnum.GENERATE_QR_CODE
+                || action == PerformActionEnum.GENERATE_BAR_CODE
                 || action == PerformActionEnum.LOAD_PARAM) {
             showSelectView(method, context, listener);
             return true;
@@ -422,7 +423,8 @@ public class FunctionSelectUtil {
             View customView = LayoutInflater.from(context).inflate(R.layout.dialog_select_view, null);
             View itemScan = customView.findViewById(R.id.item_scan);
             TextView itemUrl = customView.findViewById(R.id.item_url);
-            if (actionEnum == PerformActionEnum.GENERATE_QR_CODE) {
+            if (actionEnum == PerformActionEnum.GENERATE_QR_CODE
+                    || actionEnum == PerformActionEnum.GENERATE_BAR_CODE) {
                 itemUrl.setText(R.string.function__input_code);
             }
             final AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
@@ -443,7 +445,8 @@ public class FunctionSelectUtil {
                 @Override
                 public void onClick(View v) {
                     if (actionEnum == PerformActionEnum.JUMP_TO_PAGE
-                        || actionEnum == PerformActionEnum.GENERATE_QR_CODE) {
+                        || actionEnum == PerformActionEnum.GENERATE_QR_CODE
+                        || actionEnum == PerformActionEnum.GENERATE_BAR_CODE) {
                         if (v.getId() == R.id.item_scan) {
                             method.putParam("scan", "1");
                             listener.onProcessFunction(method, null);
@@ -491,12 +494,16 @@ public class FunctionSelectUtil {
         View v = LayoutInflater.from(ContextUtil.getContextThemeWrapper(context, R.style.AppDialogTheme)).inflate(R.layout.dialog_record_name, null);
         final EditText edit = (EditText) v.findViewById(R.id.dialog_record_edit);
         edit.setHint(R.string.function__please_input_url);
-        if (actionEnum == PerformActionEnum.GENERATE_QR_CODE) {
+        if (actionEnum == PerformActionEnum.GENERATE_QR_CODE
+                || actionEnum == PerformActionEnum.GENERATE_BAR_CODE) {
             edit.setHint(R.string.function__please_input_qr_code);
         }
 
+        int title = (actionEnum == PerformActionEnum.GENERATE_QR_CODE
+                || actionEnum == PerformActionEnum.GENERATE_BAR_CODE)? R.string.function__input_qr_code: R.string.function__input_url;
+
         AlertDialog dialog = new AlertDialog.Builder(context, R.style.AppDialogTheme)
-                .setTitle(actionEnum == PerformActionEnum.GENERATE_QR_CODE? R.string.function__input_url: R.string.function__input_qr_code)
+                .setTitle(title)
                 .setView(v)
                 .setPositiveButton(R.string.function__input, new DialogInterface.OnClickListener() {
                     @Override
@@ -507,7 +514,8 @@ public class FunctionSelectUtil {
                         dialog.dismiss();
 
                         if (actionEnum == PerformActionEnum.JUMP_TO_PAGE
-                            || actionEnum == PerformActionEnum.GENERATE_QR_CODE) {
+                            || actionEnum == PerformActionEnum.GENERATE_QR_CODE
+                            || actionEnum == PerformActionEnum.GENERATE_BAR_CODE) {
 
                             // 向handler发送请求
                             method.putParam(OperationExecutor.SCHEME_KEY, data);

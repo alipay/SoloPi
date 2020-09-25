@@ -116,7 +116,7 @@
             android:name=".activity.QRScanActivity"
             android:label="@string/activity__scan"
             android:launchMode="singleInstance"
-            android:screenOrientation="unspecified"/>
+            android:screenOrientation="portrait"/>
 
         <activity android:name=".activity.BatchExecutionActivity"
                   android:label="@string/activity__batch_replay"

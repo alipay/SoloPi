@@ -58,7 +58,9 @@ import com.alipay.hulu.shared.node.utils.LogicUtil;
 import com.alipay.hulu.shared.node.utils.NodeTreeUtil;
 import com.alipay.hulu.shared.node.utils.OperationUtil;
 import com.alipay.hulu.shared.node.utils.PrepareUtil;
+import com.alipay.hulu.shared.scan.ScanCodeType;
 import com.android.permission.rom.RomUtils;
+import com.google.zxing.BarcodeFormat;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -94,6 +96,7 @@ public class OperationExecutor {
     public static final String GET_NODE_MODE = "descriptorMode";
     public static final String GESTURE_PATH = "gesturePath";
     public static final String GESTURE_FILTER = "gestureFilter";
+    public static final String GENERATE_CODE_TYPE = "codeType";
 
 
     public static final String SCROLL_DISTANCE = "scrollDistance";
@@ -660,16 +663,48 @@ public class OperationExecutor {
                 executor.executeCmdSync("am start '" + scheme + "'");
                 break;
             case GENERATE_QR_CODE:
+            case GENERATE_BAR_CODE:
                 final String qrCode = method.getParam(SCHEME_KEY);
                 if (StringUtil.isEmpty(qrCode)) {
                     return false;
+                }
+                final BarcodeFormat format;
+                if (actionEnum == PerformActionEnum.GENERATE_QR_CODE) {
+                    format = BarcodeFormat.QR_CODE;
+                } else {
+                    String type = method.getParam(GENERATE_CODE_TYPE);
+                    if (StringUtil.isEmpty(type)) {
+                        format = BarcodeFormat.EAN_13;
+                    } else {
+                        ScanCodeType codeType = ScanCodeType.getByCode(type);
+                        if (codeType == null) {
+                            // 没有对应的码类型
+                            return false;
+                        }
+                        format = codeType.getTargetFormat();
+                    }
+                }
+
+                // 检查数据格式是否合理
+                if (format == BarcodeFormat.EAN_13) {
+                    if (qrCode.length() != 13 || !StringUtil.isDigits(qrCode)) {
+                        return false;
+                    }
+                } else if (format == BarcodeFormat.EAN_8) {
+                    if (qrCode.length() != 8 || !StringUtil.isDigits(qrCode)) {
+                        return false;
+                    }
+                } else if (format == BarcodeFormat.CODE_128) {
+                    if (StringUtil.containsNonASCII(qrCode) || qrCode.length() > 128) {
+                        return false;
+                    }
                 }
 
                 opContext.notifyOnFinish(new Runnable() {
                     @Override
                     public void run() {
                         // 生成二维码
-                        Bitmap bitmap = BitmapUtil.generateQrCode(qrCode, 512, Color.WHITE, Color.BLACK);
+                        Bitmap bitmap = BitmapUtil.generateCode(qrCode, format, 512, Color.WHITE, Color.BLACK);
 
                         File targetDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
                         targetDir = new File(targetDir, "solopi");

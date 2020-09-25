@@ -18,6 +18,10 @@ package com.alipay.hulu.event;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.shared.scan.ScanCodeType;
+import com.google.zxing.BarcodeFormat;
+
 /**
  * Created by lezhou.wyl on 2018/2/7.
  */
@@ -28,8 +32,10 @@ public class ScanSuccessEvent implements Parcelable {
     public static final int SCAN_TYPE_PARAM = 6;
     public static final int SCAN_TYPE_OTHER = 7;
     public static final int SCAN_TYPE_QR_CODE = 10;
+    public static final int SCAN_TYPE_BAR_CODE = 11;
     private int type;
     private String content;
+    private ScanCodeType codeType;
 
     public int getType() {
         return type;
@@ -47,6 +53,13 @@ public class ScanSuccessEvent implements Parcelable {
         this.content = content;
     }
 
+    public ScanCodeType getCodeType() {
+        return codeType;
+    }
+
+    public void setCodeType(ScanCodeType codeType) {
+        this.codeType = codeType;
+    }
 
     @Override
     public int describeContents() {
@@ -57,6 +70,9 @@ public class ScanSuccessEvent implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(this.type);
         dest.writeString(this.content);
+        if (this.codeType != null) {
+            dest.writeString(this.codeType.getCode());
+        }
     }
 
     public ScanSuccessEvent() {
@@ -65,6 +81,10 @@ public class ScanSuccessEvent implements Parcelable {
     protected ScanSuccessEvent(Parcel in) {
         this.type = in.readInt();
         this.content = in.readString();
+        String code = in.readString();
+        if (StringUtil.isNotEmpty(code)) {
+            this.codeType = ScanCodeType.getByCode(code);
+        }
     }
 
     public static final Parcelable.Creator<ScanSuccessEvent> CREATOR = new Creator<ScanSuccessEvent>() {

@@ -47,6 +47,10 @@ public class StringUtil {
      * 整数格式
      */
     private static final Pattern INTEGER_PATTERN = Pattern.compile("[-+]?\\d+");
+    /**
+     * 纯数字格式
+     */
+    private static final Pattern DIGITS_PATTERN = Pattern.compile("\\d+");
 
     /**
      * 字符串是否为空
@@ -110,6 +114,19 @@ public class StringUtil {
         }
 
         return origin.toString();
+    }
+
+    /**
+     * 是否为纯数字字符串
+     * @param origin
+     * @return
+     */
+    public static boolean isDigits(CharSequence origin) {
+        if (origin == null || origin.length() == 0) {
+            return false;
+        }
+
+        return DIGITS_PATTERN.matcher(origin).matches();
     }
 
     /**
@@ -539,6 +556,24 @@ public class StringUtil {
             for(int i = 0; i < checkChars.length(); i++){
                 char checkChar = checkChars.charAt(i);
                 if(checkCharContainChinese(checkChar)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 判断是否包含非ASCII字符
+     * @param checkStr
+     * @return
+     */
+    public static boolean containsNonASCII(CharSequence checkStr){
+        if(!isEmpty(checkStr)){
+            String checkChars = checkStr.toString();
+            for(int i = 0; i < checkChars.length(); i++){
+                char checkChar = checkChars.charAt(i);
+                if(checkChar > 127){
                     return true;
                 }
             }

@@ -26,6 +26,8 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.provider.Settings;
 import androidx.annotation.Nullable;
+
+import com.alipay.hulu.shared.scan.ScanCodeType;
 import com.google.android.material.tabs.TabLayout;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -200,9 +202,17 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
                 break;
 
             case ScanSuccessEvent.SCAN_TYPE_QR_CODE:
+            case ScanSuccessEvent.SCAN_TYPE_BAR_CODE:
                 // 向handler发送请求
-                method = new OperationMethod(PerformActionEnum.GENERATE_QR_CODE);
+                method = new OperationMethod(event.getType() == ScanSuccessEvent.SCAN_TYPE_QR_CODE?
+                        PerformActionEnum.GENERATE_QR_CODE: PerformActionEnum.GENERATE_BAR_CODE);
                 method.putParam(OperationExecutor.SCHEME_KEY, event.getContent());
+                if (event.getType() == ScanSuccessEvent.SCAN_TYPE_BAR_CODE) {
+                    ScanCodeType type = event.getCodeType();
+                    if (type != null) {
+                        method.putParam(OperationExecutor.GENERATE_CODE_TYPE, type.getCode());
+                    }
+                }
 
                 // 录制模式需要记录下
                 step = new OperationStep();
@@ -1093,6 +1103,7 @@ public class CaseStepEditFragment extends BaseFragment implements TagFlowLayout.
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.CHANGE_MODE));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.JUMP_TO_PAGE));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.GENERATE_QR_CODE));
+        gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.GENERATE_BAR_CODE));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.KILL_PROCESS));
         GLOBAL_ACTION_MAP.put(R.string.function_group__app, gAppActions);
 

@@ -28,7 +28,6 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
-import androidx.appcompat.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Pair;
@@ -93,6 +92,7 @@ import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
 import com.alipay.hulu.shared.node.utils.BitmapUtil;
 import com.alipay.hulu.shared.node.utils.PrepareUtil;
 import com.alipay.hulu.shared.node.utils.RectUtil;
+import com.alipay.hulu.shared.scan.ScanCodeType;
 import com.alipay.hulu.tools.HighLightService;
 import com.alipay.hulu.ui.TwoLevelSelectLayout;
 import com.alipay.hulu.util.DialogUtils;
@@ -111,6 +111,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import androidx.appcompat.app.AlertDialog;
 
 import static android.accessibilityservice.AccessibilityService.GESTURE_SWIPE_UP;
 import static com.alipay.hulu.shared.event.constant.Constant.KEY_TOUCH_POINT;
@@ -245,6 +247,8 @@ public class CaseRecordManager implements ExportService {
     public void onScanEvent(final ScanSuccessEvent event) {
         switch (event.getType()) {
             case ScanSuccessEvent.SCAN_TYPE_SCHEME:
+                processAction(new OperationMethod(PerformActionEnum.RESUME), null, binder.loadServiceContext());
+
                 // 向handler发送请求
                 OperationMethod method = new OperationMethod(PerformActionEnum.JUMP_TO_PAGE);
                 method.putParam(OperationExecutor.SCHEME_KEY, event.getContent());
@@ -253,14 +257,24 @@ public class CaseRecordManager implements ExportService {
                 operationAndRecord(method, null);
                 break;
             case ScanSuccessEvent.SCAN_TYPE_QR_CODE:
+            case ScanSuccessEvent.SCAN_TYPE_BAR_CODE:
+                processAction(new OperationMethod(PerformActionEnum.RESUME), null, binder.loadServiceContext());
                 // 向handler发送请求
-                method = new OperationMethod(PerformActionEnum.GENERATE_QR_CODE);
+                method = new OperationMethod(event.getType() == ScanSuccessEvent.SCAN_TYPE_QR_CODE?
+                        PerformActionEnum.GENERATE_QR_CODE: PerformActionEnum.GENERATE_BAR_CODE);
                 method.putParam(OperationExecutor.SCHEME_KEY, event.getContent());
+                if (event.getType() == ScanSuccessEvent.SCAN_TYPE_BAR_CODE) {
+                    ScanCodeType type = event.getCodeType();
+                    if (type != null) {
+                        method.putParam(OperationExecutor.GENERATE_CODE_TYPE, type.getCode());
+                    }
+                }
 
                 // 录制模式需要记录下
                 operationAndRecord(method, null);
                 break;
             case ScanSuccessEvent.SCAN_TYPE_PARAM:
+                processAction(new OperationMethod(PerformActionEnum.RESUME), null, binder.loadServiceContext());
                 // 向handler发送请求
                 method = new OperationMethod(PerformActionEnum.LOAD_PARAM);
                 method.putParam(OperationExecutor.APP_URL_KEY, event.getContent());
@@ -746,6 +760,7 @@ public class CaseRecordManager implements ExportService {
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.CHANGE_MODE));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.JUMP_TO_PAGE));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.GENERATE_QR_CODE));
+        gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.GENERATE_BAR_CODE));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.KILL_PROCESS));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.CLEAR_DATA));
         gAppActions.add(convertPerformActionToSubMenu(PerformActionEnum.ASSERT_TOAST));
@@ -1049,6 +1064,7 @@ public class CaseRecordManager implements ExportService {
             return true;
         } else if (action == PerformActionEnum.JUMP_TO_PAGE
                 || action == PerformActionEnum.GENERATE_QR_CODE
+                || action == PerformActionEnum.GENERATE_BAR_CODE
                 || action == PerformActionEnum.LOAD_PARAM) {
             if (!StringUtil.equals(method.getParam("scan"), "1")) {
                 operationAndRecord(method, node);
@@ -1058,19 +1074,29 @@ public class CaseRecordManager implements ExportService {
                     intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_SCHEME);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
-                    setServiceToTouchBlockMode();
-                }  else if (action == PerformActionEnum.GENERATE_QR_CODE) {
+                    processAction(new OperationMethod(PerformActionEnum.PAUSE), null, context);
+//                    setServiceToTouchBlockMode();
+                } else if (action == PerformActionEnum.GENERATE_QR_CODE) {
                     Intent intent = new Intent(context, QRScanActivity.class);
                     intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_QR_CODE);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
-                    setServiceToTouchBlockMode();
+                    processAction(new OperationMethod(PerformActionEnum.PAUSE), null, context);
+//                    setServiceToTouchBlockMode();
+                } else if (action == PerformActionEnum.GENERATE_BAR_CODE) {
+                    Intent intent = new Intent(context, QRScanActivity.class);
+                    intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_BAR_CODE);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
+                    processAction(new OperationMethod(PerformActionEnum.PAUSE), null, context);
+//                    setServiceToTouchBlockMode();
                 } else if (action == PerformActionEnum.LOAD_PARAM) {
                     Intent intent = new Intent(context, QRScanActivity.class);
                     intent.putExtra(QRScanActivity.KEY_SCAN_TYPE, ScanSuccessEvent.SCAN_TYPE_PARAM);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);
-                    setServiceToTouchBlockMode();
+                    processAction(new OperationMethod(PerformActionEnum.PAUSE), null, context);
+//                    setServiceToTouchBlockMode();
                 }
             }
         } else {

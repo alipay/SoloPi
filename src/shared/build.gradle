@@ -51,7 +51,7 @@ greendao{
 }
 
 dependencies {
-    compileOnly "com.google.zxing:core:3.2.1"
+    compileOnly "com.google.zxing:core:3.4.0"
     compileOnly 'com.alibaba:fastjson:1.2.73'
     compileOnly 'androidx.appcompat:appcompat:1.0.0'
     compileOnly 'androidx.legacy:legacy-support-v4:1.0.0'

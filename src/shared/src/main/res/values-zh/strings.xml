@@ -125,4 +125,5 @@
     <string name="action_param__qr_code_value">QR码值</string>
     <string name="toast_message__turn_on_gfx_info">请在设置里\"开发人员选项\"中开启\"GPU呈现模式分析\"选项</string>
     <string name="permission__starting_accessibility_service">辅助功能启动中</string>
+    <string name="action__generate_bar_code">生成条形码</string>
 </resources>
