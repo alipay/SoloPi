@@ -45,7 +45,7 @@ import java.util.Map;
  * Created by cathor on 17/7/25.
  */
 
-@DisplayItem(nameRes = FinalR.RESPONSE_TIME, permissions = {Settings.ACTION_ACCESSIBILITY_SETTINGS})
+@DisplayItem(nameRes = FinalR.RESPONSE_TIME, key = "Response", permissions = {Settings.ACTION_ACCESSIBILITY_SETTINGS})
 public class ResponseTools implements Displayable {
     public static final int RES = 1;
     private static final String TAG = "ResponseTools";

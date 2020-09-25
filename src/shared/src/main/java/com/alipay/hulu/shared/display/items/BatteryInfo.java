@@ -48,7 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@DisplayItem(nameRes = FinalR.BATTERY, trigger = "清零")
+@DisplayItem(nameRes = FinalR.BATTERY, key = "Battery", trigger = "清零")
 public class BatteryInfo implements Displayable{
 
 	private static String batteryPath = null;

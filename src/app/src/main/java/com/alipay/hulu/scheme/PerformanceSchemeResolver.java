@@ -31,14 +31,19 @@ import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.screenRecord.Notifications;
+import com.alipay.hulu.shared.display.DisplayItemInfo;
 import com.alipay.hulu.shared.display.DisplayProvider;
 import com.alipay.hulu.shared.display.items.base.RecordPattern;
 import com.alipay.hulu.util.RecordUtil;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by qiaoruikai on 2019/12/4 4:47 PM.
@@ -81,8 +86,8 @@ public class PerformanceSchemeResolver implements SchemeActionResolver {
         String action = params.get(ACTION);
         if (StringUtil.equals(action, "start")) {
             String itemList = params.get(NORMAL_ITEMS);
-            final String[] items = StringUtil.split(itemList, ",");
-            if (items == null) {
+            final String[] itemArray = StringUtil.split(itemList, ",");
+            if (itemArray == null) {
                 return false;
             }
 
@@ -105,12 +110,23 @@ public class PerformanceSchemeResolver implements SchemeActionResolver {
                 MyApplication.getInstance().updateAppAndNameTemp(targetApp, appLabel);
             }
 
-            PermissionUtil.requestPermissions(Arrays.asList("adb", "float", "toast:" + context.getString(R.string.toast__open_gfx_info), Settings.ACTION_ACCESSIBILITY_SETTINGS), (Activity) context, new PermissionUtil.OnPermissionCallback() {
+            final List<String> items = Arrays.asList(itemArray);
+            final DisplayProvider displayProvider = LauncherApplication.service(DisplayProvider.class);
+            // 逐项开启
+            List<DisplayItemInfo> displayItems = displayProvider.getAllDisplayItems();
+            Set<String> allPermissions = new HashSet<>();
+            for (DisplayItemInfo info: displayItems) {
+                if (items.contains(info.getKey())) {
+                    allPermissions.addAll(info.getPermissions());
+                }
+            }
+
+            PermissionUtil.requestPermissions(new ArrayList<>(allPermissions), (Activity) context, new PermissionUtil.OnPermissionCallback() {
                 @Override
                 public void onPermissionResult(boolean result, String reason) {
                     if (result) {
                         isRecording = true;
-                        DisplayProvider displayProvider = LauncherApplication.service(DisplayProvider.class);
+
                         // 逐项开启
                         displayProvider.stopAllDisplay();
                         for (String name : items) {

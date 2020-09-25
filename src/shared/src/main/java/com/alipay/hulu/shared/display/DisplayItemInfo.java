@@ -35,6 +35,11 @@ public class DisplayItemInfo {
     private final String name;
 
     /**
+     * key
+     */
+    private final String key;
+
+    /**
      * 依赖权限
      */
     private final List<String> permissions;
@@ -67,6 +72,7 @@ public class DisplayItemInfo {
     public DisplayItemInfo(DisplayItem displayItem, Class<? extends Displayable> targetClass) {
         this.targetClass = targetClass;
         FinalR nameRes = displayItem.nameRes();
+        this.key = displayItem.key();
         if (nameRes != FinalR.NULL) {
             this.name = StringUtil.getString(nameRes.getRealVal());
         } else {
@@ -85,6 +91,10 @@ public class DisplayItemInfo {
 
     public String getName() {
         return name;
+    }
+
+    public String getKey() {
+        return key;
     }
 
     public List<String> getPermissions() {

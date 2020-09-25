@@ -37,6 +37,12 @@ public @interface DisplayItem {
      */
     String name() default "";
 
+    /**
+     * 显示名称
+     * @return
+     */
+    String key();
+
 //    @StringRes
     FinalR nameRes() default FinalR.NULL;
 

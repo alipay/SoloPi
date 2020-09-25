@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@DisplayItem(nameRes = FinalR.FPS, permissions = "toast:${com.alipay.hulu.shared.R$string.toast_message__turn_on_gfx_info}")
+@DisplayItem(nameRes = FinalR.FPS, key = "FPS", permissions = "toast:${com.alipay.hulu.shared.R$string.toast_message__turn_on_gfx_info}")
 public class FpsTools implements Displayable {
 	private static String TAG = "FpsTools";
 	private static Long startTime = 0L;

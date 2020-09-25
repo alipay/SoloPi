@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@DisplayItem(nameRes = FinalR.PROCESS_STATUS)
+@DisplayItem(nameRes = FinalR.PROCESS_STATUS, key = "Status")
 public class StatusTools implements Displayable {
     private static final String TAG = StatusTools.class.getSimpleName();
 

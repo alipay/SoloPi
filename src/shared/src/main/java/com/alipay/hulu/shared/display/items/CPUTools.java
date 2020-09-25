@@ -50,7 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@DisplayItem(name = "CPU")
+@DisplayItem(name = "CPU", key = "CPU")
 public class CPUTools implements Displayable{
 
 	private static final String TAG = "CPUTools";
