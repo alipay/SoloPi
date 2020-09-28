@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-@DisplayItem(nameRes = FinalR.MEMORY, key = "Memory")
+@DisplayItem(nameRes = FinalR.MEMORY, key = "Memory", permissions = "adb")
 public class MemoryTools implements Displayable{
 
 	private static String TAG = "MemoryTools";

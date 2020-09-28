@@ -25,8 +25,10 @@ import android.provider.Settings;
 import com.alipay.hulu.R;
 import com.alipay.hulu.activity.MyApplication;
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.scheme.SchemeActionResolver;
 import com.alipay.hulu.common.scheme.SchemeResolver;
+import com.alipay.hulu.common.tools.AppInfoProvider;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
@@ -120,6 +122,7 @@ public class PerformanceSchemeResolver implements SchemeActionResolver {
                     allPermissions.addAll(info.getPermissions());
                 }
             }
+            allPermissions.add("adb");
 
             PermissionUtil.requestPermissions(new ArrayList<>(allPermissions), (Activity) context, new PermissionUtil.OnPermissionCallback() {
                 @Override
@@ -127,10 +130,14 @@ public class PerformanceSchemeResolver implements SchemeActionResolver {
                     if (result) {
                         isRecording = true;
 
+                        AppInfoProvider provider = AppInfoProvider.getInstance();
+                        InjectorService.g().unregister(provider);
+                        InjectorService.g().register(provider);
+
                         // 逐项开启
                         displayProvider.stopAllDisplay();
-                        for (String name : items) {
-                            displayProvider.startDisplay(name);
+                        for (String key : items) {
+                            displayProvider.startDisplayByKey(key);
                         }
                         displayProvider.startRecording();
                         notification = Notifications.generateNotificationBuilder(context)

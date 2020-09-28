@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@DisplayItem(nameRes = FinalR.NETWORK, key = "Network", trigger = "清零")
+@DisplayItem(nameRes = FinalR.NETWORK, key = "Network", trigger = "清零", permissions = "adb")
 public class NetworkTools implements Displayable{
 
 	private static final float KB_MILLION_SECOND = 1000 / 1024f;
