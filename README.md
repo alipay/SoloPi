@@ -50,11 +50,11 @@ SoloPi支持通过操作一台主机设备来控制多台从机设备，不需�
 #### 编译环境：
 
 - macOS 10.14.3
-- Android Studio 3.2
-- **Gradle 4.4（Android Studio打开项目时会提示升级Gradle版本，建议不要进行升级）**
-- **CMake 3.6..4111459（建议不要进行升级）**
-- Ndk 15.2.4203819
-- TargetApi 25
+- Android Studio 4.0
+- Gradle 6.1.1
+- CMake 3.6/3.10均可
+- Ndk 16
+- TargetApi 29
 - MinimumApi 18
 - **注意，构建时请将Android Studio的instant run功能关闭，否则打出来的安装包会无法使用**
 
