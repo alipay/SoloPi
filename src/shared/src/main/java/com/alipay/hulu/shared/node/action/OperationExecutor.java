@@ -731,24 +731,28 @@ public class OperationExecutor {
                 opContext.notifyOnFinish(new Runnable() {
                     @Override
                     public void run() {
-                        // 生成二维码
-                        Bitmap bitmap = BitmapUtil.generateCode(qrCode, format, 512, Color.WHITE, Color.BLACK);
-
-                        File targetDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-                        targetDir = new File(targetDir, "solopi");
-                        targetDir.mkdir();
-                        File saveImg = new File(targetDir, "image-" + System.currentTimeMillis() + ".jpg");
                         try {
-                            FileOutputStream stream = new FileOutputStream(saveImg);
-                            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
-                            stream.flush();
-                            stream.close();
-                        } catch (IOException e) {
-                            LogUtil.e(TAG, "Fail to export to " + saveImg);
-                        }
+                            // 生成二维码
+                            Bitmap bitmap = BitmapUtil.generateCode(qrCode, format, 512, Color.WHITE, Color.BLACK);
 
-                        BitmapUtil.notifyNewImage(saveImg);
-                        MiscUtil.sleep(500);
+                            File targetDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+                            targetDir = new File(targetDir, "solopi");
+                            targetDir.mkdir();
+                            File saveImg = new File(targetDir, "image-" + System.currentTimeMillis() + ".jpg");
+                            try {
+                                FileOutputStream stream = new FileOutputStream(saveImg);
+                                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+                                stream.flush();
+                                stream.close();
+                            } catch (IOException e) {
+                                LogUtil.e(TAG, "Fail to export to " + saveImg);
+                            }
+
+                            BitmapUtil.notifyNewImage(saveImg);
+                            MiscUtil.sleep(500);
+                        } catch (Exception e) {
+                            LogUtil.w(TAG, "Fail to generate qr code", e);
+                        }
                     }
                 });
                 return true;
