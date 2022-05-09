@@ -15,6 +15,11 @@
  */
 package com.alipay.hulu.common.application;
 
+import static android.content.DialogInterface.BUTTON_NEGATIVE;
+import static android.content.DialogInterface.BUTTON_POSITIVE;
+import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_90;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -31,23 +36,25 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.LocaleList;
 import android.os.Looper;
-import androidx.annotation.StringRes;
-import androidx.multidex.MultiDex;
-import android.util.DisplayMetrics;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.annotation.StringRes;
+import androidx.multidex.MultiDex;
+
 import com.alipay.hulu.common.R;
+import com.alipay.hulu.common.http.HttpServer;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.logger.DiskLogStrategy;
 import com.alipay.hulu.common.logger.SimpleFormatStrategy;
-import com.alipay.hulu.common.logger.ThreadInfoLoggerPrinter;
 import com.alipay.hulu.common.scheme.SchemeActionResolver;
+import com.alipay.hulu.common.scheme.SchemeHttpListener;
 import com.alipay.hulu.common.scheme.SchemeResolver;
 import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.service.base.ExportService;
 import com.alipay.hulu.common.service.base.LocalService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
+import com.alipay.hulu.common.trigger.Trigger;
 import com.alipay.hulu.common.utils.ClassUtil;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
@@ -64,7 +71,9 @@ import com.orhanobut.logger.DiskLogAdapter;
 import com.orhanobut.logger.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,13 +86,14 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import static android.content.DialogInterface.BUTTON_NEGATIVE;
-import static android.content.DialogInterface.BUTTON_POSITIVE;
-import static android.view.Surface.ROTATION_0;
-import static android.view.Surface.ROTATION_90;
 
 /**
  * Created by qiaoruikai on 2018/9/29 10:59 AM.
@@ -105,6 +115,27 @@ public abstract class LauncherApplication extends Application {
      * 屏幕方向监控
      */
     public static final String SCREEN_ORIENTATION = "screenOrientation";
+
+    private HttpServer totalControlHttpServer;
+    private SchemeHttpListener schemeListener;
+
+    /**
+     * 触发器线程池（无常备线程）
+     */
+    private final ExecutorService triggerThreadPool = new ThreadPoolExecutor(0, 3, 3, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(), new ThreadFactory() {
+        AtomicInteger counter = new AtomicInteger(1);
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r);
+            t.setName("Trigger-thread-" + counter.getAndIncrement());
+            return t;
+        }
+    });
+
+    /**
+     * 触发器队列
+     */
+    private Map<String, SortedList<Class<? extends Runnable>>> triggerClasses;
 
     protected static LauncherApplication appInstance;
     protected Map<String, ServiceReference> registeredService = new HashMap<>();
@@ -212,21 +243,32 @@ public abstract class LauncherApplication extends Application {
                     } catch (Throwable t) {
                         LogUtil.e(TAG, "加载类失败, " + t.getMessage(), t);
                     }
-                    
+
+                    registerTriggerClasses();
+                    // 起始时间触发器
+                    triggerAtTime(Trigger.TRIGGER_TIME_START);
+
                     // 初始化基础服务
                     registerServices();
 
                     // 实际初始化
                     init();
 
+                    triggerAtTime(Trigger.TRIGGER_TIME_START_FINISH);
                     finishInit = true;
 
                     BackgroundExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
                             initActionResolvers();
+
+                            startHttpServerAtPort(SPService.getInt(SPService.KEY_CONTROL_PORT, 23342));
+                            schemeListener = new SchemeHttpListener();
+                            registerControlListener(schemeListener);
+
+                            triggerAtTime(Trigger.TRIGGER_TIME_SCHEME_INIT);
                         }
-                    }, 10000);
+                    }, 5000);
                 } catch (Throwable e) {
                     LogUtil.e(TAG, "无法处理", e);
                     // 解决不了
@@ -237,6 +279,44 @@ public abstract class LauncherApplication extends Application {
 
         // 主线程初始化
         initInMain();
+    }
+
+    /**
+     * 启动http服务
+     * @param port
+     */
+    public void startHttpServerAtPort(int port) {
+        List<HttpServer.OnUrlRequestListener> listeners = new ArrayList<>();
+        if (totalControlHttpServer != null) {
+            // 转移注册
+            listeners.addAll(totalControlHttpServer.getAllListeners());
+            totalControlHttpServer.removeAllListeners();
+            totalControlHttpServer.stop();
+            totalControlHttpServer = null;
+        }
+
+        totalControlHttpServer = new HttpServer(port);
+        try {
+            totalControlHttpServer.start();
+            totalControlHttpServer.addAllListeners(listeners);
+        } catch (IOException e) {
+            LogUtil.e(TAG, "Start totalControlHttpServer failed", e);
+            showToast("启动HTTP服务失败，当前端口为 " + port +  " ，请确认是否端口冲突");
+        }
+    }
+
+    /**
+     * 注册控制服务监听器
+     * @param listener
+     */
+    public boolean registerControlListener(HttpServer.OnUrlRequestListener listener) {
+        if (totalControlHttpServer == null) {
+            LogUtil.w(TAG, "Control server is null, can't register");
+            return false;
+        }
+
+        totalControlHttpServer.addListener(listener);
+        return true;
     }
 
     @Override
@@ -295,6 +375,92 @@ public abstract class LauncherApplication extends Application {
 //            getApplicationContext().createConfigurationContext(config);
         }
         resources.updateConfiguration(config, null);
+    }
+
+    /**
+     * 注册触发器类
+     */
+    protected synchronized void registerTriggerClasses() {
+        if (triggerClasses != null) {
+            LogUtil.i(TAG, "Trigger Classes already registered");
+            return;
+        }
+        List<Class<? extends Runnable>> triggerClasses = ClassUtil.findSubClass(Runnable.class, Trigger.class);
+        Map<String, SortedList<Class<? extends Runnable>>> triggerMap = new HashMap<>();
+        for (Class<? extends Runnable> triggerClz: triggerClasses) {
+            Trigger trigger = triggerClz.getAnnotation(Trigger.class);
+            if (trigger == null) {
+                LogUtil.e(TAG, "Trigger class %s has no trigger annotation", triggerClz);
+                continue;
+            }
+
+            String[] values = trigger.value();
+            if (values == null || values.length == 0) {
+                LogUtil.e(TAG, "Trigger class %s has no related time", triggerClz);
+                continue;
+            }
+
+            // 批量注册
+            for (String value: values) {
+                if (StringUtil.isEmpty(value)) {
+                    LogUtil.w(TAG, "Invalid trigger time for class " + triggerClz);
+                    continue;
+                }
+                if (!triggerMap.containsKey(value)) {
+                    triggerMap.put(value, new SortedList<Class<? extends Runnable>>(true));
+                }
+
+                triggerMap.get(value).add(triggerClz, trigger.level());
+            }
+        }
+
+        this.triggerClasses = triggerMap;
+    }
+
+    /**
+     * 触发特定环节触发器
+     * @param trigger
+     */
+    public void triggerAtTime(final String trigger) {
+        if (triggerClasses.containsKey(trigger)) {
+            LogUtil.i(TAG, "Trigger at time: " + trigger);
+            final SortedList<Class<? extends Runnable>> clzList = triggerClasses.get(trigger);
+            if (clzList == null || clzList.size() == 0) {
+                LogUtil.w(TAG, "No trigger registered at time: " + trigger);
+                return;
+            }
+
+            // 实际触发执行
+            triggerThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    long startTime = System.currentTimeMillis();
+                    LogUtil.i(trigger, "Do Trigger at time: " + trigger);
+
+                    for (Class<? extends Runnable> triggerClz: clzList) {
+                        LogUtil.i(trigger, "Start trigger for class: " + triggerClz);
+                        Runnable r = ClassUtil.constructClass(triggerClz);
+                        if (r == null) {
+                            LogUtil.e(trigger, "Initialize failed for trigger class: " + triggerClz);
+                            return;
+                        }
+
+                        // 实际执行
+                        try {
+                            r.run();
+                        } catch (Throwable t) {
+                            LogUtil.e(trigger, "Trigger Run failed for class: " + triggerClz);
+                        } finally {
+                            LogUtil.i(trigger, "Finish trigger for class: " + triggerClz);
+                        }
+                    }
+
+                    LogUtil.i(trigger, "Finish Trigger at time: " + trigger + ", total spend time: " + (System.currentTimeMillis() - startTime));
+                }
+            });
+        } else {
+            LogUtil.w(TAG, "No trigger registered at time: " + trigger);
+        }
     }
 
     /**
@@ -743,6 +909,22 @@ public abstract class LauncherApplication extends Application {
         }
 
         setSchemeResolver(resolvers);
+    }
+
+    /**
+     * 获取最适合的前台Context
+     * @return
+     */
+    public Context getBestForegroundContext() {
+        Context activity = loadActivityOnTop();
+        if (activity != null) {
+            return activity;
+        }
+        Context service = loadRunningService();
+        if (service != null) {
+            return service;
+        }
+        return this;
     }
 
     /**

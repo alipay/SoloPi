@@ -35,6 +35,7 @@ public class SPService {
     public static final String KEY_DISPLAY_SYSTEM_APP = "KEY_DISPLAY_SYSTEM_APP";
     public static final String KEY_BASE_DIR = "KEY_BASE_DIR";
     public static final String KEY_CHECK_UPDATE = "KEY_CHECK_UPDATE";
+    public static final String KEY_SHOULD_UPDATE_IN_APP = "KEY_SHOULD_UPDATE_IN_APP";
     public static final String KEY_RECORD_SCREEN_UPLOAD = "KEY_RECORD_SCREEN_UPLOAD";
     public static final String KEY_PATCH_URL = "KEY_PATCH_URL";
     public static final String KEY_AES_KEY = "KEY_AES_KEY";
@@ -56,6 +57,10 @@ public class SPService {
 
     public static final String KEY_INDEX_RECORD = "KEY_INDEX_RECORD";
     public static final String KEY_ADB_SERVER = "KEY_ADB_SERVER";
+    public static final String KEY_CONTROL_PORT = "KEY_CONTROL_PORT";
+
+    public static final String KEY_USE_EASY_MODE = "KEY_USE_EASY_MODE";
+    public static final String KEY_EASY_MODE_NOTIFY_TIME = "KEY_EASY_MODE_NOTIFY_TIME";
 
     private static SharedPreferences preferences;
 

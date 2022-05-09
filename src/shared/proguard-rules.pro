@@ -19,3 +19,38 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# BroadcastPackage
+-keep class com.alipay.hulu.shared.io.socket.LocalNetworkBroadcastService$BroadcastPackage { *; }
+-keep enum com.alipay.hulu.shared.io.socket.enums.BroadcastCommandEnum { *; }
+
+#PrepareWorker
+-keep interface com.alipay.hulu.shared.node.utils.prepare.PrepareWorker { *; }
+-keep @com.alipay.hulu.shared.node.utils.prepare.PrepareWorker$PrepareTool class * implements com.alipay.hulu.shared.node.utils.prepare.PrepareWorker { *; }
+
+# greeendao
+-keep class com.alipay.hulu.shared.io.bean.** {*;}
+-keep class com.alipay.hulu.shared.io.db.** {*;}
+### greenDAO 3
+-keepclassmembers class * extends org.greenrobot.greendao.AbstractDao {
+public static java.lang.String TABLENAME;
+}
+-keep class **$Properties
+
+# If you do not use SQLCipher:
+-dontwarn org.greenrobot.greendao.database.**
+# If you do not use RxJava:
+-dontwarn rx.**
+
+-keep class com.alipay.hulu.shared.node.tree.export.bean.** {*;}
+-keep class com.alipay.hulu.shared.node.action.OperationMethod {*;}
+-keep class com.alipay.hulu.shared.node.tree.OperationNode {*;}
+-keep class com.alipay.hulu.shared.node.tree.OperationNode$AssistantNode {*;}
+-keep class com.alipay.hulu.shared.node.tree.AbstractNodeTree { *; }
+-keep class com.alipay.hulu.shared.node.tree.FakeNodeTree { *; }
+-keep class com.alipay.hulu.shared.node.tree.accessibility.tree.AccessibilityNodeTree { *; }
+-keep class * extends com.alipay.hulu.shared.node.tree.AbstractNodeTree { *; }
+
+-keep class ** implements com.alipay.hulu.shared.display.items.base.Displayable {
+public void clear();
+}

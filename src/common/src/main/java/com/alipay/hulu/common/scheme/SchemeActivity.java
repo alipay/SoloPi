@@ -25,6 +25,7 @@ import androidx.annotation.Nullable;
 import com.alipay.hulu.common.R;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
+import com.alipay.hulu.common.utils.Callback;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.SortedList;
@@ -101,12 +102,29 @@ public class SchemeActivity extends Activity {
             return;
         }
 
-        SortedList<SchemeActionResolver> resolverList = resolvers.get(action);
-        for (SchemeActionResolver realResolver: resolverList) {
-            if (realResolver.processScheme(this, params)) {
-                finish();
-                return;
+        try {
+            SortedList<SchemeActionResolver> resolverList = resolvers.get(action);
+            Callback<Map<String, Object>> emptyCallback = new Callback<Map<String, Object>>() {
+                @Override
+                public void onResult(Map<String, Object> item) {
+                    LogUtil.i(TAG, "Receive callback: " + item);
+                }
+
+                @Override
+                public void onFailed() {
+                    LogUtil.w(TAG, "Receive fail callback");
+                }
+            };
+            if (resolverList != null) {
+                for (SchemeActionResolver realResolver : resolverList) {
+                    if (realResolver.processScheme(this, params, emptyCallback)) {
+                        LogUtil.i(TAG, "Processed by " + realResolver.getClass().getSimpleName());
+                        return;
+                    }
+                }
             }
+        } catch (Throwable t) {
+            LogUtil.e(TAG, "handle resolver failed: " + t.getMessage(), t);
         }
 
         startOrigin();

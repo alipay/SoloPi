@@ -4,9 +4,11 @@ import android.content.Context;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.scheme.SchemeActionResolver;
 import com.alipay.hulu.common.scheme.SchemeResolver;
 import com.alipay.hulu.common.service.SPService;
+import com.alipay.hulu.common.utils.Callback;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 
@@ -22,7 +24,7 @@ public class ConfigSchemeResolver implements SchemeActionResolver {
     private static final String VALUE = "value";
 
     @Override
-    public boolean processScheme(Context context, Map<String, String> params) {
+    public boolean processScheme(Context context, Map<String, String> params, Callback<Map<String, Object>> callback) {
         String key = params.get(KEY);
         String value = params.get(VALUE);
         if (StringUtil.isEmpty(key) || value == null) {
@@ -40,6 +42,7 @@ public class ConfigSchemeResolver implements SchemeActionResolver {
      */
     private boolean processConfigSet(String key, String value) {
         switch (key) {
+
             case KEY_AUTO_CLEAR_FILES_DAYS:
                 return processInt(key, value, null, -1);
             case KEY_SCREEN_FACTOR_ROTATION:
@@ -60,6 +63,12 @@ public class ConfigSchemeResolver implements SchemeActionResolver {
                     return false;
                 }
                 break;
+            case KEY_CONTROL_PORT:
+                boolean processed = processInt(key, value, 65535, 5000);
+                if (processed) {
+                    LauncherApplication.getInstance().startHttpServerAtPort(SPService.getInt(KEY_CONTROL_PORT, 23342));
+                }
+                return processed;
             case KEY_GLOBAL_SETTINGS:
                 JSONObject obj = JSON.parseObject(value);
                 if (obj == null) {

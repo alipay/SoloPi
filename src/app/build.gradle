@@ -22,6 +22,9 @@ android {
         minSdkVersion 18
         targetSdkVersion rootProject.ext.targetSdkVersion
     }
+    lintOptions {
+        abortOnError false
+    }
     buildTypes {
         release {
             minifyEnabled true

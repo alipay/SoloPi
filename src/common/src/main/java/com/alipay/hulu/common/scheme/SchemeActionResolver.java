@@ -17,11 +17,22 @@ package com.alipay.hulu.common.scheme;
 
 import android.content.Context;
 
+import com.alipay.hulu.common.utils.Callback;
+
 import java.util.Map;
 
 /**
  * Created by qiaoruikai on 2019/11/8 11:01 PM.
  */
 public interface SchemeActionResolver {
-    boolean processScheme(Context context, Map<String, String> params);
+
+    /**
+     * 处理scheme消息
+     * @param context Activity上下文
+     * @param params 请求参数
+     * @param callback 响应结果回调
+     * @return
+     */
+    boolean processScheme(Context context, Map<String, String> params,
+                          Callback<Map<String, Object>> callback);
 }

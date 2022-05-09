@@ -873,6 +873,11 @@ public class SettingsActivity extends BaseActivity {
             mCheckUpdateSettingInfo.setText(R.string.constant__no);
         }
 
+        // 如果不应该展示检测更新部分
+        if (!SPService.getBoolean(SPService.KEY_SHOULD_UPDATE_IN_APP, true)) {
+            mCheckUpdateSettingWrapper.setVisibility(View.GONE);
+        }
+
         mBaseDirSettingWrapper = findViewById(R.id.base_dir_setting_wrapper);
         mBaseDirSettingInfo = (TextView) findViewById(R.id.base_dir_setting_info);
         mBaseDirSettingInfo.setText(FileUtils.getSolopiDir().getPath());

@@ -30,6 +30,7 @@ import com.alipay.hulu.common.scheme.SchemeActionResolver;
 import com.alipay.hulu.common.scheme.SchemeResolver;
 import com.alipay.hulu.common.tools.AppInfoProvider;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
+import com.alipay.hulu.common.utils.Callback;
 import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.screenRecord.Notifications;
@@ -64,7 +65,7 @@ public class PerformanceSchemeResolver implements SchemeActionResolver {
     private boolean isRecording = false;
 
     @Override
-    public boolean processScheme(Context context, Map<String, String> params) {
+    public boolean processScheme(Context context, Map<String, String> params, Callback<Map<String, Object>> callback) {
         String mode = params.get(PERFORMANCE_MODE);
         if (StringUtil.isEmpty(mode)) {
             return false;

@@ -45,6 +45,7 @@ import com.alipay.hulu.common.constant.Constant;
 import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.tools.CmdTools;
+import com.alipay.hulu.common.trigger.Trigger;
 import com.alipay.hulu.common.utils.ClassUtil;
 import com.alipay.hulu.common.utils.ContextUtil;
 import com.alipay.hulu.common.utils.FileUtils;
@@ -97,8 +98,10 @@ public class IndexActivity extends BaseActivity {
         initData();
         loadOthers();
 
+//        SPService.putBoolean(SPService.KEY_USE_EASY_MODE, true);
+
         // check update
-        if (SPService.getBoolean(SPService.KEY_CHECK_UPDATE, true)) {
+        if (SPService.getBoolean(SPService.KEY_SHOULD_UPDATE_IN_APP, true) && SPService.getBoolean(SPService.KEY_CHECK_UPDATE, true)) {
             BackgroundExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -166,6 +169,14 @@ public class IndexActivity extends BaseActivity {
                 }
             });
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // 进入主页的trigger
+        LauncherApplication.getInstance().triggerAtTime(Trigger.TRIGGER_TIME_HOME_PAGE);
     }
 
     /**

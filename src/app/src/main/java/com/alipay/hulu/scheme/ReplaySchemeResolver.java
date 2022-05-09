@@ -23,6 +23,7 @@ import android.provider.Settings;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.scheme.SchemeActionResolver;
 import com.alipay.hulu.common.scheme.SchemeResolver;
+import com.alipay.hulu.common.utils.Callback;
 import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
@@ -46,7 +47,7 @@ public class ReplaySchemeResolver implements SchemeActionResolver {
     public static final String MODE_NORMAL = "normal";
 
     @Override
-    public boolean processScheme(Context context, Map<String, String> params) {
+    public boolean processScheme(Context context, Map<String, String> params, Callback<Map<String, Object>> callback) {
         String mode = params.get(REPLAY_MODE);
         if (StringUtil.isEmpty(mode)) {
             return false;

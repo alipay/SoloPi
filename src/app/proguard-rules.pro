@@ -69,8 +69,6 @@
 -keepattributes Signature
 # 抛出异常时保留代码行号
 -keepattributes SourceFile,LineNumberTable
-#忽略警告
--ignorewarning
 #==================================【项目配置】==================================
 # 保留所有的本地native方法不被混淆
 -keepclasseswithmembernames class * {
@@ -132,10 +130,6 @@ void *(**On*Event);
 #Patch相关类
 -keep class com.alipay.hulu.upgrade.PatchResponse { *; }
 -keep class com.alipay.hulu.upgrade.PatchResponse$DataBean { *; }
--keep class com.alipay.hulu.common.utils.ClassUtil$PatchVersionInfo { *; }
--keep class com.alipay.hulu.common.utils.patch.PatchDescription {*;}
-
--keep class com.alipay.hulu.common.utils.DeviceInfoUtil {*;}
 
 #内部方法
 -keepattributes EnclosingMethod
@@ -155,28 +149,6 @@ void *(**On*Event);
 # OkHttp platform used only on JVM and when Conscrypt dependency is available.
 -dontwarn okhttp3.internal.platform.ConscryptPlatform
 
-# injector
--keepclassmembers class ** {
-@com.alipay.hulu.common.injector.param.Subscriber <methods>;
-}
--keepclassmembers class ** {
-@com.alipay.hulu.common.injector.provider.Provider <methods>;
-}
-
-# BroadcastPackage
--keep class com.alipay.hulu.shared.io.socket.LocalNetworkBroadcastService$BroadcastPackage { *; }
--keep enum com.alipay.hulu.shared.io.socket.enums.BroadcastCommandEnum { *; }
-
-# ActionProvider
--keep @com.alipay.hulu.common.annotation.Enable class *
-
-#PrepareWorker
--keep interface com.alipay.hulu.shared.node.utils.prepare.PrepareWorker { *; }
--keep @com.alipay.hulu.shared.node.utils.prepare.PrepareWorker$PrepareTool class * implements com.alipay.hulu.shared.node.utils.prepare.PrepareWorker { *; }
-
-# SchemeResolver
--keep interface com.alipay.hulu.common.scheme.SchemeActionResolver { *; }
--keep @com.alipay.hulu.common.scheme.SchemeResolver class * implements com.alipay.hulu.common.scheme.SchemeActionResolver { *; }
 
 #Github Replease
 -keep class com.alipay.hulu.bean.GithubReleaseBean { *; }
@@ -190,57 +162,6 @@ void *(**On*Event);
 -keep class com.android.permission.** {*;}
 -keep class com.codebutler.android_websockets.** {*;}
 
-# greeendao
--keep class com.alipay.hulu.shared.io.bean.** {*;}
--keep class com.alipay.hulu.shared.io.db.** {*;}
-### greenDAO 3
--keepclassmembers class * extends org.greenrobot.greendao.AbstractDao {
-public static java.lang.String TABLENAME;
-}
--keep class **$Properties
-
-# If you do not use SQLCipher:
--dontwarn org.greenrobot.greendao.database.**
-# If you do not use RxJava:
--dontwarn rx.**
-
-
--keep class com.alipay.hulu.shared.node.tree.export.bean.** {*;}
--keep class com.alipay.hulu.shared.node.action.OperationMethod {*;}
--keep class com.alipay.hulu.shared.node.tree.OperationNode {*;}
--keep class com.alipay.hulu.shared.node.tree.OperationNode$AssistantNode {*;}
--keep class com.alipay.hulu.shared.node.tree.AbstractNodeTree { *; }
--keep class com.alipay.hulu.shared.node.tree.FakeNodeTree { *; }
--keep class com.alipay.hulu.shared.node.tree.accessibility.tree.AccessibilityNodeTree { *; }
--keep class * extends com.alipay.hulu.shared.node.tree.AbstractNodeTree { *; }
-
--keep class com.alipay.hulu.common.bean.** {*;}
-
--keep interface com.alipay.hulu.common.tools.AbstCmdLine {*;}
-
--keep class com.alipay.hulu.common.utils.patch.PatchContext {*;}
-
-# Glide
--keep class com.alipay.hulu.common.utils.Glide* { *; }
--keep public class * implements com.bumptech.glide.module.GlideModule
--keep public class * extends com.bumptech.glide.module.AppGlideModule
--keep public enum com.bumptech.glide.load.ImageHeaderParser$** {
-  **[] $VALUES;
-  public *;
-}
-
--keep class ** implements com.alipay.hulu.shared.display.items.base.Displayable {
-public void clear();
-}
-
--keep interface com.alipay.hulu.common.service.base.ExportService { *; }
--keep @interface com.alipay.hulu.common.service.base.LocalService {*;}
--keep class com.alipay.hulu.common.utils.patch.PatchClassLoader {
-public com.alipay.hulu.common.utils.patch.PatchContext getContext();
-}
--keep class ** implements com.alipay.hulu.common.service.base.ExportService { *; }
-
--keep interface ** extends com.alipay.hulu.common.service.base.ExportService { *; }
 
 -keepattributes Exceptions,InnerClasses,Signature
 

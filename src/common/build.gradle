@@ -35,9 +35,10 @@ android {
 }
 
 dependencies {
-    compileOnly 'androidx.appcompat:appcompat:1.0.0'
+    api "org.nanohttpd:nanohttpd:2.2.0"
+    implementation 'androidx.appcompat:appcompat:1.0.0'
     compileOnly 'androidx.legacy:legacy-support-v4:1.0.0'
-    compileOnly 'com.google.android.material:material:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
     compileOnly ('com.orhanobut:logger:2.2.0') {
         exclude group: "com.android.support"
     }
