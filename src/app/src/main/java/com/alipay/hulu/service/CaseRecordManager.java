@@ -523,7 +523,6 @@ public class CaseRecordManager implements ExportService {
      * 进入触摸屏蔽模式
      */
     protected void setServiceToTouchBlockMode() {
-        LogUtil.d(TAG, "准备进入触摸阻塞模式:" + Arrays.toString(Thread.currentThread().getStackTrace()));
         LauncherApplication.getInstance().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -539,7 +538,7 @@ public class CaseRecordManager implements ExportService {
         if (pauseFlag) {
             return;
         }
-        LogUtil.d(TAG, "进入触摸阻塞模式:" + Arrays.toString(Thread.currentThread().getStackTrace()));
+        LogUtil.d(TAG, "进入触摸阻塞模式");
         touchBlockMode = true;
         // 可选CoverMode
         if (SPService.getBoolean(SPService.KEY_RECORD_COVER_MODE, false)) {
