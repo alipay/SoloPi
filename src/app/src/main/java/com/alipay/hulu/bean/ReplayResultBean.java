@@ -19,7 +19,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.alibaba.fastjson.JSON;
-import com.alipay.hulu.activity.CaseReplayResultActivity;
 import com.alipay.hulu.common.bean.DeviceInfo;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
@@ -116,7 +115,7 @@ public class ReplayResultBean implements Parcelable {
     /**
      * （仅用于本地结果）结果截图列表
      */
-    private List<CaseReplayResultActivity.ScreenshotBean> screenshots;
+    private List<ScreenshotBean> screenshots;
 
     /**
      * （仅用于本地结果）结果目录
@@ -195,11 +194,11 @@ public class ReplayResultBean implements Parcelable {
         this.currentOperationLog = currentOperationLog;
     }
 
-    public List<CaseReplayResultActivity.ScreenshotBean> getScreenshots() {
+    public List<ScreenshotBean> getScreenshots() {
         return screenshots;
     }
 
-    public void setScreenshots(List<CaseReplayResultActivity.ScreenshotBean> screenshots) {
+    public void setScreenshots(List<ScreenshotBean> screenshots) {
         this.screenshots = screenshots;
     }
 

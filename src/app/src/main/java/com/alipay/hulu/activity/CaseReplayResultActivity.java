@@ -26,11 +26,18 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.hulu.R;
 import com.alipay.hulu.bean.CaseStepHolder;
 import com.alipay.hulu.bean.ReplayResultBean;
+import com.alipay.hulu.bean.ScreenshotBean;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.utils.FileUtils;
@@ -52,12 +59,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
 
 public class CaseReplayResultActivity extends BaseActivity {
     private static final String TAG = "CaseActivity";
@@ -219,8 +220,8 @@ public class CaseReplayResultActivity extends BaseActivity {
 
                         // 记录拷贝成功的截图信息
                         ScreenshotBean bean = new ScreenshotBean();
-                        bean.name = entry.getKey();
-                        bean.file = copyTo.getName();
+                        bean.setName(entry.getKey());
+                        bean.setFile(copyTo.getName());
                         screenshots.add(bean);
                     } catch (IOException e) {
                         LogUtil.e(TAG, "拷贝截图文件失败", e);
@@ -345,27 +346,4 @@ public class CaseReplayResultActivity extends BaseActivity {
     }
 
 
-    /**
-     * 截图信息
-     */
-    public static class ScreenshotBean {
-        private String name;
-        private String file;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getFile() {
-            return file;
-        }
-
-        public void setFile(String file) {
-            this.file = file;
-        }
-    }
 }

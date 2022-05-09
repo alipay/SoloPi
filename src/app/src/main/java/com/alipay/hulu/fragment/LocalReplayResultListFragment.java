@@ -35,6 +35,7 @@ import com.alipay.hulu.adapter.LocalTaskResultListAdapter;
 import com.alipay.hulu.bean.CaseStepHolder;
 import com.alipay.hulu.bean.ReplayResultBean;
 import com.alipay.hulu.bean.ReplayStepInfoBean;
+import com.alipay.hulu.bean.ScreenshotBean;
 import com.alipay.hulu.common.bean.DeviceInfo;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.utils.FileUtils;
@@ -300,10 +301,13 @@ public class LocalReplayResultListFragment extends BaseFragment {
             LogUtil.e(TAG, "Fail to find ", e);
         }
 
-        List<CaseReplayResultActivity.ScreenshotBean> screenshotBeans = resultBean.getScreenshots();
+        List<ScreenshotBean> screenshotBeans = resultBean.getScreenshots();
         if (screenshotBeans != null) {
             ArrayMap<String, String> screenshots = new ArrayMap<>();
-            for (CaseReplayResultActivity.ScreenshotBean screenshot: screenshotBeans) {
+            for (ScreenshotBean screenshot: screenshotBeans) {
+                if (screenshot == null || StringUtil.isEmpty(screenshot.getFile()) || StringUtil.isEmpty(screenshot.getName())) {
+                    continue;
+                }
                 screenshots.put(screenshot.getName(), new File(baseDir, screenshot.getFile()).getPath());
             }
             resultBean.setScreenshotFiles(screenshots);
