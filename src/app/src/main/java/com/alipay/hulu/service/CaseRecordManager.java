@@ -114,6 +114,7 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -522,6 +523,7 @@ public class CaseRecordManager implements ExportService {
      * 进入触摸屏蔽模式
      */
     protected void setServiceToTouchBlockMode() {
+        LogUtil.d(TAG, "准备进入触摸阻塞模式:" + Arrays.toString(Thread.currentThread().getStackTrace()));
         LauncherApplication.getInstance().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -537,7 +539,7 @@ public class CaseRecordManager implements ExportService {
         if (pauseFlag) {
             return;
         }
-        LogUtil.d(TAG, "进入触摸阻塞模式");
+        LogUtil.d(TAG, "进入触摸阻塞模式:" + Arrays.toString(Thread.currentThread().getStackTrace()));
         touchBlockMode = true;
         // 可选CoverMode
         if (SPService.getBoolean(SPService.KEY_RECORD_COVER_MODE, false)) {
@@ -1717,7 +1719,7 @@ public class CaseRecordManager implements ExportService {
      * @param deviceInfo
      * @param context
      */
-    public void showDialog(String title, String deviceInfo, Context context, long timeout) {
+    public void showDialog(final String title, String deviceInfo, Context context, long timeout) {
         if (TextUtils.isEmpty(deviceInfo)) {
             return;
         }
@@ -1755,10 +1757,12 @@ public class CaseRecordManager implements ExportService {
                     .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            setServiceToTouchBlockMode();
+                            if (!"SLEEP".equals(title)) {
+                                setServiceToTouchBlockMode();
+                                notifyDialogDismiss(2000);
+                            }
                             forceStopBlocking = false;
                             dialog.dismiss();
-                            notifyDialogDismiss(2000);
                         }
                     }).create();
             dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
