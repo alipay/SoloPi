@@ -16,6 +16,7 @@
 package com.alipay.hulu.shared.node.utils;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by qiaoruikai on 2018/10/8 4:30 PM.
@@ -28,6 +29,13 @@ public class NodeContext extends HashMap<String, Object> {
         }
 
         return target;
+    }
+
+    public NodeContext() {
+    }
+
+    public NodeContext(Map<String, ?> m) {
+        super(m);
     }
 
     public <T> T getField(String name) {

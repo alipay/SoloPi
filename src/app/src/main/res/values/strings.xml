@@ -29,16 +29,16 @@
     <string name="attention_input_space">Mind space</string>
     <string name="splash_app_desc">Automation Testing Tools</string>
     <string name="disclaimer">
-&#160;&#160;&#160;&#160;SoloPi开源自动化测试工具的功能是我们针对不同用户的需求而特别提供。SoloPi提供的应用、代码和资料的著作权均归SoloPi所有，用户具有自由的使用权。\n
-&#160;&#160;&#160;&#160;如果用户下载、安装、使用、修改本工具及相关代码，即表明用户信任该工具。那么，用户在使用本工具时造成对用户自己或他人任何形式的损失和伤害，SoloPi工具不承担任何责任。\n
-&#160;&#160;&#160;&#160;本工具不含有任何旨在破坏用户计算机数据和获取用户隐私信息的恶意代码；本工具使用过程中获取到的操作信息在打印日志时默认会进行脱敏，且不会进行上传；当应用出现异常时，用户可手动选择是否通过邮件上报故障日志，不会泄漏用户隐私。\n
-&#160;&#160;&#160;&#160;对于用户从非工具发布站点下载的应用，本工具无法保证其是否感染计算机病毒、是否隐藏有伪装的特洛伊木马程序或者黑客软件。用户使用此类软件，将可能导致不可预测的风险，建议用户不要轻易下载、安装、使用。本工具不承担由此产生的一切法律责任。\n
-&#160;&#160;&#160;&#160;用户不得利用本工具提供的功能误导、欺骗他人；用户仅可将本工具用于学习交流，不得用于非法用途；不得故意避开或者破坏本工具为保护著作权而采取的技术措施。\n
-&#160;&#160;&#160;&#160;本工具提供的功能经过详细的测试，但不能保证与所有的软硬件系统完全兼容，不能保证本工具完全没有错误。如果出现不兼容及软件错误的情况，用户可以到交流群获得技术支持。我们将尽力为用户解决问题、解答疑问。\n
-&#160;&#160;&#160;&#160;使用本工具所提供的系统所产生的风险由用户自行承担。在适用法律允许的最大范围内，对因使用或不能使用本系统所产生的损害及风险，本工具不承担任何相关责任。\n
-&#160;&#160;&#160;&#160;如果本协议中的任何条款无论因何种原因完全或部分无效或不具有执行力，或违反任何适用的法律条款，则该条款被视为删除，但本协议的其余条款仍有效并且具有约束力。\n
-&#160;&#160;&#160;&#160;作者有权根据有关法律、法规的变化以及工具的发展需求等因素修改本协议。若新旧协议有冲突，以最新版本协议为准。如果用户继续使用本系统，则视为您接受本协议的变动。\n
-&#160;&#160;&#160;&#160;本协议的一切解释权与修改权归本工具所有。\n
+&#160;&#160;&#160;&#160;SoloPi is an open source automation test tool that aims for the needs of different users. All  applications, codes and materials of copyright provided by SoloPi shall be owned by SoloPi, and users have the right of free use.\n
+&#160;&#160;&#160;&#160;If the user downloads, installs, uses, or modifies the tool and related codes, it indicates that the user trusts the tool. Therefore, SoloPi tool shall not be liable for any loss or injury caused by users to themselves or others when using the tool.\n
+&#160;&#160;&#160;&#160;This tool does not contain any malicious code designed to destroy user computer data and obtain user privacy information; The operation information obtained in the process of using this tool will be desensitized by default when the log is printed, and will not be uploaded; When an exception occurs to an application, the user can manually choose whether to report the fault log via email, without disclosing the user\'s privacy.\n
+&#160;&#160;&#160;&#160;The tool does not guarantee that applications downloaded from non-tools publishing sites are infected by computer viruses, hidden by disguised Trojan horses program or hacker software. Users using such software may lead to unpredictable risks, users are suggested not to easily download, install and use. SoloPi shall not bear any legal liability arising therefrom.\n
+&#160;&#160;&#160;&#160;Users shall not use the functions provided by this tool to mislead or deceive others; Users can only use this tool for learning and communication, and shall not use it for illegal purposes; Users shall not intentionally avoid or destroy the technical measures taken by this tool for the protection of copyright.\n
+&#160;&#160;&#160;&#160;The functions provided by this tool have been tested in detail, but it cannot be guaranteed to be fully compatible with all hardware and software systems, and it cannot be guaranteed that this tool is completely error-free. If incompatibilities and software errors occur, users can go to the communication group for technical support. We will try our best to solve problems and answer questions for users.\n
+&#160;&#160;&#160;&#160;The use of the system provided by this tool is at the user\'s own risk. To the maximum extent permitted by applicable law, the Tool shall not be liable for any damage or risk arising from the use or inability to use the System.\n
+&#160;&#160;&#160;&#160;If any provision of this Agreement is invalid or unenforceable in whole or in part for any reason, or violates any applicable legal provisions, such provision shall be deemed to be deleted, but the remaining provisions of this Agreement shall remain valid and binding.\n
+&#160;&#160;&#160;&#160;The author has the right to modify this Agreement in accordance with the changes of relevant laws and regulations and the development needs of tools. In case of any conflict between the old and the new, the latest version shall prevail. If the User continues to use the System, you shall be deemed to have accepted the change of this Agreement.\n
+&#160;&#160;&#160;&#160;All rights of interpretation and modification of this Agreement belong to this tool.\n
 </string>
 
     <string name="replay_step_fragment__node_size_format">%d x %d</string>
@@ -279,7 +279,6 @@
     <string name="stress__cpu_load">CPU Load(%)</string>
     <string name="stress__cpu_core">CPU Cores(n)</string>
     <string name="stress__memory">Memory(MB)</string>
-    <string name="ime__click_change">Change IME</string>
     <string name="let__string">String</string>
     <string name="let__integer">Integer</string>
     <string name="let__custom">Custom</string>
@@ -379,6 +378,10 @@
     <string name="case_step_status__unenforced">Unenforced</string>
     <string name="setting__set_screen_orientation">Select Default Screen Orientation</string>
     <string name="setting__change_screen_axis">Change Screen XY Axis?</string>
+    <string name="setting__action_block_mode">Operation block mode</string>
+    <string name="setting__conver_mode">Cover View Mode</string>
+    <string name="setting__block_mode">Block Mode</string>
+    <string name="setting__choose_action_block_mode">Choose operation block mode</string>
     <string name="batch__execution_list">Execution List</string>
     <string name="action_let_cur_value">Current: %s</string>
     <string name="action_let_cur_value_null">Current: -</string>

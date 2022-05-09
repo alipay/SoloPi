@@ -49,13 +49,17 @@ public class NodeTreeGenerator {
      * 构建当前Provider的树
      * @return
      */
-    public AbstractNodeTree generateNodeTree() {
+    public AbstractNodeTree generateNodeTree(NodeContext superContext) {
         // 没有处理器，无法生成
         if (nodeProvider == null || nodeProcessors == null || nodeProcessors.size() == 0) {
             return null;
         }
         // 初始化上下文
-        context = new NodeContext();
+        if (superContext == null) {
+            context = new NodeContext();
+        } else {
+            context = superContext;
+        }
         long startTime = System.currentTimeMillis();
 
         LogUtil.d(TAG, "开始加载树结构");
@@ -91,7 +95,7 @@ public class NodeTreeGenerator {
                         if (AbstractProvider.class.isAssignableFrom((Class) target)) {
 
                             // 重开一次加载树流程
-                            targetTree = this.manager.get().startLoadProvider((Class<? extends AbstractProvider>) target, loadCurrentProviderClass());
+                            targetTree = this.manager.get().startLoadProvider((Class<? extends AbstractProvider>) target, loadCurrentProviderClass(), context);
 
                             // 生成成功，结束处理
                             if (targetTree != null) {
@@ -146,6 +150,10 @@ public class NodeTreeGenerator {
         }
 
         return providerClasses;
+    }
+
+    public NodeContext getContext() {
+        return context;
     }
 
     public NodeTreeGenerator(List<AbstractNodeProcessor> nodeProcessors, AbstractProvider nodeProvider, OperationService manager) {

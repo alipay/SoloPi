@@ -33,6 +33,7 @@ import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.service.SPService;
+import com.alipay.hulu.common.trigger.Trigger;
 import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
@@ -89,8 +90,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class CmdTools {
     private static String TAG = "CmdTools";
-
-    private static final int MODE_APPEND = 0;
 
     public static final String FATAL_ADB_CANNOT_RECOVER = "fatalAdbNotRecover";
 
@@ -632,6 +631,7 @@ public class CmdTools {
                     sb.append(new String(bytes));
                 }
             }
+            logcatCmd(stream.getLocalId() + "@" + "shell:->" + sb.toString());
             streams.remove(stream);
             return sb.toString();
         } catch (IllegalStateException e) {
@@ -716,6 +716,7 @@ public class CmdTools {
                     sb.append(new String(bytes));
                 }
             }
+            logcatCmd(stream.getLocalId() + "@" + "shell:->" + sb.toString());
             streams.remove(stream);
             return sb.toString();
         } catch (IllegalStateException e) {
@@ -769,6 +770,7 @@ public class CmdTools {
                     sb.append(new String(bytes));
                 }
             }
+            logcatCmd(stream.getLocalId() + "@" + "shell:->" + sb.toString());
             streams.remove(stream);
             return sb.toString();
         } catch (IOException e) {
@@ -817,6 +819,8 @@ public class CmdTools {
                     sb.append(new String(bytes));
                 }
             }
+
+            logcatCmd(stream.getLocalId() + "@" + "shell:->" + sb.toString());
             streams.remove(stream);
             return sb.toString();
         } catch (IllegalStateException e) {
@@ -997,6 +1001,10 @@ public class CmdTools {
 
         // ADB成功连接后，开启ADB状态监测
         startAdbStatusCheck();
+
+        // 触发ADB连接状态监听
+        LauncherApplication.getInstance().triggerAtTime(Trigger.TRIGGER_TIME_ADB_CONNECT);
+
         return true;
     }
 
@@ -1143,7 +1151,7 @@ public class CmdTools {
     public static void writeFileData(String monkeyLog, String message, Context ct) {
         String time = "";
         try {
-            FileOutputStream fout = ct.openFileOutput(monkeyLog, MODE_APPEND);
+            FileOutputStream fout = ct.openFileOutput(monkeyLog, Context.MODE_APPEND);
 
             SimpleDateFormat formatter = new SimpleDateFormat("+++   HH:mm:ss");
             Date curDate = new Date(System.currentTimeMillis());//获取当前时间
@@ -1321,6 +1329,14 @@ public class CmdTools {
         } else {
             return execAdbCmd("dumpsys activity top | grep ACTIVITY", 1000);
         }
+    }
+
+    /**
+     * 获取adb状态
+     * @return
+     */
+    public static boolean getConnectionStatus() {
+        return connection != null && connection.isFine();
     }
 
     public static String getTopActivity(String pkg) {

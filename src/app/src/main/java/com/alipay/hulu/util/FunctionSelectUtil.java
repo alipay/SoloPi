@@ -1277,7 +1277,7 @@ public class FunctionSelectUtil {
      *
      * @param node
      */
-    protected static void showEditView(final AbstractNodeTree node, final OperationMethod method,
+    public static void showEditView(final AbstractNodeTree node, final OperationMethod method,
                                 final Context context, final FunctionListener listener) {
 
         try {

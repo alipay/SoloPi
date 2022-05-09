@@ -21,10 +21,7 @@ import com.alipay.hulu.shared.node.action.PerformActionEnum;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by qiaoruikai on 2018/11/5 12:23 PM.
- */
-public class FakeNodeTree extends AbstractNodeTree {
+public class InputWindowTree extends AbstractNodeTree {
     @Override
     public boolean canDoAction(PerformActionEnum action) {
         return false;
@@ -59,7 +56,7 @@ public class FakeNodeTree extends AbstractNodeTree {
 
     @Override
     public boolean isSelfUsableForLocating() {
-        return false;
+        return true;
     }
 
     @Override

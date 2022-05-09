@@ -18,8 +18,11 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="#444"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
     >
     <TextView
+        android:id="@+id/adb_ime_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/ime__click_change"

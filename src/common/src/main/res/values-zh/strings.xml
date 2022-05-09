@@ -79,4 +79,6 @@
     <string name="permission__open_accessibility">开启辅助功能</string>
     <string name="permission__try_kil_uiautomator">尝试关闭现有UIAutomator与Instrument进程</string>
     <string name="permission__force_stop">强制关闭</string>
+    <string name="ime__click_change">点击切换输入法</string>
+    <string name="ime__click_to_input">点击输入</string>
 </resources>

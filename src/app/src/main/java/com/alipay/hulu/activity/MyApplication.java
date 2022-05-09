@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -43,6 +44,7 @@ import com.alipay.hulu.common.utils.HuluCrashHandler;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.service.CaseReplayManager;
+import com.alipay.hulu.service.InstallReceiver;
 import com.alipay.hulu.shared.io.db.GreenDaoManager;
 import com.alipay.hulu.util.LargeObjectHolder;
 import com.alipay.hulu.util.SystemUtil;
@@ -290,6 +292,15 @@ public class MyApplication extends LauncherApplication {
             SystemUtil.VERSION_CODE = pInfo.versionCode;      //version code
         } catch (PackageManager.NameNotFoundException e) {
             LogUtil.e(TAG, "Fail to load my app version info", e);
+        }
+
+        // Android  8.0及以上，显式监控应用状态
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            IntentFilter intentFilter =new IntentFilter();
+            intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+            intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+            intentFilter.addDataScheme("package");
+            registerReceiver(new InstallReceiver(), intentFilter);
         }
 
         registerLifecycleCallbacks();

@@ -38,6 +38,7 @@
         android:layout_height="80dp">
     <com.zhy.view.flowlayout.TagFlowLayout
         android:id="@+id/global_param_group"
+        android:contentDescription="@string/settings__global_param"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     </ScrollView>
@@ -117,6 +118,7 @@
 
         <ImageView
             android:id="@+id/global_param_add"
+            android:contentDescription="@string/function__add"
             android:foreground="?attr/selectableItemBackground"
             android:layout_width="48dp"
             android:scaleType="fitCenter"

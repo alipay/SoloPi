@@ -169,11 +169,6 @@ public class IndexActivity extends BaseActivity {
                 }
             });
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
 
         // 进入主页的trigger
         LauncherApplication.getInstance().triggerAtTime(Trigger.TRIGGER_TIME_HOME_PAGE);

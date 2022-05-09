@@ -93,4 +93,6 @@ public class Constant {
      * 触摸位置
      */
     public static final String KEY_TOUCH_POINT = "touchPoint";
+
+    public static final String RUNNING_STATUS = "RUNNING_STATUS";
 }

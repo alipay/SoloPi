@@ -33,4 +33,9 @@ public class Constant {
     public static final int HOTPATCH_VERSION = 1;
     public static final int TYPE_ALERT = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
 
+
+    /**
+     * 屏幕方向监控
+     */
+    public static final String SCREEN_ORIENTATION = "screenOrientation";
 }

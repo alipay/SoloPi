@@ -54,6 +54,11 @@
   public *;
 }
 
+-keep @interface com.alipay.hulu.common.trigger.Trigger { *; }
+-keep @com.alipay.hulu.common.trigger.Trigger class ** implements java.lang.Runnable {
+public void run();
+}
+
 -keep interface com.alipay.hulu.common.service.base.ExportService { *; }
 -keep @interface com.alipay.hulu.common.service.base.LocalService {*;}
 -keep class com.alipay.hulu.common.utils.patch.PatchClassLoader {

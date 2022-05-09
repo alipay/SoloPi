@@ -18,6 +18,7 @@
     package="com.alipay.hulu.common">
 
     <uses-permission android:name="android.permission.REORDER_TASKS" />
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
     <application
         tools:node="merge"
         >
@@ -35,5 +36,14 @@
 
         <activity android:name=".utils.activity.FileChooseDialogActivity"
             android:theme="@style/PermissionAppDialogTheme" />
+
+        <service android:name=".tools.AdbIME"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_INPUT_METHOD">
+            <intent-filter>
+                <action android:name="android.view.InputMethod" />
+            </intent-filter>
+            <meta-data android:name="android.view.im" android:resource="@xml/methods" />
+        </service>
     </application>
 </manifest>

@@ -112,6 +112,9 @@ public class SettingsActivity extends BaseActivity {
     private View mAutoReplaySettingWrapper;
     private TextView mAutoReplaySettingInfo;
 
+    private View mRecordCoverModeSettingWrapper;
+    private TextView mRecordCoverModeSettingInfo;
+
     private View mSkipAccessibilitySettingWrapper;
     private TextView mSkipAccessibilitySettingInfo;
 
@@ -435,6 +438,29 @@ public class SettingsActivity extends BaseActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         SPService.putBoolean(SPService.KEY_REPLAY_AUTO_START, false);
                         mAutoReplaySettingInfo.setText(R.string.constant__no);
+                        dialog.dismiss();
+                    }
+                }).show();
+            }
+        });
+
+        mRecordCoverModeSettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AlertDialog.Builder(SettingsActivity.this, R.style.SimpleDialogTheme)
+                        .setMessage(R.string.setting__choose_action_block_mode)
+                        .setPositiveButton(R.string.setting__conver_mode, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SPService.putBoolean(SPService.KEY_RECORD_COVER_MODE, true);
+                                mRecordCoverModeSettingInfo.setText(R.string.setting__conver_mode);
+                                dialog.dismiss();
+                            }
+                        }).setNegativeButton(R.string.setting__block_mode, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SPService.putBoolean(SPService.KEY_RECORD_COVER_MODE, false);
+                        mRecordCoverModeSettingInfo.setText(R.string.setting__block_mode);
                         dialog.dismiss();
                     }
                 }).show();
@@ -807,6 +833,15 @@ public class SettingsActivity extends BaseActivity {
         mHightlightSettingWrapper = findViewById(R.id.replay_highlight_setting_wrapper);
         mHightlightSettingInfo = (TextView) findViewById(R.id.replay_highlight_setting_info);
         mHightlightSettingInfo.setText(SPService.getBoolean(SPService.KEY_HIGHLIGHT_REPLAY_NODE, true)? R.string.constant__yes: R.string.constant__no);
+
+        mRecordCoverModeSettingWrapper = findViewById(R.id.record_cover_mode_setting_wrapper);
+        mRecordCoverModeSettingInfo = _findViewById(R.id.record_cover_mode_setting_info);
+        boolean coverMode = SPService.getBoolean(SPService.KEY_RECORD_COVER_MODE, false);
+        if (coverMode) {
+            mRecordCoverModeSettingInfo.setText(R.string.setting__conver_mode);
+        } else {
+            mRecordCoverModeSettingInfo.setText(R.string.setting__block_mode);
+        }
 
         mLanguageSettingWrapper = findViewById(R.id.language_setting_wrapper);
         mLanguageSettingInfo = (TextView) findViewById(R.id.language_setting_info);

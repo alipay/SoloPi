@@ -39,6 +39,7 @@ public class SPService {
     public static final String KEY_RECORD_SCREEN_UPLOAD = "KEY_RECORD_SCREEN_UPLOAD";
     public static final String KEY_PATCH_URL = "KEY_PATCH_URL";
     public static final String KEY_AES_KEY = "KEY_AES_KEY";
+    public static final String KEY_RECORD_COVER_MODE = "KEY_RECORD_COVER_MODE";
     public static final String KEY_REPLAY_AUTO_START = "KEY_REPLAY_AUTO_START";
     public static final String KEY_RESTART_APP_ON_PLAY = "KEY_RESTART_APP_ON_PLAY";
     public static final String KEY_SKIP_ACCESSIBILITY = "KEY_SKIP_ACCESSIBILITY";

@@ -15,6 +15,8 @@
  */
 package com.alipay.hulu.service;
 
+import static com.alipay.hulu.shared.node.action.Constant.TRIGGER_INPUT_METHOD;
+
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -31,13 +33,18 @@ import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
+
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.hulu.R;
 import com.alipay.hulu.activity.MyApplication;
 import com.alipay.hulu.activity.NewRecordActivity;
@@ -69,8 +76,8 @@ import com.alipay.hulu.event.HandlePermissionEvent;
 import com.alipay.hulu.event.ScanSuccessEvent;
 import com.alipay.hulu.shared.event.EventService;
 import com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl;
-import com.alipay.hulu.shared.event.bean.UniversalEventBean;
 import com.alipay.hulu.shared.event.constant.Constant;
+import com.alipay.hulu.shared.event.touch.TouchWrapper;
 import com.alipay.hulu.shared.io.OperationStepService;
 import com.alipay.hulu.shared.io.bean.OperationStepMessage;
 import com.alipay.hulu.shared.io.bean.RecordCaseInfo;
@@ -84,15 +91,19 @@ import com.alipay.hulu.shared.node.action.UIOperationMessage;
 import com.alipay.hulu.shared.node.action.provider.ActionProviderManager;
 import com.alipay.hulu.shared.node.locater.PositionLocator;
 import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
+import com.alipay.hulu.shared.node.tree.InputWindowTree;
 import com.alipay.hulu.shared.node.tree.accessibility.AccessibilityNodeProcessor;
 import com.alipay.hulu.shared.node.tree.accessibility.AccessibilityProvider;
+import com.alipay.hulu.shared.node.tree.accessibility.tree.AccessibilityNodeTree;
 import com.alipay.hulu.shared.node.tree.capture.CaptureTree;
 import com.alipay.hulu.shared.node.tree.export.OperationStepExporter;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
 import com.alipay.hulu.shared.node.utils.BitmapUtil;
+import com.alipay.hulu.shared.node.utils.NodeContext;
 import com.alipay.hulu.shared.node.utils.PrepareUtil;
 import com.alipay.hulu.shared.node.utils.RectUtil;
 import com.alipay.hulu.shared.scan.ScanCodeType;
+import com.alipay.hulu.status.StatusListener;
 import com.alipay.hulu.tools.HighLightService;
 import com.alipay.hulu.ui.TwoLevelSelectLayout;
 import com.alipay.hulu.util.DialogUtils;
@@ -111,11 +122,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import androidx.appcompat.app.AlertDialog;
-
-import static android.accessibilityservice.AccessibilityService.GESTURE_SWIPE_UP;
-import static com.alipay.hulu.shared.event.constant.Constant.KEY_TOUCH_POINT;
 
 /**
  * 操作录制服务
@@ -142,6 +148,12 @@ public class CaseRecordManager implements ExportService {
     // 操作日志输出Handler
     protected OperationStepService operationStepService;
 
+    /**
+     * 状态监听器
+     */
+    protected StatusListener statusListener;
+
+
     protected volatile boolean displayDialog = false;
 
     /**
@@ -165,7 +177,7 @@ public class CaseRecordManager implements ExportService {
 
     private WindowManager windowManager;
 
-    private String app;
+    protected String app;
 
     protected RecordCaseInfo caseInfo;
 
@@ -229,14 +241,13 @@ public class CaseRecordManager implements ExportService {
         PermissionUtil.grantHighPrivilegePermission(LauncherApplication.getContext());
 
         currentRecordId = StringUtil.generateRandomString(10);
-        setServiceToNormalMode();
+//        setServiceToNormalMode();
 
         // 启动悬浮窗
         connection = new RecordFloatConnection(this);
         listener = new FloatClickListener(this);
         stopListener = new FloatStopListener();
-
-        context.getApplicationContext().bindService(new Intent(context.getApplicationContext(), FloatWinService.class), connection, Context.BIND_AUTO_CREATE);
+        context.bindService(new Intent(context, FloatWinService.class), connection, Context.BIND_AUTO_CREATE);
 
         // 开始扩展功能处理
         operationService.startExtraActionHandle();
@@ -328,6 +339,13 @@ public class CaseRecordManager implements ExportService {
             return;
         }
 
+        if (statusListener != null) {
+            JSONObject obj = new JSONObject();
+            obj.put("case", caseInfo);
+            obj.put("time", System.currentTimeMillis());
+            statusListener.onStatusChange(StatusListener.STATUS_START, obj);
+        }
+
         this.caseInfo = caseInfo;
 
         // 重置RecordId和operationIdx
@@ -396,6 +414,12 @@ public class CaseRecordManager implements ExportService {
                             }
                         });
                     }
+
+                    if (statusListener != null) {
+                        JSONObject obj = new JSONObject();
+                        obj.put("time", System.currentTimeMillis());
+                        statusListener.onStatusChange(StatusListener.STATUS_PREPARED, obj);
+                    }
                 }
 
             }
@@ -409,9 +433,12 @@ public class CaseRecordManager implements ExportService {
         isRecording = true;
         displayDialog = true;
 
+        InjectorService.g().pushMessage(Constant.RUNNING_STATUS, "record");
+
         // 先记录下默认输入法
         defaultIme = CmdTools.execHighPrivilegeCmd("settings get secure default_input_method");
-        MyApplication.getInstance().updateDefaultIme("com.alipay.hulu/.tools.AdbIME");
+        MyApplication.getInstance().updateDefaultIme("com.alipay.hulu/.common.tools.AdbIME");
+        CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
 
         // 初始化
         operationStepService.startRecord(caseInfo);
@@ -437,6 +464,11 @@ public class CaseRecordManager implements ExportService {
         // 重载下当前界面
         operationService.invalidRoot();
 
+        // 覆盖模式不记录操作位置
+        if (SPService.getBoolean(SPService.KEY_RECORD_COVER_MODE, false)) {
+            eventService.stopTrackTouch();
+        }
+
         // 通知进入触摸屏蔽模式
         setServiceToTouchBlockModeNoDelay();
 
@@ -444,7 +476,24 @@ public class CaseRecordManager implements ExportService {
         notifyDialogDismiss(1000);
 
         operationService.invalidRoot();
+
+        TouchWrapper.getInstance().listen(gestureListener);
+        TouchWrapper.getInstance().start();
+
+        // 执行准备操作
+        AdvanceCaseSetting setting = JSON.parseObject(caseInfo.getAdvanceSettings(), AdvanceCaseSetting.class);
+        if (setting != null && setting.getPrepareActions() != null) {
+            List<OperationStep> steps = setting.getPrepareActions();
+            for (OperationStep step: steps) {
+                // 直接操作不录制
+                if (step.getOperationNode() == null && step.getOperationMethod() != null) {
+                    operationService.doSomeAction(step.getOperationMethod(), null);
+                }
+            }
+        }
     }
+
+    private View coverView = null;
 
     /**
      * 进入触摸屏蔽模式
@@ -467,8 +516,63 @@ public class CaseRecordManager implements ExportService {
         }
         LogUtil.d(TAG, "进入触摸阻塞模式");
         touchBlockMode = true;
-        injectorService.pushMessage(com.alipay.hulu.shared.event.constant.Constant.EVENT_ACCESSIBILITY_MODE, AccessibilityServiceImpl.MODE_BLOCK);
+        // 可选CoverMode
+        if (SPService.getBoolean(SPService.KEY_RECORD_COVER_MODE, false)) {
+            LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (coverView == null) {
+                        coverView = LayoutInflater.from(binder.loadServiceContext()).inflate(R.layout.record_cover_view, null);
+                        WindowManager.LayoutParams wmParams = new WindowManager.LayoutParams();
+                        wmParams.type = com.alipay.hulu.common.constant.Constant.TYPE_ALERT;
+                        wmParams.flags |= 8;
+                        wmParams.gravity = Gravity.LEFT | Gravity.TOP; // 调整悬浮窗口至左上角
+                        // 以屏幕左上角为原点，设置x、y初始值
+                        wmParams.x = 0;
+                        wmParams.y = 0;
+                        // 设置悬浮窗口长宽数据
+                        wmParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+                        wmParams.height = WindowManager.LayoutParams.MATCH_PARENT;
+                        wmParams.format = 1;
+                        wmParams.alpha = 1F;
+
+                        coverView.setOnTouchListener(new View.OnTouchListener() {
+                            @Override
+                            public boolean onTouch(View v, MotionEvent event) {
+                                if (SPService.getBoolean(SPService.KEY_USE_EASY_MODE, false)) {
+                                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                                        TouchWrapper.getInstance().receiveTouchDown(event.getEventTime());
+                                        TouchWrapper.getInstance().receiveTouchPosition(new Point((int) event.getRawX(), (int) event.getRawY()), event.getEventTime());
+                                    } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                                        TouchWrapper.getInstance().receiveTouchPosition(new Point((int) event.getRawX(), (int) event.getRawY()), event.getEventTime());
+                                    } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                                        TouchWrapper.getInstance().receiveTouchPosition(new Point((int) event.getRawX(), (int) event.getRawY()), event.getEventTime());
+                                        TouchWrapper.getInstance().receiveTouchUp(event.getEventTime());
+                                    }
+                                } else {
+                                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                                        receiveClickPosition(new Point((int) event.getRawX(), (int) event.getRawY()));
+                                    }
+                                }
+                                return false;
+                            }
+                        });
+
+                        coverView.setFocusable(false);
+
+                        binder.addView(coverView, wmParams);
+                    }
+
+                    coverView.setVisibility(View.VISIBLE);
+                }
+            });
+        } else {
+            // 延迟500ms
+            injectorService.pushMessage(com.alipay.hulu.shared.event.constant.Constant.EVENT_ACCESSIBILITY_MODE, AccessibilityServiceImpl.MODE_BLOCK);
+        }
     }
+
+    private long startCallTime = 0;
 
     /**
      * 进入正常模式
@@ -476,29 +580,81 @@ public class CaseRecordManager implements ExportService {
     protected void setServiceToNormalMode() {
         touchBlockMode = false;
         LogUtil.d(TAG, "进入正常触摸模式");
-        // 200ms后点击
-        injectorService.pushMessage(com.alipay.hulu.shared.event.constant.Constant.EVENT_ACCESSIBILITY_MODE, AccessibilityServiceImpl.MODE_NORMAL, 200);
-    }
 
-    private UniversalEventBean touchPos;
-
-    @Subscriber(value = @Param(Constant.EVENT_TOUCH_POSITION), thread = RunningThread.BACKGROUND)
-    public void receiveTouchPos(UniversalEventBean eventBean) {
-        this.touchPos = eventBean;
-    }
-
-    @Subscriber(value = @Param(Constant.EVENT_TOUCH_UP), thread = RunningThread.BACKGROUND)
-    public void receiveTouchUp(UniversalEventBean event) {
-        if (touchPos != null) {
-            receiveTouchPosition(touchPos);
-            touchPos = null;
+        // 可选CoverMode
+        if (SPService.getBoolean(SPService.KEY_RECORD_COVER_MODE, false)) {
+            LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (coverView != null) {
+                        coverView.setVisibility(View.GONE);
+                    }
+                }
+            }, 200);
+        } else {
+            // 200ms后点击
+            injectorService.pushMessage(com.alipay.hulu.shared.event.constant.Constant.EVENT_ACCESSIBILITY_MODE, AccessibilityServiceImpl.MODE_NORMAL, 200);
         }
     }
 
-    public void receiveTouchPosition(UniversalEventBean eventBean) {
-        Point point = eventBean.getParam(KEY_TOUCH_POINT);
+    /**
+     * 进入正常模式
+     */
+    protected void setServiceToNormalModeNoDelay() {
+        touchBlockMode = false;
+        LogUtil.d(TAG, "进入正常触摸模式");
+
+        // 可选CoverMode
+        if (SPService.getBoolean(SPService.KEY_RECORD_COVER_MODE, false)) {
+            LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (coverView != null) {
+                        coverView.setVisibility(View.GONE);
+                    }
+                }
+            });
+        } else {
+            // 200ms后点击
+            injectorService.pushMessage(com.alipay.hulu.shared.event.constant.Constant.EVENT_ACCESSIBILITY_MODE, AccessibilityServiceImpl.MODE_NORMAL);
+        }
+    }
+
+    /**
+     * 手势监听器
+     */
+    protected TouchWrapper.GestureListener gestureListener = new TouchWrapper.GestureListener() {
+        @Override
+        public void receiveClick(Point point) {
+            if (SPService.getBoolean(SPService.KEY_USE_EASY_MODE, false)) {
+                receiveDirectClick(point);
+            } else {
+                receiveClickPosition(point);
+            }
+        }
+
+        @Override
+        public void receiveLongClick(Point p, long time) {
+            receiveClickPosition(p);
+        }
+
+        @Override
+        public void receiveScroll(Point start, Point end, long time) {
+            if (SPService.getBoolean(SPService.KEY_USE_EASY_MODE, false)) {
+                receiveDirectScroll(start, end, time);
+            } else {
+                receiveClickPosition(end);
+            }
+        }
+    };
+
+    /**
+     * 收到直接点击
+     * @param point
+     */
+    protected void receiveDirectClick(Point point) {
         if (point == null) {
-            LogUtil.w(TAG, "收到空触摸消息【%s】", eventBean);
+            LogUtil.w(TAG, "收到空触摸消息");
             return;
         }
 
@@ -508,7 +664,284 @@ public class CaseRecordManager implements ExportService {
             return;
         }
 
-        LogUtil.d(TAG, "Receive Touch at time " + eventBean.getTime());
+        LogUtil.d(TAG, "Receive Touch at time " + System.currentTimeMillis());
+
+        int x = point.x;
+        int y = point.y;
+
+        // 只针对显示dialog的情况
+        if (displayDialog || pauseFlag || nodeLoading || isExecuting || !isRecording) {
+            return;
+        }
+
+        LogUtil.i(TAG, "Start notify Touch Event at (%d, %d)", x, y);
+
+        // 看下是否点到葫芦娃图标
+        if (binder.checkInFloat(point)) {
+            LogUtil.i(TAG, "点到了葫芦娃");
+            startCallTime = System.currentTimeMillis();
+            showFunctionView(null);
+            return;
+        }
+
+        setServiceToNormalModeNoDelay();
+
+        nodeLoading = true;
+        try {
+            AbstractNodeTree root = operationService.getCurrentRoot();
+
+            // 如果有显示输入法框，找有input focus的输入框
+            NodeContext context = operationService.getNodeContext();
+            if (context != null && StringUtil.equals(context.getField(TRIGGER_INPUT_METHOD, ""), "true")) {
+                AbstractNodeTree node = null;
+                for (AbstractNodeTree tmp: root) {
+                    if (tmp.getNodeBound().contains(x, y)) {
+                        if (tmp instanceof AccessibilityNodeTree) {
+                            // 找输入框
+                            if (((AccessibilityNodeTree) tmp).isEditable() && ((AccessibilityNodeTree) tmp).getCurrentNode().isFocused()) {
+                                node = tmp;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+
+                // 如果找到了待输入控件
+                if (node != null) {
+
+                    // 先切换到默认输入法
+                    CmdTools.switchToIme(defaultIme);
+
+                    displayDialog  = true;
+
+                    highLightService.highLight(node.getNodeBound(), null);
+                    final AbstractNodeTree finalNode = node;
+                    LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            FunctionSelectUtil.showEditView(finalNode, new OperationMethod(PerformActionEnum.INPUT),
+                                    binder.loadServiceContext(), new FunctionSelectUtil.FunctionListener() {
+                                        @Override
+                                        public void onProcessFunction(final OperationMethod method, final AbstractNodeTree node) {
+                                            highLightService.removeHightLightSync();
+
+                                            // 切换回葫芦娃输入法
+                                            CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
+
+                                            // 等悬浮窗消失了再操作
+                                            BackgroundExecutor.execute(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    LogUtil.d(TAG, "开始执行操作");
+                                                    boolean result = processAction(method, node, binder.loadServiceContext());
+
+                                                    // 是否需要处理
+                                                    if (!result) {
+                                                        setServiceToTouchBlockMode();
+                                                        notifyDialogDismiss();
+                                                    }
+                                                }
+                                            }, 50);
+                                        }
+
+                                        @Override
+                                        public void onCancel() {
+                                            highLightService.removeHightLightSync();
+
+                                            setServiceToTouchBlockModeNoDelay();
+                                            notifyDialogDismiss();
+                                        }
+                                    });
+                        }
+                    });
+                    return;
+                }
+            }
+
+            final AbstractNodeTree node = PositionLocator.findDeepestNode(root, x, y);
+            LogUtil.i(TAG, "目标节点：%s", node);
+
+            // 节点没拿到
+            if (node == null) {
+                LogUtil.e(TAG, "Get node at (" + x + ", " + y + ") null");
+                setServiceToTouchBlockMode();
+                return;
+            }
+
+            if (node instanceof InputWindowTree) {
+
+                AbstractNodeTree targetNode = null;
+                for (AbstractNodeTree tmp: root) {
+                    if (tmp instanceof AccessibilityNodeTree) {
+                        // 找输入框
+                        if (((AccessibilityNodeTree) tmp).isEditable() && ((AccessibilityNodeTree) tmp).getCurrentNode().isFocused()) {
+                            targetNode = tmp;
+                            break;
+                        }
+                    }
+                }
+
+
+                // 如果找到了待输入控件
+                if (targetNode != null) {
+
+                    // 先切换到默认输入法
+                    CmdTools.switchToIme(defaultIme);
+
+                    displayDialog  = true;
+
+                    highLightService.highLight(targetNode.getNodeBound(), null);
+                    final AbstractNodeTree finalNode = targetNode;
+                    LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            FunctionSelectUtil.showEditView(finalNode, new OperationMethod(PerformActionEnum.INPUT),
+                                    binder.loadServiceContext(), new FunctionSelectUtil.FunctionListener() {
+                                        @Override
+                                        public void onProcessFunction(final OperationMethod method, final AbstractNodeTree node) {
+                                            highLightService.removeHightLightSync();
+
+                                            // 切换回葫芦娃输入法
+                                            CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
+
+                                            // 等悬浮窗消失了再操作
+                                            BackgroundExecutor.execute(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    LogUtil.d(TAG, "开始执行操作");
+                                                    boolean result = processAction(method, node, binder.loadServiceContext());
+
+                                                    // 是否需要处理
+                                                    if (!result) {
+                                                        setServiceToTouchBlockMode();
+                                                        notifyDialogDismiss();
+                                                    }
+                                                }
+                                            }, 50);
+                                        }
+
+                                        @Override
+                                        public void onCancel() {
+                                            highLightService.removeHightLightSync();
+
+                                            setServiceToTouchBlockModeNoDelay();
+                                            notifyDialogDismiss();
+                                        }
+                                    });
+                        }
+                    });
+                    return;
+                } else {
+                    LogUtil.w(TAG, "Can't find target node， even input method is display");
+                    LauncherApplication.getInstance().showToast("未能找到输入控件，无法操作");
+                    setServiceToTouchBlockMode();
+                    return;
+                }
+            }
+
+            Rect bound = node.getNodeBound();
+            float xFactor = (x - bound.left) / (float) bound.width();
+            float yFactor = (y - bound.top) / (float) bound.height();
+
+            final OperationMethod method = new OperationMethod(PerformActionEnum.CLICK);
+            // 添加控件点击位置
+            method.putParam(OperationExecutor.LOCAL_CLICK_POS_KEY, xFactor + "," +  yFactor);
+//            startCallTime = System.currentTimeMillis();
+            highLightService.highLight(bound, point);
+            BackgroundExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    highLightService.removeHightLightSync();
+                    boolean result = CaseRecordManager.this.processAction(method, node, binder.loadServiceContext());
+                    if (!result) {
+                        CaseRecordManager.this.setServiceToTouchBlockMode();
+                        CaseRecordManager.this.notifyDialogDismiss();
+                    }
+                }
+            }, 200);
+
+
+        } finally {
+            nodeLoading = false;
+        }
+    }
+
+    /**
+     * 收到直接滑动
+     * @param start
+     * @param end
+     * @param time
+     */
+    protected void receiveDirectScroll(Point start, Point end, long time) {
+        if (start == null || end == null) {
+            LogUtil.w(TAG, "收到空触摸消息");
+            return;
+        }
+
+        // 非触摸阻塞模式
+        if (!touchBlockMode) {
+            LogUtil.d(TAG, "当前非阻塞模式");
+            return;
+        }
+
+        LogUtil.d(TAG, "Receive Touch at time " + System.currentTimeMillis());
+
+        // 只针对显示dialog的情况
+        if (displayDialog || pauseFlag || nodeLoading || isExecuting || !isRecording) {
+            return;
+        }
+
+        setServiceToNormalModeNoDelay();
+
+        LogUtil.i(TAG, "Receive scroll from %s to %s", start, end);
+        int xDistance = end.x - start.x;
+        int yDistance = end.y - start.y;
+        DisplayMetrics dm = new DisplayMetrics();
+        ((WindowManager) LauncherApplication.getInstance().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRealMetrics(dm);
+        int height = dm.heightPixels;
+        int width = dm.widthPixels;
+
+        OperationMethod method = new OperationMethod();
+        method.putParam(OperationExecutor.SCROLL_TIME, Long.toString(time));
+        if (Math.abs(xDistance) > Math.abs(yDistance)) {
+            if (xDistance < 0) {
+                method.setActionEnum(PerformActionEnum.GLOBAL_SCROLL_TO_RIGHT);
+            } else {
+                method.setActionEnum(PerformActionEnum.GLOBAL_SCROLL_TO_LEFT);
+            }
+
+            method.putParam(OperationExecutor.SCROLL_DISTANCE, Integer.toString((int) (Math.abs(xDistance) / (float) width)));
+        } else {
+            if (yDistance < 0) {
+                method.setActionEnum(PerformActionEnum.GLOBAL_SCROLL_TO_TOP);
+            } else {
+                method.setActionEnum(PerformActionEnum.GLOBAL_SCROLL_TO_BOTTOM);
+            }
+            method.putParam(OperationExecutor.SCROLL_DISTANCE, Integer.toString((int) (Math.abs(yDistance) / (float) height)));
+        }
+
+        boolean result = processAction(method, null, binder.loadServiceContext());
+        if (!result) {
+            setServiceToTouchBlockMode();
+            notifyDialogDismiss();
+        }
+    }
+
+//    @Subscriber(value = @Param(com.alipay.hulu.shared.event.constant.Constant.EVENT_TOUCH_POSITION), thread = RunningThread.BACKGROUND)
+    public void receiveClickPosition(Point point) {
+        if (point == null) {
+            LogUtil.w(TAG, "收到空触摸消息");
+            return;
+        }
+
+        // 非触摸阻塞模式
+        if (!touchBlockMode) {
+            LogUtil.d(TAG, "当前非阻塞模式");
+            return;
+        }
+
+        LogUtil.d(TAG, "Receive Touch at time " + System.currentTimeMillis());
 
         int x = point.x;
         int y = point.y;
@@ -523,6 +956,7 @@ public class CaseRecordManager implements ExportService {
         // 看下是否点到SoloPi图标
         if (binder.checkInFloat(point)) {
             LogUtil.i(TAG, "点到了SoloPi");
+            startCallTime = System.currentTimeMillis();
             showFunctionView(null);
             return;
         }
@@ -545,6 +979,7 @@ public class CaseRecordManager implements ExportService {
             float yFactor = (y - bound.top) / (float) bound.height();
 
             localClickPos = new Pair<>(xFactor, yFactor);
+            startCallTime = System.currentTimeMillis();
             showFunctionView(node);
         } finally {
             nodeLoading = false;
@@ -924,7 +1359,7 @@ public class CaseRecordManager implements ExportService {
                         LogUtil.d(TAG, "悬浮窗消失");
 
                         // 切换回SoloPi输入法
-                        CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
+                        CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
 
                         // 等悬浮窗消失了再操作
                         LauncherApplication.getInstance().runOnUiThread(new Runnable() {
@@ -1024,8 +1459,19 @@ public class CaseRecordManager implements ExportService {
 
             eventService.stopTrackAccessibilityEvent();
             eventService.stopTrackTouch();
+            LauncherApplication.getInstance().stopServiceByName(OperationService.class.getName());
 
             setServiceToNormalMode();
+
+            if (statusListener != null) {
+                JSONObject obj = new JSONObject();
+                obj.put("time", System.currentTimeMillis());
+                if (caseInfo.getId() > 0) {
+                    obj.put("id", caseInfo.getId());
+                }
+                obj.put("caseName", caseInfo.getCaseName());
+                statusListener.onStatusChange(StatusListener.STATUS_STOP, obj);
+            }
 
             if (!processed) {
                 // 恢复悬浮窗
@@ -1038,6 +1484,14 @@ public class CaseRecordManager implements ExportService {
                 LauncherApplication.getInstance().stopServiceByName(CaseRecordManager.class.getName());
             } else {
                 LauncherApplication.getInstance().stopServiceByName(CaseRecordManager.class.getName());
+            }
+
+            TouchWrapper.getInstance().cancelListen(gestureListener);
+            TouchWrapper.getInstance().stop();
+
+            // 不能影响其他操作
+            if (SPService.getBoolean(SPService.KEY_USE_EASY_MODE, false)) {
+                SPService.putBoolean(SPService.KEY_USE_EASY_MODE, false);
             }
             return true;
         } else if (action == PerformActionEnum.PAUSE) {
@@ -1148,18 +1602,6 @@ public class CaseRecordManager implements ExportService {
      */
     public boolean isSupportedDevice() {
         return true;
-    }
-
-    @Subscriber(@Param(com.alipay.hulu.shared.event.constant.Constant.EVENT_ACCESSIBILITY_GESTURE))
-    public void onGesture(UniversalEventBean gestureEvent) {
-        LogUtil.i(TAG, "System Call Gesture Method: " + gestureEvent);
-
-        Integer gestureId;
-        if (gestureEvent != null && (gestureId = gestureEvent.getParam(com.alipay.hulu.shared.event.constant.Constant.KEY_GESTURE_TYPE)) != null) {
-            if (gestureId == GESTURE_SWIPE_UP && !displayDialog && !pauseFlag && !nodeLoading) {
-                showFunctionView(null);
-            }
-        }
     }
 
     public void onDestroy(Context context) {
@@ -1351,6 +1793,10 @@ public class CaseRecordManager implements ExportService {
         } else {
             cmdExecutor.schedule(runnable, mill, TimeUnit.MILLISECONDS);
         }
+    }
+
+    public void registerStatusListener(StatusListener statusListener) {
+        this.statusListener = statusListener;
     }
 
     @Subscriber(@Param(SubscribeParamEnum.APP))

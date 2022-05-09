@@ -13,27 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.hulu.tools;
+package com.alipay.hulu.common.tools;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.inputmethodservice.InputMethodService;
+import android.os.Build;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 
-import com.alipay.hulu.R;
+import com.alipay.hulu.common.R;
 import com.alipay.hulu.common.application.LauncherApplication;
-import com.alipay.hulu.common.constant.Constant;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.RunningThread;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
-import com.alipay.hulu.common.tools.BackgroundExecutor;
+import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 
@@ -46,32 +49,53 @@ public class AdbIME extends InputMethodService {
 
     public static final String IME_MESSAGE = "ADB_INPUT_TEXT";
     public static final String IME_SEARCH_MESSAGE = "ADB_SEARCH_TEXT";
+    public static final String IME_OPERATION_ACTION = "IME_OPERATION_ACTION";
     public static final String IME_CHARS = "ADB_INPUT_CHARS";
     public static final String IME_KEYCODE = "ADB_INPUT_CODE";
     public static final String IME_EDITORCODE = "ADB_EDITOR_CODE";
     private BroadcastReceiver mReceiver = null;
     private InputMethodManager manager;
+    private TextView title;
+
+    private String currentStatus = null;
 
     @Override
     public void onCreate() {
-        super.onCreate();
+        try {
+            super.onCreate();
 
-        // System Alert类型，不影响背景显示
-        getWindow().getWindow().setType(Constant.TYPE_ALERT);
-
-        this.manager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        BackgroundExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                while (!LauncherApplication.getInstance().hasFinishInit()) {
-                    MiscUtil.sleep(50);
-                }
-
-                // 初始化好后再注册
-                InjectorService.g().register(AdbIME.this);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getWindow().getWindow().setNavigationBarColor(Color.rgb(0x44, 0x44, 0x44));
             }
-        });
+
+            // 输入法
+            getWindow().getWindow().setType(WindowManager.LayoutParams.TYPE_INPUT_METHOD);
+
+            this.manager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            BackgroundExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    while (!LauncherApplication.getInstance().hasFinishInit()) {
+                        MiscUtil.sleep(50);
+                    }
+
+                    // 初始化好后再注册
+                    InjectorService.g().register(AdbIME.this);
+                }
+            });
+        } catch (Exception e) {
+            LogUtil.e(TAG, "Init ime failed", e);
+        }
     }
+
+    @Subscriber(value = @Param("RUNNING_STATUS"), thread = RunningThread.MAIN_THREAD)
+    public void setCurrentStatus(String currentStatus) {
+        this.currentStatus = currentStatus;
+        if (title != null) {
+            title.setText(StringUtil.equals(currentStatus, "record")? "点击输入": "点击切换输入法");
+        }
+    }
+
 
     @Subscriber(value = @Param(value = MSG_HIDE_INPUT, sticky = false), thread = RunningThread.MAIN_THREAD)
     public void hideInput() {
@@ -163,7 +187,19 @@ public class AdbIME extends InputMethodService {
 
     @Override
     public View onCreateInputView() {
+        return getLayoutInflater().inflate(R.layout.adb_ime_input, null, false);
+    }
+
+    @Override
+    public View onCreateCandidatesView() {
         View mInputView = getLayoutInflater().inflate(R.layout.input_view, null);
+
+        title = mInputView.findViewById(R.id.adb_ime_title);
+        if (StringUtil.equals(currentStatus, "record")) {
+            title.setText(R.string.ime__click_to_input);
+        } else {
+            title.setText(R.string.ime__click_change);
+        }
 
         if (mReceiver == null) {
             IntentFilter filter = new IntentFilter(IME_MESSAGE);
@@ -186,12 +222,141 @@ public class AdbIME extends InputMethodService {
         return mInputView;
     }
 
+    @Override
+    public void onStartInputView(EditorInfo info, boolean restarting) {
+        try {
+            super.onStartInputView(info, restarting);
+            setCandidatesViewShown(true);
+        } catch (Exception e) {
+            LogUtil.e(TAG, "What happened to start input");
+        }
+    }
+
+    @Override
+    public void onFinishInput() {
+        try {
+            super.onFinishInput();
+            setCandidatesViewShown(false);
+        } catch (Exception e) {
+            LogUtil.e(TAG, "What happened to finish input");
+        }
+    }
+
     public void onDestroy() {
         if (mReceiver != null) {
             unregisterReceiver(mReceiver);
         }
 
         super.onDestroy();
+    }
+
+    @Subscriber(@Param(value = IME_OPERATION_ACTION, sticky = false))
+    public void receiveImeOperation(KeyboardActionEnum action) {
+        if (action == null) {
+            LogUtil.e(TAG, "Keyboard action is null");
+            return;
+        }
+
+        InputConnection ic = getCurrentInputConnection();
+        if (ic == null) {
+            LogUtil.e(TAG, "No valid input connection");
+            return;
+        }
+
+        switch (action) {
+            case ENTER:
+                pressEnter(ic);
+                break;
+            case BACKSPACE:
+                ic.deleteSurroundingText(1, 0);
+                break;
+            case LEFT:
+                int leftTextLength = getTextLengthBefore(ic);
+                ic.setSelection(leftTextLength - 1, leftTextLength - 1);
+                break;
+            case RIGHT:
+                leftTextLength = getTextLengthBefore(ic);
+                ic.setSelection(leftTextLength + 1, leftTextLength + 1);
+                break;
+            case CLEAR:
+                ic.deleteSurroundingText(Integer.MAX_VALUE, Integer.MAX_VALUE);
+                break;
+        }
+    }
+
+    /**
+     * 获得左侧文字长度
+     * @param ic
+     * @return
+     */
+    private int getTextLengthBefore(InputConnection ic) {
+        CharSequence cs = ic.getTextBeforeCursor(Integer.MAX_VALUE, 0);
+        if (cs != null) {
+            return cs.length();
+        }
+
+        return 0;
+    }
+
+    /**
+     * Enter键
+     * @param ic
+     */
+    private void pressEnter(InputConnection ic) {
+        if (ic != null) {
+
+            // 需要额外点击发送
+            EditorInfo editorInfo = getCurrentInputEditorInfo();
+            if (editorInfo != null) {
+                int options = editorInfo.imeOptions;
+                final int actionId = options & EditorInfo.IME_MASK_ACTION;
+
+                switch (actionId) {
+                    case EditorInfo.IME_ACTION_SEARCH:
+                    case EditorInfo.IME_ACTION_GO:
+                    case EditorInfo.IME_ACTION_SEND:
+                        sendDefaultEditorAction(true);
+                        break;
+                    default:
+                        ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
+                }
+            }
+        }
+    }
+
+    @Subscriber(@Param(IME_MESSAGE))
+    public void receiveInput(String input) {
+        if (StringUtil.isEmpty(input)) {
+            return;
+        }
+
+        InputConnection ic = getCurrentInputConnection();
+        if (ic != null) {
+            ic.commitText(input, 1);
+        }
+    }
+
+    @Subscriber(@Param(IME_SEARCH_MESSAGE))
+    public void receiveInputSearch(String input) {
+        InputConnection ic = getCurrentInputConnection();
+        if (ic != null) {
+
+            if (!StringUtil.isEmpty(input)) {
+                ic.commitText(input, 1);
+            }
+
+            pressEnter(ic);
+        }
+    }
+
+    @Subscriber(@Param(IME_KEYCODE))
+    public void receiveKeyCode(int keyCode) {
+        if (keyCode != -1) {
+            InputConnection ic = getCurrentInputConnection();
+            if (ic != null) {
+                ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
+            }
+        }
     }
 
     class AdbReceiver extends BroadcastReceiver {
@@ -221,6 +386,33 @@ public class AdbIME extends InputMethodService {
             if (sendFlag) {
                 hideInput();
             }
+        }
+    }
+
+    public enum KeyboardActionEnum {
+        ENTER("enter"),
+        BACKSPACE("backspace"),
+        LEFT("left"),
+        RIGHT("right"),
+        CLEAR("clear")
+        ;
+        private String name;
+        KeyboardActionEnum(String name) {
+            this.name = name;
+        }
+
+        public static KeyboardActionEnum getActionByName(String name) {
+            if (StringUtil.isEmpty(name)) {
+                return null;
+            }
+
+            for (KeyboardActionEnum action: values()) {
+                if (name.equalsIgnoreCase(action.name)) {
+                    return action;
+                }
+            }
+
+            return null;
         }
     }
 }

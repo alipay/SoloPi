@@ -22,6 +22,7 @@
 
     <ImageView
         android:id="@+id/back_icon"
+        android:contentDescription="@string/action__back"
         android:layout_width="@dimen/control_dp40"
         android:layout_height="@dimen/control_dp40"
         android:padding="@dimen/control_dp8"
@@ -52,6 +53,7 @@
 
         <ImageView
             android:visibility="gone"
+            android:contentDescription="@string/function_group__info"
             android:id="@+id/info_icon"
             android:layout_width="@dimen/control_dp40"
             android:layout_height="@dimen/control_dp40"

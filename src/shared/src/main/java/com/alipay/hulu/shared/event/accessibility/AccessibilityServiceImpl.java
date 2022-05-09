@@ -18,6 +18,7 @@ package com.alipay.hulu.shared.event.accessibility;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
+import android.os.Build;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.alipay.hulu.common.application.LauncherApplication;
@@ -27,12 +28,14 @@ import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.injector.provider.Provider;
+import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.utils.LogUtil;
-import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.event.constant.Constant;
 
 import java.lang.ref.WeakReference;
+
+import androidx.annotation.NonNull;
 
 /**
  * Created by qiaoruikai on 2018/10/9 4:35 PM.
@@ -64,7 +67,8 @@ public class AccessibilityServiceImpl extends AccessibilityService {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        LogUtil.d(TAG, "Service on unbind");
+        LogUtil.i(TAG, "Service on unbind");
+        LauncherApplication.getInstance().prepareInMain();
         InjectorService service = LauncherApplication.getInstance()
                 .findServiceByName(InjectorService.class.getName());
 
@@ -75,7 +79,8 @@ public class AccessibilityServiceImpl extends AccessibilityService {
 
         if (this.accessibilityEventTrackerRef != null) {
             this.accessibilityEventTrackerRef.clear();
-        }return super.onUnbind(intent);
+        }
+        return super.onUnbind(intent);
     }
 
     @Override
@@ -96,19 +101,17 @@ public class AccessibilityServiceImpl extends AccessibilityService {
         super.onServiceConnected();
 
         // 如果初始化完成但没有注册过
-        if (!LauncherApplication.getInstance().getAccessibilityState() && LauncherApplication.getInstance().hasFinishInit()) {
-            // 注册自身到注入服务
-            InjectorService service = LauncherApplication.getInstance()
-                    .findServiceByName(InjectorService.class.getName());
-            if (service != null) {
-                service.register(this);
-            }
-            // 防止之前block
-            setServiceToNormalMode();
-
-            // 设置为已注册
-            LauncherApplication.getInstance().setAccessibilityState(true);
+        if (Build.VERSION.SDK_INT >= 24) {
+            SoftKeyboardController controller = getSoftKeyboardController();
+            controller.addOnShowModeChangedListener(new SoftKeyboardController.OnShowModeChangedListener() {
+                @Override
+                public void onShowModeChanged(@NonNull SoftKeyboardController controller, int showMode) {
+                    LogUtil.i(TAG, "Soft keyboard show mode changed, to= " + (showMode == SHOW_MODE_AUTO? "自动": "隐藏"));
+                }
+            });
+            controller.setShowMode(SHOW_MODE_AUTO);
         }
+        registerSelf();
     }
 
     @Override
@@ -123,6 +126,8 @@ public class AccessibilityServiceImpl extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        LogUtil.d(TAG, "收到辅助功能事件:" + event.getEventType());
+
         // SoloPi的窗口事件，不处理
         if (StringUtil.equals(event.getPackageName(), getPackageName())) {
             return;
@@ -131,16 +136,7 @@ public class AccessibilityServiceImpl extends AccessibilityService {
         // 如果没有注册过
         if (!LauncherApplication.getInstance().getAccessibilityState() && LauncherApplication.getInstance().hasFinishInit()) {
             // 注册自身到注入服务
-            InjectorService service = LauncherApplication.getInstance()
-                    .findServiceByName(InjectorService.class.getName());
-            if (service != null) {
-                service.register(this);
-            }
-            // 防止之前block
-            setServiceToNormalMode();
-
-            // 设置为已注册
-            LauncherApplication.getInstance().setAccessibilityState(true);
+            registerSelf();
         }
 
         if (accessibilityEventTrackerRef == null) {
@@ -170,6 +166,23 @@ public class AccessibilityServiceImpl extends AccessibilityService {
         return super.onGesture(gestureId);
     }
 
+    private void registerSelf() {
+        BackgroundExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                LauncherApplication.getInstance().prepareInMain();
+                InjectorService.g().register(AccessibilityServiceImpl.this);
+                LauncherApplication.getInstance().setAccessibilityState(true);
+                LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setServiceToNormalMode();
+                    }
+                });
+            }
+        });
+    }
+
     @Override
     public void onInterrupt() {
         LogUtil.e(TAG, "服务被Interrupt");
@@ -182,6 +195,18 @@ public class AccessibilityServiceImpl extends AccessibilityService {
         } else if (mode == MODE_NORMAL) {
             setServiceToNormalMode();
         }
+    }
+
+    private AccessibilityServiceInfo _getServiceInfo() {
+        AccessibilityServiceInfo serviceInfo = getServiceInfo();
+        if (serviceInfo == null) {
+            serviceInfo = new AccessibilityServiceInfo();
+            serviceInfo.eventTypes = AccessibilityEvent.TYPES_ALL_MASK;
+            serviceInfo.notificationTimeout = 100;
+            serviceInfo.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
+        }
+
+        return serviceInfo;
     }
 
     private void setServiceInfoToTouchBlockMode() {

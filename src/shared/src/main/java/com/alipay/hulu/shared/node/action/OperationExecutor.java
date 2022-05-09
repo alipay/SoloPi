@@ -496,7 +496,7 @@ public class OperationExecutor {
             public void run() {
                 LogUtil.e(TAG, "Start Input");
                 try {
-                    CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
+                    CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
                     executor.executeClick(rect.centerX(), rect.centerY());
                     MiscUtil.sleep(1500);
                     InjectorService.g().pushMessage("ADB_INPUT_TEXT", text);

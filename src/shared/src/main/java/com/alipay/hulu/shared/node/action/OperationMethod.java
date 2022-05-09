@@ -38,6 +38,8 @@ public class OperationMethod implements Parcelable {
     private static final String TAG = OperationMethod.class.getSimpleName();
 
     private boolean encrypt = true;
+    private Boolean safeEncrypt = false;
+
     /**
      * 操作方法
      */

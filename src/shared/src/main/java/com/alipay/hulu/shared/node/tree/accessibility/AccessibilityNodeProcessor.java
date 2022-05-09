@@ -22,11 +22,12 @@ import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.shared.node.AbstractNodeProcessor;
 import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
 import com.alipay.hulu.shared.node.tree.FakeNodeTree;
+import com.alipay.hulu.shared.node.tree.InputWindowTree;
 import com.alipay.hulu.shared.node.tree.accessibility.util.AccessibilityUtil;
 import com.alipay.hulu.shared.node.tree.annotation.NodeProcessor;
 import com.alipay.hulu.shared.node.utils.NodeContext;
 
-@NodeProcessor(acceptNodes = { AccessibilityNodeInfo.class, FakeNodeTree.class })
+@NodeProcessor(acceptNodes = { AccessibilityNodeInfo.class, FakeNodeTree.class, InputWindowTree.class })
 public class AccessibilityNodeProcessor implements AbstractNodeProcessor {
     private static final String TAG = "AccessibilityNodeProcessor";
 
@@ -40,6 +41,8 @@ public class AccessibilityNodeProcessor implements AbstractNodeProcessor {
             }
         } else if (source instanceof FakeNodeTree) {
             return (FakeNodeTree) source;
+        } else if (source instanceof InputWindowTree) {
+            return (InputWindowTree) source;
         }
         return null;
     }

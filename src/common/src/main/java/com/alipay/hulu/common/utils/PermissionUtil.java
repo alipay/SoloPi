@@ -29,6 +29,9 @@ import androidx.core.content.ContextCompat;
 
 import com.alipay.hulu.common.R;
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.constant.Constant;
+import com.alipay.hulu.common.injector.InjectorService;
+import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.activity.PermissionDialogActivity;
@@ -66,7 +69,7 @@ public class PermissionUtil {
      * @param activity
      * @param callback
      */
-    public static void requestPermissions(@NonNull final List<String> permissions, final Activity activity, @NonNull final OnPermissionCallback callback) {
+    public static void requestPermissions(@NonNull final List<String> permissions, final Context activity, @NonNull final OnPermissionCallback callback) {
         // 可能悬浮窗Dialog还没关闭，延后一下权限申请任务
         LauncherApplication.getInstance().runOnUiThread(new Runnable() {
             @Override
@@ -98,6 +101,11 @@ public class PermissionUtil {
                     intent.putStringArrayListExtra(PermissionDialogActivity.PERMISSIONS_KEY, (ArrayList<String>) permissions);
                 } else {
                     intent.putStringArrayListExtra(PermissionDialogActivity.PERMISSIONS_KEY, new ArrayList<>(permissions));
+                }
+
+                // 非activity启动
+                if (!(activity instanceof Activity)) {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 }
 
                 // 设置回调idz
@@ -224,6 +232,37 @@ public class PermissionUtil {
             });
         } else {
             callback.onGrantSuccess();
+        }
+    }
+
+
+
+    /**
+     * 获取权限状态
+     * @param context
+     * @param permission
+     * @return
+     */
+    public static boolean getPermissionStatus(Context context, String permission) {
+        if ("float".equals(permission)) {
+            return FloatWindowManager.getInstance().checkPermission(context);
+        } else if ("root".equals(permission)) {
+            return CmdTools.isRooted();
+        } else if ("background".equals(permission)) {
+            return true;
+        } else if ("adb".equals(permission)) {
+            return CmdTools.getConnectionStatus();
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Settings.ACTION_USAGE_ACCESS_SETTINGS.equals(permission)) {
+            // 4.4及以上直接申请Usage Access权限
+            return PermissionUtil.isUsageStatPermissionOn(context);
+        } else if (Settings.ACTION_ACCESSIBILITY_SETTINGS.equals(permission)) {
+            // 没有注册上AccessibilityService，需要开辅助功能
+            return InjectorService.g().getMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, null) != null;
+            // 其他权限记录在需要申请的权限中，如果版本在6.0及以上再进行申请
+        } else if (StringUtil.equals("screenRecord", permission)) {
+            return InjectorService.g().getMessage(Constant.EVENT_RECORD_SCREEN_CODE, Intent.class) != null;
+        } else {
+            return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
         }
     }
 

@@ -20,6 +20,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.service.SPService;
@@ -125,7 +127,7 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
         info.getBoundsInScreen(rect);
         this.nodeBound = rect;
         this.isScrollable = info.isScrollable();
-        this.visible = info.isVisibleToUser();
+        this.visible = rect.width() * rect.height() > 0;//info.isVisibleToUser();
         this.isClickable = info.isClickable();
         this.isFocusable = info.isFocusable();
         this.isEditable = info.isEditable();
@@ -156,6 +158,7 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
         return TYPE_NOT_SCROLLABLE;
     }
 
+    @JSONField(serialize = false)
     public AccessibilityNodeInfo getCurrentNode() {
         return currentNode;
     }
@@ -270,7 +273,7 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
                     public void run() {
                         LogUtil.e(TAG, "Start Input");
                         try {
-                            CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
+                            CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
                             Rect rect = getNodeBound();
 
                             opContext.executor.executeClick(rect.centerX(), rect.centerY());
@@ -302,7 +305,7 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
                     public void run() {
                         LogUtil.e(TAG, "Start Input");
                         try {
-                            CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
+                            CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
                             Rect rect = getNodeBound();
 
                             opContext.executor.executeClick(rect.centerX(), rect.centerY());
@@ -350,8 +353,19 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
         return builder;
     }
 
+    @Override
+    public JSONObject exportToJsonObject() {
+        JSONObject obj = super.exportToJsonObject();
+        obj.put("isWebView", isWebview);
+        obj.put("isClickable", isClickable);
+        obj.put("isEditable", isEditable);
+        obj.put("isFocusable", isFocusable);
+        obj.put("isScrollable", isScrollable);
+        return obj;
+    }
+
     public boolean isSelfUsableForLocating() {
-        return visible && (!StringUtil.isEmpty(text) || !StringUtil.isEmpty(description) || !StringUtil.isEmpty(resourceId));
+        return visible;
     }
 
     public boolean isScrollable() {

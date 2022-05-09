@@ -138,15 +138,6 @@
         <activity android:name=".activity.LocalReplayResultActivity" />
 
         <service android:name=".service.FloatWinService"/>
-
-        <service android:name=".tools.AdbIME"
-                 android:label="@string/app_name"
-                 android:permission="android.permission.BIND_INPUT_METHOD">
-            <intent-filter>
-                <action android:name="android.view.InputMethod" />
-            </intent-filter>
-            <meta-data android:name="android.view.im" android:resource="@xml/methods" />
-        </service>
         <service android:name=".screenRecord.RecordService"
             android:foregroundServiceType="mediaProjection"/>
         <service android:name=".screenRecord.SimpleRecordService"

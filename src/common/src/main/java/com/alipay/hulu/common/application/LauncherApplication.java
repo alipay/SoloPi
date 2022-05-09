@@ -15,10 +15,11 @@
  */
 package com.alipay.hulu.common.application;
 
+import androidx.annotation.StringRes;
+import androidx.multidex.MultiDex;
+
 import static android.content.DialogInterface.BUTTON_NEGATIVE;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
-import static android.view.Surface.ROTATION_0;
-import static android.view.Surface.ROTATION_90;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -44,7 +45,6 @@ import androidx.multidex.MultiDex;
 
 import com.alipay.hulu.common.R;
 import com.alipay.hulu.common.http.HttpServer;
-import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.logger.DiskLogStrategy;
 import com.alipay.hulu.common.logger.SimpleFormatStrategy;
 import com.alipay.hulu.common.scheme.SchemeActionResolver;
@@ -110,11 +110,6 @@ public abstract class LauncherApplication extends Application {
      * Android系统默认语言
      */
     public final Locale DEFAULT_LOCALE;
-
-    /**
-     * 屏幕方向监控
-     */
-    public static final String SCREEN_ORIENTATION = "screenOrientation";
 
     private HttpServer totalControlHttpServer;
     private SchemeHttpListener schemeListener;
@@ -355,8 +350,6 @@ public abstract class LauncherApplication extends Application {
 
     protected void initInMain() {
     }
-
-
 
     /**
      * 设置应用默认语言
@@ -1240,41 +1233,6 @@ public abstract class LauncherApplication extends Application {
             } catch (PendingIntent.CanceledException e) {
                 LogUtil.e(TAG, "Catch android.app.PendingIntent.CanceledException: " + e.getMessage(), e);
             }
-        }
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        // 等Injector初始化
-        if (InjectorService.g() == null) {
-            return;
-        }
-
-        // 如果有Activity
-        Activity context = (Activity) loadActivityOnTop();
-        if (context != null) {
-            InjectorService.g().pushMessage(SCREEN_ORIENTATION, context.getWindowManager().getDefaultDisplay().getRotation());
-            return;
-        }
-
-        // 从Service获取
-        Service service = (Service) loadRunningService();
-
-        // 没有就只能去0或90
-        if (service == null) {
-            InjectorService.g().pushMessage(SCREEN_ORIENTATION, newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? ROTATION_90 : ROTATION_0);
-            return;
-        }
-
-        // 找WindowManager
-        WindowManager wm = (WindowManager) service.getSystemService(WINDOW_SERVICE);
-        int rotation = wm.getDefaultDisplay().getRotation();
-
-        // 推送屏幕方向
-        if (InjectorService.g() != null) {
-            InjectorService.g().pushMessage(SCREEN_ORIENTATION, rotation);
         }
     }
 

@@ -50,6 +50,7 @@ import com.alipay.hulu.R;
 import com.alipay.hulu.activity.IndexActivity;
 import com.alipay.hulu.activity.MyApplication;
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.constant.Constant;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.RunningThread;
 import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
@@ -198,7 +199,7 @@ public class FloatWinService extends BaseService {
 		}
 	}
 
-	@Subscriber(@Param(LauncherApplication.SCREEN_ORIENTATION))
+	@Subscriber(@Param(Constant.SCREEN_ORIENTATION))
 	public void setScreenOrientation(int orientation) {
 		if (orientation != currentOrientation) {
 			currentOrientation = orientation;

@@ -20,6 +20,7 @@ import android.graphics.Rect;
 
 import androidx.annotation.NonNull;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.ClassUtil;
@@ -186,7 +187,7 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
                     public void run() {
                         LogUtil.e(TAG, "Start Input");
                         try {
-                            CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
+                            CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
                             context.executor.executeClick(rect.centerX(), rect.centerY());
                             MiscUtil.sleep(1500);
                             InjectorService.g().pushMessage("ADB_SEARCH_TEXT", text);
@@ -375,6 +376,38 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
      * @return
      */
     public abstract StringBuilder printTrace(StringBuilder builder);
+
+
+    /**
+     * 打印树结构
+     * @return
+     */
+    public JSONObject exportToJsonObject() {
+        JSONObject obj = new JSONObject();
+        obj.put("depth", depth);
+        obj.put("className", className);
+        obj.put("nodeBound", nodeBound);
+        obj.put("text", text);
+        obj.put("description", description);
+        obj.put("resourceId", resourceId);
+        obj.put("id", id);
+        obj.put("packageName", packageName);
+        obj.put("visible", visible);
+        obj.put("type", getClass().getSimpleName());
+
+        if (childrenNodes != null) {
+            List<JSONObject> children = new ArrayList<>(childrenNodes.size() + 1);
+            for (AbstractNodeTree child : getChildrenNodes()) {
+                JSONObject childObj = child.exportToJsonObject();
+                if (childObj != null) {
+                    children.add(childObj);
+                }
+            }
+            obj.put("children", children);
+        }
+
+        return obj;
+    }
 
     /**
      * 自身是否可用于辅助定位

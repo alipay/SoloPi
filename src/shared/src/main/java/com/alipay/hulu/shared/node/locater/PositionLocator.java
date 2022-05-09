@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
 import com.alipay.hulu.shared.node.tree.FakeNodeTree;
+import com.alipay.hulu.shared.node.tree.InputWindowTree;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -55,6 +56,13 @@ public class PositionLocator {
             List<AbstractNodeTree> windows = root.getChildrenNodes();
             int maxIdx = -1;
             for (AbstractNodeTree window: windows) {
+                // 点到输入法框就是输入法
+                if (window instanceof InputWindowTree) {
+                    if (window.getNodeBound().contains(x, y)) {
+                        return window;
+                    }
+                }
+
                 // 找包含该坐标的最上层window
                 if (window.getDrawingOrder() > maxIdx && window.getNodeBound().contains(x, y)) {
                     maxIdx = window.getDrawingOrder();

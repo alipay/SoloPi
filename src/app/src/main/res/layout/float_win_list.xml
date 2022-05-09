@@ -37,7 +37,6 @@
         android:focusable="false"
         android:layout_gravity="center_vertical"
         android:textColor="@color/colorPrimaryDark"
-        android:maxLines="2"
         android:textSize="@dimen/control_float_per_item_text_size"
         />
     <TextView
@@ -50,7 +49,6 @@
         android:focusable="true"
         android:layout_gravity="center_vertical"
         android:textColor="@color/colorAccent"
-        android:maxLines="2"
         android:textSize="@dimen/control_float_per_item_trigger_text_size"
         />
 

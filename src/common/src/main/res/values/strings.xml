@@ -79,4 +79,6 @@
     <string name="permission__open_accessibility">Starting Accessibility Service</string>
     <string name="permission__try_kil_uiautomator">Try to kill uiautomator and instrument processes</string>
     <string name="permission__force_stop">Force stop</string>
+    <string name="ime__click_to_input">Click to input</string>
+    <string name="ime__click_change">Change IME</string>
 </resources>

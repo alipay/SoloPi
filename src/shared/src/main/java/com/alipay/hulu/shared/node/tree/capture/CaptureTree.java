@@ -18,6 +18,7 @@ package com.alipay.hulu.shared.node.tree.capture;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
@@ -31,6 +32,8 @@ import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
 import com.alipay.hulu.shared.node.utils.BitmapUtil;
 import com.alipay.hulu.shared.node.utils.RectUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -81,6 +84,25 @@ public class CaptureTree extends AbstractNodeTree {
         Bitmap capture = Bitmap.createBitmap(bitmap, scaled.left, scaled.top, scaled.width(), scaled.height());
 
         return BitmapUtil.bitmapToBase64(capture);
+    }
+
+
+    @Override
+    public JSONObject exportToJsonObject() {
+        JSONObject obj = new JSONObject(6);
+        obj.put("type", getClass().getSimpleName());
+        obj.put("nodeBound", nodeBound);
+        if (childrenNodes != null) {
+            List<JSONObject> children = new ArrayList<>(childrenNodes.size() + 1);
+            for (AbstractNodeTree child : getChildrenNodes()) {
+                JSONObject childObj = child.exportToJsonObject();
+                if (childObj != null) {
+                    children.add(childObj);
+                }
+            }
+            obj.put("children", children);
+        }
+        return obj;
     }
 
     /**
@@ -167,7 +189,7 @@ public class CaptureTree extends AbstractNodeTree {
                 LogUtil.e(TAG, "Start Input");
                 if (StringUtil.containsChinese(text)) {
                     try {
-                        CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
+                        CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
                         Rect rect = getNodeBound();
                         opContext.executor.executeClick(rect.centerX(), rect.centerY());
                         MiscUtil.sleep(1500);

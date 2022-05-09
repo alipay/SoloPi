@@ -434,8 +434,8 @@ public class CaseReplayManager implements ExportService {
 
         // 先记录下默认输入法
         defaultIme = CmdTools.execHighPrivilegeCmd("settings get secure default_input_method");
-        MyApplication.getInstance().updateDefaultIme("com.alipay.hulu/.tools.AdbIME");
-        CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
+        MyApplication.getInstance().updateDefaultIme("com.alipay.hulu/.common.tools.AdbIME");
+        CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
 
         // 初始化
         stepCount = 1;

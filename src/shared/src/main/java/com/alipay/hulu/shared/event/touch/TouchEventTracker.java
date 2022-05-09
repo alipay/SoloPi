@@ -230,7 +230,7 @@ public class TouchEventTracker {
             cmdLine = null;
         }
 
-        @Subscriber(@Param(LauncherApplication.SCREEN_ORIENTATION))
+        @Subscriber(@Param(com.alipay.hulu.common.constant.Constant.SCREEN_ORIENTATION))
         public void setScreenOrientation(int orientation) {
             this.currentOrientation = (orientation + defaultScreenRotation) % 4;
 

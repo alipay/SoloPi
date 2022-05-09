@@ -308,6 +308,51 @@
 
     </RelativeLayout>
 
+
+            <RelativeLayout
+                android:id="@+id/record_cover_mode_setting_wrapper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/control_dp8"
+                android:paddingBottom="@dimen/control_dp8"
+                android:layout_marginTop="@dimen/control_dp12"
+                android:background="@drawable/bg_settings_item"
+                android:gravity="center_vertical"
+                android:paddingLeft="@dimen/control_dp16"
+                android:paddingRight="@dimen/control_dp16">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/control_dp12"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:text="@string/setting__action_block_mode"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/textsize_16" />
+
+                <TextView
+                    android:id="@+id/record_cover_mode_setting_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/control_dp6"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:maxWidth="@dimen/capture_circle_min_size"
+                    android:textColor="@color/gray"
+                    android:textSize="@dimen/textsize_12" />
+
+            </RelativeLayout>
+
     <RelativeLayout
         android:id="@+id/auto_replay_setting_wrapper"
         android:layout_width="match_parent"

@@ -36,7 +36,9 @@ import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.R;
 import com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl;
 import com.alipay.hulu.shared.node.AbstractProvider;
+import com.alipay.hulu.shared.node.action.Constant;
 import com.alipay.hulu.shared.node.tree.FakeNodeTree;
+import com.alipay.hulu.shared.node.tree.InputWindowTree;
 import com.alipay.hulu.shared.node.tree.MetaTree;
 import com.alipay.hulu.shared.node.tree.annotation.NodeProvider;
 import com.alipay.hulu.shared.node.utils.NodeContext;
@@ -131,7 +133,7 @@ public class AccessibilityProvider implements AbstractProvider {
      * 获取根节点
      * @return
      */
-    private MetaTree getRootInWindows() {
+    private MetaTree getRootInWindows(NodeContext context) {
         AccessibilityService service = accessibilityServiceRef.get();
         if (service == null) {
             return null;
@@ -142,7 +144,24 @@ public class AccessibilityProvider implements AbstractProvider {
             AccessibilityWindowInfo targetWin = null;
             AccessibilityWindowInfo maxSizeWin = null;
             int maxSize = -1;
+            MetaTree inputNode = null;
             for (AccessibilityWindowInfo win : windowInfos) {
+                Rect size = new Rect();
+                win.getBoundsInScreen(size);
+                LogUtil.i(TAG, "当前窗口区域：%s, 类型：%d", size, win.getType());
+                // 在极速模式下，输入法框特殊定义
+                if (SPService.getBoolean(SPService.KEY_USE_EASY_MODE, false) && win.getType() == AccessibilityWindowInfo.TYPE_INPUT_METHOD) {
+                    LogUtil.i(TAG, "发现输入法框，注意下");
+                    context.put(Constant.TRIGGER_INPUT_METHOD, "true");
+
+                    inputNode = new MetaTree();
+                    InputWindowTree tree = new InputWindowTree();
+                    tree.setNodeBound(size);
+                    tree.setDrawingOrder(Integer.MAX_VALUE);
+                    inputNode.setCurrentNode(tree);
+                    continue;
+                }
+
                 AccessibilityNodeInfo root = win.getRoot();
 
                 // 不包含子节点，直接跳过
@@ -154,8 +173,7 @@ public class AccessibilityProvider implements AbstractProvider {
                     LogUtil.d(TAG, "自己的Windows，不处理");
                     continue;
                 }
-                Rect size = new Rect();
-                win.getBoundsInScreen(size);
+
                 int realSize = size.width() * size.height();
                 if (realSize > maxSize) {
                     maxSize = realSize;
@@ -184,7 +202,7 @@ public class AccessibilityProvider implements AbstractProvider {
 
             // 多窗口情况
             MetaTree result = new MetaTree();
-            if (targetWin.getChildCount() > 0) {
+            if (inputNode != null || targetWin.getChildCount() > 0) {
                 FakeNodeTree fake = new FakeNodeTree();
                 result.setCurrentNode(fake);
                 List<MetaTree> children = new ArrayList<>();
@@ -198,6 +216,10 @@ public class AccessibilityProvider implements AbstractProvider {
                 CharSequence packageName = null;
                 while (!windowQueue.isEmpty()) {
                     AccessibilityWindowInfo windowInfo = windowQueue.poll();
+                    if (windowInfo == null) {
+                        continue;
+                    }
+
                     MetaTree item = new MetaTree();
                     AccessibilityNodeInfo root = windowInfo.getRoot();
                     if (packageName == null) {
@@ -240,7 +262,11 @@ public class AccessibilityProvider implements AbstractProvider {
                 fake.setPackageName(StringUtil.toString(packageName));
                 fake.setNodeBound(maxRect);
 
-                // 整合获取到的window
+                if (inputNode != null) {
+                    children.add(inputNode);
+                }
+
+                // 将window结果拍平
                 result.setChildren(children);
             } else {
                 AccessibilityNodeInfo root = targetWin.getRoot();
@@ -292,7 +318,7 @@ public class AccessibilityProvider implements AbstractProvider {
         // 重试三次
         while (root == null && retryCount < 3) {
             try {
-                root = loadMetaTree();
+                root = loadMetaTree(context);
                 retryCount++;
             } catch (Exception e) {
                 LogUtil.e(TAG, "Load accessibility tree throw exception: " + e.getMessage(), e);
@@ -306,13 +332,13 @@ public class AccessibilityProvider implements AbstractProvider {
      * 加载Meta树
      * @return
      */
-    private MetaTree loadMetaTree() {
-        MetaTree rootNode = getRootInWindows();
+    private MetaTree loadMetaTree(NodeContext context) {
+        MetaTree rootNode = getRootInWindows(context);
         int retryCount = 0;
         while ((rootNode == null || rootNode.getCurrentNode() == null) && retryCount < 3) {
             MiscUtil.sleep(500);
             retryCount ++;
-            rootNode = getRootInWindows();
+            rootNode = getRootInWindows(context);
         }
 
         if (rootNode == null || rootNode.getCurrentNode() == null) {
@@ -327,7 +353,9 @@ public class AccessibilityProvider implements AbstractProvider {
 
         if (rootNode.getCurrentNode() instanceof FakeNodeTree) {
             for (MetaTree child: rootNode.getChildren()) {
-                nodeQueue.add(new Pair<>(child, (AccessibilityNodeInfo) child.getCurrentNode()));
+                if (child.getCurrentNode() instanceof AccessibilityNodeInfo) {
+                    nodeQueue.add(new Pair<>(child, (AccessibilityNodeInfo) child.getCurrentNode()));
+                }
             }
         } else {
             nodeQueue.add(new Pair<>(rootNode, (AccessibilityNodeInfo) rootNode.getCurrentNode()));

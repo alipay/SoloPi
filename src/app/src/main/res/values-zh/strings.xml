@@ -278,7 +278,6 @@
     <string name="stress__cpu_load">CPU负载(%)</string>
     <string name="stress__cpu_core">CPU多核(n)</string>
     <string name="stress__memory">内存占用(m)</string>
-    <string name="ime__click_change">点击切换输入法</string>
     <string name="let__string">字符串</string>
     <string name="let__integer">整数</string>
     <string name="let__custom">自定义</string>
@@ -378,6 +377,10 @@
     <string name="case_step_status__unenforced">尚未执行</string>
     <string name="setting__set_screen_orientation">请选择屏幕默认选择方向</string>
     <string name="setting__change_screen_axis">是否切换屏幕横纵比？</string>
+    <string name="setting__action_block_mode">操作拦截模式</string>
+    <string name="setting__conver_mode">覆盖模式</string>
+    <string name="setting__choose_action_block_mode">录制模式选择</string>
+    <string name="setting__block_mode">阻塞模式</string>
     <string name="batch__execution_list">执行序列</string>
     <string name="action_let_cur_value">当前值：%s</string>
     <string name="action_let_cur_value_null">当前值：-</string>

@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.constant.Constant;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
@@ -36,9 +37,13 @@ import com.alipay.hulu.shared.node.action.OperationExecutor;
 import com.alipay.hulu.shared.node.action.OperationMethod;
 import com.alipay.hulu.shared.node.action.provider.ActionProviderManager;
 import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
+import com.alipay.hulu.shared.node.tree.FakeNodeTree;
+import com.alipay.hulu.shared.node.tree.accessibility.AccessibilityNodeProcessor;
+import com.alipay.hulu.shared.node.tree.accessibility.AccessibilityProvider;
 import com.alipay.hulu.shared.node.tree.annotation.NodeProcessor;
 import com.alipay.hulu.shared.node.tree.annotation.NodeProvider;
 import com.alipay.hulu.shared.node.tree.export.BaseStepExporter;
+import com.alipay.hulu.shared.node.utils.NodeContext;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,6 +72,7 @@ public class OperationService implements ExportService {
     private List<Class<? extends AbstractNodeProcessor>> defaultProcessors;
 
     private volatile AbstractNodeTree currentRoot;
+    private volatile NodeContext context;
 
     private ActionProviderManager actionProviderMng;
 
@@ -120,7 +126,7 @@ public class OperationService implements ExportService {
         actionProviderMng.stop(LauncherApplication.getContext());
     }
 
-    @Subscriber(@Param(LauncherApplication.SCREEN_ORIENTATION))
+    @Subscriber(@Param(Constant.SCREEN_ORIENTATION))
     public void setScreenOrientation(int orientation) {
         if (currentOrientation != orientation) {
             currentOrientation = orientation;
@@ -180,7 +186,10 @@ public class OperationService implements ExportService {
         }
 
         if (tmp != null) {
+            long startTime = System.currentTimeMillis();
             tmp.recycle();
+
+            LogUtil.d(TAG, "节点回收耗时%dms", System.currentTimeMillis() - startTime);
         }
     }
 
@@ -235,6 +244,23 @@ public class OperationService implements ExportService {
     }
 
     /**
+     * 获取当前根节点
+     *
+     * @return
+     */
+    public AbstractNodeTree getBaseCurrentRoot() {
+        LogUtil.w(TAG, "开始加载跟结构");
+        synchronized (this) {
+            if (currentRoot != null) {
+                currentRoot.recycle();
+            }
+            LogUtil.w(TAG, "重载树结构");
+            currentRoot = startLoadProvider(AccessibilityProvider.class, Collections.<Class<? extends AbstractNodeProcessor>>singletonList(AccessibilityNodeProcessor.class));
+            return currentRoot;
+        }
+    }
+
+    /**
      * 刷新并返回根节点
      *
      * @return
@@ -243,7 +269,10 @@ public class OperationService implements ExportService {
         // 先回收下
         synchronized (this) {
             if (currentRoot != null) {
+                long startTime = System.currentTimeMillis();
                 currentRoot.recycle();
+
+                LogUtil.d(TAG, "节点回收耗时%dms", System.currentTimeMillis() - startTime);
                 currentRoot = null;
             }
         }
@@ -259,6 +288,18 @@ public class OperationService implements ExportService {
      * @return
      */
     public AbstractNodeTree startLoadProvider(Class<? extends AbstractProvider> providerClass, List<Class<? extends AbstractNodeProcessor>> processorClasses) {
+        return startLoadProvider(providerClass, processorClasses, null);
+    }
+
+    /**
+     * 加载Provider树
+     * @param providerClass
+     * @param processorClasses
+     * @return
+     */
+    public AbstractNodeTree startLoadProvider(Class<? extends AbstractProvider> providerClass,
+                                              List<Class<? extends AbstractNodeProcessor>> processorClasses,
+                                              NodeContext superContext) {
         if (providerClass == null) {
             return null;
         }
@@ -313,13 +354,15 @@ public class OperationService implements ExportService {
         AbstractNodeTree tree;
         try {
             // 构造树结构
-            tree = generator.generateNodeTree();
+            tree = generator.generateNodeTree(superContext);
+            context = generator.getContext();
         }  catch (Exception e) {
             LogUtil.e(TAG, "构建树抛出异常，可能是正在切换页面，稍等片刻重试", e);
             MiscUtil.sleep(1000);
 
             try {
-                tree = generator.generateNodeTree();
+                tree = generator.generateNodeTree(superContext);
+                context = generator.getContext();
             } catch (Exception innerE) {
                 LogUtil.e(TAG, "暂时无法生成树结构", e);
                 tree = null;
@@ -414,6 +457,10 @@ public class OperationService implements ExportService {
         }
 
         temporaryVariables.put(key, value);
+    }
+
+    public NodeContext getNodeContext() {
+        return context;
     }
 
     /**
@@ -536,6 +583,23 @@ public class OperationService implements ExportService {
         }
 
         return null;
+    }
+
+    /**
+     * 返回实际值
+     * @param val
+     * @return
+     */
+    private Object returnRealVal(Object val) {
+        if (val == null) {
+            return null;
+        }
+
+        if (val instanceof String) {
+            return OperationExecutor.getMappedContent((String) val, this);
+        } else {
+            return val;
+        }
     }
 
     public ActionProviderManager getActionProviderMng() {

@@ -15,6 +15,8 @@
  */
 package com.alipay.hulu.bean;
 
+import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
+
 import java.util.List;
 
 /**
@@ -27,6 +29,16 @@ public class AdvanceCaseSetting {
     private List<CaseParamBean> params;
     private String overrideApp;
     private CaseRunningParam runningParam;
+
+    /**
+     * 准备步骤（不录制）
+     */
+    private List<OperationStep> prepareActions;
+
+    /**
+     * 后续步骤（不录制）
+     */
+    private List<OperationStep> suffixActions;
 
     public AdvanceCaseSetting() {
 
@@ -81,5 +93,21 @@ public class AdvanceCaseSetting {
 
     public void setRunningParam(CaseRunningParam runningParam) {
         this.runningParam = runningParam;
+    }
+
+    public List<OperationStep> getPrepareActions() {
+        return prepareActions;
+    }
+
+    public void setPrepareActions(List<OperationStep> prepareActions) {
+        this.prepareActions = prepareActions;
+    }
+
+    public List<OperationStep> getSuffixActions() {
+        return suffixActions;
+    }
+
+    public void setSuffixActions(List<OperationStep> suffixActions) {
+        this.suffixActions = suffixActions;
     }
 }
