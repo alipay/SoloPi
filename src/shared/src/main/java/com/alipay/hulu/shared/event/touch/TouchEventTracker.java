@@ -548,7 +548,7 @@ public class TouchEventTracker {
 
                         lastUpActionTime = upTime;
 
-                        LogUtil.w(TAG, "Tracking line: " + line);
+                        LogUtil.d(TAG, "Tracking line: " + line);
                         tracker.receiveTouchUp(upTime);
                     } else {
                         // 根据DOWN消息来确定是否有点击
@@ -580,7 +580,7 @@ public class TouchEventTracker {
 
                         lastUpActionTime = upTime;
 
-                        LogUtil.w(TAG, "Tracking line: " + line);
+                        LogUtil.d(TAG, "Tracking line: " + line);
                         tracker.receiveTouchUp(upTime);
                     } else if (line.contains("DOWN")) {
                         long downTime = getEventMicroSecond(line);
@@ -594,20 +594,20 @@ public class TouchEventTracker {
                         if (xFactor == 0f || yFactor == 0f) {
                             reloadFactor(line);
                         }
-                        LogUtil.i(TAG, line);
+                        LogUtil.d(TAG, line);
                         waitForXY = new boolean[]{true, true};
                         tracker.receiveTouchDown(downTime);
                     }
                 } else if (waitForXY[0] && line.contains("ABS_MT_POSITION_X")) {
-                    LogUtil.i(TAG, line);
+                    LogUtil.d(TAG, line);
                     String[] splited = line.split("ABS_MT_POSITION_X");
                     String x = splited[splited.length - 1].trim();
                     xy[0] = (int) (Integer.parseInt(x, 16) * xFactor);
                     waitForXY[0] = false;
 
-                    LogUtil.w("lezhou", "xfactor:" + xFactor);
+                    LogUtil.d("lezhou", "xfactor:" + xFactor);
 
-                    LogUtil.w("lezhou", "x: " + (xy[0]));
+                    LogUtil.d("lezhou", "x: " + (xy[0]));
 
                     // 如果xy都找到了，发送消息
                     sendIfPossible(line);
@@ -618,7 +618,7 @@ public class TouchEventTracker {
                     xy[1] = (int) (Integer.parseInt(y, 16) * yFactor);
                     waitForXY[1] = false;
 
-                    LogUtil.w("lezhou", "y: " + xy[1]);
+                    LogUtil.d("lezhou", "y: " + xy[1]);
 
                     // 如果xy都找到了，发送消息
                     sendIfPossible(line);
@@ -723,6 +723,10 @@ public class TouchEventTracker {
                 // 获取毫秒级时间
                 long eventTime = getEventMicroSecond(line);
                 handlerRef.get().receiveNewTouch(eventTime, p);
+
+                // 接收下一次事件
+                waitForXY[0] = true;
+                waitForXY[1] = true;
             }
         }
     }
