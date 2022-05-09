@@ -52,7 +52,7 @@ public class ContentChangeWatcher {
     @Subscriber(@Param(value = Constant.EVENT_ACCESSIBILITY_EVENT, sticky = false))
     public void onAccessibilityEvent(UniversalEventBean eventBean) {
         Integer eventType = eventBean.getParam(Constant.KEY_ACCESSIBILITY_TYPE);
-        LogUtil.d(TAG, "【ChangeWatcher】收到辅助功能事件=%d", eventType);
+        LogUtil.v(TAG, "【ChangeWatcher】收到辅助功能事件=%d", eventType);
         if (eventType != null) {
             switch (eventType) {
                 case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:

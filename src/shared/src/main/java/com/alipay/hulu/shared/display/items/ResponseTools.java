@@ -133,7 +133,7 @@ public class ResponseTools implements Displayable {
             return;
         }
 
-        LogUtil.d(TAG, "收到辅助功能事件, %s", eventBean);
+        LogUtil.v(TAG, "收到辅助功能事件, %s", eventBean);
 
         switch ((Integer) eventBean.getParam(Constant.KEY_ACCESSIBILITY_TYPE)) {
             case AccessibilityEvent.TYPE_VIEW_CLICKED:

@@ -21,13 +21,14 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.LocaleList;
+import android.os.Looper;
 
 import com.alipay.hulu.common.application.LauncherApplication;
-import com.alipay.hulu.common.service.SPService;
 
 import java.util.Locale;
 
@@ -38,6 +39,20 @@ import java.util.Locale;
 public abstract class BaseService extends Service {
     private static final String HULU_SERVICE_CHANNEL_ID = "hulu-service";
     protected NotificationManager mNotificationManager;
+
+    @Override
+    public void startActivity(final Intent intent) {
+        if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
+            LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    BaseService.super.startActivity(intent);
+                }
+            });
+        } else {
+            super.startActivity(intent);
+        }
+    }
 
     @Override
     public void onCreate() {

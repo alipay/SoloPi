@@ -127,7 +127,6 @@ public class TemperatureTools implements Displayable {
 
     @Override
     public void clear() {
-
     }
 
     @Override

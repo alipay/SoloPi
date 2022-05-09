@@ -25,6 +25,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -299,6 +300,20 @@ public abstract class BaseActivity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getRealSize(DeviceInfoUtil.realScreenSize);
         getWindowManager().getDefaultDisplay().getSize(DeviceInfoUtil.curScreenSize);
         getWindowManager().getDefaultDisplay().getMetrics(DeviceInfoUtil.metrics);
+    }
+
+    @Override
+    public void startActivity(final Intent intent) {
+        if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
+            LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    BaseActivity.super.startActivity(intent);
+                }
+            });
+        } else {
+            super.startActivity(intent);
+        }
     }
 
     /**
