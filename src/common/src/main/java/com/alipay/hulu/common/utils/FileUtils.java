@@ -335,7 +335,10 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
                 .query(uri, null, selection, null, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
-                path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                int columnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+                if (columnIndex >= 0) {
+                    path = cursor.getString(columnIndex);
+                }
             }
             cursor.close();
         }

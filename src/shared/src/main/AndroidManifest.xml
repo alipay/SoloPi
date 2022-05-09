@@ -18,6 +18,7 @@
     package="com.alipay.hulu.shared">
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.REORDER_TASKS" />
 
     <application
         tools:node="merge">

@@ -129,7 +129,7 @@ public class ResponseTools implements Displayable {
         }
 
         if (!StringUtil.equals((String) eventBean.getParam(Constant.KEY_ACCESSIBILITY_SOURCE), app)) {
-            LogUtil.d(TAG, "收到其他来源：%s", eventBean.getParam(Constant.KEY_ACCESSIBILITY_SOURCE));
+            LogUtil.d(TAG, "收到其他来源：%s", (Object) eventBean.getParam(Constant.KEY_ACCESSIBILITY_SOURCE));
             return;
         }
 
