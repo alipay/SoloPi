@@ -741,7 +741,9 @@ public class CaseReplayManager implements ExportService {
             }
 
             // 输入操作会较耗时，需要等待下
-            if (method.getActionEnum() == PerformActionEnum.INPUT || method.getActionEnum() == PerformActionEnum.INPUT_SEARCH) {
+            if (method.getActionEnum() == PerformActionEnum.INPUT
+                    || method.getActionEnum() == PerformActionEnum.INPUT_SEARCH
+                    || method.getActionEnum() == PerformActionEnum.CLICK_AND_INPUT) {
                 MiscUtil.sleep(1000);
                 watcher.sleepUntilContentDontChange();
             }

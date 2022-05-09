@@ -46,6 +46,8 @@ import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.node.AbstractNodeProcessor;
 import com.alipay.hulu.shared.node.OperationService;
+import com.alipay.hulu.shared.node.locater.OperationNodeLocator;
+import com.alipay.hulu.shared.node.locater.comparator.ItemComparator;
 import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
 import com.alipay.hulu.shared.node.tree.accessibility.AccessibilityNodeProcessor;
 import com.alipay.hulu.shared.node.tree.accessibility.AccessibilityProvider;
@@ -314,6 +316,7 @@ public class OperationExecutor {
         context.setListener(listener);
 
         context.opExecutor = this;
+        context.keyBoard = new NodeKeyBoard(executor);
         context.executor = executor;
         context.screenHeight = height;
         context.screenWidth = width;
@@ -412,7 +415,7 @@ public class OperationExecutor {
             }
         }
 
-        boolean result;
+        int result;
         if (operationFlag) {
             // 由节点自身去处理
             result = targetNode.performAction(method, opContext);
@@ -424,11 +427,11 @@ public class OperationExecutor {
         operationManagerRef.get().invalidRoot();
 
         // 通知完成，失败就不通知
-        if (result) {
+        if (result == 0) {
             opContext.notifyOperationFinish();
         }
 
-        return result;
+        return result >= 0;
     }
 
     /**
@@ -437,13 +440,13 @@ public class OperationExecutor {
      * @param node
      * @return
      */
-    private boolean forceAction(OperationMethod method, AbstractNodeTree node, OperationContext listener) {
+    private int forceAction(OperationMethod method, AbstractNodeTree node, OperationContext listener) {
         if (method.getActionEnum() == PerformActionEnum.INPUT) {
             inputText(method.getParam(OperationExecutor.INPUT_TEXT_KEY), node.getNodeBound(), listener);
-            return true;
+            return 1;
         }
 
-        return false;
+        return -1;
     }
 
     /**
@@ -490,20 +493,11 @@ public class OperationExecutor {
      * @param text
      * @param rect
      */
-    private void inputText(final String text, final Rect rect, OperationContext listener) {
+    private void inputText(final String text, final Rect rect, final OperationContext listener) {
         listener.notifyOnFinish(new Runnable() {
             @Override
             public void run() {
-                LogUtil.e(TAG, "Start Input");
-                try {
-                    CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
-                    executor.executeClick(rect.centerX(), rect.centerY());
-                    MiscUtil.sleep(1500);
-                    InjectorService.g().pushMessage("ADB_INPUT_TEXT", text);
-                } catch (Exception e) {
-                    LogUtil.e(TAG, "Input throw Exception：" + e.getLocalizedMessage(), e);
-                }
-                LogUtil.e(TAG, "Finish Input");
+                listener.keyBoard.inputText(text, rect.centerX(), rect.centerY());
             }
         });
     }
@@ -593,6 +587,36 @@ public class OperationExecutor {
                     }
                 });
                 return true;
+            case KEYBOARD_INPUT:
+                final String keyboardContent = method.getParam(INPUT_TEXT_KEY);
+                if (StringUtil.isEmpty(keyboardContent)) {
+                    return false;
+                }
+
+                Pattern pattern = Pattern.compile("[^0-9a-zA-Z]");
+                if (pattern.matcher(keyboardContent).find()) {
+                    return false;
+                }
+                opContext.notifyOnFinish(new Runnable() {
+                    @Override
+                    public void run() {
+                        inputKeyboard(opContext, keyboardContent);
+                    }
+                });
+                return true;
+            case INPUT_GLOBAL:
+                final String input = method.getParam(INPUT_TEXT_KEY);
+                if (StringUtil.isEmpty(input)) {
+                    return false;
+                }
+
+                opContext.notifyOnFinish(new Runnable() {
+                    @Override
+                    public void run() {
+                        opContext.keyBoard.inputInActiveIme(input);
+                    }
+                });
+                break;
             case GLOBAL_PINCH_IN:
                 int x = width / 2;
                 int y = height / 2;
@@ -965,6 +989,118 @@ public class OperationExecutor {
         operationManagerRef.get().invalidRoot();
 
         return true;
+    }
+
+    /**
+     * 键盘输入
+     * @param opContext
+     * @param content
+     */
+    private void inputKeyboard(OperationContext opContext, String content) {
+        int width = opContext.screenWidth;
+        int height = opContext.screenHeight;
+        OperationService operationService = operationManagerRef.get();
+        if (operationService == null) {
+            return;
+        }
+
+        // 一个字符一个字符输入
+        for (char item: content.toCharArray()) {
+            AbstractNodeTree root = operationService.refreshCurrentRoot();
+            final String target = item + "";
+            if (item >= '0' && item <= '9') {
+                boolean result = findAndClickKeyboardKey(root, operationService, target, width, height);
+                if (!result) {
+                    // 从字母键盘切换到数字键盘
+                    result = findAndClickKeyboardKey(root, operationService, "123", width, height);
+                    if (!result) {
+                        return;
+                    }
+
+                    MiscUtil.sleep(1000);
+                    root = operationService.refreshCurrentRoot();
+
+                    result = findAndClickKeyboardKey(root, operationService, target, width, height);
+                    if (!result) {
+                        return;
+                    }
+                }
+            } else {
+                boolean result = findAndClickKeyboardKey(root, operationService, target, width, height);
+                if (!result) {
+                    // 从数字键盘切换到字母键盘
+                    result = findAndClickKeyboardKey(root, operationService, "ABC", width, height);
+                    if (!result) {
+                        return;
+                    }
+
+                    MiscUtil.sleep(1000);
+                    root = operationService.refreshCurrentRoot();
+
+                    result = findAndClickKeyboardKey(root, operationService, target, width, height);
+                    if (!result) {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 查找并点击键盘按键
+     * @param root
+     * @param service
+     * @param text
+     * @param width
+     * @param height
+     * @return
+     */
+    private boolean findAndClickKeyboardKey(AbstractNodeTree root, OperationService service,
+                                            final String text, int width, int height) {
+        if (StringUtil.isEmpty(text)) {
+            return false;
+        }
+        List<AbstractNodeTree> result;
+        if (text.length() > 1) {
+            result = OperationNodeLocator.findAbstractNodeBySomething(root, new ItemComparator<AbstractNodeTree>() {
+                @Override
+                public boolean isEqual(AbstractNodeTree item) {
+                    return item != null && (StringUtil.contains(item.getText(), text) || StringUtil.contains(item.getDescription(), text));
+                }
+            });
+        } else {
+            result = OperationNodeLocator.findAbstractNodeBySomething(root, new ItemComparator<AbstractNodeTree>() {
+                @Override
+                public boolean isEqual(AbstractNodeTree item) {
+                    return item != null && (text.equalsIgnoreCase(item.getText()) || text.equalsIgnoreCase(item.getDescription()));
+                }
+            });
+        }
+
+        if (result.size() == 1) {
+            service.doSomeAction(new OperationMethod(PerformActionEnum.CLICK), result.get(0));
+            return true;
+        } else if (result.size() > 1) {
+            AbstractNodeTree aim = null;
+            for (AbstractNodeTree node: result) {
+                Rect rect = node.getNodeBound();
+                if (rect.width() >= width / 3 + 10 || rect.centerY() > height / 2) {
+                    continue;
+                }
+
+                aim = node;
+                break;
+            }
+
+            if (aim == null) {
+                aim = result.get(0);
+            }
+
+            service.doSomeAction(new OperationMethod(PerformActionEnum.CLICK), aim);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**

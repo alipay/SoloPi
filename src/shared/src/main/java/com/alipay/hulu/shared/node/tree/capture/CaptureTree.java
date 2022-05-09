@@ -19,13 +19,8 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 
 import com.alibaba.fastjson.JSONObject;
-import com.alipay.hulu.common.injector.InjectorService;
-import com.alipay.hulu.common.tools.CmdTools;
-import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
-import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.node.action.OperationContext;
-import com.alipay.hulu.shared.node.action.OperationExecutor;
 import com.alipay.hulu.shared.node.action.OperationMethod;
 import com.alipay.hulu.shared.node.action.PerformActionEnum;
 import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
@@ -159,54 +154,15 @@ public class CaptureTree extends AbstractNodeTree {
     }
 
     @Override
-    public boolean performAction(OperationMethod method, OperationContext context) {
-        // 输入通过位置进行
-        if (method.getActionEnum() == PerformActionEnum.INPUT) {
-            String text = method.getParam(OperationExecutor.INPUT_TEXT_KEY);
-            inputText(text, context);
-            return true;
-        }
-
-        boolean result = super.performAction(method, context);
+    public int performAction(OperationMethod method, OperationContext context) {
+        int result = super.performAction(method, context);
 
         // 等1秒
-        if (result) {
+        if (result >= 0) {
             MiscUtil.sleep(1000);
         }
 
         return result;
-    }
-
-    /**
-     * 输入文字
-     * @param text
-     * @param opContext
-     */
-    private void inputText(final String text, final OperationContext opContext) {
-        opContext.notifyOnFinish(new Runnable() {
-            @Override
-            public void run() {
-                LogUtil.e(TAG, "Start Input");
-                if (StringUtil.containsChinese(text)) {
-                    try {
-                        CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
-                        Rect rect = getNodeBound();
-                        opContext.executor.executeClick(rect.centerX(), rect.centerY());
-                        MiscUtil.sleep(1500);
-                        InjectorService.g().pushMessage("ADB_INPUT_TEXT", text);
-                    } catch (Exception e) {
-                        LogUtil.e(TAG, "Input throw Exception：" + e.getLocalizedMessage(), e);
-                    }
-                } else {
-                    Rect rect = getNodeBound();
-                    opContext.executor.executeClick(rect.centerX(), rect.centerY());
-                    MiscUtil.sleep(1500);
-                    opContext.executor.executeCmdSync("input text \"" + StringUtil.escapeShellText(text) + "\"");
-                }
-                LogUtil.e(TAG, "Finish Input");
-                waitInputMethodHide();
-            }
-        });
     }
 
     public void exportExtras(Map<String, String> extras) {

@@ -29,6 +29,7 @@
     <string name="action__multi_click">REPEAT CLICK</string>
     <string name="action__find_click">CLICK IF EXISTS</string>
     <string name="action__quick_click">QUICK CLICK</string>
+    <string name="action__click_and_input">CLICK AND INPUT</string>
     <string name="action__input_search">INPUT AND SEARCH</string>
     <string name="action__scroll_to_bottom">SCROLL DOWN</string>
     <string name="action_scroll_to_top">SCROLL UP</string>
@@ -48,6 +49,8 @@
     <string name="action__global_scroll_up">SCROLL UP</string>
     <string name="action__global_scroll_right">SCROLL RIGHT</string>
     <string name="action__global_scroll_left">SCROLL LEFT</string>
+    <string name="action__global_keyboard_input">KEYBOARD INPUT</string>
+    <string name="action__global_global_input">GLOBAL INPUT</string>
     <string name="action__goto_index">RESTART</string>
     <string name="action__clear_data">CLEAR DATA</string>
     <string name="action__kill_process">KILL PROCESS</string>

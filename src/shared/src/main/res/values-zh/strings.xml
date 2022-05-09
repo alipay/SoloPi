@@ -29,6 +29,7 @@
     <string name="action__multi_click">重复点击</string>
     <string name="action__find_click">发现则点击</string>
     <string name="action__quick_click">快速点击</string>
+    <string name="action__click_and_input">点击并输入</string>
     <string name="action__input_search">输入并搜索</string>
     <string name="action__scroll_to_bottom">下滑</string>
     <string name="action_scroll_to_top">上滑</string>
@@ -48,6 +49,8 @@
     <string name="action__global_scroll_up">全局上滑</string>
     <string name="action__global_scroll_right">全局右滑</string>
     <string name="action__global_scroll_left">全局左滑</string>
+    <string name="action__global_keyboard_input">键盘输入</string>
+    <string name="action__global_global_input">全局输入</string>
     <string name="action__goto_index">回到首页</string>
     <string name="action__clear_data">清理数据</string>
     <string name="action__kill_process">结束进程</string>

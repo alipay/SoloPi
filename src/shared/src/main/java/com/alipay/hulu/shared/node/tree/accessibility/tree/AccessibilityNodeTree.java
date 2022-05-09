@@ -189,15 +189,23 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
     }
 
     @Override
-    public boolean performAction(OperationMethod method, OperationContext opContext) {
+    public int performAction(OperationMethod method, OperationContext opContext) {
         PerformActionEnum action = method.getActionEnum();
         switch (action) {
             case INPUT:
-                performInput(method.getParam(OperationExecutor.INPUT_TEXT_KEY), opContext);
-                return true;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    try {
+                        performInputByAccessibility(method.getParam(OperationExecutor.INPUT_TEXT_KEY), opContext);
+                    } catch (IllegalStateException e) {
+                        return super.performAction(method, opContext);
+                    }
+                } else {
+                    return super.performAction(method, opContext);
+                }
+                return 0;
             case FOCUS:
                 currentNode.performAction(AccessibilityNodeInfo.ACTION_FOCUS, null);
-                return true;
+                return 0;
         }
 
         return super.performAction(method, opContext);
@@ -256,68 +264,22 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
      * @param content
      * @param opContext
      */
-    public void performInput(final String content, final OperationContext opContext) {
-        Bundle textData = new Bundle();
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            if (!StringUtil.containsChinese(content)) {
-                Rect rect = getNodeBound();
-                opContext.executor.executeClick(rect.centerX(), rect.centerY());
-                MiscUtil.sleep(500);
-
-                opContext.executor.executeCmd("input text \"" + StringUtil.escapeShellText(content) + "\"");
-
-                waitInputMethodHide();
-            } else {
-                opContext.notifyOnFinish(new Runnable() {
-                    @Override
-                    public void run() {
-                        LogUtil.e(TAG, "Start Input");
-                        try {
-                            CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
-                            Rect rect = getNodeBound();
-
-                            opContext.executor.executeClick(rect.centerX(), rect.centerY());
-                            MiscUtil.sleep(1500);
-                            InjectorService.g().pushMessage("ADB_INPUT_TEXT", content);
-                        } catch (Exception e) {
-                            LogUtil.e(TAG, "Input throw Exception：" + e.getLocalizedMessage(), e);
-                        }
-                        LogUtil.e(TAG, "Finish Input");
-                        waitInputMethodHide();
-                    }
-                });
-            }
-        } else {
-            try {
-                textData.putString(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, content);
-                currentNode.performAction(AccessibilityNodeInfo.ACTION_FOCUS, null);
-                currentNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, textData);
-                opContext.notifyOnFinish(new Runnable() {
-                    @Override
-                    public void run() {
-                        waitInputMethodHide();
-                    }
-                });
-            } catch (IllegalStateException e) {
-                LogUtil.e(TAG, "Node recycled", e);
-                opContext.notifyOnFinish(new Runnable() {
-                    @Override
-                    public void run() {
-                        LogUtil.e(TAG, "Start Input");
-                        try {
-                            CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
-                            Rect rect = getNodeBound();
-
-                            opContext.executor.executeClick(rect.centerX(), rect.centerY());
-                            MiscUtil.sleep(1500);
-                            InjectorService.g().pushMessage("ADB_INPUT_TEXT", content);
-                        } catch (Exception e) {
-                            LogUtil.e(TAG, "Input throw Exception：" + e.getLocalizedMessage(), e);
-                        }
-                        LogUtil.e(TAG, "Finish Input");
-                    }
-                });
-            }
+    public void performInputByAccessibility(final String content, final OperationContext opContext) throws IllegalStateException {
+        try {
+            Bundle textData = new Bundle();
+            textData.putString(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, content);
+            currentNode.performAction(AccessibilityNodeInfo.ACTION_FOCUS, null);
+            currentNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, textData);
+            MiscUtil.sleep(500);
+            opContext.notifyOnFinish(new Runnable() {
+                @Override
+                public void run() {
+                    waitInputMethodHide();
+                }
+            });
+        } catch (IllegalStateException e) {
+            LogUtil.e(TAG, "Node recycled", e);
+            throw e;
         }
     }
 

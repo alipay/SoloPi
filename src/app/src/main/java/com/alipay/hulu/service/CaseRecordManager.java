@@ -1142,6 +1142,7 @@ public class CaseRecordManager implements ExportService {
         clickActions.add(convertPerformActionToSubMenu(PerformActionEnum.CLICK_IF_EXISTS));
         clickActions.add(convertPerformActionToSubMenu(PerformActionEnum.CLICK_QUICK));
         clickActions.add(convertPerformActionToSubMenu(PerformActionEnum.MULTI_CLICK));
+        clickActions.add(convertPerformActionToSubMenu(PerformActionEnum.CLICK_AND_INPUT));
         NODE_ACTION_MAP.put(R.string.function_group__click, clickActions);
 
         NODE_KEYS.add(R.string.function_group__input);
@@ -1209,6 +1210,8 @@ public class CaseRecordManager implements ExportService {
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_SCROLL_TO_TOP));
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_SCROLL_TO_LEFT));
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_SCROLL_TO_RIGHT));
+        gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.KEYBOARD_INPUT));
+        gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.INPUT_GLOBAL));
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_PINCH_OUT));
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_PINCH_IN));
         gScrollActions.add(convertPerformActionToSubMenu(PerformActionEnum.GLOBAL_GESTURE));

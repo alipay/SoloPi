@@ -38,4 +38,14 @@ public class Constant {
      * 屏幕方向监控
      */
     public static final String SCREEN_ORIENTATION = "screenOrientation";
+
+    public static class IME {
+        public static final String IME_STATUS = "ime_status";
+        public static final String IME_INPUT_TEXT = "ime_inputText";
+        public static final String IME_INPUT_TEXT_ENTER = "ime_inputTextEnter";
+        public static final String IME_INPUT_KEY_CODE = "ime_inputKeyCode";
+        public static final String IME_CLEAR_TEXT = "ime_clearText";
+        public static final String IME_HIDE_IME = "ime_hideIme";
+        public static final String IME_OPERATION_ACTION = "ime_operationAction";
+    }
 }

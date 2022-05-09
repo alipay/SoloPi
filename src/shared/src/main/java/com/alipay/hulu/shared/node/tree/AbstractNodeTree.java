@@ -135,7 +135,7 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
      * @param context 执行上下文
      * @return
      */
-    public boolean performAction(OperationMethod method, final OperationContext context) {
+    public int performAction(OperationMethod method, final OperationContext context) {
         final Rect rect = getNodeBound();
         int x = rect.centerX();
         int y = rect.centerY();
@@ -157,6 +157,8 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
                 y = (int) (rect.top + factorY * rect.height());
             }
         }
+        final int finalX = x;
+        final int finalY = y;
 
         PerformActionEnum action = method.getActionEnum();
 
@@ -173,52 +175,60 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
                 break;
             case ASSERT:
                 LogUtil.i(TAG, "Start Assert");
-                return NodeTreeUtil.performAssertAction(this, method);
+                return NodeTreeUtil.performAssertAction(this, method)? 0: -1;
             case CLICK:
             case CLICK_IF_EXISTS:
             case CLICK_QUICK:
                 LogUtil.i(TAG, "Start ADB click " + x + "," + y);
                 context.executor.executeClick(x, y);
                 break;
+            case CLICK_AND_INPUT:
+                final String input = method.getParam(OperationExecutor.INPUT_TEXT_KEY);
+                if (StringUtil.isEmpty(input)) {
+                    break;
+                }
+                context.notifyOnFinish(new Runnable() {
+                    @Override
+                    public void run() {
+                        context.keyBoard.inputText(input, finalX, finalY);
+                    }
+                });
+                return 1;
             case INPUT_SEARCH:
                 final String text = method.getParam(OperationExecutor.INPUT_TEXT_KEY);
                 context.notifyOnFinish(new Runnable() {
                     @Override
                     public void run() {
-                        LogUtil.e(TAG, "Start Input");
-                        try {
-                            CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
-                            context.executor.executeClick(rect.centerX(), rect.centerY());
-                            MiscUtil.sleep(1500);
-                            InjectorService.g().pushMessage("ADB_SEARCH_TEXT", text);
-                        } catch (Exception e) {
-                            LogUtil.e(TAG, "Input throw Exception：" + e.getLocalizedMessage(), e);
-                        }
-                        LogUtil.e(TAG, "Finish Input");
+                        context.keyBoard.inputTextSearch(text, finalX, finalY);
                     }
                 });
-                break;
+                return 1;
             case MULTI_CLICK:
-                LogUtil.i(TAG, "Start ADB multi click " + x + "," + y);
+                LogUtil.w(TAG, "Start ADB multi click " + x + "," + y);
                 String clickText = method.getParam(OperationExecutor.INPUT_TEXT_KEY);
-                int clickTime;
+                final int clickTime;
                 try {
                     clickTime = Integer.parseInt(clickText);
                     // 数量小于一，无法执行
                     if (clickTime < 1) {
-                        return false;
+                        return -1;
                     }
                 } catch (NumberFormatException e) {
                     LogUtil.e(TAG, e, "无法解析文字【%s】为数字", clickText);
-                    return false;
+                    return -1;
                 }
 
                 // 通过&实现短时间内多次点击
-                for (int i = 0; i < clickTime; i++) {
-                    context.executor.executeClickAsync(x, y);
-                    MiscUtil.sleep(100);
-                }
-                break;
+                context.notifyOnFinish(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (int i = 0; i < clickTime; i++) {
+                            context.executor.executeClickAsync(finalX, finalY);
+                            MiscUtil.sleep(100);
+                        }
+                    }
+                });
+                return 1;
             case SCROLL_TO_TOP:
                 LogUtil.i(TAG, "Start ADB scroll " + x + "," + y);
                 int fromHeight = y;
@@ -227,7 +237,7 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
 
                     // 控件不可见
                     if (fromHeight <= rect.top) {
-                        return false;
+                        return -1;
                     }
                 }
 
@@ -257,7 +267,7 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
 
                     // 控件不可见
                     if (fromHeight >= rect.bottom) {
-                        return false;
+                        return -1;
                     }
                 }
 
@@ -286,7 +296,7 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
                 if (fromX < 10) {
                     fromX = 10;
                     if (fromX >= rect.right) {
-                        return false;
+                        return -1;
                     }
                 }
 
@@ -314,7 +324,7 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
                 if (fromX > screenWidth - 10) {
                     fromX = screenWidth - 10;
                     if (fromX <= rect.left) {
-                        return false;
+                        return -1;
                     }
                 }
 
@@ -336,9 +346,22 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
                 }
                 context.executor.executeScrollSync(fromX, y, toX, y, 300);
                 break;
+            case INPUT:
+                final String inputText = method.getParam(OperationExecutor.INPUT_TEXT_KEY);
+                if (StringUtil.isEmpty(inputText)) {
+                    return -1;
+                }
+                context.notifyOnFinish(new Runnable() {
+                    @Override
+                    public void run() {
+                        context.keyBoard.inputText(inputText, finalX, finalY);
+                        waitInputMethodHide();
+                    }
+                });
+                return 1;
         }
 
-        return true;
+        return 0;
     }
 
     /**

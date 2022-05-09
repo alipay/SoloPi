@@ -45,6 +45,9 @@ import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatSpinner;
+
 import com.alibaba.fastjson.JSON;
 import com.alipay.hulu.R;
 import com.alipay.hulu.common.application.LauncherApplication;
@@ -227,10 +230,13 @@ public class FunctionSelectUtil {
         PerformActionEnum action = method.getActionEnum();
         if (action == PerformActionEnum.INPUT
                 || action == PerformActionEnum.INPUT_SEARCH
+                || action == PerformActionEnum.CLICK_AND_INPUT
                 || action == PerformActionEnum.LONG_CLICK
                 || action == PerformActionEnum.MULTI_CLICK
                 || action == PerformActionEnum.SLEEP_UNTIL
                 || action == PerformActionEnum.SLEEP
+                || action == PerformActionEnum.KEYBOARD_INPUT
+                || action == PerformActionEnum.INPUT_GLOBAL
                 || action == PerformActionEnum.SCREENSHOT
                 || action == PerformActionEnum.SCROLL_TO_BOTTOM
                 || action == PerformActionEnum.SCROLL_TO_TOP
@@ -1322,6 +1328,8 @@ public class FunctionSelectUtil {
                 edit.setHint(R.string.function__adb_cmd);
                 title = StringUtil.getString(R.string.function__set_adb_cmd);
                 textPattern = null;
+            } else if (action == PerformActionEnum.KEYBOARD_INPUT) {
+                textPattern = Pattern.compile("[a-zA-Z0-9]+");
             } else if (action == PerformActionEnum.LONG_CLICK) {
                 edit.setHint(R.string.function__long_press);
                 title = StringUtil.getString(R.string.function__set_long_press);
