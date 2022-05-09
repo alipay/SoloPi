@@ -30,6 +30,7 @@ public enum FinalR {
     MEMORY(R.string.performance__memory),
     NETWORK(R.string.performance__network),
     PROCESS_STATUS(R.string.performance__process_status),
+    TEMPERATURE(R.string.performance__temperature),
     NULL(-1)
     ;
     
