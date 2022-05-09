@@ -37,7 +37,12 @@ android {
     }
 
     buildTypes {
-
+        release {
+            consumerProguardFiles 'proguard-rules.pro'
+        }
+        debug {
+            consumerProguardFiles 'proguard-rules.pro'
+        }
     }
 
 
@@ -56,13 +61,13 @@ greendao{
 
 dependencies {
     compileOnly "com.google.zxing:core:3.4.0"
-    compileOnly 'com.alibaba:fastjson:1.2.73'
-    compileOnly 'androidx.appcompat:appcompat:1.0.0'
-    compileOnly 'androidx.legacy:legacy-support-v4:1.0.0'
+    compileOnly "com.alibaba:fastjson:${FASTJSON_VERSION}"
+    compileOnly "androidx.appcompat:appcompat:${ANDROIDX_APPCOMPAT_VERSION}"
+    compileOnly "androidx.legacy:legacy-support-v4:${ANDROIDX_SUPPORT_V4_VERSION}"
     compileOnly 'com.liulishuo.filedownloader:library:1.7.7'
     compileOnly 'com.squareup.okhttp3:okhttp:3.12.3'
     compileOnly 'org.greenrobot:greendao:3.3.0'
 
-    compileOnly group: 'commons-io', name: 'commons-io', version: '2.6'
+    compileOnly "commons-io:commons-io:${COMMON_IO_VERSION}"
     api project(':common')
 }

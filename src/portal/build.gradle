@@ -42,7 +42,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
-            minifyEnabled false
+            minifyEnabled true
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             versionNameSuffix "-" + new Date().format("yyMMddHHmm")
@@ -74,7 +74,7 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.multidex:multidex:2.0.0'
+    implementation "androidx.multidex:multidex:${ANDROIDX_MULTIDEX_VERSION}"
     implementation project(':app')
 }
 

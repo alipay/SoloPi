@@ -27,25 +27,22 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            consumerProguardFiles 'proguard-rules.pro'
         }
         debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            versionNameSuffix "-" + new Date().format("yyMMddHHmm")
+            consumerProguardFiles 'proguard-rules.pro'
         }
     }
 }
 
 dependencies {
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.legacy:legacy-support-core-utils:1.0.0'
-    implementation 'androidx.appcompat:appcompat:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation "androidx.legacy:legacy-support-v4:${ANDROIDX_SUPPORT_V4_VERSION}"
+    implementation "androidx.legacy:legacy-support-core-utils:${ANDROIDX_SUPPORT_CORE_UTILS_VERSION}"
+    implementation "androidx.appcompat:appcompat:${ANDROIDX_APPCOMPAT_VERSION}"
+    implementation "androidx.recyclerview:recyclerview:${ANDROIDX_RECYCLERVIEW_VERSION}"
+    implementation "com.google.android.material:material:${ANDROIDX_MATERIAL_VERSION}"
     implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'
-    implementation 'com.alibaba:fastjson:1.2.73'
+    implementation "com.alibaba:fastjson:${FASTJSON_VERSION}"
     implementation 'org.greenrobot:greendao:3.3.0'
     implementation 'com.squareup.okhttp3:okhttp:3.12.3'
     implementation 'com.liulishuo.filedownloader:library:1.7.7'
@@ -61,10 +58,10 @@ dependencies {
     implementation('com.github.bumptech.glide:glide:4.11.0') {
         exclude group: "com.android.support"
     }
-    implementation 'commons-io:commons-io:2.6'
+    implementation "commons-io:commons-io:${COMMON_IO_VERSION}"
     implementation ('com.orhanobut:logger:2.2.0') {
         exclude group: "com.android.support"
     }
-    compileOnly 'androidx.multidex:multidex:2.0.0'
+    compileOnly "androidx.multidex:multidex:${ANDROIDX_MULTIDEX_VERSION}"
     implementation project(':shared')
 }

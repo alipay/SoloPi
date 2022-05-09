@@ -30,15 +30,21 @@ android {
     }
 
     buildTypes {
+        release {
+            consumerProguardFiles 'proguard-rules.pro'
+        }
+        debug {
+            consumerProguardFiles 'proguard-rules.pro'
+        }
     }
 
 }
 
 dependencies {
     api "org.nanohttpd:nanohttpd:2.2.0"
-    implementation 'androidx.appcompat:appcompat:1.0.0'
-    compileOnly 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.android.material:material:1.0.0'
+    compileOnly "androidx.appcompat:appcompat:${ANDROIDX_APPCOMPAT_VERSION}"
+    compileOnly "androidx.legacy:legacy-support-v4:${ANDROIDX_SUPPORT_V4_VERSION}"
+    compileOnly "com.google.android.material:material:${ANDROIDX_MATERIAL_VERSION}"
     compileOnly ('com.orhanobut:logger:2.2.0') {
         exclude group: "com.android.support"
     }
@@ -47,9 +53,9 @@ dependencies {
     {
         exclude group: "com.android.support"
     }
-    compileOnly 'com.alibaba:fastjson:1.2.73'
-    compileOnly group: 'commons-io', name: 'commons-io', version: '2.6'
-    compileOnly 'androidx.multidex:multidex:2.0.0'
+    compileOnly "com.alibaba:fastjson:${FASTJSON_VERSION}"
+    compileOnly "commons-io:commons-io:${COMMON_IO_VERSION}"
+    compileOnly "androidx.multidex:multidex:${ANDROIDX_MULTIDEX_VERSION}"
     annotationProcessor ('com.github.bumptech.glide:compiler:4.11.0')
     {
         exclude group: "com.android.support"
