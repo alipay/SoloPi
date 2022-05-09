@@ -142,8 +142,11 @@ public class AccessibilityProvider implements AbstractProvider {
             // 构建Windows树
             List<AccessibilityWindowInfo> windowInfos = service.getWindows();
             AccessibilityWindowInfo targetWin = null;
+            CharSequence targetPkgName = null;
             AccessibilityWindowInfo maxSizeWin = null;
+            CharSequence maxSizePkgName = null;
             int maxSize = -1;
+            List<Pair<CharSequence, AccessibilityWindowInfo>> windowsHasContents = new ArrayList<>();
             MetaTree inputNode = null;
             for (AccessibilityWindowInfo win : windowInfos) {
                 Rect size = new Rect();
@@ -173,17 +176,19 @@ public class AccessibilityProvider implements AbstractProvider {
                     LogUtil.d(TAG, "自己的Windows，不处理");
                     continue;
                 }
-
+                windowsHasContents.add(new Pair<>(root.getPackageName(), win));
                 int realSize = size.width() * size.height();
                 if (realSize > maxSize) {
                     maxSize = realSize;
                     maxSizeWin = win;
+                    maxSizePkgName = root.getPackageName();
                 }
 
                 // 首先是active window
                 if (win.isActive()) {
                     LogUtil.i(TAG, "Active window:::" + root.getPackageName());
                     targetWin = win;
+                    targetPkgName = root.getPackageName();
                     break;
                     // 然后考虑有Accessibility focus的
                 } else if (targetWin == null && win.isAccessibilityFocused()) {
@@ -195,14 +200,25 @@ public class AccessibilityProvider implements AbstractProvider {
             if (targetWin == null) {
                 if (maxSizeWin != null) {
                     targetWin = maxSizeWin;
+                    targetPkgName = maxSizePkgName;
                 } else {
                     return null;
                 }
             }
 
+
             // 多窗口情况
+            List<AccessibilityWindowInfo> relatedWindows = new ArrayList<>();
+            if (targetPkgName != null) {
+                for (Pair<CharSequence, AccessibilityWindowInfo> pair : windowsHasContents) {
+                    if (targetPkgName.equals(pair.first) && pair.second.getLayer() > targetWin.getLayer()) {
+                        relatedWindows.add(pair.second);
+                    }
+                }
+            }
+            windowsHasContents.clear();
             MetaTree result = new MetaTree();
-            if (inputNode != null || targetWin.getChildCount() > 0) {
+            if (inputNode != null || targetWin.getChildCount() > 0 || relatedWindows.size() > 0) {
                 FakeNodeTree fake = new FakeNodeTree();
                 result.setCurrentNode(fake);
                 List<MetaTree> children = new ArrayList<>();
@@ -213,6 +229,7 @@ public class AccessibilityProvider implements AbstractProvider {
                 // 添加所有子窗口
                 Queue<AccessibilityWindowInfo> windowQueue = new LinkedList<>();
                 windowQueue.add(targetWin);
+                windowQueue.addAll(relatedWindows);
                 CharSequence packageName = null;
                 while (!windowQueue.isEmpty()) {
                     AccessibilityWindowInfo windowInfo = windowQueue.poll();
