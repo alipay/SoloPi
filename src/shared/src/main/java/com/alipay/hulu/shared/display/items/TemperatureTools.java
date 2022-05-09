@@ -50,6 +50,7 @@ public class TemperatureTools implements Displayable {
     };
     private static String TARGET_FILE_DIR = null;
 
+    private long startRecordTime = -1L;
     private List<RecordPattern.RecordItem> cpuRecord;
 
     private static String getTargetFileIdx() {
@@ -132,6 +133,7 @@ public class TemperatureTools implements Displayable {
     @Override
     public void startRecord() {
         cpuRecord = new ArrayList<>();
+        startRecordTime = System.currentTimeMillis();
     }
 
     @Override
@@ -148,7 +150,11 @@ public class TemperatureTools implements Displayable {
 
     @Override
     public Map<RecordPattern, List<RecordPattern.RecordItem>> stopRecord() {
-        Map<RecordPattern, List<RecordPattern.RecordItem>> records = Collections.singletonMap(new RecordPattern("CPU温度", "度", "Temperature"), cpuRecord);
+        RecordPattern pattern = new RecordPattern("CPU温度", "度", "Temperature");
+        pattern.setStartTime(startRecordTime);
+        pattern.setEndTime(System.currentTimeMillis());
+        startRecordTime = -1L;
+        Map<RecordPattern, List<RecordPattern.RecordItem>> records = Collections.singletonMap(pattern, cpuRecord);
         cpuRecord = null;
         return records;
     }
