@@ -61,12 +61,30 @@ public class DecompressUtil {
             targetFolder.mkdirs();
         }
 
+        String originCanonicalPath;
+        try {
+            originCanonicalPath = originFile.getCanonicalPath();
+        } catch (IOException e) {
+            LogUtil.e(TAG, "Get Canonical Path Failed, throw exception", e);
+            originCanonicalPath = originFile.getPath();
+        }
+
         ZipInputStream zip = new ZipInputStream(inputStream);
         ZipEntry zipEntry;
         String  szName;
         try {
             while ((zipEntry = zip.getNextEntry()) != null) {
                 szName = zipEntry.getName();
+
+
+                File f = new File(originFile, zipEntry.getName());
+                String canonicalPath = f.getCanonicalPath();
+                if (!canonicalPath.startsWith(originCanonicalPath)) {
+                    LogUtil.e(TAG, "Zip Entry: " + szName + ", not belong to zip file " + canonicalPath);
+                    // 忽略该zip压缩包
+                    continue;
+                }
+
                 if (zipEntry.isDirectory()) {
                     //获取部件的文件夹名
                     szName = szName.substring(0, szName.length() - 1);
