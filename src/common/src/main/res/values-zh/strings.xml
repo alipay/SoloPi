@@ -49,6 +49,7 @@
     <string name="permission__right_parentheses">)</string>
     <string name="file_choose__select_dir">选择目录</string>
     <string name="permission__open_background_permission">MIUI请开启后台弹出界面权限</string>
+    <string name="permission__ignore_battery_optimization_permission">请允许SoloPi忽略省电优化策略，以确保ADB、录屏等服务能正常运行</string>
     <string name="permission__opened">我已开启</string>
     <string name="permission__go_to_open">前往开启</string>
     <string name="permission__read_calendar">读取日历</string>

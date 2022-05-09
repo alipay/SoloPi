@@ -25,9 +25,11 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.media.projection.MediaProjectionManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.LocaleList;
+import android.os.PowerManager;
 import android.provider.Settings;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,6 +42,7 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alipay.hulu.common.R;
 import com.alipay.hulu.common.application.LauncherApplication;
@@ -93,6 +96,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
     public static final int PERMISSION_ANDROID = 8;
     public static final int PERMISSION_DYNAMIC = 9;
     public static final int PERMISSION_BACKGROUND = 10;
+    public static final int PERMISSION_POWER_SAVE = 11;
 
     public static volatile boolean runningStatus = false;
 
@@ -259,6 +263,9 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                 case "background":
                     group = PERMISSION_BACKGROUND;
                     break;
+                case "powerSave":
+                    group = PERMISSION_POWER_SAVE;
+                    break;
                 default:
                     if (permission.startsWith("Android=")) {
                         group = PERMISSION_ANDROID;
@@ -362,6 +369,11 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                 break;
             case PERMISSION_BACKGROUND:
                 if (!processBackgroundPermission()) {
+                    return;
+                }
+                break;
+            case PERMISSION_POWER_SAVE:
+                if (!processPowerSavePermission()) {
                     return;
                 }
                 break;
@@ -824,6 +836,41 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                     @Override
                     public void run() {
                         MiuiUtils.applyMiuiPermission(PermissionDialogActivity.this);
+                    }
+                });
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 处理省电优化权限
+     * @return
+     */
+    private boolean processPowerSavePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            final PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            if (!powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
+                showAction(getString(R.string.permission__ignore_battery_optimization_permission), getString(R.string.permission__go_to_open), new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                            intent.setData(Uri.parse("package:" + getPackageName()));
+                            startActivity(intent);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, getString(R.string.permission__opened), new Runnable() {
+                    @Override
+                    public void run() {
+                        if (powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
+                            processedAction();
+                        } else {
+                            Toast.makeText(PermissionDialogActivity.this, "暂未加入后台白名单", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
                 return false;

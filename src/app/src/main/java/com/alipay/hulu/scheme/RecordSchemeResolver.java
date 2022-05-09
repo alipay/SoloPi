@@ -79,7 +79,7 @@ public class RecordSchemeResolver implements SchemeActionResolver {
         }
         caseInfo.setRecordMode("local");
 
-        PermissionUtil.requestPermissions(Arrays.asList("adb", "float", Settings.ACTION_ACCESSIBILITY_SETTINGS), (Activity) context, new PermissionUtil.OnPermissionCallback() {
+        PermissionUtil.requestPermissions(Arrays.asList("adb", "float", Settings.ACTION_ACCESSIBILITY_SETTINGS, "powerSave"), (Activity) context, new PermissionUtil.OnPermissionCallback() {
             @Override
             public void onPermissionResult(boolean result, String reason) {
                 if (result) {

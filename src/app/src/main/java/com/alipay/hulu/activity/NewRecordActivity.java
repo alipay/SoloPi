@@ -72,7 +72,7 @@ import java.util.List;
 /**
  * Created by lezhou.wyl on 2018/2/1.
  */
-@EntryActivity(iconName = "com.alipay.hulu.R$drawable.icon_luxiang", nameResName = "com.alipay.hulu.R$string.activity__record", permissions = {"adb", "float", "background", "toast:${com.alipay.hulu.R$string.toast_message__add_solopi_background}"}, index = 1, cornerText = "New", cornerPersist = 3, cornerBg = 0xFFFF5900)
+@EntryActivity(iconName = "com.alipay.hulu.R$drawable.icon_luxiang", nameResName = "com.alipay.hulu.R$string.activity__record", permissions = {"adb", "float", "background", "toast:${com.alipay.hulu.R$string.toast_message__add_solopi_background}", "powerSave"}, index = 1, cornerText = "New", cornerPersist = 3, cornerBg = 0xFFFF5900)
 public class NewRecordActivity extends BaseActivity {
 
     private static final String TAG = NewRecordActivity.class.getSimpleName();

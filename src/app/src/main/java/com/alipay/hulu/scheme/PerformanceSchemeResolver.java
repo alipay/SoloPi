@@ -124,6 +124,7 @@ public class PerformanceSchemeResolver implements SchemeActionResolver {
                 }
             }
             allPermissions.add("adb");
+            allPermissions.add("powerSave");
 
             PermissionUtil.requestPermissions(new ArrayList<>(allPermissions), (Activity) context, new PermissionUtil.OnPermissionCallback() {
                 @Override

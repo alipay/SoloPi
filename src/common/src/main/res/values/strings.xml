@@ -49,6 +49,7 @@
     <string name="permission__right_parentheses">)</string>
     <string name="file_choose__select_dir">Select Folder</string>
     <string name="permission__open_background_permission">Please grant \"Display pop-up window\" permission in MIUI</string>
+    <string name="permission__ignore_battery_optimization_permission">Please grant \"Ignore battery optimization\" permission</string>
     <string name="permission__go_to_open">Go to Grant</string>
     <string name="permission__opened">Granted</string>
     <string name="permission__read_calendar">Read Calendar</string>
