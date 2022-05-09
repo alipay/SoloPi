@@ -927,7 +927,7 @@ public class SettingsActivity extends BaseActivity {
 
         mMaxScrollFindSettingWrapper = findViewById(R.id.max_scroll_find_setting_wrapper);
         mMaxScrollFindSettingInfo = _findViewById(R.id.max_scroll_find_setting_info);
-        mMaxScrollFindSettingInfo.setText(Long.toString(SPService.getInt(SPService.KEY_MAX_SCROLL_FIND_COUNT, 0)));
+        mMaxScrollFindSettingInfo.setText(Integer.toString(SPService.getInt(SPService.KEY_MAX_SCROLL_FIND_COUNT, 2)));
 
 
         mCheckUpdateSettingWrapper = findViewById(R.id.check_update_setting_wrapper);
