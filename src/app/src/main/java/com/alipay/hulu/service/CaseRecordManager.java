@@ -62,6 +62,7 @@ import com.alipay.hulu.common.injector.provider.Provider;
 import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.service.ScreenCaptureService;
 import com.alipay.hulu.common.service.TouchService;
+import com.alipay.hulu.common.service.base.AppGuardian;
 import com.alipay.hulu.common.service.base.ExportService;
 import com.alipay.hulu.common.service.base.LocalService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
@@ -295,6 +296,18 @@ public class CaseRecordManager implements ExportService {
                 break;
             default:
                 break;
+        }
+    }
+
+    @Subscriber(@Param(value = LauncherApplication.SYSTEM_GUARDIAN_EVENT, sticky = false))
+    public void onSystemEvent(AppGuardian.ReceiveSystemEvent event) {
+        if (!isRecording || isExecuting) {
+            return;
+        }
+        if (event == AppGuardian.ReceiveSystemEvent.SCREEN_LOCK && !pauseFlag && !displayDialog) {
+            processAction(new OperationMethod(PerformActionEnum.PAUSE), null, binder.loadServiceContext());
+        } else if (event == AppGuardian.ReceiveSystemEvent.SCREEN_UNLOCK && pauseFlag) {
+            processAction(new OperationMethod(PerformActionEnum.RESUME), null, binder.loadServiceContext());
         }
     }
 

@@ -27,9 +27,12 @@ import android.app.AlertDialog;
 import android.app.Application;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -45,12 +48,16 @@ import androidx.multidex.MultiDex;
 
 import com.alipay.hulu.common.R;
 import com.alipay.hulu.common.http.HttpServer;
+import com.alipay.hulu.common.injector.InjectorService;
+import com.alipay.hulu.common.injector.provider.Param;
+import com.alipay.hulu.common.injector.provider.Provider;
 import com.alipay.hulu.common.logger.DiskLogStrategy;
 import com.alipay.hulu.common.logger.SimpleFormatStrategy;
 import com.alipay.hulu.common.scheme.SchemeActionResolver;
 import com.alipay.hulu.common.scheme.SchemeHttpListener;
 import com.alipay.hulu.common.scheme.SchemeResolver;
 import com.alipay.hulu.common.service.SPService;
+import com.alipay.hulu.common.service.base.AppGuardian;
 import com.alipay.hulu.common.service.base.ExportService;
 import com.alipay.hulu.common.service.base.LocalService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
@@ -61,6 +68,7 @@ import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.SortedList;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.common.utils.patch.PatchLoadResult;
+import com.bumptech.glide.Registry;
 import com.mdit.library.Enhancer;
 import com.mdit.library.EnhancerInterface;
 import com.mdit.library.MethodInterceptor;
@@ -98,11 +106,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Created by qiaoruikai on 2018/9/29 10:59 AM.
  */
+@Provider(@Param(value = LauncherApplication.SYSTEM_GUARDIAN_EVENT, sticky = false, type = AppGuardian.ReceiveSystemEvent.class))
 public abstract class LauncherApplication extends Application {
     private static final String TAG = LauncherApplication.class.getSimpleName();
 
     public static final String SHOW_LOADING_DIALOG = "showLoadingDialog";
     public static final String DISMISS_LOADING_DIALOG = "dismissLoadingDialog";
+    public static final String ON_TRIM_MEMORY = "system_trim_memory";
+    public static final String SYSTEM_GUARDIAN_EVENT = "system_guardian_event";
 
     private Map<String, SortedList<SchemeActionResolver>> schemeResolver;
 
@@ -227,6 +238,8 @@ public abstract class LauncherApplication extends Application {
         initialLogger();
 
         handler = new Handler();
+
+        initEventTracker();
 
         BackgroundExecutor.execute(new Runnable() {
             @Override
@@ -902,6 +915,16 @@ public abstract class LauncherApplication extends Application {
         }
 
         setSchemeResolver(resolvers);
+
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        if (level >= ComponentCallbacks2.TRIM_MEMORY_MODERATE) {
+            InjectorService.g().pushMessage(ON_TRIM_MEMORY);
+        }
+        LogUtil.i("ScreenEventBroadCastReceiver", "Receive memory state " + level);
+        super.onTrimMemory(level);
     }
 
     /**
@@ -1254,17 +1277,41 @@ public abstract class LauncherApplication extends Application {
         this.schemeResolver = schemeResolver;
     }
 
+    private void initEventTracker() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_USER_PRESENT);
+        registerReceiver(new ScreenEventBroadCastReceiver(this), filter);
+    }
+
+    private void triggerServiceEvent(AppGuardian.ReceiveSystemEvent event) {
+        if (!finishInit) {
+            return;
+        }
+        for (ServiceReference service: registeredService.values()) {
+            service.onSystemEventTriggered(event);
+        }
+        InjectorService.g().pushMessage(SYSTEM_GUARDIAN_EVENT, event);
+    }
+
     /**
      * 服务引用
      */
     private static class ServiceReference {
         private Class<? extends ExportService> targetClass;
         private ExportService target;
+        private boolean isAppGuardianEnable = false;
         private int level;
+        private volatile boolean isInitialized = false;
 
         public ServiceReference(LocalService annotation, Class<? extends ExportService> targetClass) {
             this.targetClass = targetClass;
             this.level = annotation.level();
+            AppGuardian.AppGuardianEnable guardianEnable = targetClass.getAnnotation(AppGuardian.AppGuardianEnable.class);
+            if (guardianEnable != null && guardianEnable.value() && AppGuardian.class.isAssignableFrom(targetClass)) {
+                this.isAppGuardianEnable = true;
+            }
             initializedService(targetClass, annotation.lazy());
         }
 
@@ -1301,6 +1348,7 @@ public abstract class LauncherApplication extends Application {
                                 @Override
                                 public void run() {
                                     enhancerInterface.setTarget$Enhancer$(initClass());
+                                    isInitialized = true;
                                     runningFLag.set(false);
                                 }
                             });
@@ -1331,6 +1379,7 @@ public abstract class LauncherApplication extends Application {
                         @Override
                         public void run() {
                             ExportService service = initClass();
+                            isInitialized = true;
                             result.setTarget$Enhancer$(service);
                         }
                     });
@@ -1355,6 +1404,12 @@ public abstract class LauncherApplication extends Application {
             return target;
         }
 
+        private synchronized void onSystemEventTriggered(AppGuardian.ReceiveSystemEvent event) {
+            if (this.isAppGuardianEnable && this.isInitialized) {
+                ((AppGuardian) this.target).onEventTrigger(event);
+            }
+        }
+
         /**
          * 调用清理
          * @param context
@@ -1363,6 +1418,7 @@ public abstract class LauncherApplication extends Application {
             EnhancerInterface target = (EnhancerInterface) this.target;
             final ExportService service = (ExportService) target.getTarget$Enhancer$();
             if (service != null) {
+                isInitialized = false;
                 getInstance().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -1371,6 +1427,27 @@ public abstract class LauncherApplication extends Application {
                 });
                 // 设置为空
                 target.setTarget$Enhancer$(null);
+            }
+        }
+    }
+
+    private static class ScreenEventBroadCastReceiver extends BroadcastReceiver {
+        private static final String TAG = ScreenEventBroadCastReceiver.class.getSimpleName();
+        private LauncherApplication app;
+        private ScreenEventBroadCastReceiver(LauncherApplication app) {
+            this.app = app;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            LogUtil.i(TAG, "Receive broadcast event" + intent.getAction());
+            switch (intent.getAction()) {
+                case Intent.ACTION_SCREEN_OFF:
+                    app.triggerServiceEvent(AppGuardian.ReceiveSystemEvent.SCREEN_LOCK);
+                    break;
+                case Intent.ACTION_USER_PRESENT:
+                    app.triggerServiceEvent(AppGuardian.ReceiveSystemEvent.SCREEN_UNLOCK);
+                    break;
             }
         }
     }

@@ -18,9 +18,9 @@ package com.alipay.hulu.shared.event;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
-import android.widget.Toast;
 
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.service.base.AppGuardian;
 import com.alipay.hulu.common.service.base.ExportService;
 import com.alipay.hulu.common.service.base.LocalService;
 import com.alipay.hulu.common.utils.PermissionUtil;
@@ -33,7 +33,8 @@ import java.lang.ref.WeakReference;
  * Created by qiaoruikai on 2018/10/9 11:08 PM.
  */
 @LocalService
-public class EventService implements ExportService {
+@AppGuardian.AppGuardianEnable
+public class EventService implements ExportService, AppGuardian {
     private TouchEventTracker touchTracker;
     private AccessibilityEventTracker accessibilityTracker;
     private EventProxy proxy;
@@ -92,6 +93,16 @@ public class EventService implements ExportService {
     public void stopTrackAccessibilityEvent() {
         if (accessibilityTracker != null) {
             accessibilityTracker.stopTrackEvent();
+        }
+    }
+
+    @Override
+    public void onEventTrigger(ReceiveSystemEvent event) {
+        if (event == ReceiveSystemEvent.SCREEN_UNLOCK) {
+            if (touchTracker != null && !touchTracker.isTouchTrackRunning()) {
+                touchTracker.registerTouchListener(proxy);
+                touchTracker.startTrackTouch();
+            }
         }
     }
 

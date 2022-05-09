@@ -126,7 +126,7 @@ public class AccessibilityServiceImpl extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        LogUtil.d(TAG, "收到辅助功能事件:" + event.getEventType());
+        LogUtil.v(TAG, "收到辅助功能事件:" + event.getEventType());
 
         // SoloPi的窗口事件，不处理
         if (StringUtil.equals(event.getPackageName(), getPackageName())) {

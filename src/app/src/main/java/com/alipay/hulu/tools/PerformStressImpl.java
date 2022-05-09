@@ -16,7 +16,6 @@
 package com.alipay.hulu.tools;
 
 import android.content.Context;
-import android.widget.Toast;
 
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.injector.InjectorService;
@@ -32,7 +31,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @LocalService
-public class PerformStressImpl implements IPerformStress, ExportService {
+public class PerformStressImpl implements ExportService {
 	public static final String PERFORMANCE_STRESS_CPU_COUNT = "performanceStressCpuCount";
 	public static final String PERFORMANCE_STRESS_CPU_PERCENT = "performanceStressCpuPercent";
 	public static final String PERFORMANCE_STRESS_MEMORY = "performanceStressMemory";
@@ -72,6 +71,18 @@ public class PerformStressImpl implements IPerformStress, ExportService {
         performMemoryStress();
     }
 
+	/**
+	 * 内存不足时调整一下内存数据
+	 */
+	@Subscriber(@Param(value = LauncherApplication.ON_TRIM_MEMORY, sticky = false))
+	public void onTrimMemory() {
+		LogUtil.w(TAG, "Urgent!!!!, lower memory");
+		if (memory > 0) {
+			int newMemory = (int) (memory * 0.8);
+			InjectorService.g().pushMessage(PERFORMANCE_STRESS_MEMORY, newMemory);
+		}
+	}
+
     @Override
     public void onCreate(Context context) {
         cachedThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -83,10 +94,6 @@ public class PerformStressImpl implements IPerformStress, ExportService {
         cachedThreadPool.shutdownNow();
         InjectorService.g().unregister(this);
     }
-
-	public void addOrReduceToTargetThread(int count) {
-
-	}
 
     public void performCpuStressByCount() {
         if (targetCount > currentCount.get()) {
@@ -148,11 +155,4 @@ public class PerformStressImpl implements IPerformStress, ExportService {
 		}
 
 	}
-
-	@Override
-	public void PerformEntry(int param) {
-		// TODO Auto-generated method stub
-
-	}
-
 }

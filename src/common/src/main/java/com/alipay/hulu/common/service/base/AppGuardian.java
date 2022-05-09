@@ -13,11 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.hulu.tools;
+package com.alipay.hulu.common.service.base;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface IPerformStress {
-	public abstract void PerformEntry(int param);
-	public abstract void addOrReduceToTargetThread(int count);
+public interface AppGuardian {
+    /**
+     * 当系统事件时调用
+     */
+    void onEventTrigger(ReceiveSystemEvent event);
 
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface AppGuardianEnable {
+        boolean value() default true;
+    }
+
+    enum ReceiveSystemEvent {
+        SCREEN_LOCK,
+        SCREEN_UNLOCK,
+        APP_VISIBLE,
+        APP_INVISIBLE
+    }
 }

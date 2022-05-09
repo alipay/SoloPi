@@ -33,6 +33,7 @@ import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.service.SPService;
+import com.alipay.hulu.common.service.base.AppGuardian;
 import com.alipay.hulu.common.trigger.Trigger;
 import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
@@ -115,6 +116,9 @@ public class CmdTools {
 
     private static PidWatcher watcher;
 
+    // ADB解锁后恢复工具
+    private static volatile CmdToolsGuardianService guardian;
+
     private static File currentLogFile;
 
     private static ConcurrentLinkedQueue<String> logs = null;
@@ -126,8 +130,6 @@ public class CmdTools {
     public static void cancelForceAdb(){
         isRoot = null;
     }
-
-    public static long LAST_ADB_RETRY_TIME = 0;
 
     /**
      * 开始adb日志记录
@@ -1451,6 +1453,10 @@ public class CmdTools {
             scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
         }
 
+        if (guardian == null) {
+            guardian = new CmdToolsGuardianService();
+        }
+
         scheduledExecutorService.schedule(new Runnable() {
             @Override
             public void run() {
@@ -1461,77 +1467,89 @@ public class CmdTools {
                 }
 
                 LAST_RUNNING_TIME = currentTime;
-                String result = null;
-                try {
-                    result = execAdbCmd("echo '1'", 5000);
-                } catch (Exception e) {
-                    LogUtil.e(TAG, "Check adb status throw :" + e.getMessage(), e);
-                }
-
-                if (!StringUtil.equals("1", StringUtil.trim(result))) {
-                    // 等2s再检验一次
-                    MiscUtil.sleep(2000);
-
-                    boolean genResult = false;
-
-                    // double check机制，防止单次偶然失败带来重连
-                    String doubleCheck = null;
-                    try {
-                        doubleCheck = execAdbCmd("echo '1'", 5000);
-                    } catch (Exception e) {
-                        LogUtil.e(TAG, "Check adb status throw :" + e.getMessage(), e);
-                    }
-                    if (!StringUtil.equals("1", StringUtil.trim(doubleCheck))) {
-                        // 尝试恢复3次
-                        for (int i = 0; i < 3; i++) {
-                            // 关停无用连接
-                            if (connection != null && connection.isFine()) {
-                                try {
-                                    connection.close();
-                                } catch (IOException e) {
-                                    LogUtil.e(TAG, "Catch java.io.IOException: " + e.getMessage(), e);
-                                } finally {
-                                    connection = null;
-                                }
-                            }
-
-                            // 清理下当前已连接进程
-                            clearProcesses();
-
-                            // 尝试重连
-                            genResult = generateConnection();
-                            if (genResult) {
-                                break;
-                            }
-                        }
-
-                        // 恢复失败
-                        if (!genResult) {
-                            Context con = LauncherApplication.getInstance().loadActivityOnTop();
-                            if (con == null) {
-                                con = LauncherApplication.getInstance().loadRunningService();
-                            }
-
-                            if (con == null) {
-                                LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.cmd__adb_break));
-                                return;
-                            }
-
-                            // 回首页
-                            LauncherApplication.getInstance().showDialog(con, StringUtil.getString(R.string.cmd__adb_break), StringUtil.getString(R.string.constant__sure), null);
-
-                            // 通知各个功能ADB挂了
-                            InjectorService.g().pushMessage(FATAL_ADB_CANNOT_RECOVER);
-
-                            return;
-                        }
-                    }
+                int result = checkAdbStatus();
+                if (result < 0) {
+                    return;
                 }
 
                 // 15S 检查一次
                 scheduledExecutorService.schedule(this, 15, TimeUnit.SECONDS);
             }
         }, 15, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 检查并尝试恢复ADB连接
+     * @return
+     */
+    private static int checkAdbStatus() {
+        String result = null;
+        try {
+            result = execAdbCmd("echo '1'", 5000);
+        } catch (Exception e) {
+            LogUtil.e(TAG, "Check adb status throw :" + e.getMessage(), e);
+        }
+
+        if (!StringUtil.equals("1", StringUtil.trim(result))) {
+            // 等2s再检验一次
+            MiscUtil.sleep(2000);
+
+            boolean genResult = false;
+
+            // double check机制，防止单次偶然失败带来重连
+            String doubleCheck = null;
+            try {
+                doubleCheck = execAdbCmd("echo '1'", 5000);
+            } catch (Exception e) {
+                LogUtil.e(TAG, "Check adb status throw :" + e.getMessage(), e);
+            }
+            if (!StringUtil.equals("1", StringUtil.trim(doubleCheck))) {
+                // 尝试恢复3次
+                for (int i = 0; i < 3; i++) {
+                    // 关停无用连接
+                    if (connection != null && connection.isFine()) {
+                        try {
+                            connection.close();
+                        } catch (IOException e) {
+                            LogUtil.e(TAG, "Catch java.io.IOException: " + e.getMessage(), e);
+                        } finally {
+                            connection = null;
+                        }
+                    }
+
+                    // 清理下当前已连接进程
+                    clearProcesses();
+
+                    // 尝试重连
+                    genResult = generateConnection();
+                    if (genResult) {
+                        break;
+                    }
+                }
+
+                // 恢复失败
+                if (!genResult) {
+                    // 通知各个功能ADB挂了
+                    InjectorService.g().pushMessage(FATAL_ADB_CANNOT_RECOVER);
+
+                    Context con = LauncherApplication.getInstance().loadActivityOnTop();
+                    if (con == null) {
+                        con = LauncherApplication.getInstance().loadRunningService();
+                    }
+
+                    if (con == null) {
+                        LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.cmd__adb_break));
+                        return -1;
+                    }
+
+                    // 回首页
+                    LauncherApplication.getInstance().showDialog(con, StringUtil.getString(R.string.cmd__adb_break), StringUtil.getString(R.string.constant__sure), null);
+                    return -1;
+                }
+            }
+        }
+
+        return 0;
     }
 
     /**
@@ -1691,6 +1709,18 @@ public class CmdTools {
         return exec;
     }
 
+    private static class CmdToolsGuardianService {
+        private CmdToolsGuardianService() {
+            InjectorService.g().register(this);
+        }
+        @Subscriber(value = @Param(value = LauncherApplication.SYSTEM_GUARDIAN_EVENT, sticky = false), thread = RunningThread.BACKGROUND)
+        public void onSystemEvent(AppGuardian.ReceiveSystemEvent event) {
+            if (event == AppGuardian.ReceiveSystemEvent.SCREEN_UNLOCK && LAST_RUNNING_TIME > 0 && connection == null) {
+                // 解锁前可能adb连接被强制中断，解锁后立刻尝试恢复一次
+                checkAdbStatus();
+            }
+        }
+    }
 
     /**
      * <p>Reverses the order of the given array.</p>

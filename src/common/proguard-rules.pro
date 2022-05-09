@@ -67,3 +67,8 @@ public com.alipay.hulu.common.utils.patch.PatchContext getContext();
 -keep class ** implements com.alipay.hulu.common.service.base.ExportService { *; }
 
 -keep interface ** extends com.alipay.hulu.common.service.base.ExportService { *; }
+
+-keep interface com.alipay.hulu.common.service.base.AppGuardian { *; }
+-keep @interface com.alipay.hulu.common.service.base.AppGuardian$AppGuardianEnable { *; }
+-keep enum com.alipay.hulu.common.service.base.AppGuardian$ReceiveSystemEvent { *; }
+-keep @interface com.alipay.hulu.common.service.base.LocalService {*;}
