@@ -24,7 +24,6 @@ import com.alipay.hulu.common.service.base.LocalService;
 import com.alipay.hulu.common.utils.ClassUtil;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.PermissionUtil;
-import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.display.items.base.DisplayItem;
 import com.alipay.hulu.shared.display.items.base.Displayable;
 import com.alipay.hulu.shared.display.items.base.RecordPattern;
@@ -143,13 +142,13 @@ public class DisplayProvider implements ExportService {
                 if (annotation != null) {
                     DisplayItemInfo info = new DisplayItemInfo(annotation, clazz);
 
-                    DisplayItemInfo origin = infoMap.get(info.getName());
+                    DisplayItemInfo origin = infoMap.get(info.getKey());
                     if (origin == null) {
-                        infoMap.put(info.getName(), info);
+                        infoMap.put(info.getKey(), info);
                     } else {
                         // 如果level高于原有的level
                         if (origin.level < info.level) {
-                            infoMap.put(info.getName(), info);
+                            infoMap.put(info.getKey(), info);
                         }
                     }
                 }
@@ -310,38 +309,22 @@ public class DisplayProvider implements ExportService {
      * 通过工具类与参数反射生成显示工具并配置参数
      * 工具类需事先 {@link Displayable} 接口，并对需要注入的依赖实现public的设置方法，并在相关方法使用{@link Subscriber}注解
      *
-     * @param name 工具类名称
+     * @param key 工具类名称
      * @return 显示名称与显示工具
      */
-    public boolean startDisplay(String name) {
-        DisplayItemInfo displayItemInfo = allDisplayItems.get(name);
-
-        // 实际启动
-        return startDisplay(displayItemInfo);
-    }
-
-    /**
-     * 通过工具类与参数反射生成显示工具并配置参数
-     * 工具类需事先 {@link Displayable} 接口，并对需要注入的依赖实现public的设置方法，并在相关方法使用{@link Subscriber}注解
-     *
-     * @param name 工具类名称
-     * @return 显示名称与显示工具
-     */
-    public boolean startDisplayByKey(String key) {
-        DisplayItemInfo target = null;
-        for (DisplayItemInfo info: allDisplayItems.values()) {
-            if (StringUtil.equals(key, info.getKey())) {
-                target = info;
-                break;
+    public boolean startDisplay(String key) {
+        DisplayItemInfo displayItemInfo = allDisplayItems.get(key);
+        if (displayItemInfo == null) {
+            for (DisplayItemInfo info: allDisplayItems.values()) {
+                if (info.getName().equals(key)) {
+                    displayItemInfo = info;
+                    break;
+                }
             }
         }
 
-        if (target == null) {
-            LogUtil.w(TAG, "未能找到key[%s]关联的显示项", key);
-        }
-
         // 实际启动
-        return startDisplay(target);
+        return startDisplay(displayItemInfo);
     }
 
     private boolean startDisplay(DisplayItemInfo displayItemInfo) {

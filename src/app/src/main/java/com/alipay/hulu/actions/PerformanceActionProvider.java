@@ -202,7 +202,7 @@ public class PerformanceActionProvider implements ActionProvider {
                 itemView.setOnCheckedChangeListener(listener);
 
                 // 暂存下
-                itemView.setTag(info.getName());
+                itemView.setTag(info.getKey());
 
                 // 添加子节点
                 linearLayout.addView(itemView, params);

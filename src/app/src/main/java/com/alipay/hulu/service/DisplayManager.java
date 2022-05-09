@@ -185,7 +185,7 @@ public class DisplayManager {
         List<DisplayItemInfo> failed = new ArrayList<>();
         if (newItems != null && newItems.size() > 0) {
             for (DisplayItemInfo info : newItems) {
-                boolean result = provider.startDisplay(info.getName());
+                boolean result = provider.startDisplay(info.getKey());
 
                 // 失败项将取消
                 if (result) {

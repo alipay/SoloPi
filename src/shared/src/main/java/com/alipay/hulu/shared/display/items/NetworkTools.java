@@ -33,7 +33,6 @@ import com.alipay.hulu.shared.display.items.base.RecordPattern;
 import com.alipay.hulu.shared.display.items.util.FinalR;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

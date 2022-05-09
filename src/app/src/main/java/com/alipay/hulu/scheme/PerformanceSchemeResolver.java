@@ -138,7 +138,7 @@ public class PerformanceSchemeResolver implements SchemeActionResolver {
                         // 逐项开启
                         displayProvider.stopAllDisplay();
                         for (String key : items) {
-                            displayProvider.startDisplayByKey(key);
+                            displayProvider.startDisplay(key);
                         }
                         displayProvider.startRecording();
                         notification = Notifications.generateNotificationBuilder(context)
