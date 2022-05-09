@@ -21,6 +21,9 @@ import androidx.multidex.MultiDex;
 import static android.content.DialogInterface.BUTTON_NEGATIVE;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 
+import static android.content.DialogInterface.BUTTON_NEGATIVE;
+import static android.content.DialogInterface.BUTTON_POSITIVE;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -34,8 +37,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.Handler;
 import android.os.LocaleList;
@@ -63,12 +64,12 @@ import com.alipay.hulu.common.service.base.LocalService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
 import com.alipay.hulu.common.trigger.Trigger;
 import com.alipay.hulu.common.utils.ClassUtil;
+import com.alipay.hulu.common.utils.ContextUtil;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.SortedList;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.common.utils.patch.PatchLoadResult;
-import com.bumptech.glide.Registry;
 import com.mdit.library.Enhancer;
 import com.mdit.library.EnhancerInterface;
 import com.mdit.library.MethodInterceptor;
@@ -221,11 +222,13 @@ public abstract class LauncherApplication extends Application {
 
         // 初始化过，看看不重新onCreate的影响
         if (finishInit) {
+            super.onCreate();
             LogUtil.e(TAG, "Already initialized");
             return;
         }
 
         finishInit = false;
+        appInstance = this;
         super.onCreate();
         SPService.init(this);
         setApplicationLanguage();
@@ -234,7 +237,6 @@ public abstract class LauncherApplication extends Application {
         ApplicationInfo info = getApplicationInfo();
         DEBUG = (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
 
-        appInstance = this;
         initialLogger();
 
         handler = new Handler();
@@ -368,19 +370,8 @@ public abstract class LauncherApplication extends Application {
      * 设置应用默认语言
      */
     public void setApplicationLanguage() {
-        Resources resources = getApplicationContext().getResources();
-        Configuration config = resources.getConfiguration();
-        Locale locale = getLanguageLocale();
-        config.setLocale(locale);
-        Locale.setDefault(locale);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            LocaleList localeList = new LocaleList(locale);
-            LocaleList.setDefault(localeList);
-            config.setLocales(localeList);
-//            getApplicationContext().createConfigurationContext(config);
-        }
-        resources.updateConfiguration(config, null);
+        Locale.setDefault(getLanguageLocale());
+        ContextUtil.updateResources(this);
     }
 
     /**
@@ -1195,9 +1186,9 @@ public abstract class LauncherApplication extends Application {
     public Locale getLanguageLocale() {
         switch (SPService.getInt(SPService.KEY_USE_LANGUAGE, 0)) {
             case 1:
-                return Locale.CHINESE;
+                return Locale.CHINA;
             case 2:
-                return Locale.ENGLISH;
+                return Locale.US;
             default:
                 return DEFAULT_LOCALE;
         }

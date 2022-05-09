@@ -15,14 +15,12 @@
  */
 package com.alipay.hulu.activity;
 
-import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
@@ -31,21 +29,23 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
-import com.alipay.hulu.R;
-import com.alipay.hulu.common.application.LauncherApplication;
-import com.alipay.hulu.common.utils.ClassUtil;
-import com.alipay.hulu.common.utils.DeviceInfoUtil;
-import com.alipay.hulu.common.utils.LogUtil;
-
-import java.util.HashSet;
-import java.util.Set;
-
 import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+
+import com.alipay.hulu.R;
+import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.utils.ClassUtil;
+import com.alipay.hulu.common.utils.ContextUtil;
+import com.alipay.hulu.common.utils.DeviceInfoUtil;
+import com.alipay.hulu.common.utils.LogUtil;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by lezhou.wyl on 2018/1/28.
@@ -87,30 +87,16 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(createLocaleContext(newBase));
+        super.attachBaseContext(newBase);
+        ContextUtil.updateResources(this);
     }
 
-
-    public static Context createLocaleContext(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            //7.0及以后
-            return updateResourcesForAndroidN(context);
-        } else {
-            //7.0之前
-            Configuration configuration = context.getResources().getConfiguration();
-            configuration.locale = LauncherApplication.getInstance().getLanguageLocale();
-            context.getResources().updateConfiguration(configuration, null);
-            return context;
-        }
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        ContextUtil.updateResources(this);
     }
 
-    @TargetApi(Build.VERSION_CODES.N)
-    private static Context updateResourcesForAndroidN(Context context) {
-        Resources resources = context.getResources();
-        Configuration configuration = resources.getConfiguration();
-        configuration.setLocale(LauncherApplication.getInstance().getLanguageLocale());
-        return context.createConfigurationContext(configuration);
-    }
 
     @Override
     protected void onResume() {

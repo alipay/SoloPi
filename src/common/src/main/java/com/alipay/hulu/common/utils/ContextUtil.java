@@ -19,7 +19,16 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.Build;
+import android.os.LocaleList;
+
 import androidx.appcompat.view.ContextThemeWrapper;
+
+import com.alipay.hulu.common.application.LauncherApplication;
+
+import java.util.Locale;
 
 /**
  * Context工具类
@@ -73,5 +82,17 @@ public class ContextUtil {
             LogUtil.e(TAG, "Catch PackageManager.NameNotFoundException: " + e.getMessage(), e);
         }
         return packageInfo;
+    }
+
+    public static void updateResources(Context context) {
+        Resources resources = context.getResources();
+        Configuration configuration = resources.getConfiguration();
+        Locale locale = LauncherApplication.getInstance().getLanguageLocale();
+        configuration.setLocale(locale);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            configuration.setLocales(new LocaleList(locale));
+            context.createConfigurationContext(configuration);
+        }
+        resources.updateConfiguration(configuration, resources.getDisplayMetrics());
     }
 }

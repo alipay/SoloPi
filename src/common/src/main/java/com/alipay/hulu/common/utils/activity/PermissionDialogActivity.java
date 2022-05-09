@@ -17,23 +17,17 @@ package com.alipay.hulu.common.utils.activity;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.LocaleList;
 import android.os.PowerManager;
 import android.provider.Settings;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import android.text.Html;
 import android.view.Display;
 import android.view.Gravity;
@@ -43,6 +37,10 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 
 import com.alipay.hulu.common.R;
 import com.alipay.hulu.common.application.LauncherApplication;
@@ -69,7 +67,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -1204,22 +1201,14 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
 
     @Override
     protected void attachBaseContext(Context newBase) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            newBase = updateResources(newBase);
-        }
         super.attachBaseContext(newBase);
+        ContextUtil.updateResources(this);
     }
 
-    @TargetApi(Build.VERSION_CODES.N)
-    private static Context updateResources(Context context) {
-
-        Resources resources = context.getResources();
-        Locale locale = LauncherApplication.getInstance().getLanguageLocale();
-
-        Configuration configuration = resources.getConfiguration();
-        configuration.setLocale(locale);
-        configuration.setLocales(new LocaleList(locale));
-        return context.createConfigurationContext(configuration);
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        ContextUtil.updateResources(this);
     }
 
     /**

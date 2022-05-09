@@ -15,7 +15,6 @@
  */
 package com.alipay.hulu.service;
 
-import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -23,14 +22,11 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Build;
-import android.os.LocaleList;
 import android.os.Looper;
 
 import com.alipay.hulu.common.application.LauncherApplication;
-
-import java.util.Locale;
+import com.alipay.hulu.common.utils.ContextUtil;
 
 /**
  * 应用启动的Service，目前只需要FloatWinService来承载
@@ -71,21 +67,14 @@ public abstract class BaseService extends Service {
 
     @Override
     protected void attachBaseContext(Context newBase) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            newBase = updateResources(newBase);
-        }
         super.attachBaseContext(newBase);
+        ContextUtil.updateResources(this);
     }
 
-    @TargetApi(Build.VERSION_CODES.N)
-    private static Context updateResources(Context context) {
-        Resources resources = context.getResources();
-        Locale locale = LauncherApplication.getInstance().getLanguageLocale();
-
-        Configuration configuration = resources.getConfiguration();
-        configuration.setLocale(locale);
-        configuration.setLocales(new LocaleList(locale));
-        return context.createConfigurationContext(configuration);
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        ContextUtil.updateResources(this);
     }
 
     public Notification.Builder generateNotificationBuilder() {
