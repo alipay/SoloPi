@@ -1683,8 +1683,11 @@ public class FunctionSelectUtil {
         ((WindowManager) LauncherApplication.getInstance().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRealMetrics(metrics);
 
         ScreenCaptureService captureService = LauncherApplication.service(ScreenCaptureService.class);
-        Bitmap bitmap = captureService.captureScreen(captureFile, metrics.widthPixels, metrics.heightPixels,
-                metrics.widthPixels, metrics.heightPixels);
+        Bitmap bitmap = null;
+        if (captureService != null) {
+            bitmap = captureService.captureScreen(captureFile, metrics.widthPixels, metrics.heightPixels,
+                    metrics.widthPixels, metrics.heightPixels);
+        }
         // 原有截图方案失败
         if (bitmap == null) {
             String path = FileUtils.getPathInShell(captureFile);
