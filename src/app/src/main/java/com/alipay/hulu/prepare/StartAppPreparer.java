@@ -61,7 +61,7 @@ public class StartAppPreparer implements PrepareWorker {
             // 处理清理数据后弹出的权限弹窗
             final CountDownLatch latch = new CountDownLatch(1);
             OperationMethod method = new OperationMethod(PerformActionEnum.HANDLE_ALERT);
-            service.doSomeAction(method, null, new OperationContext.OperationListener() {
+            service.doSomeAction(method, null, new OperationContext.BaseOperationListener() {
                 @Override
                 public void notifyOperationFinish() {
                     latch.countDown();

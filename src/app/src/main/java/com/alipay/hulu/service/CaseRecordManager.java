@@ -176,6 +176,8 @@ public class CaseRecordManager implements ExportService {
 
     protected OperationStepExporter stepProvider;
 
+    protected volatile OperationContext executingContext;
+
     private WindowManager windowManager;
 
     protected String app;
@@ -198,9 +200,17 @@ public class CaseRecordManager implements ExportService {
     // 截图服务
     private ScreenCaptureService captureService;
 
-    private static FloatWinService.OnFloatListener DEFAULT_FLOAT_LISTENER = new FloatWinService.OnFloatListener() {
+    private FloatWinService.OnFloatListener DEFAULT_FLOAT_LISTENER = new FloatWinService.OnFloatListener() {
         @Override
         public void onFloatClick(boolean hide) {
+            if (isRecording && isExecuting) {
+                if (executingContext != null) {
+                    executingContext.cancelRunning();
+                }
+                setServiceToTouchBlockMode();
+                operationService.invalidRoot();
+                notifyDialogDismiss(1000);
+            }
         }
     };
 
@@ -684,6 +694,17 @@ public class CaseRecordManager implements ExportService {
 
         // 只针对显示dialog的情况
         if (displayDialog || pauseFlag || nodeLoading || isExecuting || !isRecording) {
+            if (isExecuting && isRecording) {
+                if (binder.checkInFloat(point)) {
+                    LogUtil.i(TAG, "录制时点到了SoloPi");
+                    if (executingContext != null) {
+                        executingContext.cancelRunning();
+                    }
+                    setServiceToTouchBlockMode();
+                    operationService.invalidRoot();
+                    notifyDialogDismiss(1000);
+                }
+            }
             return;
         }
 
@@ -1098,6 +1119,11 @@ public class CaseRecordManager implements ExportService {
                         notifyDialogDismiss(100);
                     }
                     updateFloatIcon(R.drawable.solopi_float);
+                }
+
+                @Override
+                public void onContextReceive(OperationContext context) {
+                    executingContext = context;
                 }
             });
         } catch (Exception e) {
@@ -1835,7 +1861,7 @@ public class CaseRecordManager implements ExportService {
             managerRef.get().provideDisplayContent(binder);
             binder.registerRunClickListener(managerRef.get().listener);
             binder.registerStopClickListener(managerRef.get().stopListener);
-            binder.registerFloatClickListener(DEFAULT_FLOAT_LISTENER);
+            binder.registerFloatClickListener(managerRef.get().DEFAULT_FLOAT_LISTENER);
         }
 
         @Override

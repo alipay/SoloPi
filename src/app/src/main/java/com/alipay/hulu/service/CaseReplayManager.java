@@ -152,6 +152,8 @@ public class CaseReplayManager implements ExportService {
      */
     private InjectorService injectorService;
 
+    private volatile OperationContext runningContext;
+
     /**
      * 用例运行器
      */
@@ -551,6 +553,9 @@ public class CaseReplayManager implements ExportService {
 
     public void stopRunning() {
         this.runningFlag = false;
+        if (runningContext != null) {
+            runningContext.cancelRunning();
+        }
     }
 
 
@@ -611,9 +616,15 @@ public class CaseReplayManager implements ExportService {
                 LogUtil.d(TAG, "当前操作【%s】执行完毕，执行耗时: %dms", method.getActionEnum().getDesc(), System.currentTimeMillis() - startTime);
                 runningFlag.countDown();
             }
+
+            @Override
+            public void onContextReceive(OperationContext context) {
+                runningContext = context;
+            }
         };
 
         // 对于需要操作节点的记录
+        AbstractNodeTree node = null;
         if (operation.getOperationNode() != null) {
             // 解析Node数据
             OperationNode origin = new OperationNode(operation.getOperationNode(), operationService);
@@ -624,8 +635,6 @@ public class CaseReplayManager implements ExportService {
                 MiscUtil.sleep(500);
             }
             List<String> prepareActions = new ArrayList<>();
-
-            AbstractNodeTree node = null;
             if (operation.getOperationMethod().getActionEnum() == PerformActionEnum.CLICK_IF_EXISTS) {
                 node = OperationUtil.findAbstractNodeWithoutScroll(origin, operationService, prepareActions);
 
@@ -724,60 +733,51 @@ public class CaseReplayManager implements ExportService {
                 // 高亮下
                 highLightAndRemove(node, operation.getOperationMethod());
             }
-
-            // 执行操作
-            boolean result = operationService.doSomeAction(operation.getOperationMethod(), node, listener);
-            if (!result) {
-                return "执行失败";
-            }
-
-            OperationNode opNode = OperationStepExporter.exportNodeToOperationNode(node);
-
-            // 等待操作结束
-            try {
-                runningFlag.await(600 * 100, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
-            }
-
-            // 输入操作会较耗时，需要等待下
-            if (method.getActionEnum() == PerformActionEnum.INPUT
-                    || method.getActionEnum() == PerformActionEnum.INPUT_SEARCH
-                    || method.getActionEnum() == PerformActionEnum.CLICK_AND_INPUT) {
-                MiscUtil.sleep(1000);
-                watcher.sleepUntilContentDontChange();
-            }
-
-            stepInfoBean.setFindNode(opNode);
-
-            provider.onStepInfo(stepInfoBean);
         } else {
             // 前一次操作时间有记录，需要Sleep这段时间
             watcher.sleepUntilContentDontChange();
-
-            // 对于全局操作，直接执行
-            boolean result = operationService.doSomeAction(method, null, listener);
-            if (!result) {
-                return "执行失败";
-            }
-
-            // 成功执行，需要等待10分钟
-            // 等待操作结束
-            if (operation.getOperationMethod().getActionEnum() != PerformActionEnum.SLEEP) {
-                try {
-                    runningFlag.await(600, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
-                }
-            } else {
-                // SLEEP特殊处理，等待1小时
-                try {
-                    runningFlag.await(60, TimeUnit.MINUTES);
-                } catch (InterruptedException e) {
-                    LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
-                }
-            }
         }
+
+
+        // 执行操作
+        boolean result = operationService.doSomeAction(operation.getOperationMethod(), node, listener);
+        if (!result) {
+            return "执行失败";
+        }
+
+        OperationNode opNode = null;
+        if (node != null) {
+            opNode = OperationStepExporter.exportNodeToOperationNode(node);
+        }
+
+        // 等待操作结束
+        long sleepTime;
+        // 成功执行，需要等待10分钟
+        // 等待操作结束
+        if (node != null) {
+            sleepTime = 60;
+        } else if (operation.getOperationMethod().getActionEnum() != PerformActionEnum.SLEEP) {
+            sleepTime = 600;
+        } else {
+            sleepTime = 60 * 60;
+        }
+        try {
+            runningFlag.await(sleepTime, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            LogUtil.e(TAG, "Catch java.lang.InterruptedException: " + e.getMessage(), e);
+        }
+
+        // 输入操作会较耗时，需要等待下
+        if (method.getActionEnum() == PerformActionEnum.INPUT
+                || method.getActionEnum() == PerformActionEnum.INPUT_SEARCH
+                || method.getActionEnum() == PerformActionEnum.CLICK_AND_INPUT) {
+            MiscUtil.sleep(1000);
+            watcher.sleepUntilContentDontChange();
+        }
+
+        stepInfoBean.setFindNode(opNode);
+
+        provider.onStepInfo(stepInfoBean);
         LogUtil.d(TAG, "操作执行完毕");
         return null;
     }

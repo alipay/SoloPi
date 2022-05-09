@@ -497,7 +497,7 @@ public class OperationStepProvider extends AbstractStepProvider {
 
         final CountDownLatch latch = new CountDownLatch(1);
         // 执行截图操作
-        operationService.doSomeAction(method, null, new OperationContext.OperationListener() {
+        operationService.doSomeAction(method, null, new OperationContext.BaseOperationListener() {
             @Override
             public void notifyOperationFinish() {
                 latch.countDown();

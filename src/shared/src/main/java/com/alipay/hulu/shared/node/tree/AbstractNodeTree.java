@@ -171,8 +171,15 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
                     clickDuration = Integer.parseInt(longClickTime);
                 }
 
-                context.executor.executePress(x, y, clickDuration);
-                break;
+                final int finalClickDuration = clickDuration;
+                context.notifyOnFinish(new Runnable() {
+                    @Override
+                    public void run() {
+                        context.executor.executePress(finalX, finalY, finalClickDuration);
+                    }
+                });
+                return 1;
+//                break;
             case ASSERT:
                 LogUtil.i(TAG, "Start Assert");
                 return NodeTreeUtil.performAssertAction(this, method)? 0: -1;
@@ -230,122 +237,74 @@ public abstract class AbstractNodeTree implements Iterable<AbstractNodeTree> {
                 });
                 return 1;
             case SCROLL_TO_TOP:
-                LogUtil.i(TAG, "Start ADB scroll " + x + "," + y);
-                int fromHeight = y;
-                if (fromHeight > screenHeight - 40) {
-                    fromHeight = screenHeight - 40;
-
-                    // 控件不可见
-                    if (fromHeight <= rect.top) {
-                        return -1;
-                    }
-                }
-
-                int scroll = height;
-                if (method.containsParam(OperationExecutor.INPUT_TEXT_KEY)) {
-                    String content = method.getParam(OperationExecutor.INPUT_TEXT_KEY);
-                    if (!StringUtil.isEmpty(content)) {
-                        try {
-                            scroll = (int) (Integer.parseInt(content) / 100f * height);
-                        } catch (NumberFormatException e) {
-                            LogUtil.e(TAG, "Content %s is not integer", content);
-                        }
-                    }
-                }
-
-                int toHeight = fromHeight - scroll;
-                if (toHeight < 40) {
-                    toHeight = 40;
-                }
-                context.executor.executeScroll(x, fromHeight, x, toHeight, 300);;
-                break;
             case SCROLL_TO_BOTTOM:
-                LogUtil.i(TAG, "Start ADB scroll " + x + "," + y);
-                fromHeight = y;
-                if (fromHeight < 40) {
-                    fromHeight = 40;
-
-                    // 控件不可见
-                    if (fromHeight >= rect.bottom) {
-                        return -1;
-                    }
-                }
-
-                scroll = height;
-                if (method.containsParam(OperationExecutor.INPUT_TEXT_KEY)) {
-                    String content = method.getParam(OperationExecutor.INPUT_TEXT_KEY);
-                    if (!StringUtil.isEmpty(content)) {
-                        try {
-                            scroll = (int) (Integer.parseInt(content) / 100f * height);
-                        } catch (NumberFormatException e) {
-                            LogUtil.e(TAG, "Content %s is not integer", content);
-                        }
-                    }
-                }
-
-                toHeight = fromHeight + scroll;
-                if (toHeight > screenHeight - 40) {
-                    toHeight = screenHeight - 40;
-                }
-
-                context.executor.executeScrollSync(x, y, x, toHeight, 300);
-                break;
+            case SCROLL_TO_LEFT:
             case SCROLL_TO_RIGHT:
                 LogUtil.i(TAG, "Start ADB scroll " + x + "," + y);
+                int fromY = y;
                 int fromX = x;
+                if (fromY > screenHeight - 40) {
+                    fromY = screenHeight - 40;
+                }
+                if (fromY < 40) {
+                    fromY = 40;
+                }
                 if (fromX < 10) {
                     fromX = 10;
-                    if (fromX >= rect.right) {
-                        return -1;
-                    }
                 }
-
-                scroll = width;
-                if (method.containsParam(OperationExecutor.INPUT_TEXT_KEY)) {
-                    String content = method.getParam(OperationExecutor.INPUT_TEXT_KEY);
-                    if (!StringUtil.isEmpty(content)) {
-                        try {
-                            scroll = (int) (Integer.parseInt(content) / 100f * width);
-                        } catch (NumberFormatException e) {
-                            LogUtil.e(TAG, "Content %s is not integer", content);
-                        }
-                    }
-                }
-
-                int toX = fromX + scroll;
-                if (toX > screenWidth - 10) {
-                    toX = screenWidth - 10;
-                }
-                context.executor.executeScrollSync(fromX, y, toX, y, 300);
-                break;
-            case SCROLL_TO_LEFT:
-                LogUtil.i(TAG, "Start ADB scroll " + x + "," + y);
-                fromX = x;
                 if (fromX > screenWidth - 10) {
                     fromX = screenWidth - 10;
-                    if (fromX <= rect.left) {
-                        return -1;
-                    }
                 }
 
-                scroll = width;
+                int toX = fromX, toY  = fromY;
+
+                float scrollPercent = 1F;
                 if (method.containsParam(OperationExecutor.INPUT_TEXT_KEY)) {
                     String content = method.getParam(OperationExecutor.INPUT_TEXT_KEY);
                     if (!StringUtil.isEmpty(content)) {
                         try {
-                            scroll = (int) (Integer.parseInt(content) / 100f * width);
+                            scrollPercent = Integer.parseInt(content) / 100f;
                         } catch (NumberFormatException e) {
                             LogUtil.e(TAG, "Content %s is not integer", content);
                         }
                     }
                 }
+                if (action == PerformActionEnum.SCROLL_TO_BOTTOM || action == PerformActionEnum.SCROLL_TO_TOP) {
+                    int scroll = (int) (scrollPercent * height);
+                    if (action == PerformActionEnum.SCROLL_TO_TOP) {
+                        toY = fromY - scroll;
+                    } else {
+                        toY = fromY + scroll;
+                    }
+                } else {
+                    int scroll = (int) (scrollPercent * width);
+                    if (action == PerformActionEnum.SCROLL_TO_LEFT) {
+                        toX = fromX - scroll;
+                    } else {
+                        toX = fromX + scroll;
+                    }
+                }
 
-                toX = fromX - scroll;
+                if (toY > screenHeight - 40) {
+                    toY = screenHeight - 40;
+                }
+                if (toY < 40) {
+                    toY = 40;
+                }
                 if (toX < 10) {
                     toX = 10;
                 }
-                context.executor.executeScrollSync(fromX, y, toX, y, 300);
-                break;
+                if (toX > screenWidth - 10) {
+                    toX = screenWidth - 10;
+                }
+                final int fx = fromX, fy = fromY, tx = toX, ty = toY;
+                context.notifyOnFinish(new Runnable() {
+                    @Override
+                    public void run() {
+                        context.executor.executeScroll(fx, fy, tx, ty, 300);;
+                    }
+                });
+                return 1;
             case INPUT:
                 final String inputText = method.getParam(OperationExecutor.INPUT_TEXT_KEY);
                 if (StringUtil.isEmpty(inputText)) {

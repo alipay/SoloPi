@@ -415,13 +415,17 @@ public class OperationExecutor {
             }
         }
 
-        int result;
-        if (operationFlag) {
-            // 由节点自身去处理
-            result = targetNode.performAction(method, opContext);
-        } else {
-            // 强制执行
-            result = forceAction(method, node, opContext);
+        int result = -1;
+        try {
+            if (operationFlag) {
+                // 由节点自身去处理
+                result = targetNode.performAction(method, opContext);
+            } else {
+                // 强制执行
+                result = forceAction(method, node, opContext);
+            }
+        } catch (Exception e) {
+            LogUtil.e(TAG, "执行控件操作失败", e);
         }
 
         operationManagerRef.get().invalidRoot();
@@ -824,9 +828,10 @@ public class OperationExecutor {
                             long startTime = System.currentTimeMillis();
                             long sleeper;
                             // 防止sleep不够
-                            while ((sleeper = System.currentTimeMillis() - startTime) < finalCount - 10) {
+                            if ((sleeper = System.currentTimeMillis() - startTime) < finalCount - 10) {
                                 MiscUtil.sleep(finalCount - sleeper);
                             }
+                            LogUtil.i(TAG, "Sleep time: %dms", (System.currentTimeMillis() - startTime));
                         }
                     });
                     return true;
@@ -876,7 +881,7 @@ public class OperationExecutor {
                 injectorService.pushMessage(null, message, false);
                 break;
             case SCREENSHOT:
-                String screenShot = method.getParam(INPUT_TEXT_KEY);
+                final String screenShot = method.getParam(INPUT_TEXT_KEY);
                 if (StringUtil.isEmpty(screenShot)) {
                     return false;
                 }
@@ -898,6 +903,8 @@ public class OperationExecutor {
                                         opContext.screenHeight, opContext.screenWidth, opContext.screenHeight);
                                 if (bit != null) {
                                     return;
+                                } else {
+                                    screenshot.delete();
                                 }
                             }
 

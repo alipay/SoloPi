@@ -17,6 +17,7 @@ package com.alipay.hulu.shared.node.action;
 
 import com.alipay.hulu.common.utils.LogUtil;
 
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -29,9 +30,15 @@ public class OperationContext {
     private OperationListener listener;
     public OperationExecutor opExecutor;
     public NodeKeyBoard keyBoard;
+    private volatile Thread currentThread;
+    private volatile Future<?> future;
 
     public int screenWidth;
     public int screenHeight;
+
+    public OperationContext() {
+        currentThread = Thread.currentThread();
+    }
 
     /**
      * 后台执行并通知完成
@@ -44,7 +51,11 @@ public class OperationContext {
                 try {
                     runnable.run();
                 } catch (Throwable e) {
-                    LogUtil.e("OperationContext", "execute background action throw " + e.getMessage(), e);
+                    if (e instanceof InterruptedException) {
+                        LogUtil.i("OperationContext", "任务强制中断");
+                    } else {
+                        LogUtil.e("OperationContext", "execute background action throw " + e.getMessage(), e);
+                    }
                 } finally {
                     // 清理当前结构
                     opExecutor.invalidRoot();
@@ -53,13 +64,24 @@ public class OperationContext {
             }
         };
 
-        executor.execute(wrapper);
+        future = executor.execute(wrapper);
+    }
+
+    public void cancelRunning() {
+        currentThread.interrupt();
+        if (future != null) {
+            future.cancel(true);
+        }
+        notifyOperationFinish();
     }
 
     /**
      * 通知执行完成
      */
     public void notifyOperationFinish() {
+        if (future != null) {
+            future = null;
+        }
         if (listener != null && !notifyStatus.getAndSet(true)) {
             listener.notifyOperationFinish();
         }
@@ -70,15 +92,24 @@ public class OperationContext {
 
     public void setListener(OperationListener listener) {
         this.listener = listener;
+        if (listener != null) {
+            listener.onContextReceive(this);
+        }
     }
 
     /**
      * 操作执行回调
      */
     public interface OperationListener {
+        void onContextReceive(OperationContext context);
         /**
          * 通知执行完成
          */
         void notifyOperationFinish();
+    }
+
+    public static abstract class BaseOperationListener implements OperationListener {
+        public void onContextReceive(OperationContext context) {
+        }
     }
 }

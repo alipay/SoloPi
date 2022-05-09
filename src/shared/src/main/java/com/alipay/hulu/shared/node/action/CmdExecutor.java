@@ -27,6 +27,7 @@ import com.android.permission.rom.RomUtils;
 
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -322,7 +323,7 @@ public class CmdExecutor {
      * 执行runnable
      * @param runnable
      */
-    public void execute(Runnable runnable) {
-        executorService.execute(runnable);
+    public Future<?> execute(Runnable runnable) {
+        return executorService.submit(runnable);
     }
 }
