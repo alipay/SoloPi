@@ -16,6 +16,7 @@
 package com.alipay.hulu.shared.display.items;
 
 import com.alipay.hulu.common.tools.CmdTools;
+import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.R;
 import com.alipay.hulu.shared.display.items.base.DisplayItem;
@@ -30,9 +31,11 @@ import java.util.Map;
 
 @DisplayItem(key = "Temperature", nameRes = FinalR.TEMPERATURE, permissions = "adb")
 public class TemperatureTools implements Displayable {
+    private static final String TAG = TemperatureTools.class.getSimpleName();
     private static final String[] TEMPERATURE_FILE_LIST = new String[] {
             "/sys/devices/system/cpu/cpu0/cpufreq/cpu_temp",
             "/sys/devices/system/cpu/cpu0/cpufreq/FakeShmoo_cpu_temp",
+            "/sys/class/thermal/thermal_zone0/temp",
             "/sys/class/thermal/thermal_zone1/temp",
             "/sys/class/i2c-adapter/i2c-4/4-004c/temperature",
             "/sys/devices/platform/tegra-i2c.3/i2c-4/4-004c/temperature",
@@ -40,37 +43,63 @@ public class TemperatureTools implements Displayable {
             "/sys/devices/platform/tegra_tmon/temp1_input",
             "/sys/kernel/debug/tegra_thermal/temp_tj",
             "/sys/devices/platform/s5p-tmu/temperature",
-            "/sys/class/thermal/thermal_zone0/temp",
             "/sys/devices/virtual/thermal/thermal_zone0/temp",
             "/sys/class/hwmon/hwmon0/device/temp1_input",
             "/sys/devices/virtual/thermal/thermal_zone1/temp",
             "/sys/devices/platform/s5p-tmu/curr_temp"
     };
+    private static String TARGET_FILE_DIR = null;
 
     private List<RecordPattern.RecordItem> cpuRecord;
-    private static int TARGET_FILE = -1;
 
-    private static int getTargetFileIdx() {
-        int i;
-        for (i = 0; i < TEMPERATURE_FILE_LIST.length; i++) {
+    private static String getTargetFileIdx() {
+        String pathFromThermal = getPathFromThermal();
+        if (StringUtil.isNotEmpty(pathFromThermal)) {
+            return pathFromThermal;
+        }
+        for (int i = 0; i < TEMPERATURE_FILE_LIST.length; i++) {
             String file = TEMPERATURE_FILE_LIST[i];
             String content = CmdTools.execHighPrivilegeCmd("cat " + file);
-            if (StringUtil.isInteger(content.trim())) {
-                return i;
+            if (StringUtil.isInteger(content.trim()) && Integer.parseInt(content.trim()) > 0) {
+                return TEMPERATURE_FILE_LIST[i];
             }
         }
-        return i;
+        return "";
     }
 
-    private static float readCurrentCpuTemperature() {
-        if (TARGET_FILE >= TEMPERATURE_FILE_LIST.length) {
-            return -1;
-        }
-        if (TARGET_FILE < 0) {
-            TARGET_FILE = getTargetFileIdx();
+    /**
+     * 从Thermal文件夹中读取类型
+     * @return
+     */
+    private static String getPathFromThermal() {
+        String result = CmdTools.execHighPrivilegeCmd("for f in /sys/class/thermal/thermal_zone*/type\ndo\necho \"$f:$(cat $f)\"\ndone");
+        LogUtil.i(TAG, "Read temperature types:" + result);
+        if (StringUtil.contains(result, "/sys/class/thermal/thermal_zone0/type")) {
+            String[] lines = StringUtil.split(result, "\n");
+            for (String line: lines) {
+                if (line.contains(":cpu-0-0")) {
+                    String prefix = line.split(":")[0];
+                    if (prefix.endsWith("/type")) {
+                        return prefix.substring(0, prefix.length() - 5) + "/temp";
+                    }
+                }
+            }
         }
 
-        String content = CmdTools.execHighPrivilegeCmd("cat " + TEMPERATURE_FILE_LIST[TARGET_FILE]);
+        return null;
+    }
+    private static float readCurrentCpuTemperature() {
+        if ("".equals(TARGET_FILE_DIR)) {
+            return -1;
+        }
+        if (TARGET_FILE_DIR == null) {
+            TARGET_FILE_DIR = getTargetFileIdx();
+        }
+        if ("".equals(TARGET_FILE_DIR)) {
+            return -1;
+        }
+
+        String content = CmdTools.execHighPrivilegeCmd("cat " + TARGET_FILE_DIR);
         return Integer.parseInt(content.trim()) / 1000F;
     }
 
