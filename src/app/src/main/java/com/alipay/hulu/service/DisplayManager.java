@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.alipay.hulu.R;
+import com.alipay.hulu.adapter.FloatStressAdapter;
 import com.alipay.hulu.adapter.FloatWinAdapter;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.injector.InjectorService;
@@ -71,6 +72,8 @@ public class DisplayManager {
 
     private FloatWinAdapter floatWinAdapter;
 
+    private FloatStressAdapter floatStressAdapter;
+
     private int runningMode;
     private volatile boolean runningFlag = true;
 
@@ -89,6 +92,10 @@ public class DisplayManager {
     private InjectorService injectorService;
 
     private RecyclerView floatWinList;
+
+    private RecyclerView floatStressList;
+
+    private View floatStressHide;
 
     private DisplayConnection connection;
 
@@ -284,8 +291,8 @@ public class DisplayManager {
         if (runningMode == DisplayProvider.RECORDING_MODE) {
             return null;
         }
-
-        floatWinList = (RecyclerView) LayoutInflater.from(context).inflate(R.layout.display_main_layout, null);
+        View root = LayoutInflater.from(context).inflate(R.layout.display_main_layout, null);
+        floatWinList = root.findViewById(R.id.float_recycler_view);
         floatWinList.setLayoutManager(new LinearLayoutManager(context));
         floatWinList.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -300,7 +307,37 @@ public class DisplayManager {
         floatWinList.addItemDecoration(new RecycleViewDivider(context,
                 LinearLayoutManager.HORIZONTAL, 1, context.getResources().getColor(R.color.divider_color)));
 
-        return floatWinList;
+        floatStressList = root.findViewById(R.id.float_stress_recycler_view);
+
+        floatStressList.setLayoutManager(new LinearLayoutManager(context));
+        floatStressList.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return false;
+            }
+        });
+
+        floatStressAdapter = new FloatStressAdapter(context);
+        floatStressList.setAdapter(floatStressAdapter);
+        // 添加分割线
+        floatStressList.addItemDecoration(new RecycleViewDivider(context,
+                LinearLayoutManager.HORIZONTAL, 1, context.getResources().getColor(R.color.divider_color)));
+
+        floatStressHide = root.findViewById(R.id.float_stress_hide);
+        floatStressHide.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (floatStressList.getVisibility() == View.VISIBLE) {
+                    floatStressHide.setRotation(0);
+                    floatStressList.setVisibility(View.GONE);
+                } else {
+                    floatStressHide.setRotation(180);
+                    floatStressList.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        return root;
     }
 
     private View provideExpendView(Context context) {

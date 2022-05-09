@@ -16,6 +16,7 @@
 package com.alipay.hulu.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -176,6 +177,14 @@ public class PerformStressAdapter extends BaseAdapter {
 						default:
 							return;
 					}
+					// 超过一半，将颜色变成红色，提示危险
+					if (position == 2) {
+						if (progress > arg0.getMax() / 2) {
+							finalHolder.data.setTextColor(Color.RED);
+						} else {
+							finalHolder.data.setTextColor(finalHolder.data.getResources().getColor(R.color.secondaryText));
+						}
+					}
 					finalHolder.data.setText(String.valueOf(progress));
 				}
 			}
@@ -220,6 +229,11 @@ public class PerformStressAdapter extends BaseAdapter {
 				break;
 			case 2:
 				holder.sBar.setProgress(memory);
+				if (memory > holder.sBar.getMax() / 2) {
+					holder.data.setTextColor(Color.RED);
+				} else {
+					holder.data.setTextColor(holder.data.getResources().getColor(R.color.secondaryText));
+				}
 				holder.data.setText(Integer.toString(memory));
 				break;
 		}

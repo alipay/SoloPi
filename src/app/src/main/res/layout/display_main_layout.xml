@@ -13,10 +13,31 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
 -->
-<androidx.recyclerview.widget.RecyclerView android:id="@+id/float_recycler_view"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/control_float_title_width"
-    android:layout_height="wrap_content"
-    android:clickable="true"
-    android:filterTouchesWhenObscured="false"
-    android:focusable="false"
-    xmlns:android="http://schemas.android.com/apk/res/android" />
+    android:orientation="vertical"
+    android:layout_height="wrap_content">
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/float_recycler_view"
+        android:layout_width="@dimen/control_float_title_width"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:filterTouchesWhenObscured="false"
+        android:focusable="false"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/float_stress_recycler_view"
+        android:layout_width="@dimen/control_float_title_width"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:filterTouchesWhenObscured="false"
+        android:focusable="false"/>
+    <ImageView
+        android:id="@+id/float_stress_hide"
+        android:layout_width="@dimen/control_float_title_width"
+        android:layout_height="@dimen/control_dp16"
+        android:padding="@dimen/control_dp2"
+        android:scaleType="fitCenter"
+        android:rotation="180"
+        android:src="@drawable/angel"/>
+</LinearLayout>
