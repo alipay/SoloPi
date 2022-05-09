@@ -93,12 +93,13 @@ public class RecordUtil {
                     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(saveFile), charset));
 
                     // 第一行写标题
-                    writer.write("RecordTime," + pattern.getName() + "(" + pattern.getUnit() + "),extra\n");
+                    writer.write("RecordTime," + pattern.getName() + "(" + pattern.getUnit() + "),extra,SimpleTime\n");
                     writer.flush();
+                    long dataStartTime = entry.getKey().getStartTime();
 
                     // 写入录制
                     for (RecordPattern.RecordItem item: entry.getValue()) {
-                        writer.write(item.time + "," + item.value + "," + item.extra + "\n");
+                        writer.write(item.time + "," + item.value + "," + item.extra + "," + (item.time - dataStartTime) / 1000F + "\n");
                         writer.flush();
                     }
                     writer.close();

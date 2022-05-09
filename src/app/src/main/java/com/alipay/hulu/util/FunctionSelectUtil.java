@@ -1411,7 +1411,7 @@ public class FunctionSelectUtil {
 
         } catch (Exception e) {
             LogUtil.e(TAG, "Throw exception: " + e.getMessage(), e);
-
+            listener.onCancel();
         }
     }
 
@@ -1669,6 +1669,7 @@ public class FunctionSelectUtil {
 
         } catch (Exception e) {
             LogUtil.e(TAG, "Login info dialog throw exception: " + e.getMessage(), e);
+            listener.onCancel();
         }
     }
 

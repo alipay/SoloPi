@@ -27,6 +27,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatSpinner;
 
 import com.alipay.hulu.R;
+import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
@@ -37,8 +38,11 @@ import com.alipay.hulu.ui.linechart.CheckableLineChartView;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -238,8 +242,18 @@ public class PerformanceChartActivity extends BaseActivity {
                     } else {
                         // 重新构造录制文件名称
                         File f = new File(currentFolder, realPattern.getName() + "_" + realPattern.getSource() + "_" + realPattern.getStartTime() + "_" + realPattern.getEndTime() + ".csv");
+
+                        // 加载编码信息
+                        String charsetName = SPService.getString(SPService.KEY_OUTPUT_CHARSET, "GBK");
+                        Charset charset;
                         try {
-                            BufferedReader reader = new BufferedReader(new FileReader(f));
+                            charset = Charset.forName(charsetName);
+                        } catch (UnsupportedCharsetException e) {
+                            LogUtil.w(TAG, "unsupported charset for name=" + charsetName, e);
+                            charset = Charset.forName("UTF-8");
+                        }
+                        try {
+                            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(f), charset));
                             String dataTitle = reader.readLine();
                             // 首行定义数据单位
                             if (dataTitle != null) {
@@ -253,7 +267,7 @@ public class PerformanceChartActivity extends BaseActivity {
                             while ((line = reader.readLine()) != null) {
                                 String[] contents = line.split(",");
                                 LogUtil.d(TAG, "read line: %s", Arrays.toString(contents));
-                                if (contents.length == 3) {
+                                if (contents.length == 3 || contents.length == 4) {
                                     RecordPattern.RecordItem item = new RecordPattern.RecordItem(Long.parseLong(contents[0]), Float.parseFloat(contents[1]), contents[2]);
                                     records.add(item);
                                 } else if (contents.length == 2) {
