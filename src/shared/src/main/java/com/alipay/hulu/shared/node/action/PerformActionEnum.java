@@ -99,6 +99,8 @@ public enum PerformActionEnum {
     /**
      * 本地模式专用 5
      */
+    FORCE_STOP("forceStop", R.string.action__force_stop, 6, 2, R.drawable.dialog_action_drawable_cancel),
+    NORMAL_EXIT("slaveExit", R.string.action__normal_exit, 6, 2, R.drawable.dialog_action_drawable_cancel),
 
     /**
      * 内部操作，不对外

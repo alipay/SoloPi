@@ -74,8 +74,9 @@ public class PatchRequest {
             return;
         }
 
+        String cpuAbi = DeviceInfoUtil.getCPUABIInArm();
         // 替换ABI参数
-        String realUrl = StringUtil.patternReplace(storedUrl, "<abi>", filterAcceptAbi(DeviceInfoUtil.getCPUABI()));
+        String realUrl = StringUtil.patternReplace(storedUrl, "<abi>", cpuAbi);
 
         LogUtil.i(TAG, "Start request patch list on: " + realUrl);
 
@@ -229,18 +230,6 @@ public class PatchRequest {
             add("arm64-v8a");
         }
     };
-
-    /**
-     * 过滤可用ABI
-     * @param abi
-     * @return
-     */
-    private static String filterAcceptAbi(String abi) {
-        if (ACCEPT_ABI.contains(abi)) {
-            return abi;
-        }
-        return "armeabi-v7a";
-    }
 
     public interface LoadPatchCallback {
         void onLoaded();

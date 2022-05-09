@@ -28,7 +28,9 @@ import java.io.FileReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
 
 
 /**
@@ -97,6 +99,27 @@ public class DeviceInfoUtil {
         } else {
             return Build.SUPPORTED_ABIS[0];
         }
+    }
+
+    /**
+     * 兼容X86的arm64-v8a或armeabi-v7a，兜底armeabi
+     * @return
+     */
+    public static String getCPUABIInArm() {
+        List<String> supportAbis;
+        if (Build.VERSION.SDK_INT < 21) {
+            String originAbi = Build.CPU_ABI;
+            String secondAbi = Build.CPU_ABI2;
+            supportAbis = Arrays.asList(originAbi, secondAbi);
+        } else {
+            supportAbis = Arrays.asList(Build.SUPPORTED_ABIS);
+        }
+        if (supportAbis.contains("arm64-v8a")) {
+            return "arm64-v8a";
+        } else if (supportAbis.contains("armeabi-v7a")) {
+            return "armeabi-v7a";
+        }
+        return "armeabi";
     }
 
     public static String getIP() {

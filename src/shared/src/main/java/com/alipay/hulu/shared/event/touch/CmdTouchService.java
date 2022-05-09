@@ -24,6 +24,7 @@ import com.alipay.hulu.common.service.TouchService;
 import com.alipay.hulu.common.service.base.LocalService;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
+import com.alipay.hulu.common.utils.MiscUtil;
 
 /**
  * Created by qiaoruikai on 2019/12/2 2:22 PM.
@@ -44,10 +45,15 @@ public class CmdTouchService implements TouchService {
 
     @Override
     public void scroll(int x1, int y1, int x2, int y2, int scrollTime) {
+        long currentTime = System.currentTimeMillis();
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             CmdTools.execHighPrivilegeCmd("input swipe " + x1 + " " + y1 + " " + x2 + " " + y2);
         } else {
             CmdTools.execHighPrivilegeCmd("input swipe " + x1 + " " + y1 + " " + x2 + " " + y2 + " " + scrollTime);
+        }
+        long timeToSleep = currentTime + scrollTime - System.currentTimeMillis();
+        if (timeToSleep > 0) {
+            MiscUtil.sleep(timeToSleep);
         }
     }
 

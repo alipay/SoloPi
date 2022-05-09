@@ -367,7 +367,7 @@ public class StringUtil {
      * @param contents
      * @return
      */
-    public static String join(CharSequence joiner, List<String> contents) {
+    public static String join(CharSequence joiner, List<? extends Object> contents) {
         if (contents == null || contents.size() == 0) {
             return "";
         }
@@ -385,7 +385,7 @@ public class StringUtil {
      * @param contents
      * @return
      */
-    public static String join(CharSequence joiner, CharSequence... contents) {
+    public static <T extends Object> String join(CharSequence joiner, T... contents) {
         if (contents == null || contents.length == 0) {
             return "";
         }

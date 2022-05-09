@@ -1378,7 +1378,7 @@ public class CaseRecordManager implements ExportService {
                         CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
 
                         // 等悬浮窗消失了再操作
-                        LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+                        BackgroundExecutor.execute(new Runnable() {
                             @Override
                             public void run() {
                                 // 返回是否处理完毕
@@ -1490,6 +1490,7 @@ public class CaseRecordManager implements ExportService {
             }
 
             if (!processed) {
+                binder.restoreFloat();
                 // 恢复悬浮窗
                 binder.restoreFloat();
                 Intent intent = new Intent(context, NewRecordActivity.class);

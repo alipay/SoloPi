@@ -15,18 +15,27 @@
  */
 package com.alipay.hulu.replay;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import androidx.appcompat.app.AlertDialog;
+
+import android.os.Build;
 import android.view.View;
 
 import com.alipay.hulu.R;
 import com.alipay.hulu.bean.ReplayResultBean;
 import com.alipay.hulu.bean.ReplayStepInfoBean;
+import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.tools.BackgroundExecutor;
+import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.service.CaseReplayManager;
+import com.alipay.hulu.shared.node.action.PerformActionEnum;
 import com.alipay.hulu.shared.node.tree.export.bean.OperationStep;
+import com.alipay.hulu.util.DialogUtils;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -93,12 +102,62 @@ public abstract class AbstractStepProvider {
     public abstract void onStepInfo(ReplayStepInfoBean bean);
 
     public void onFloatClick(Context context, final CaseReplayManager manager) {
-        showFunctionView(context, "是否终止回放", new Runnable() {
+        DialogUtils.showFunctionView(context, Arrays.asList(PerformActionEnum.NORMAL_EXIT, PerformActionEnum.FORCE_STOP), new DialogUtils.FunctionViewCallback<PerformActionEnum>() {
+
             @Override
-            public void run() {
-                manager.stopRunning();
+            public void onExecute(DialogInterface dialog, PerformActionEnum action) {
+                if (action == PerformActionEnum.NORMAL_EXIT) {
+                    manager.stopRunning();
+                } else if (action == PerformActionEnum.FORCE_STOP) {
+                    // 移除所有Task
+                    ActivityManager am = (ActivityManager) LauncherApplication.getInstance()
+                            .getSystemService(Context.ACTIVITY_SERVICE);
+                    if (am != null && Build.VERSION.SDK_INT >= 21) {
+                        try {
+                            List<ActivityManager.AppTask> tasks = am.getAppTasks();
+                            for (ActivityManager.AppTask task: tasks) {
+                                task.finishAndRemoveTask();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    BackgroundExecutor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            int pid = android.os.Process.myPid();
+                            String command = "kill -9 "+ pid;
+                            try {
+                                Runtime.getRuntime().exec(command);
+                            } catch (IOException e) {
+                                LogUtil.e(TAG, "强制关闭进程失败");
+                            }
+                            // adb强杀
+                            try {
+                                String cmd = "am force-stop " + LauncherApplication.getInstance().getPackageName();
+                                CmdTools.execCmd(cmd + " && " + cmd);
+                            } catch (Throwable e) {
+                                LogUtil.w(TAG, "force-stop fail??", e);
+                            }
+                        }
+                    }, 200);
+
+                    // System exit
+                    System.exit(0);
+                }
+                dialog.dismiss();
             }
-        }, null);
+
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                dialog.dismiss();
+            }
+
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+
+            }
+        });
     }
 
     /**
@@ -108,46 +167,5 @@ public abstract class AbstractStepProvider {
      */
     public View provideView(Context context) {
         return null;
-    }
-
-    /**
-     * 展示操作dialog
-     * @param message 消息
-     * @param confirmAction 确定动作
-     * @param cancelAction 取消动作
-     */
-    protected void showFunctionView(Context context, String message, final Runnable confirmAction, final Runnable cancelAction) {
-        try {
-            AlertDialog dialog = new AlertDialog.Builder(context, R.style.SimpleDialogTheme)
-                    .setMessage(message)
-                    .setPositiveButton(R.string.constant__confirm, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (confirmAction != null) {
-                                confirmAction.run();
-                            }
-                            dialog.dismiss();
-                        }
-                    })
-                    .setNegativeButton(R.string.constant__cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (cancelAction != null) {
-                                cancelAction.run();
-                            }
-                            dialog.dismiss();
-                        }
-                    }).setOnCancelListener(new DialogInterface.OnCancelListener() {
-                        @Override
-                        public void onCancel(DialogInterface dialog) {
-                            dialog.dismiss();
-                        }
-                    }).create();
-            dialog.getWindow().setType(com.alipay.hulu.common.constant.Constant.TYPE_ALERT);
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.show();
-        } catch (Exception e) {
-            LogUtil.e(TAG, e.getMessage());
-        }
     }
 }
