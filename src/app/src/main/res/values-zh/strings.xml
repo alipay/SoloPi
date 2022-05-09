@@ -336,6 +336,8 @@
     <string name="prepare__handle_start_alert">处理应用启动弹窗</string>
     <string name="settings__max_wait_time">页面变化最长等待时间</string>
     <string name="setting__max_wait_time">页面变化最长等待时间(毫秒)</string>
+    <string name="settings__max_scroll_find_count">最多滑动查找次数</string>
+    <string name="settings__count">次</string>
     <string name="case_edit__should_save_case">是否保存用例</string>
     <string name="constant__plugin_load_fail">插件加载失败，原因: </string>
     <string name="performance__summary">∫f(x): %.2f 平均值: %.2f 最小值: %.2f 最大值: %.2f</string>

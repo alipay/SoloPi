@@ -121,6 +121,47 @@ public class VivoUtils {
     }
 
     /**
+     * 去i管家申请页面
+     */
+    public static void applyBackgroundPermission(final Context context) {
+        Intent appIntent = context.getPackageManager().getLaunchIntentForPackage("com.iqoo.secure");
+        if(appIntent != null){
+            try {
+                context.startActivity(appIntent);
+                if (context instanceof Activity) {
+                    ((Activity) context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(context, R.string.vivo__open_background, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+
+                if (context instanceof Activity) {
+                    ((Activity) context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(context, R.string.vivo__open_background_noopen, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            }
+        } else {
+            if (context instanceof Activity) {
+                ((Activity) context).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context, R.string.vivo__open_background_noopen, Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }
+    }
+
+
+    /**
      * vivo比较新的系统获取方法
      *
      * @param context

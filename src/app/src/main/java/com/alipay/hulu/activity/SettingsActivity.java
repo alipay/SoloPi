@@ -121,6 +121,9 @@ public class SettingsActivity extends BaseActivity {
     private View mMaxWaitSettingWrapper;
     private TextView mMaxWaitSettingInfo;
 
+    private View mMaxScrollFindSettingWrapper;
+    private TextView mMaxScrollFindSettingInfo;
+
     private View mDefaultRotationSettingWrapper;
     private TextView mDefaultRotationSettingInfo;
 
@@ -503,6 +506,28 @@ public class SettingsActivity extends BaseActivity {
                         }
                     }
                 }, getString(R.string.settings__max_wait_time), Collections.singletonList(new Pair<>(getString(R.string.setting__max_wait_time), Long.toString(SPService.getLong(SPService.KEY_MAX_WAIT_TIME, 10000)))));
+            }
+        });
+
+
+        mMaxScrollFindSettingWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<Pair<String, String>> data = new ArrayList<>(2);
+                data.add(new Pair<>(getString(R.string.settings__max_scroll_find_count), "" + SPService.getLong(SPService.KEY_MAX_SCROLL_FIND_COUNT, 0)));
+                showMultipleEditDialog(SettingsActivity.this, new OnDialogResultListener() {
+                    @Override
+                    public void onDialogPositive(List<String> data) {
+                        if (data.size() != 1) {
+                            LogUtil.e("SettingActivity", "获取编辑项不为1项");
+                            return;
+                        }
+
+                        // 更新截图分辨率信息
+                        SPService.putInt(SPService.KEY_MAX_SCROLL_FIND_COUNT, Integer.parseInt(data.get(0)));
+                        mMaxWaitSettingInfo.setText(data.get(0));
+                    }
+                }, getString(R.string.settings__max_scroll_find_count), data);
             }
         });
 
@@ -898,6 +923,12 @@ public class SettingsActivity extends BaseActivity {
         mMaxWaitSettingInfo = (TextView) findViewById(R.id.max_wait_setting_info);
         long maxWaitTime = SPService.getLong(SPService.KEY_MAX_WAIT_TIME, 10000L);
         mMaxWaitSettingInfo.setText(maxWaitTime + "ms");
+
+
+        mMaxScrollFindSettingWrapper = findViewById(R.id.max_scroll_find_setting_wrapper);
+        mMaxScrollFindSettingInfo = _findViewById(R.id.max_scroll_find_setting_info);
+        mMaxScrollFindSettingInfo.setText(Long.toString(SPService.getInt(SPService.KEY_MAX_SCROLL_FIND_COUNT, 0)));
+
 
         mCheckUpdateSettingWrapper = findViewById(R.id.check_update_setting_wrapper);
         mCheckUpdateSettingInfo = (TextView) findViewById(R.id.check_update_setting_info);

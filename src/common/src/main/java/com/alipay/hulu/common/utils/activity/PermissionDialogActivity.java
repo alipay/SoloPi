@@ -62,6 +62,7 @@ import com.alipay.hulu.common.utils.StringUtil;
 import com.android.permission.FloatWindowManager;
 import com.android.permission.rom.MiuiUtils;
 import com.android.permission.rom.RomUtils;
+import com.android.permission.rom.VivoUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -836,6 +837,23 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                     @Override
                     public void run() {
                         MiuiUtils.applyMiuiPermission(PermissionDialogActivity.this);
+                    }
+                });
+                return false;
+            }
+        } else if (RomUtils.isVivoSystem()) {
+            final String content = "Vivo请在开启后台弹出界面权限";
+            if (!SPService.getBoolean(content, false)) {
+                showAction(content, "我已开启", new Runnable() {
+                    @Override
+                    public void run() {
+                        SPService.putBoolean(content, true);
+                        processedAction();
+                    }
+                }, "前往开启", new Runnable() {
+                    @Override
+                    public void run() {
+                        VivoUtils.applyBackgroundPermission(PermissionDialogActivity.this);
                     }
                 });
                 return false;

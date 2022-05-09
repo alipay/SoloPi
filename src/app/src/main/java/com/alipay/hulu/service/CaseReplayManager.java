@@ -633,7 +633,7 @@ public class CaseReplayManager implements ExportService {
                     LogUtil.i(TAG, "未查找到节点【%s】，不进行操作", origin);
                     return null;
                 }
-            } else if (operation.getOperationMethod().getActionEnum() == PerformActionEnum.CHECK_NODE) {
+            } else if (operation.getOperationMethod().getActionEnum() == PerformActionEnum.CHECK_NODE || operation.getOperationMethod().getActionEnum() == PerformActionEnum.CLICK_QUICK) {
                 node = OperationUtil.findAbstractNodeWithoutScroll(origin, operationService, prepareActions);
 
                 if (node == null) {

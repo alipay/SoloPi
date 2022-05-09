@@ -337,6 +337,8 @@
     <string name="prepare__handle_start_alert">Handle Alert</string>
     <string name="settings__max_wait_time">Max Step Wait Time</string>
     <string name="setting__max_wait_time">Max Step Wait Time(ms)</string>
+    <string name="settings__max_scroll_find_count">Max Scroll Find Times</string>
+    <string name="settings__count">times</string>
     <string name="case_edit__should_save_case">Save Case?</string>
     <string name="constant__plugin_load_fail">Plugin load failed: </string>
     <string name="performance__summary">∫f(x): %.2f avg: %.2f min: %.2f max: %.2f</string>

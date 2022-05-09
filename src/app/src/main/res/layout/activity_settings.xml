@@ -570,7 +570,65 @@
 
     </RelativeLayout>
 
-    <RelativeLayout
+
+            <RelativeLayout
+                android:id="@+id/max_scroll_find_setting_wrapper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_settings_item"
+                android:gravity="center_vertical"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/max_scroll_find_setting_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:text="@string/settings__max_scroll_find_count"
+                    android:textColor="@color/black"
+                    android:textSize="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="16dp"
+                    android:layout_toRightOf="@id/max_scroll_find_setting_title"
+                    android:gravity="center"
+                    android:text="@string/settings__count"
+                    android:textColor="@color/gray"
+                    android:textSize="12dp" />
+
+                <TextView
+                    android:id="@+id/max_scroll_find_setting_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="5dp"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:maxWidth="120dp"
+                    android:textColor="@color/gray"
+                    android:textSize="12dp" />
+
+            </RelativeLayout>
+
+
+            <RelativeLayout
         android:id="@+id/output_charset_setting_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

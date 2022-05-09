@@ -29,6 +29,7 @@ public class SPService {
     public static final String KEY_SOLOPI_PATH_NAME = "KEY_SOLOPI_PATH_NAME";
     public static final String KEY_OUTPUT_CHARSET = "KEY_OUTPUT_CHARSET";
     public static final String KEY_MAX_WAIT_TIME = "KEY_MAX_WAIT_TIME";
+    public static final String KEY_MAX_SCROLL_FIND_COUNT = "KEY_MAX_SCROLL_FIND_COUNT";
     public static final String KEY_ERROR_CHECK_TIME = "KEY_ERROR_CHECK_TIME";
     public static final String KEY_GLOBAL_SETTINGS = "KEY_GLOBAL_SETTINGS";
     public static final String KEY_PERFORMANCE_UPLOAD = "KEY_PERFORMANCE_UPLOAD";

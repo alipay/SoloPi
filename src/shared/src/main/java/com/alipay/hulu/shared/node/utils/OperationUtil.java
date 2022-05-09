@@ -21,6 +21,7 @@ import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
@@ -245,7 +246,7 @@ public class OperationUtil {
 
         // 两次处理弹窗
         int maxCount = 2;
-        while (maxCount > 0) {
+        while (targetNode == null && maxCount > 0) {
             targetNode = scrollToScreen(node, service);
             maxCount--;
 
@@ -262,16 +263,12 @@ public class OperationUtil {
                 if (System.currentTimeMillis() - startTime < 1500) {
                     break;
                 }
-            } else {
-                break;
+                service.invalidRoot();
             }
-
-//            MiscUtil.sleep(1500);
-            service.invalidRoot();
         }
 
         // 上滑刷新两次
-        maxCount = 2;
+        maxCount = SPService.getInt(SPService.KEY_MAX_SCROLL_FIND_COUNT, 0);
         while (targetNode == null && maxCount > 0) {
             targetNode = scrollToScreen(node, service);
             maxCount--;
@@ -293,7 +290,7 @@ public class OperationUtil {
 
 
         // 下滑查找四次
-        maxCount = 4;
+        maxCount = SPService.getInt(SPService.KEY_MAX_SCROLL_FIND_COUNT, 0) * 2;
         while (targetNode == null && maxCount > 0) {
             targetNode = scrollToScreen(node, service);
             maxCount--;
@@ -356,13 +353,8 @@ public class OperationUtil {
                 if (System.currentTimeMillis() - startTime < 1500) {
                     break;
                 }
-            } else {
-                break;
+                service.invalidRoot();
             }
-
-            // 不需要Sleep，处理弹窗时已经sleep过了
-//            MiscUtil.sleep(1500);
-            service.invalidRoot();
         }
 
         return targetNode;
