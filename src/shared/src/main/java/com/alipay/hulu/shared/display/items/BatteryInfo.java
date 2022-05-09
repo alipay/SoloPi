@@ -78,9 +78,9 @@ public class BatteryInfo implements Displayable{
 	public String getCurrentInfo() {
 		float current = getCurrent(LauncherApplication.getContext());
 		if (current != -1) {
-			return String.format("瞬时电流:%.1fmA/均值:%.1fmA", current, getAvg());
+			return StringUtil.getString(R.string.display_battery__current_info, current, getAvg());
 		} else {
-			return "数据获取失败";
+			return StringUtil.getString(R.string.display_battery__load_fail);
 		}
 	}
 
@@ -111,11 +111,11 @@ public class BatteryInfo implements Displayable{
 	public Map<RecordPattern, List<RecordPattern.RecordItem>> stopRecord() {
 		Long endTime = System.currentTimeMillis();
 		Map<RecordPattern, List<RecordPattern.RecordItem>> result = new HashMap<>();
-		RecordPattern pattern = new RecordPattern("实时电流", "mA", "Battery");
+		RecordPattern pattern = new RecordPattern(StringUtil.getString(R.string.display_battery__real_time_current), "mA", "Battery");
 		pattern.setEndTime(endTime);
 		pattern.setStartTime(startTime);
 		result.put(pattern, currentBattery);
-		pattern = new RecordPattern("平均电流", "mA", "Battery");
+		pattern = new RecordPattern(StringUtil.getString(R.string.display_battery__avg_current), "mA", "Battery");
 		pattern.setEndTime(endTime);
 		pattern.setStartTime(startTime);
 		result.put(pattern, avgBattery);

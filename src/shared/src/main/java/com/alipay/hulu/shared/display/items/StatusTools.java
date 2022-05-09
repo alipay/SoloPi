@@ -23,6 +23,8 @@ import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
+import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.shared.R;
 import com.alipay.hulu.shared.display.items.base.DisplayItem;
 import com.alipay.hulu.shared.display.items.base.Displayable;
 import com.alipay.hulu.shared.display.items.base.FixedLengthCircularArray;
@@ -297,7 +299,7 @@ public class StatusTools implements Displayable {
         if (appVmSize != null && appVmSize.size() > 0) {
             for (String processName : appVmSize.keySet()) {
                 List<RecordPattern.RecordItem> appCurrent = appVmSize.get(processName);
-                pattern = new RecordPattern("应用进程-" + processName, "MB", "VmSize");
+                pattern = new RecordPattern(StringUtil.getString(R.string.display_status__app_process) + processName, "MB", "VmSize");
                 pattern.setStartTime(startTime);
                 pattern.setEndTime(endTime);
                 result.put(pattern, appCurrent);
@@ -309,7 +311,7 @@ public class StatusTools implements Displayable {
         if (appVmRSS != null && appVmRSS.size() > 0) {
             for (String processName : appVmRSS.keySet()) {
                 List<RecordPattern.RecordItem> appCurrent = appVmRSS.get(processName);
-                pattern = new RecordPattern("应用进程-" + processName, "MB", "VmRSS");
+                pattern = new RecordPattern(StringUtil.getString(R.string.display_status__app_process) + processName, "MB", "VmRSS");
                 pattern.setStartTime(startTime);
                 pattern.setEndTime(endTime);
                 result.put(pattern, appCurrent);
@@ -321,7 +323,7 @@ public class StatusTools implements Displayable {
         if (appThreadCount != null && appThreadCount.size() > 0) {
             for (String processName : appThreadCount.keySet()) {
                 List<RecordPattern.RecordItem> appCurrent = appThreadCount.get(processName);
-                pattern = new RecordPattern("应用进程-" + processName, "个", "ThreadCount");
+                pattern = new RecordPattern(StringUtil.getString(R.string.display_status__app_process) + processName, "个", "ThreadCount");
                 pattern.setStartTime(startTime);
                 pattern.setEndTime(endTime);
                 result.put(pattern, appCurrent);

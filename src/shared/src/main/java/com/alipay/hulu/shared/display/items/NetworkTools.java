@@ -96,7 +96,7 @@ public class NetworkTools implements Displayable{
                 triggerReload = false;
             }
 			float[] value = getProcessData(new int[] {currentProcess.getPid()});
-			return String.format("%s:下%.1fK/累计%.1fK\n%s:上%.1fK/累计%.1fK", currentProcess.getProcessName(), value[0], value[1], currentProcess.getProcessName(), value[2], value[3]);
+			return StringUtil.getString(R.string.display_network__current_info, currentProcess.getProcessName(), value[0], value[1], currentProcess.getProcessName(), value[2], value[3]);
 		}
 
 		if (triggerReload) {
@@ -105,7 +105,7 @@ public class NetworkTools implements Displayable{
 
 			triggerReload = false;
 		}
-		return String.format("total:下%.1fK/累计%.1fK\ntotal:上%.1fK/累计%.1fK", getRxTotal(), getRxAll(), getTxTotal(), getTxAll());
+		return StringUtil.getString(R.string.display_network__app_current_info, getRxTotal(), getRxAll(), getTxTotal(), getTxAll());
 	}
 
 	@Override
@@ -193,17 +193,17 @@ public class NetworkTools implements Displayable{
 	public Map<RecordPattern, List<RecordPattern.RecordItem>> stopRecord() {
 		Long endTime = System.currentTimeMillis();
 		Map<RecordPattern, List<RecordPattern.RecordItem>> result = new HashMap<>();
-		RecordPattern pattern = new RecordPattern("累计全局下行流量", "KB", "Network");
+		RecordPattern pattern = new RecordPattern(StringUtil.getString(R.string.display_network__total_download_flow), "KB", "Network");
 		pattern.setEndTime(endTime);
 		pattern.setStartTime(startTime);
 		result.put(pattern, downloadRecordAll);
-		pattern = new RecordPattern("全局下行速率", "KB", "Network");
+		pattern = new RecordPattern(StringUtil.getString(R.string.display_network__global_download_speed), "KB", "Network");
 		pattern.setEndTime(endTime);
 		pattern.setStartTime(startTime);
 		result.put(pattern, downloadRecord);
 		if (downloadSizeProcessRecords != null && downloadSizeProcessRecords.size() > 0) {
 			for (String name: downloadSizeProcessRecords.keySet()) {
-				pattern = new RecordPattern("进程下行流量-" + name, "KB", "Network");
+				pattern = new RecordPattern(StringUtil.getString(R.string.display_network__process_download_flow) + name, "KB", "Network");
 				pattern.setEndTime(endTime);
 				pattern.setStartTime(startTime);
 				result.put(pattern, downloadSizeProcessRecords.get(name));
@@ -212,24 +212,24 @@ public class NetworkTools implements Displayable{
 
 		if (downloadSpeedProcessRecords != null && downloadSpeedProcessRecords.size() > 0) {
 			for (String name: downloadSpeedProcessRecords.keySet()) {
-				pattern = new RecordPattern("进程下行速率-" + name, "KB/S", "Network");
+				pattern = new RecordPattern(StringUtil.getString(R.string.display_network__process_download_speed) + name, "KB/S", "Network");
 				pattern.setEndTime(endTime);
 				pattern.setStartTime(startTime);
 				result.put(pattern, downloadSpeedProcessRecords.get(name));
 			}
 		}
 
-		pattern = new RecordPattern("累计全局上行流量", "KB", "Network");
+		pattern = new RecordPattern(StringUtil.getString(R.string.display_network__global_upload_flow), "KB", "Network");
 		pattern.setEndTime(endTime);
 		pattern.setStartTime(startTime);
 		result.put(pattern, uploadRecordAll);
-		pattern = new RecordPattern("全局上行速率", "KB", "Network");
+		pattern = new RecordPattern(StringUtil.getString(R.string.display_network__global_upload_speed), "KB", "Network");
 		pattern.setEndTime(endTime);
 		pattern.setStartTime(startTime);
 		result.put(pattern, uploadRecord);
 		if (uploadSizeProcessRecords != null && uploadSizeProcessRecords.size() > 0) {
 			for (String name: uploadSizeProcessRecords.keySet()) {
-				pattern = new RecordPattern("进程上行流量-" + name, "KB", "Network");
+				pattern = new RecordPattern(StringUtil.getString(R.string.display_network__process_upload_flow) + name, "KB", "Network");
 				pattern.setEndTime(endTime);
 				pattern.setStartTime(startTime);
 				result.put(pattern, uploadSizeProcessRecords.get(name));
@@ -237,7 +237,7 @@ public class NetworkTools implements Displayable{
 		}
 		if (uploadSpeedProcessRecords != null && uploadSpeedProcessRecords.size() > 0) {
 			for (String name: uploadSpeedProcessRecords.keySet()) {
-				pattern = new RecordPattern("进程上行速率-" + name, "KB/S", "Network");
+				pattern = new RecordPattern(StringUtil.getString(R.string.display_network__process_upload_speed) + name, "KB/S", "Network");
 				pattern.setEndTime(endTime);
 				pattern.setStartTime(startTime);
 				result.put(pattern, uploadSpeedProcessRecords.get(name));

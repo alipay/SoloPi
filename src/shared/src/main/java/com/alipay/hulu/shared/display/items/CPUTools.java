@@ -276,7 +276,7 @@ public class CPUTools implements Displayable{
         if (appCurrents != null && appCurrents.size() > 0) {
 			for (String processName : appCurrents.keySet()) {
 				List<RecordPattern.RecordItem> appCurrent = appCurrents.get(processName);
-				pattern = new RecordPattern("应用进程-" + processName, "%", "CPU");
+				pattern = new RecordPattern(StringUtil.getString(R.string.display_cpu__app_process) + processName, "%", "CPU");
 				pattern.setStartTime(startTime);
 				pattern.setEndTime(endTime);
 				result.put(pattern, appCurrent);
@@ -285,7 +285,7 @@ public class CPUTools implements Displayable{
 			cachedData.clear();
 		}
 
-		pattern = new RecordPattern("全局占用", "%", "CPU");
+		pattern = new RecordPattern(StringUtil.getString(R.string.display_cpu__global_usage), "%", "CPU");
 		pattern.setStartTime(startTime);
 		pattern.setEndTime(endTime);
 		result.put(pattern, totalCurrent);

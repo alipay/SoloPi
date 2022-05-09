@@ -104,11 +104,11 @@ public class ResponseTools implements Displayable {
     public Map<RecordPattern, List<RecordPattern.RecordItem>> stopRecord() {
         Long endTime = System.currentTimeMillis();
         Map<RecordPattern, List<RecordPattern.RecordItem>> result = new HashMap<>();
-        RecordPattern pattern = new RecordPattern("响应耗时", "ms", "Response");
+        RecordPattern pattern = new RecordPattern(StringUtil.getString(R.string.display_response__response_time), "ms", "Response");
         pattern.setEndTime(endTime);
         pattern.setStartTime(startTime);
         result.put(pattern, responseList);
-        pattern = new RecordPattern("刷新耗时", "ms", "Response");
+        pattern = new RecordPattern(StringUtil.getString(R.string.display_response__refresh_time), "ms", "Response");
         pattern.setEndTime(endTime);
         pattern.setStartTime(startTime);
         result.put(pattern, refreshList);
@@ -202,8 +202,9 @@ public class ResponseTools implements Displayable {
 
     @Override
     public String getCurrentInfo() {
-        return "响应耗时: " + (eventResponse.getResponsDate() - eventResponse.getClickDate()) + "ms/刷新耗时: "
-                + (eventResponse.getRefreshDate() - eventResponse.getClickDate()) + "ms";
+        return StringUtil.getString(R.string.display_response__current_info,
+                eventResponse.getResponsDate() - eventResponse.getClickDate(),
+                eventResponse.getRefreshDate() - eventResponse.getClickDate());
     }
 
     @Override

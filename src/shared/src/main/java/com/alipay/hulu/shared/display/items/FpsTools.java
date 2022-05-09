@@ -20,6 +20,7 @@ import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.Subscriber;
 import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.shared.R;
 import com.alipay.hulu.shared.display.items.base.DisplayItem;
 import com.alipay.hulu.shared.display.items.base.Displayable;
 import com.alipay.hulu.shared.display.items.base.RecordPattern;
@@ -120,19 +121,19 @@ public class FpsTools implements Displayable {
 	public Map<RecordPattern, List<RecordPattern.RecordItem>> stopRecord() {
 		Map<RecordPattern, List<RecordPattern.RecordItem>> result = new HashMap<>();
 		Long endTime = System.currentTimeMillis();
-		RecordPattern pattern = new RecordPattern("帧率", "帧", "FPS");
+		RecordPattern pattern = new RecordPattern(StringUtil.getString(R.string.display_fps__framerate), StringUtil.getString(R.string.display_fps__frame), "FPS");
 		pattern.setStartTime(startTime);
 		pattern.setEndTime(endTime);
 		result.put(pattern, fpsCurrent);
-		pattern = new RecordPattern("延迟次数", "次", "FPS");
+		pattern = new RecordPattern(StringUtil.getString(R.string.display_fps__jank_time), StringUtil.getString(R.string.display_fps__count), "FPS");
 		pattern.setStartTime(startTime);
 		pattern.setEndTime(endTime);
 		result.put(pattern, jankCurrent);
-		pattern = new RecordPattern("最长延迟时间", "ms", "FPS");
+		pattern = new RecordPattern(StringUtil.getString(R.string.display_fps__max_jank_time), "ms", "FPS");
 		pattern.setStartTime(startTime);
 		pattern.setEndTime(endTime);
 		result.put(pattern, maxJankCurrent);
-		pattern = new RecordPattern("延迟占比", "%", "FPS");
+		pattern = new RecordPattern(StringUtil.getString(R.string.display_fps__jank_percentage), "%", "FPS");
 		pattern.setStartTime(startTime);
 		pattern.setEndTime(endTime);
 		result.put(pattern, jankPercentCurrent);
@@ -154,11 +155,11 @@ public class FpsTools implements Displayable {
 
 		if (dataWrapper.fps > 0) {
 			if (displayExtra && !StringUtil.isEmpty(dataWrapper.activity)) {
-				return String.format("帧率:%d/延迟数:%d/最长延迟:%dms/延迟占比:%.2f%%\n%s",
+				return StringUtil.getString(R.string.display_fps__current_info_activity,
 						dataWrapper.fps, dataWrapper.junkCount, dataWrapper.maxJunk,
 						dataWrapper.junkPercent, dataWrapper.activity.substring(dataWrapper.activity.indexOf('/') + 1));
 			}
-			return String.format("帧率:%d/延迟数:%d/最长延迟:%dms/延迟占比:%.2f%%", dataWrapper.fps,
+			return StringUtil.getString(R.string.display_fps__current_info, dataWrapper.fps,
 					dataWrapper.junkCount, dataWrapper.maxJunk, dataWrapper.junkPercent);
 		}
 		return "-";

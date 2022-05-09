@@ -30,6 +30,7 @@ import com.alipay.hulu.common.injector.provider.Param;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.shared.R;
 import com.alipay.hulu.shared.display.items.base.DisplayItem;
 import com.alipay.hulu.shared.display.items.base.Displayable;
 import com.alipay.hulu.shared.display.items.base.FixedLengthCircularArray;
@@ -278,7 +279,7 @@ public class MemoryTools implements Displayable{
 	public Map<RecordPattern, List<RecordPattern.RecordItem>> stopRecord() {
 		Long endTime = System.currentTimeMillis();
 		Map<RecordPattern, List<RecordPattern.RecordItem>> result = new HashMap<>();
-		RecordPattern pattern = new RecordPattern("全局占用", "MB", "Memory");
+		RecordPattern pattern = new RecordPattern(StringUtil.getString(R.string.display_memory__total_usage), "MB", "Memory");
 		pattern.setStartTime(startTime);
 		pattern.setEndTime(endTime);
 		result.put(pattern, usedMemory);
@@ -287,11 +288,11 @@ public class MemoryTools implements Displayable{
 		for (String pid : appMemory.keySet()) {
 			ArrayList<RecordPattern.RecordItem>[] pidRecord = appMemory.get(pid);
 
-			pattern = new RecordPattern("PSS内存-" + pid, "MB", "Memory");
+			pattern = new RecordPattern("PSS-" + pid, "MB", "Memory");
 			pattern.setStartTime(startTime);
 			pattern.setEndTime(endTime);
 			result.put(pattern, pidRecord[0]);
-			pattern = new RecordPattern("PrivateDirty内存-" + pid, "MB", "Memory");
+			pattern = new RecordPattern("PrivateDirty-" + pid, "MB", "Memory");
 			pattern.setStartTime(startTime);
 			pattern.setEndTime(endTime);
 			result.put(pattern, pidRecord[1]);
@@ -314,7 +315,7 @@ public class MemoryTools implements Displayable{
 		if (totalMemory == null) {
 			totalMemory = getTotalMemory();
 		}
-		return "可用内存:" + getAvailMemory(context) + "MB/总内存:" + totalMemory + "MB";
+		return StringUtil.getString(R.string.display_memory__current_info, getAvailMemory(context), totalMemory);
 	}
 
 	@Override
