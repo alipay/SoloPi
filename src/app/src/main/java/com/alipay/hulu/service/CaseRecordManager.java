@@ -712,9 +712,9 @@ public class CaseRecordManager implements ExportService {
 
         LogUtil.i(TAG, "Start notify Touch Event at (%d, %d)", x, y);
 
-        // 看下是否点到葫芦娃图标
+        // 看下是否点到SoloPi图标
         if (binder.checkInFloat(point)) {
-            LogUtil.i(TAG, "点到了葫芦娃");
+            LogUtil.i(TAG, "点到了SoloPi");
             startCallTime = System.currentTimeMillis();
             showFunctionView(null);
             return;
@@ -762,7 +762,7 @@ public class CaseRecordManager implements ExportService {
                                         public void onProcessFunction(final OperationMethod method, final AbstractNodeTree node) {
                                             highLightService.removeHightLightSync();
 
-                                            // 切换回葫芦娃输入法
+                                            // 切换回SoloPi输入法
                                             CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
 
                                             // 等悬浮窗消失了再操作
@@ -838,7 +838,7 @@ public class CaseRecordManager implements ExportService {
                                         public void onProcessFunction(final OperationMethod method, final AbstractNodeTree node) {
                                             highLightService.removeHightLightSync();
 
-                                            // 切换回葫芦娃输入法
+                                            // 切换回SoloPi输入法
                                             CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
 
                                             // 等悬浮窗消失了再操作
