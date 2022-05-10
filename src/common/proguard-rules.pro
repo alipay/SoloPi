@@ -24,6 +24,8 @@
 -keep class com.alipay.hulu.common.utils.patch.PatchDescription {*;}
 
 -keep class com.alipay.hulu.common.utils.DeviceInfoUtil {*;}
+-keep class com.alipay.hulu.common.utils.Callback {*;}
+-keep class com.alipay.hulu.common.utils.LogUtil {*;}
 # injector
 -keepclassmembers class ** {
 @com.alipay.hulu.common.injector.param.Subscriber <methods>;

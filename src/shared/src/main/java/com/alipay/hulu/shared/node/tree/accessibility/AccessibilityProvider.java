@@ -15,6 +15,8 @@
  */
 package com.alipay.hulu.shared.node.tree.accessibility;
 
+import static com.alipay.hulu.common.utils.activity.PermissionDialogActivity.cleanInstrumentationAndUiAutomator;
+
 import android.accessibilityservice.AccessibilityService;
 import android.graphics.Rect;
 import android.os.Build;
@@ -34,7 +36,6 @@ import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.R;
-import com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl;
 import com.alipay.hulu.shared.node.AbstractProvider;
 import com.alipay.hulu.shared.node.action.Constant;
 import com.alipay.hulu.shared.node.tree.FakeNodeTree;
@@ -50,8 +51,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import static com.alipay.hulu.common.utils.activity.PermissionDialogActivity.cleanInstrumentationAndUiAutomator;
 
 /**
  * Created by qiaoruikai on 2018/10/8 12:46 PM.
@@ -99,21 +98,37 @@ public class AccessibilityProvider implements AbstractProvider {
             waitToFind = true;
             LogUtil.i(TAG, "目标检查窗口:" + topPkg);
 
-            List<AccessibilityWindowInfo> windowInfos = service.getWindows();
-            for (AccessibilityWindowInfo win : windowInfos) {
-                AccessibilityNodeInfo root = win.getRoot();
+            int retryCount = 3;
+            while (waitToFind && retryCount-- > 0) {
+                List<AccessibilityWindowInfo> windowInfos = service.getWindows();
+                for (AccessibilityWindowInfo win : windowInfos) {
+                    AccessibilityNodeInfo root = win.getRoot();
 
-                // 不包含子节点，直接跳过
-                if (root == null) {
-                    continue;
+                    // 不包含子节点，直接跳过
+                    if (root == null) {
+                        continue;
+                    }
+
+                    LogUtil.i(TAG, "当前访问窗口:" + root.getPackageName());
+
+                    // 是否能够找到目标应用
+                    if (StringUtil.contains(root.getPackageName(), topPkg)) {
+                        waitToFind = false;
+                        break;
+                    }
                 }
 
-                LogUtil.i(TAG, "当前访问窗口:" + root.getPackageName());
+                // 此次查找未找到目标控件，等待处理一下
+                if (waitToFind) {
+                    if (windowInfos != null && windowInfos.size() > 0) {
+                        for (AccessibilityWindowInfo windowInfo: windowInfos) {
+                            windowInfo.recycle();
+                        }
+                        windowInfos.clear();
+                    }
 
-                // 是否能够找到目标应用
-                if (StringUtil.contains(root.getPackageName(), topPkg)) {
-                    waitToFind = false;
-                    break;
+                    // 等300毫秒再操作
+                    MiscUtil.sleep(300);
                 }
             }
 
