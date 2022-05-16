@@ -58,9 +58,9 @@ public class NodeKeyBoard {
     public void inputInActiveIme(String text) {
         // 如果不是AdbIME，切换到对应IDE中
         String defaultIme = getCurrentIme();
-        if (!StringUtil.equals(defaultIme, "com.alipay.hulu/.tools.AdbIME") &&
-                !StringUtil.equals(defaultIme, "com.alipay.hulu/com.alipay.hulu.tools.AdbIME")) {
-            CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
+        if (!StringUtil.equals(defaultIme, "com.alipay.hulu/.common.tools.AdbIME") &&
+                !StringUtil.equals(defaultIme, "com.alipay.hulu/com.alipay.hulu.common.tools.AdbIME")) {
+            CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
             MiscUtil.sleep(500);
         }
 
@@ -73,8 +73,8 @@ public class NodeKeyBoard {
         }
 
         // 切换回原始IME
-        if (!StringUtil.equals(defaultIme, "com.alipay.hulu/.tools.AdbIME") &&
-                !StringUtil.equals(defaultIme, "com.alipay.hulu/com.alipay.hulu.tools.AdbIME")) {
+        if (!StringUtil.equals(defaultIme, "com.alipay.hulu/.common.tools.AdbIME") &&
+                !StringUtil.equals(defaultIme, "com.alipay.hulu/com.alipay.hulu.common.tools.AdbIME")) {
             CmdTools.switchToIme(defaultIme);
         }
     }
@@ -86,9 +86,9 @@ public class NodeKeyBoard {
      */
     public void inputText(String text, int x, int y) {
         String defaultIme = getCurrentIme();
-        if (!StringUtil.equals(defaultIme, "com.alipay.hulu/.tools.AdbIME") &&
-                !StringUtil.equals(defaultIme, "com.alipay.hulu/com.alipay.hulu.tools.AdbIME")) {
-            CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
+        if (!StringUtil.equals(defaultIme, "com.alipay.hulu/.common.tools.AdbIME") &&
+                !StringUtil.equals(defaultIme, "com.alipay.hulu/com.alipay.hulu.common.tools.AdbIME")) {
+            CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
             MiscUtil.sleep(500);
         }
 
@@ -109,8 +109,8 @@ public class NodeKeyBoard {
             MiscUtil.sleep(1500);
         }
 
-        if (!StringUtil.equals(defaultIme, "com.alipay.hulu/.tools.AdbIME") &&
-                !StringUtil.equals(defaultIme, "com.alipay.hulu/com.alipay.hulu.tools.AdbIME")) {
+        if (!StringUtil.equals(defaultIme, "com.alipay.hulu/.common.tools.AdbIME") &&
+                !StringUtil.equals(defaultIme, "com.alipay.hulu/com.alipay.hulu.common.tools.AdbIME")) {
             CmdTools.switchToIme(defaultIme);
         }
     }
@@ -121,9 +121,9 @@ public class NodeKeyBoard {
      */
     public void inputTextSearch(String text, int x, int y) {
         String defaultIme = getCurrentIme();
-        if (!StringUtil.equals(defaultIme, "com.alipay.hulu/.tools.AdbIME") &&
-                !StringUtil.equals(defaultIme, "com.alipay.hulu/com.alipay.hulu.tools.AdbIME")) {
-            CmdTools.switchToIme("com.alipay.hulu/.tools.AdbIME");
+        if (!StringUtil.equals(defaultIme, "com.alipay.hulu/.common.tools.AdbIME") &&
+                !StringUtil.equals(defaultIme, "com.alipay.hulu/com.alipay.hulu.common.tools.AdbIME")) {
+            CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
         }
         MiscUtil.sleep(500);
         executor.executeClick(x, y);
@@ -143,8 +143,8 @@ public class NodeKeyBoard {
             MiscUtil.sleep(500);
         }
 
-        if (!StringUtil.equals(defaultIme, "com.alipay.hulu/.tools.AdbIME") &&
-                !StringUtil.equals(defaultIme, "com.alipay.hulu/com.alipay.hulu.tools.AdbIME")) {
+        if (!StringUtil.equals(defaultIme, "com.alipay.hulu/.common.tools.AdbIME") &&
+                !StringUtil.equals(defaultIme, "com.alipay.hulu/com.alipay.hulu.common.tools.AdbIME")) {
             CmdTools.switchToIme(defaultIme);
         }
     }
