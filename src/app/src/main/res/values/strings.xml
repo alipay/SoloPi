@@ -127,6 +127,7 @@
     <string name="record__preparing">Preparing</string>
     <string name="record__prepare_failed">Environment preparing fail.</string>
     <string name="record__case_name_empty">Case name should not be empty.</string>
+    <string name="record__app_list_empty">Installed app should not be empty.</string>
     <string name="activity__record">Record &amp; Replay</string>
     <string name="index__disclaimer">Disclaimer</string>
     <string name="replay__delete_case">Delete?</string>

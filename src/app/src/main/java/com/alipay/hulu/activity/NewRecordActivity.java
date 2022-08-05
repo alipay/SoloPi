@@ -318,6 +318,11 @@ public class NewRecordActivity extends BaseActivity {
         });
 
         mListPack = MyApplication.getInstance().loadAppList();
+        if (mListPack.isEmpty()) {
+            toastShort(R.string.record__app_list_empty);
+            finish();
+            return;
+        }
 
         int position = 0;
         if (!StringUtil.isEmpty(app)) {
@@ -349,6 +354,9 @@ public class NewRecordActivity extends BaseActivity {
                     break;
                 }
             }
+        }
+        if (mListPack.isEmpty()) {
+            return;
         }
         mCurrentApp = mListPack.get(position);
 

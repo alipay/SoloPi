@@ -126,6 +126,7 @@
     <string name="record__preparing">正在准备中</string>
     <string name="record__prepare_failed">环境准备失败</string>
     <string name="record__case_name_empty">用例名不能为空</string>
+    <string name="record__app_list_empty">已安装应用列表不能为空</string>
     <string name="activity__record">录制回放</string>
     <string name="index__disclaimer">免责声明</string>
     <string name="replay__delete_case">删除此用例？</string>
