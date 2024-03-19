@@ -123,7 +123,7 @@ If it returns with the device number, then the connection is successful.
 
 > **Note:** Windows system may need Android device driver to make a successful connection. Devices driver can be downloaded on device's official website. You can also download the phone manager which includes device driver.
 
-> **Note:** If the command line dosen't return `device`, make sure the device driver is installed successfully and the USB debugging is turned on. For some device, the connection mode needs to be `Media Transfer Protocal`(MTP).
+> **Note:** If the command line dosen't return `device`, make sure the device driver is installed successfully and the USB debugging is turned on. For some device, the connection mode needs to be `Media Transfer Protocol`(MTP).
 
 For single device,
 
