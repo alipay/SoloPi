@@ -66,7 +66,7 @@ public class HttpStatusListener implements StatusListener {
 
             @Override
             public void onResponse(Call call, String result) throws IOException {
-                LogUtil.i(TAG, "Report status finished, reponse:" + result);
+                LogUtil.i(TAG, "Report status finished, response:" + result);
             }
         });
     }
