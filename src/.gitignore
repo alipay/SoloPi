@@ -1,0 +1,11 @@
+build/
+.idea/
+.gradle/
+*.iml
+local.properties
+
+.cxx/
+
+git_stats/
+seeds.txt
+unused.txt

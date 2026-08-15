@@ -1,0 +1,115 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/content_container"
+    android:orientation="vertical">
+    <include layout="@layout/head_panel_layout" android:id="@+id/head_replay_list" />
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/control_dp48"
+        app:tabGravity="fill"
+        app:tabTextAppearance="@style/TabLayoutTextStyle"
+        app:tabPaddingTop="@dimen/control_dp8"
+        app:tabPaddingBottom="@dimen/control_dp8"
+        app:tabPaddingStart="@dimen/control_dp16"
+        app:tabPaddingEnd="@dimen/control_dp16"
+        app:tabMode="fixed"
+        app:tabMaxWidth="0dp"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="#bebebe"/>
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:layout_height="0dp">
+
+    </androidx.viewpager.widget.ViewPager>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/light_gray"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="16dp"
+        android:textColor="@color/primaryText"
+        android:text="@string/batch__execution_list"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/batch_execute__scroll_height">
+        <com.zhy.view.flowlayout.TagFlowLayout
+            android:id="@+id/batch_execute_tag_group"
+            app:max_select="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/control_dp8"
+            android:paddingBottom="@dimen/control_dp8"
+            android:paddingLeft="@dimen/control_dp8"
+            android:paddingRight="@dimen/control_dp8">
+        </com.zhy.view.flowlayout.TagFlowLayout>
+    </ScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/light_gray"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp16">
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_centerVertical="true"
+            android:checked="true"
+            android:textSize="@dimen/textsize_12"
+            android:layout_height="wrap_content"
+            android:id="@+id/batch_execute_restart"
+            android:text="@string/repeat__restart_before_exec"/>
+
+        <Button
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:id="@+id/batch_execute_start_btn"
+            android:layout_width="wrap_content"
+            android:paddingLeft="@dimen/control_dp12"
+            android:paddingRight="@dimen/control_dp12"
+            android:layout_height="@dimen/control_dp30"
+            android:background="@drawable/bg_confirm_btn"
+            android:text="@string/constant__start_execution"
+            android:textSize="@dimen/textsize_14"
+            android:textColor="@color/white"/>
+
+    </RelativeLayout>
+</LinearLayout>

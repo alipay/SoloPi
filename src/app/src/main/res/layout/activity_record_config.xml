@@ -1,0 +1,104 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+                android:gravity="center_horizontal">
+
+    <include layout="@layout/head_panel_layout"
+             android:id="@+id/info_head"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp16"
+        android:layout_marginTop="@dimen/control_dp16"
+        android:textSize="@dimen/textsize_16"
+        android:text="@string/record_config__title"/>
+
+    <com.alipay.hulu.screenRecord.TextSpinner
+        android:id="@+id/spinner_video_codec"
+        app:name="@string/record_config__codec"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/control_dp20"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp16"
+        android:fadeScrollbars="false">
+
+    </com.alipay.hulu.screenRecord.TextSpinner>
+
+    <com.alipay.hulu.screenRecord.TextSpinner
+        android:id="@+id/spinner_resolution"
+        app:name="@string/record_config__resolution"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/control_dp8"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp16"
+        app:entries="@array/video_resolutions"/>
+
+    <com.alipay.hulu.screenRecord.TextSpinner
+        android:id="@+id/spinner_video_bitrate"
+        app:name="@string/record_config__bitrate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/control_dp8"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp16"
+        app:entries="@array/video_bitrates">
+
+    </com.alipay.hulu.screenRecord.TextSpinner>
+
+    <com.alipay.hulu.screenRecord.TextSpinner
+        android:id="@+id/spinner_framerate"
+        app:name="@string/record_config__framerate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/control_dp8"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp16"
+        app:entries="@array/video_framerates"/>
+
+    <com.alipay.hulu.screenRecord.TextSpinner
+        android:id="@+id/spinner_except_diff"
+        app:name="@string/record_config__expect_diff"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/control_dp8"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp16"
+        app:entries="@array/video_except_diff"/>
+
+    <Button
+        android:id="@+id/btn_start"
+        android:layout_marginTop="@dimen/control_dp24"
+        android:layout_marginLeft="@dimen/control_dp16"
+        android:layout_marginRight="@dimen/control_dp16"
+        android:layout_width="@dimen/perf_records_btn_width"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/control_dp8"
+        android:paddingBottom="@dimen/control_dp8"
+        android:textSize="@dimen/textsize_16"
+        android:text="@string/record_config__start"
+        android:textColor="@color/white"
+        android:background="@drawable/bg_solid_round_btn"/>
+
+
+</LinearLayout>

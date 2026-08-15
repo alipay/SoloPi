@@ -1,0 +1,25 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="12dp"
+    android:height="12dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M640 960 192 960C160 960 128 934.4 128 896L128 320C128 281.6 160 256 192 256L192 192C121.6 192 64 249.6 64 320L64 896C64 966.4 121.6 1024 192 1024L640 1024C710.4 1024 768 966.4 768 896L704 896C704 928 672 960 640 960ZM704 0 384 0C313.6 0 256 57.6 256 128L256 704C256 774.4 313.6 832 384 832L832 832C902.4 832 960 774.4 960 704L960 256 704 0ZM608 768 352 768C332.8 768 320 755.2 320 736 320 716.8 332.8 704 352 704L608 704C627.2 704 640 716.8 640 736 640 755.2 627.2 768 608 768ZM800 640 352 640C332.8 640 320 627.2 320 608 320 588.8 332.8 576 352 576L800 576C819.2 576 832 588.8 832 608 832 627.2 819.2 640 800 640ZM800 512 352 512C332.8 512 320 499.2 320 480 320 460.8 332.8 448 352 448L800 448C819.2 448 832 460.8 832 480 832 499.2 819.2 512 800 512ZM704 256 704 96 864 256 704 256Z" />
+</vector>

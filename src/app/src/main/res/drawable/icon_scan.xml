@@ -1,0 +1,25 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M823.744 536l-624 0c-13.264 0-24-10.752-24-24s10.736-24 24-24l624 0c13.248 0 24 10.752 24 24S836.992 536 823.744 536zM807.744 440c-10.4 0-19.056-6.72-22.368-16l-1.632 0L783.744 416l0 0 0 0 0-8 0 0 0-176-176 0 0-1.616c-2.528 0.896-5.152 1.616-8 1.616-13.248 0-24-10.752-24-24s10.752-24 24-24c2.848 0 5.472 0.72 8 1.616L607.744 184l192 0c17.664 0 32 14.336 32 32l0 144 0 64-1.632 0C826.816 433.28 818.16 440 807.744 440zM439.744 232c-2.832 0-5.472-0.72-8-1.616L431.744 232l-192 0 0 176 0 0L239.744 416l0 0 0 0 0 8-1.616 0c-3.328 9.28-11.968 16-22.384 16s-19.056-6.72-22.384-16l-1.616 0 0-64 0-144c0-17.664 14.336-32 32-32l208 0 0 1.616c2.528-0.896 5.168-1.616 8-1.616 13.264 0 24 10.752 24 24S453.008 232 439.744 232zM215.744 584c13.264 0 24 10.752 24 24 0 2.848-0.704 5.472-1.616 8l1.616 0 0 48 0 128 192 0 0 1.632c2.528-0.912 5.168-1.632 8-1.632 13.264 0 24 10.752 24 24s-10.736 24-24 24c-2.832 0-5.472-0.704-8-1.616L431.744 840l-208 0c-17.664 0-32-14.336-32-32l0-144 0-16 0-32 1.616 0c-0.96-2.496-1.616-5.136-1.616-8C191.744 594.752 202.496 584 215.744 584zM599.744 792c2.848 0 5.472 0.72 8 1.632L607.744 792l176 0 0-176 0 0L783.744 608l0 0 0 0 0-8 1.632 0c3.312-9.28 11.968-16 22.368-16s19.056 6.72 22.368 16l1.632 0 0 64 0 144c0 17.664-14.336 32-32 32l-192 0 0-1.616c-2.528 0.912-5.152 1.616-8 1.616-13.248 0-24-10.752-24-24S586.496 792 599.744 792z" />
+</vector>

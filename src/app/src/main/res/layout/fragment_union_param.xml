@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    >
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18dp"
+        android:layout_marginLeft="24dp"
+        android:textColor="@color/primaryText"
+        android:text="@string/union_param__selected"
+        />
+
+    <ScrollView
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_width="match_parent"
+        android:background="@drawable/bg_template_list"
+        android:layout_height="80dp">
+    <com.zhy.view.flowlayout.TagFlowLayout
+        android:id="@+id/union_param_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    </ScrollView>
+    <ListView
+        android:layout_marginTop="8dp"
+        android:id="@+id/union_param_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        tools:listitem="@layout/item_case_step_edit_input" />
+    <Button
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:id="@+id/union_param_add"
+        android:layout_width="wrap_content"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_horizontal"
+        android:textSize="14dp"
+        android:text="@string/union_param__create_union"
+        android:textColor="@color/white"
+        android:background="@drawable/bg_solid_round_btn"/>
+</LinearLayout>

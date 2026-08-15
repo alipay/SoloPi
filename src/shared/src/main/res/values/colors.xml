@@ -1,0 +1,80 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<resources>
+    <color name="divider_color">#FFCCCCCC</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="light_purple">#EFEFF4</color>
+    <color name="dark_gray">#818181</color>
+    <color name="light_gray">#D2D1D5</color>
+    <color name="gray">#A6A6A6</color>
+    <color name="dark_blue">#0079FF</color>
+    <color name="red">#FF0000</color>
+    <color name="yellow">#FFD322</color>
+    <color name="light_green">#00C378</color>
+    <color name="green">#1D9C00</color>
+    <color name="mix_gray">#CECED2</color>
+    <color name="colorPrimary">#03A9F4</color>
+    <color name="colorPrimaryDark">#0288D1</color>
+    <color name="colorPrimaryLight">#B3E5FC</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccentTransparent">#aaFF4081</color>
+    <color name="orangered">#FF4500</color>
+    <color name="bkg_light">#F5F5F5</color>
+
+    <color name="primaryText">#212121</color>
+    <color name="secondaryText">#757575</color>
+
+    <color name="cardview_light_background">#DEFFFFFF</color>
+
+    <color name="default_background_color">#F3F3F3</color>
+    <color name="transparent">#00ffffff</color>
+
+    <color name="mainFont">#333333</color>
+    <color name="mainBlue">#03A9F4</color>
+    <color name="subBlue">#0288D1</color>
+    <color name="subFont">#999999</color>
+    <color name="mainRed">#FF4081</color>
+
+
+    <color name="colorFirstBackground">#8bc6f7</color>
+    <color name="bg_app">#F1F1F1</color>
+
+    <color name="colorLayoutBackground">#f7f6f9</color> <!-- #536DFE -->
+
+    <color name="tab_unselect">#bfbfbf</color>
+    <color name="bg_btn">#dadada</color>
+
+    <color name = "colorBtnGreen" >#0dc3e4</color >
+    <color name = "colorBtnRed" >#fb0009</color >
+
+    <color name = "colorStatusGreen" >#54e491</color >
+    <color name = "colorStatusBlue" >#5e72e8</color >
+    <color name = "colorStatusYellow" >#f9b022</color >
+    <color name = "colorStatusRed" >#ff4b2d</color >
+    <color name = "colorStatusGay" >#54b3e4</color >
+
+    <color name="divideBgColor">#c9c9c9</color> <!-- 分割线的背景色, 中灰 -->
+    <color name="item_pressed">#D8D8D8</color> <!-- listview中item的按下效果, 中灰 -->
+    <color name="textColorDeepGray">#333333</color> <!-- 深灰色 -->
+    <color name="textColorShallowGray">#666666</color>
+    <color name="textColorShallowGray2">#999999</color>
+    <color name="textColorLowGray">#d3d3d3</color>
+    <color name="textColorMidGray">#c7c6c6</color>
+
+    <color name="hint_color">#aaaaaa</color>
+
+</resources>

@@ -1,0 +1,30 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+    <group android:translateX="102.4"
+        android:translateY="102.4"
+        android:rotation="0"
+        android:scaleY="0.8"
+        android:scaleX="0.8">
+        <path
+            android:pathData="M607.9,615.48L28.17,615.48c-15.17,0 -27.81,12.28 -27.81,27.81 0,15.17 12.28,27.81 27.81,27.81h579.72c15.17,0 27.81,-12.28 27.81,-27.81 0,-15.17 -12.28,-27.81 -27.81,-27.81zM28.17,399.13h579.72c15.53,0 28.17,-12.64 28.17,-28.17s-12.64,-28.17 -28.17,-28.17L28.17,342.78C12.64,342.78 0,355.42 0,370.95s12.64,28.17 28.17,28.17zM28.17,149.54h949.23c15.53,0 28.17,-12.64 28.17,-28.17s-12.64,-28.17 -28.17,-28.17L28.17,93.19C12.64,93.19 0,105.83 0,121.36s12.64,28.17 28.17,28.17zM977.41,874.1L28.17,874.1C12.64,874.1 0,886.74 0,902.28s12.64,28.17 28.17,28.17h949.23c15.53,0 28.17,-12.64 28.17,-28.17s-12.64,-28.17 -28.17,-28.17zM1008.47,314.97c-13.73,-6.86 -30.7,-1.45 -37.56,12.64L920.7,430.55c-0.72,1.08 -1.45,2.53 -2.17,3.61l-29.26,59.6c-0.72,0.72 -1.08,1.81 -1.45,2.89l-49.48,101.14c-0.72,1.08 -1.45,2.53 -2.17,3.61l-46.59,95.72 -92.11,-52.01c-13.36,-7.59 -30.7,-3.25 -38.29,10.11 -7.59,13.36 -3.25,30.7 10.11,38.29l118.47,66.82c7.22,3.97 15.89,4.33 23.12,1.81 6.86,-2.53 12.64,-7.59 15.89,-14.45l49.48,-101.14c0.72,-1.08 1.45,-2.53 2.17,-3.97l28.9,-59.24c0.72,-1.08 1.08,-1.81 1.81,-2.89l50.21,-102.58c0.72,-1.08 1.45,-2.53 2.17,-3.97l59.24,-121c7.22,-14.09 1.45,-31.06 -12.28,-37.93z"
+            android:fillColor="#ffffff"/>
+    </group>
+</vector>

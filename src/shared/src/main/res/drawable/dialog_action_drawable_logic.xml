@@ -1,0 +1,25 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+
+    <path
+        android:fillColor="#FF4081"
+        android:pathData="M776 384h176c39.8 0 72-32.2 72-72V136c0-39.8-32.2-72-72-72H776c-39.8 0-72 32.2-72 72v57.6c-5.2-1.1-10.5-1.6-16-1.6H528c-44.2 0-80 35.8-80 80v204H320v-52c0-39.8-32.2-72-72-72H72c-39.8 0-72 32.2-72 72v176c0 39.8 32.2 72 72 72h176c39.8 0 72-32.2 72-72v-52h128v204c0 44.2 35.8 80 80 80h160c5.5 0 10.8-0.6 16-1.6V888c0 39.8 32.2 72 72 72h176c39.8 0 72-32.2 72-72V712c0-39.8-32.2-72-72-72H776c-39.8 0-72 32.2-72 72v48H520V264h184v48c0 39.8 32.2 72 72 72z m0-248h176v176H776V136zM248 600H72V424h176v176z m528 112h176v176H776V712z" />
+</vector>

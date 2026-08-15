@@ -1,0 +1,42 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+  <path
+      android:pathData="M115,115m-115,0a115,115 0,1 0,230 0,115 115,0 1,0 -230,0Z"
+      android:fillColor="#FF4081"/>
+  <path
+      android:pathData="M512,115m-115,0a115,115 0,1 0,230 0,115 115,0 1,0 -230,0Z"
+      android:fillColor="#FF4081"/>
+  <path
+      android:pathData="M115,512m-115,0a115,115 0,1 0,230 0,115 115,0 1,0 -230,0Z"
+      android:fillColor="#FF4081"/>
+  <path
+      android:pathData="M627,512c0,-20.7 -5.5,-40.1 -15.1,-56.9L852,215c16.8,9.6 36.2,15.1 56.9,15.1 63.5,0 115,-51.5 115,-115S972.5,0 909,0 794,51.5 794,115c0,21.4 5.9,41.4 16,58.6L570.6,413c-17.2,-10.2 -37.2,-16 -58.6,-16 -63.5,0 -115,51.5 -115,115 0,53.5 36.5,98.4 86,111.3v174.4c-49.5,12.9 -86,57.8 -86,111.3 0,63.5 51.5,115 115,115s115,-51.5 115,-115c0,-53.2 -36.1,-97.9 -85.1,-111.1V623.1c49,-13.2 85.1,-57.9 85.1,-111.1z"
+      android:fillColor="#FF4081"/>
+  <path
+      android:pathData="M909,512m-115,0a115,115 0,1 0,230 0,115 115,0 1,0 -230,0Z"
+      android:fillColor="#FF4081"/>
+  <path
+      android:pathData="M115,909m-115,0a115,115 0,1 0,230 0,115 115,0 1,0 -230,0Z"
+      android:fillColor="#FF4081"/>
+  <path
+      android:pathData="M909,909m-115,0a115,115 0,1 0,230 0,115 115,0 1,0 -230,0Z"
+      android:fillColor="#FF4081"/>
+</vector>
