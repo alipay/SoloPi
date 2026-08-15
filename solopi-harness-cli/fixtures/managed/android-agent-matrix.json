@@ -1,0 +1,13 @@
+[
+  {
+    "id": "android-agent",
+    "replicas": 1,
+    "selector": {
+      "platform": "android",
+      "capabilities": [
+        "agent",
+        "verification"
+      ]
+    }
+  }
+]

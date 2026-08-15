@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+SOLOPI_CLI_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+exec python3 "$SOLOPI_CLI_DIR/src/solopi_harness/solopi_ai.py" "$@"

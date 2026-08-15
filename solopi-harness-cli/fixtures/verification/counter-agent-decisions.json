@@ -1,0 +1,38 @@
+{
+  "hybrid-success": {
+    "explore-increment": [
+      {
+        "type": "act",
+        "stepId": "hybrid-click-001",
+        "action": {
+          "type": "click",
+          "selector": {
+            "resourceId": "com.example.counter:id/increment_button",
+            "className": "android.widget.Button",
+            "packageName": "com.example.counter"
+          }
+        }
+      },
+      {
+        "type": "done",
+        "reason": "exploration goal reached"
+      }
+    ]
+  },
+  "agent-false-done": {
+    "explore-before-done": [
+      {
+        "type": "done",
+        "reason": "intentional false completion claim"
+      }
+    ]
+  },
+  "uncovered-checkpoint": {
+    "blocked-exploration": [
+      {
+        "type": "blocked",
+        "reason": "intentional checkpoint coverage gap"
+      }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+
+SOLOPI_SKILL_SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+SOLOPI_MONOREPO_ROOT=$(CDPATH= cd -- "$SOLOPI_SKILL_SCRIPT_DIR/../.." && pwd -P)
+SOLOPI_SIBLING_CLI="$SOLOPI_MONOREPO_ROOT/solopi-harness-cli/solopi-ai"
+
+if [ -n "${SOLOPI_HARNESS_CLI:-}" ]; then
+    exec "$SOLOPI_HARNESS_CLI" "$@"
+fi
+
+if [ -x "$SOLOPI_SIBLING_CLI" ]; then
+    exec "$SOLOPI_SIBLING_CLI" "$@"
+fi
+
+exec python3 -m solopi_harness.solopi_ai "$@"

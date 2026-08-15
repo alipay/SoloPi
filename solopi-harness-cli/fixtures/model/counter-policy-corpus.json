@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "solopi.ai.decision-corpus/v1",
+  "modelId": "solopi-counter-add-policy",
+  "cases": [
+    {"id": "state-0", "inputs": [[0.0], [1.0]], "expectedOutput": 1},
+    {"id": "state-1", "inputs": [[1.0], [1.0]], "expectedOutput": 2},
+    {"id": "state-2", "inputs": [[2.0], [1.0]], "expectedOutput": 3},
+    {"id": "state-3", "inputs": [[3.0], [1.0]], "expectedOutput": 4}
+  ]
+}
