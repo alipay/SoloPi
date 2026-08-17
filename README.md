@@ -1,6 +1,6 @@
 # <img src="solopi-app/assets/icon.png" width="48" alt="SoloPi" /> SoloPi
 
-[![GitHub stars](https://img.shields.io/github/stars/alipay/SoloPi.svg)](https://github.com/alipay/SoloPi/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/alipay/SoloPi.svg)](https://github.com/alipay/SoloPi)
 [![GitHub license](https://img.shields.io/github/license/alipay/SoloPi.svg)](LICENSE)
 [![Main app API](https://img.shields.io/badge/Main_App_API-18%2B-brightgreen.svg)](https://developer.android.com/guide/topics/manifest/uses-sdk-element)
 
@@ -189,7 +189,7 @@ $ANDROID_SDK/platform-tools/adb -s <设备序列号> tcpip 5555
 
 > 请确保设备处于安全的网络环境，不要随意允许 ADB 调试请求，以免造成不必要的损失。
 
-可以从 [GitHub Releases](https://github.com/alipay/SoloPi/releases) 下载打包好的 SoloPi APK，
+可以从 [GitHub Releases](https://github.com/alipay/SoloPi/releases/latest) 下载打包好的 SoloPi APK，
 或克隆源码后自行编译。具体使用方式参见[solopi-app 快速开始](#solopi-app-快速开始)。
 
 ### solopi-app 文档

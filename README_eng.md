@@ -1,6 +1,6 @@
 # <img src="solopi-app/assets/icon.png" width="48" alt="SoloPi" /> SoloPi
 
-[![GitHub stars](https://img.shields.io/github/stars/alipay/SoloPi.svg)](https://github.com/alipay/SoloPi/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/alipay/SoloPi.svg)](https://github.com/alipay/SoloPi)
 [![GitHub license](https://img.shields.io/github/license/alipay/SoloPi.svg)](LICENSE)
 [![Main app API](https://img.shields.io/badge/Main_App_API-18%2B-brightgreen.svg)](https://developer.android.com/guide/topics/manifest/uses-sdk-element)
 
@@ -215,7 +215,7 @@ debugging has been enabled.
 > Make sure the device is on a secure network. Do not accept ADB debugging requests casually, as
 > doing so may cause unnecessary loss.
 
-Download a packaged SoloPi APK from [GitHub Releases](https://github.com/alipay/SoloPi/releases), or
+Download a packaged SoloPi APK from [GitHub Releases](https://github.com/alipay/SoloPi/releases/latest), or
 clone the source and build it yourself. See [solopi-app Quick Start](#solopi-app-quick-start)
 for detailed instructions.
 
