@@ -79,7 +79,7 @@ solopi-app  -------------------->  App under test
 
 SoloPi captures all actions performed during testing sessions so that issues can be identified and
 resolved more quickly. The recording can be played on any device. All these actions can be done on
-just one single phone. See [Record and Replay](https://github.com/alipay/SoloPi/wiki/RecordCase).
+just one single phone. See [Record and Replay](#record-and-replay).
 
 SoloPi JSON can be converted into other automation scripts. Appium and Macaca are currently
 supported; download and try [SoloPi-Convertor](https://github.com/soloPi/SoloPi-Convertor).
@@ -101,7 +101,7 @@ slow down the internet speed to simulate using the app with a poor network conne
 
 SoloPi also adds a function to calculate app launch time. This tool shows the actual launch time to
 the greatest extent possible. The calculator can be incorporated into UI automation tests by
-sending broadcast messages. See [Performance Testing](https://github.com/alipay/SoloPi/wiki/Performance).
+sending broadcast messages. See [Performance Testing](#performance-testing).
 
 #### Multi-device Compatibility Testing
 
@@ -111,7 +111,7 @@ sending broadcast messages. See [Performance Testing](https://github.com/alipay/
 
 SoloPi supports simultaneous multi-device compatibility testing controlled by one device. This
 enormously improves the efficiency of testing on different devices. See
-[OneToMany](https://github.com/alipay/SoloPi/wiki/OneToMany).
+[Multi-device Compatibility Testing](#multi-device-compatibility-testing).
 
 ### Build
 
@@ -149,7 +149,7 @@ open "Developer options," and enable "USB debugging."
 
 #### Known Issues
 
-If you encounter a problem, first check the [FAQ](https://github.com/alipay/SoloPi/wiki/FAQ).
+If you encounter a problem, first check [Known Issues](#known-issues).
 
 - On VIVO devices, if Developer options contains an option such as "USB security access," it must
   be enabled manually.
@@ -216,13 +216,13 @@ debugging has been enabled.
 > doing so may cause unnecessary loss.
 
 Download a packaged SoloPi APK from [GitHub Releases](https://github.com/alipay/SoloPi/releases), or
-clone the source and build it yourself. See [First Use](https://github.com/alipay/SoloPi/wiki/FirstUse)
+clone the source and build it yourself. See [solopi-app Quick Start](#solopi-app-quick-start)
 for detailed instructions.
 
 ### solopi-app Documentation
 
-- [First Use and Notes](https://github.com/alipay/SoloPi/wiki/FirstUse)
-- [Wiki Home](https://github.com/alipay/SoloPi/wiki)
+- [First Use and Notes](#solopi-app-quick-start)
+- [Full solopi-app Documentation](solopi-app/README_eng.md)
 
 ## Major Capabilities
 

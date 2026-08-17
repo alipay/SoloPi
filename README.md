@@ -69,7 +69,7 @@ solopi-app  -------------------->  被测 App
 
 SoloPi 拥有录制操作的能力，用户只需要通过 SoloPi 执行用例步骤，SoloPi 就能够将用户的操作
 记录下来，并且支持在各个设备上进行回放，这一切都能够在手机上独立完成。详见
-[录制回放](https://github.com/alipay/SoloPi/wiki/RecordCase)。
+[录制回放](#录制回放)。
 
 SoloPi JSON 可以转化为其他自动化脚本，目前支持 Appium 和 Macaca，可以前往
 [SoloPi-Convertor](https://github.com/soloPi/SoloPi-Convertor) 下载体验。
@@ -88,7 +88,7 @@ SoloPi 能够记录待测应用的各项指标，你可以在悬浮窗中观察�
 
 除了常规性能指标，SoloPi 还提供了启动耗时计算工具，测试同学只需要点击两次按钮，就可以
 得到最贴近用户体验的启动耗时数据。同时，启动耗时计算工具还可以通过广播调用，可以非常方便
-地与 UI 自动化测试打通。详见[性能工具](https://github.com/alipay/SoloPi/wiki/Performance)。
+地与 UI 自动化测试打通。详见[性能工具](#性能工具)。
 
 #### 一机多控
 
@@ -98,7 +98,7 @@ SoloPi 能够记录待测应用的各项指标，你可以在悬浮窗中观察�
 
 SoloPi 支持通过操作一台主机设备来控制多台从机设备，不需要在各个设备上分别进行重复冗杂的
 兼容性测试，能够极大提升兼容性测试的效率。详见
-[一机多控](https://github.com/alipay/SoloPi/wiki/OneToMany)。
+[一机多控](#一机多控)。
 
 ### 构建
 
@@ -133,7 +133,7 @@ SoloPi 支持通过操作一台主机设备来控制多台从机设备，不需�
 
 #### 常见问题
 
-如果使用过程中遇到问题，可以先到 [FAQ](https://github.com/alipay/SoloPi/wiki/FAQ) 查找。
+如果使用过程中遇到问题，可以先到[常见问题](#常见问题)查找。
 
 - VIVO：如果开发者选项中包含“USB 安全操作”，需要手动开启；
 - 小米：需要开启“USB 安装”和“USB 调试（安全设置）”，并手动开启 SoloPi 的“后台弹出界面”；
@@ -190,12 +190,12 @@ $ANDROID_SDK/platform-tools/adb -s <设备序列号> tcpip 5555
 > 请确保设备处于安全的网络环境，不要随意允许 ADB 调试请求，以免造成不必要的损失。
 
 可以从 [GitHub Releases](https://github.com/alipay/SoloPi/releases) 下载打包好的 SoloPi APK，
-或克隆源码后自行编译。具体使用方式参见[第一次使用](https://github.com/alipay/SoloPi/wiki/FirstUse)。
+或克隆源码后自行编译。具体使用方式参见[solopi-app 快速开始](#solopi-app-快速开始)。
 
 ### solopi-app 文档
 
-- [第一次使用与注意事项](https://github.com/alipay/SoloPi/wiki/FirstUse)
-- [Wiki Home](https://github.com/alipay/SoloPi/wiki)
+- [第一次使用与注意事项](#solopi-app-快速开始)
+- [solopi-app 完整文档](solopi-app/README.md)
 
 ## 主要能力
 
