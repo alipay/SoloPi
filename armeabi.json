@@ -1,0 +1,13 @@
+{
+    "status": "success",
+    "reason": "",
+    "version": 1,
+    "data": [
+        {
+            "url": "https://raw.githubusercontent.com/alipay/SoloPi/v0.12.0/plugins/hulu_screenRecord_armeabi.zip",
+            "version": 7,
+            "type": "required",
+            "name": "hulu_screenRecord"
+        }
+    ]
+}

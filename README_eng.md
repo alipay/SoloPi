@@ -92,6 +92,12 @@ supported; download and try [SoloPi-Convertor](https://github.com/soloPi/SoloPi-
 
 **[Use the launch time calculator](https://gw.alipayobjects.com/os/basement_prod/4e82ca85-13fc-4de2-82ff-a9079344f5ef.mov)**
 
+> Video-difference response-time analysis requires the `hulu_screenRecord` plugin. Legacy clients
+> continue to use the ABI compatibility manifests in the repository root, with plugin assets pinned
+> to `v0.12.0`. New clients do not automatically trust remote dynamic plugins; install a verified
+> local archive with `solopi-skill/scripts/solopi-ai plugin-install --file <plugin ZIP>`, then restart
+> SoloPi. The `startup-time` command for cold or warm launches does not require this plugin.
+
 SoloPi is able to record and show the app's performance data, such as CPU, memory, and internet
 speed, while testing. The performance window with selected testing metrics will float on top. After
 testing, you can check each testing parameter in generated data graphs.
