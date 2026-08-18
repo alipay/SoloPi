@@ -156,7 +156,7 @@ scripts/solopi-ai --pretty result --run-id '<run-id>'
 
 ## 插件管理
 
-`plugin-list` 返回已安装插件和稳定 `pluginId`。`plugin-install --file <本地.zip>` 只接受用户明确提供的本地文件；CLI 自动计算 SHA-256，使用受控随机名称暂存到设备，并在成功、失败和中断路径清理暂存文件。新安装的 App 默认远程插件源为空；不得为用户自动下载不明插件，也不得绕过哈希校验。
+`plugin-list` 返回已安装插件和稳定 `pluginId`。`plugin-install --file <本地.zip>` 只接受用户明确提供的本地文件；CLI 自动计算 SHA-256，使用受控随机名称暂存到设备，并在成功、失败和中断路径清理暂存文件。新安装的 App 默认使用仓库 ABI 兼容清单，用户可在 App 中清空或替换；CLI 不主动触发远程下载，也不得绕过本地包哈希校验。
 
 安装或 `plugin-remove --id <pluginId>` 只有达到 `completed_restart_required` 才算变更完成，但新状态尚未生效；必须明确告知用户需重启 SoloPi。插件包含动态代码，执行变更前核对文件来源、准确哈希、目标设备和影响范围；不得把“需重启”报告为“已加载”。
 

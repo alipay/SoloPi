@@ -1707,13 +1707,50 @@ Complete
             REPO_ROOT
             / "solopi-app/app/src/main/java/com/alipay/hulu/activity/SettingsActivity.java"
         ).read_text(encoding="utf-8")
-        self.assertNotIn("raw.githubusercontent.com/alipay/SoloPi", patch_request)
-        self.assertNotIn("raw.githubusercontent.com/alipay/SoloPi", settings)
+        config_resolver = (
+            REPO_ROOT
+            / "solopi-app/app/src/main/java/com/alipay/hulu/scheme/ConfigSchemeResolver.java"
+        ).read_text(encoding="utf-8")
+        default_patch_url = (
+            "https://raw.githubusercontent.com/alipay/SoloPi/master/<abi>.json"
+        )
+        self.assertIn(default_patch_url, patch_request)
+        self.assertIn("PatchRequest.DEFAULT_PATCH_URL", settings)
+        self.assertIn("PatchRequest.DEFAULT_PATCH_URL", config_resolver)
         empty_source = patch_request[
             patch_request.index("if (StringUtil.isEmpty(storedUrl))") :
             patch_request.index("String cpuAbi")
         ]
         self.assertIn("callback.onFailed()", empty_source)
+
+    def test_default_remote_plugin_manifests_are_version_pinned(self):
+        expected_archives = {
+            "arm64-v8a.json": "hulu_screenRecord_v8a.zip",
+            "armeabi-v7a.json": "hulu_screenRecord_v7a.zip",
+            "armeabi.json": "hulu_screenRecord_armeabi.zip",
+        }
+
+        for manifest_name, archive_name in expected_archives.items():
+            with self.subTest(manifest=manifest_name):
+                manifest = json.loads(
+                    (REPO_ROOT / manifest_name).read_text(encoding="utf-8")
+                )
+                self.assertEqual("success", manifest["status"])
+                self.assertEqual(1, manifest["version"])
+                self.assertEqual(
+                    [
+                        {
+                            "url": (
+                                "https://raw.githubusercontent.com/alipay/SoloPi/"
+                                f"v0.12.0/plugins/{archive_name}"
+                            ),
+                            "version": 7,
+                            "type": "required",
+                            "name": "hulu_screenRecord",
+                        }
+                    ],
+                    manifest["data"],
+                )
 
     def test_doctor_checks_power_save_and_settings_editors_use_correct_fields(self):
         permission_source = (

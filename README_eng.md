@@ -92,11 +92,11 @@ supported; download and try [SoloPi-Convertor](https://github.com/soloPi/SoloPi-
 
 **[Use the launch time calculator](https://gw.alipayobjects.com/os/basement_prod/4e82ca85-13fc-4de2-82ff-a9079344f5ef.mov)**
 
-> Video-difference response-time analysis requires the `hulu_screenRecord` plugin. Legacy clients
-> continue to use the ABI compatibility manifests in the repository root, with plugin assets pinned
-> to `v0.12.0`. New clients do not automatically trust remote dynamic plugins; install a verified
-> local archive with `solopi-skill/scripts/solopi-ai plugin-install --file <plugin ZIP>`, then restart
-> SoloPi. The `startup-time` command for cold or warm launches does not require this plugin.
+> Video-difference response-time analysis requires the `hulu_screenRecord` plugin. By default,
+> SoloPi uses the ABI compatibility manifests in the repository root to fetch plugin assets pinned to
+> `v0.12.0`. The source can be cleared or replaced in the App settings, or a local archive can be
+> installed with `solopi-skill/scripts/solopi-ai plugin-install --file <plugin ZIP>`. Restart SoloPi
+> after installation. The `startup-time` command for cold or warm launches does not require this plugin.
 
 SoloPi is able to record and show the app's performance data, such as CPU, memory, and internet
 speed, while testing. The performance window with selected testing metrics will float on top. After
@@ -415,8 +415,8 @@ The project uses third-party libraries. See [Attributions](NOTICE.md) for detail
   enterprise web-management platform.
 - Dynamic Agents are intended for trusted workstations, controlled test devices, and clearly scoped
   tasks.
-- Plugins contain dynamic code that can run in the app process. Install only authorized local
-  packages from known sources.
+- Plugins contain dynamic code that can run in the app process. The default compatibility manifests
+  reference pinned assets; authorized local packages from known sources can also be installed.
 - `done` is only the Agent's stop signal. The formal conclusion always comes from the Result Judge.
 - Trustworthy delivery does not mean that every task passes. Return `not_tested` when the result
   cannot be observed reliably or when evidence is missing.

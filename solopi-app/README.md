@@ -30,9 +30,9 @@ SoloPi JSON 可以转化为其他自动化脚本，目前支持 Appium 和 Macac
 
 **[响应耗时计算使用视频](https://gw.alipayobjects.com/os/basement_prod/4e82ca85-13fc-4de2-82ff-a9079344f5ef.mov)**
 
-> 视频差分响应耗时依赖 `hulu_screenRecord` 插件。旧版客户端使用仓库根目录的 ABI
-> 兼容清单获取固定版本资源；新版默认不自动信任远程动态插件，建议通过根目录的
-> `solopi-skill` 使用本地 ZIP 受控安装，完成后重启 SoloPi。冷启动、暖启动测量不依赖该插件。
+> 视频差分响应耗时依赖 `hulu_screenRecord` 插件。SoloPi 默认使用仓库根目录的 ABI
+> 兼容清单获取固定版本资源；可以在 App 设置中清空或替换插件源，也可以通过根目录的
+> `solopi-skill` 安装本地 ZIP，完成后重启 SoloPi。冷启动、暖启动测量不依赖该插件。
 
 SoloPi能够记录待测应用的各项指标，你可以在悬浮窗中观察实时更新的数据，也可以对性能数据进行录制，在录制结束后查看图表；同时，SoloPi还支持性能加压，能够对CPU、内存与网络环境进行限制，复现应用在性能较差、网络环境不佳场景下的表现。
 

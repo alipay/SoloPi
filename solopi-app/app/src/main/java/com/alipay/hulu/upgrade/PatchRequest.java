@@ -52,6 +52,8 @@ import okhttp3.Call;
 
 public class PatchRequest {
     private static final String TAG = "PatchRequest";
+    public static final String DEFAULT_PATCH_URL =
+            "https://raw.githubusercontent.com/alipay/SoloPi/master/<abi>.json";
     /**
      * 强制升级
      */
@@ -67,7 +69,7 @@ public class PatchRequest {
      * 更新Patch列表
      */
     public static void updatePatchList(final LoadPatchCallback callback) {
-        String storedUrl = SPService.getString(SPService.KEY_PATCH_URL, "");
+        String storedUrl = SPService.getString(SPService.KEY_PATCH_URL, DEFAULT_PATCH_URL);
         // 地址为空
         if (StringUtil.isEmpty(storedUrl)) {
             LogUtil.e(TAG, "Patch url is empty");

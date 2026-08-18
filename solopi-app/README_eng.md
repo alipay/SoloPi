@@ -44,10 +44,11 @@ The video tutorial:
 
 **[Use the launch time calculator](https://gw.alipayobjects.com/os/basement_prod/4e82ca85-13fc-4de2-82ff-a9079344f5ef.mov)**
 
-> Video-difference response-time analysis requires the `hulu_screenRecord` plugin. Legacy clients
-> use the ABI compatibility manifests in the repository root to fetch a pinned asset. New clients do
-> not automatically trust remote dynamic plugins; use the root `solopi-skill` to install a verified
-> local ZIP, then restart SoloPi. Cold or warm launch-time measurement does not require this plugin.
+> Video-difference response-time analysis requires the `hulu_screenRecord` plugin. By default,
+> SoloPi uses the ABI compatibility manifests in the repository root to fetch a pinned asset. The
+> source can be cleared or replaced in the App settings, or the root `solopi-skill` can install a
+> local ZIP. Restart SoloPi after installation. Cold or warm launch-time measurement does not require
+> this plugin.
 
 ### 3. Multi-device compatibility testing
 

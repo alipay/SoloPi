@@ -29,6 +29,7 @@ import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.utils.Callback;
 import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.upgrade.PatchRequest;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -94,10 +95,10 @@ public class ConfigSchemeResolver implements SchemeActionResolver {
 
     private static Map<String, ConfigSpec> buildSpecs() {
         Map<String, ConfigSpec> result = new LinkedHashMap<>();
-        // 外发地址、远程代码源和内部 ADB 目标需要用户在 App 中明确核对，CLI 只读。
+        // 外发地址、远程代码源和内部 ADB 目标只允许在 App 中修改，CLI 只读。
         add(result, KEY_PERFORMANCE_UPLOAD, TYPE_STRING, "性能数据上传地址", "", false, null, null);
         add(result, KEY_RECORD_SCREEN_UPLOAD, TYPE_STRING, "响应耗时录屏上传地址", "", false, null, null);
-        add(result, KEY_PATCH_URL, TYPE_STRING, "插件源地址", "", false, null, null);
+        add(result, KEY_PATCH_URL, TYPE_STRING, "插件源地址", PatchRequest.DEFAULT_PATCH_URL, false, null, null);
         add(result, KEY_OUTPUT_CHARSET, TYPE_STRING, "导出文件编码", "GBK", true, null, null);
         add(result, KEY_USE_LANGUAGE, TYPE_INT, "界面语言：0 跟随系统，1 中文，2 English", 0, true, 0L, 2L);
         add(result, KEY_ALLOW_REPLAY_DIFFERENT_APP, TYPE_BOOLEAN, "允许跨应用回放", false, true, null, null);

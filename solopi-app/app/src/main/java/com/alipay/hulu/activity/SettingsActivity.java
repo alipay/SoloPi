@@ -300,7 +300,8 @@ public class SettingsActivity extends BaseActivity {
                     }
                 }, getString(R.string.settings__plugin_url),
                         Collections.singletonList(new Pair<>(getString(R.string.settings__plugin_url),
-                                SPService.getString(SPService.KEY_PATCH_URL, ""))));
+                                SPService.getString(SPService.KEY_PATCH_URL,
+                                        PatchRequest.DEFAULT_PATCH_URL))));
             }
         });
 
@@ -826,7 +827,7 @@ public class SettingsActivity extends BaseActivity {
 
         mPatchListWrapper = findViewById(R.id.patch_list_setting_wrapper);
         mPatchListInfo = (TextView) findViewById(R.id.patch_list_setting_info);
-        path = SPService.getString(SPService.KEY_PATCH_URL, "");
+        path = SPService.getString(SPService.KEY_PATCH_URL, PatchRequest.DEFAULT_PATCH_URL);
         if (StringUtil.isEmpty(path)) {
             mPatchListInfo.setText(R.string.settings__unset);
         } else {

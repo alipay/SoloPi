@@ -158,7 +158,7 @@ PERFORMANCE_CSV_MAX_COLUMNS = 512
 CLI_UI_ONLY_CONFIG_REASONS = {
     "KEY_PERFORMANCE_UPLOAD": "性能数据外发地址必须在 SoloPi App 中由用户核对",
     "KEY_RECORD_SCREEN_UPLOAD": "录屏数据外发地址必须在 SoloPi App 中由用户核对",
-    "KEY_PATCH_URL": "远程插件源可下载并加载代码，只允许用户在 SoloPi App 中配置",
+    "KEY_PATCH_URL": "远程插件源可下载并加载代码，内建默认源只允许用户在 SoloPi App 中覆盖或清空",
     "KEY_ADB_SERVER": "内部 ADB 目标地址只允许用户在 SoloPi App 中配置",
 }
 

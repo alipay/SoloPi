@@ -82,9 +82,9 @@ SoloPi JSON 可以转化为其他自动化脚本，目前支持 Appium 和 Macac
 
 **[响应耗时计算使用视频](https://gw.alipayobjects.com/os/basement_prod/4e82ca85-13fc-4de2-82ff-a9079344f5ef.mov)**
 
-> 视频差分响应耗时依赖 `hulu_screenRecord` 插件。旧版客户端继续使用仓库根目录的
-> ABI 兼容清单，插件资源固定到 `v0.12.0`；新版默认不自动信任远程动态插件，可通过
-> `solopi-skill/scripts/solopi-ai plugin-install --file <插件 ZIP>` 安装经过核验的本地包，
+> 视频差分响应耗时依赖 `hulu_screenRecord` 插件。SoloPi 默认通过仓库根目录的 ABI
+> 兼容清单获取固定到 `v0.12.0` 的插件资源；可以在 App 设置中清空或替换插件源，也可以
+> 通过 `solopi-skill/scripts/solopi-ai plugin-install --file <插件 ZIP>` 安装本地包。
 > 安装完成后需重启 SoloPi。冷启动、暖启动的 `startup-time` 测量不依赖该插件。
 
 SoloPi 能够记录待测应用的各项指标，你可以在悬浮窗中观察实时更新的数据，也可以对性能数据
@@ -371,7 +371,8 @@ Star、Fork、Merge Request 和 Issue 随时欢迎使用。如果你有好的想
 - Managed Execution 是单主机 SQLite WAL 控制面，支持同主机多 Worker，不是云真机供给、
   多主机高可用或企业 Web 管理平台；
 - 动态 Agent 面向可信工作站、受控测试设备和明确的任务范围；
-- 插件包含可在 App 进程中运行的动态代码，只应安装来源明确且经过授权的本地包；
+- 插件包含可在 App 进程中运行的动态代码；默认兼容清单只引用固定版本资源，也可以安装
+  来源明确且经过授权的本地包；
 - `done` 只是 Agent 的停止信号，正式结论始终来自 Result Judge；
 - 可信交付不等于所有任务都通过，无法可靠观察或缺少证据时应返回 `not_tested`。
 
