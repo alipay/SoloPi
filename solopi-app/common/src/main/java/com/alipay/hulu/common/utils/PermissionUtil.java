@@ -112,10 +112,15 @@ public class PermissionUtil {
                 // 设置回调idz
                 int currentIdx = callbackCount.getAndIncrement();
                 intent.putExtra(PermissionDialogActivity.PERMISSION_IDX_KEY, currentIdx);
-
-                // 起了intent再设置callback
-                activity.startActivity(intent);
+                // 先登记回调，避免权限页在已授权场景下同步结束导致回调丢失。
                 _callbackMap.put(currentIdx, callback);
+
+                try {
+                    activity.startActivity(intent);
+                } catch (RuntimeException e) {
+                    _callbackMap.remove(currentIdx);
+                    throw e;
+                }
             }
         });
     }

@@ -5,6 +5,7 @@ package com.android.permission;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,7 +27,6 @@ import com.android.permission.rom.QikuUtils;
 import com.android.permission.rom.RomUtils;
 import com.android.permission.rom.VivoUtils;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**
@@ -64,7 +64,10 @@ public class FloatWindowManager {
     }
 
     public boolean checkPermission(Context context) {
-        //6.0 版本之后由于 google 增加了对悬浮窗权限的管理，所以方式就统一了
+        if (Build.VERSION.SDK_INT >= 23) {
+            return Settings.canDrawOverlays(context);
+        }
+
         if (Build.VERSION.SDK_INT < 23) {
             if (RomUtils.checkIsMiuiRom()) {
                 return miuiPermissionCheck(context);
@@ -166,17 +169,10 @@ public class FloatWindowManager {
                 VivoUtils.applyPermission(context);
             }
         } else {
-            // 其他的再试一次
-            if (RomUtils.checkIsMeizuRom()) {
-                MeizuUtils.applyPermission(context);
-            } else if (RomUtils.isVivoSystem()) {
-                VivoUtils.applyPermission(context);
-            } else {
-                try {
-                    commonROMPermissionApplyInternal(context);
-                } catch (Exception e) {
-                    Log.e(TAG, "Throw exception " + e.getMessage(), e);
-                }
+            try {
+                commonROMPermissionApplyInternal(context);
+            } catch (Exception e) {
+                Log.e(TAG, "Throw exception " + e.getMessage(), e);
             }
         }
     }
@@ -254,38 +250,38 @@ public class FloatWindowManager {
      * 通用 rom 权限申请
      */
     private void commonROMPermissionApply(final Context context) {
-        //这里也一样，魅族系统需要单独适配
-        if (RomUtils.checkIsMeizuRom()) {
-            meizuROMPermissionApply(context);
-        } else {
-            if (Build.VERSION.SDK_INT >= 23) {
-                showConfirmDialog(context, new OnConfirmResult() {
-                    @Override
-                    public void confirmResult(boolean confirm) {
-                        if (confirm) {
-                            try {
-                                commonROMPermissionApplyInternal(context);
-                            } catch (Exception e) {
-                                Log.e(TAG, Log.getStackTraceString(e));
-                            }
-                        } else {
-                            Log.d(TAG, "user manually refuse OVERLAY_PERMISSION");
-                            //需要做统计效果
+        if (Build.VERSION.SDK_INT >= 23) {
+            showConfirmDialog(context, new OnConfirmResult() {
+                @Override
+                public void confirmResult(boolean confirm) {
+                    if (confirm) {
+                        try {
+                            commonROMPermissionApplyInternal(context);
+                        } catch (Exception e) {
+                            Log.e(TAG, Log.getStackTraceString(e));
                         }
+                    } else {
+                        Log.d(TAG, "user manually refuse OVERLAY_PERMISSION");
+                        //需要做统计效果
                     }
-                });
-            }
+                }
+            });
         }
     }
 
-    public static void commonROMPermissionApplyInternal(Context context) throws NoSuchFieldException, IllegalAccessException {
-        Class clazz = Settings.class;
-        Field field = clazz.getDeclaredField("ACTION_MANAGE_OVERLAY_PERMISSION");
-
-        Intent intent = new Intent(field.get(null).toString());
+    public static void commonROMPermissionApplyInternal(Context context) {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setData(Uri.parse("package:" + context.getPackageName()));
-        context.startActivity(intent);
+        try {
+            context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            // Some vendor ROMs do not expose the app-specific overlay page.
+            Intent appDetails = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            appDetails.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            appDetails.setData(Uri.parse("package:" + context.getPackageName()));
+            context.startActivity(appDetails);
+        }
     }
 
     private void showConfirmDialog(Context context, OnConfirmResult result) {

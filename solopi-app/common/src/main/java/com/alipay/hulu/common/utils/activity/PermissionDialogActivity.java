@@ -123,6 +123,8 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
 
     private List<GroupPermission> allPermissions;
     private int currentPermissionIdx;
+    private boolean waitingForFloatPermission;
+    private boolean leftForFloatPermissionSettings;
     private static final Pattern FILED_CALL_PATTERN = Pattern.compile("\\$\\{[^}\\s]+\\.?[^}\\s]*\\}");
     /**
      * 权限名称映射表
@@ -198,6 +200,26 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
         runningStatus = false;
         LogUtil.i(TAG, "权限弹窗Stop");
         super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (waitingForFloatPermission && leftForFloatPermissionSettings) {
+            waitingForFloatPermission = false;
+            leftForFloatPermissionSettings = false;
+            if (FloatWindowManager.getInstance().checkPermission(this)) {
+                processedAction();
+            }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        if (waitingForFloatPermission) {
+            leftForFloatPermissionSettings = true;
+        }
+        super.onPause();
     }
 
     /**
@@ -399,6 +421,8 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
             }, getString(R.string.constant__confirm), new Runnable() {
                 @Override
                 public void run() {
+                    waitingForFloatPermission = true;
+                    leftForFloatPermissionSettings = false;
                     FloatWindowManager.getInstance().applyPermissionDirect(PermissionDialogActivity.this);
                 }
             });
