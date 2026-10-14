@@ -1,0 +1,138 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "id": "goalpath-alipay-negative-oracle",
+  "title": "独立验收反例：输入天气但错误预期为晴天",
+  "targetAppPackage": "com.eg.android.AlipayGphone",
+  "targetAppLabel": "支付宝",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-DRAFT",
+      "text": "故意设置与目标不一致的输入期望晴天，用于确认错误预期不能通过。"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "negative-oracle",
+      "title": "独立验收反例：输入天气但错误预期为晴天",
+      "acceptanceCriteria": [
+        "AC-DRAFT"
+      ],
+      "preconditions": [
+        {
+          "id": "home-more-ready",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "更多"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "id": "draft-weather",
+          "type": "explore",
+          "goal": "从支付宝首页打开搜索，输入冻结的测试文本“天气”，保留搜索草稿，不提交搜索。",
+          "allowedActions": [
+            "click",
+            "input",
+            "wait"
+          ],
+          "budget": {
+            "maxSteps": 6,
+            "maxDurationMs": 180000,
+            "idleTimeoutMs": 120000,
+            "maxRepeatedActions": 2,
+            "maxNoProgressSteps": 2
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "weather-draft",
+          "afterStep": "draft-weather",
+          "acceptanceCriteria": [
+            "AC-DRAFT"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.EditText",
+              "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "晴天"
+          }
+        },
+        {
+          "id": "search-confirm-present",
+          "afterStep": "draft-weather",
+          "acceptanceCriteria": [
+            "AC-DRAFT"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.FrameLayout",
+              "resourceId": "com.alipay.mobile.antui:id/search_confirm"
+            },
+            "field": "description",
+            "operator": "equals",
+            "expected": "搜索"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "header-return-1",
+          "required": true,
+          "action": {
+            "type": "click",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.FrameLayout",
+              "description": "返回",
+              "resourceId": "com.alipay.mobile.antui:id/search_back_button"
+            }
+          }
+        },
+        {
+          "id": "header-return-2",
+          "required": true,
+          "action": {
+            "type": "click",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.FrameLayout",
+              "description": "返回",
+              "resourceId": "com.alipay.mobile.antui:id/search_back_button"
+            }
+          }
+        },
+        {
+          "id": "home-more-final",
+          "required": true,
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "更多"
+          }
+        }
+      ]
+    }
+  ]
+}

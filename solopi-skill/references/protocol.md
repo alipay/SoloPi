@@ -15,6 +15,14 @@ CLI 只组合受约束的本地传输：
 
 用例 JSON 不放入 URI。CLI 先本地规范化，再推送到应用专属导入目录，携带新的 `requestId` 调用受保护 ADB Activity，并从只读通道获取准确回执。
 
+## 电脑端执行模式
+
+新版 `capabilities.replayExecutionModes` 声明 `interactive` 与 `headless`；`health.executionProfiles.host` 返回 `replayMode: headless`、必需权限 `adb/accessibility`、建议权限 `powerSave` 和独立 `ready`。顶层 `health.ready` 保留旧客户端的权限及自动播放判断。新版 CLI 以 host profile 与原始权限状态共同判断，未知或畸形 profile 拒绝执行；旧 APK 无此字段时维持 legacy 门禁并提示升级。
+
+CLI 的 `run`、`run-repeat`、`run-batch` 与 `verify-run` 固定段自动协商 host 模式，启动参数增加严格布尔值 `headless=true`。设备仍校验受保护入口、用例指纹与租约，只去掉浮窗、进度弹框、高亮及结束页；直接自动执行，不修改全局自动播放设置。手机交互入口及未传此参数的旧客户端保持原行为。需要人工确认的设备信息动作在 headless 中明确失败，原有等待动作仍保留等待时间。结果由同一 `runId` 查询，截图/日志由主机证据导出。
+
+已初始化的控制服务和 headless 回放入口不打开控制页面；首次安装和冷启动仍可能进入 SoloPi 初始化页面。此模式不承诺熄屏或系统强制休眠后的永久保活；电池优化建议不会改变测试裁决。
+
 ## 标识与所有权
 
 | 标识 | 所有对象 | 规则 |
@@ -47,7 +55,7 @@ connecting -> connected
            -> failed
 ```
 
-`adb-connect` 只在 `doctor` 的唯一缺失项为内部 `adb` 时启动。受保护 Activity 立即记录新 `requestId` 的 `connecting` 回执，后台调用 SoloPi 既有连接器；HTTP 只读查询 `adb-connect-status`。只有 `connected=true`、随后完整 `doctor.ready=true` 且退出码为 `0` 才算门禁通过。`failed` 必须返回稳定错误码和 `userActionRequired`；CLI 不接受 RSA 弹窗、不修改内部地址，也不执行 `adb tcpip 5555`。
+`adb-connect` 只在 `doctor` 的唯一缺失项为内部 `adb` 时启动。受保护 Activity 立即记录新 `requestId` 的 `connecting` 回执，后台调用 SoloPi 既有连接器；HTTP 只读查询 `adb-connect-status`。只有 `connected=true`、随后完整 `doctor.success=true` 且退出码为 `0` 才算门禁通过。`failed` 必须返回稳定错误码和 `userActionRequired`；CLI 不接受 RSA 弹窗、不修改内部地址，也不执行 `adb tcpip 5555`。
 
 ### 回放
 
@@ -81,9 +89,13 @@ settled observation 后再次调用。DecisionProvider 只输出 Action Proposal
 用例系统中由三个 `ActionProvider` 实现发布的 6 个性能、录屏和图片动作契约不是
 同一扩展点；动态 Agent proposal 仍只允许下述 7 个 typed action。
 
-动态 Agent CLI 会在启动控制服务或调用受保护的 ADB 写入口后恢复命令前的前台 Activity。设备端只接受达到可操作窗口尺寸且不是 SoloPi 控制页的根节点，短暂切换期间会等待目标窗口恢复，不会把状态栏等窄系统窗口发布为 observation。
+动态 Agent CLI 会在启动控制服务或调用受保护的 ADB 写入口后恢复命令前的前台 Activity。设备端接受达到可操作窗口尺寸且不是 SoloPi 控制页的根节点；小尺寸根节点还必须有同包名、边界匹配且 active/focused 的原生应用窗口证明。这样可以观察真实应用菜单，同时继续拒绝窄系统窗口、键盘和 SoloPi 控制页。短暂切换期间会等待目标窗口恢复。
 
 `agent-act` 必须同时携带准确 `sessionId`、`ownerToken`、新 `stepId` 和当前 `observationId`。设备执行前再次刷新树并比较签名；旧观察、已消费观察、另一会话或另一 owner 的请求均在调用 `OperationService` 前拒绝。动作仅允许 `click`、`longClick`、`input`、`back`、`home`、`scroll`、`wait`，由显式映射复用 `OperationService`；不接受 `PerformActionEnum` 名称、任意 Shell、Provider、清数据、进程控制或任意 Scheme。
+
+默认 `full-page` 校验整页签名，并把该 observation 的节点绑定到确切树路径，不做模糊重定位。显式启用 `target-context-v1` 后，符合条件的固定原生点击可以容忍不相关区域变化：仍校验目标身份、位置、子树、祖先、相邻及重叠节点、窗口，执行前刷新目标和窗口后单次 `ACTION_CLICK`，失败不改用坐标重发。列表、滚动或 WebView 祖先等结构不适用时，在目标及祖先身份未变的前提下记录 `not_applicable`，再要求整页签名完全一致；缺失或被拒绝的校验证明不能走此分支。回执的 `effectiveStrategy` 表明实际使用哪条路径，不能只看会话配置。
+
+`event-stable-v1` 的动作后观察先等待 3 秒；若页面仍未稳定，仅延长一次、最多 5 秒继续观察，不重新发送动作。稳定且无可见变化的页面不延长，持续不稳定则失败。`settleTiming` 合计两段采样及耗时。`actionEffect` 只允许 `UI_CHANGED` / `NO_VISIBLE_CHANGE`，表示签名层面的可见变化，不能代替业务验收。
 
 动作先产生 `accepted` receipt，完成后等待 UI 签名稳定，再发布 `succeeded` receipt 和新的 settled observation；验证错误为 `rejected`，执行或 settle 错误为 `failed`。相同 `stepId` 的重试只返回已保存 receipt，因此协议内不会主动执行第二次；但进程失联、网络中断或租约切换时，真实点击等物理副作用可能已经发生而 receipt 尚未持久可见，系统不承诺 UI 副作用 exactly-once。恢复方必须重新 observation 和判定页面，而不是盲目重发最后动作。`maxSteps`、`maxDurationMs`、`idleTimeoutMs`、连续重复动作和无进展阈值均由设备端执行，不能靠客户端关闭。暂停状态允许查询和 observe，但拒绝 act，恢复后才能继续。
 

@@ -127,12 +127,20 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
     }
 
     /**
+     * Keep the optional FastPath validation app away from existing SoloPi files.
+     */
+    public static String getDefaultSolopiFolderName() {
+        return "com.alipay.hulu.fastpath".equals(LauncherApplication.getContext().getPackageName())
+                ? "solopi-fastpath" : "solopi";
+    }
+
+    /**
      * 获取Solopi文件夹目录名称
      * @return
      */
     public static String getSolopiFolderName() {
         if (SOLOPI_FOLDER_NAME == null) {
-            SOLOPI_FOLDER_NAME = SPService.getString(SPService.KEY_SOLOPI_PATH_NAME, "solopi");
+            SOLOPI_FOLDER_NAME = SPService.getString(SPService.KEY_SOLOPI_PATH_NAME, getDefaultSolopiFolderName());
         }
 
         return SOLOPI_FOLDER_NAME;
@@ -144,11 +152,7 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
      */
     public static File getSolopiDir() {
         if (solopiBaseDir == null) {
-            if (SOLOPI_FOLDER_NAME == null) {
-                SOLOPI_FOLDER_NAME = SPService.getString(SPService.KEY_SOLOPI_PATH_NAME, "solopi");
-            }
-
-            solopiBaseDir = new File(Environment.getExternalStorageDirectory(), SOLOPI_FOLDER_NAME);
+            solopiBaseDir = new File(Environment.getExternalStorageDirectory(), getSolopiFolderName());
 
         }
         if (!solopiBaseDir.exists()) {

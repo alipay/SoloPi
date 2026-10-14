@@ -62,6 +62,7 @@ public class ReplaySchemeResolver implements SchemeActionResolver {
     public static final String REQUEST_ID = "requestId";
     public static final String TARGET_APP = "targetApp";
     public static final String RESTART_APP = "restartApp";
+    public static final String HEADLESS = "headless";
 
     public static final String MODE_NORMAL = "normal";
     private static final Charset UTF_8 = Charset.forName("UTF-8");
@@ -134,8 +135,10 @@ public class ReplaySchemeResolver implements SchemeActionResolver {
             return true;
         }
         final Boolean restartApp;
+        final boolean headless;
         try {
             restartApp = parseOptionalBoolean(params.get(RESTART_APP), RESTART_APP);
+            headless = Boolean.TRUE.equals(parseOptionalBoolean(params.get(HEADLESS), HEADLESS));
         } catch (IllegalArgumentException exception) {
             callback.onResult(Collections.<String, Object>singletonMap(
                     "error", exception.getMessage()));
@@ -194,6 +197,19 @@ public class ReplaySchemeResolver implements SchemeActionResolver {
             return true;
         }
         callback.onResult(Collections.<String, Object>singletonMap("runId", runId));
+        if (headless) {
+            // Code security: only the authenticated ADB entry above can request host execution.
+            // Required device capabilities still fail closed; optional access never opens a dialog.
+            String missing = missingHeadlessPermission(
+                    PermissionUtil.getPermissionStatus(context, "adb"),
+                    PermissionUtil.getPermissionStatus(context, Settings.ACTION_ACCESSIBILITY_SETTINGS));
+            if (missing != null) {
+                HarnessState.failToStart(runId, "Required host permission unavailable: " + missing);
+            } else {
+                startReplayOnUiThread(runId, caseInfo, replayOwner, restartApp, true);
+            }
+            return true;
+        }
         PermissionUtil.requestPermissions(Arrays.asList("adb", "float", "background", Settings.ACTION_ACCESSIBILITY_SETTINGS), (Activity) context, new PermissionUtil.OnPermissionCallback() {
             @Override
             public void onPermissionResult(final boolean result, String reason) {
@@ -201,26 +217,39 @@ public class ReplaySchemeResolver implements SchemeActionResolver {
                     return;
                 }
                 if (result) {
-                    LauncherApplication.getInstance().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (!HarnessState.isRunning(runId)) {
-                                return;
-                            }
-                            try {
-                                CaseReplayUtil.startReplay(caseInfo, replayOwner, restartApp);
-                            } catch (RuntimeException exception) {
-                                HarnessState.failToStart(runId,
-                                        "Unable to start replay: " + exception.getMessage());
-                            }
-                        }
-                    });
+                    startReplayOnUiThread(runId, caseInfo, replayOwner, restartApp, false);
                 } else {
                     HarnessState.failToStart(runId, "Permission denied: " + reason);
                 }
             }
         });
         return true;
+    }
+
+    static String missingHeadlessPermission(boolean adb, boolean accessibility) {
+        if (!adb) {
+            return "adb";
+        }
+        return accessibility ? null : "accessibility";
+    }
+
+    private static void startReplayOnUiThread(final String runId, final RecordCaseInfo caseInfo,
+                                              final String replayOwner, final Boolean restartApp,
+                                              final boolean headless) {
+        LauncherApplication.getInstance().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (!HarnessState.isRunning(runId)) {
+                    return;
+                }
+                try {
+                    CaseReplayUtil.startReplay(caseInfo, replayOwner, restartApp, headless);
+                } catch (RuntimeException exception) {
+                    HarnessState.failToStart(runId,
+                            "Unable to start replay: " + exception.getMessage());
+                }
+            }
+        });
     }
 
     /**

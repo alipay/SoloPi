@@ -352,7 +352,7 @@ public class IndexActivity extends BaseActivity {
                                     new String[] { Constant.MAIL_ADDERSS });
                             i.putExtra(Intent.EXTRA_SUBJECT, StringUtil.getString(R.string.index__report_error_log));
                             i.putExtra(Intent.EXTRA_TEXT, getString(R.string.index__error_occur_time, errorTime));
-                            Uri uri = FileProvider.getUriForFile(IndexActivity.this, "com.alipay.hulu.myProvider", zipFile);
+                            Uri uri = FileProvider.getUriForFile(IndexActivity.this, getPackageName() + ".myProvider", zipFile);
                             i.putExtra(Intent.EXTRA_STREAM, uri);
                             startActivity(Intent.createChooser(i,
                                     getString(R.string.index__select_mail_app)));

@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.scheme.AdbSchemeActivity;
+import com.alipay.hulu.common.scheme.AdbAgentActivity;
 import com.alipay.hulu.common.scheme.SchemeActionResolver;
 import com.alipay.hulu.common.scheme.SchemeResolver;
 import com.alipay.hulu.common.service.ScreenCaptureService;
@@ -31,17 +32,16 @@ import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.service.DeviceControlLease;
+import com.alipay.hulu.shared.event.accessibility.AccessibilityUiEventClock;
 import com.alipay.hulu.shared.node.OperationService;
 import com.alipay.hulu.shared.node.action.OperationContext;
 import com.alipay.hulu.shared.node.action.OperationExecutor;
 import com.alipay.hulu.shared.node.action.OperationMethod;
 import com.alipay.hulu.shared.node.action.PerformActionEnum;
-import com.alipay.hulu.shared.node.locater.OperationNodeLocator;
 import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
-import com.alipay.hulu.shared.node.tree.OperationNode;
-import com.alipay.hulu.shared.node.tree.export.OperationStepExporter;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -186,6 +186,12 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         result.put("arbitraryShell", false);
         result.put("mutationTransport", "adb-scheme");
         result.put("queryTransport", "adb-forward-http");
+        result.put("settleStrategies", java.util.Arrays.asList(
+                AgentUiWaiter.LEGACY, AgentUiWaiter.EVENT_STABLE_V1));
+        result.put("defaultSettleStrategy", AgentUiWaiter.LEGACY);
+        result.put("actionValidationStrategies", java.util.Arrays.asList(
+                AgentTargetContextGuard.FULL_PAGE, AgentTargetContextGuard.TARGET_CONTEXT_V1));
+        result.put("defaultActionValidationStrategy", AgentTargetContextGuard.FULL_PAGE);
         return result;
     }
 
@@ -197,7 +203,9 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
                 boundedLong(params, "maxDurationMs", DEFAULT_MAX_DURATION_MS, 1_000L, 1_800_000L),
                 boundedLong(params, "idleTimeoutMs", DEFAULT_IDLE_TIMEOUT_MS, 1_000L, 300_000L),
                 boundedInt(params, "maxRepeatedActions", DEFAULT_MAX_REPEATED_ACTIONS, 1, 20),
-                boundedInt(params, "maxNoProgressSteps", DEFAULT_MAX_NO_PROGRESS_STEPS, 1, 20));
+                boundedInt(params, "maxNoProgressSteps", DEFAULT_MAX_NO_PROGRESS_STEPS, 1, 20),
+                parseSettleStrategy(params.get("settleStrategy")),
+                parseActionValidationStrategy(params.get("actionValidationStrategy")));
         final AgentSessionState.StartResult started = SESSION.start(ownerToken, config);
         if (!started.success) {
             return error(started.errorCode, started.error);
@@ -339,20 +347,33 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
             return;
         }
         try {
+            AgentSessionState.Config config = requireWorkConfig(sessionId, ownerToken);
+            String settleStrategy = config.settleStrategy;
+            boolean targetContext = AgentTargetContextGuard.TARGET_CONTEXT_V1.equals(config.actionValidationStrategy);
+            AgentUiWaiter.Guard guard = workGuard(sessionId, ownerToken);
             Frame frame;
             synchronized (FRAME_LOCK) {
                 frame = currentFrame;
             }
-            AbstractNodeTree freshRoot = loadControllableRoot(
-                    service, ROOT_READY_TIMEOUT_MS, frame == null ? null : frame.packageName);
+            AgentUiWaiter.Result<AbstractNodeTree> ready = loadControllableRoot(
+                    service, ROOT_READY_TIMEOUT_MS, frame == null ? null : frame.packageName,
+                    settleStrategy, guard);
+            AbstractNodeTree freshRoot = ready.value;
             if (freshRoot == null) {
                 failAcceptedAction(sessionId, ownerToken, stepId, observationId, action,
                         "Controllable foreground page root is unavailable");
                 return;
             }
-            String currentSignature = signature(freshRoot.exportToJsonObject());
+            JSONObject freshPage = freshRoot.exportToJsonObject();
+            String currentSignature = signature(freshPage);
+            AgentTargetContextGuard.Snapshot freshContext = targetContext
+                    ? AgentTargetContextAndroid.capture(freshRoot, freshPage) : null;
+            AgentTargetContextGuard.Verification validation = targetContext
+                    ? AgentTargetContextGuard.verify(observationId,
+                    frame != null && observationId.equals(frame.observationId) ? frame.targetContext : null,
+                    freshContext, action) : null;
             AgentSessionState.BeginResult begin = SESSION.beginAction(sessionId, ownerToken,
-                    stepId, observationId, currentSignature, action);
+                    stepId, observationId, currentSignature, action, freshPage, validation);
             if (!begin.accepted) {
                 stopTouchServiceIfTerminal();
                 return;
@@ -360,10 +381,18 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
             actionGeneration = begin.generation;
             final long acceptedGeneration = begin.generation;
 
-            AbstractNodeTree target = locateTarget(frame, observationId, action, freshRoot);
+            boolean nativeClick = validation != null && "verified".equals(validation.result);
+            AbstractNodeTree target = nativeClick ? AgentTargetContextAndroid.at(freshRoot, validation.path)
+                    : locateTarget(frame, observationId, action, freshRoot);
             OperationMethod method = operationMethod(action);
             final CountDownLatch completed = new CountDownLatch(1);
-            boolean dispatched = service.doSomeAction(method, target,
+            guard.check();
+            boolean dispatched;
+            if (nativeClick) {
+                dispatched = AgentTargetContextAndroid.click(freshRoot, freshContext, validation, guard);
+                completed.countDown();
+            } else {
+                dispatched = service.doSomeAction(method, target,
                     new OperationContext.BaseOperationListener() {
                         @Override
                         public void onContextReceive(OperationContext context) {
@@ -378,22 +407,34 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
                             completed.countDown();
                         }
                     });
+            }
             if (!dispatched || !completed.await(ACTION_COMPLETION_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
                 SESSION.finishAction(begin.generation, stepId, false,
-                        dispatched ? "Action completion timed out" : "OperationService rejected the action",
+                        dispatched ? "Action completion timed out" : nativeClick
+                                ? "Native click rejected or live target/window changed before dispatch"
+                                : "OperationService rejected the action",
                         null);
                 return;
             }
 
-            CapturedPage settled = settle(service, sessionId, currentSignature);
+            CapturedPage settled = settle(service, sessionId, currentSignature, settleStrategy, guard, targetContext);
+            // This is observation feedback, never a business-verification result.
+            settled.evidence.put("actionEffect", currentSignature.equals(settled.signature)
+                    ? "NO_VISIBLE_CHANGE" : "UI_CHANGED");
+            Map<String, Object> settleTiming = (Map<String, Object>) settled.evidence.get("settleTiming");
+            settleTiming.put("preActionRootMs", ready.elapsedMs);
+            settleTiming.put("preActionTreeSamples", ready.treeSamples);
+            guard.check();
             AgentSessionState.Receipt receipt = SESSION.finishAction(begin.generation, stepId, true,
                     null, AgentSessionState.ObservationInput.of(settled.signature, settled.evidence));
             if (receipt != null && receipt.settledObservation != null) {
                 synchronized (FRAME_LOCK) {
                     currentFrame = new Frame(receipt.settledObservation.observationId,
-                            settled.signature, settled.packageName, settled.nodes);
+                            settled.signature, settled.packageName, settled.nodes, settled.targetContext);
                 }
             }
+        } catch (AgentUiWaiter.AbortedException aborted) {
+            SESSION.finishAction(actionGeneration, stepId, false, "Agent UI work was cancelled", null);
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
             SESSION.finishAction(actionGeneration, stepId, false,
@@ -464,7 +505,7 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
     }
 
     private static void requireAdb(Context context) throws AgentProtocolException {
-        if (!(context instanceof AdbSchemeActivity)) {
+        if (!(context instanceof AdbSchemeActivity) && !(context instanceof AdbAgentActivity)) {
             throw new AgentProtocolException("adb_required",
                     "Agent mutations require the DUMP-protected ADB scheme transport");
         }
@@ -481,61 +522,91 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
 
     private AgentSessionState.Result<AgentSessionState.Observation> captureAndRecord(
             String sessionId, String ownerToken, boolean screenshot) throws AgentProtocolException {
+        AgentSessionState.Config config = requireWorkConfig(sessionId, ownerToken);
+        String settleStrategy = config.settleStrategy;
+        AgentUiWaiter.Guard guard = workGuard(sessionId, ownerToken);
         OperationService service = LauncherApplication.service(OperationService.class);
         if (service == null) {
             return AgentSessionState.Result.error("operation_service_unavailable",
                     "Operation service is unavailable");
         }
-        AbstractNodeTree root;
+        AgentUiWaiter.Result<AbstractNodeTree> ready;
         try {
-            root = loadControllableRoot(service, ROOT_READY_TIMEOUT_MS, null);
+            ready = loadControllableRoot(service, ROOT_READY_TIMEOUT_MS, null, settleStrategy, guard);
+        } catch (AgentUiWaiter.AbortedException aborted) {
+            return AgentSessionState.Result.error("observation_cancelled", "Observation capture was cancelled");
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
             return AgentSessionState.Result.error("observation_interrupted",
                     "Observation capture was interrupted");
         }
-        if (root == null) {
+        if (ready.value == null) {
             return AgentSessionState.Result.error("page_root_unavailable",
                     "Controllable foreground page root is unavailable");
         }
-        CapturedPage captured = capturePage(root, sessionId, screenshot);
+        CapturedPage captured = capturePage(ready.value, sessionId, screenshot,
+                AgentTargetContextGuard.TARGET_CONTEXT_V1.equals(config.actionValidationStrategy));
+        captured.evidence.put("settleTiming", settleTiming(settleStrategy, "root-ready", ready));
+        requireWorkConfig(sessionId, ownerToken);
         AgentSessionState.Result<AgentSessionState.Observation> result = SESSION.recordObservation(
                 sessionId, ownerToken, captured.signature, captured.evidence);
         if (result.success) {
             synchronized (FRAME_LOCK) {
                 currentFrame = new Frame(result.value.observationId,
-                        captured.signature, captured.packageName, captured.nodes);
+                        captured.signature, captured.packageName, captured.nodes, captured.targetContext);
             }
         }
         return result;
     }
 
-    private CapturedPage settle(OperationService service, String sessionId, String baselineSignature)
+    private CapturedPage settle(OperationService service, String sessionId, String baselineSignature,
+                               String strategy, AgentUiWaiter.Guard guard, boolean targetContext)
             throws AgentProtocolException, InterruptedException {
-        long deadline = System.currentTimeMillis() + SETTLE_TIMEOUT_MS;
+        if (AgentUiWaiter.EVENT_STABLE_V1.equals(strategy)) {
+            AgentUiWaiter.Result<AbstractNodeTree> result = stableRoot(
+                    service, SETTLE_TIMEOUT_MS, null, baselineSignature, guard);
+            if (result.value == null) {
+                throw new AgentProtocolException("settle_failed", "UI stability could not be verified after action");
+            }
+            CapturedPage captured = capturePage(result.value, sessionId, true, targetContext);
+            captured.evidence.put("settleTiming", settleTiming(strategy, "post-action", result));
+            return captured;
+        }
+        long started = AccessibilityUiEventClock.monotonicMs();
+        long deadline = started + SETTLE_TIMEOUT_MS;
         String previousSignature = null;
         AbstractNodeTree root = null;
-        while (System.currentTimeMillis() < deadline) {
+        int samples = 0;
+        boolean settled = false;
+        while (AccessibilityUiEventClock.monotonicMs() < deadline) {
+            guard.check();
             Thread.sleep(SETTLE_INTERVAL_MS);
-            root = service.getBaseCurrentRoot();
+            root = service.getBaseCurrentRootForAgent();
+            samples++;
+            guard.check();
             if (root == null) {
                 continue;
             }
             JSONObject page = root.exportToJsonObject();
-            if (!isControllablePage(page, displayMetrics())) {
+            if (!isControllableRoot(root, page, displayMetrics())) {
                 root = null;
                 continue;
             }
             String current = signature(page);
             if (hasSettled(baselineSignature, previousSignature, current)) {
-                return capturePage(root, sessionId, true);
+                settled = true;
+                break;
             }
             previousSignature = current;
         }
         if (root == null) {
             throw new AgentProtocolException("settle_failed", "No UI root was available after action");
         }
-        return capturePage(root, sessionId, true);
+        AgentUiWaiter.Result<AbstractNodeTree> result = new AgentUiWaiter.Result<>(root,
+                AccessibilityUiEventClock.monotonicMs() - started, samples, settled, !settled);
+        CapturedPage captured = capturePage(root, sessionId, true, targetContext);
+        captured.evidence.put("settleTiming", settleTiming(strategy, "post-action", result));
+        return captured;
     }
 
     static boolean hasSettled(String baselineSignature, String previousSignature,
@@ -545,37 +616,147 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
                 && currentSignature.equals(previousSignature);
     }
 
-    private static AbstractNodeTree loadControllableRoot(OperationService service, long timeoutMs,
-                                                         String expectedPackage)
+    private static AgentUiWaiter.Result<AbstractNodeTree> loadControllableRoot(
+            OperationService service, long timeoutMs, String expectedPackage,
+            String strategy, AgentUiWaiter.Guard guard)
             throws InterruptedException {
-        long deadline = System.currentTimeMillis() + timeoutMs;
+        if (AgentUiWaiter.EVENT_STABLE_V1.equals(strategy)) {
+            return stableRoot(service, timeoutMs, expectedPackage, null, guard);
+        }
+        long started = AccessibilityUiEventClock.monotonicMs();
+        long deadline = started + timeoutMs;
+        int samples = 0;
         DisplayMetrics metrics = displayMetrics();
         do {
-            AbstractNodeTree root = service.getBaseCurrentRoot();
+            guard.check();
+            AbstractNodeTree root = service.getBaseCurrentRootForAgent();
+            samples++;
+            guard.check();
             if (root != null) {
                 JSONObject page = root.exportToJsonObject();
                 String packageName = page == null ? null : page.getString("packageName");
-                if (isControllablePage(page, metrics)
+                if (isControllableRoot(root, page, metrics)
                         && (StringUtil.isEmpty(expectedPackage)
                         || expectedPackage.equals(packageName))) {
                     Thread.sleep(ROOT_TRANSITION_SETTLE_MS);
-                    root = service.getBaseCurrentRoot();
+                    guard.check();
+                    root = service.getBaseCurrentRootForAgent();
+                    samples++;
+                    guard.check();
                     page = root == null ? null : root.exportToJsonObject();
                     packageName = page == null ? null : page.getString("packageName");
-                    if (isControllablePage(page, metrics)
+                    if (isControllableRoot(root, page, metrics)
                             && (StringUtil.isEmpty(expectedPackage)
                             || expectedPackage.equals(packageName))) {
-                        return root;
+                        return new AgentUiWaiter.Result<>(root,
+                                AccessibilityUiEventClock.monotonicMs() - started,
+                                samples, true, false);
                     }
                 }
             }
             Thread.sleep(ROOT_READY_INTERVAL_MS);
-        } while (System.currentTimeMillis() < deadline);
-        return null;
+        } while (AccessibilityUiEventClock.monotonicMs() < deadline);
+        return new AgentUiWaiter.Result<>(null, AccessibilityUiEventClock.monotonicMs() - started,
+                samples, false, true);
+    }
+
+    static String parseSettleStrategy(String value) throws AgentProtocolException {
+        String strategy = value == null ? AgentUiWaiter.LEGACY : value;
+        if (!AgentUiWaiter.supports(strategy)) {
+            throw new AgentProtocolException("invalid_settle_strategy", "Unsupported UI settle strategy");
+        }
+        return strategy;
+    }
+
+    static String parseActionValidationStrategy(String value) throws AgentProtocolException {
+        String strategy = value == null ? AgentTargetContextGuard.FULL_PAGE : value;
+        if (!AgentTargetContextGuard.supports(strategy)) {
+            throw new AgentProtocolException("invalid_action_validation_strategy",
+                    "Unsupported action validation strategy");
+        }
+        return strategy;
+    }
+
+    private static AgentSessionState.Config requireWorkConfig(String sessionId, String ownerToken)
+            throws AgentProtocolException {
+        AgentSessionState.Result<AgentSessionState.Config> result = SESSION.workConfig(sessionId, ownerToken);
+        if (!result.success) {
+            throw new AgentProtocolException(result.errorCode, result.error);
+        }
+        return result.value;
+    }
+
+    private static AgentUiWaiter.Guard workGuard(final String sessionId, final String ownerToken) {
+        return new AgentUiWaiter.Guard() {
+            @Override
+            public void check() throws InterruptedException {
+                if (Thread.currentThread().isInterrupted()) {
+                    throw new InterruptedException("Agent UI wait interrupted");
+                }
+                // Code security: every fresh sample and the final dispatch retain exact owner/lease
+                // binding; polling does not refresh idle deadlines or revive terminal sessions.
+                if (!SESSION.workConfig(sessionId, ownerToken).success) {
+                    throw new AgentUiWaiter.AbortedException();
+                }
+            }
+        };
+    }
+
+    private static AgentUiWaiter.Result<AbstractNodeTree> stableRoot(
+            final OperationService service, long timeoutMs, final String expectedPackage,
+            String baselineSignature, AgentUiWaiter.Guard guard) throws InterruptedException {
+        final DisplayMetrics metrics = displayMetrics();
+        AgentUiWaiter<AbstractNodeTree> waiter = new AgentUiWaiter<>(new AgentUiWaiter.Clock() {
+            @Override
+            public long now() {
+                return AccessibilityUiEventClock.monotonicMs();
+            }
+
+            @Override
+            public void sleep(long durationMs) throws InterruptedException {
+                Thread.sleep(durationMs);
+            }
+        }, new AgentUiWaiter.Reader<AbstractNodeTree>() {
+            @Override
+            public AgentUiWaiter.Sample<AbstractNodeTree> read() {
+                AccessibilityUiEventClock.Snapshot before = AccessibilityUiEventClock.snapshot();
+                AbstractNodeTree root = service.getBaseCurrentRootForAgent();
+                JSONObject page = root == null ? null : root.exportToJsonObject();
+                String packageName = page == null ? null : page.getString("packageName");
+                boolean valid = isControllableRoot(root, page, metrics)
+                        && (StringUtil.isEmpty(expectedPackage) || expectedPackage.equals(packageName));
+                String pageSignature = valid ? signature(page) : null;
+                AccessibilityUiEventClock.Snapshot after = AccessibilityUiEventClock.snapshot();
+                return new AgentUiWaiter.Sample<>(valid ? root : null, pageSignature,
+                        before.sequence, after.sequence, after.lastEventMs,
+                        before.available && after.available);
+            }
+        }, guard);
+        return baselineSignature == null ? waiter.await(timeoutMs, null)
+                : waiter.awaitWithTransitionGrace(timeoutMs, 5_000L, baselineSignature);
+    }
+
+    private static Map<String, Object> settleTiming(String strategy, String phase,
+                                                    AgentUiWaiter.Result<?> result) {
+        Map<String, Object> timing = new LinkedHashMap<>();
+        timing.put("strategy", strategy);
+        timing.put("phase", phase);
+        timing.put("elapsedMs", result.elapsedMs);
+        timing.put("treeSamples", result.treeSamples);
+        timing.put("settled", result.settled);
+        timing.put("timedOut", result.timedOut);
+        return timing;
     }
 
     static boolean isControllablePage(JSONObject page, DisplayMetrics metrics) {
         return isControllablePage(page, metrics,
+                LauncherApplication.getContext().getPackageName());
+    }
+
+    private static boolean isControllableRoot(AbstractNodeTree root, JSONObject page,
+                                              DisplayMetrics metrics) {
+        return isControllablePage(page, metrics)
+                || AgentTargetContextAndroid.isActiveApplicationRoot(root, page, metrics,
                 LauncherApplication.getContext().getPackageName());
     }
 
@@ -607,7 +788,8 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         return metrics;
     }
 
-    private CapturedPage capturePage(AbstractNodeTree root, String sessionId, boolean screenshot)
+    private CapturedPage capturePage(AbstractNodeTree root, String sessionId, boolean screenshot,
+                                    boolean targetContext)
             throws AgentProtocolException {
         JSONObject page = root.exportToJsonObject();
         if (page == null) {
@@ -615,8 +797,10 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         }
         String signature = signature(page);
         String packageName = page.getString("packageName");
-        Map<String, OperationNode> nodes = new LinkedHashMap<>();
-        assignNodeIds(root, page, nodes, new AtomicInteger());
+        AgentTargetContextGuard.Snapshot context = targetContext
+                ? AgentTargetContextAndroid.capture(root, page) : null;
+        Map<String, int[]> nodes = new LinkedHashMap<>();
+        assignNodeIds(root, page, nodes, new AtomicInteger(), new int[0]);
 
         Map<String, Object> evidence = new LinkedHashMap<>();
         evidence.put("treeSha256", signature);
@@ -625,7 +809,7 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         if (screenshot) {
             evidence.putAll(captureScreenshot(sessionId));
         }
-        return new CapturedPage(signature, packageName, evidence, nodes);
+        return new CapturedPage(signature, packageName, evidence, nodes, context);
     }
 
     private Map<String, Object> captureScreenshot(String sessionId) {
@@ -660,20 +844,26 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
     }
 
     private static void assignNodeIds(AbstractNodeTree node, JSONObject json,
-                                      Map<String, OperationNode> nodes, AtomicInteger sequence) {
+                                      Map<String, int[]> nodes, AtomicInteger sequence, int[] path) {
         String nodeId = "node-" + sequence.incrementAndGet();
         json.put("nodeId", nodeId);
-        nodes.put(nodeId, OperationStepExporter.exportNodeToOperationNode(node));
+        nodes.put(nodeId, path.clone());
         List<AbstractNodeTree> children = node.getChildrenNodes();
         JSONArray childJson = json.getJSONArray("children");
         if (children == null || childJson == null) {
             return;
         }
-        int count = Math.min(children.size(), childJson.size());
+        // Code security: never guess a path if export removed a child.
+        if (children.size() != childJson.size()) {
+            throw new IllegalArgumentException("Observation child mapping is incomplete");
+        }
+        int count = children.size();
         for (int index = 0; index < count; index++) {
             JSONObject current = childJson.getJSONObject(index);
             if (current != null) {
-                assignNodeIds(children.get(index), current, nodes, sequence);
+                int[] childPath = Arrays.copyOf(path, path.length + 1);
+                childPath[path.length] = index;
+                assignNodeIds(children.get(index), current, nodes, sequence, childPath);
             }
         }
     }
@@ -689,15 +879,20 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         if (frame == null || !observationId.equals(frame.observationId)) {
             throw new AgentProtocolException("stale_observation", "Observation frame is unavailable");
         }
-        OperationNode selector = frame.nodes.get(rawNodeId.toString());
-        if (selector == null) {
-            throw new AgentProtocolException("node_not_found", "nodeId does not belong to observation");
-        }
-        AbstractNodeTree target = OperationNodeLocator.findAbstractNode(root, selector);
+        // Code security: beginAction has verified owner, observation and the complete
+        // fresh page signature. Bind its exact path; replay's fuzzy locator can choose
+        // a different same-labelled node even when the complete page is unchanged.
+        AbstractNodeTree target = locateFrameTarget(root, frame.nodes, rawNodeId.toString());
         if (target == null) {
             throw new AgentProtocolException("node_not_found", "Observed node no longer exists");
         }
         return target;
+    }
+
+    static AbstractNodeTree locateFrameTarget(AbstractNodeTree root, Map<String, int[]> nodes,
+                                               String nodeId) {
+        int[] path = nodes.get(nodeId);
+        return path == null ? null : AgentTargetContextAndroid.at(root, path);
     }
 
     private static OperationMethod operationMethod(AgentSessionState.Action action)
@@ -793,7 +988,33 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
 
     static String signature(JSONObject page) {
         return AgentEvidenceStore.sha256(
-                JSON.toJSONString(page, SerializerFeature.MapSortField));
+                JSON.toJSONString(pageForSignature(page), SerializerFeature.MapSortField));
+    }
+
+    private static JSONObject pageForSignature(JSONObject page) {
+        if (page == null) {
+            return null;
+        }
+        JSONObject semanticPage = new JSONObject(page.size());
+        boolean accessibilityNode = "AccessibilityNodeTree".equals(page.getString("type"));
+        for (Map.Entry<String, Object> field : page.entrySet()) {
+            // Code security: only Accessibility's transient source ID is nonsemantic.
+            // Preserve every other field and ordered child; never mutate raw evidence.
+            if (accessibilityNode && "id".equals(field.getKey())) {
+                continue;
+            }
+            if ("children".equals(field.getKey()) && field.getValue() instanceof List) {
+                JSONArray children = new JSONArray();
+                for (Object child : (List<?>) field.getValue()) {
+                    children.add(child instanceof JSONObject
+                            ? pageForSignature((JSONObject) child) : child);
+                }
+                semanticPage.put(field.getKey(), children);
+            } else {
+                semanticPage.put(field.getKey(), field.getValue());
+            }
+        }
+        return semanticPage;
     }
 
     private static String require(Map<String, String> params, String key)
@@ -940,14 +1161,16 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         final String observationId;
         final String signature;
         final String packageName;
-        final Map<String, OperationNode> nodes;
+        final Map<String, int[]> nodes;
+        final AgentTargetContextGuard.Snapshot targetContext;
 
         Frame(String observationId, String signature, String packageName,
-              Map<String, OperationNode> nodes) {
+              Map<String, int[]> nodes, AgentTargetContextGuard.Snapshot targetContext) {
             this.observationId = observationId;
             this.signature = signature;
             this.packageName = packageName;
             this.nodes = Collections.unmodifiableMap(new LinkedHashMap<>(nodes));
+            this.targetContext = targetContext;
         }
     }
 
@@ -955,14 +1178,16 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         final String signature;
         final String packageName;
         final Map<String, Object> evidence;
-        final Map<String, OperationNode> nodes;
+        final Map<String, int[]> nodes;
+        final AgentTargetContextGuard.Snapshot targetContext;
 
         CapturedPage(String signature, String packageName, Map<String, Object> evidence,
-                     Map<String, OperationNode> nodes) {
+                     Map<String, int[]> nodes, AgentTargetContextGuard.Snapshot targetContext) {
             this.signature = signature;
             this.packageName = packageName;
             this.evidence = evidence;
             this.nodes = nodes;
+            this.targetContext = targetContext;
         }
     }
 

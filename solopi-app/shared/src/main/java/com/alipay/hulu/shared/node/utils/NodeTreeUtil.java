@@ -87,6 +87,26 @@ public class NodeTreeUtil {
      * @param method
      */
     public static boolean performAssertAction(AbstractNodeTree node, OperationMethod method) {
+        String matchTxt = assertionContent(node, method.getParam(OperationExecutor.ASSERT_TARGET));
+        if (matchTxt == null) {
+            LogUtil.w(ASSERT, "Unsupported assertion target or missing node");
+            return false;
+        }
+        return assertText(matchTxt, method);
+    }
+
+    static String assertionContent(AbstractNodeTree node, String target) {
+        if (node == null) {
+            return null;
+        }
+        if ("description".equals(target)) {
+            // A description oracle addresses this node, not its descendants or visible text.
+            return StringUtil.nonNullString(node.getDescription());
+        }
+        if (target != null && !"text".equals(target)) {
+            return null;
+        }
+        // Preserve legacy text aggregation when the target is absent or explicitly text.
         StringBuilder matchTxtBuilder = new StringBuilder(); // 待匹配的字符串
         for (AbstractNodeTree item : node) {
             if (!StringUtil.isEmpty(item.getText())) {
@@ -94,8 +114,7 @@ public class NodeTreeUtil {
             }
         }
 
-        String matchTxt = matchTxtBuilder.toString();
-        return assertText(matchTxt, method);
+        return matchTxtBuilder.toString();
     }
 
     /**
@@ -109,8 +128,9 @@ public class NodeTreeUtil {
         String mode = method.getParam(OperationExecutor.ASSERT_MODE);
         String inputContent = method.getParam(OperationExecutor.ASSERT_INPUT_CONTENT);
 
-        LogUtil.i(TAG, "current node text: %s, assert mode: %s, target text: %s",
-                matchTxt, mode, inputContent);
+        // Code security: UI descriptions and expected text may contain personal information.
+        LogUtil.i(TAG, "assertion content length: %d, expected length: %d",
+                matchTxt.length(), inputContent == null ? 0 : inputContent.length());
 
         Integer content = null;
 

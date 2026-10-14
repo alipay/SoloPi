@@ -44,6 +44,8 @@ public class FakeNodeTree extends AbstractNodeTree {
     public JSONObject exportToJsonObject() {
         JSONObject obj = new JSONObject(4);
         obj.put("type", getClass().getSimpleName());
+        obj.put("packageName", packageName);
+        obj.put("nodeBound", nodeBound);
         if (childrenNodes != null) {
             List<JSONObject> children = new ArrayList<>(childrenNodes.size() + 1);
             for (AbstractNodeTree child : getChildrenNodes()) {

@@ -128,7 +128,7 @@ public class ConfigSchemeResolver implements SchemeActionResolver {
                 "", false, null, null);
         // 控制端口不是设置页控件，但属于既有 Scheme 能力。
         add(result, KEY_CONTROL_PORT, TYPE_INT, "本地控制服务端口（修改会中断当前控制会话）",
-                23342, false, 5000L, 65535L);
+                SPService.getDefaultControlPort(), false, 5000L, 65535L);
         return result;
     }
 

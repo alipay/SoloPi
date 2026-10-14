@@ -1,9 +1,12 @@
 package com.alipay.hulu.scheme;
 
+import com.alibaba.fastjson.JSONObject;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +33,48 @@ public class AgentSessionStateTest {
     }
 
     @Test
+    public void strategyIsFrozenPerSessionAndLegacyConstructorRemainsCompatible() {
+        AgentSessionState.StartResult first = start("owner-token-a-12345", config());
+        assertEquals("legacy", first.session.get("settleStrategy"));
+        state.end(first.sessionId, first.ownerToken);
+        AgentSessionState.Config optimized = new AgentSessionState.Config(10, 60_000L, 5_000L,
+                3, 3, "event-stable-v1");
+        AgentSessionState.StartResult second = start("owner-token-b-12345", optimized);
+        assertEquals("event-stable-v1", second.session.get("settleStrategy"));
+        assertEquals("event-stable-v1", state.workConfig(second.sessionId, second.ownerToken)
+                .value.settleStrategy);
+        assertFalse(state.workConfig(first.sessionId, first.ownerToken).success);
+    }
+
+    @Test
+    public void uiWorkGuardRejectsWrongOwnerCancellationLeaseLossAndExpiry() {
+        AgentSessionState.StartResult first = start("owner-token-a-12345", config());
+        assertFalse(state.workConfig(first.sessionId, "owner-token-b-12345").success);
+        assertTrue(state.workConfig(first.sessionId, first.ownerToken).success);
+        state.cancel(first.sessionId, first.ownerToken);
+        assertFalse(state.workConfig(first.sessionId, first.ownerToken).success);
+
+        AgentSessionState.StartResult second = start("owner-token-b-12345", config());
+        lease.release(second.leaseOwner);
+        assertEquals("lease_lost", state.workConfig(second.sessionId, second.ownerToken).errorCode);
+        assertEquals(AgentSessionState.STATE_FAILED, state.snapshot().get("state"));
+
+        AgentSessionState.StartResult third = start("owner-token-c-12345", config());
+        clock.advance(60_000L);
+        assertFalse(state.workConfig(third.sessionId, third.ownerToken).success);
+        assertEquals(AgentSessionState.STATE_EXPIRED, state.snapshot().get("state"));
+    }
+
+    @Test
+    public void uiWorkPollingDoesNotExtendIdleDeadline() {
+        AgentSessionState.StartResult started = start("owner-token-a-12345", config());
+        Object lastActivity = state.snapshot().get("lastActivityAt");
+        clock.advance(10L);
+        assertTrue(state.workConfig(started.sessionId, started.ownerToken).success);
+        assertEquals(lastActivity, state.snapshot().get("lastActivityAt"));
+    }
+
+    @Test
     public void staleAndConsumedObservationsCannotExecute() {
         AgentSessionState.StartResult start = start("owner-token-a-12345", config());
         AgentSessionState.Observation first = observe(start, "tree-a");
@@ -53,6 +98,128 @@ public class AgentSessionStateTest {
                 "step-2", second.observationId, "tree-b", click);
         assertFalse(consumed.accepted);
         assertEquals("stale_observation", consumed.receipt.errorCode);
+    }
+
+    @Test
+    public void stalePageDiagnosticPreservesRejectionAndPersistsOnceWithoutOwnerToken() {
+        final List<Map<String, Object>> persisted = new ArrayList<>();
+        state = new AgentSessionState(clock, lease, ids, new AgentSessionState.EventSink() {
+            @Override
+            public void append(Map<String, Object> event) {
+                persisted.add(event);
+            }
+        });
+        AgentSessionState.StartResult start = start("owner-token-a-12345", config());
+        AgentSessionState.Observation observation = observe(start, "tree-before");
+        Map<String, Object> freshPage = singleton("packageName", "com.example.orders");
+        AgentSessionState.Action back = AgentSessionState.Action.of(
+                "back", Collections.<String, Object>emptyMap());
+
+        AgentSessionState.BeginResult rejected = state.beginAction(start.sessionId,
+                "owner-token-a-12345", "step-stale", observation.observationId,
+                "tree-after", back, freshPage);
+
+        assertFalse(rejected.accepted);
+        assertEquals("stale_observation", rejected.receipt.errorCode);
+        assertEquals(0, state.getAcceptedStepCount());
+        assertEquals(AgentSessionState.STATE_ACTIVE, state.snapshot().get("state"));
+        assertTrue(lease.isOwnedBy(start.leaseOwner));
+        Map<String, Object> event = persisted.get(persisted.size() - 1);
+        assertEquals("stale_observation_diagnostic", event.get("type"));
+        assertEquals(start.sessionId, event.get("sessionId"));
+        assertEquals("step-stale", event.get("stepId"));
+        assertEquals(observation.observationId, event.get("observationId"));
+        Map<?, ?> details = (Map<?, ?>) event.get("details");
+        assertEquals("tree-before", details.get("expectedSignature"));
+        assertEquals("tree-after", details.get("currentSignature"));
+        assertEquals(observation.observationId, details.get("currentObservationId"));
+        assertEquals(freshPage, details.get("freshPage"));
+        assertFalse(event.toString().contains("ownerToken"));
+        assertFalse(event.toString().contains("owner-token-a-12345"));
+
+        int eventCount = persisted.size();
+        AgentSessionState.BeginResult duplicate = state.beginAction(start.sessionId,
+                "owner-token-a-12345", "step-stale", observation.observationId,
+                "another-tree", back, singleton("text", "later page"));
+        assertTrue(duplicate.duplicate);
+        assertEquals(eventCount, persisted.size());
+    }
+
+    @Test
+    public void diagnosticCannotBeWrittenByWrongOwnerOrSessionAndDoesNotAffectValidAction() {
+        AgentSessionState.StartResult start = start("owner-token-a-12345", config());
+        AgentSessionState.Observation observation = observe(start, "tree-before");
+        AgentSessionState.Action back = AgentSessionState.Action.of(
+                "back", Collections.<String, Object>emptyMap());
+        Map<String, Object> freshPage = singleton("packageName", "com.example.orders");
+        int eventCount = state.timeline(start.sessionId, "owner-token-a-12345").value.size();
+
+        AgentSessionState.BeginResult wrongOwner = state.beginAction(start.sessionId,
+                "owner-token-b-12345", "step-wrong-owner", observation.observationId,
+                "tree-after", back, freshPage);
+        AgentSessionState.BeginResult wrongSession = state.beginAction("other-session",
+                "owner-token-a-12345", "step-wrong-session", observation.observationId,
+                "tree-after", back, freshPage);
+
+        assertEquals("owner_mismatch", wrongOwner.receipt.errorCode);
+        assertEquals("session_not_found", wrongSession.receipt.errorCode);
+        assertEquals(eventCount, state.timeline(start.sessionId, "owner-token-a-12345").value.size());
+
+        AgentSessionState.BeginResult accepted = state.beginAction(start.sessionId,
+                "owner-token-a-12345", "step-valid", observation.observationId,
+                "tree-before", back, freshPage);
+        assertTrue(accepted.accepted);
+        List<Map<String, Object>> timeline = state.timeline(start.sessionId, "owner-token-a-12345").value;
+        assertEquals(eventCount + 1, timeline.size());
+        assertEquals("action_accepted", timeline.get(timeline.size() - 1).get("type"));
+    }
+
+    @Test
+    public void sourceIdRefreshAllowsCurrentObservationButStillRejectsOldObservationId() {
+        AgentSessionState.StartResult start = start("owner-token-a-12345", config());
+        String observed = AgentSessionSchemeResolver.signature(
+                AgentSessionSchemeResolverTest.accessibilityPage("source-before"));
+        String fresh = AgentSessionSchemeResolver.signature(
+                AgentSessionSchemeResolverTest.accessibilityPage("source-after"));
+        AgentSessionState.Observation old = observe(start, observed);
+        AgentSessionState.Observation current = observe(start, observed);
+        AgentSessionState.Action click = AgentSessionState.Action.of(
+                "click", singleton("nodeId", "node-1"));
+
+        AgentSessionState.BeginResult stale = state.beginAction(start.sessionId,
+                "owner-token-a-12345", "step-old-frame", old.observationId, fresh, click);
+        assertFalse(stale.accepted);
+        assertEquals("stale_observation", stale.receipt.errorCode);
+        AgentSessionState.BeginResult accepted = state.beginAction(start.sessionId,
+                "owner-token-a-12345", "step-current-frame", current.observationId, fresh, click);
+        assertTrue(accepted.accepted);
+        assertEquals(1, state.getAcceptedStepCount());
+    }
+
+    @Test
+    public void semanticPageChangesStillRejectActionsAsStale() {
+        AgentSessionState.StartResult start = start("owner-token-a-12345", config());
+        String observed = AgentSessionSchemeResolver.signature(
+                AgentSessionSchemeResolverTest.accessibilityPage("source-before"));
+        AgentSessionState.Observation observation = observe(start, observed);
+        AgentSessionState.Action click = AgentSessionState.Action.of(
+                "click", singleton("nodeId", "node-1"));
+        String[] fields = {"text", "packageName", "resourceId", "description", "isEnabled", "isClickable", "nodeBound"};
+        for (String field : fields) {
+            JSONObject changed = AgentSessionSchemeResolverTest.accessibilityPage("source-after");
+            if ("nodeBound".equals(field)) {
+                changed.getJSONObject(field).put("left", 1);
+            } else {
+                Object value = changed.get(field);
+                changed.put(field, value instanceof Boolean ? !((Boolean) value) : "changed");
+            }
+            AgentSessionState.BeginResult rejected = state.beginAction(start.sessionId,
+                    "owner-token-a-12345", "step-changed-" + field, observation.observationId,
+                    AgentSessionSchemeResolver.signature(changed), click);
+            assertFalse(field, rejected.accepted);
+            assertEquals("stale_observation", rejected.receipt.errorCode);
+        }
+        assertEquals(0, state.getAcceptedStepCount());
     }
 
     @Test

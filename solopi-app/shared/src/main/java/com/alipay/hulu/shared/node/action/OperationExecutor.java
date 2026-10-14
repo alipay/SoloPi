@@ -91,6 +91,7 @@ public class OperationExecutor {
     public static final String ASSERT_MODE = "assertMode";
     public static final String ASSERT_INPUT_CONTENT = "assertInputContent";
     public static final String ASSERT_CONTENT = "assertContent";
+    public static final String ASSERT_TARGET = "assertTarget";
     public static final String LOCAL_CLICK_POS_KEY = "localClickPos";
     public static final String SCREEN_SIZE_KEY = "screenSize";
     public static final String IS_OVERRIDE_INSTALL_KEY = "isOverrideInstall";

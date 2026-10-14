@@ -155,7 +155,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.alipay.hulu.myProvider"
+            android:authorities="${applicationId}.myProvider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

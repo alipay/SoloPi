@@ -30,6 +30,12 @@ import java.lang.annotation.Target;
 public interface PrepareWorker {
     boolean doPrepareWork(String targetApp, PrepareUtil.PrepareStatus status);
 
+    /** Per-run policy; legacy workers keep their existing behavior. */
+    default boolean doPrepareWork(String targetApp, PrepareUtil.PrepareStatus status,
+                                  Boolean restartAppOverride) {
+        return doPrepareWork(targetApp, status);
+    }
+
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.RUNTIME)
     @interface PrepareTool {

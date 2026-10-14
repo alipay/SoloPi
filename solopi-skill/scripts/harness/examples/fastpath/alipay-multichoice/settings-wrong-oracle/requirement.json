@@ -1,0 +1,147 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "id": "fastpath-multichoice-settings-wrong-oracle",
+  "title": "支付宝三候选实验：settings-wrong-oracle",
+  "targetAppPackage": "com.eg.android.AlipayGphone",
+  "targetAppLabel": "支付宝",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-PREP",
+      "text": "进入我的页面，设置入口可见。"
+    },
+    {
+      "id": "AC-TARGET",
+      "text": "目标页两条固定检查满足预期，最后恢复首页。"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "scenario-settings-wrong-oracle",
+      "title": "settings-wrong-oracle",
+      "acceptanceCriteria": [
+        "AC-PREP",
+        "AC-TARGET"
+      ],
+      "steps": [
+        {
+          "id": "prepare-my",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "resourceId": "com.alipay.android.tablauncher:id/tab_description",
+              "className": "android.widget.TextView",
+              "text": "我的"
+            }
+          }
+        },
+        {
+          "id": "choose-entry",
+          "type": "explore",
+          "goal": "打开设置页。",
+          "allowedActions": [
+            "click"
+          ],
+          "budget": {
+            "maxSteps": 2,
+            "maxDurationMs": 180000,
+            "idleTimeoutMs": 120000,
+            "maxRepeatedActions": 1,
+            "maxNoProgressSteps": 1
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "my-settings-present",
+          "afterStep": "prepare-my",
+          "acceptanceCriteria": [
+            "AC-PREP"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.Button",
+              "description": "设置"
+            },
+            "field": "description",
+            "operator": "equals",
+            "expected": "设置"
+          }
+        },
+        {
+          "id": "target-1",
+          "afterStep": "choose-entry",
+          "acceptanceCriteria": [
+            "AC-TARGET"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "resourceId": "com.alipay.mobile.antui:id/title_text",
+              "className": "android.widget.TextView"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "设置"
+          }
+        },
+        {
+          "id": "target-2",
+          "afterStep": "choose-entry",
+          "acceptanceCriteria": [
+            "AC-TARGET"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "resourceId": "com.alipay.mobile.antui:id/back_button",
+              "className": "android.widget.FrameLayout"
+            },
+            "field": "description",
+            "operator": "equals",
+            "expected": "FASTPATH_EXPECTED_MISMATCH"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "return-my",
+          "action": {
+            "type": "back"
+          }
+        },
+        {
+          "id": "return-home",
+          "action": {
+            "type": "click",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "resourceId": "com.alipay.android.tablauncher:id/tab_description",
+              "className": "android.widget.TextView",
+              "text": "首页"
+            }
+          }
+        },
+        {
+          "id": "home-restored",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text",
+              "className": "android.widget.TextView"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "更多"
+          }
+        }
+      ]
+    }
+  ]
+}

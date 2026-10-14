@@ -97,6 +97,18 @@ public class SchemeActivity extends Activity {
      * @param params
      */
     private void doSchemeJump(Map<String, SortedList<SchemeActionResolver>> resolvers, String action, Map<String, String> params) {
+        try {
+            dispatchScheme(resolvers, action, params);
+        } finally {
+            onSchemeDispatchFinished(action);
+        }
+    }
+
+    /** Called after the actual synchronous dispatch, including asynchronous initialization paths. */
+    protected void onSchemeDispatchFinished(String action) {
+    }
+
+    private void dispatchScheme(Map<String, SortedList<SchemeActionResolver>> resolvers, String action, Map<String, String> params) {
         if (resolvers == null || !resolvers.containsKey(action)) {
             startOrigin();
             return;

@@ -15,6 +15,7 @@
  */
 package com.alipay.hulu.shared.node.utils;
 
+import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.utils.ClassUtil;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.shared.node.utils.prepare.PrepareWorker;
@@ -44,6 +45,16 @@ public class PrepareUtil {
      * @return
      */
     public static boolean doPrepareWork(String targetApp, PrepareStatus status) {
+        return doPrepareWork(targetApp, status, null);
+    }
+
+    public static boolean shouldRestartApp(Boolean restartAppOverride) {
+        return restartAppOverride != null ? restartAppOverride
+                : SPService.getBoolean(SPService.KEY_RESTART_APP_ON_PLAY, true);
+    }
+
+    public static boolean doPrepareWork(String targetApp, PrepareStatus status,
+                                        Boolean restartAppOverride) {
         if (!initialized) {
             initialized = true;
             initPrepareWorkers();
@@ -54,7 +65,8 @@ public class PrepareUtil {
             for (PrepareWorker prepareWorker: PREPARE_WORKERS) {
                 // 如果某步准备工作失败，停止准备
                 try {
-                    boolean result = prepareWorker.doPrepareWork(targetApp, status);
+                    boolean result = prepareWorker.doPrepareWork(targetApp, status,
+                            restartAppOverride);
 
                     if (!result) {
                         return false;

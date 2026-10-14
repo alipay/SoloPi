@@ -18,15 +18,18 @@ package com.alipay.hulu.shared.node.utils;
 import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.os.Looper;
 
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.MiscUtil;
-import com.alipay.hulu.common.utils.StringUtil;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,46 +61,116 @@ public class AppUtil {
     }
 
 
-    private static final Pattern TASK_ID_PATTERN = Pattern.compile(".*\\s+#(\\d+)\\s+.*");
+    private static final Pattern TASK_HEADER_PATTERN = Pattern.compile(
+            "^\\s*(?:\\*\\s+)?(?:TaskRecord|Task)\\{[^\\s}]+\\s+#(\\d+)\\s+([^}]*)\\}.*$");
+    private static final Pattern TASK_AFFINITY_PATTERN = Pattern.compile(
+            "(?:^|\\s)A=(?:\\d+:)?([^\\s}]+)(?=\\s|$)");
+    private static final long TASK_MOVE_TIMEOUT_MS = 5_000L;
 
     /**
      * 启动目标应用
      * @param packageName
      */
     public static void launchTargetApp(String packageName) {
-        //获得当前运行的task
-        String result = CmdTools.execHighPrivilegeCmd("dumpsys activity activities | grep '* TaskRecord.*A=" + packageName + '\'');
+        launchTargetApp(packageName, true);
+    }
 
-        LogUtil.d(TAG,"task list Result: " + result);
-        if (!StringUtil.isEmpty(result) && result.contains(packageName)) {
-            String[] list = result.split("\n");
-            String targetLine = list[0];
-            Matcher matcher = TASK_ID_PATTERN.matcher(targetLine);
-            if (matcher.matches()) {
-                String matchRes = matcher.group(1);
-                try {
-                    final int taskId = Integer.parseInt(matchRes);
-                    final CountDownLatch latch = new CountDownLatch(1);
-                    LauncherApplication.getInstance().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ActivityManager mAm = (ActivityManager) LauncherApplication.getInstance().getSystemService(ACTIVITY_SERVICE);
-                            mAm.moveTaskToFront(taskId, 0);
-                            latch.countDown();
-                        }
-                    });
-
-                    latch.countDown();
+    /** Returns false when an existing task cannot be restored, or a new launch is forbidden. */
+    public static boolean launchTargetApp(String packageName, boolean allowStart) {
+        // Code security: CmdTools logs stdout; retain only task headers, never Activity intents.
+        // The command is fixed: package names are matched as data below, not shell input.
+        String result = CmdTools.execHighPrivilegeCmd("dumpsys activity activities | grep -Eo "
+                + "'^[[:space:]]*(\\*[[:space:]]+)?(TaskRecord|Task)\\{[^}]*\\}'");
+        final Integer taskId = findTaskId(result, packageName);
+        if (taskId != null) {
+            final LauncherApplication application = LauncherApplication.getInstance();
+            try {
+                boolean moved = moveTaskAndWait(new Runnable() {
+                    @Override
+                    public void run() {
+                        ActivityManager manager = (ActivityManager) application.getSystemService(ACTIVITY_SERVICE);
+                        manager.moveTaskToFront(taskId, 0);
+                    }
+                }, new Executor() {
+                    @Override
+                    public void execute(Runnable command) {
+                        application.runOnUiThread(command);
+                    }
+                }, Looper.myLooper() == Looper.getMainLooper(), TASK_MOVE_TIMEOUT_MS);
+                if (moved) {
                     MiscUtil.sleep(2000);
-                    return;
-                } catch (NumberFormatException e) {
-                    LogUtil.e(TAG, "Can't format for content :" + matchRes, e);
+                    return true;
+                } else {
+                    LogUtil.w(TAG, "Existing task could not be moved to the foreground");
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                LogUtil.w(TAG, "Interrupted while bringing the existing task to the foreground");
             }
+            // An existing task must not fall back to its launcher and lose the current page.
+            return false;
         }
 
-        // 没有目标应用进程，手动启动
-        startApp(packageName);
+        // A no-restart caller must not replace a missing task with a new launcher page.
+        return allowStart && startApp(packageName);
+    }
+
+    static Integer findTaskId(String activityDump, String packageName) {
+        if (activityDump == null || packageName == null || packageName.isEmpty()) {
+            return null;
+        }
+        for (String line : activityDump.split("\\r?\\n")) {
+            Matcher task = TASK_HEADER_PATTERN.matcher(line);
+            if (!task.matches()) {
+                continue;
+            }
+            Matcher affinity = TASK_AFFINITY_PATTERN.matcher(task.group(2));
+            // Code security: match a task's complete default affinity, never a package prefix.
+            if (!affinity.find() || !packageName.equals(affinity.group(1))) {
+                continue;
+            }
+            try {
+                return Integer.parseInt(task.group(1));
+            } catch (NumberFormatException ignored) {
+                // Malformed task IDs must not hide a later valid task header.
+            }
+        }
+        return null;
+    }
+
+    static boolean moveTaskAndWait(final Runnable moveTask, Executor uiExecutor,
+                                   boolean onMainThread, long timeoutMs) throws InterruptedException {
+        final CountDownLatch completed = new CountDownLatch(1);
+        final AtomicBoolean moved = new AtomicBoolean();
+        final AtomicBoolean cancelled = new AtomicBoolean();
+        Runnable action = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (!cancelled.get()) {
+                        moveTask.run();
+                        moved.set(true);
+                    }
+                } catch (RuntimeException ignored) {
+                    // A denied or removed task must not crash the UI thread or relaunch the app.
+                } finally {
+                    completed.countDown();
+                }
+            }
+        };
+        try {
+            if (onMainThread) {
+                action.run();
+            } else {
+                uiExecutor.execute(action);
+            }
+            return completed.await(timeoutMs, TimeUnit.MILLISECONDS) && moved.get();
+        } catch (RuntimeException ignored) {
+            return false;
+        } finally {
+            // Prevent a queued UI action from running after timeout or interruption.
+            cancelled.set(true);
+        }
     }
 
     /**

@@ -249,7 +249,8 @@ public abstract class LauncherApplication extends Application {
                 try {
                     try {
                         // 搜索下内部类
-                        ClassUtil.initClasses(LauncherApplication.this, null);
+                        // The Java namespace stays fixed when a debug applicationId has a suffix.
+                        ClassUtil.initClasses(LauncherApplication.this, getString(R.string.scan_package));
                     } catch (Throwable t) {
                         LogUtil.e(TAG, "加载类失败, " + t.getMessage(), t);
                     }
@@ -272,7 +273,7 @@ public abstract class LauncherApplication extends Application {
                         public void run() {
                             initActionResolvers();
 
-                            startHttpServerAtPort(SPService.getInt(SPService.KEY_CONTROL_PORT, 23342));
+                            startHttpServerAtPort(SPService.getInt(SPService.KEY_CONTROL_PORT, SPService.getDefaultControlPort()));
                             schemeListener = new SchemeHttpListener();
                             registerControlListener(schemeListener);
 

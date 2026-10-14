@@ -249,13 +249,26 @@ public class OperationService implements ExportService {
      * @return
      */
     public AbstractNodeTree getBaseCurrentRoot() {
+        return getBaseCurrentRoot(null);
+    }
+
+    /** Agent observations must not repair device services or terminate other applications. */
+    public AbstractNodeTree getBaseCurrentRootForAgent() {
+        NodeContext readOnlyContext = new NodeContext();
+        readOnlyContext.put(AccessibilityProvider.READ_ONLY_CAPTURE, true);
+        return getBaseCurrentRoot(readOnlyContext);
+    }
+
+    private AbstractNodeTree getBaseCurrentRoot(NodeContext captureContext) {
         LogUtil.w(TAG, "开始加载跟结构");
         synchronized (this) {
             if (currentRoot != null) {
                 currentRoot.recycle();
             }
             LogUtil.w(TAG, "重载树结构");
-            currentRoot = startLoadProvider(AccessibilityProvider.class, Collections.<Class<? extends AbstractNodeProcessor>>singletonList(AccessibilityNodeProcessor.class));
+            currentRoot = startLoadProvider(AccessibilityProvider.class,
+                    Collections.<Class<? extends AbstractNodeProcessor>>singletonList(AccessibilityNodeProcessor.class),
+                    captureContext);
             return currentRoot;
         }
     }

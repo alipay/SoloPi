@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "solopi.ai.goalpath-policy/v1",
+  "targetPackage": "com.eg.android.AlipayGphone",
+  "steps": {
+    "replace-draft": {
+      "instructions": "把当前的“天气”搜索草稿改成冻结的测试文本“计算器”，保留在搜索输入页，不提交搜索。",
+      "stopWhen": {
+        "selector": {
+          "packageName": "com.eg.android.AlipayGphone",
+          "className": "android.widget.EditText",
+          "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+        },
+        "field": "text",
+        "equals": "计算器"
+      },
+      "readyWhen": {
+        "selector": {
+          "packageName": "com.eg.android.AlipayGphone",
+          "className": "android.widget.EditText",
+          "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+        },
+        "field": "className",
+        "equals": "android.widget.EditText"
+      },
+      "inputData": {
+        "query": "计算器"
+      },
+      "maxCandidates": 64,
+      "minProbability": 0.65,
+      "minMargin": 0.15,
+      "denyLabels": [
+        "支付",
+        "付款",
+        "转账",
+        "收款",
+        "收付款",
+        "扫一扫",
+        "理财",
+        "借钱",
+        "余额宝",
+        "花呗",
+        "网商贷",
+        "信用卡还款",
+        "基金",
+        "股票",
+        "黄金",
+        "允许",
+        "同意",
+        "授权",
+        "搜索"
+      ],
+      "rules": [
+        {
+          "when": {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.EditText",
+              "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+            },
+            "field": "text",
+            "equals": "天气"
+          },
+          "action": "click",
+          "selector": {
+            "packageName": "com.eg.android.AlipayGphone",
+            "className": "android.widget.FrameLayout",
+            "description": "清空",
+            "resourceId": "com.alipay.mobile.antui:id/search_clear_btn"
+          }
+        },
+        {
+          "when": {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.EditText",
+              "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+            },
+            "field": "className",
+            "equals": "android.widget.EditText"
+          },
+          "action": "input",
+          "selector": {
+            "packageName": "com.eg.android.AlipayGphone",
+            "className": "android.widget.EditText",
+            "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+          },
+          "inputKey": "query"
+        }
+      ]
+    }
+  }
+}

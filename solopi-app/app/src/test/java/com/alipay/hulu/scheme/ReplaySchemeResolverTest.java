@@ -21,6 +21,21 @@ import static org.junit.Assert.assertTrue;
 
 public class ReplaySchemeResolverTest {
     @Test
+    public void headlessRequiresDeviceControlWithoutOptionalAccess() {
+        assertEquals("adb", ReplaySchemeResolver.missingHeadlessPermission(false, true));
+        assertEquals("accessibility", ReplaySchemeResolver.missingHeadlessPermission(true, false));
+        assertNull(ReplaySchemeResolver.missingHeadlessPermission(true, true));
+        assertNull(ReplaySchemeResolver.parseOptionalBoolean(null, "headless"));
+        assertTrue(ReplaySchemeResolver.parseOptionalBoolean("true", "headless"));
+        assertFalse(ReplaySchemeResolver.parseOptionalBoolean("false", "headless"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void malformedHeadlessModeCannotStartReplay() {
+        ReplaySchemeResolver.parseOptionalBoolean("yes", "headless");
+    }
+
+    @Test
     public void optionalBooleanAcceptsOnlyExplicitValues() {
         assertNull(ReplaySchemeResolver.parseOptionalBoolean(null, "restartApp"));
         assertTrue(ReplaySchemeResolver.parseOptionalBoolean("true", "restartApp"));

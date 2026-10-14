@@ -41,6 +41,15 @@
             android:noHistory="true"
             android:permission="android.permission.DUMP" />
 
+        <activity
+            android:name=".scheme.AdbAgentActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true"
+            android:permission="android.permission.DUMP"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.NoDisplay" />
+
         <activity android:name=".utils.activity.FileChooseDialogActivity"
             android:theme="@style/PermissionAppDialogTheme" />
 

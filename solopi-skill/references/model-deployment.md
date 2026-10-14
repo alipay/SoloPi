@@ -14,11 +14,13 @@ SoloPi 本体仍只负责受约束观察、typed action、settle、租约和证�
 模型 SHA-256/大小、ExecuTorch 版本、backend、API、ABI 和 CPU 能力；任一失败均
 不改变已安装或活动版本。仓库只保存 PoC 公钥，不保存私钥。
 
+下面示例中的 `scripts/` 均相对于 Skill 根目录；从其他目录调用时使用对应绝对路径。
+
 ```bash
 scripts/solopi-ai --pretty model-verify \
-  --package examples/executorch-counter-policy --api-level 35 --abi arm64-v8a
+  --package scripts/harness/examples/executorch-counter-policy --api-level 35 --abi arm64-v8a
 scripts/solopi-ai --pretty model-install \
-  --package examples/executorch-counter-policy
+  --package scripts/harness/examples/executorch-counter-policy
 scripts/solopi-ai --pretty model-activate \
   --model-id solopi-counter-add-policy --model-version 1.0.0
 scripts/solopi-ai --pretty model-infer \
@@ -39,13 +41,13 @@ Shell。激活和回滚都会重新核对 app-private 包的签名、身份、�
 
 ```bash
 scripts/solopi-ai --pretty model-benchmark \
-  --package examples/executorch-counter-policy \
+  --package scripts/harness/examples/executorch-counter-policy \
   --model-id solopi-counter-add-policy --model-version 1.0.0 \
   --inputs '[[0],[1]]' --output /tmp/counter-benchmark.json
 scripts/solopi-ai --pretty model-release-check \
-  --package examples/executorch-counter-policy \
+  --package scripts/harness/examples/executorch-counter-policy \
   --benchmark /tmp/counter-benchmark.json \
-  --evaluation solopi-harness-cli/fixtures/model/counter-policy-evaluation.json
+  --evaluation scripts/harness/fixtures/model/counter-policy-evaluation.json
 ```
 
 benchmark 使用 `solopi.ai.model-benchmark/v1`，必须绑定签名包 digest、model/version、
@@ -77,7 +79,7 @@ benchmark 使用 `solopi.ai.model-benchmark/v1`，必须绑定签名包 digest�
 `not_tested` 可能来自前置条件、checkpoint 未到达、证据缺失或无法可靠归因，不能
 笼统描述为 Oracle 失败。
 
-离线 PoC 使用 `examples/executorch-counter-policy` 与
-`solopi-harness-cli/fixtures/model/counter-offline-requirement.json`。该 add 模型只证明
+离线 PoC 使用 `scripts/harness/examples/executorch-counter-policy` 与
+`scripts/harness/fixtures/model/counter-offline-requirement.json`（相对于 Skill 根目录）。该 add 模型只证明
 真实 JNI 推理、生命周期、Action Proposal 和 Result Judge 闭环，不代表通用 GUI
 模型质量、业务成功率或生产部署范围。

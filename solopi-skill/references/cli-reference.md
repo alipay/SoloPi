@@ -31,13 +31,13 @@ scripts/solopi-ai [全局选项] <命令> [命令选项]
 
 ## 命令清单
 
-本版 CLI 公开 100 个顶层命令，分组如下。该数字只表示命令入口数量，不代表已经用真机证明所有应用功能和所有动作均可执行。
+本版 CLI 公开 103 个顶层命令，分组如下。该数字只表示命令入口数量，不代表已经用真机证明所有应用功能和所有动作均可执行。
 
 ### 设备、本地与发现（10）
 
 | 命令 | 重要选项 | 行为 |
 |---|---|---|
-| `doctor` | 无 | 检查设备、安装、内部 ADB、悬浮窗、电池优化白名单、辅助功能和自动回放启动；稳定返回 `missingPermissions` 与 `failedChecks`，未就绪退出码为 `2`。 |
+| `doctor` | 无 | 检查设备、安装和执行模式；新版电脑端只要求内部 ADB 与辅助功能，电池优化白名单输出建议，悬浮窗与手机自动播放设置不阻塞。旧版 APK 保留原检查并提示升级。返回 `executionProfile`、`missingPermissions`、`failedChecks` 和 `warnings`，未就绪退出码为 `2`。 |
 | `adb-connect` | `--connect-timeout 20`；`--ready-timeout 5`；`--poll-interval 0.25` | 仅当 `doctor` 唯一缺失内部 `adb` 时，经受保护入口发起 SoloPi 自身连接，按新 `requestId` 等待终态并重新核对完整 `doctor`。 |
 | `capabilities` | 无 | 查询设备协议、只读端点和变更能力。 |
 | `apps` | 无 | 列出 SoloPi 当前可选择的应用、包名、版本和系统应用标记。 |
@@ -48,7 +48,7 @@ scripts/solopi-ai [全局选项] <命令> [命令选项]
 | `screenshot` | `--output` 必填 | 通过受限 ADB 保存 PNG，会覆盖同名文件。 |
 | `logs` | `--output` 必填 | 保存当前 `logcat`，会覆盖同名文件。 |
 
-`adb-connect` 不运行 `adb tcpip 5555`，不修改 `KEY_ADB_SERVER`，也不能代替用户确认设备上的 RSA 授权弹窗。只有连接终态为 `connected`、随后 `doctor.health.ready=true` 且退出码为 `0` 才表示门禁通过。`state=connecting` 只表示后台连接仍在进行；`state=failed` 时保留 `errorCode`、`userActionRequired` 和中文 `requiredUserAction`，不得盲目重复调用。
+`adb-connect` 不运行 `adb tcpip 5555`，不修改 `KEY_ADB_SERVER`，也不能代替用户确认设备上的 RSA 授权弹窗。只有连接终态为 `connected`、随后 `doctor.success=true` 且退出码为 `0` 才表示门禁通过。`state=connecting` 只表示后台连接仍在进行；`state=failed` 时保留 `errorCode`、`userActionRequired` 和中文 `requiredUserAction`，不得盲目重复调用。
 
 ### 配置（3）
 
@@ -291,7 +291,10 @@ scripts/solopi-ai --pretty agent-end \
 | `verify-normalize` | `--file` 必填；`--output` 可选 | 纯本地规范化需求、AC、场景和预算，不补造缺失测试意图。 |
 | `verify-compile` | `--file`、`--output` 必填；`--cases-dir` 可选 | 纯本地生成 Goal Tree、Test Intent IR、DAG、路由、固定用例和内容指纹。 |
 | `verify-validate` | `--plan` 必填 | 纯本地校验静态契约、动作安全和 `planFingerprint`。 |
-| `verify-run` | `--plan`、全新 `--artifacts` 必填；动态计划可选 static/on-device/cloud provider | 复用固定回放和动态 Agent，由 Result Judge 联合 checkpoint oracle、required cleanup 和本次运行证据输出统一报告。 |
+| `verify-run` | `--plan`、全新 `--artifacts` 必填；动态计划可选 static/on-device/cloud/fastpath/goalpath provider；可选 `--segment-screenshots` | 复用固定回放和动态 Agent，由 Result Judge 联合 checkpoint oracle、required cleanup 和本次运行证据输出统一报告。截图开关额外导出每个执行段的整屏 PNG。 |
+| `workflow-list` | 无必填参数 | 纯本地列出随 Harness 安装的内置模板、前置页面及模式。 |
+| `workflow-run` | `--template` 必填；`--mode rules/laya`、`--profile optimized/baseline`、`--model`、全新 `--artifacts` 可选 | 自动预检、冻结计划并执行；默认规则，Laya 显式选择本机权重；导出 MD 和整屏截图。 |
+| `workflow-report` | `--artifacts` 必填 | 纯本地核对已有工作流证据并返回报告路径，不重放动作。完整用法见[内置工作流](workflows.md)。 |
 
 `verify-run` 的退出码 `0` 只对应报告 `passed`；`failed` 和 `not_tested` 均为 `2`，但二者含义不同。Agent 决策只有 `act`、`done`、`blocked`，其中 `done` 不具有通过语义。完整输入、路由、三态和报告字段见[验证工程](verification-engine.md)。
 
@@ -301,7 +304,7 @@ scripts/solopi-ai --pretty agent-end \
 
 ```bash
 scripts/solopi-ai --pretty verify-compile \
-  --file solopi-harness-cli/fixtures/verification/counter-success.json \
+  --file <Skill根目录>/scripts/harness/fixtures/verification/counter-success.json \
   --output artifacts/counter-success.plan.json \
   --cases-dir artifacts/counter-success-cases
 scripts/solopi-ai --pretty verify-validate \

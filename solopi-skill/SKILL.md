@@ -1,6 +1,6 @@
 ---
 name: solopi-ai
-description: 通过 SoloPi 的机器可读 CLI 编译和执行 AI 验证计划，管理签名端侧 ExecuTorch 决策模型、持久设备池、无人值守任务、安卓设备、应用、动作、配置、用例步骤与交互录制、回放及性能历史、动态 Agent、批量与重复执行、性能监控、压力测试和证据。适用于需求/AC 到 Result Judge 三态结论、cloud/on-device 决策切换、模型发布门禁，以及 generation 租约的多设备 CI 执行。
+description: 通过 SoloPi Harness 运行 Android 真机测试、选择支付宝内置模板并生成带完整截图的验收报告。默认使用规则，Laya 为可选的电脑本地实验模式。也支持从需求/AC 编译验证计划、交互录制、回放、动态 Agent、性能监控、签名端侧模型和多设备 CI。
 ---
 
 # SoloPi AI 控制框架
@@ -11,9 +11,27 @@ description: 通过 SoloPi 的机器可读 CLI 编译和执行 AI 验证计划�
 scripts/solopi-ai --pretty <命令>
 ```
 
-执行时把 `scripts/solopi-ai` 解析为绝对路径，并保持调用者当前工作目录不变。该入口调用同级 `solopi-harness-cli` 的核心实现；独立安装时可通过 `SOLOPI_HARNESS_CLI` 指向准确 CLI。不得调用仓库根目录下的兼容脚本，也不得自行拼接 HTTP、Scheme 或 Shell 命令代替类型化 CLI。
+执行时把 `scripts/solopi-ai` 解析为绝对路径，并保持调用者当前工作目录不变。Harness 实现与内置模板随本 Skill 放在 `scripts/harness/`，入口默认只调用这一份实现，不依赖仓库外的同级目录或已安装的 Python 包。调用方显式配置 `SOLOPI_HARNESS_CLI` 时可指定另一准确 CLI；普通使用无需配置。不得自行拼接 HTTP、Scheme 或 Shell 命令代替类型化 CLI。
+
+安装时完整复制本 Skill 目录，保留脚本执行权限；运行需要 Python 3.9+ 和设备操作所需的 ADB。Laya 权重、虚拟环境、APK 和真机证据不随 Skill 打包。独立安装与本地验证见[内置工作流](references/workflows.md#安装与目录)。
 
 全局参数必须放在子命令前。多台设备在线时，每次调用都必须添加 `--serial <adb-serial>`。
+
+## 快速使用
+
+用户要“连接手机跑几个案例”“运行支付宝模板”“查看带截图的结果”时，优先读取
+[内置工作流](references/workflows.md)，使用以下入口：
+
+```bash
+scripts/solopi-ai --pretty workflow-list
+scripts/solopi-ai --serial <adb-serial> --pretty workflow-run --template alipay-more-services
+scripts/solopi-ai --pretty workflow-report --artifacts <上一步返回的artifacts>
+```
+
+默认规则模式不加载模型。只有用户明确选择 Laya 实验时，才传 `--mode laya --model <本地MLX权重目录>`；
+模型运行在电脑上。不要为这些模板安装 companion APK，也不要把模型输出当成验收结论。
+`workflow-run` 自动完成预检、计划编译与校验、执行及截图报告；前置页面不满足时保留 `not_tested`，
+不自动重跑。完成后返回 Markdown 报告路径，并说明三态结果、清理结果和截图是否齐全。
 
 ## 能力路由
 
@@ -21,6 +39,7 @@ scripts/solopi-ai --pretty <命令>
 
 | 用户意图 | 使用命令 | 必须读取 |
 |---|---|---|
+| 选择内置模板、一条命令执行、查看整屏截图报告 | `workflow-list`、`workflow-run`、`workflow-report` | [内置工作流](references/workflows.md) |
 | 检查设备、恢复内部 ADB、查询版本和协议 | `doctor`、`adb-connect`、`capabilities`、`app-info`、`app-status` | [故障处理](references/troubleshooting.md) |
 | 发现被测应用与动作 | `apps`、`actions` | [CLI 参考](references/cli-reference.md)、[动作目录](references/action-catalog.md) |
 | 查询或修改配置 | `config-list`、`config-get`、`config-set` | [CLI 参考](references/cli-reference.md)、[协议](references/protocol.md) |
@@ -47,11 +66,11 @@ scripts/solopi-ai --pretty <命令>
 | 插件列表、本地安装与精确移除 | `plugin-list`、`plugin-install`、`plugin-remove` | [CLI 参考](references/cli-reference.md)、[故障处理](references/troubleshooting.md) |
 | 独立采集截图或日志 | `screenshot`、`logs` | [CLI 参考](references/cli-reference.md) |
 
-`actions`、`case-template`、`case-validate`、`case-step-*`、`perf-analyze`、`verify-normalize`、`verify-compile` 和 `verify-validate` 是纯本地操作。`verify-run` 与其他 SoloPi 协议设备操作首次执行前先运行 `doctor`；`startup-time`、`screenshot` 和 `logs` 只要求 ADB 设备，不要求 SoloPi 控制协议或内部权限就绪。
+`workflow-list`、`workflow-report`、`actions`、`case-template`、`case-validate`、`case-step-*`、`perf-analyze`、`verify-normalize`、`verify-compile` 和 `verify-validate` 是纯本地操作。`workflow-run` 内置 `doctor`；`verify-run` 与其他 SoloPi 协议设备操作首次执行前先运行 `doctor`；`startup-time`、`screenshot` 和 `logs` 只要求 ADB 设备，不要求 SoloPi 控制协议或内部权限就绪。
 
 ## 通用执行规则
 
-1. 设备命令先运行 `doctor`；纯本地的 `actions`、`case-template`、`case-validate`、`case-step-*` 和 `perf-analyze` 不连接设备，可直接执行。`doctor` 必须核对内部 ADB、悬浮窗、电池优化白名单和辅助功能；`background` 只是 App 的提示型状态。若唯一缺失项为内部 `adb`，使用 `adb-connect` 发起 SoloPi 自身连接并等待准确 `requestId` 的终态，再以命令返回的完整 `doctor` 为门禁。存在其他缺失项时停止设备变更并报告，不得静默授权。
+1. 设备命令先运行 `doctor`；纯本地的 `actions`、`case-template`、`case-validate`、`case-step-*` 和 `perf-analyze` 不连接设备，可直接执行。`doctor` 按设备声明的执行模式检查权限：支持 `executionProfiles.host` 的电脑端回放只要求内部 ADB 和辅助功能；电池优化白名单仅作建议，悬浮窗不阻止执行，`background` 仍只是提示型状态。旧版 APK 保留原门禁并提示升级。手机交互录制和浮窗功能由对应入口按需检查权限。若唯一缺失项为内部 `adb`，使用 `adb-connect` 发起 SoloPi 自身连接并等待准确 `requestId` 的终态，再以命令返回的完整 `doctor` 为门禁。存在其他缺失项时停止设备变更并报告，不得静默授权。
 2. 运行 `capabilities`，只调用设备声明支持的 SoloPi 协议命令；`startup-time` 是当前 Skill CLI 内置的固定 ADB 能力，不属于设备控制协议。
 3. 查询真实数据：应用用 `apps`，内置动作契约用 `actions`，用例用 `cases`，性能指标用 `perf-list`。`actions` 不访问设备，也不会发现插件额外注册的入口或 Provider；不得猜测包名、动作、用例名或指标键。
 4. 保存每次变更和回放启动使用的 `requestId`，以及回放的 `runId`、性能/录制/压力/独立录屏操作的 `sessionId`、历史记录的不透明 `id` 和插件的稳定 `pluginId`。后续查询、停止或删除必须使用原标识；标识不匹配时停止归因。

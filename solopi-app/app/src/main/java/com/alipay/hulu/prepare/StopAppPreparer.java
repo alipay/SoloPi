@@ -17,7 +17,6 @@ package com.alipay.hulu.prepare;
 
 import com.alipay.hulu.R;
 import com.alipay.hulu.common.application.LauncherApplication;
-import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.node.OperationService;
 import com.alipay.hulu.shared.node.action.OperationMethod;
@@ -36,10 +35,15 @@ public class StopAppPreparer implements PrepareWorker {
     public static final String KEY_CLEARED_APP_DATA = "K_clearedAppData";
     @Override
     public boolean doPrepareWork(String targetApp, PrepareUtil.PrepareStatus status) {
+        return doPrepareWork(targetApp, status, null);
+    }
+
+    @Override
+    public boolean doPrepareWork(String targetApp, PrepareUtil.PrepareStatus status,
+                                 Boolean restartAppOverride) {
         // 拉起应用
-        if (!SPService.getBoolean(SPService.KEY_RESTART_APP_ON_PLAY, true)) {
-            AppUtil.launchTargetApp(targetApp);
-            return true;
+        if (!PrepareUtil.shouldRestartApp(restartAppOverride)) {
+            return resumeTargetApp(targetApp);
         }
 
         OperationService service = LauncherApplication.service(OperationService.class);
@@ -59,5 +63,9 @@ public class StopAppPreparer implements PrepareWorker {
         AppUtil.forceStopApp(targetApp);
 
         return true;
+    }
+
+    protected boolean resumeTargetApp(String targetApp) {
+        return AppUtil.launchTargetApp(targetApp, false);
     }
 }

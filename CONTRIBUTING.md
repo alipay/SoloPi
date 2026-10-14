@@ -3,8 +3,7 @@
 感谢你参与 SoloPi。当前公开贡献范围包括：
 
 - `solopi-app`：Android 真机执行、录制回放、动态协议、性能与证据；
-- `solopi-harness-cli`：宿主机 CLI、验证、托管与报告；
-- `solopi-skill`：Agent 使用规则、能力说明和薄启动入口。
+- `solopi-skill`：Agent 使用规则、能力说明和统一入口，以及 `scripts/harness` 下的宿主机 CLI、验证、托管与报告。
 
 ## 开始之前
 
@@ -28,10 +27,10 @@ Pull Request 中的提示为准。签署协议不代表获得仓库写权限，�
 - JDK 11；
 - macOS 或 Linux。
 
-建议先运行三模块的最小门禁：
+建议先运行 Harness、Skill 入口与 Android 模块的最小门禁：
 
 ```bash
-python3 -m unittest discover -s solopi-harness-cli/tests -v
+python3 -m unittest discover -s solopi-skill/scripts/harness/tests -v
 ./solopi-skill/scripts/solopi-ai --pretty actions
 ./solopi-app/gradlew -p solopi-app \
   :app:testDebugUnitTest \
@@ -52,7 +51,7 @@ python3 -m unittest discover -s solopi-harness-cli/tests -v
 - 新增 Java 文件应带 Apache-2.0 许可证头和清晰的类级说明；
 - 涉及页面树、截图、输入或日志时，必须考虑脱敏、存储位置和保留期。
 
-### solopi-harness-cli
+### solopi-skill/scripts/harness
 
 - 保持类型化命令和结构化 JSON 输出；
 - 不得把“请求已受理”报告为业务成功；
@@ -62,7 +61,8 @@ python3 -m unittest discover -s solopi-harness-cli/tests -v
 
 ### solopi-skill
 
-- Skill 是规则和路由入口，不复制 CLI 的核心实现；
+- Skill 在 `scripts/harness` 内维护唯一的 CLI 核心实现，统一入口使用随 Skill 分发的代码；
+- 目录迁移需要验证独立复制后的启动、内置资源和相对输入输出路径；
 - 命令、参数、状态或安全边界变化时，同步更新 `SKILL.md` 和相关 references；
 - 文档必须区分用户输入、Agent 推断、设备事实和 Result Judge 结论；
 - 不得指示 Agent 绕过权限、执行任意 Shell、自动接受系统授权或伪造证据。
@@ -119,7 +119,7 @@ Pull Request 必须包含：
 
 ## Pull Request 检查清单
 
-- [ ] 改动位于公开的三个模块或必要的根级文档与许可证文件；
+- [ ] 改动位于 App、Skill（含 Harness）或必要的文档与许可证文件；
 - [ ] 已运行相关测试和构建，并记录结果；
 - [ ] 已处理协议、兼容性和迁移影响；
 - [ ] 已覆盖失败、清理和安全路径；

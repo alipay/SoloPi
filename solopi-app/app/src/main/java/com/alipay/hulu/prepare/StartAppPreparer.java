@@ -17,7 +17,6 @@ package com.alipay.hulu.prepare;
 
 import com.alipay.hulu.R;
 import com.alipay.hulu.common.application.LauncherApplication;
-import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.shared.node.OperationService;
@@ -41,7 +40,13 @@ public class StartAppPreparer implements PrepareWorker {
 
     @Override
     public boolean doPrepareWork(String targetApp, PrepareUtil.PrepareStatus status) {
-        if (!SPService.getBoolean(SPService.KEY_RESTART_APP_ON_PLAY, true)) {
+        return doPrepareWork(targetApp, status, null);
+    }
+
+    @Override
+    public boolean doPrepareWork(String targetApp, PrepareUtil.PrepareStatus status,
+                                 Boolean restartAppOverride) {
+        if (!PrepareUtil.shouldRestartApp(restartAppOverride)) {
             return true;
         }
         if (status != null) {

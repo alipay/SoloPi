@@ -10,17 +10,15 @@ devices, while adding Agent integration, safe execution on dynamic pages, indepe
 adjudication, unattended managed execution, and same-run evidence. This turns a device interaction
 into a conclusion that can be delivered into development and CI workflows.
 
-> The planned public distribution includes only the three product modules `solopi-app`,
-> `solopi-harness-cli`, and `solopi-skill`, together with the necessary root-level documentation
-> and license files.
+> Product source has two top-level modules: `solopi-app` and `solopi-skill`. The Harness lives
+> inside `solopi-skill/scripts/harness`, with supporting documentation and license files in the repository.
 
 ## Open-source Modules
 
 | Module | Role | Primary responsibilities |
 |---|---|---|
 | [`solopi-app/`](solopi-app/README_eng.md) | Physical-device execution kernel | Recording and replay, page observation, pre-touch verification, assertions, performance and network collection, and action receipts; the current open-source implementation is for Android |
-| [`solopi-harness-cli/`](solopi-harness-cli/README.md) | Host-side responsibility center | Typed CLI, device protocol, verification plans, result judge, single-host managed execution, evidence reports, and an optional model lifecycle |
-| [`solopi-skill/`](solopi-skill/SKILL.md) | Agent entry point | Describes capabilities, validates input, defines safety rules and result semantics, and routes Agent requests to the controlled CLI; it does not contain the execution kernel |
+| [`solopi-skill/`](solopi-skill/SKILL.md) | Agent entry point and host-side Harness | Instructions, typed CLI, device protocol, verification plans, independent result judge, single-host managed execution, and evidence reports; the core implementation lives in `scripts/harness` |
 
 The app under test does not need to integrate an Agent SDK or change its business code in order to
 use the Harness.
@@ -37,7 +35,7 @@ Skill-capable Agent
 solopi-skill
    |  Typed tasks and safety constraints
    v
-solopi-harness-cli
+solopi-skill/scripts/harness
    |  ADB + controlled protocol
    v
 solopi-app  -------------------->  App under test
@@ -301,8 +299,8 @@ silently.
 Run the source entry point directly:
 
 ```bash
-./solopi-harness-cli/solopi-ai --pretty actions
-./solopi-harness-cli/solopi-ai --pretty doctor
+./solopi-skill/scripts/solopi-ai --pretty actions
+./solopi-skill/scripts/solopi-ai --pretty doctor
 ```
 
 Alternatively, install it in a virtual environment:
@@ -310,7 +308,7 @@ Alternatively, install it in a virtual environment:
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install -e ./solopi-harness-cli
+python -m pip install -e ./solopi-skill/scripts/harness
 solopi-ai --pretty actions
 ```
 
@@ -320,8 +318,8 @@ readiness gaps it reports.
 
 ### 3. Invoke It Through the Agent Skill
 
-`solopi-skill` is the rules entry point for Skill-capable Agents. It invokes the CLI in the same
-repository:
+`solopi-skill` contains both Agent instructions and the Harness implementation. Copy the complete
+Skill directory to use it outside the repository, then invoke its bundled entry point:
 
 ```bash
 ./solopi-skill/scripts/solopi-ai --pretty doctor
@@ -334,10 +332,10 @@ model, and it does not bypass the CLI or the device-side safety boundaries.
 
 ## Local Verification
 
-The basic gate for the public source depends only on these three modules:
+The basic gate covers the bundled Harness, Skill entry point, and Android module:
 
 ```bash
-python3 -m unittest discover -s solopi-harness-cli/tests -v
+python3 -m unittest discover -s solopi-skill/scripts/harness/tests -v
 ./solopi-skill/scripts/solopi-ai --pretty actions
 ./solopi-app/gradlew -p solopi-app \
   :app:testDebugUnitTest \

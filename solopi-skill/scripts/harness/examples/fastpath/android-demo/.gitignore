@@ -1,0 +1,4 @@
+build/
+*.apk
+*.keystore
+__pycache__/

@@ -41,9 +41,9 @@
 | `SettingsActivity` | 设置、用例导入、插件导入 | `config-*`、`case-import`、`plugin-list/install/remove` | 类型化 CLI；敏感迁移项保留 UI。 |
 | `PatchStatusActivity` | 插件状态与更新结果 | `plugin-list/install/remove` | 直接 CLI；本地 ZIP、哈希和重启边界。 |
 | `InfoActivity`、`LicenseActivity` | 版本、设备、帮助链接与完整许可证 | `app-info` | 版本、设备与许可证标识可只读查询；帮助链接和完整 `NOTICE.html` 保留 App 查看。 |
-| `PermissionDialogActivity` | ADB、悬浮窗、后台、电池优化、辅助功能和录屏授权 | `doctor`、`adb-connect`、各会话的 `userActionRequired` | `doctor` 核对电池优化白名单；RSA 和其他系统权限由用户确认。`background` 是 App 的提示型权限，没有可靠系统真值。 |
+| `PermissionDialogActivity` | ADB、悬浮窗、后台、电池优化、辅助功能和录屏授权 | `doctor`、`adb-connect`、各会话的 `userActionRequired` | 新版 `doctor` 将电池优化白名单列为建议，电脑回放不要求浮窗；交互功能按需授权。RSA 和辅助功能仍由用户确认；`background` 仅为提示。 |
 | `FileChooseDialogActivity` | 数据目录与本地文件选择 | CLI 使用显式本地路径；`KEY_BASE_DIR` 保留 App UI | 只读或人工保留。 |
-| `SchemeActivity`、`AdbSchemeActivity` | 公开只读深链与受 DUMP 保护的 ADB 变更传输 | CLI 内部固定传输；不作为用户可拼接命令 | 安全基础设施。 |
+| `SchemeActivity`、`AdbSchemeActivity`、`AdbAgentActivity` | 公开只读深链与受 DUMP 保护的 ADB 变更传输；动态 Agent 使用专用无界面入口 | CLI 内部固定传输；不作为用户可拼接命令 | 安全基础设施。 |
 
 `BaseActivity`、结果 Fragment、Adapter、`FloatWinService` 和安装广播属于上述业务流程的内部支撑，不是独立用户功能入口。`AdbIME` 是录制和回放文本输入的内部支撑；CLI 不把它包装成独立命令，输入法切换与恢复由对应会话负责。
 

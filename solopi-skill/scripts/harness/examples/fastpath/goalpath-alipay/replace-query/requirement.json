@@ -1,0 +1,186 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "id": "goalpath-alipay-replace-query",
+  "title": "支付宝目标驱动替换草稿：把天气改成计算器",
+  "targetAppPackage": "com.eg.android.AlipayGphone",
+  "targetAppLabel": "支付宝",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-PREP",
+      "text": "开始探索前，搜索输入框已经显示天气。"
+    },
+    {
+      "id": "AC-DRAFT",
+      "text": "探索后搜索输入框显示计算器，并保留搜索确认入口。"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "replace-query",
+      "title": "支付宝目标驱动替换草稿：把天气改成计算器",
+      "acceptanceCriteria": [
+        "AC-PREP",
+        "AC-DRAFT"
+      ],
+      "preconditions": [
+        {
+          "id": "home-more-ready",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "更多"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "id": "prepare-search",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.RelativeLayout",
+              "description": "搜索框"
+            }
+          }
+        },
+        {
+          "id": "prepare-weather",
+          "type": "operation",
+          "action": {
+            "type": "input",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.EditText",
+              "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+            },
+            "text": "天气"
+          }
+        },
+        {
+          "id": "replace-draft",
+          "type": "explore",
+          "goal": "把当前的“天气”搜索草稿改成冻结的测试文本“计算器”，保留在搜索输入页，不提交搜索。",
+          "allowedActions": [
+            "click",
+            "input",
+            "wait"
+          ],
+          "budget": {
+            "maxSteps": 6,
+            "maxDurationMs": 180000,
+            "idleTimeoutMs": 120000,
+            "maxRepeatedActions": 2,
+            "maxNoProgressSteps": 2
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "prepared-weather",
+          "afterStep": "prepare-weather",
+          "acceptanceCriteria": [
+            "AC-PREP"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.EditText",
+              "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "天气"
+          }
+        },
+        {
+          "id": "calculator-draft",
+          "afterStep": "replace-draft",
+          "acceptanceCriteria": [
+            "AC-DRAFT"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.EditText",
+              "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "计算器"
+          }
+        },
+        {
+          "id": "search-confirm-present",
+          "afterStep": "replace-draft",
+          "acceptanceCriteria": [
+            "AC-DRAFT"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.FrameLayout",
+              "resourceId": "com.alipay.mobile.antui:id/search_confirm"
+            },
+            "field": "description",
+            "operator": "equals",
+            "expected": "搜索"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "header-return-1",
+          "required": true,
+          "action": {
+            "type": "click",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.FrameLayout",
+              "description": "返回",
+              "resourceId": "com.alipay.mobile.antui:id/search_back_button"
+            }
+          }
+        },
+        {
+          "id": "header-return-2",
+          "required": true,
+          "action": {
+            "type": "click",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.FrameLayout",
+              "description": "返回",
+              "resourceId": "com.alipay.mobile.antui:id/search_back_button"
+            }
+          }
+        },
+        {
+          "id": "home-more-final",
+          "required": true,
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "更多"
+          }
+        }
+      ]
+    }
+  ]
+}

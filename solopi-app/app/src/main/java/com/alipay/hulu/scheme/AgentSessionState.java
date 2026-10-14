@@ -137,6 +137,25 @@ public final class AgentSessionState {
                                                 String observationId,
                                                 String currentSignature,
                                                 Action action) {
+        return beginAction(expectedSessionId, expectedOwnerToken, stepId, observationId,
+                currentSignature, action, null);
+    }
+
+    synchronized BeginResult beginAction(String expectedSessionId,
+                                         String expectedOwnerToken,
+                                         String stepId,
+                                         String observationId,
+                                         String currentSignature,
+                                         Action action,
+                                         Map<String, Object> freshPage) {
+        return beginAction(expectedSessionId, expectedOwnerToken, stepId, observationId,
+                currentSignature, action, freshPage, null);
+    }
+
+    synchronized BeginResult beginAction(String expectedSessionId, String expectedOwnerToken,
+                                         String stepId, String observationId, String currentSignature,
+                                         Action action, Map<String, Object> freshPage,
+                                         AgentTargetContextGuard.Verification validation) {
         Result<Object> identity = requireIdentity(expectedSessionId, expectedOwnerToken);
         if (!identity.success) {
             return BeginResult.rejected(rejectedReceipt(stepId, observationId, action,
@@ -166,6 +185,14 @@ public final class AgentSessionState {
             return rememberRejection(stepId, observationId, action,
                     "terminal_session", "The session is no longer active");
         }
+        // Code security: ownership may be lost during the fresh-tree capture. Check
+        // the lease again at acceptance, not just at the outer worker entry point.
+        if (leaseOwner == null || !lease.isOwnedBy(leaseOwner)) {
+            BeginResult rejected = rememberRejection(stepId, observationId, action,
+                    "lease_lost", "The session no longer owns device control");
+            terminate(STATE_FAILED, "lease_lost");
+            return rejected;
+        }
         if (action == null || !ALLOWED_ACTIONS.contains(action.type)) {
             return rememberRejection(stepId, observationId, action,
                     "unsupported_action", "Only phase-one typed actions are allowed");
@@ -175,13 +202,55 @@ public final class AgentSessionState {
             return rememberRejection(stepId, observationId, action,
                     "invalid_action", validationError);
         }
+        boolean targetStrategy = AgentTargetContextGuard.TARGET_CONTEXT_V1.equals(config.actionValidationStrategy);
+        boolean verifiedTarget = targetStrategy && validation != null && currentObservation != null
+                && currentSignature != null && validation.verifies(observationId,
+                currentObservation.signature, currentSignature, action);
+        if (targetStrategy && validation != null) {
+            appendEvent("action_validation", stepId, observationId, validation.metadata());
+        }
+        // Code security: only a device-bound structural-ineligibility proof may use
+        // the unchanged full-page path. A missing/rejected proof never falls back.
+        boolean fullPageTarget = targetStrategy && validation != null && currentObservation != null
+                && validation.requiresUnchangedFullPage(observationId,
+                currentObservation.signature, currentSignature, action);
+        boolean targetClickRejected = targetStrategy && "click".equals(action.type)
+                && !verifiedTarget && !fullPageTarget;
         if (currentObservation == null || observationConsumed
                 || observationId == null
                 || !observationId.equals(currentObservation.observationId)
                 || currentSignature == null
-                || !currentSignature.equals(currentObservation.signature)) {
-            return rememberRejection(stepId, observationId, action,
+                || targetClickRejected
+                || (!verifiedTarget && !currentSignature.equals(currentObservation.signature))) {
+            BeginResult rejection = rememberRejection(stepId, observationId, action,
                     "stale_observation", "The action must reference the current unchanged observation");
+            if (targetStrategy && validation != null) {
+                Receipt annotated = rejection.receipt.withValidation(validation.metadata());
+                receipts.put(stepId, annotated);
+                rejection = BeginResult.rejected(annotated, false);
+            }
+            if (freshPage != null) {
+                // Code security: owner binding above also protects local diagnostic evidence.
+                // Keep only explicit page/signature fields, never transport params or ownerToken.
+                Map<String, Object> diagnostic = new LinkedHashMap<>();
+                diagnostic.put("expectedSignature", currentObservation == null
+                        ? null : currentObservation.signature);
+                diagnostic.put("currentSignature", currentSignature);
+                diagnostic.put("currentObservationId", observationId());
+                diagnostic.put("freshPage", freshPage);
+                appendEvent("stale_observation_diagnostic", stepId, observationId, diagnostic);
+            }
+            return rejection;
+        }
+        if (freshPage != null && "click".equals(action.type)) {
+            // Code security: device-collected page, after owner/observation validation and before
+            // consuming a step. Full-page fallback must not bypass existing overlays.
+            String occlusion = AgentTargetContextGuard.clickOcclusionReason(freshPage,
+                    (String) action.arguments.get("nodeId"), verifiedTarget ? validation.path : null);
+            if (occlusion != null) {
+                return rememberRejection(stepId, observationId, action, occlusion,
+                        "Target geometry is unknown or overlaps another visible interactive node");
+            }
         }
         if (acceptedStepCount >= config.maxSteps) {
             Receipt rejected = rejectedReceipt(stepId, observationId, action,
@@ -211,7 +280,10 @@ public final class AgentSessionState {
         repeatedActionCount = nextRepeatedCount;
         state = STATE_ACTING;
         Receipt accepted = Receipt.accepted(stepId, observationId, action, clock.now())
-                .withSourceSignature(currentObservation.signature);
+                .withSourceSignature(currentSignature);
+        if (targetStrategy && validation != null) {
+            accepted = accepted.withValidation(validation.metadata());
+        }
         receipts.put(stepId, accepted);
         appendEvent("action_accepted", stepId, observationId, accepted.toMap());
         return BeginResult.accepted(accepted, generation);
@@ -394,6 +466,20 @@ public final class AgentSessionState {
         return acceptedStepCount;
     }
 
+    synchronized Result<Config> workConfig(String expectedSessionId, String expectedOwnerToken) {
+        // Code security: protocol sessionId/ownerToken are untrusted capabilities. Compare both
+        // with the ADB-created session and its exact server-held lease before capture/dispatch.
+        Result<Object> access = requireAccess(expectedSessionId, expectedOwnerToken, true);
+        if (!access.success) {
+            return Result.error(access.errorCode, access.error);
+        }
+        if (leaseOwner == null || !lease.isOwnedBy(leaseOwner)) {
+            terminate(STATE_FAILED, "lease_lost");
+            return Result.error("lease_lost", "The session no longer owns device control");
+        }
+        return Result.success(config);
+    }
+
     private Result<Object> requireAccess(String expectedSessionId, String expectedOwnerToken,
                                          boolean allowPaused) {
         Result<Object> identity = requireIdentity(expectedSessionId, expectedOwnerToken);
@@ -510,6 +596,8 @@ public final class AgentSessionState {
         result.put("finishedAt", finishedAt == 0L ? null : finishedAt);
         result.put("acceptedSteps", acceptedStepCount);
         result.put("maxSteps", config == null ? null : config.maxSteps);
+        result.put("settleStrategy", config == null ? null : config.settleStrategy);
+        result.put("actionValidationStrategy", config == null ? null : config.actionValidationStrategy);
         result.put("observationId", observationId());
         result.put("leaseHeld", leaseOwner != null && lease.isOwnedBy(leaseOwner));
         return result;
@@ -556,18 +644,41 @@ public final class AgentSessionState {
         public final long idleTimeoutMs;
         public final int maxRepeatedActions;
         public final int maxNoProgressSteps;
+        public final String settleStrategy;
+        public final String actionValidationStrategy;
 
         public Config(int maxSteps, long maxDurationMs, long idleTimeoutMs,
                       int maxRepeatedActions, int maxNoProgressSteps) {
+            this(maxSteps, maxDurationMs, idleTimeoutMs, maxRepeatedActions, maxNoProgressSteps,
+                    AgentUiWaiter.LEGACY);
+        }
+
+        public Config(int maxSteps, long maxDurationMs, long idleTimeoutMs,
+                      int maxRepeatedActions, int maxNoProgressSteps, String settleStrategy) {
+            this(maxSteps, maxDurationMs, idleTimeoutMs, maxRepeatedActions, maxNoProgressSteps,
+                    settleStrategy, AgentTargetContextGuard.FULL_PAGE);
+        }
+
+        public Config(int maxSteps, long maxDurationMs, long idleTimeoutMs,
+                      int maxRepeatedActions, int maxNoProgressSteps, String settleStrategy,
+                      String actionValidationStrategy) {
             if (maxSteps <= 0 || maxDurationMs <= 0L || idleTimeoutMs <= 0L
                     || maxRepeatedActions <= 0 || maxNoProgressSteps <= 0) {
                 throw new IllegalArgumentException("All Agent session bounds must be positive");
+            }
+            if (!AgentUiWaiter.supports(settleStrategy)) {
+                throw new IllegalArgumentException("Unsupported settle strategy");
+            }
+            if (!AgentTargetContextGuard.supports(actionValidationStrategy)) {
+                throw new IllegalArgumentException("Unsupported action validation strategy");
             }
             this.maxSteps = maxSteps;
             this.maxDurationMs = maxDurationMs;
             this.idleTimeoutMs = idleTimeoutMs;
             this.maxRepeatedActions = maxRepeatedActions;
             this.maxNoProgressSteps = maxNoProgressSteps;
+            this.settleStrategy = settleStrategy;
+            this.actionValidationStrategy = actionValidationStrategy;
         }
     }
 
@@ -713,6 +824,7 @@ public final class AgentSessionState {
         public final long finishedAt;
         public final Observation settledObservation;
         private final String sourceSignature;
+        private Map<String, Object> actionValidation;
 
         private Receipt(String stepId, String observationId, Action action, String status,
                         String errorCode, String error, long acceptedAt, long finishedAt,
@@ -743,12 +855,17 @@ public final class AgentSessionState {
         Receipt finish(String finalStatus, Observation observation, String code,
                        String finalError, long now) {
             return new Receipt(stepId, observationId, action, finalStatus, code, finalError,
-                    acceptedAt, now, observation, sourceSignature);
+                    acceptedAt, now, observation, sourceSignature).withValidation(actionValidation);
         }
 
         Receipt withSourceSignature(String signature) {
             return new Receipt(stepId, observationId, action, status, errorCode, error,
-                    acceptedAt, finishedAt, settledObservation, signature);
+                    acceptedAt, finishedAt, settledObservation, signature).withValidation(actionValidation);
+        }
+
+        Receipt withValidation(Map<String, Object> validation) {
+            actionValidation = validation == null ? null : new LinkedHashMap<>(validation);
+            return this;
         }
 
         public Map<String, Object> toMap() {
@@ -763,6 +880,7 @@ public final class AgentSessionState {
             result.put("finishedAt", finishedAt == 0L ? null : finishedAt);
             result.put("settledObservation", settledObservation == null
                     ? null : settledObservation.toMap());
+            result.put("actionValidation", actionValidation == null ? null : new LinkedHashMap<>(actionValidation));
             return result;
         }
     }

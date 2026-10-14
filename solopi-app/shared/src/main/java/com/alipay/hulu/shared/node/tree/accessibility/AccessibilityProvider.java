@@ -57,6 +57,7 @@ import java.util.concurrent.TimeUnit;
  */
 @NodeProvider(dataType = AccessibilityNodeInfo.class)
 public class AccessibilityProvider implements AbstractProvider {
+    public static final String READ_ONLY_CAPTURE = "accessibility.readOnlyCapture";
     private static final String TAG = "AccessibilityProvider";
     private WeakReference<AccessibilityService> accessibilityServiceRef;
 
@@ -148,7 +149,7 @@ public class AccessibilityProvider implements AbstractProvider {
      * 获取根节点
      * @return
      */
-    private MetaTree getRootInWindows(NodeContext context) {
+    protected MetaTree getRootInWindows(NodeContext context) {
         AccessibilityService service = accessibilityServiceRef.get();
         if (service == null) {
             return null;
@@ -187,7 +188,7 @@ public class AccessibilityProvider implements AbstractProvider {
                     continue;
                 }
                 // 如果是SoloPi自己的window，就不处理
-                if (StringUtil.equals(root.getPackageName(), "com.alipay.hulu")) {
+                if (StringUtil.equals(root.getPackageName(), LauncherApplication.getContext().getPackageName())) {
                     LogUtil.d(TAG, "自己的Windows，不处理");
                     continue;
                 }
@@ -339,7 +340,11 @@ public class AccessibilityProvider implements AbstractProvider {
         }
 
         // 预先检查可访问行
-        checkFrontActivityAccessibility();
+        // Code security: observation failure must not restart services or kill tested apps.
+        boolean readOnly = isReadOnlyCapture(context);
+        if (!readOnly) {
+            checkFrontActivityAccessibility();
+        }
 
         reloadFlag = false;
         MetaTree root = null;
@@ -348,10 +353,10 @@ public class AccessibilityProvider implements AbstractProvider {
 //        final AtomicBoolean runningFlag = new AtomicBoolean(false);
 
         // 重试三次
-        while (root == null && retryCount < 3) {
+        while (root == null && retryCount < (readOnly ? 1 : 3)) {
+            retryCount++;
             try {
                 root = loadMetaTree(context);
-                retryCount++;
             } catch (Exception e) {
                 LogUtil.e(TAG, "Load accessibility tree throw exception: " + e.getMessage(), e);
             }
@@ -366,6 +371,10 @@ public class AccessibilityProvider implements AbstractProvider {
      */
     private MetaTree loadMetaTree(NodeContext context) {
         MetaTree rootNode = getRootInWindows(context);
+        boolean readOnly = isReadOnlyCapture(context);
+        if (readOnly && (rootNode == null || rootNode.getCurrentNode() == null)) {
+            return null;
+        }
         int retryCount = 0;
         while ((rootNode == null || rootNode.getCurrentNode() == null) && retryCount < 3) {
             MiscUtil.sleep(500);
@@ -399,7 +408,7 @@ public class AccessibilityProvider implements AbstractProvider {
             AccessibilityNodeInfo info = curr.second;
 
             // 遇到WebView，重新加载
-            if (!reloadFlag &&
+            if (!readOnly && !reloadFlag &&
                     (StringUtil.equals(info.getClassName(), "android.webkit.WebView")
                     || StringUtil.contains(info.getClassName(), "com.uc.webkit"))) {
                 reloadFlag = true;
@@ -434,6 +443,10 @@ public class AccessibilityProvider implements AbstractProvider {
         }
 
         return rootNode;
+    }
+
+    private static boolean isReadOnlyCapture(NodeContext context) {
+        return context != null && Boolean.TRUE.equals(context.get(READ_ONLY_CAPTURE));
     }
 
     /**

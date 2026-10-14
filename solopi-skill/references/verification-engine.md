@@ -144,7 +144,7 @@ checkpoint reason/status 与 cleanup 状态做规范化摘要，用于比较裁�
 
 ## Demo 夹具
 
-- `solopi-harness-cli/fixtures/verification/counter-success.json`：可重复固定成功；
+- `scripts/harness/fixtures/verification/counter-success.json`（相对于 Skill 根目录）：可重复固定成功；
 - `counter-outcome-matrix.json`：hybrid 成功、产品失败、Agent 误报完成、未覆盖
   checkpoint 和清理失败；
 - `counter-agent-decisions.json`：只包含 typed act/done/blocked。

@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "solopi.ai.goalpath-policy/v1",
+  "targetPackage": "com.eg.android.AlipayGphone",
+  "steps": {
+    "draft-weather": {
+      "instructions": "从支付宝首页打开搜索，输入冻结的测试文本“天气”，保留搜索草稿，不提交搜索。",
+      "stopWhen": {
+        "all": [
+          {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.EditText",
+              "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+            },
+            "field": "text",
+            "equals": "天气"
+          },
+          {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.FrameLayout",
+              "resourceId": "com.alipay.mobile.antui:id/search_confirm"
+            },
+            "field": "description",
+            "equals": "搜索"
+          }
+        ]
+      },
+      "readyWhen": {
+        "any": [
+          {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text"
+            },
+            "field": "text",
+            "equals": "更多"
+          },
+          {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.EditText",
+              "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+            },
+            "field": "className",
+            "equals": "android.widget.EditText"
+          }
+        ]
+      },
+      "inputData": {
+        "query": "天气"
+      },
+      "maxCandidates": 64,
+      "minProbability": 0.65,
+      "minMargin": 0.15,
+      "denyLabels": [
+        "支付",
+        "付款",
+        "转账",
+        "收款",
+        "收付款",
+        "扫一扫",
+        "理财",
+        "借钱",
+        "余额宝",
+        "花呗",
+        "网商贷",
+        "信用卡还款",
+        "基金",
+        "股票",
+        "黄金",
+        "允许",
+        "同意",
+        "授权",
+        "搜索"
+      ],
+      "rules": [
+        {
+          "when": {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text"
+            },
+            "field": "text",
+            "equals": "更多"
+          },
+          "action": "click",
+          "selector": {
+            "packageName": "com.eg.android.AlipayGphone",
+            "className": "android.widget.RelativeLayout",
+            "description": "搜索框"
+          }
+        },
+        {
+          "when": {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.EditText",
+              "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+            },
+            "field": "className",
+            "equals": "android.widget.EditText"
+          },
+          "action": "input",
+          "selector": {
+            "packageName": "com.eg.android.AlipayGphone",
+            "className": "android.widget.EditText",
+            "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+          },
+          "inputKey": "query"
+        }
+      ]
+    }
+  }
+}

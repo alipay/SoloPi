@@ -130,6 +130,11 @@ public class CaseReplayManager implements ExportService {
     private final AtomicBoolean processStarted = new AtomicBoolean(false);
     private final AtomicBoolean preStartCancellationHandled = new AtomicBoolean(false);
     private volatile boolean cancelRequested;
+    private boolean restartAppForReplay = true;
+    private volatile boolean headless;
+    private volatile String headlessExecutionError;
+    private final AtomicBoolean finishDelivered = new AtomicBoolean(false);
+    private String preparationError;
 
     /**
      * 操作服务
@@ -222,8 +227,10 @@ public class CaseReplayManager implements ExportService {
     private FloatWinService.OnFloatListener floatListener = new FloatWinService.OnFloatListener() {
         @Override
         public void onFloatClick(boolean hide) {
-            if (!hide && provider != null) {
-                provider.onFloatClick(binder.loadServiceContext(), CaseReplayManager.this);
+            final FloatWinService.FloatBinder activeBinder = binder;
+            final AbstractStepProvider activeProvider = provider;
+            if (!headless && !hide && activeProvider != null && activeBinder != null) {
+                activeProvider.onFloatClick(activeBinder.loadServiceContext(), CaseReplayManager.this);
             }
         }
     };
@@ -231,6 +238,7 @@ public class CaseReplayManager implements ExportService {
     private int stepCount = 0;
 
     private String defaultIme = null;
+    private boolean imeRestorePending;
 
     private volatile CaseReplayStatus currentStatus = CaseReplayStatus.NONE;
 
@@ -240,7 +248,6 @@ public class CaseReplayManager implements ExportService {
         injectorService = app.findServiceByName(InjectorService.class.getName());
         injectorService.register(this);
         eventService = app.findServiceByName(EventService.class.getName());
-        highLightService = app.findServiceByName(HighLightService.class.getName());
         touchService = app.findServiceByName(TouchService.class.getName());
 
         // 截图服务
@@ -265,8 +272,27 @@ public class CaseReplayManager implements ExportService {
     public synchronized boolean start(AbstractStepProvider provider,
                                       OnFinishListener finishListener,
                                       String expectedOwner) {
+        return start(provider, finishListener, expectedOwner, null);
+    }
+
+    public synchronized boolean start(AbstractStepProvider provider,
+                                      OnFinishListener finishListener,
+                                      String expectedOwner, Boolean restartAppOverride) {
+        return start(provider, finishListener, expectedOwner, restartAppOverride, false);
+    }
+
+    /** Computer-controlled replay executes without creating any replay overlay. */
+    public synchronized boolean start(AbstractStepProvider provider,
+                                      OnFinishListener finishListener,
+                                      String expectedOwner, Boolean restartAppOverride,
+                                      boolean headless) {
+        if (provider == null || (headless && !provider.canStart())) {
+            return false;
+        }
         if (connection != null || replayLeaseOwner != null) {
-            LauncherApplication.getInstance().showToast("已有回放正在进行");
+            if (!headless) {
+                LauncherApplication.getInstance().showToast("已有回放正在进行");
+            }
             return false;
         }
 
@@ -274,7 +300,9 @@ public class CaseReplayManager implements ExportService {
         if (owner == null) {
             owner = ReplaySessionLease.newOwner("ui");
             if (!ReplaySessionLease.tryAcquire(owner)) {
-                LauncherApplication.getInstance().showToast("已有回放或插件维护正在进行");
+                if (!headless) {
+                    LauncherApplication.getInstance().showToast("已有回放或插件维护正在进行");
+                }
                 return false;
             }
         } else if (!ReplaySessionLease.isOwnedBy(owner)) {
@@ -288,12 +316,20 @@ public class CaseReplayManager implements ExportService {
         try {
             this.provider = provider;
             this.finishListener = finishListener;
+            this.headless = headless;
+            headlessExecutionError = null;
+            finishDelivered.set(false);
 
-            AppUtil.forceStopApp(app);
+            restartAppForReplay = PrepareUtil.shouldRestartApp(restartAppOverride);
+            preparationError = null;
+            if (restartAppForReplay) {
+                AppUtil.forceStopApp(app);
+            }
 
             // 初始化运行参数
             stepCount = 0;
             defaultIme = null;
+            imeRestorePending = false;
             runningFlag = false;
             cancelRequested = false;
             processStarted.set(false);
@@ -306,13 +342,17 @@ public class CaseReplayManager implements ExportService {
             operationService.configProvider(AccessibilityProvider.class);
 
             Context context = LauncherApplication.getContext();
-            // 连接悬浮窗
-            connection = new ReplayConnection(this);
-            floatBound = context.getApplicationContext().bindService(
-                    new Intent(context.getApplicationContext(), FloatWinService.class),
-                    connection, Context.BIND_AUTO_CREATE);
-            if (!floatBound) {
-                throw new IllegalStateException("Unable to bind replay floating window");
+            if (!headless) {
+                // HighLightService creates an overlay in onCreate, so load it only for UI replay.
+                highLightService = LauncherApplication.getInstance().findServiceByName(
+                        HighLightService.class.getName());
+                connection = new ReplayConnection(this);
+                floatBound = context.getApplicationContext().bindService(
+                        new Intent(context.getApplicationContext(), FloatWinService.class),
+                        connection, Context.BIND_AUTO_CREATE);
+                if (!floatBound) {
+                    throw new IllegalStateException("Unable to bind replay floating window");
+                }
             }
 
             watcher = new ContentChangeWatcher();
@@ -322,8 +362,10 @@ public class CaseReplayManager implements ExportService {
                 touchService.start();
             }
 
-            // 如果是自动启动
-            if (provider.canStart()
+            // A host request is already the start signal; no phone preference or binder is needed.
+            if (headless) {
+                startProcess();
+            } else if (provider.canStart()
                     && SPService.getBoolean(SPService.KEY_REPLAY_AUTO_START, false)) {
                 // 等待初始化完毕
                 LauncherApplication.getInstance().runOnUiThread(new Runnable() {
@@ -383,6 +425,14 @@ public class CaseReplayManager implements ExportService {
                 LogUtil.w(TAG, "Unable to unbind failed replay floating window");
             }
         }
+        if (highLightService != null) {
+            try {
+                LauncherApplication.getInstance().stopServiceByName(HighLightService.class.getName());
+            } catch (RuntimeException ignored) {
+                LogUtil.w(TAG, "Unable to stop failed replay highlight service");
+            }
+            highLightService = null;
+        }
         connection = null;
         binder = null;
         provider = null;
@@ -400,6 +450,9 @@ public class CaseReplayManager implements ExportService {
         String owner = replayLeaseOwner;
         replayLeaseOwner = null;
         try {
+            // Preparation or a replay action can throw before suffixAction is reached.
+            // Restore only if this replay actually attempted an IME switch.
+            restoreReplayIme();
             this.provider = null;
             try {
                 eventService.stopTrackAccessibilityEvent();
@@ -435,11 +488,17 @@ public class CaseReplayManager implements ExportService {
             currentStatus = CaseReplayStatus.STOP;
             runningExecutor.shutdownNow();
             daemonExecutor.shutdownNow();
-            try {
-                LauncherApplication.getInstance().stopServiceByName(
-                        HighLightService.class.getName());
-            } catch (RuntimeException exception) {
-                LogUtil.w(TAG, "Unable to stop replay highlight service", exception);
+            if (highLightService != null) {
+                try {
+                    LauncherApplication.getInstance().stopServiceByName(
+                            HighLightService.class.getName());
+                } catch (RuntimeException exception) {
+                    LogUtil.w(TAG, "Unable to stop replay highlight service", exception);
+                }
+                highLightService = null;
+            }
+            if (injectorService != null) {
+                injectorService.unregister(this);
             }
         } finally {
             HarnessState.failByReplayLeaseOwner(owner,
@@ -454,7 +513,7 @@ public class CaseReplayManager implements ExportService {
     public void startProcess() {
         final String activeOwner = replayLeaseOwner;
         final FloatWinService.FloatBinder activeBinder = binder;
-        if (cancelRequested || activeBinder == null || !ownsReplayLease(activeOwner)
+        if (!canStartProcess(activeOwner)
                 || !processStarted.compareAndSet(false, true)) {
             return;
         }
@@ -468,8 +527,9 @@ public class CaseReplayManager implements ExportService {
         }
 
         try {
-            // 隐藏悬浮窗
-            activeBinder.hideFloat();
+            if (!headless && activeBinder != null) {
+                activeBinder.hideFloat();
+            }
 
             runningFlag = true;
             if (cancelRequested) {
@@ -517,6 +577,12 @@ public class CaseReplayManager implements ExportService {
         }
     }
 
+    // Code security: changing UI mode never bypasses the exact-owner device lease.
+    boolean canStartProcess(String activeOwner) {
+        return !cancelRequested && (headless || binder != null)
+                && ownsReplayLease(activeOwner);
+    }
+
     /**
      * 具体执行（可重入）
      */
@@ -536,8 +602,13 @@ public class CaseReplayManager implements ExportService {
         }
 
         if (currentStatus == CaseReplayStatus.BEFORE_PREPARE) {
-            prepareAction();
-            currentStatus = CaseReplayStatus.PREPARED;
+            if (prepareAction()) {
+                currentStatus = CaseReplayStatus.PREPARED;
+            } else {
+                preparationError = "Replay preparation failed; no replay step was executed";
+                runningFlag = false;
+                currentStatus = CaseReplayStatus.FINISH_RUNNING;
+            }
         }
 
         if (currentStatus == CaseReplayStatus.PREPARED || currentStatus == CaseReplayStatus.RUNNING) {
@@ -562,10 +633,93 @@ public class CaseReplayManager implements ExportService {
     /**
      * 前置准备操作
      */
-    private void prepareAction() {
+    protected boolean prepareAction() {
         // 准备
         provider.prepare();
 
+        boolean prepared = prepareReplayEnvironment();
+        if (!prepared) {
+            return false;
+        }
+
+        // Headless assertion-only segments never use a keyboard. Defer their IME setup;
+        // interactive replay retains the original preparation point.
+        if (!headless && !prepareReplayIme()) {
+            return false;
+        }
+
+        stepCount = 1;
+        return true;
+    }
+
+    protected synchronized boolean prepareReplayIme() {
+        if (imeRestorePending) {
+            return true;
+        }
+        String original = readDefaultIme();
+        if (original == null || original.trim().length() == 0 || "null".equals(original.trim())) {
+            return false;
+        }
+        defaultIme = original.trim();
+        // Record before switching: an exception may happen after the platform changed the IME.
+        imeRestorePending = true;
+        try {
+            applyReplayIme("com.alipay.hulu/.common.tools.AdbIME");
+            return true;
+        } catch (RuntimeException exception) {
+            restoreReplayIme();
+            return false;
+        }
+    }
+
+    protected String readDefaultIme() {
+        return CmdTools.execHighPrivilegeCmd("settings get secure default_input_method");
+    }
+
+    protected void applyReplayIme(String ime) {
+        MyApplication.getInstance().updateDefaultIme(ime);
+        CmdTools.switchToIme(ime);
+    }
+
+    protected synchronized void restoreReplayIme() {
+        if (!imeRestorePending || defaultIme == null) {
+            return;
+        }
+        try {
+            applyReplayIme(defaultIme);
+            imeRestorePending = false;
+        } catch (RuntimeException exception) {
+            // Keep the marker so onDestroy can retry without omitting result/lease cleanup.
+            LogUtil.w(TAG, "Unable to restore replay input method");
+        }
+    }
+
+    static boolean requiresPreparedIme(PerformActionEnum action) {
+        if (action == null) {
+            return true;
+        }
+        switch (action) {
+            case ASSERT:
+            case ASSERT_TOAST:
+            case CHECK_NODE:
+            case CHECK:
+            case LET_NODE:
+            case LET:
+            case SLEEP_UNTIL:
+            case SLEEP:
+            case SCREENSHOT:
+                return false;
+            default:
+                // Unknown/plugin/input actions keep the old IME environment. This first
+                // optimization is intentionally limited to proven read-only segments.
+                return true;
+        }
+    }
+
+    protected boolean prepareReplayEnvironment() {
+        if (headless) {
+            return prepareTargetApp(null);
+        }
         Context service = LauncherApplication.getInstance().loadRunningService();
         final ProgressDialog progressDialog = DialogUtils.showProgressDialog(ContextUtil.getContextThemeWrapper(service, R.style.AppDialogTheme), "环境准备中");
         PrepareUtil.PrepareStatus prepareStatus = new PrepareUtil.PrepareStatus() {
@@ -586,22 +740,22 @@ public class CaseReplayManager implements ExportService {
                 });
             }
         };
-        PrepareUtil.doPrepareWork(app, prepareStatus);
+        boolean prepared = prepareTargetApp(prepareStatus);
 
         LauncherApplication.getInstance().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                progressDialog.dismiss();
+                if (progressDialog != null) {
+                    progressDialog.dismiss();
+                }
             }
         });
 
-        // 先记录下默认输入法
-        defaultIme = CmdTools.execHighPrivilegeCmd("settings get secure default_input_method");
-        MyApplication.getInstance().updateDefaultIme("com.alipay.hulu/.common.tools.AdbIME");
-        CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
+        return prepared;
+    }
 
-        // 初始化
-        stepCount = 1;
+    protected boolean prepareTargetApp(PrepareUtil.PrepareStatus status) {
+        return PrepareUtil.doPrepareWork(app, status, restartAppForReplay);
     }
 
     /**
@@ -672,7 +826,7 @@ public class CaseReplayManager implements ExportService {
     /**
      * 后置操作
      */
-    private void suffixAction() {
+    protected void suffixAction() {
         watcher.sleepUntilContentDontChange();
         if (touchService != null) {
             touchService.stop();
@@ -686,11 +840,10 @@ public class CaseReplayManager implements ExportService {
         }
 
         // 切换回默认输入法
-        MyApplication.getInstance().updateDefaultIme(defaultIme);
-        CmdTools.switchToIme(defaultIme);
+        restoreReplayIme();
 
         // 汇报结果
-        final List<ReplayResultBean> resultBeans = provider.genReplayResult();
+        final List<ReplayResultBean> resultBeans = collectReplayResults();
         if (resultBeans != null && resultBeans.size() > 0) {
             DeviceInfo deviceInfo = DeviceInfoUtil.generateDeviceInfo();
             for (ReplayResultBean result: resultBeans) {
@@ -701,15 +854,46 @@ public class CaseReplayManager implements ExportService {
         }
 
 
-        // 先restore再stop
-        binder.restoreFloat();
-        binder.stopFloat();
-        if (finishListener != null) {
-            finishListener.onFinish(resultBeans, binder.loadServiceContext());
+        try {
+            final FloatWinService.FloatBinder activeBinder = binder;
+            if (!headless && activeBinder != null) {
+                activeBinder.restoreFloat();
+                activeBinder.stopFloat();
+            }
+            deliverReplayResults(resultBeans);
+        } finally {
+            // Release services and the device lease even if a result consumer fails.
+            LauncherApplication.getInstance().stopServiceByName(CaseReplayManager.class.getName());
         }
+    }
 
-        // 停止自身
-        LauncherApplication.getInstance().stopServiceByName(CaseReplayManager.class.getName());
+    protected Context getReplayContext() {
+        final FloatWinService.FloatBinder activeBinder = binder;
+        return !headless && activeBinder != null
+                ? activeBinder.loadServiceContext() : LauncherApplication.getContext();
+    }
+
+    protected void deliverReplayResults(List<ReplayResultBean> resultBeans) {
+        final OnFinishListener activeListener = finishListener;
+        if (activeListener != null && finishDelivered.compareAndSet(false, true)) {
+            activeListener.onFinish(resultBeans, getReplayContext());
+        }
+    }
+
+    protected List<ReplayResultBean> collectReplayResults() {
+        List<ReplayResultBean> results = provider.genReplayResult();
+        String terminalError = preparationError != null ? preparationError : headlessExecutionError;
+        if (terminalError != null && results != null) {
+            for (ReplayResultBean result : results) {
+                if (result != null) {
+                    result.setExceptionMessage(terminalError);
+                    if (preparationError != null) {
+                        result.setExceptionStep(-1);
+                    }
+                }
+            }
+        }
+        return results;
     }
 
     public void stopRunning() {
@@ -783,10 +967,30 @@ public class CaseReplayManager implements ExportService {
             return "方法为空";
         }
 
+        if (headless && method.getActionEnum() == PerformActionEnum.DEVICE_INFO) {
+            exceptionStep = operation;
+            failHeadlessUiOperation();
+            return headlessExecutionError;
+        }
+
         // 这两个操作返回出来，说明出现问题
         if (method.getActionEnum() == PerformActionEnum.BREAK ||
                 method.getActionEnum() == PerformActionEnum.CONTINUE) {
             return "逻辑控制异常";
+        }
+
+        if (headless && requiresPreparedIme(method.getActionEnum())) {
+            // Code security: validate the live owner before preparing the keyboard, then
+            // acquire the target afresh because switching the IME can change window bounds.
+            if (!canContinueHeadlessLookup()) {
+                return "回放终止";
+            }
+            if (!prepareReplayIme()) {
+                return "输入法准备失败";
+            }
+            if (!canContinueHeadlessLookup()) {
+                return "回放终止";
+            }
         }
 
         ReplayStepInfoBean stepInfoBean = new ReplayStepInfoBean();
@@ -818,7 +1022,30 @@ public class CaseReplayManager implements ExportService {
                 MiscUtil.sleep(500);
             }
             List<String> prepareActions = new ArrayList<>();
-            if (operation.getOperationMethod().getActionEnum() == PerformActionEnum.CLICK_IF_EXISTS) {
+            if (headless && HeadlessReplayNodeResolver.supports(origin)) {
+                long targetWaitMs = 3000L;
+                if (method.getActionEnum() == PerformActionEnum.CLICK_IF_EXISTS) {
+                    targetWaitMs = 0L;
+                } else if (method.getActionEnum() == PerformActionEnum.SLEEP_UNTIL) {
+                    try {
+                        targetWaitMs = Long.parseLong(method.getParam(OperationExecutor.INPUT_TEXT_KEY));
+                    } catch (NumberFormatException exception) {
+                        return "参数错误";
+                    }
+                }
+                try {
+                    node = findHeadlessReplayNode(origin, targetWaitMs);
+                } catch (HeadlessReplayNodeResolver.AmbiguousTargetException exception) {
+                    return "节点匹配不唯一";
+                }
+                if (!canContinueHeadlessLookup()) {
+                    return "回放终止";
+                }
+                if (node == null) {
+                    return method.getActionEnum() == PerformActionEnum.CLICK_IF_EXISTS
+                            ? null : "节点未查找到或匹配不唯一";
+                }
+            } else if (operation.getOperationMethod().getActionEnum() == PerformActionEnum.CLICK_IF_EXISTS) {
                 node = OperationUtil.findAbstractNodeWithoutScroll(origin, operationService, prepareActions);
 
                 if (node == null) {
@@ -869,6 +1096,12 @@ public class CaseReplayManager implements ExportService {
                 }
             }
 
+            if (headless && !HeadlessReplayNodeResolver.matchesDeclaredFields(origin, node)) {
+                return "节点与已冻结定位条件不一致";
+            }
+            if (headless && !HeadlessReplayNodeResolver.isActionEligible(node, method.getActionEnum())) {
+                return "目标节点不可见或不可用";
+            }
             stepInfoBean.setPrepareActionList(prepareActions);
 
             // 非一机多控回放时截图对比
@@ -919,7 +1152,7 @@ public class CaseReplayManager implements ExportService {
             }
 
             // 如果需要高亮
-            if (SPService.getBoolean(SPService.KEY_HIGHLIGHT_REPLAY_NODE, true)) {
+            if (!headless && SPService.getBoolean(SPService.KEY_HIGHLIGHT_REPLAY_NODE, true)) {
                 // 高亮下
                 highLightAndRemove(node, operation.getOperationMethod());
             }
@@ -929,6 +1162,10 @@ public class CaseReplayManager implements ExportService {
         }
 
 
+        // Code security: do not execute after cancellation/lease loss while collecting evidence.
+        if (headless && !canContinueHeadlessLookup()) {
+            return "回放终止";
+        }
         // 执行操作
         boolean result = operationService.doSomeAction(operation.getOperationMethod(), node, listener);
         if (!result) {
@@ -965,6 +1202,9 @@ public class CaseReplayManager implements ExportService {
             watcher.sleepUntilContentDontChange();
         }
 
+        if (headlessExecutionError != null) {
+            return headlessExecutionError;
+        }
         stepInfoBean.setFindNode(opNode);
 
         provider.onStepInfo(stepInfoBean);
@@ -972,15 +1212,51 @@ public class CaseReplayManager implements ExportService {
         return null;
     }
 
+    private boolean canContinueHeadlessLookup() {
+        return runningFlag && !cancelRequested && !Thread.currentThread().isInterrupted()
+                && ownsReplayLease(replayLeaseOwner);
+    }
+
+    private AbstractNodeTree findHeadlessReplayNode(OperationNode selector, long timeoutMs) {
+        return HeadlessReplayNodeResolver.resolve(selector, timeoutMs,
+                new HeadlessReplayNodeResolver.Source() {
+                    @Override public AbstractNodeTree capture() {
+                        operationService.invalidRoot();
+                        return operationService.getCurrentRoot();
+                    }
+                    @Override public boolean canContinue() {
+                        return canContinueHeadlessLookup();
+                    }
+                    @Override public long nowMs() {
+                        return TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+                    }
+                    @Override public boolean await(long delayMs) {
+                        try {
+                            Thread.sleep(delayMs);
+                            return true;
+                        } catch (InterruptedException exception) {
+                            Thread.currentThread().interrupt();
+                            return false;
+                        }
+                    }
+                });
+    }
+
     /**
      * 更新悬浮窗图标
      * @param res
      */
     public void updateFloatIcon(final int res) {
+        if (headless) {
+            return;
+        }
         LauncherApplication.getInstance().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                binder.updateFloatIcon(res);
+                final FloatWinService.FloatBinder activeBinder = binder;
+                if (activeBinder != null && !headless) {
+                    activeBinder.updateFloatIcon(res);
+                }
             }
         });
     }
@@ -1027,6 +1303,21 @@ public class CaseReplayManager implements ExportService {
 
     @Subscriber(value = @Param(type = UIOperationMessage.class, sticky = false), thread = RunningThread.MAIN_THREAD)
     public void receiveDeviceInfoMessage(UIOperationMessage message) {
+        if (message == null) {
+            return;
+        }
+        if (headless) {
+            // A sleep countdown is presentation only; the executor still performs the full wait.
+            // Interactive-only operations must fail instead of silently disappearing or waiting.
+            if (runningFlag && (message.eventType == UIOperationMessage.TYPE_DEVICE_INFO
+                    || message.eventType == UIOperationMessage.TYPE_DIALOG)) {
+                failHeadlessUiOperation();
+            }
+            return;
+        }
+        if (binder == null) {
+            return;
+        }
         if (message.eventType == UIOperationMessage.TYPE_DEVICE_INFO) {
             DeviceInfo info = DeviceInfoUtil.generateDeviceInfo();
             showDialog(StringUtil.getString(R.string.ui__device_info), info.toString(), binder.loadServiceContext(), 0);
@@ -1045,6 +1336,15 @@ public class CaseReplayManager implements ExportService {
         }
     }
 
+    private void failHeadlessUiOperation() {
+        headlessExecutionError = "Interactive replay operation is unavailable in headless mode";
+        runningFlag = false;
+        OperationContext context = runningContext;
+        if (context != null) {
+            context.cancelRunning();
+        }
+    }
+
     private WeakReference<AlertDialog> dialogRef;
 
     /**
@@ -1053,7 +1353,7 @@ public class CaseReplayManager implements ExportService {
      * @param context
      */
     public void showDialog(String title, String deviceInfo, Context context, long timeOut) {
-        if (TextUtils.isEmpty(deviceInfo)) {
+        if (headless || TextUtils.isEmpty(deviceInfo)) {
             return;
         }
 
@@ -1121,6 +1421,12 @@ public class CaseReplayManager implements ExportService {
             final FloatWinService.FloatBinder binder = (FloatWinService.FloatBinder) service;
             final CaseReplayManager manager = managerRef.get();
 
+            if (manager == null || manager.headless || manager.cancelRequested
+                    || manager.connection != this
+                    || !manager.ownsReplayLease(manager.replayLeaseOwner)
+                    || manager.provider == null) {
+                return;
+            }
             manager.binder = binder;
             View v = manager.provider.provideView(binder.loadServiceContext());
             if (v != null) {

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "solopi.ai.fastpath-policy/v1",
+  "targetPackage": "com.eg.android.AlipayGphone",
+  "steps": {
+    "open-search": {
+      "instructions": "选择完成请求需要点击的控件。",
+      "readyWhen": {
+        "selector": {
+          "resourceId": "com.alipay.android.tablauncher:id/selected_fl",
+          "className": "android.widget.FrameLayout",
+          "packageName": "com.eg.android.AlipayGphone"
+        },
+        "field": "description",
+        "equals": "首页"
+      },
+      "stopWhen": {
+        "selector": {
+          "resourceId": "com.alipay.mobile.antui:id/search_back_button",
+          "className": "android.widget.FrameLayout",
+          "packageName": "com.eg.android.AlipayGphone"
+        },
+        "field": "description",
+        "equals": "返回"
+      },
+      "candidateSelectors": [
+        {
+          "className": "android.widget.RelativeLayout",
+          "packageName": "com.eg.android.AlipayGphone",
+          "description": "搜索框"
+        }
+      ],
+      "exactText": "搜索框",
+      "maxCandidates": 1
+    }
+  }
+}

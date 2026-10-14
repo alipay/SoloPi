@@ -123,8 +123,9 @@ public class SplashActivity extends BaseActivity {
 
 	private void processPemission() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			// 如果不存储在/sdcard/solopi，说明已经降级到外置私有目录下了
-			if (!StringUtil.equals(SPService.getString(SPService.KEY_SOLOPI_PATH_NAME, "solopi"), "solopi")) {
+			// 如果不存储在默认公共目录，说明已经降级到外置私有目录下了
+			String defaultFolder = FileUtils.getDefaultSolopiFolderName();
+			if (!StringUtil.equals(SPService.getString(SPService.KEY_SOLOPI_PATH_NAME, defaultFolder), defaultFolder)) {
 				afterWritePermission(true);
 				return;
 			}

@@ -67,6 +67,7 @@ public class AccessibilityServiceImpl extends AccessibilityService {
 
     @Override
     public boolean onUnbind(Intent intent) {
+        AccessibilityUiEventClock.connected(false);
         LogUtil.i(TAG, "Service on unbind");
         LauncherApplication.getInstance().prepareInMain();
         InjectorService service = LauncherApplication.getInstance()
@@ -99,6 +100,7 @@ public class AccessibilityServiceImpl extends AccessibilityService {
     protected void onServiceConnected() {
         LogUtil.d(TAG, "Service connected");
         super.onServiceConnected();
+        AccessibilityUiEventClock.connected(true);
 
         // 如果初始化完成但没有注册过
         if (Build.VERSION.SDK_INT >= 24) {
@@ -126,6 +128,11 @@ public class AccessibilityServiceImpl extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        // No event text, package, or node is retained. Include control/IME/window transitions
+        // before the recorder's own-package filter; they can obscure an Agent target.
+        if (isUiTransitionEvent(event.getEventType())) {
+            AccessibilityUiEventClock.changed();
+        }
         LogUtil.v(TAG, "收到辅助功能事件:" + event.getEventType());
 
         // SoloPi的窗口事件，不处理
@@ -149,6 +156,24 @@ public class AccessibilityServiceImpl extends AccessibilityService {
         if (tracker != null) {
             tracker.notifyAccessibilityEvent(event);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        AccessibilityUiEventClock.connected(false);
+        super.onDestroy();
+    }
+
+    static boolean isUiTransitionEvent(int type) {
+        return type == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+                || type == AccessibilityEvent.TYPE_WINDOWS_CHANGED
+                || type == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+                || type == AccessibilityEvent.TYPE_VIEW_SCROLLED
+                || type == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
+                || type == AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED
+                || type == AccessibilityEvent.TYPE_VIEW_FOCUSED
+                || type == AccessibilityEvent.TYPE_VIEW_SELECTED
+                || type == AccessibilityEvent.TYPE_VIEW_CLICKED;
     }
 
     @Override

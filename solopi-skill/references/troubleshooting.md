@@ -40,7 +40,7 @@ scripts/solopi-ai --serial <serial> --pretty doctor
 - 确保 `adb` 在 `PATH` 中；需要自定义路径时使用全局参数 `--adb <path>`。
 - 保持一台设备处于 `device` 状态；多设备时明确指定 `--serial <serial>`。
 - 安装包含 AI Harness 的 SoloPi 构建，默认包名为 `com.alipay.hulu`。
-- 由用户完成悬浮窗、电池优化白名单、辅助功能和可能出现的 SoloPi 内部 ADB RSA 一次性授权；`background` 当前只是提示型状态，CLI 只能发起内部 ADB 连接。
+- 电脑控制需由用户完成辅助功能和可能出现的 SoloPi 内部 ADB RSA 一次性授权。新版无界面回放不要求悬浮窗或电池优化白名单；手机录制、悬浮控制仍按功能申请。电池白名单仅建议用于长时间后台任务，CLI 不静默授权。
 
 ## 先运行 doctor
 
@@ -48,7 +48,7 @@ scripts/solopi-ai --serial <serial> --pretty doctor
 scripts/solopi-ai --serial <serial> --pretty doctor
 ```
 
-仅在退出码为 `0` 且 `health.ready` 为 `true` 时继续设备操作。根据结果处理：
+仅在 `doctor.success=true` 且退出码为 `0` 时继续设备操作。新版 `executionProfile=host` 使用 `health.executionProfiles.host.ready`；顶层 `health.ready` 为兼容旧客户端保留，可能因可选权限缺失而为 `false`，不能拿它否决新版 host 模式。根据结果处理：
 
 | 现象 | 含义 | 处理 |
 |---|---|---|
@@ -59,7 +59,7 @@ scripts/solopi-ai --serial <serial> --pretty doctor
 | `SoloPi control server did not become ready` | 应用已启动，但控制服务在启动超时内不可达，退出码 `4` | 检查应用版本、进程或崩溃日志；确认设备连接后重试。不要改用设备网络直连 HTTP 端口。 |
 | `Unable to reach SoloPi control server` | ADB 转发后的 HTTP 请求失败，退出码 `4` | 检查 ADB 状态和 SoloPi 进程；保留错误中的 `url`，重跑 `doctor`。 |
 | `invalid JSON` 或 `non-object response` | 应用返回内容不符合协议，退出码 `4` | 记录响应摘要，检查 CLI 与应用版本是否匹配；不要猜测或继续执行变更命令。 |
-| `health.ready: false`、`missingPermissions` 或 `failedChecks` 非空 | 一次性权限或就绪检查未完成，退出码 `2` | `missingPermissions` 精确列出缺失的 `adb`、`float`、`powerSave`、`background` 或 `accessibility`；`failedChecks` 列出 `appInitialized`、`permissions`、`autoStart` 或不一致的 `ready`。`powerSave=false` 表示 SoloPi 尚未加入电池优化白名单。仅当唯一缺失项为 `adb` 时运行 `adb-connect`；其他项由用户在设备上处理。 |
+| `doctor.success: false`、`missingPermissions` 或 `failedChecks` 非空 | 所选执行模式未就绪，退出码 `2` | host 模式的必需权限为 `adb`、`accessibility`；`powerSave=false` 只产生建议。初始化、权限载荷或 profile 不一致仍失败。旧 APK 使用 legacy 门禁并提示升级；不要忽略缺失权限来冒充 headless。仅当唯一缺失项为 `adb` 时运行 `adb-connect`；辅助功能由用户开启。 |
 
 ## 恢复 SoloPi 内部 ADB
 
@@ -78,7 +78,7 @@ scripts/solopi-ai --serial <serial> --pretty adb-connect
 ```
 
 3. 若设备显示 SoloPi ADB 密钥授权弹窗，由用户亲自确认，再使用同一命令重试。CLI 不自动点击，也不把 `connecting`、请求已受理或 Activity 已启动当作连接成功。
-4. 只有命令返回 `connected=true`、完整 `doctor.health.ready=true` 且退出码为 `0` 才继续设备功能。
+4. 只有命令返回 `connected=true`、完整 `doctor.success=true` 且退出码为 `0` 才继续设备功能。
 5. 若返回 `adb_connection_failed`，内部端口可能未监听，也可能尚未确认 RSA；布尔连接结果无法区分两者。保留结构化错误，不要盲目修改设置。
 6. 只有用户明确要求开启 TCP ADB，并在获知攻击面扩大的风险后明确批准，才可执行：
 

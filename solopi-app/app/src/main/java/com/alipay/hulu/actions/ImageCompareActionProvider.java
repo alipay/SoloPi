@@ -74,13 +74,20 @@ public class ImageCompareActionProvider implements ActionProvider {
 
     @Override
     public void onCreate(Context context) {
-        highLight = LauncherApplication.getInstance().findServiceByName(HighLightService.class.getName());
-        captureService = LauncherApplication.getInstance().findServiceByName(ScreenCaptureService.class.getName());
+        // Providers are also initialized for computer-controlled replay, before its UI mode
+        // is known. Highlighting is optional presentation and must not create an overlay here.
+        highLight = null;
+        captureService = loadCaptureService();
+    }
+
+    protected ScreenCaptureService loadCaptureService() {
+        return LauncherApplication.getInstance().findServiceByName(ScreenCaptureService.class.getName());
     }
 
     @Override
     public void onDestroy(Context context) {
-
+        highLight = null;
+        captureService = null;
     }
 
     @Override
@@ -141,14 +148,7 @@ public class ImageCompareActionProvider implements ActionProvider {
                     LogUtil.e(TAG, "Can't find target Image");
                     return false;
                 } else {
-                    // 高亮控件
-                    highLight.highLight(target, null);
-                    BackgroundExecutor.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            highLight.removeHighLight();
-                        }
-                    }, 1000);
+                    highlightIfConfigured(target, 1000);
 
                     // 执行adb命令
                     context.executor.executeClick(target.centerX(), target.centerY());
@@ -212,14 +212,7 @@ public class ImageCompareActionProvider implements ActionProvider {
                     LauncherApplication.getInstance().showToast(StringUtil.getString(R.string.image_compare__assert_failed));
                     return false;
                 } else {
-                    // 高亮控件
-                    highLight.highLight(target, null);
-                    BackgroundExecutor.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            highLight.removeHighLight();
-                        }
-                    }, 1500);
+                    highlightIfConfigured(target, 1500);
 
                     // 执行adb命令
                     context.notifyOperationFinish();
@@ -262,6 +255,8 @@ public class ImageCompareActionProvider implements ActionProvider {
 
         LogUtil.d(TAG, "开始提供图像对比界面");
 
+        // Only the interactive configuration flow needs a highlight service.
+        highLight = LauncherApplication.getInstance().findServiceByName(HighLightService.class.getName());
         highLight.removeHighLight();
         // 等2秒，高亮、Dialog消失
         BackgroundExecutor.execute(new Runnable() {
@@ -366,6 +361,20 @@ public class ImageCompareActionProvider implements ActionProvider {
             }
         }, 200);
         return;
+    }
+
+    void highlightIfConfigured(Rect target, int delayMillis) {
+        final HighLightService activeHighlight = highLight;
+        if (activeHighlight == null) {
+            return;
+        }
+        activeHighlight.highLight(target, null);
+        BackgroundExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                activeHighlight.removeHighLight();
+            }
+        }, delayMillis);
     }
 
     /**

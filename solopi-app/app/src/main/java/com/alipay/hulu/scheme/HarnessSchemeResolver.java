@@ -50,6 +50,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -138,8 +139,12 @@ public class HarnessSchemeResolver implements SchemeActionResolver {
     private Map<String, Object> capabilities(Context context) {
         Map<String, Object> result = success();
         result.put("protocolVersion", PROTOCOL_VERSION);
+        result.put("settleStrategies", Arrays.asList("legacy", "event-stable-v1"));
+        result.put("defaultSettleStrategy", "legacy");
+        result.put("actionValidationStrategies", Arrays.asList("full-page", "target-context-v1"));
+        result.put("defaultActionValidationStrategy", "full-page");
         result.put("packageName", context.getPackageName());
-        result.put("devicePort", SPService.getInt(SPService.KEY_CONTROL_PORT, 23342));
+        result.put("devicePort", SPService.getInt(SPService.KEY_CONTROL_PORT, SPService.getDefaultControlPort()));
         result.put("queries", Arrays.asList("capabilities", "health", "info", "apps", "cases", "case",
                 "status", "result", "case-import-status", "case-delete-status",
                 "adb-connect-status"));
@@ -167,6 +172,7 @@ public class HarnessSchemeResolver implements SchemeActionResolver {
         result.put("agentCommands", Arrays.asList("start", "act", "pause", "resume",
                 "end", "cancel"));
         result.put("transports", Arrays.asList("adb-forward-http", "adb-scheme"));
+        result.put("replayExecutionModes", Arrays.asList("interactive", "headless"));
         return result;
     }
 
@@ -192,8 +198,22 @@ public class HarnessSchemeResolver implements SchemeActionResolver {
         result.put("autoStart", autoStart);
         result.put("ready", LauncherApplication.getInstance().hasFinishInit()
                 && permissionsReady && autoStart);
+        result.put("executionProfiles", Collections.singletonMap("host",
+                hostExecutionProfile(LauncherApplication.getInstance().hasFinishInit(), permissions)));
         result.put("run", HarnessState.snapshot());
         return result;
+    }
+
+    /** Host execution has no floating controls and starts independently of UI preferences. */
+    static Map<String, Object> hostExecutionProfile(boolean initialized,
+                                                    Map<String, Object> permissions) {
+        Map<String, Object> host = new LinkedHashMap<>();
+        host.put("replayMode", "headless");
+        host.put("requiredPermissions", Arrays.asList("adb", "accessibility"));
+        host.put("advisoryPermissions", Collections.singletonList("powerSave"));
+        host.put("ready", initialized && Boolean.TRUE.equals(permissions.get("adb"))
+                && Boolean.TRUE.equals(permissions.get("accessibility")));
+        return host;
     }
 
     private Map<String, Object> info(Context context) {

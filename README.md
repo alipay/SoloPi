@@ -8,16 +8,15 @@ SoloPi 是一套面向移动端研发的开源自动化与 AI Harness 工程。�
 真机上的录制、回放、断言和性能诊断能力，并增加 Agent 接入、动态页面安全执行、独立结果
 判定、无人值守托管和同次运行证据，让一次设备操作可以交付为可进入研发与 CI 流程的结论。
 
-> 计划公开发行范围只包括 `solopi-app`、`solopi-harness-cli` 和 `solopi-skill`
-> 三个产品模块，以及必要的根级文档与许可证文件。
+> 产品源码包含 `solopi-app` 和 `solopi-skill` 两个顶层模块。Harness 随 Skill 放在
+> `solopi-skill/scripts/harness`；配套文档与许可证保留在仓库中。
 
 ## 开源模块
 
 | 模块 | 定位 | 主要职责 |
 |---|---|---|
 | [`solopi-app/`](solopi-app/README.md) | 真机执行内核 | 录制回放、页面观察、触屏前复核、断言、性能与网络采集、动作回执；当前开源实现为 Android |
-| [`solopi-harness-cli/`](solopi-harness-cli/README.md) | 宿主机责任中枢 | 类型化 CLI、设备协议、验证计划、结果判定器、单机托管、证据报告和可选模型生命周期 |
-| [`solopi-skill/`](solopi-skill/SKILL.md) | Agent 使用入口 | 描述能力、核对输入、安全规则和结果口径，并把 Agent 请求路由到受控 CLI；不承载执行内核 |
+| [`solopi-skill/`](solopi-skill/SKILL.md) | Agent 入口与宿主机 Harness | 使用说明、类型化 CLI、设备协议、验证计划、独立验收、单机托管与证据报告；核心实现位于 `scripts/harness` |
 
 被测 App 不需要接入 Agent SDK，也不需要因为使用 Harness 修改业务代码。
 
@@ -33,7 +32,7 @@ SoloPi 是一套面向移动端研发的开源自动化与 AI Harness 工程。�
 solopi-skill
    |  类型化任务与安全约束
    v
-solopi-harness-cli
+solopi-skill/scripts/harness
    |  ADB + 受控协议
    v
 solopi-app  -------------------->  被测 App
@@ -270,8 +269,8 @@ adb install -r solopi-app/portal/build/outputs/apk/debug/portal-debug.apk
 直接使用源码入口：
 
 ```bash
-./solopi-harness-cli/solopi-ai --pretty actions
-./solopi-harness-cli/solopi-ai --pretty doctor
+./solopi-skill/scripts/solopi-ai --pretty actions
+./solopi-skill/scripts/solopi-ai --pretty doctor
 ```
 
 也可以在虚拟环境中安装：
@@ -279,7 +278,7 @@ adb install -r solopi-app/portal/build/outputs/apk/debug/portal-debug.apk
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install -e ./solopi-harness-cli
+python -m pip install -e ./solopi-skill/scripts/harness
 solopi-ai --pretty actions
 ```
 
@@ -288,7 +287,7 @@ solopi-ai --pretty actions
 
 ### 3. 通过 Agent Skill 调用
 
-`solopi-skill` 是面向支持 Skill 的 Agent 的规则入口。它会调用同仓的 CLI：
+`solopi-skill` 包含 Agent 使用规则和 Harness 实现，可以完整复制到仓库外使用。统一入口为：
 
 ```bash
 ./solopi-skill/scripts/solopi-ai --pretty doctor
@@ -300,10 +299,10 @@ solopi-ai --pretty actions
 
 ## 本地验证
 
-公开源码的基础门禁只依赖这三个模块：
+公开源码的基础门禁覆盖 Skill 内的 Harness 与 Android 模块：
 
 ```bash
-python3 -m unittest discover -s solopi-harness-cli/tests -v
+python3 -m unittest discover -s solopi-skill/scripts/harness/tests -v
 ./solopi-skill/scripts/solopi-ai --pretty actions
 ./solopi-app/gradlew -p solopi-app \
   :app:testDebugUnitTest \

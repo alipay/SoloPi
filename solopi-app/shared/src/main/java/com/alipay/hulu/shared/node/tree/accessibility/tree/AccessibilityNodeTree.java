@@ -59,9 +59,17 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
     private boolean isScrollable;
 
     private boolean isClickable;
+    private boolean isEnabled;
     private boolean isFocusable;
 
     private boolean isEditable;
+
+    // Nullable protocol metadata: a synthetic node without AccessibilityNodeInfo
+    // cannot claim that it is visible, non-password, unchecked, or unselected.
+    private Boolean isPassword;
+    private Boolean isSelected;
+    private Boolean isChecked;
+    private Boolean isVisibleToUser;
 
     /**
      * 构造函数
@@ -129,8 +137,13 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
         this.isScrollable = info.isScrollable();
         this.visible = rect.width() * rect.height() > 0;//info.isVisibleToUser();
         this.isClickable = info.isClickable();
+        this.isEnabled = info.isEnabled();
         this.isFocusable = info.isFocusable();
         this.isEditable = info.isEditable();
+        this.isPassword = info.isPassword();
+        this.isSelected = info.isSelected();
+        this.isChecked = info.isChecked();
+        this.isVisibleToUser = info.isVisibleToUser();
     }
 
     public int getScrollType() {
@@ -320,9 +333,16 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
         JSONObject obj = super.exportToJsonObject();
         obj.put("isWebView", isWebview);
         obj.put("isClickable", isClickable);
+        obj.put("isEnabled", isEnabled);
         obj.put("isEditable", isEditable);
         obj.put("isFocusable", isFocusable);
         obj.put("isScrollable", isScrollable);
+        // Code security: preserve raw Android metadata for fail-closed candidate
+        // filtering. Do not infer privacy or visibility from labels or area alone.
+        obj.put("isPassword", isPassword);
+        obj.put("isSelected", isSelected);
+        obj.put("isChecked", isChecked);
+        obj.put("isVisibleToUser", isVisibleToUser);
         return obj;
     }
 
@@ -340,6 +360,10 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
 
     public boolean isClickable() {
         return isClickable;
+    }
+
+    public boolean isEnabled() {
+        return isEnabled;
     }
 
     public void setClickable(boolean clickable) {

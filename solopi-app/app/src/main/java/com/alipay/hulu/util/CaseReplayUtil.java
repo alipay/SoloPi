@@ -34,6 +34,7 @@ import com.alibaba.fastjson.JSON;
 import com.alipay.hulu.R;
 import com.alipay.hulu.activity.MyApplication;
 import com.alipay.hulu.bean.AdvanceCaseSetting;
+import com.alipay.hulu.bean.ReplayResultBean;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
@@ -79,11 +80,19 @@ public class CaseReplayUtil {
     public static void startReplay(@NonNull final RecordCaseInfo recordCase,
                                    final String replayOwner,
                                    final Boolean restartAppOverride) {
+        startReplay(recordCase, replayOwner, restartAppOverride, false);
+    }
+
+    /** Host-driven replay uses the frozen target and reports results without launching phone UI. */
+    public static void startReplay(@NonNull final RecordCaseInfo recordCase,
+                                   final String replayOwner,
+                                   final Boolean restartAppOverride,
+                                   final boolean headless) {
         final String advanceSettings = recordCase.getAdvanceSettings();
         final AdvanceCaseSetting setting = JSON.parseObject(advanceSettings, AdvanceCaseSetting.class);
         if (setting != null && !StringUtil.isEmpty(setting.getOverrideApp())) {
             recordCase.setTargetAppPackage(setting.getOverrideApp());
-        } else if (SPService.getBoolean(SPService.KEY_ALLOW_REPLAY_DIFFERENT_APP, false)) {
+        } else if (!headless && SPService.getBoolean(SPService.KEY_ALLOW_REPLAY_DIFFERENT_APP, false)) {
             LauncherApplication.getInstance().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -128,27 +137,33 @@ public class CaseReplayUtil {
         boolean restartApp = restartAppOverride != null
                 ? restartAppOverride
                 : SPService.getBoolean(SPService.KEY_RESTART_APP_ON_PLAY, true);
-        if (restartApp) {
+        if (restartApp && !headless) {
             restartTargetApp(recordCase.getTargetAppPackage());
-        } else {
-            BackgroundExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    AppUtil.launchTargetApp(recordCase.getTargetAppPackage());
-                }
-            });
         }
+        // Headless starts immediately: its synchronous preparer owns restart/resume, so an
+        // additional asynchronous restart cannot race the first replay step.
 
         if (setting != null && setting.getRunningParam() != null) {
             MultiParamStepProvider stepProvider = new MultiParamStepProvider(recordCase);
-            handleReplayStart(manager.start(stepProvider, MyApplication.MULTI_REPLAY_LISTENER,
-                    replayOwner), replayOwner);
+            handleReplayStart(manager.start(stepProvider,
+                    headless ? HEADLESS_REPLAY_LISTENER : MyApplication.MULTI_REPLAY_LISTENER,
+                    replayOwner, restartApp, headless), replayOwner);
         } else {
             OperationStepProvider stepProvider = new OperationStepProvider(recordCase);
-            handleReplayStart(manager.start(stepProvider, MyApplication.SINGLE_REPLAY_LISTENER,
-                    replayOwner), replayOwner);
+            handleReplayStart(manager.start(stepProvider,
+                    headless ? HEADLESS_REPLAY_LISTENER : MyApplication.SINGLE_REPLAY_LISTENER,
+                    replayOwner, restartApp, headless), replayOwner);
         }
     }
+
+    static final CaseReplayManager.OnFinishListener HEADLESS_REPLAY_LISTENER =
+            new CaseReplayManager.OnFinishListener() {
+                @Override
+                public void onFinish(List<ReplayResultBean> resultBeans, Context context) {
+                    // Same result summaries and evidence paths as interactive replay, without an Activity.
+                    HarnessState.complete(resultBeans);
+                }
+            };
 
     private static void handleReplayStart(boolean started, String replayOwner) {
         if (started) {

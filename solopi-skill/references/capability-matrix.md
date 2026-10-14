@@ -16,7 +16,7 @@
 
 | 能力域 | 具体能力 | 状态 | 当前入口与边界 |
 |---|---|---|---|
-| 1. 设备与动作 | 设备、安装、权限和协议诊断 | 直接 CLI | `doctor`、`capabilities`；核对内部 ADB、悬浮窗、电池优化和辅助功能，只诊断、不静默授权。`background` 仅是提示型状态。 |
+| 1. 设备与动作 | 设备、安装、权限和协议诊断 | 直接 CLI | `doctor`、`capabilities`；新版电脑端仅要求内部 ADB 与辅助功能；电池优化白名单为建议，浮窗按交互功能检查。旧版 APK 保留原门禁并提示升级；只诊断、不静默授权。 |
 | 1. 设备与动作 | SoloPi 内部 ADB 连接初始化与终态核验 | 直接 CLI + 用户确认 | `adb-connect` 只在内部 `adb` 为唯一缺口时发起应用既有连接流程，按 `requestId` 轮询并重新核对 `doctor`；RSA 弹窗仍由用户确认，不执行 `adb tcpip 5555`。 |
 | 1. 设备与动作 | 应用、版本、运行状态、页面树 | 直接 CLI | `apps`、`app-info`、`app-status`、`inspect`；查询结果不是业务验证。 |
 | 1. 设备与动作 | 66 个安卓枚举与 6 个内置动态 ActionProvider 动作契约 | 直接 CLI | `actions` 返回当前源码的离线编写契约，不访问设备；6 个动作由三个 Android `ActionProvider` 实现发布，插件、权限和真机可执行性仍需另证。它们不是 AI 控制层的 `DecisionProvider`。 |

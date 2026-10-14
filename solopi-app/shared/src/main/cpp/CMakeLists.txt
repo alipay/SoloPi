@@ -22,3 +22,11 @@ add_library(nativeModule SHARED
 find_library(log-lib log)
 
 target_link_libraries(nativeModule android ${log-lib})
+
+# Older NDKs need explicit ELF and RELRO alignment on 16 KB Android devices.
+# LINK_FLAGS keeps compatibility with this project's CMake 3.4.1 minimum.
+# https://developer.android.com/guide/practices/page-sizes
+if(ANDROID_ABI STREQUAL "arm64-v8a" OR ANDROID_ABI STREQUAL "x86_64")
+    set_property(TARGET nativeModule APPEND_STRING PROPERTY LINK_FLAGS
+                 " -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384")
+endif()

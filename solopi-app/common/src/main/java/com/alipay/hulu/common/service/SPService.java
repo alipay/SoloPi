@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.alibaba.fastjson.JSON;
+import com.alipay.hulu.common.application.LauncherApplication;
 
 /**
  * Created by lezhou.wyl on 2018/1/12.
@@ -68,6 +69,13 @@ public class SPService {
 
     public static void init(Context context) {
         preferences = context.getSharedPreferences(COMMON_CONFIG, Context.MODE_PRIVATE);
+    }
+
+    /** Keep the optional FastPath copy from binding the installed app's port. */
+    public static int getDefaultControlPort() {
+        Context context = LauncherApplication.getContext();
+        return context != null && "com.alipay.hulu.fastpath".equals(context.getPackageName())
+                ? 23343 : 23342;
     }
 
     /**

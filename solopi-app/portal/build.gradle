@@ -28,6 +28,7 @@ android {
 
     defaultConfig {
         applicationId "com.alipay.hulu"
+        manifestPlaceholders = [portalAppLabel: '@string/app_name']
         minSdkVersion 18
         targetSdkVersion rootProject.ext.targetSdkVersion
         multiDexEnabled true
@@ -43,6 +44,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
+            if (project.hasProperty('fastpathDebug')) {
+                applicationIdSuffix '.fastpath'
+                manifestPlaceholders = [portalAppLabel: 'SoloPi FastPath']
+            }
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

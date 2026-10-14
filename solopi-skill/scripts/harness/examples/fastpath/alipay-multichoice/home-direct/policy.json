@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "solopi.ai.fastpath-policy/v1",
+  "targetPackage": "com.eg.android.AlipayGphone",
+  "steps": {
+    "choose-entry": {
+      "instructions": "选择完成请求需要点击的控件。",
+      "readyWhen": {
+        "selector": {
+          "packageName": "com.eg.android.AlipayGphone",
+          "className": "android.widget.Button",
+          "description": "设置"
+        },
+        "field": "description",
+        "equals": "设置"
+      },
+      "stopWhen": {
+        "selector": {
+          "packageName": "com.eg.android.AlipayGphone",
+          "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text",
+          "className": "android.widget.TextView"
+        },
+        "field": "text",
+        "equals": "更多"
+      },
+      "candidateSelectors": [
+        {
+          "packageName": "com.eg.android.AlipayGphone",
+          "resourceId": "com.alipay.android.tablauncher:id/tab_description",
+          "className": "android.widget.TextView",
+          "text": "首页"
+        },
+        {
+          "packageName": "com.eg.android.AlipayGphone",
+          "resourceId": "com.alipay.android.tablauncher:id/tab_description",
+          "className": "android.widget.TextView",
+          "text": "我的"
+        },
+        {
+          "packageName": "com.eg.android.AlipayGphone",
+          "className": "android.widget.Button",
+          "description": "设置"
+        }
+      ],
+      "candidateResolution": "self-or-clickable-ancestor",
+      "maxCandidates": 3,
+      "exactText": "首页"
+    }
+  }
+}
