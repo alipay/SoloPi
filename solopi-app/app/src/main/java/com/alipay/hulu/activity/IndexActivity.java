@@ -240,8 +240,8 @@ public class IndexActivity extends BaseActivity {
         }
         mGridView.setAdapter(adapter);
 
-        // 有写权限，申请下
-        PatchRequest.updatePatchList(null);
+        // 启动时只从官方源自动更新。自定义源必须由用户在设置或插件页主动触发。
+        PatchRequest.updateDefaultPatchList(null);
     }
 
     /**

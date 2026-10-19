@@ -70,6 +70,21 @@ public class PatchRequest {
      */
     public static void updatePatchList(final LoadPatchCallback callback) {
         String storedUrl = SPService.getString(SPService.KEY_PATCH_URL, DEFAULT_PATCH_URL);
+        updatePatchList(storedUrl, callback);
+    }
+
+    /**
+     * 启动时仅从官方默认源更新，避免历史遗留的自定义地址自动加载代码。
+     */
+    public static void updateDefaultPatchList(final LoadPatchCallback callback) {
+        updatePatchList(getStartupPatchUrl(), callback);
+    }
+
+    static String getStartupPatchUrl() {
+        return DEFAULT_PATCH_URL;
+    }
+
+    private static void updatePatchList(String storedUrl, final LoadPatchCallback callback) {
         // 地址为空
         if (StringUtil.isEmpty(storedUrl)) {
             LogUtil.e(TAG, "Patch url is empty");
