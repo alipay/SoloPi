@@ -18,7 +18,7 @@ The production private key is named `SoloPi Patch Signing 2026` and currently li
 2. Use the release-signing key to create binary `manifest.sig` for `desc.json`.
 3. Add `manifest.sig` within the ZIP's effective root and rebuild the ZIP.
 4. Verify the ZIP locally by loading it through the same application verifier and by checking a tampered `desc.json` fails.
-5. Publish signed ZIPs at immutable release URLs, then update all ABI indexes in the same change.
+5. Publish signed ZIPs at immutable release URLs, then update all ABI indexes in the same change. Do not retain an ABI entry when its signed artifact is unavailable.
 6. Build and validate the APK on a dedicated device before changing the public indexes.
 
 The private key needs a second, access-controlled recovery copy before the first public release. If it is lost, a new key id and an app update that trusts it are required; do not silently replace a key under the same id.
