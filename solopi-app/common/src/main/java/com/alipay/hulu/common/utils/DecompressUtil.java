@@ -61,12 +61,12 @@ public class DecompressUtil {
             targetFolder.mkdirs();
         }
 
-        String originCanonicalPath;
+        String targetCanonicalPath;
         try {
-            originCanonicalPath = originFile.getCanonicalPath();
+            targetCanonicalPath = targetFolder.getCanonicalPath() + File.separator;
         } catch (IOException e) {
             LogUtil.e(TAG, "Get Canonical Path Failed, throw exception", e);
-            originCanonicalPath = originFile.getPath();
+            return null;
         }
 
         ZipInputStream zip = new ZipInputStream(inputStream);
@@ -77,9 +77,10 @@ public class DecompressUtil {
                 szName = zipEntry.getName();
 
 
-                File f = new File(originFile, zipEntry.getName());
+                File f = new File(targetFolder, zipEntry.getName());
                 String canonicalPath = f.getCanonicalPath();
-                if (!canonicalPath.startsWith(originCanonicalPath)) {
+                if (!canonicalPath.equals(targetFolder.getCanonicalPath())
+                        && !canonicalPath.startsWith(targetCanonicalPath)) {
                     LogUtil.e(TAG, "Zip Entry: " + szName + ", not belong to zip file " + canonicalPath);
                     // 忽略该zip压缩包
                     continue;

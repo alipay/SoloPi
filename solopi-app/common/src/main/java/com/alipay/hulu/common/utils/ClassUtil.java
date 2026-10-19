@@ -516,8 +516,11 @@ public class ClassUtil {
                 }
             }
 
-            if (matchDependency) {
+            if (matchDependency && (StringUtil.equals(patch.name, Constant.HOTPATCH_NAME)
+                    || PatchProcessUtil.isTrustedInstalledPatch(patch))) {
                 loadPatch(patch);
+            } else if (matchDependency) {
+                LogUtil.e(TAG, "Refusing untrusted installed patch %s", patch.name);
             } else {
                 result.add(patch);
             }
