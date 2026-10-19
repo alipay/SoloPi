@@ -15,14 +15,13 @@
  */
 package com.alipay.hulu.common.utils;
 
-import android.util.Base64;
-
 import org.junit.Test;
 
 import java.nio.charset.Charset;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.Signature;
+import java.util.Base64;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -37,8 +36,8 @@ public class PatchSignatureVerifierTest {
 
     @Test
     public void acceptsProductionKeyTestVector() {
-        assertTrue(PatchSignatureVerifier.verify(Base64.decode(PRODUCTION_VECTOR_CONTENT, Base64.DEFAULT),
-                Base64.decode(PRODUCTION_VECTOR_SIGNATURE, Base64.DEFAULT)));
+        assertTrue(PatchSignatureVerifier.verify(Base64.getDecoder().decode(PRODUCTION_VECTOR_CONTENT),
+                Base64.getDecoder().decode(PRODUCTION_VECTOR_SIGNATURE)));
     }
 
     @Test
