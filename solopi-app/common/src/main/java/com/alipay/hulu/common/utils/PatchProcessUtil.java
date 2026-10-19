@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Method;
 
 import dalvik.system.DexClassLoader;
@@ -33,6 +34,9 @@ import dalvik.system.DexClassLoader;
  */
 public class PatchProcessUtil {
     public static final String TAG = "PatchProcess";
+    private static final String DESCRIPTION_FILE = "desc.json";
+    private static final long MAX_DESCRIPTION_BYTES = 1024L * 1024L;
+    private static final long MAX_SIGNATURE_BYTES = 64L * 1024L;
 
     /**
      * 加载补丁信息
@@ -64,23 +68,21 @@ public class PatchProcessUtil {
             }
 
             // 解析描述信息
-            File description = new File(outFolder, "desc.json");
+            File description = new File(outFolder, DESCRIPTION_FILE);
 
             if (!description.exists()) {
                 LogUtil.e(TAG, "压缩文件【%s】格式有误，不包含desc.json文件", file);
                 return null;
             }
 
-            FileInputStream stream = new FileInputStream(description);
-
-            StringBuilder sb = new StringBuilder();
-            byte[] content = new byte[4096];
-            int readCount = -1;
-            while ((readCount = stream.read(content)) > 0) {
-                sb.append(new String(content, 0, readCount));
+            byte[] descriptionBytes = readBounded(description, MAX_DESCRIPTION_BYTES, "description");
+            if (!PatchSignatureVerifier.verify(descriptionBytes,
+                    readBounded(new File(outFolder, PatchSignatureVerifier.SIGNATURE_FILE),
+                            MAX_SIGNATURE_BYTES, "signature"))) {
+                throw new PatchProcessException("Patch signature is invalid", outFolder);
             }
 
-            PatchDescription patchDesc = JSON.parseObject(sb.toString(), PatchDescription.class);
+            PatchDescription patchDesc = JSON.parseObject(new String(descriptionBytes, "UTF-8"), PatchDescription.class);
 
             String patchName = patchDesc.getName();
             if (StringUtil.isEmpty(patchName)) {
@@ -170,6 +172,9 @@ public class PatchProcessUtil {
                 FileUtils.copyFile(new File(outFolder, jar), targetJar);
                 result.jarPath = targetJar.getCanonicalPath();
             }
+            FileUtils.copyFile(description, new File(innerDirectory, DESCRIPTION_FILE));
+            FileUtils.copyFile(new File(outFolder, PatchSignatureVerifier.SIGNATURE_FILE),
+                    new File(innerDirectory, PatchSignatureVerifier.SIGNATURE_FILE));
             if (soList != null && soList.length > 0) {
                 File lib = new File(innerDirectory, "lib");
                 lib.mkdirs();
@@ -225,6 +230,65 @@ public class PatchProcessUtil {
                 // 稳妥走deleteFile
                 FileUtils.deleteFile(outFolder);
             }
+        }
+    }
+
+    public static boolean isTrustedInstalledPatch(PatchLoadResult patch) {
+        if (patch == null || StringUtil.isEmpty(patch.root)) {
+            return false;
+        }
+        try {
+            File root = new File(patch.root);
+            byte[] descriptionBytes = readBounded(new File(root, DESCRIPTION_FILE),
+                    MAX_DESCRIPTION_BYTES, "description");
+            if (!PatchSignatureVerifier.verify(descriptionBytes,
+                    readBounded(new File(root, PatchSignatureVerifier.SIGNATURE_FILE),
+                            MAX_SIGNATURE_BYTES, "signature"))) {
+                return false;
+            }
+            PatchDescription description = JSON.parseObject(new String(descriptionBytes, "UTF-8"), PatchDescription.class);
+            if (!StringUtil.equals(patch.name, description.getName())
+                    || Float.compare(patch.version, description.getVersion()) != 0) {
+                return false;
+            }
+            if (!StringUtil.isEmpty(description.getJar()) && !FileUtils.checkFileMd5(
+                    new File(root, description.getJar()), description.getJarMd5())) {
+                return false;
+            }
+            String[] soList = description.getSoList();
+            String[] soMd5s = description.getSoMd5s();
+            if (soList != null) {
+                if (soMd5s == null || soList.length != soMd5s.length) {
+                    return false;
+                }
+                for (int index = 0; index < soList.length; index++) {
+                    if (!FileUtils.checkFileMd5(new File(root, "lib/" + new File(soList[index]).getName()), soMd5s[index])) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            LogUtil.e(TAG, e, "Installed patch trust check failed");
+            return false;
+        }
+    }
+
+    private static byte[] readBounded(File file, long maximum, String label) throws IOException {
+        if (!file.isFile() || file.length() <= 0 || file.length() > maximum) {
+            throw new IOException(label + " has an invalid size");
+        }
+        FileInputStream stream = new FileInputStream(file);
+        try {
+            ByteArrayOutputStream output = new ByteArrayOutputStream((int) Math.min(file.length(), 65536));
+            byte[] content = new byte[4096];
+            int readCount;
+            while ((readCount = stream.read(content)) > 0) {
+                output.write(content, 0, readCount);
+            }
+            return output.toByteArray();
+        } finally {
+            stream.close();
         }
     }
 
