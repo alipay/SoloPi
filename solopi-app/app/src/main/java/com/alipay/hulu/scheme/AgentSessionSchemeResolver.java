@@ -644,6 +644,7 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         long deadline = started + timeoutMs;
         int samples = 0;
         DisplayMetrics metrics = displayMetrics();
+        String previousSignature = null;
         do {
             guard.check();
             AbstractNodeTree root = service.getBaseCurrentRootForAgent();
@@ -655,23 +656,20 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
                 if (isControllableRoot(root, page, metrics)
                         && (StringUtil.isEmpty(expectedPackage)
                         || expectedPackage.equals(packageName))) {
-                    Thread.sleep(ROOT_TRANSITION_SETTLE_MS);
-                    guard.check();
-                    root = service.getBaseCurrentRootForAgent();
-                    samples++;
-                    guard.check();
-                    page = root == null ? null : root.exportToJsonObject();
-                    packageName = page == null ? null : page.getString("packageName");
-                    if (isControllableRoot(root, page, metrics)
-                            && (StringUtil.isEmpty(expectedPackage)
-                            || expectedPackage.equals(packageName))) {
+                    String currentSignature = signature(page);
+                    if (isStableObservation(previousSignature, currentSignature)) {
                         return new AgentUiWaiter.Result<>(root,
                                 AccessibilityUiEventClock.monotonicMs() - started,
                                 samples, true, false);
                     }
+                    previousSignature = currentSignature;
+                } else {
+                    previousSignature = null;
                 }
+            } else {
+                previousSignature = null;
             }
-            Thread.sleep(ROOT_READY_INTERVAL_MS);
+            Thread.sleep(ROOT_TRANSITION_SETTLE_MS);
         } while (AccessibilityUiEventClock.monotonicMs() < deadline);
         return new AgentUiWaiter.Result<>(null, AccessibilityUiEventClock.monotonicMs() - started,
                 samples, false, true);
@@ -882,9 +880,19 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
 
     private static boolean isControllableRoot(AbstractNodeTree root, JSONObject page,
                                               DisplayMetrics metrics) {
-        return isControllablePage(page, metrics)
+        return hasConsistentOnscreenContent(page, metrics) && (isControllablePage(page, metrics)
                 || AgentTargetContextAndroid.isActiveApplicationRoot(root, page, metrics,
-                LauncherApplication.getContext().getPackageName());
+                LauncherApplication.getContext().getPackageName()));
+    }
+
+    static boolean hasConsistentOnscreenContent(JSONObject page, DisplayMetrics metrics) {
+        if (page == null || metrics == null) return false;
+        JSONObject b = page.getJSONObject("nodeBound");
+        if (b == null || b.getIntValue("left") < 0 || b.getIntValue("top") < 0
+                || b.getIntValue("right") > metrics.widthPixels
+                || b.getIntValue("bottom") > metrics.heightPixels) return false;
+        return hasOnscreenContent(page, page.getString("packageName"),
+                0, 0, metrics.widthPixels, metrics.heightPixels);
     }
 
     static boolean isControllablePage(JSONObject page, DisplayMetrics metrics,

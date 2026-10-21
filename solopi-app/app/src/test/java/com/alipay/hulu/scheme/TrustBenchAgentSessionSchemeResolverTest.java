@@ -11,6 +11,19 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class TrustBenchAgentSessionSchemeResolverTest {
+    @Test public void readinessRejectsAnimatedRootEvenWithOnscreenChildren() {
+        JSONObject root = page("com.example.trustnotes", 1214, 126, 2254, 2385);
+        root.put("visible", true);
+        JSONArray children = new JSONArray();
+        children.add(content(48, 505, 1108, 649));
+        root.put("children", children);
+        assertFalse(AgentSessionSchemeResolver.hasConsistentOnscreenContent(root, metrics(1156, 2510)));
+        root.put("nodeBound", page("com.example.trustnotes", 0, 0, 1156, 2510).get("nodeBound"));
+        assertTrue(AgentSessionSchemeResolver.hasConsistentOnscreenContent(root, metrics(1156, 2510)));
+        // A small real dialog remains eligible; native window ownership is checked separately.
+        root.put("nodeBound", page("com.example.trustnotes", 30, 450, 1120, 900).get("nodeBound"));
+        assertTrue(AgentSessionSchemeResolver.hasConsistentOnscreenContent(root, metrics(1156, 2510)));
+    }
     @Test public void nativeDialogOwnerFallbackDoesNotOverrideKnownFocus() {
         String owner = "\n mFocusedApp=ActivityRecord{123 u0 org.fossify.filemanager/.activities.MainActivity t1}";
         assertTrue("org.fossify.filemanager".equals(AgentSessionSchemeResolver.focusedDialogOwner(
