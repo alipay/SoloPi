@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "solopi.trustbench.agent-ledger-manifest/v1",
+  "note": "Separate 30s pacing / 600s total / 120s idle group; never pool with original baseline.",
+  "attempts": [{
+    "runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-theta-kimi-k3-v3-redmi-paced30-long-v1-20261015-live-01",
+    "track": "model",
+    "modelId": "Kimi-K3"
+  }, {
+    "runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-theta-kimi-k3-v3-redmi-paced30-long-v1-20261015-live-02",
+    "track": "model",
+    "modelId": "Kimi-K3"
+  }]
+}

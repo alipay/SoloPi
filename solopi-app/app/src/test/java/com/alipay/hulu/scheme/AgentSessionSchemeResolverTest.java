@@ -20,6 +20,17 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 public class AgentSessionSchemeResolverTest {
+    @Test public void nativeDialogOwnerFallbackDoesNotOverrideKnownFocus() {
+        String owner = "\n mFocusedApp=ActivityRecord{123 u0 org.fossify.filemanager/.activities.MainActivity t1}";
+        assertTrue("org.fossify.filemanager".equals(AgentSessionSchemeResolver.focusedDialogOwner(
+                "mCurrentFocus=Window{abc u0 新建}" + owner)));
+        assertTrue(AgentSessionSchemeResolver.focusedDialogOwner(
+                "mCurrentFocus=Window{abc u0 com.android.systemui/.Panel}" + owner) == null);
+        assertTrue(AgentSessionSchemeResolver.focusedDialogOwner(
+                "mCurrentFocus=null" + owner) == null);
+        assertTrue(AgentSessionSchemeResolver.focusedDialogOwner(
+                "mCurrentFocus=Window{abc u0 新建}") == null);
+    }
     @Test
     public void frameTargetBindsExactPathEvenWhenSiblingsHaveSameLabelsAndIds() {
         FakeNodeTree root = window("com.example.orders", 0, 0, 1080, 2400);

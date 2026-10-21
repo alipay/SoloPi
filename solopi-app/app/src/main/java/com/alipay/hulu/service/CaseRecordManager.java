@@ -646,8 +646,8 @@ public class CaseRecordManager implements ExportService {
 
         // 先记录下默认输入法
         defaultIme = CmdTools.execHighPrivilegeCmd("settings get secure default_input_method");
-        MyApplication.getInstance().updateDefaultIme("com.alipay.hulu/.common.tools.AdbIME");
-        CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
+        MyApplication.getInstance().updateDefaultIme(com.alipay.hulu.common.utils.AppIdentity.adbImeShort());
+        CmdTools.switchToIme(com.alipay.hulu.common.utils.AppIdentity.adbImeShort());
 
         // 初始化
         operationStepService.startRecord(caseInfo);
@@ -947,7 +947,7 @@ public class CaseRecordManager implements ExportService {
                                             highLightService.removeHightLightSync();
 
                                             // 切换回SoloPi输入法
-                                            CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
+                                            CmdTools.switchToIme(com.alipay.hulu.common.utils.AppIdentity.adbImeShort());
 
                                             // 等悬浮窗消失了再操作
                                             BackgroundExecutor.execute(new Runnable() {
@@ -1023,7 +1023,7 @@ public class CaseRecordManager implements ExportService {
                                             highLightService.removeHightLightSync();
 
                                             // 切换回SoloPi输入法
-                                            CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
+                                            CmdTools.switchToIme(com.alipay.hulu.common.utils.AppIdentity.adbImeShort());
 
                                             // 等悬浮窗消失了再操作
                                             BackgroundExecutor.execute(new Runnable() {
@@ -1587,7 +1587,7 @@ public class CaseRecordManager implements ExportService {
                         LogUtil.d(TAG, "悬浮窗消失");
 
                         // 切换回SoloPi输入法
-                        CmdTools.switchToIme("com.alipay.hulu/.common.tools.AdbIME");
+                        CmdTools.switchToIme(com.alipay.hulu.common.utils.AppIdentity.adbImeShort());
 
                         // 等悬浮窗消失了再操作
                         BackgroundExecutor.execute(new Runnable() {

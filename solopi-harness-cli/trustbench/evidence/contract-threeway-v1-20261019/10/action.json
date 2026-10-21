@@ -1,0 +1,33 @@
+{
+  "success": true,
+  "session": {
+    "success": true,
+    "sessionId": "agent-session-6ea5b059-e3bf-42bd-bb04-b7cb8182c2c6",
+    "generation": 50,
+    "state": "active",
+    "active": true,
+    "terminal": false,
+    "startedAt": 1792378791235,
+    "lastActivityAt": 1792378793143,
+    "acceptedSteps": 0,
+    "maxSteps": 2,
+    "observationId": "observation-d9bad891-0d97-47da-9841-fd7a579f4913",
+    "leaseHeld": true
+  },
+  "receipt": {
+    "stepId": "strict-1",
+    "observationId": "observation-d9bad891-0d97-47da-9841-fd7a579f4913",
+    "action": {
+      "type": "input",
+      "arguments": {
+        "nodeId": "node-9",
+        "text": "37"
+      }
+    },
+    "status": "rejected",
+    "errorCode": "stale_observation",
+    "error": "The action must reference the current unchanged observation",
+    "acceptedAt": 1792378805022,
+    "finishedAt": 1792378805022
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "type": "act",
+  "action": {
+    "type": "input",
+    "selector": {
+      "resourceId": "com.example.trusttransfer:id/target",
+      "className": "android.widget.EditText",
+      "packageName": "com.example.trusttransfer"
+    },
+    "text": "37"
+  },
+  "modelReceipt": {
+    "modelId": "Kimi-K3",
+    "requestId": "2192776617923780618875269eb266",
+    "usage": {
+      "completion_tokens": 134,
+      "prompt_tokens": 530,
+      "total_tokens": 664,
+      "prompt_tokens_details": {
+        "cached_tokens": 192
+      }
+    },
+    "maxOutputTokens": 4096,
+    "minRequestIntervalMs": 60000,
+    "fallbackUsed": false,
+    "latencyMs": 2510
+  }
+}

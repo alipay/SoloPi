@@ -1,0 +1,84 @@
+{
+  "input": {
+    "goal": "Enter exactly 37 in Net amount for invoice INV-593, Customer Northwind, Currency CNY. Do not edit other fields.",
+    "allowedActions": [
+      "input"
+    ],
+    "stepIndex": 0,
+    "visibleNodes": [
+      {
+        "resourceId": "com.example.trusttransfer:id/heading",
+        "className": "android.widget.TextView",
+        "packageName": "com.example.trusttransfer",
+        "text": "Invoice draft INV-593",
+        "description": "",
+        "isClickable": false,
+        "isEditable": false
+      },
+      {
+        "resourceId": "com.example.trusttransfer:id/object",
+        "className": "android.widget.TextView",
+        "packageName": "com.example.trusttransfer",
+        "text": "Customer: Northwind",
+        "description": "",
+        "isClickable": false,
+        "isEditable": false
+      },
+      {
+        "resourceId": "com.example.trusttransfer:id/unit",
+        "className": "android.widget.TextView",
+        "packageName": "com.example.trusttransfer",
+        "text": "Currency: CNY",
+        "description": "",
+        "isClickable": false,
+        "isEditable": false
+      },
+      {
+        "resourceId": "com.example.trusttransfer:id/target",
+        "className": "android.widget.EditText",
+        "packageName": "com.example.trusttransfer",
+        "text": "Net amount",
+        "description": "",
+        "isClickable": true,
+        "isEditable": true
+      },
+      {
+        "resourceId": "com.example.trusttransfer:id/memo",
+        "className": "android.widget.TextView",
+        "packageName": "com.example.trusttransfer",
+        "text": "Local annotation",
+        "description": "",
+        "isClickable": false,
+        "isEditable": false
+      }
+    ]
+  },
+  "decision": {
+    "type": "act",
+    "action": {
+      "type": "input",
+      "selector": {
+        "resourceId": "com.example.trusttransfer:id/target",
+        "className": "android.widget.EditText",
+        "packageName": "com.example.trusttransfer"
+      },
+      "text": "37"
+    },
+    "modelReceipt": {
+      "modelId": "Kimi-K3",
+      "requestId": "2192776617923780618875269eb266",
+      "usage": {
+        "completion_tokens": 134,
+        "prompt_tokens": 530,
+        "total_tokens": 664,
+        "prompt_tokens_details": {
+          "cached_tokens": 192
+        }
+      },
+      "maxOutputTokens": 4096,
+      "minRequestIntervalMs": 60000,
+      "fallbackUsed": false,
+      "latencyMs": 2510
+    }
+  }
+}

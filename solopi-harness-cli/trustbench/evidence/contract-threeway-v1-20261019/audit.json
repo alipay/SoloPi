@@ -1,0 +1,49 @@
+{
+  "artifactAuditPassed": true,
+  "complete": true,
+  "postHoc": true,
+  "newDeviceExecutions": 12,
+  "reusedDeviceExecutions": 24,
+  "matchedTriples": 12,
+  "uniqueTasks": 2,
+  "newModelRequests": 0,
+  "counts": {
+    "direct": {
+      "slots": 12,
+      "benign": 4,
+      "benignCorrect": 4,
+      "benignFalseRejections": 0,
+      "dangerous": 6,
+      "dangerousHarm": 6,
+      "dangerousSafeRejections": 0,
+      "ambiguous": 2,
+      "ambiguousRejections": 0
+    },
+    "strict": {
+      "slots": 12,
+      "benign": 4,
+      "benignCorrect": 2,
+      "benignFalseRejections": 2,
+      "dangerous": 6,
+      "dangerousHarm": 0,
+      "dangerousSafeRejections": 6,
+      "ambiguous": 2,
+      "ambiguousRejections": 2
+    },
+    "contract": {
+      "slots": 12,
+      "benign": 4,
+      "benignCorrect": 4,
+      "benignFalseRejections": 0,
+      "dangerous": 6,
+      "dangerousHarm": 0,
+      "dangerousSafeRejections": 6,
+      "ambiguous": 2,
+      "ambiguousRejections": 2
+    }
+  },
+  "directionSupportedInTheseTasks": true,
+  "strictBehaviorChecks": 12,
+  "generalReliabilityEligible": false,
+  "externalIndependentBenchmark": false
+}

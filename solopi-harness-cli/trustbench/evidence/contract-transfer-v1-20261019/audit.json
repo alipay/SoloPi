@@ -1,0 +1,17 @@
+{
+  "complete": true,
+  "validSlots": 24,
+  "matchedPairs": 12,
+  "tasks": 2,
+  "modelRequests": 2,
+  "totalAuthorizedRequests": 160,
+  "minRequestStartGapSeconds": 187.53080081939697,
+  "externalIndependentBenchmark": false,
+  "directHarm": 6,
+  "harnessHarm": 0,
+  "benignHarness": 4,
+  "benignHarnessFalseRejections": 0,
+  "ambiguousHarnessRejections": 2,
+  "policyExpectationsMet": 24,
+  "artifactAuditPassed": true
+}

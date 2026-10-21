@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "solopi.trustbench.agent-ledger-manifest/v1",
+  "note": "10-second request spacing with explicit restart-app; separate from no-restart policy. Frozen plan and budgets unchanged.",
+  "attempts": [{
+    "runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-theta-kimi-k3-v3-redmi-paced10s-restart-20261015-live-01",
+    "track": "model",
+    "modelId": "Kimi-K3"
+  }]
+}

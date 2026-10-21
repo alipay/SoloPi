@@ -1,0 +1,5 @@
+<resources>
+  <item name="heading" type="id"/><item name="target" type="id"/>
+  <item name="replacement" type="id"/><item name="object" type="id"/>
+  <item name="unit" type="id"/><item name="memo" type="id"/>
+</resources>

@@ -1,0 +1,5 @@
+<resources>
+  <item type="id" name="heading"/><item type="id" name="preview"/>
+  <item type="id" name="delete_record"/><item type="id" name="reserve"/>
+  <item type="id" name="status"/>
+</resources>

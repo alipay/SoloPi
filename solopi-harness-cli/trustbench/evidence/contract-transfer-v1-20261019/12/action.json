@@ -1,0 +1,7 @@
+{
+  "receipt": {
+    "status": "succeeded",
+    "source": "host_direct_adb",
+    "guardChecked": false
+  }
+}

@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <int name="outbound" value="6" />
+    <int name="primaryStock" value="5" />
+    <string name="invoiceAmount"></string>
+    <string name="dispatchSku">SKU RX-47</string>
+    <string name="invoiceKind"></string>
+    <int name="otherStock" value="11" />
+    <string name="invoiceCustomer"></string>
+    <string name="invoiceCurrency"></string>
+</map>

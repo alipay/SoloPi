@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "solopi.ai.model-evaluation/v1",
+  "success": true,
+  "modelId": "solopi-counter-add-policy",
+  "version": "1.0.0",
+  "packageDigest": "d5c1f8fe4c8315a0e13899db95f94fa99def0e4cc47a7000cd190b57252aa51d",
+  "testSetDigest": "30c99a79f900d6cd9411b41ca9fd87601aa5a468ab9b416b623659bc59e670d3",
+  "providers": [
+    "on-device",
+    "cloud"
+  ],
+  "decisionAccuracy": 1.0,
+  "taskSuccessRate": 1.0
+}

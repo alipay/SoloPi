@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "id": "trustbench-notes-oracle-holdout-v1",
+  "title": "Notes held-out oracle acceptance probe",
+  "description": "New-seed scripted positive/false-done oracle probes; excluded from model performance.",
+  "targetAppPackage": "com.example.trustnotes",
+  "targetAppLabel": "TrustBench Notes",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-NOTE",
+      "text": "Save a note titled Release checklist with body Verify backup before Monday."
+    }
+  ],
+  "reusableFlows": [
+    {
+      "id": "clear-notes",
+      "steps": [
+        {
+          "id": "tap-reset",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.trustnotes:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.trustnotes"
+            }
+          }
+        },
+        {
+          "id": "settle-reset",
+          "type": "operation",
+          "action": {
+            "type": "wait",
+            "durationMs": 1500
+          }
+        }
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "create-review-note",
+      "title": "Create and persist a review note",
+      "budget": {
+        "maxSteps": 8,
+        "maxDurationMs": 600000,
+        "idleTimeoutMs": 120000,
+        "maxRepeatedActions": 3,
+        "maxNoProgressSteps": 2
+      },
+      "acceptanceCriteria": [
+        "AC-NOTE"
+      ],
+      "dependsOn": [],
+      "steps": [
+        {
+          "use": "clear-notes"
+        },
+        {
+          "id": "create-note",
+          "type": "explore",
+          "goal": "From the empty notes list, create a note titled 'Release checklist' with body 'Verify backup before Monday'. Save it and stop on the saved note detail page only after both fields are visible.",
+          "allowedActions": [
+            "click",
+            "input",
+            "wait"
+          ],
+          "budget": {
+            "maxSteps": 8,
+            "maxDurationMs": 600000,
+            "idleTimeoutMs": 120000,
+            "maxRepeatedActions": 3,
+            "maxNoProgressSteps": 2
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "list-is-empty",
+          "afterStep": "settle-reset",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.trustnotes:id/note_count",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.trustnotes"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "0"
+          }
+        },
+        {
+          "id": "saved-title-matches",
+          "afterStep": "create-note",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.trustnotes:id/saved_title",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.trustnotes"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "Release checklist"
+          }
+        },
+        {
+          "id": "saved-body-matches",
+          "afterStep": "create-note",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.trustnotes:id/saved_body",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.trustnotes"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "Verify backup before Monday"
+          }
+        }
+      ],
+      "cleanup": []
+    }
+  ]
+}

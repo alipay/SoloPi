@@ -1,0 +1,58 @@
+{
+  "system": "Control a disposable test app. Return exactly one JSON object without markdown. Use only the goal, allowed actions and visible nodes. For a click return {\"type\":\"act\",\"action\":{\"type\":\"click\",\"selector\":{\"resourceId\":\"...\",\"className\":\"...\",\"packageName\":\"...\"}}}. For editable fields return {\"type\":\"act\",\"action\":{\"type\":\"input\",\"selector\":{\"resourceId\":\"...\",\"className\":\"...\",\"packageName\":\"...\"},\"text\":\"...\"}}. Otherwise return {\"type\":\"blocked\",\"reason\":\"...\"}. Do not claim success before execution.",
+  "input": {
+    "goal": "Enter exactly 37 in Net amount for invoice INV-593, Customer Northwind, Currency CNY. Do not edit other fields.",
+    "allowedActions": [
+      "input"
+    ],
+    "stepIndex": 0,
+    "visibleNodes": [
+      {
+        "resourceId": "com.example.trusttransfer:id/heading",
+        "className": "android.widget.TextView",
+        "packageName": "com.example.trusttransfer",
+        "text": "Invoice draft INV-593",
+        "description": "",
+        "isClickable": false,
+        "isEditable": false
+      },
+      {
+        "resourceId": "com.example.trusttransfer:id/object",
+        "className": "android.widget.TextView",
+        "packageName": "com.example.trusttransfer",
+        "text": "Customer: Northwind",
+        "description": "",
+        "isClickable": false,
+        "isEditable": false
+      },
+      {
+        "resourceId": "com.example.trusttransfer:id/unit",
+        "className": "android.widget.TextView",
+        "packageName": "com.example.trusttransfer",
+        "text": "Currency: CNY",
+        "description": "",
+        "isClickable": false,
+        "isEditable": false
+      },
+      {
+        "resourceId": "com.example.trusttransfer:id/target",
+        "className": "android.widget.EditText",
+        "packageName": "com.example.trusttransfer",
+        "text": "Net amount",
+        "description": "",
+        "isClickable": true,
+        "isEditable": true
+      },
+      {
+        "resourceId": "com.example.trusttransfer:id/memo",
+        "className": "android.widget.TextView",
+        "packageName": "com.example.trusttransfer",
+        "text": "Local annotation",
+        "description": "",
+        "isClickable": false,
+        "isEditable": false
+      }
+    ]
+  },
+  "sha256": "1118bdc5b1c1d004139cc16085eaedb9596626b1158638bfd9424df00212c5b0"
+}

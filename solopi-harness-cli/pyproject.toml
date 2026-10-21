@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "solopi-harness-cli"
+version = "0.1.0"
+description = "Host-side control plane for the SoloPi AI Harness"
+requires-python = ">=3.9"
+
+[project.scripts]
+solopi-ai = "solopi_harness.solopi_ai:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+solopi_harness = ["resources/keys/*.pem"]

@@ -1,0 +1,263 @@
+{
+  "schemaVersion": 1,
+  "derivedEvidence": true,
+  "originalsModified": false,
+  "description": "Public derivatives redact host paths, real device identifiers and internal endpoints; nested file hash references are recomputed. Business values, actions, outcomes, model identities and APK hashes are preserved. This is not the original byte-identical freeze.",
+  "files": [
+    {
+      "path": "solopi-harness-cli/tests/test_solopi_ai.py",
+      "originalSha256": "026c58dc9e93a36ca95918160fd44554506bdb202a71ba0b26f1692c828f660d",
+      "redactedSha256": "7e61cabb4242e0881028041662cf851e921963c69fc1094ff9b078673a4af1aa"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/agent-group-paced30-long-v1.json",
+      "originalSha256": "2a93199d610cd05bcdaa2ccb2f743af7f12791649affb8ca320ef859c7b4a2d4",
+      "redactedSha256": "68190a41e04b23101bc9ac0cc0df39b1cc9d1c5e4a4866dcaa4ed4cd29d9164c"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/SAFETY-V2.md",
+      "originalSha256": "1679e7848d76c2b61b97a2fb7921dcdc0b3a884825d36f0b957b646776fe1b41",
+      "redactedSha256": "9727aebd0b3e1ff1fe8802d526f9c7ba2f73ace94c831e1a0d70165d53900257"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/agent-ledger-paced30-long-v1-20261015.json",
+      "originalSha256": "1505382cd24c9e9d094b56065900043691bc51b3a342eff4ea5a54a8bdeb3cc0",
+      "redactedSha256": "6bd8d5df0f20fe14ea35484d26c5a7f62bdddfc159b7dbb5abfc1524ffca08aa"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/direct-comparison-protocol-v1.json",
+      "originalSha256": "c2909a8808fe80c0f7a43b16bb4c96dec2ce3f737e30ae813d39dfa6c6a84b95",
+      "redactedSha256": "3edea26570ef0d45133b253945068535e2cdd1984b223c7c121290e824636475"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/effects-protocol-v2.json",
+      "originalSha256": "7702e9fbcd10de67d0c41af871baecdaf59715e1861dc53e9af46f099c74c68f",
+      "redactedSha256": "6ab3d3d514b571aa75855e4a6739de2fe8450b3e4d14187a668ca968dd27c9c7"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/SAFETY-EVALUATION.md",
+      "originalSha256": "4a60c42f8733f220938d5f0750190c1747b8b049730a2c6db4c52242791644e6",
+      "redactedSha256": "de12318b3ce2d8433b5b93894a4d70feaad532495ca36df922b0f02738c9e1ed"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/safety-protocol-v2.json",
+      "originalSha256": "2e24504a7e007b37bb57205c9b54200a6385e02593892a1bbec85c692eb94fb9",
+      "redactedSha256": "3f898cdcf1f014deae1209c86507db30c1e964f278fa00f00cefd2186860c705"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/PORTABLE-SMOKE.md",
+      "originalSha256": "d73bed3594642490e16884a6666c7d717b31282001e0d9d5158eb14640a2c392",
+      "redactedSha256": "3290d5a5a61a3e3f71b2c891d5f501d5489879e577138d49b46b49445b3c5f03"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/agent-ledger-paced60-long-v1-20261015.json",
+      "originalSha256": "c326cef9c704d9e8ff20bd899f15465cf32ca51bcee664ef604adb9ab6df8e18",
+      "redactedSha256": "0165dad27f255be2c6068687a9a90f3d7e2b2f381922b0e06fc2096446067183"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/agent-ledger-paced10s-20261015.json",
+      "originalSha256": "e92e59e81d40efdd6047396e60b01b0567216c1d6005fa3f18431f00685316b2",
+      "redactedSha256": "b6589da3aa3499a1ee69f73508d02e317f626cb5ff3950dc7f881bf2ed2b7df5"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/EFFECTS-EXPERIMENT.md",
+      "originalSha256": "8cb8fbefda1ab606f5bb2cd96310718c12f0e30113a81520d25bea7e6118fb72",
+      "redactedSha256": "db0108660e0e4d36a2cb46ec3773cf7105a7b00dc158ad100d831f08596c13c5"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/safety-v2-audit-20261015-batch01.json",
+      "originalSha256": "66a280f48c2a417a6c98a2fdc4533833c66642e57cc40e976426fd09b778435e",
+      "redactedSha256": "1fe846f9612b90d18f8b990f51553cd52c9d66c6e64a8f03c8022641314fbb5d"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/agent-ledger-isolated-20261015.json",
+      "originalSha256": "d9d8551efcd2b8ffdfd4dc76eff9d7a8d55c8eb3c18ae69daa68f1f68c12d971",
+      "redactedSha256": "6e4f158a6b688394bfa4177fc17fbff791e596e159ce836f008fc5a0e525ab4c"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/agent-ledger-stable-start-20261015.json",
+      "originalSha256": "bed8ecfde91ac265dd8bf6a557ef77c056911f285e78ace6b2a821db2ab83c33",
+      "redactedSha256": "6bcd1aab13bdf2112055e227b2f5fbdc11557af3e40f7fa110421bc02002d37d"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/direct-comparison-result-20261015-v2.json",
+      "originalSha256": "1224fbafff9de2543e6270d9bfc7a75f60ef8cc921cc15c9b054cd4e254f99f0",
+      "redactedSha256": "c1508d057dae547ed2ea33b7cefe07b1cbd7479f81fc7efa93fa5488d757a236"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/safety-v2-final-20261015.json",
+      "originalSha256": "637a973237c7115951828e5eb1bddcd5c3b6994ae2478fcb7d015704a149c89a",
+      "redactedSha256": "eb04ba4bbc550b7ba234235db540a36ef85f0fce49e7b6c9ffa36d3310226503"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/perturbed-comparison-result-20261015-v1.json",
+      "originalSha256": "86322be49c2476bc623183922b2f48628830409af7cb613ecbe02596143076ef",
+      "redactedSha256": "5c5ce52ca6234393440bd65ea882d5d645eedd1eccfae002eb948250c6e67df3"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/agent-ledger-paced30s-restart-20261015.json",
+      "originalSha256": "5a7838a2727f299b739f3331085ea0516403d20ae1c6d0e72117779accb16272",
+      "redactedSha256": "d4bd570805dcb010df2bf0661da444189123719f83439717849cc54b76fcc56a"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/direct-comparison-result-20261015-v1.json",
+      "originalSha256": "e1f9145f931b25075ef3c907e31292b2e04c2b4c78553f888ef11ec406785947",
+      "redactedSha256": "07c54e57edc0a501fd4cc9a04b8e839e2376f083d3ce75fb1f5d887ccfaa9351"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/pilot-closure-index-20261015.json",
+      "originalSha256": "0d3a2840f65464c9beb2de62fad8c02fdfce4f695e13aa1e9420ae53f61fd44a",
+      "redactedSha256": "c62e33610862e2b69eb51cef670af0958b633aed72683cadbe8bfec41f8a7c40"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/BASELINE.md",
+      "originalSha256": "d4bf82fd1c5a02f6730b1ba7edf25e71e5dcaf7809ca0b4bbf7ada9a2062cf6b",
+      "redactedSha256": "605e0a8b1141f1cc5273f4a3381ea34a70e9e0ab61836d33aea3a8d13c81b6ab"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/safety-progress-20261015-v3.json",
+      "originalSha256": "610522239c15bd5d4531d56af871b6e17920273dbba8296a6b77682b17722d15",
+      "redactedSha256": "3845dead3952242dd0d400363826643069af537c2ac9f2854b1abb884493bfed"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/agent-ledger-20261014.json",
+      "originalSha256": "f79f861a5a65c7a531170327497620a1a8d2a61ccae7f4b05e8f7f1669232313",
+      "redactedSha256": "7eff2f559bf041d11fa1296b774ab003729bd9b57aebca6591cbfac3a0214884"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/PERTURBED-COMPARISON.md",
+      "originalSha256": "fc139f41c4a2f9ec2f5b2647154d4edf555f19dbca52256fda5011be9190e5aa",
+      "redactedSha256": "6109a92ad469fb6058b9a28b90032f0b4b279ea45d327d62a885f67d32bdc599"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/safety-progress-20261015-v2.json",
+      "originalSha256": "c2a4e8a9a8a39b0ca26cbaea3c752af697a2f616b0e063311f4be27800bc730a",
+      "redactedSha256": "7704d9f30db6df97a966c9400a0a844755a5d0ad965e8adbd003a8f3282d6cb3"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/agent-ledger-paced10s-restart-20261015.json",
+      "originalSha256": "8b39c21c1fa4a357a5af5e05ccd2ea68cebe1060c812ff78cb80b62e00588f1b",
+      "redactedSha256": "aa649d5d6c21f6fbaa74838fbbef43db08bafac5b03a16c23843b118e8be9884"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/pilot-closure-result-20261015.json",
+      "originalSha256": "7b2736e3fdacef7eb61af4a9d779050955c57faa87d5de52be544a78aa519229",
+      "redactedSha256": "5d3fcf3319f64627596391d2202361e8c6b6f85d697d757485fe1d78f4aff078"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/safety-final-20261015-v1.json",
+      "originalSha256": "6182771ef7611d072ade768100cbc4c2c7e0eb11c8a412ff58d02bb5a9bc041e",
+      "redactedSha256": "32ba0bdf7f2934dca396bd4f9943e62ae8fe887d24216b89bd791e7e52148e58"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/effects-protocol-v1.json",
+      "originalSha256": "96015a9dec2a4e55abe507295aa0dcbc3dcc51fffc1fc624358f4127a5bdf735",
+      "redactedSha256": "356b57e03d8d402f509f10c15d291886af974173a2e8e86804602b44b898a884"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/agent-ledger-isolated-reuse-20261015.json",
+      "originalSha256": "8ad8dc4ca98a2292450ee6173069b597f1bc8287688d4d7a8ff966e2ecc7d3b5",
+      "redactedSha256": "74d0bb85c97dd98ccb4360a5905175ead05800997f81f22d28aed8feb76fe836"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/DIRECT-COMPARISON.md",
+      "originalSha256": "6eca4c4716cb1fa880218723b816bb934152618b6c4170e626945601eb3773bb",
+      "redactedSha256": "55fe92090410cb1e8a39c9c2edbbcba482adef713133c3145d735c1309b60563"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/EFFECTS-RESULTS.md",
+      "originalSha256": "d7609928ac55cac5b004f5303d9d6035bc55963a3fd4ff7769972834ba6d2a0f",
+      "redactedSha256": "edd9b25e57eff7c07d131a74c4fd0850654563414e12400df4505848888b739e"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/safety-protocol-v1.json",
+      "originalSha256": "680678c6cbb7d94eb3cd63f4715267ea69271acf9b45ceaea00b9858481669cd",
+      "redactedSha256": "f42447597444997ffebb5a16d0d2a32c88da572350544c6b977049e5b3dfa666"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/agent-ledger-stable-observation-20261015.json",
+      "originalSha256": "0d0d64bbaad32ef14cd1f4bb11c9c284ba213bbdb955cc01aa2d7d97c621fe3d",
+      "redactedSha256": "67c0a8b95c2c1e9cd9255e398213aa763e12f58127b1dd1b1fca3012f0def5fd"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/agent-ledger-stable-start-reuse-20261015.json",
+      "originalSha256": "ce1858ee2a82d4e9352ab64f863b66aafd88dacffb1e45c4786a2c948cda5a99",
+      "redactedSha256": "633abcac8f61ec361eb7de7d0566091e2572d2eb077afb58b58106c29034d9c3"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/agent-group-paced60-long-v1.json",
+      "originalSha256": "f7adac075c63b851205ed7c9ef4784c5e1533b288d0ba3f5beeab9710e932a34",
+      "redactedSha256": "5a8db686ab86f093c8234618a7076ca45479b8967398a135a864d9fa7d49f65c"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/effects-v2-final-20261016.json",
+      "originalSha256": "ca2613cc0a207adbd779ea3dc3752eb75fa444d8466773712540da98339fd2f0",
+      "redactedSha256": "ca9a17a55e84e4bd8a498a783860405670f5dbaa98cd0bcdb26c7e595bbc3021"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/agent-ledger-ready-foreground-20261015.json",
+      "originalSha256": "05453d6f881f35f32bc99a7ff41f01c970f342dc03fcb2c3cc43098ff779702f",
+      "redactedSha256": "847859c2e1cb8d38855371d305f8e0089244bbeacd35a4b4d709485e11c96525"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/evidence/contract-transfer-v1-20261019/protocol.json",
+      "originalSha256": "9657b7f1aa6ff591bcd2c7d89ea0304e3046c5d0ac0c8d76739ce0b6c3a740a9",
+      "redactedSha256": "6989e9ac4b6131b73a3000ef74c3f7ed20b8c73ed5b41ac7d95a9b42f491cb81"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/evidence/contract-transfer-v1-20261019/source-snapshot/solopi-harness-cli/src/solopi_harness/trustbench_coverage.py",
+      "originalSha256": "be29bf7723e5d255e6cbd33b2301c21de9d0ef8d36ac7af5f6f45c813a3c3ed5",
+      "redactedSha256": "0f08a798e41a713f5d2ab114a88dd0252283478355386bae2826b758613227a0"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/evidence/contract-transfer-v1-20261019/source-snapshot/solopi-harness-cli/src/solopi_harness/trustbench_contract_transfer.py",
+      "originalSha256": "6e859e5c78fc3fda548316d34c9f5d629e72f3e9aa418b342c15c869a5c87eaf",
+      "redactedSha256": "8ddd9dddf763a8ff94fff98d47501dfa0158daf1a6fc6c6444bfd91c280a6aba"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/evidence/contract-threeway-v1-20261019/protocol.json",
+      "originalSha256": "a7ed65032f1305bc739ecde81e692479fec2f3ccb5a0fc5cc2d84e43ac0a30a8",
+      "redactedSha256": "d126c117a58fe7209d237ef5e2ba621ae508e59c08c34e7dd83f59729cd38378"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/evidence/contract-threeway-v1-20261019/source-snapshot/solopi-harness-cli/src/solopi_harness/trustbench_coverage.py",
+      "originalSha256": "be29bf7723e5d255e6cbd33b2301c21de9d0ef8d36ac7af5f6f45c813a3c3ed5",
+      "redactedSha256": "0f08a798e41a713f5d2ab114a88dd0252283478355386bae2826b758613227a0"
+    },
+    {
+      "path": "solopi-harness-cli/trustbench/evidence/contract-threeway-v1-20261019/source-snapshot/solopi-harness-cli/src/solopi_harness/trustbench_contract_transfer.py",
+      "originalSha256": "6e859e5c78fc3fda548316d34c9f5d629e72f3e9aa418b342c15c869a5c87eaf",
+      "redactedSha256": "8ddd9dddf763a8ff94fff98d47501dfa0158daf1a6fc6c6444bfd91c280a6aba"
+    },
+    {
+      "path": "solopi-harness-cli/src/solopi_harness/trustbench_effects.py",
+      "originalSha256": "36af3ca6d2dce7332c7c199998a507b93aaa37645be0f687bbf22a8713a21dec",
+      "redactedSha256": "85432941302d9644c144ec5aadc553024e6e72fd384ba833f1995dcf5a757624"
+    },
+    {
+      "path": "solopi-harness-cli/src/solopi_harness/trustbench_safety_batch.py",
+      "originalSha256": "4fb9cd02fae6a1f43c156a45a87050fddc977609572afcdbf09746e4f834116d",
+      "redactedSha256": "df976775a14ac292fcb91fabdcaf28454a651e2e8dcbf43a7ae5eea9150dd1a1"
+    },
+    {
+      "path": "solopi-harness-cli/src/solopi_harness/trustbench_coverage.py",
+      "originalSha256": "be29bf7723e5d255e6cbd33b2301c21de9d0ef8d36ac7af5f6f45c813a3c3ed5",
+      "redactedSha256": "0f08a798e41a713f5d2ab114a88dd0252283478355386bae2826b758613227a0"
+    },
+    {
+      "path": "solopi-harness-cli/src/solopi_harness/trustbench_effects_v2.py",
+      "originalSha256": "561e36db2b1c047442573d6148d1e752685956b68c379693f070b6854a189854",
+      "redactedSha256": "7712d13063ceb7aa47434eab262555c27cfdd0f0d9e5c19e79e0df8f4a313f6c"
+    },
+    {
+      "path": "solopi-harness-cli/src/solopi_harness/trustbench_contract_transfer.py",
+      "originalSha256": "6e859e5c78fc3fda548316d34c9f5d629e72f3e9aa418b342c15c869a5c87eaf",
+      "redactedSha256": "8ddd9dddf763a8ff94fff98d47501dfa0158daf1a6fc6c6444bfd91c280a6aba"
+    },
+    {
+      "path": "solopi-harness-cli/src/solopi_harness/trustbench_recovery_smoke.py",
+      "originalSha256": "6fd50004e7f3f8df26660d9ad4fec720741358c2fcc097742268e32319be2485",
+      "redactedSha256": "1b673e84bcbb481edceb4a3f6f4a26dd6956329f74ffe020c242506ace4fa6b6"
+    }
+  ]
+}

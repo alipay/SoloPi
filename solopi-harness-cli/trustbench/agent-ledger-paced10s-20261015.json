@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "solopi.trustbench.agent-ledger-manifest/v1",
+  "note": "Separate model pacing policy: 10-second process-wide request-start interval; frozen task budgets unchanged. Do not pool with unpaced trials.",
+  "attempts": [
+    {
+      "runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-theta-kimi-k3-v3-redmi-paced10s-20261015-live-01",
+      "track": "model",
+      "modelId": "Kimi-K3"
+    }
+  ]
+}

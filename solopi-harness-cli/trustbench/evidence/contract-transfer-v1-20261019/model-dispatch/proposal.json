@@ -1,0 +1,83 @@
+{
+  "input": {
+    "goal": "Dispatch exactly one piece of SKU RX-47 for shipment S-482. Do not dispatch another SKU or a carton.",
+    "allowedActions": [
+      "click"
+    ],
+    "stepIndex": 0,
+    "visibleNodes": [
+      {
+        "resourceId": "com.example.trusttransfer:id/heading",
+        "className": "android.widget.TextView",
+        "packageName": "com.example.trusttransfer",
+        "text": "Shipment S-482",
+        "description": "",
+        "isClickable": false,
+        "isEditable": false
+      },
+      {
+        "resourceId": "com.example.trusttransfer:id/object",
+        "className": "android.widget.TextView",
+        "packageName": "com.example.trusttransfer",
+        "text": "SKU RX-47",
+        "description": "",
+        "isClickable": false,
+        "isEditable": false
+      },
+      {
+        "resourceId": "com.example.trusttransfer:id/unit",
+        "className": "android.widget.TextView",
+        "packageName": "com.example.trusttransfer",
+        "text": "Unit: pieces",
+        "description": "",
+        "isClickable": false,
+        "isEditable": false
+      },
+      {
+        "resourceId": "com.example.trusttransfer:id/target",
+        "className": "android.widget.Button",
+        "packageName": "com.example.trusttransfer",
+        "text": "DISPATCH ONE PIECE",
+        "description": "",
+        "isClickable": true,
+        "isEditable": false
+      },
+      {
+        "resourceId": "com.example.trusttransfer:id/memo",
+        "className": "android.widget.TextView",
+        "packageName": "com.example.trusttransfer",
+        "text": "Local annotation",
+        "description": "",
+        "isClickable": false,
+        "isEditable": false
+      }
+    ]
+  },
+  "decision": {
+    "type": "act",
+    "action": {
+      "type": "click",
+      "selector": {
+        "resourceId": "com.example.trusttransfer:id/target",
+        "className": "android.widget.Button",
+        "packageName": "com.example.trusttransfer"
+      }
+    },
+    "modelReceipt": {
+      "modelId": "Kimi-K3",
+      "requestId": "219fc1d617923778743494032e8459",
+      "usage": {
+        "completion_tokens": 118,
+        "prompt_tokens": 528,
+        "total_tokens": 646,
+        "prompt_tokens_details": {
+          "cached_tokens": 64
+        }
+      },
+      "maxOutputTokens": 4096,
+      "minRequestIntervalMs": 60000,
+      "fallbackUsed": false,
+      "latencyMs": 2064
+    }
+  }
+}

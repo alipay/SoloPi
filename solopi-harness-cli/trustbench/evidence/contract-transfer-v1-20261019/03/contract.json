@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "packageName": "com.example.trusttransfer",
+  "action": {
+    "type": "click",
+    "targetResourceId": "com.example.trusttransfer:id/target"
+  },
+  "bindings": [
+    {
+      "role": "object",
+      "resourceId": "com.example.trusttransfer:id/object",
+      "text": "SKU RX-47"
+    },
+    {
+      "role": "unit",
+      "resourceId": "com.example.trusttransfer:id/unit",
+      "text": "Unit: pieces"
+    }
+  ],
+  "volatileTextResources": [
+    "com.example.trusttransfer:id/memo"
+  ]
+}

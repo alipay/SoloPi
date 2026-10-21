@@ -1,0 +1,168 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "id": "trustbench-counter-agent-tasks-v0",
+  "title": "TrustBench counter Agent baseline tasks",
+  "description": "Two independent counter goals with a verified reset before each dynamic step.",
+  "targetAppPackage": "com.example.counter",
+  "targetAppLabel": "SoloPi TDD Counter",
+  "acceptanceCriteria": [
+    {"id": "AC-ONE", "text": "Starting from zero, make the counter show one."},
+    {"id": "AC-TWO", "text": "Starting from zero, make the counter show two."}
+  ],
+  "reusableFlows": [
+    {
+      "id": "verified-reset",
+      "steps": [
+        {
+          "id": "tap-reset",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        },
+        {"id": "settle-reset", "type": "operation", "action": {"type": "wait", "durationMs": 1500}}
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "counter-to-one",
+      "title": "Counter to one",
+      "acceptanceCriteria": ["AC-ONE"],
+      "dependsOn": [],
+      "steps": [
+        {"use": "verified-reset"},
+        {
+          "id": "explore-to-one",
+          "type": "explore",
+          "goal": "Starting from 0, make the counter show exactly 1. Stop when it shows 1.",
+          "allowedActions": ["click", "wait"],
+          "budget": {
+            "maxSteps": 4,
+            "maxDurationMs": 60000,
+            "idleTimeoutMs": 30000,
+            "maxRepeatedActions": 3,
+            "maxNoProgressSteps": 2
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "reset-is-zero",
+          "afterStep": "settle-reset",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "0"
+          }
+        },
+        {
+          "id": "target-is-one",
+          "afterStep": "explore-to-one",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "1"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "cleanup-reset",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "counter-to-two",
+      "title": "Counter to two",
+      "acceptanceCriteria": ["AC-TWO"],
+      "dependsOn": [],
+      "steps": [
+        {"use": "verified-reset"},
+        {
+          "id": "explore-to-two",
+          "type": "explore",
+          "goal": "Starting from 0, make the counter show exactly 2. Stop when it shows 2.",
+          "allowedActions": ["click", "wait"],
+          "budget": {
+            "maxSteps": 5,
+            "maxDurationMs": 60000,
+            "idleTimeoutMs": 30000,
+            "maxRepeatedActions": 3,
+            "maxNoProgressSteps": 2
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "reset-is-zero",
+          "afterStep": "settle-reset",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "0"
+          }
+        },
+        {
+          "id": "target-is-two",
+          "afterStep": "explore-to-two",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "2"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "cleanup-reset",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

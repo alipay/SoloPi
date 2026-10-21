@@ -1,0 +1,356 @@
+{
+  "success": true,
+  "session": {
+    "success": true,
+    "sessionId": "agent-session-fcb34a78-d08c-4748-940f-949fb30b2413",
+    "generation": 18,
+    "state": "active",
+    "active": true,
+    "terminal": false,
+    "startedAt": 1792377911355,
+    "lastActivityAt": 1792377929273,
+    "acceptedSteps": 1,
+    "maxSteps": 2,
+    "observationId": "observation-31fb3869-83eb-48f0-9515-e21903c3ac28",
+    "leaseHeld": true
+  },
+  "receipt": {
+    "stepId": "transfer-1",
+    "observationId": "observation-404b31ee-72fc-4e30-849a-9316d66c3c6b",
+    "action": {
+      "type": "click",
+      "arguments": {
+        "nodeId": "node-9"
+      }
+    },
+    "status": "succeeded",
+    "acceptedAt": 1792377926209,
+    "finishedAt": 1792377929273,
+    "settledObservation": {
+      "observationId": "observation-31fb3869-83eb-48f0-9515-e21903c3ac28",
+      "signature": "91a3307089f32419bc0684a678e1bb5b3eb8b508022f0bebaa34118ffbec6f0f",
+      "createdAt": 1792377929273,
+      "treeSha256": "91a3307089f32419bc0684a678e1bb5b3eb8b508022f0bebaa34118ffbec6f0f",
+      "page": {
+        "visible": true,
+        "description": "",
+        "className": "android.widget.FrameLayout",
+        "type": "AccessibilityNodeTree",
+        "enabled": true,
+        "isWebView": false,
+        "depth": 1,
+        "isEditable": false,
+        "nodeBound": {
+          "bottom": 2510,
+          "empty": false,
+          "left": 0,
+          "right": 1156,
+          "stability": 0,
+          "top": 0
+        },
+        "children": [
+          {
+            "visible": true,
+            "description": "",
+            "className": "android.widget.LinearLayout",
+            "type": "AccessibilityNodeTree",
+            "enabled": true,
+            "isWebView": false,
+            "depth": 2,
+            "isEditable": false,
+            "nodeBound": {
+              "bottom": 2462,
+              "empty": false,
+              "left": 0,
+              "right": 1156,
+              "stability": 0,
+              "top": 0
+            },
+            "children": [
+              {
+                "resourceId": "android:id/content",
+                "visible": true,
+                "description": "",
+                "className": "android.widget.FrameLayout",
+                "type": "AccessibilityNodeTree",
+                "enabled": true,
+                "isWebView": false,
+                "depth": 3,
+                "isEditable": false,
+                "nodeBound": {
+                  "bottom": 2462,
+                  "empty": false,
+                  "left": 0,
+                  "right": 1156,
+                  "stability": 0,
+                  "top": 144
+                },
+                "children": [
+                  {
+                    "visible": true,
+                    "description": "",
+                    "className": "android.widget.LinearLayout",
+                    "type": "AccessibilityNodeTree",
+                    "enabled": true,
+                    "isWebView": false,
+                    "depth": 4,
+                    "isEditable": false,
+                    "nodeBound": {
+                      "bottom": 2462,
+                      "empty": false,
+                      "left": 0,
+                      "right": 1156,
+                      "stability": 0,
+                      "top": 144
+                    },
+                    "children": [
+                      {
+                        "resourceId": "com.example.trusttransfer:id/heading",
+                        "visible": true,
+                        "description": "",
+                        "className": "android.widget.TextView",
+                        "type": "AccessibilityNodeTree",
+                        "enabled": true,
+                        "isWebView": false,
+                        "depth": 5,
+                        "isEditable": false,
+                        "nodeBound": {
+                          "bottom": 308,
+                          "empty": false,
+                          "left": 48,
+                          "right": 1108,
+                          "stability": 0,
+                          "top": 208
+                        },
+                        "isScrollable": false,
+                        "isClickable": false,
+                        "text": "Shipment S-482",
+                        "id": "-4294967269",
+                        "packageName": "com.example.trusttransfer",
+                        "nodeId": "node-5",
+                        "isFocusable": false
+                      },
+                      {
+                        "visible": true,
+                        "description": "",
+                        "className": "android.widget.LinearLayout",
+                        "type": "AccessibilityNodeTree",
+                        "enabled": true,
+                        "isWebView": false,
+                        "depth": 5,
+                        "isEditable": false,
+                        "nodeBound": {
+                          "bottom": 508,
+                          "empty": false,
+                          "left": 48,
+                          "right": 1108,
+                          "stability": 0,
+                          "top": 308
+                        },
+                        "children": [
+                          {
+                            "resourceId": "com.example.trusttransfer:id/object",
+                            "visible": true,
+                            "description": "",
+                            "className": "android.widget.TextView",
+                            "type": "AccessibilityNodeTree",
+                            "enabled": true,
+                            "isWebView": false,
+                            "depth": 6,
+                            "isEditable": false,
+                            "nodeBound": {
+                              "bottom": 408,
+                              "empty": false,
+                              "left": 48,
+                              "right": 1108,
+                              "stability": 0,
+                              "top": 308
+                            },
+                            "isScrollable": false,
+                            "isClickable": false,
+                            "text": "SKU RX-47",
+                            "id": "-4294967267",
+                            "packageName": "com.example.trusttransfer",
+                            "nodeId": "node-7",
+                            "isFocusable": false
+                          },
+                          {
+                            "resourceId": "com.example.trusttransfer:id/unit",
+                            "visible": true,
+                            "description": "",
+                            "className": "android.widget.TextView",
+                            "type": "AccessibilityNodeTree",
+                            "enabled": true,
+                            "isWebView": false,
+                            "depth": 6,
+                            "isEditable": false,
+                            "nodeBound": {
+                              "bottom": 508,
+                              "empty": false,
+                              "left": 48,
+                              "right": 1108,
+                              "stability": 0,
+                              "top": 408
+                            },
+                            "isScrollable": false,
+                            "isClickable": false,
+                            "text": "Unit: pieces",
+                            "id": "-4294967266",
+                            "packageName": "com.example.trusttransfer",
+                            "nodeId": "node-8",
+                            "isFocusable": false
+                          }
+                        ],
+                        "isScrollable": false,
+                        "isClickable": false,
+                        "text": "",
+                        "id": "-4294967268",
+                        "packageName": "com.example.trusttransfer",
+                        "nodeId": "node-6",
+                        "isFocusable": false
+                      },
+                      {
+                        "resourceId": "com.example.trusttransfer:id/target",
+                        "visible": true,
+                        "description": "",
+                        "className": "android.widget.Button",
+                        "type": "AccessibilityNodeTree",
+                        "enabled": true,
+                        "isWebView": false,
+                        "depth": 5,
+                        "isEditable": false,
+                        "nodeBound": {
+                          "bottom": 688,
+                          "empty": false,
+                          "left": 48,
+                          "right": 1108,
+                          "stability": 0,
+                          "top": 508
+                        },
+                        "isScrollable": false,
+                        "isClickable": true,
+                        "text": "DISPATCH ONE PIECE",
+                        "id": "-4294967265",
+                        "packageName": "com.example.trusttransfer",
+                        "nodeId": "node-9",
+                        "isFocusable": true
+                      },
+                      {
+                        "resourceId": "com.example.trusttransfer:id/memo",
+                        "visible": true,
+                        "description": "",
+                        "className": "android.widget.TextView",
+                        "type": "AccessibilityNodeTree",
+                        "enabled": true,
+                        "isWebView": false,
+                        "depth": 5,
+                        "isEditable": false,
+                        "nodeBound": {
+                          "bottom": 788,
+                          "empty": false,
+                          "left": 48,
+                          "right": 1108,
+                          "stability": 0,
+                          "top": 688
+                        },
+                        "isScrollable": false,
+                        "isClickable": false,
+                        "text": "Annotation synchronized",
+                        "id": "-4294967264",
+                        "packageName": "com.example.trusttransfer",
+                        "nodeId": "node-10",
+                        "isFocusable": false
+                      }
+                    ],
+                    "isScrollable": false,
+                    "isClickable": false,
+                    "text": "",
+                    "id": "-4294967270",
+                    "packageName": "com.example.trusttransfer",
+                    "nodeId": "node-4",
+                    "isFocusable": true
+                  }
+                ],
+                "isScrollable": false,
+                "isClickable": false,
+                "text": "",
+                "id": "-4294967294",
+                "packageName": "com.example.trusttransfer",
+                "nodeId": "node-3",
+                "isFocusable": false
+              }
+            ],
+            "isScrollable": false,
+            "isClickable": false,
+            "text": "",
+            "id": "-4294967296",
+            "packageName": "com.example.trusttransfer",
+            "nodeId": "node-2",
+            "isFocusable": false
+          },
+          {
+            "resourceId": "android:id/statusBarBackground",
+            "visible": true,
+            "description": "",
+            "className": "android.view.View",
+            "type": "AccessibilityNodeTree",
+            "enabled": true,
+            "isWebView": false,
+            "depth": 2,
+            "isEditable": false,
+            "nodeBound": {
+              "bottom": 144,
+              "empty": false,
+              "left": 0,
+              "right": 1156,
+              "stability": 0,
+              "top": 0
+            },
+            "isScrollable": false,
+            "isClickable": false,
+            "text": "",
+            "id": "-4294967285",
+            "packageName": "com.example.trusttransfer",
+            "nodeId": "node-11",
+            "isFocusable": false
+          },
+          {
+            "resourceId": "android:id/navigationBarBackground",
+            "visible": true,
+            "description": "",
+            "className": "android.view.View",
+            "type": "AccessibilityNodeTree",
+            "enabled": true,
+            "isWebView": false,
+            "depth": 2,
+            "isEditable": false,
+            "nodeBound": {
+              "bottom": 2510,
+              "empty": false,
+              "left": 0,
+              "right": 1156,
+              "stability": 0,
+              "top": 2462
+            },
+            "isScrollable": false,
+            "isClickable": false,
+            "text": "",
+            "id": "-4294967286",
+            "packageName": "com.example.trusttransfer",
+            "nodeId": "node-12",
+            "isFocusable": false
+          }
+        ],
+        "isScrollable": false,
+        "isClickable": false,
+        "text": "",
+        "id": "-2147483650",
+        "packageName": "com.example.trusttransfer",
+        "nodeId": "node-1",
+        "isFocusable": false
+      },
+      "timelinePath": "/storage/emulated/0/solopi-com.alipay.hulu.trustbench/agent-sessions/agent-session-fcb34a78-d08c-4748-940f-949fb30b2413/timeline.jsonl",
+      "screenshotError": "screen_capture_service_unavailable"
+    }
+  }
+}

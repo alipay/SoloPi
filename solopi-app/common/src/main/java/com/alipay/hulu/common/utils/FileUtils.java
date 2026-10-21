@@ -130,6 +130,9 @@ public class FileUtils extends org.apache.commons.io.FileUtils {
      * Keep the optional FastPath validation app away from existing SoloPi files.
      */
     public static String getDefaultSolopiFolderName() {
+        if ("com.alipay.hulu.trustbench".equals(LauncherApplication.getContext().getPackageName())) {
+            return AppIdentity.storageDirectory();
+        }
         return "com.alipay.hulu.fastpath".equals(LauncherApplication.getContext().getPackageName())
                 ? "solopi-fastpath" : "solopi";
     }

@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "solopi.trustbench.agent-ledger-manifest/v1",
+  "note": "Single authorized stability-fix validation on Redmi; distinct APK, not a replacement for previous failed trials.",
+  "attempts": [
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-theta-kimi-k3-v3-redmi-stable-observation-20261015-live-01", "track": "model", "modelId": "Kimi-K3"}
+  ]
+}

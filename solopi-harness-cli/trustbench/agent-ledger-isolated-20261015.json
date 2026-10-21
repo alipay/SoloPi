@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "solopi.trustbench.agent-ledger-manifest/v1",
+  "note": "Diagnostic isolated SoloPi build; keep separate from original-build attempts. See run build-provenance.json; local hashes are not device attestation.",
+  "attempts": [
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-control-v3-pixel8-isolated-20261015-live-01", "track": "control"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-control-v3-pixel8-isolated-20261015-live-02", "track": "control"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-theta-kimi-k3-v3-pixel8-isolated-20261015-live-01", "track": "model", "modelId": "Kimi-K3"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-theta-kimi-k3-v3-pixel8-isolated-20261015-live-02", "track": "model", "modelId": "Kimi-K3"}
+  ]
+}

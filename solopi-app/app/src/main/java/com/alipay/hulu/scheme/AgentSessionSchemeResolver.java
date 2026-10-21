@@ -27,6 +27,7 @@ import com.alipay.hulu.common.scheme.SchemeResolver;
 import com.alipay.hulu.common.service.ScreenCaptureService;
 import com.alipay.hulu.common.service.TouchService;
 import com.alipay.hulu.common.tools.BackgroundExecutor;
+import com.alipay.hulu.common.tools.CmdTools;
 import com.alipay.hulu.common.utils.Callback;
 import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.PermissionUtil;
@@ -50,6 +51,8 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** 绑定准确观察和会话所有者的动态 Agent observe/act 协议。 */
 @SchemeResolver("agent")
@@ -139,10 +142,13 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
                 case "start":
                     requireAdb(context);
                     callback.onResult(start(params));
+                    // Initial capture runs asynchronously and must not observe this transport window.
+                    ((AdbSchemeActivity) context).finish();
                     return true;
                 case "act":
                     requireAdb(context);
                     callback.onResult(scheduleAction(params));
+                    ((AdbSchemeActivity) context).finish();
                     return true;
                 case "pause":
                     requireAdb(context);
@@ -184,6 +190,7 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         result.put("actions", java.util.Arrays.asList(
                 "click", "longClick", "input", "back", "home", "scroll", "wait"));
         result.put("arbitraryShell", false);
+        result.put("actionContractVersion", 1);
         result.put("mutationTransport", "adb-scheme");
         result.put("queryTransport", "adb-forward-http");
         result.put("settleStrategies", java.util.Arrays.asList(
@@ -205,7 +212,8 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
                 boundedInt(params, "maxRepeatedActions", DEFAULT_MAX_REPEATED_ACTIONS, 1, 20),
                 boundedInt(params, "maxNoProgressSteps", DEFAULT_MAX_NO_PROGRESS_STEPS, 1, 20),
                 parseSettleStrategy(params.get("settleStrategy")),
-                parseActionValidationStrategy(params.get("actionValidationStrategy")));
+                parseActionValidationStrategy(params.get("actionValidationStrategy")),
+                params.get("actionContractJson"));
         final AgentSessionState.StartResult started = SESSION.start(ownerToken, config);
         if (!started.success) {
             return error(started.errorCode, started.error);
@@ -372,8 +380,13 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
                     ? AgentTargetContextGuard.verify(observationId,
                     frame != null && observationId.equals(frame.observationId) ? frame.targetContext : null,
                     freshContext, action) : null;
+            String contract = SESSION.actionContract(sessionId, ownerToken);
+            boolean contractValidated = contract != null && frame != null
+                    && observationId.equals(frame.observationId)
+                    && AgentActionContract.allows(contract, frame.page, freshPage, action);
             AgentSessionState.BeginResult begin = SESSION.beginAction(sessionId, ownerToken,
-                    stepId, observationId, currentSignature, action, freshPage, validation);
+                    stepId, observationId, currentSignature, action, freshPage, validation,
+                    contractValidated, contract != null && !contractValidated ? "Contract mismatch" : null);
             if (!begin.accepted) {
                 stopTouchServiceIfTerminal();
                 return;
@@ -383,6 +396,8 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
 
             boolean nativeClick = validation != null && "verified".equals(validation.result);
             AbstractNodeTree target = nativeClick ? AgentTargetContextAndroid.at(freshRoot, validation.path)
+                    : contractValidated ? locateContractTarget(freshRoot, JSON.parseObject(contract).getString("packageName"),
+                            JSON.parseObject(contract).getJSONObject("action").getString("targetResourceId"))
                     : locateTarget(frame, observationId, action, freshRoot);
             OperationMethod method = operationMethod(action);
             final CountDownLatch completed = new CountDownLatch(1);
@@ -430,7 +445,8 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
             if (receipt != null && receipt.settledObservation != null) {
                 synchronized (FRAME_LOCK) {
                     currentFrame = new Frame(receipt.settledObservation.observationId,
-                            settled.signature, settled.packageName, settled.nodes, settled.targetContext);
+                            settled.signature, settled.packageName, settled.nodes, settled.targetContext,
+                            (JSONObject) settled.evidence.get("page"));
                 }
             }
         } catch (AgentUiWaiter.AbortedException aborted) {
@@ -542,7 +558,7 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         }
         if (ready.value == null) {
             return AgentSessionState.Result.error("page_root_unavailable",
-                    "Controllable foreground page root is unavailable");
+                    "Stable on-screen foreground observation is unavailable");
         }
         CapturedPage captured = capturePage(ready.value, sessionId, screenshot,
                 AgentTargetContextGuard.TARGET_CONTEXT_V1.equals(config.actionValidationStrategy));
@@ -553,7 +569,8 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         if (result.success) {
             synchronized (FRAME_LOCK) {
                 currentFrame = new Frame(result.value.observationId,
-                        captured.signature, captured.packageName, captured.nodes, captured.targetContext);
+                        captured.signature, captured.packageName, captured.nodes, captured.targetContext,
+                        (JSONObject) captured.evidence.get("page"));
             }
         }
         return result;
@@ -748,6 +765,116 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         return timing;
     }
 
+    private static AbstractNodeTree loadStableObservationRoot(OperationService service, long timeoutMs)
+            throws InterruptedException {
+        long deadline = android.os.SystemClock.elapsedRealtime() + timeoutMs;
+        DisplayMetrics metrics = displayMetrics();
+        String previousSignature = null;
+        int samples = 0;
+        while (android.os.SystemClock.elapsedRealtime() < deadline) {
+            // Do not trigger AccessibilityProvider's recovery while the host is restoring
+            // the target from the Scheme/replay-result window.
+            String[] foreground = CmdTools.getTopPkgAndActivity();
+            if (foreground == null || foreground.length == 0) {
+                String focusedPackage = focusedDialogOwner(CmdTools.execHighPrivilegeCmd(
+                        "dumpsys window visible-apps"));
+                if (focusedPackage != null) foreground = new String[]{focusedPackage};
+            }
+            if (foreground == null || foreground.length == 0
+                    || !isObservationForegroundReady(foreground[0],
+                    LauncherApplication.getContext().getPackageName())) {
+                previousSignature = null;
+                long remaining = deadline - android.os.SystemClock.elapsedRealtime();
+                if (remaining > 0) {
+                    Thread.sleep(Math.min(ROOT_READY_INTERVAL_MS, remaining));
+                }
+                continue;
+            }
+            AbstractNodeTree root = service.getBaseCurrentRoot();
+            JSONObject page = root == null ? null : root.exportToJsonObject();
+            String currentSignature = isObservationPageReady(page, metrics,
+                    LauncherApplication.getContext().getPackageName()) ? signature(page) : null;
+            if (samples++ < 10) {
+                // Bounded metadata only: no page text, credentials, screenshots or continuous log capture.
+                LogUtil.i(TAG, "Observation readiness sample=" + samples
+                        + " package=" + (page == null ? null : page.getString("packageName"))
+                        + " ready=" + (currentSignature != null)
+                        + " stable=" + isStableObservation(previousSignature, currentSignature));
+            }
+            if (android.os.SystemClock.elapsedRealtime() >= deadline) {
+                break;
+            }
+            if (isStableObservation(previousSignature, currentSignature)) {
+                return root;
+            }
+            // An invalid frame breaks the sequence; never return an unstable frame on timeout.
+            previousSignature = currentSignature;
+            long remaining = deadline - android.os.SystemClock.elapsedRealtime();
+            if (remaining > 0) {
+                Thread.sleep(Math.min(ROOT_TRANSITION_SETTLE_MS, remaining));
+            }
+        }
+        return null;
+    }
+
+    static boolean isStableObservation(String previousSignature, String currentSignature) {
+        return currentSignature != null && currentSignature.equals(previousSignature);
+    }
+
+    static boolean isObservationForegroundReady(String foregroundPackage, String controlPackage) {
+        return !StringUtil.isEmpty(foregroundPackage) && !controlPackage.equals(foregroundPackage);
+    }
+
+    static String focusedDialogOwner(String windows) {
+        if (windows == null) return null;
+        // Only application dialogs lacking a component title qualify. Never
+        // replace a known system/control-app focus with the underlying activity.
+        Matcher focus = Pattern.compile("mCurrentFocus=Window\\{[^\\n}]*\\su\\d+\\s+([^}]+)\\}").matcher(windows);
+        if (!focus.find() || focus.group(1).contains("/")) return null;
+        Matcher owner = Pattern.compile("mFocusedApp=[^\\n]*?\\su\\d+\\s+([A-Za-z0-9_.$]+)/[A-Za-z0-9_.$]+").matcher(windows);
+        return owner.find() ? owner.group(1) : null;
+    }
+
+    static boolean isObservationPageReady(JSONObject page, DisplayMetrics metrics,
+                                          String controlPackage) {
+        return isControllablePage(page, metrics, controlPackage)
+                && hasOnscreenContent(page, page.getString("packageName"),
+                0, 0, metrics.widthPixels, metrics.heightPixels);
+    }
+
+    private static boolean hasOnscreenContent(JSONObject node, String targetPackage,
+                                              int left, int top, int right, int bottom) {
+        if (node == null || !node.getBooleanValue("visible")) {
+            return false;
+        }
+        JSONObject bounds = node.getJSONObject("nodeBound");
+        if (bounds == null) {
+            return false;
+        }
+        left = Math.max(left, bounds.getIntValue("left"));
+        top = Math.max(top, bounds.getIntValue("top"));
+        right = Math.min(right, bounds.getIntValue("right"));
+        bottom = Math.min(bottom, bounds.getIntValue("bottom"));
+        if (left >= right || top >= bottom) {
+            return false;
+        }
+        if (targetPackage.equals(node.getString("packageName"))
+                && (node.getBooleanValue("isClickable") || node.getBooleanValue("isEditable")
+                || !StringUtil.isEmpty(node.getString("text")))) {
+            return true;
+        }
+        JSONArray children = node.getJSONArray("children");
+        if (children != null) {
+            for (int i = 0; i < children.size(); i++) {
+                if (hasOnscreenContent(children.getJSONObject(i), targetPackage,
+                        left, top, right, bottom)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     static boolean isControllablePage(JSONObject page, DisplayMetrics metrics) {
         return isControllablePage(page, metrics,
                 LauncherApplication.getContext().getPackageName());
@@ -866,6 +993,22 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
                 assignNodeIds(children.get(index), current, nodes, sequence, childPath);
             }
         }
+    }
+
+    private static AbstractNodeTree locateContractTarget(AbstractNodeTree root, String pkg, String resource)
+            throws AgentProtocolException {
+        java.util.List<AbstractNodeTree> matches = new java.util.ArrayList<>();
+        collectContractTargets(root, pkg, resource, matches);
+        if (matches.size() != 1 || !matches.get(0).isVisible())
+            throw new AgentProtocolException("node_not_found", "Contract target is missing or ambiguous");
+        return matches.get(0);
+    }
+
+    private static void collectContractTargets(AbstractNodeTree node, String pkg, String resource,
+                                                java.util.List<AbstractNodeTree> matches) {
+        if (pkg.equals(node.getPackageName()) && resource.equals(node.getResourceId())) matches.add(node);
+        if (node.getChildrenNodes() != null) for (AbstractNodeTree child : node.getChildrenNodes())
+            collectContractTargets(child, pkg, resource, matches);
     }
 
     private static AbstractNodeTree locateTarget(Frame frame, String observationId,
@@ -1158,6 +1301,7 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
     }
 
     private static final class Frame {
+        final JSONObject page;
         final String observationId;
         final String signature;
         final String packageName;
@@ -1165,7 +1309,8 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         final AgentTargetContextGuard.Snapshot targetContext;
 
         Frame(String observationId, String signature, String packageName,
-              Map<String, int[]> nodes, AgentTargetContextGuard.Snapshot targetContext) {
+              Map<String, int[]> nodes, AgentTargetContextGuard.Snapshot targetContext, JSONObject page) {
+            this.page = JSON.parseObject(page.toJSONString());
             this.observationId = observationId;
             this.signature = signature;
             this.packageName = packageName;

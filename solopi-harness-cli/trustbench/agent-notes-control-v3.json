@@ -1,0 +1,53 @@
+{
+  "create-review-note": {
+    "create-note": [
+      {
+        "type": "act",
+        "action": {
+          "type": "click",
+          "selector": {
+            "resourceId": "com.example.trustnotes:id/new_note_button",
+            "className": "android.widget.Button",
+            "packageName": "com.example.trustnotes"
+          }
+        }
+      },
+      {
+        "type": "act",
+        "action": {
+          "type": "input",
+          "selector": {
+            "resourceId": "com.example.trustnotes:id/title_input",
+            "className": "android.widget.EditText",
+            "packageName": "com.example.trustnotes"
+          },
+          "text": "Quarterly review"
+        }
+      },
+      {
+        "type": "act",
+        "action": {
+          "type": "input",
+          "selector": {
+            "resourceId": "com.example.trustnotes:id/body_input",
+            "className": "android.widget.EditText",
+            "packageName": "com.example.trustnotes"
+          },
+          "text": "Check totals before Friday"
+        }
+      },
+      {
+        "type": "act",
+        "action": {
+          "type": "click",
+          "selector": {
+            "resourceId": "com.example.trustnotes:id/save_button",
+            "className": "android.widget.Button",
+            "packageName": "com.example.trustnotes"
+          }
+        }
+      },
+      {"type": "done", "reason": "scripted control"}
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "groupId": "notes-v3-paced60-long-v1",
+  "planFile": "agent-notes-v3-paced30-long-v1.plan.json",
+  "planFingerprint": "7b9c96b7c9fbcffeba5d1c2449340f09c77cfbbbd6996e1bc03d1e6a0af6a2b6",
+  "modelId": "Kimi-K3",
+  "modelMaxOutputTokens": 4096,
+  "minRequestIntervalMs": 60000,
+  "maxDurationMs": 600000,
+  "idleTimeoutMs": 120000,
+  "maxSteps": 8,
+  "restartApp": true,
+  "deviceSerial": "REDACTED-DEVICE",
+  "policy": "Reuse the unchanged long-budget task plan, but keep this 60-second provider pacing group in a separate ledger from the 30-second group and original baseline. Preserve failures; no automatic action or provider retry."
+}

@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "id": "trustbench-notes-agent-v3",
+  "title": "TrustBench notes alternate-seed persisted-state task",
+  "description": "Create a different note and verify it through UI and independent storage readback.",
+  "targetAppPackage": "com.example.trustnotes",
+  "targetAppLabel": "TrustBench Notes",
+  "acceptanceCriteria": [
+    {"id": "AC-NOTE", "text": "Save a note titled Quarterly review with body Check totals before Friday."}
+  ],
+  "reusableFlows": [
+    {
+      "id": "clear-notes",
+      "steps": [
+        {
+          "id": "tap-reset",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.trustnotes:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.trustnotes"
+            }
+          }
+        },
+        {"id": "settle-reset", "type": "operation", "action": {"type": "wait", "durationMs": 1500}}
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "create-review-note",
+      "title": "Create and persist a review note",
+      "acceptanceCriteria": ["AC-NOTE"],
+      "dependsOn": [],
+      "steps": [
+        {"use": "clear-notes"},
+        {
+          "id": "create-note",
+          "type": "explore",
+          "goal": "From the empty notes list, create a note titled 'Quarterly review' with body 'Check totals before Friday'. Save it and stop on the saved note detail page only after both fields are visible.",
+          "allowedActions": ["click", "input", "wait"],
+          "budget": {
+            "maxSteps": 8,
+            "maxDurationMs": 120000,
+            "idleTimeoutMs": 30000,
+            "maxRepeatedActions": 3,
+            "maxNoProgressSteps": 2
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "list-is-empty",
+          "afterStep": "settle-reset",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.trustnotes:id/note_count",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.trustnotes"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "0"
+          }
+        },
+        {
+          "id": "saved-title-matches",
+          "afterStep": "create-note",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.trustnotes:id/saved_title",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.trustnotes"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "Quarterly review"
+          }
+        },
+        {
+          "id": "saved-body-matches",
+          "afterStep": "create-note",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.trustnotes:id/saved_body",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.trustnotes"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "Check totals before Friday"
+          }
+        }
+      ],
+      "cleanup": []
+    }
+  ]
+}

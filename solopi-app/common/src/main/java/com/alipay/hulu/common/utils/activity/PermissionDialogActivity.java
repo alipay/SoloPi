@@ -665,7 +665,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                             latch.countDown();
                         }
                     });
-                    CmdTools.putAccessibility("enabled_accessibility_services", "com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
+                    CmdTools.putAccessibility("enabled_accessibility_services", com.alipay.hulu.common.utils.AppIdentity.accessibilityService());
                     CmdTools.putAccessibility("accessibility_enabled", "1");
 
                     try {
@@ -675,7 +675,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                     }
 
                     if (InjectorService.g().getMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, AccessibilityService.class) == null) {
-                        CmdTools.execHighPrivilegeCmd("settings put secure enabled_accessibility_services com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
+                        CmdTools.execHighPrivilegeCmd("settings put secure enabled_accessibility_services " + com.alipay.hulu.common.utils.AppIdentity.accessibilityService());
                         CmdTools.execHighPrivilegeCmd("settings put secure accessibility_enabled 1");
                     }
                     try {
@@ -940,7 +940,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
                 Matcher matcher = pattern.matcher(line);
                 if (matcher.find()) {
                     String instPkg = matcher.group(1);
-                    if (StringUtil.equals(instPkg, "com.alipay.hulu")) {
+                    if (StringUtil.equals(instPkg, com.alipay.hulu.common.utils.AppIdentity.packageName())) {
                         continue;
                     }
                     // 不杀目标应用
@@ -1016,7 +1016,7 @@ public class PermissionDialogActivity extends Activity implements View.OnClickLi
         // 等2秒
         MiscUtil.sleep(2000);
 
-        CmdTools.putAccessibility("enabled_accessibility_services", "com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
+        CmdTools.putAccessibility("enabled_accessibility_services", com.alipay.hulu.common.utils.AppIdentity.accessibilityService());
 
         // 等待辅助功能重新激活
         LauncherApplication.getInstance().showToast(R.string.permission__restarting_accessibility);

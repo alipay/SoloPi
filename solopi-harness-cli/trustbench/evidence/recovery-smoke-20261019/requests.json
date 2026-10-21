@@ -1,0 +1,22 @@
+[
+  {
+    "slot": "click-replaced-benign-1",
+    "reservedUnixSeconds": 1792376046.153635,
+    "ordinal": 1
+  },
+  {
+    "slot": "click-replaced-benign-2",
+    "reservedUnixSeconds": 1792376107.155859,
+    "ordinal": 2
+  },
+  {
+    "slot": "input-object-danger-1",
+    "reservedUnixSeconds": 1792376168.160188,
+    "ordinal": 3
+  },
+  {
+    "slot": "input-object-danger-2",
+    "reservedUnixSeconds": 1792376229.164522,
+    "ordinal": 4
+  }
+]

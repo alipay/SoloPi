@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="counter_value" type="id" />
+    <item name="counter_status" type="id" />
+    <item name="increment_button" type="id" />
+    <item name="reset_button" type="id" />
+</resources>

@@ -1,0 +1,13 @@
+{
+  "protocolId": "notes-stale-navigation-v1",
+  "status": "frozen before first run",
+  "baseProtocol": "direct-comparison-protocol-v1.json",
+  "order": ["direct", "harness"],
+  "injection": "After first live model click New note decision, before its execution, injector taps that observed New note coordinate once. Independently verify editor resource IDs with UIAutomator, without session observe. Then dispatch original decision unchanged.",
+  "maxInjectionsPerArm": 1,
+  "minRequestIntervalMs": 60000,
+  "primary": ["verified page change", "stale action rejected versus dispatched", "independent task completion"],
+  "failurePolicy": "No automatic action recovery or provider retry; retain all failures. Missing injection verification is infrastructure failure, not evidence of guard efficacy.",
+  "limits": ["fixture-only navigation, no app reinstall", "shared observation and differing transports", "dispatch is not proof of damage", "rejection is not task completion", "one pair does not estimate reliability"],
+  "storage": "Read immediately after UI PASS, before next reset; no PASS receipt for failed tasks."
+}

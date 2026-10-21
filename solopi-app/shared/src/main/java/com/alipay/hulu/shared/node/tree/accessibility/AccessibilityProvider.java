@@ -462,7 +462,7 @@ public class AccessibilityProvider implements AbstractProvider {
         // 等2秒
         MiscUtil.sleep(2000);
 
-        CmdTools.execHighPrivilegeCmd("settings put secure enabled_accessibility_services com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
+        CmdTools.execHighPrivilegeCmd("settings put secure enabled_accessibility_services " + com.alipay.hulu.common.utils.AppIdentity.accessibilityService());
 
         final CountDownLatch latch = new CountDownLatch(1);
         InjectorService.g().waitForMessage(SubscribeParamEnum.ACCESSIBILITY_SERVICE, new Callback<AccessibilityService>() {
@@ -478,7 +478,7 @@ public class AccessibilityProvider implements AbstractProvider {
             }
         });
 
-        CmdTools.putAccessibility("enabled_accessibility_services", "com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
+        CmdTools.putAccessibility("enabled_accessibility_services", com.alipay.hulu.common.utils.AppIdentity.accessibilityService());
 
         // 等待辅助功能重新激活
         try {
@@ -512,7 +512,7 @@ public class AccessibilityProvider implements AbstractProvider {
             }
         });
 
-        CmdTools.putAccessibility("enabled_accessibility_services", "com.alipay.hulu/com.alipay.hulu.shared.event.accessibility.AccessibilityServiceImpl");
+        CmdTools.putAccessibility("enabled_accessibility_services", com.alipay.hulu.common.utils.AppIdentity.accessibilityService());
 
         LogUtil.i(TAG, "等待辅助功能重新激活");
         long startTime = System.currentTimeMillis();

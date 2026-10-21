@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+SOLOPI_COMPAT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+exec "$SOLOPI_COMPAT_DIR/../../solopi-harness-cli/solopi-ai" "$@"

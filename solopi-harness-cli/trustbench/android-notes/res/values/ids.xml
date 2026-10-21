@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="note_count" type="id" />
+    <item name="new_note_button" type="id" />
+    <item name="reset_button" type="id" />
+    <item name="title_input" type="id" />
+    <item name="body_input" type="id" />
+    <item name="save_button" type="id" />
+    <item name="saved_note_button" type="id" />
+    <item name="saved_title" type="id" />
+    <item name="saved_body" type="id" />
+    <item name="back_to_list_button" type="id" />
+</resources>

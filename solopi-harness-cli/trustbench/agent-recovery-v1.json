@@ -1,0 +1,156 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "id": "trustbench-counter-recovery-v1",
+  "title": "TrustBench counter multi-stage recovery",
+  "description": "Verify three consecutive agent goals and their intermediate states in one independent scenario.",
+  "targetAppPackage": "com.example.counter",
+  "targetAppLabel": "SoloPi TDD Counter",
+  "acceptanceCriteria": [
+    {"id": "AC-RECOVERY", "text": "Reach two, reset to zero, then reach one with every intermediate state verified."}
+  ],
+  "reusableFlows": [
+    {
+      "id": "verified-reset",
+      "steps": [
+        {
+          "id": "tap-reset",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        },
+        {"id": "settle-reset", "type": "operation", "action": {"type": "wait", "durationMs": 1500}}
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "counter-recovery",
+      "title": "Reach two, reset, and recover to one",
+      "acceptanceCriteria": ["AC-RECOVERY"],
+      "dependsOn": [],
+      "steps": [
+        {"use": "verified-reset"},
+        {
+          "id": "reach-two",
+          "type": "explore",
+          "goal": "Starting from 0, make the counter show exactly 2. Stop when it shows 2.",
+          "allowedActions": ["click", "wait"],
+          "budget": {
+            "maxSteps": 5,
+            "maxDurationMs": 60000,
+            "idleTimeoutMs": 30000,
+            "maxRepeatedActions": 3,
+            "maxNoProgressSteps": 2
+          }
+        },
+        {
+          "id": "reset-from-two",
+          "type": "explore",
+          "goal": "The counter shows 2. Reset it so it shows exactly 0. Stop when it shows 0.",
+          "allowedActions": ["click", "wait"],
+          "budget": {
+            "maxSteps": 4,
+            "maxDurationMs": 60000,
+            "idleTimeoutMs": 30000,
+            "maxRepeatedActions": 3,
+            "maxNoProgressSteps": 2
+          }
+        },
+        {
+          "id": "recover-to-one",
+          "type": "explore",
+          "goal": "Starting from 0 after the reset, make the counter show exactly 1. Stop when it shows 1.",
+          "allowedActions": ["click", "wait"],
+          "budget": {
+            "maxSteps": 4,
+            "maxDurationMs": 60000,
+            "idleTimeoutMs": 30000,
+            "maxRepeatedActions": 3,
+            "maxNoProgressSteps": 2
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "start-is-zero",
+          "afterStep": "settle-reset",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "0"
+          }
+        },
+        {
+          "id": "intermediate-is-two",
+          "afterStep": "reach-two",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "2"
+          }
+        },
+        {
+          "id": "intermediate-is-zero",
+          "afterStep": "reset-from-two",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "0"
+          }
+        },
+        {
+          "id": "target-is-one",
+          "afterStep": "recover-to-one",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "1"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "cleanup-reset",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

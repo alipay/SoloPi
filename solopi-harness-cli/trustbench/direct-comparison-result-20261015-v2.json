@@ -1,0 +1,226 @@
+{
+  "schemaVersion": "solopi.trustbench.direct-comparison/v1",
+  "attempts": [
+    {
+      "runId": "trustbench-direct-comparison-v1-direct-20261015-live-02",
+      "track": "model",
+      "modelId": "Kimi-K3",
+      "modelMaxOutputTokens": 4096,
+      "planFingerprint": "7b9c96b7c9fbcffeba5d1c2449340f09c77cfbbbd6996e1bc03d1e6a0af6a2b6",
+      "taskId": "trustbench-notes-agent-v3-paced30-long-v1",
+      "agentBudget": {
+        "maxSteps": 8,
+        "maxDurationMs": 600000,
+        "idleTimeoutMs": 120000,
+        "maxRepeatedActions": 3,
+        "maxNoProgressSteps": 2
+      },
+      "reportId": "verification-run-c8f83dd3126743f2a970ee991b94a0f8",
+      "outcome": "passed",
+      "failureReason": null,
+      "actionErrorCode": null,
+      "agentDone": true,
+      "actions": 4,
+      "modelDecisionCount": 5,
+      "startedAt": 1792058296112,
+      "finishedAt": 1792058558933,
+      "evidenceAudit": {
+        "verifiedFiles": 8,
+        "verifiedSegments": 2
+      },
+      "reportSha256": "1349fff88c69fefb1a28a68426ff081bf3df1b4ae02f22f520e22e132f97875f",
+      "planSha256": "bbba3608a1adf9adbd0ea9019b21effe57784c4abd5e8dbc0217ef7b74e89048",
+      "eventsSha256": "5c0a9dd70e085432b18963bd78b3b8aabb06edd69cf1035e18a70b2bce58846b",
+      "transcriptSha256": "01e5a84954ca75d03db6939b95e1ee725fdcb709d7c37c758d900d503935555a",
+      "transcriptSha256s": {
+        "segment-create-review-note-test-02-a3384212eadc": "01e5a84954ca75d03db6939b95e1ee725fdcb709d7c37c758d900d503935555a"
+      },
+      "storageReceiptSha256": "79a4487907255d7d0d648761720f045c90f3d73b1be54ebbab0b85991f702053",
+      "deviceSerial": "REDACTED-DEVICE",
+      "apkSha256": "e6c74dec77836d7c354139d2ceaa30cc5e3cb46dd98f8634dab1757212694480",
+      "source": "directory",
+      "arm": "direct",
+      "runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-direct-comparison-v1-direct-20261015-live-02",
+      "durationMs": 262821,
+      "modelInputsSha256": "d36e3dc2633718caa8efd56d72e747d25a7438d8204321de064322f30cdd7cd2",
+      "comparisonPolicySha256": "44e35a960edadbd417f77428856c8ac567ff041a1d138586a3f22f685f4ae4a1",
+      "modelReceipts": [
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "0b443e3117920583132411632ed1e8",
+          "latencyMs": 1957,
+          "promptTokens": 480,
+          "completionTokens": 96,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 0,
+          "minRequestIntervalMs": 60000
+        },
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "21d5843a17920583731735967eca6b",
+          "latencyMs": 2704,
+          "promptTokens": 528,
+          "completionTokens": 106,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 56305,
+          "minRequestIntervalMs": 60000
+        },
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "0b94d59417920584333143558e0a9d",
+          "latencyMs": 3668,
+          "promptTokens": 530,
+          "completionTokens": 113,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 55130,
+          "minRequestIntervalMs": 60000
+        },
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "21d58b1517920584931915211e211c",
+          "latencyMs": 10409,
+          "promptTokens": 533,
+          "completionTokens": 136,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 53006,
+          "minRequestIntervalMs": 60000
+        },
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "0b265b5117920585531805105ee725",
+          "latencyMs": 4282,
+          "promptTokens": 535,
+          "completionTokens": 199,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 47264,
+          "minRequestIntervalMs": 60000
+        }
+      ]
+    },
+    {
+      "runId": "trustbench-direct-comparison-v1-harness-20261015-live-02",
+      "track": "model",
+      "modelId": "Kimi-K3",
+      "modelMaxOutputTokens": 4096,
+      "planFingerprint": "7b9c96b7c9fbcffeba5d1c2449340f09c77cfbbbd6996e1bc03d1e6a0af6a2b6",
+      "taskId": "trustbench-notes-agent-v3-paced30-long-v1",
+      "agentBudget": {
+        "maxSteps": 8,
+        "maxDurationMs": 600000,
+        "idleTimeoutMs": 120000,
+        "maxRepeatedActions": 3,
+        "maxNoProgressSteps": 2
+      },
+      "reportId": "verification-run-c0a21fbf18b945d6866dc9f72a3008d4",
+      "outcome": "passed",
+      "failureReason": null,
+      "actionErrorCode": null,
+      "agentDone": true,
+      "actions": 4,
+      "modelDecisionCount": 5,
+      "startedAt": 1792058600897,
+      "finishedAt": 1792058863617,
+      "evidenceAudit": {
+        "verifiedFiles": 8,
+        "verifiedSegments": 2
+      },
+      "reportSha256": "20ae69b732fed7dc701154d4bc1d86a5860169f5117658d9163e5c006f5f172f",
+      "planSha256": "bbba3608a1adf9adbd0ea9019b21effe57784c4abd5e8dbc0217ef7b74e89048",
+      "eventsSha256": "4c3d24964f4cfb38b2a05662c2feb0eeb4fcf701701aa7677f5e208d485669e9",
+      "transcriptSha256": "a2c57452f3f855874f3dd6e4d6991a2c747a15a30420ff10018fd6c67f94bc09",
+      "transcriptSha256s": {
+        "segment-create-review-note-test-02-a3384212eadc": "a2c57452f3f855874f3dd6e4d6991a2c747a15a30420ff10018fd6c67f94bc09"
+      },
+      "storageReceiptSha256": "9bdf31cb4a0f510d1d21ff966d60ef640af0bba8dcf8f159bfb9714585286905",
+      "deviceSerial": "REDACTED-DEVICE",
+      "apkSha256": "e6c74dec77836d7c354139d2ceaa30cc5e3cb46dd98f8634dab1757212694480",
+      "source": "directory",
+      "arm": "harness",
+      "runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-direct-comparison-v1-harness-20261015-live-02",
+      "durationMs": 262720,
+      "modelInputsSha256": "4269894bffad5ae6ff0e639cf033111017712facc1b7f0793d508db9408697c0",
+      "comparisonPolicySha256": "b7b1ed5e72823bb33dc598fb5ef5f48938a93f3ccceb8e0a755353cdfd710fa6",
+      "modelReceipts": [
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "219fc1d617920586180923264e8454",
+          "latencyMs": 1862,
+          "promptTokens": 480,
+          "completionTokens": 102,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 0,
+          "minRequestIntervalMs": 60000
+        },
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "219fc68917920586781027962ecd64",
+          "latencyMs": 1831,
+          "promptTokens": 528,
+          "completionTokens": 106,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 50272,
+          "minRequestIntervalMs": 60000
+        },
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "2198b88d17920587381435426ef9e9",
+          "latencyMs": 2563,
+          "promptTokens": 530,
+          "completionTokens": 103,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 50456,
+          "minRequestIntervalMs": 60000
+        },
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "2182b45e17920587982681057eb1cb",
+          "latencyMs": 2456,
+          "promptTokens": 533,
+          "completionTokens": 150,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 49668,
+          "minRequestIntervalMs": 60000
+        },
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "0b93cf2017920588581001830e16c7",
+          "latencyMs": 3815,
+          "promptTokens": 535,
+          "completionTokens": 189,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 49600,
+          "minRequestIntervalMs": 60000
+        }
+      ]
+    }
+  ],
+  "sameInitialModelInput": true,
+  "samePrompt": true,
+  "samePlan": true,
+  "sameBudget": true,
+  "sameVerifiedDevice": true,
+  "sameVerifiedFixture": true,
+  "eligibleForReliabilityEstimate": false,
+  "superiorityEstablished": false,
+  "scope": "one normal-task paired execution-layer ablation; shared observer and differing action transport"
+}

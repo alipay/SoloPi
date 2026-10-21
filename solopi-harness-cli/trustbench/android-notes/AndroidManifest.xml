@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.trustnotes"
+    android:versionCode="2"
+    android:versionName="0.2.0">
+    <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="29" />
+    <application android:debuggable="true" android:label="TrustBench Notes" android:theme="@android:style/Theme.Material.Light.NoActionBar">
+        <activity android:name=".MainActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

@@ -1,0 +1,20 @@
+{
+  "protocolId": "notes-direct-vs-harness-v1",
+  "status": "frozen before first paired run",
+  "planFingerprint": "7b9c96b7c9fbcffeba5d1c2449340f09c77cfbbbd6996e1bc03d1e6a0af6a2b6",
+  "arms": ["direct", "harness"],
+  "firstPairOrder": ["direct", "harness"],
+  "modelId": "Kimi-K3",
+  "maxOutputTokens": 4096,
+  "minRequestIntervalMs": 60000,
+  "deviceSerial": "REDACTED-DEVICE",
+  "maxSteps": 8,
+  "maxDurationMs": 600000,
+  "idleTimeoutMs": 120000,
+  "common": ["typed bridge prompt and parser", "read-only SoloPi accessibility observations", "fixture allowlist", "same frozen reset and UI oracle", "independent post-run storage readback", "ASCII click/input envelope", "restart-app", "no provider fallback or automatic action retry"],
+  "difference": "Direct dispatches observed target coordinates with ADB; Harness dispatches through the unchanged guarded SoloPi action API. Direct host records are explicitly marked, not device guard receipts.",
+  "primaryOutcomes": ["independent task outcome", "agent done vs external outcome", "execution rejection", "provider unavailability"],
+  "secondaryOutcomes": ["duration", "actions", "model decisions", "tokens", "pacing wait"],
+  "limitations": ["shared observation instrumentation: not a fully SoloPi-independent agent", "action transport differs, so effects cannot all be attributed to stale guard alone", "normal task pair alone cannot prove advantage under perturbations", "no model ranking or reliability claim from one pair"],
+  "exclusions": "Historical model/script runs are not direct-agent controls and will not be pooled. Provider/setup failures remain recorded."
+}

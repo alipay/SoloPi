@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "modelOutputsMatched": 2,
+  "contractsChecked": 24,
+  "injectionsChecked": 24,
+  "initialStorageChecked": 24,
+  "harnessActionBindingsChecked": 12,
+  "sourceHashesChecked": 15,
+  "manifestFiles": 277
+}

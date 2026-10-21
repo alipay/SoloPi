@@ -156,6 +156,30 @@ public final class AgentSessionState {
                                          String stepId, String observationId, String currentSignature,
                                          Action action, Map<String, Object> freshPage,
                                          AgentTargetContextGuard.Verification validation) {
+        return beginAction(expectedSessionId, expectedOwnerToken, stepId, observationId,
+                currentSignature, action, freshPage, validation, false, null);
+    }
+
+    synchronized String actionContract(String sessionId, String ownerToken) {
+        return requireIdentity(sessionId, ownerToken).success && config != null ? config.actionContractJson : null;
+    }
+
+    synchronized BeginResult beginAction(String sessionId, String ownerToken, String stepId,
+            String observationId, String signature, Action action, boolean inputValidated) {
+        return beginAction(sessionId, ownerToken, stepId, observationId, signature, action,
+                null, null, inputValidated && action != null && "input".equals(action.type), null);
+    }
+
+    synchronized BeginResult beginAction(String sessionId, String ownerToken, String stepId,
+            String observationId, String signature, Action action, boolean validated, String error) {
+        return beginAction(sessionId, ownerToken, stepId, observationId, signature, action,
+                null, null, validated, error);
+    }
+
+    synchronized BeginResult beginAction(String expectedSessionId, String expectedOwnerToken,
+            String stepId, String observationId, String currentSignature, Action action,
+            Map<String, Object> freshPage, AgentTargetContextGuard.Verification validation,
+            boolean contextValidated, String contextError) {
         Result<Object> identity = requireIdentity(expectedSessionId, expectedOwnerToken);
         if (!identity.success) {
             return BeginResult.rejected(rejectedReceipt(stepId, observationId, action,
@@ -203,6 +227,10 @@ public final class AgentSessionState {
                     "invalid_action", validationError);
         }
         boolean targetStrategy = AgentTargetContextGuard.TARGET_CONTEXT_V1.equals(config.actionValidationStrategy);
+        if (contextError != null || config.actionContractJson != null && !contextValidated) {
+            return rememberRejection(stepId, observationId, action,
+                    "action_contract_violation", "Trusted session action contract did not match");
+        }
         boolean verifiedTarget = targetStrategy && validation != null && currentObservation != null
                 && currentSignature != null && validation.verifies(observationId,
                 currentObservation.signature, currentSignature, action);
@@ -221,7 +249,7 @@ public final class AgentSessionState {
                 || !observationId.equals(currentObservation.observationId)
                 || currentSignature == null
                 || targetClickRejected
-                || (!verifiedTarget && !currentSignature.equals(currentObservation.signature))) {
+                || (!verifiedTarget && !contextValidated && !currentSignature.equals(currentObservation.signature))) {
             BeginResult rejection = rememberRejection(stepId, observationId, action,
                     "stale_observation", "The action must reference the current unchanged observation");
             if (targetStrategy && validation != null) {
@@ -646,6 +674,7 @@ public final class AgentSessionState {
         public final int maxNoProgressSteps;
         public final String settleStrategy;
         public final String actionValidationStrategy;
+        public final String actionContractJson;
 
         public Config(int maxSteps, long maxDurationMs, long idleTimeoutMs,
                       int maxRepeatedActions, int maxNoProgressSteps) {
@@ -662,6 +691,13 @@ public final class AgentSessionState {
         public Config(int maxSteps, long maxDurationMs, long idleTimeoutMs,
                       int maxRepeatedActions, int maxNoProgressSteps, String settleStrategy,
                       String actionValidationStrategy) {
+            this(maxSteps, maxDurationMs, idleTimeoutMs, maxRepeatedActions, maxNoProgressSteps,
+                    settleStrategy, actionValidationStrategy, null);
+        }
+
+        public Config(int maxSteps, long maxDurationMs, long idleTimeoutMs,
+                      int maxRepeatedActions, int maxNoProgressSteps, String settleStrategy,
+                      String actionValidationStrategy, String actionContractJson) {
             if (maxSteps <= 0 || maxDurationMs <= 0L || idleTimeoutMs <= 0L
                     || maxRepeatedActions <= 0 || maxNoProgressSteps <= 0) {
                 throw new IllegalArgumentException("All Agent session bounds must be positive");
@@ -679,6 +715,10 @@ public final class AgentSessionState {
             this.maxNoProgressSteps = maxNoProgressSteps;
             this.settleStrategy = settleStrategy;
             this.actionValidationStrategy = actionValidationStrategy;
+            this.actionContractJson = actionContractJson;
+            if (actionContractJson != null && !AgentTargetContextGuard.FULL_PAGE.equals(actionValidationStrategy)) {
+                throw new IllegalArgumentException("Action contract cannot combine with another validation strategy");
+            }
         }
     }
 

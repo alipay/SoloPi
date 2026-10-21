@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <int name="outbound" value="0" />
+    <int name="primaryStock" value="11" />
+    <string name="invoiceAmount">37</string>
+    <string name="dispatchSku"></string>
+    <string name="invoiceKind">OTHER</string>
+    <int name="otherStock" value="11" />
+    <string name="invoiceCustomer">Customer: Northwind</string>
+    <string name="invoiceCurrency">Currency: CNY</string>
+</map>

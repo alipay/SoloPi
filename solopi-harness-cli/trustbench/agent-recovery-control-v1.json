@@ -1,0 +1,57 @@
+{
+  "counter-recovery": {
+    "reach-two": [
+      {
+        "type": "act",
+        "action": {
+          "type": "click",
+          "selector": {
+            "resourceId": "com.example.counter:id/increment_button",
+            "className": "android.widget.Button",
+            "packageName": "com.example.counter"
+          }
+        }
+      },
+      {
+        "type": "act",
+        "action": {
+          "type": "click",
+          "selector": {
+            "resourceId": "com.example.counter:id/increment_button",
+            "className": "android.widget.Button",
+            "packageName": "com.example.counter"
+          }
+        }
+      },
+      {"type": "done", "reason": "scripted control"}
+    ],
+    "reset-from-two": [
+      {
+        "type": "act",
+        "action": {
+          "type": "click",
+          "selector": {
+            "resourceId": "com.example.counter:id/reset_button",
+            "className": "android.widget.Button",
+            "packageName": "com.example.counter"
+          }
+        }
+      },
+      {"type": "done", "reason": "scripted control"}
+    ],
+    "recover-to-one": [
+      {
+        "type": "act",
+        "action": {
+          "type": "click",
+          "selector": {
+            "resourceId": "com.example.counter:id/increment_button",
+            "className": "android.widget.Button",
+            "packageName": "com.example.counter"
+          }
+        }
+      },
+      {"type": "done", "reason": "scripted control"}
+    ]
+  }
+}

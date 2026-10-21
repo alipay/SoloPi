@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "id": "trustbench-notes-revisit-v1",
+  "title": "TrustBench notes saved-item revisit task",
+  "description": "Create a note, return to the list, reopen it, and verify its persisted content.",
+  "targetAppPackage": "com.example.trustnotes",
+  "targetAppLabel": "TrustBench Notes",
+  "acceptanceCriteria": [
+    {"id": "AC-REVISIT", "text": "Save and reopen a note titled Budget review with body Reconcile 3 invoices."}
+  ],
+  "reusableFlows": [
+    {
+      "id": "clear-notes",
+      "steps": [
+        {
+          "id": "tap-reset",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.trustnotes:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.trustnotes"
+            }
+          }
+        },
+        {"id": "settle-reset", "type": "operation", "action": {"type": "wait", "durationMs": 1500}}
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "revisit-budget-note",
+      "title": "Create, leave, and reopen a saved note",
+      "acceptanceCriteria": ["AC-REVISIT"],
+      "dependsOn": [],
+      "steps": [
+        {"use": "clear-notes"},
+        {
+          "id": "create-note",
+          "type": "explore",
+          "goal": "From the empty notes list, create a note titled 'Budget review' with body 'Reconcile 3 invoices'. Save it and stop only when the detail page shows both exact values.",
+          "allowedActions": ["click", "input", "wait"],
+          "budget": {"maxSteps": 8, "maxDurationMs": 120000, "idleTimeoutMs": 30000, "maxRepeatedActions": 3, "maxNoProgressSteps": 2}
+        },
+        {
+          "id": "return-to-list",
+          "type": "explore",
+          "goal": "Leave the saved note detail page using Back to notes. Stop only when the notes list shows one saved note named Budget review.",
+          "allowedActions": ["click", "wait"],
+          "budget": {"maxSteps": 4, "maxDurationMs": 60000, "idleTimeoutMs": 30000, "maxRepeatedActions": 3, "maxNoProgressSteps": 2}
+        },
+        {
+          "id": "reopen-note",
+          "type": "explore",
+          "goal": "Open the saved Budget review note from the list. Stop only when its detail page again shows title 'Budget review' and body 'Reconcile 3 invoices'.",
+          "allowedActions": ["click", "wait"],
+          "budget": {"maxSteps": 4, "maxDurationMs": 60000, "idleTimeoutMs": 30000, "maxRepeatedActions": 3, "maxNoProgressSteps": 2}
+        }
+      ],
+      "checkpoints": [
+        {"id": "list-is-empty", "afterStep": "settle-reset", "oracle": {"type": "ui", "selector": {"resourceId": "com.example.trustnotes:id/note_count", "className": "android.widget.TextView", "packageName": "com.example.trustnotes"}, "field": "text", "operator": "equals", "expected": "0"}},
+        {"id": "initial-title-matches", "afterStep": "create-note", "oracle": {"type": "ui", "selector": {"resourceId": "com.example.trustnotes:id/saved_title", "className": "android.widget.TextView", "packageName": "com.example.trustnotes"}, "field": "text", "operator": "equals", "expected": "Budget review"}},
+        {"id": "initial-body-matches", "afterStep": "create-note", "oracle": {"type": "ui", "selector": {"resourceId": "com.example.trustnotes:id/saved_body", "className": "android.widget.TextView", "packageName": "com.example.trustnotes"}, "field": "text", "operator": "equals", "expected": "Reconcile 3 invoices"}},
+        {"id": "list-has-one-note", "afterStep": "return-to-list", "oracle": {"type": "ui", "selector": {"resourceId": "com.example.trustnotes:id/note_count", "className": "android.widget.TextView", "packageName": "com.example.trustnotes"}, "field": "text", "operator": "equals", "expected": "1"}},
+        {"id": "list-title-matches", "afterStep": "return-to-list", "oracle": {"type": "ui", "selector": {"resourceId": "com.example.trustnotes:id/saved_note_button", "className": "android.widget.Button", "packageName": "com.example.trustnotes"}, "field": "text", "operator": "equals", "expected": "Budget review"}},
+        {"id": "reopened-title-matches", "afterStep": "reopen-note", "oracle": {"type": "ui", "selector": {"resourceId": "com.example.trustnotes:id/saved_title", "className": "android.widget.TextView", "packageName": "com.example.trustnotes"}, "field": "text", "operator": "equals", "expected": "Budget review"}},
+        {"id": "reopened-body-matches", "afterStep": "reopen-note", "oracle": {"type": "ui", "selector": {"resourceId": "com.example.trustnotes:id/saved_body", "className": "android.widget.TextView", "packageName": "com.example.trustnotes"}, "field": "text", "operator": "equals", "expected": "Reconcile 3 invoices"}}
+      ],
+      "cleanup": []
+    }
+  ]
+}

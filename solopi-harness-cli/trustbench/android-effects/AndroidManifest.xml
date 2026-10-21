@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.trusteffects" android:versionCode="1" android:versionName="0.1.0">
+  <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="29" />
+  <application android:debuggable="true" android:label="TrustBench Effects" android:theme="@android:style/Theme.Material.Light.NoActionBar">
+    <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop">
+      <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+    </activity>
+  </application>
+</manifest>

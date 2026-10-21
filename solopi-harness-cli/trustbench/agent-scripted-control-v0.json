@@ -1,0 +1,48 @@
+{
+  "counter-to-one": {
+    "explore-to-one": [
+      {
+        "type": "act",
+        "stepId": "control-one-click",
+        "action": {
+          "type": "click",
+          "selector": {
+            "resourceId": "com.example.counter:id/increment_button",
+            "className": "android.widget.Button",
+            "packageName": "com.example.counter"
+          }
+        }
+      },
+      {"type": "done", "reason": "scripted control"}
+    ]
+  },
+  "counter-to-two": {
+    "explore-to-two": [
+      {
+        "type": "act",
+        "stepId": "control-two-click-one",
+        "action": {
+          "type": "click",
+          "selector": {
+            "resourceId": "com.example.counter:id/increment_button",
+            "className": "android.widget.Button",
+            "packageName": "com.example.counter"
+          }
+        }
+      },
+      {
+        "type": "act",
+        "stepId": "control-two-click-two",
+        "action": {
+          "type": "click",
+          "selector": {
+            "resourceId": "com.example.counter:id/increment_button",
+            "className": "android.widget.Button",
+            "packageName": "com.example.counter"
+          }
+        }
+      },
+      {"type": "done", "reason": "scripted control"}
+    ]
+  }
+}

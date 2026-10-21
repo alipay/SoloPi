@@ -1,0 +1,178 @@
+{
+  "schemaVersion": "solopi.trustbench.direct-comparison/v1",
+  "attempts": [
+    {
+      "runId": "trustbench-direct-comparison-v1-direct-20261015-live-01",
+      "track": "model",
+      "modelId": "Kimi-K3",
+      "modelMaxOutputTokens": 4096,
+      "planFingerprint": "7b9c96b7c9fbcffeba5d1c2449340f09c77cfbbbd6996e1bc03d1e6a0af6a2b6",
+      "taskId": "trustbench-notes-agent-v3-paced30-long-v1",
+      "agentBudget": {
+        "maxSteps": 8,
+        "maxDurationMs": 600000,
+        "idleTimeoutMs": 120000,
+        "maxRepeatedActions": 3,
+        "maxNoProgressSteps": 2
+      },
+      "reportId": "verification-run-e35bcceac4424446b2e16aa64ba2114a",
+      "outcome": "passed",
+      "failureReason": null,
+      "actionErrorCode": null,
+      "agentDone": true,
+      "actions": 4,
+      "modelDecisionCount": 5,
+      "startedAt": 1792057674778,
+      "finishedAt": 1792057940917,
+      "evidenceAudit": {
+        "verifiedFiles": 8,
+        "verifiedSegments": 2
+      },
+      "reportSha256": "bf5c324b7aecacea9949ae32521203dfc15c212b68091e14512d64659b3a6479",
+      "planSha256": "bbba3608a1adf9adbd0ea9019b21effe57784c4abd5e8dbc0217ef7b74e89048",
+      "eventsSha256": "48d88f5db2878070cf870c46ee02cd50cd8aed84f89cf4c8874284fee2150601",
+      "transcriptSha256": "dcd53c13adba52eb3edcc3bdca2c7827688b8e8dc06cc75a2f60682b08abf236",
+      "transcriptSha256s": {
+        "segment-create-review-note-test-02-a3384212eadc": "dcd53c13adba52eb3edcc3bdca2c7827688b8e8dc06cc75a2f60682b08abf236"
+      },
+      "storageReceiptSha256": "b57af7411ce3df08a45bb253aa31ffedaa7ae8355ae8df40ba111771222002ae",
+      "deviceSerial": "REDACTED-DEVICE",
+      "apkSha256": "e6c74dec77836d7c354139d2ceaa30cc5e3cb46dd98f8634dab1757212694480",
+      "source": "directory",
+      "arm": "direct",
+      "runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-direct-comparison-v1-direct-20261015-live-01",
+      "durationMs": 266139,
+      "modelInputsSha256": "400e79fe02b4548b22178c0006d8d5304d4c6f683f9dbb71a7cb636989f69cd0",
+      "comparisonPolicySha256": "44e35a960edadbd417f77428856c8ac567ff041a1d138586a3f22f685f4ae4a1",
+      "modelReceipts": [
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "21d34b7117920576920987811e7880",
+          "latencyMs": 1938,
+          "promptTokens": 480,
+          "completionTokens": 96,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 0,
+          "minRequestIntervalMs": 60000
+        },
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "21a64fe917920577521953782e8afd",
+          "latencyMs": 6399,
+          "promptTokens": 528,
+          "completionTokens": 106,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 56356,
+          "minRequestIntervalMs": 60000
+        },
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "0bffd88517920578121932667e75eb",
+          "latencyMs": 6595,
+          "promptTokens": 530,
+          "completionTokens": 103,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 51617,
+          "minRequestIntervalMs": 60000
+        },
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "2181c75417920578721436627e77a8",
+          "latencyMs": 4298,
+          "promptTokens": 533,
+          "completionTokens": 65,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 50735,
+          "minRequestIntervalMs": 60000
+        },
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "219978e917920579321827145ea9c2",
+          "latencyMs": 7322,
+          "promptTokens": 535,
+          "completionTokens": 178,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 53328,
+          "minRequestIntervalMs": 60000
+        }
+      ]
+    },
+    {
+      "runId": "trustbench-direct-comparison-v1-harness-20261015-live-01",
+      "track": "model",
+      "modelId": "Kimi-K3",
+      "modelMaxOutputTokens": 4096,
+      "planFingerprint": "7b9c96b7c9fbcffeba5d1c2449340f09c77cfbbbd6996e1bc03d1e6a0af6a2b6",
+      "taskId": "trustbench-notes-agent-v3-paced30-long-v1",
+      "agentBudget": {
+        "maxSteps": 8,
+        "maxDurationMs": 600000,
+        "idleTimeoutMs": 120000,
+        "maxRepeatedActions": 3,
+        "maxNoProgressSteps": 2
+      },
+      "reportId": "verification-run-4d068ec98a774a268166c35893678209",
+      "outcome": "provider_not_tested",
+      "failureReason": "model_decision_failed",
+      "actionErrorCode": null,
+      "agentDone": false,
+      "actions": 1,
+      "modelDecisionCount": 1,
+      "startedAt": 1792057972809,
+      "finishedAt": 1792058053276,
+      "evidenceAudit": {
+        "verifiedFiles": 7,
+        "verifiedSegments": 2
+      },
+      "reportSha256": "f50c53064691862fb23e1aca16a614bb4c3dc97ca85df0d4b3c1a0c30d064c4e",
+      "planSha256": "bbba3608a1adf9adbd0ea9019b21effe57784c4abd5e8dbc0217ef7b74e89048",
+      "eventsSha256": "ddb8348cca1cc9c812a18f98b8b42d3072884dc38f6082d22d639c603d6e18f6",
+      "transcriptSha256": "0bdfe5de892cff9fa153c3e18e7569d3b3bcb15e46bbb5d6f33f19bd244eacd7",
+      "transcriptSha256s": {
+        "segment-create-review-note-test-02-a3384212eadc": "0bdfe5de892cff9fa153c3e18e7569d3b3bcb15e46bbb5d6f33f19bd244eacd7"
+      },
+      "storageReceiptSha256": null,
+      "deviceSerial": null,
+      "apkSha256": null,
+      "source": "directory",
+      "arm": "harness",
+      "runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-direct-comparison-v1-harness-20261015-live-01",
+      "durationMs": 80467,
+      "modelInputsSha256": "24d1c5603d6408aecdceb36bc1176fe20a7f02706ebb5a271dbdaf7fa48a4beb",
+      "comparisonPolicySha256": "b7b1ed5e72823bb33dc598fb5ef5f48938a93f3ccceb8e0a755353cdfd710fa6",
+      "modelReceipts": [
+        {
+          "provider": "cloud",
+          "modelId": "Kimi-K3",
+          "requestId": "0b402b5917920579921314103eacd8",
+          "latencyMs": 6001,
+          "promptTokens": 480,
+          "completionTokens": 96,
+          "maxOutputTokens": 4096,
+          "fallbackUsed": false,
+          "pacingWaitMs": 1618,
+          "minRequestIntervalMs": 60000
+        }
+      ]
+    }
+  ],
+  "sameInitialModelInput": true,
+  "samePrompt": true,
+  "samePlan": true,
+  "sameBudget": true,
+  "sameVerifiedDevice": false,
+  "sameVerifiedFixture": false,
+  "eligibleForReliabilityEstimate": false,
+  "superiorityEstablished": false,
+  "scope": "one normal-task paired execution-layer ablation; shared observer and differing action transport"
+}

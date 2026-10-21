@@ -1,0 +1,294 @@
+{
+  "schemaVersion": "solopi.ai.verification-plan/v1",
+  "sourceFingerprint": "fcf3153210722168873ddf74ecdbf9e4b17612b9b35a71c8fde5bf029489f708",
+  "goalTree": {
+    "id": "trustbench-notes-agent-v3-paced30-long-v1",
+    "type": "requirement",
+    "title": "TrustBench notes alternate-seed persisted-state task (30s pacing, long budget)",
+    "children": [
+      {
+        "id": "AC-NOTE",
+        "type": "acceptance_criterion",
+        "text": "Save a note titled Quarterly review with body Check totals before Friday.",
+        "children": [
+          {
+            "id": "create-review-note",
+            "type": "scenario",
+            "dependsOn": [],
+            "children": [
+              {
+                "id": "list-is-empty",
+                "type": "checkpoint",
+                "afterStep": "settle-reset"
+              },
+              {
+                "id": "saved-title-matches",
+                "type": "checkpoint",
+                "afterStep": "create-note"
+              },
+              {
+                "id": "saved-body-matches",
+                "type": "checkpoint",
+                "afterStep": "create-note"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "intent": {
+    "schemaVersion": "solopi.ai.test-intent/v1",
+    "requirement": {
+      "id": "trustbench-notes-agent-v3-paced30-long-v1",
+      "title": "TrustBench notes alternate-seed persisted-state task (30s pacing, long budget)",
+      "description": "Create a different note and verify it through UI and independent storage readback.",
+      "acceptanceCriteria": [
+        {
+          "id": "AC-NOTE",
+          "text": "Save a note titled Quarterly review with body Check totals before Friday."
+        }
+      ]
+    },
+    "parameters": {},
+    "executionOrder": [
+      "create-review-note"
+    ],
+    "scenarios": [
+      {
+        "id": "create-review-note",
+        "title": "Create and persist a review note",
+        "acceptanceCriteria": [
+          "AC-NOTE"
+        ],
+        "dependsOn": [],
+        "bindings": {},
+        "testData": {},
+        "preconditions": [],
+        "steps": [
+          {
+            "id": "tap-reset",
+            "type": "operation",
+            "stability": "stable",
+            "action": {
+              "type": "click",
+              "selector": {
+                "resourceId": "com.example.trustnotes:id/reset_button",
+                "className": "android.widget.Button",
+                "packageName": "com.example.trustnotes"
+              }
+            }
+          },
+          {
+            "id": "settle-reset",
+            "type": "operation",
+            "stability": "stable",
+            "action": {
+              "type": "wait",
+              "durationMs": 1500
+            }
+          },
+          {
+            "id": "create-note",
+            "type": "explore",
+            "stability": "unknown",
+            "goal": "From the empty notes list, create a note titled 'Quarterly review' with body 'Check totals before Friday'. Save it and stop on the saved note detail page only after both fields are visible.",
+            "allowedActions": [
+              "click",
+              "input",
+              "wait"
+            ],
+            "budget": {
+              "maxSteps": 8,
+              "maxDurationMs": 600000,
+              "idleTimeoutMs": 120000,
+              "maxRepeatedActions": 3,
+              "maxNoProgressSteps": 2
+            }
+          }
+        ],
+        "checkpoints": [
+          {
+            "id": "list-is-empty",
+            "afterStep": "settle-reset",
+            "acceptanceCriteria": [
+              "AC-NOTE"
+            ],
+            "oracle": {
+              "type": "ui",
+              "selector": {
+                "resourceId": "com.example.trustnotes:id/note_count",
+                "className": "android.widget.TextView",
+                "packageName": "com.example.trustnotes"
+              },
+              "field": "text",
+              "operator": "equals",
+              "expected": "0"
+            },
+            "segmentId": "segment-create-review-note-test-01-4f603e5b8f9c",
+            "oracleStepId": "oracle-list-is-empty"
+          },
+          {
+            "id": "saved-title-matches",
+            "afterStep": "create-note",
+            "acceptanceCriteria": [
+              "AC-NOTE"
+            ],
+            "oracle": {
+              "type": "ui",
+              "selector": {
+                "resourceId": "com.example.trustnotes:id/saved_title",
+                "className": "android.widget.TextView",
+                "packageName": "com.example.trustnotes"
+              },
+              "field": "text",
+              "operator": "equals",
+              "expected": "Quarterly review"
+            },
+            "segmentId": "segment-create-review-note-test-02-a3384212eadc"
+          },
+          {
+            "id": "saved-body-matches",
+            "afterStep": "create-note",
+            "acceptanceCriteria": [
+              "AC-NOTE"
+            ],
+            "oracle": {
+              "type": "ui",
+              "selector": {
+                "resourceId": "com.example.trustnotes:id/saved_body",
+                "className": "android.widget.TextView",
+                "packageName": "com.example.trustnotes"
+              },
+              "field": "text",
+              "operator": "equals",
+              "expected": "Check totals before Friday"
+            },
+            "segmentId": "segment-create-review-note-test-02-a3384212eadc"
+          }
+        ],
+        "cleanup": [],
+        "budget": {
+          "maxSteps": 8,
+          "maxDurationMs": 600000,
+          "idleTimeoutMs": 120000,
+          "maxRepeatedActions": 3,
+          "maxNoProgressSteps": 2
+        },
+        "targetAppPackage": "com.example.trustnotes",
+        "targetAppLabel": "TrustBench Notes",
+        "route": "hybrid",
+        "segments": [
+          {
+            "segmentId": "segment-create-review-note-test-01-4f603e5b8f9c",
+            "phase": "test",
+            "route": "deterministic",
+            "sourceStepIds": [
+              "tap-reset",
+              "settle-reset"
+            ],
+            "checkpointIds": [
+              "list-is-empty"
+            ],
+            "checkpointOracleSteps": {
+              "list-is-empty": "oracle-list-is-empty"
+            },
+            "case": {
+              "caseName": "verify-trustbench-notes-agent-v3-paced30-long-v1-create-review-note-test-01-71f21cc991fd",
+              "caseDesc": "已编译的验证片段 create-review-note/test",
+              "targetAppPackage": "com.example.trustnotes",
+              "targetAppLabel": "TrustBench Notes",
+              "recordMode": "local",
+              "advanceSettings": "",
+              "priority": 2,
+              "operationLog": {
+                "steps": [
+                  {
+                    "operationNode": {
+                      "resourceId": "com.example.trustnotes:id/reset_button",
+                      "className": "android.widget.Button",
+                      "packageName": "com.example.trustnotes"
+                    },
+                    "operationMethod": {
+                      "actionEnum": "CLICK",
+                      "operationParam": {},
+                      "encrypt": false,
+                      "safeEncrypt": false
+                    },
+                    "operationIndex": 0,
+                    "operationId": "verification-create-review-note-test",
+                    "stepId": "tap-reset"
+                  },
+                  {
+                    "operationNode": null,
+                    "operationMethod": {
+                      "actionEnum": "SLEEP",
+                      "operationParam": {
+                        "text": "1500"
+                      },
+                      "encrypt": false,
+                      "safeEncrypt": false
+                    },
+                    "operationIndex": 1,
+                    "operationId": "verification-create-review-note-test",
+                    "stepId": "settle-reset"
+                  },
+                  {
+                    "operationNode": {
+                      "resourceId": "com.example.trustnotes:id/note_count",
+                      "className": "android.widget.TextView",
+                      "packageName": "com.example.trustnotes"
+                    },
+                    "operationMethod": {
+                      "actionEnum": "ASSERT",
+                      "operationParam": {
+                        "assertMode": "assert_accurate",
+                        "assertInputContent": "0"
+                      },
+                      "encrypt": false,
+                      "safeEncrypt": false
+                    },
+                    "operationIndex": 2,
+                    "operationId": "verification-create-review-note-test",
+                    "stepId": "oracle-list-is-empty"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "segmentId": "segment-create-review-note-test-02-a3384212eadc",
+            "phase": "test",
+            "route": "dynamic",
+            "sourceStepIds": [
+              "create-note"
+            ],
+            "checkpointIds": [
+              "saved-title-matches",
+              "saved-body-matches"
+            ],
+            "dynamicStep": {
+              "id": "create-note",
+              "type": "explore",
+              "stability": "unknown",
+              "goal": "From the empty notes list, create a note titled 'Quarterly review' with body 'Check totals before Friday'. Save it and stop on the saved note detail page only after both fields are visible.",
+              "allowedActions": [
+                "click",
+                "input",
+                "wait"
+              ],
+              "budget": {
+                "maxSteps": 8,
+                "maxDurationMs": 600000,
+                "idleTimeoutMs": 120000,
+                "maxRepeatedActions": 3,
+                "maxNoProgressSteps": 2
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "planFingerprint": "7b9c96b7c9fbcffeba5d1c2449340f09c77cfbbbd6996e1bc03d1e6a0af6a2b6"
+}

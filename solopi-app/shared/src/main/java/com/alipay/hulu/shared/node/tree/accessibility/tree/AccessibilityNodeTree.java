@@ -63,6 +63,7 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
     private boolean isFocusable;
 
     private boolean isEditable;
+    private boolean enabled;
 
     // Nullable protocol metadata: a synthetic node without AccessibilityNodeInfo
     // cannot claim that it is visible, non-password, unchecked, or unselected.
@@ -141,6 +142,7 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
         this.isFocusable = info.isFocusable();
         this.isEditable = info.isEditable();
         this.isPassword = info.isPassword();
+        this.enabled = info.isEnabled();
         this.isSelected = info.isSelected();
         this.isChecked = info.isChecked();
         this.isVisibleToUser = info.isVisibleToUser();
@@ -335,6 +337,7 @@ public class AccessibilityNodeTree extends AbstractNodeTree {
         obj.put("isClickable", isClickable);
         obj.put("isEnabled", isEnabled);
         obj.put("isEditable", isEditable);
+        obj.put("enabled", enabled);
         obj.put("isFocusable", isFocusable);
         obj.put("isScrollable", isScrollable);
         // Code security: preserve raw Android metadata for fail-closed candidate

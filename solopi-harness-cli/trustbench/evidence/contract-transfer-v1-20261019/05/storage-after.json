@@ -1,0 +1,10 @@
+{
+  "outbound": 1,
+  "primaryStock": 11,
+  "invoiceAmount": "",
+  "dispatchSku": "SKU ZT-92",
+  "invoiceKind": "",
+  "otherStock": 10,
+  "invoiceCustomer": "",
+  "invoiceCurrency": ""
+}

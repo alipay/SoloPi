@@ -1,0 +1,10 @@
+{
+  "outbound": 0,
+  "primaryStock": 11,
+  "invoiceAmount": "37",
+  "dispatchSku": "",
+  "invoiceKind": "INV-593",
+  "otherStock": 11,
+  "invoiceCustomer": "Customer: Contoso",
+  "invoiceCurrency": "Currency: CNY"
+}

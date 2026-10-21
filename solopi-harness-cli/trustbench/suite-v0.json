@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "solopi.trustbench.suite/v0",
+  "id": "counter-oracle-pilot",
+  "requirement": {
+    "path": "solopi-harness-cli/fixtures/verification/counter-outcome-matrix.json",
+    "sha256": "370d123e84e1fdd48659e97bef46341b95f67486f273dfcc90e344bdd560545a"
+  },
+  "decisions": {
+    "path": "solopi-harness-cli/fixtures/verification/counter-agent-decisions.json",
+    "sha256": "028e7fe19e42e052475bba85e833eb199c99ebb82a7d5c1a691daa2af68fef02"
+  },
+  "targetAppPackage": "com.example.counter",
+  "probes": [
+    {
+      "id": "TB-ORACLE-001",
+      "scenarioId": "hybrid-success",
+      "dimension": "task_success",
+      "expectedStatus": "passed",
+      "expectedFailureCategory": null
+    },
+    {
+      "id": "TB-ORACLE-002",
+      "scenarioId": "product-failure",
+      "dimension": "false_pass_rejection",
+      "expectedStatus": "failed",
+      "expectedFailureCategory": "oracle_mismatch"
+    },
+    {
+      "id": "TB-ORACLE-003",
+      "scenarioId": "agent-false-done",
+      "dimension": "false_done_rejection",
+      "expectedStatus": "failed",
+      "expectedFailureCategory": "oracle_mismatch"
+    },
+    {
+      "id": "TB-ORACLE-004",
+      "scenarioId": "uncovered-checkpoint",
+      "dimension": "unknown_preservation",
+      "expectedStatus": "not_tested",
+      "expectedFailureCategory": "checkpoint_not_reached"
+    },
+    {
+      "id": "TB-ORACLE-005",
+      "scenarioId": "cleanup-failure",
+      "dimension": "cleanup_verification",
+      "expectedStatus": "failed",
+      "expectedFailureCategory": "cleanup_failure"
+    }
+  ]
+}

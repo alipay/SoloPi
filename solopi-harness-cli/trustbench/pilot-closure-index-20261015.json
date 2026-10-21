@@ -1,0 +1,27 @@
+{
+  "manifests": [
+    "agent-ledger-20261014.json",
+    "agent-ledger-isolated-20261015.json",
+    "agent-ledger-isolated-reuse-20261015.json",
+    "agent-ledger-paced10s-20261015.json",
+    "agent-ledger-paced10s-restart-20261015.json",
+    "agent-ledger-paced30-long-v1-20261015.json",
+    "agent-ledger-paced30s-restart-20261015.json",
+    "agent-ledger-paced60-long-v1-20261015.json",
+    "agent-ledger-ready-foreground-20261015.json",
+    "agent-ledger-stable-observation-20261015.json",
+    "agent-ledger-stable-start-20261015.json",
+    "agent-ledger-stable-start-reuse-20261015.json"
+  ],
+  "currentManifest": "agent-ledger-paced60-long-v1-20261015.json",
+  "oracleProbes": [
+    {
+      "kind": "positive",
+      "runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-notes-oracle-holdout-positive-20261015-live-01"
+    },
+    {
+      "kind": "false_done",
+      "runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-notes-oracle-holdout-false-done-20261015-live-01"
+    }
+  ]
+}

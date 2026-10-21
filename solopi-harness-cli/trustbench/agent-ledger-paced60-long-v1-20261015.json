@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "solopi.trustbench.agent-ledger-manifest/v1",
+  "note": "Separate 60-second pacing group, 600-second total and 120-second idle budget. Do not pool with original baseline or 30-second policy.",
+  "attempts": [{
+    "runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-theta-kimi-k3-v3-redmi-paced60-long-v1-20261015-live-01",
+    "track": "model",
+    "modelId": "Kimi-K3"
+  }, {
+    "runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-control-v3-redmi-paced60-long-v1-20261015-live-01",
+    "track": "control"
+  }]
+}

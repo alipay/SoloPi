@@ -1933,13 +1933,17 @@ Complete
                     (REPO_ROOT / manifest_name).read_text(encoding="utf-8")
                 )
                 self.assertEqual("success", manifest["status"])
-                self.assertEqual(1, manifest["version"])
+                self.assertEqual(2, manifest["version"])
+                if manifest_name == "armeabi.json":
+                    self.assertEqual([], manifest["data"])
+                    self.assertIn("No signed", manifest["reason"])
+                    continue
                 self.assertEqual(
                     [
                         {
                             "url": (
-                                "https://raw.githubusercontent.com/alipay/SoloPi/"
-                                f"v0.12.0/plugins/{archive_name}"
+                                "https://github.com/alipay/SoloPi/releases/download/"
+                                f"patch-signing-2026-v1/{archive_name}"
                             ),
                             "version": 7,
                             "type": "required",

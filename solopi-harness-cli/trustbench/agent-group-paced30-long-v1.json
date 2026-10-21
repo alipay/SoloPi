@@ -1,0 +1,15 @@
+{
+  "groupId": "notes-v3-paced30-long-v1",
+  "planFile": "agent-notes-v3-paced30-long-v1.plan.json",
+  "planFingerprint": "7b9c96b7c9fbcffeba5d1c2449340f09c77cfbbbd6996e1bc03d1e6a0af6a2b6",
+  "sourceFingerprint": "fcf3153210722168873ddf74ecdbf9e4b17612b9b35a71c8fde5bf029489f708",
+  "modelId": "Kimi-K3",
+  "modelMaxOutputTokens": 4096,
+  "minRequestIntervalMs": 30000,
+  "maxDurationMs": 600000,
+  "idleTimeoutMs": 120000,
+  "maxSteps": 8,
+  "restartApp": true,
+  "deviceSerial": "REDACTED-DEVICE",
+  "policy": "Separate experimental group, not pooled with any original baseline. No automatic action or provider retry. Availability probes are non-scored and use archived observations without device actions. Preserve every started trial. UI pass requires immediate independent storage readback and evidence audit before declaring full pass."
+}

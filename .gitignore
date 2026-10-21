@@ -2,3 +2,11 @@
 /doc/
 /output/
 .DS_Store
+__pycache__/
+*.py[cod]
+*.apk
+*.aab
+*.jks
+*.keystore
+local.properties
+run.lock

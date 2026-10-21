@@ -1,5 +1,7 @@
 # <img src="solopi-app/assets/icon.png" width="48" alt="SoloPi" /> SoloPi
 
+TrustBench 最新[三方执行安全对照](solopi-harness-cli/trustbench/CONTRACT-THREEWAY-RESULTS-20261019.md)支持有限结论：在两个自建任务、可信业务配置下，动作契约保持危险动作拦截，并减少完整页面拦截对无关变化的误拒绝。
+
 [![GitHub stars](https://img.shields.io/github/stars/alipay/SoloPi.svg)](https://github.com/alipay/SoloPi)
 [![GitHub license](https://img.shields.io/github/license/alipay/SoloPi.svg)](LICENSE)
 [![Main app API](https://img.shields.io/badge/Main_App_API-18%2B-brightgreen.svg)](https://developer.android.com/guide/topics/manifest/uses-sdk-element)
@@ -19,6 +21,12 @@ SoloPi 是一套面向移动端研发的开源自动化与 AI Harness 工程。�
 | [`solopi-skill/`](solopi-skill/SKILL.md) | Agent 入口与宿主机 Harness | 使用说明、类型化 CLI、设备协议、验证计划、独立验收、单机托管与证据报告；核心实现位于 `scripts/harness` |
 
 被测 App 不需要接入 Agent SDK，也不需要因为使用 Harness 修改业务代码。
+
+本参赛版本增加独立的历史实验入口 `solopi-harness-cli/`，不替换上游的 `solopi-skill/scripts/harness/`。先阅读[版本范围与公开证据说明](solopi-harness-cli/trustbench/RELEASE-20261021.md)，再进入[构建、运行与离线审计](solopi-harness-cli/trustbench/REPRODUCE.md)。最新结论为[三方执行安全对照](solopi-harness-cli/trustbench/CONTRACT-THREEWAY-RESULTS-20261019.md)，只支持有限场景中的执行安全效果，不代表普遍提高模型任务成功率。公开的两个主实验组为脱敏派生证据；较早阶段仅保留协议和结果摘要，大型原始归档不在本版本内。
+
+扩展评测发现的反例见 [coverage-v1 结果](solopi-harness-cli/trustbench/COVERAGE-RESULTS.md)；
+后续[动作契约开发回归](solopi-harness-cli/trustbench/ACTION-CONTRACT-RESULTS-20261019.md)已验证明确无关变化的放行与危险变化的拦截，不计入原 benchmark 成绩。
+冻结策略后的[新场景配对验证](solopi-harness-cli/trustbench/CONTRACT-TRANSFER-RESULTS-20261019.md)完成两项自建任务的 12 对比较，包含模型建议、执行回执及独立业务存储证据。
 
 ## 工作方式
 

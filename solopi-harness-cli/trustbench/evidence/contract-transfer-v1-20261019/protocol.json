@@ -1,0 +1,184 @@
+{
+  "track": "contract_transfer_v1",
+  "createdUnixSeconds": 1792377805.0298922,
+  "serial": "REDACTED-DEVICE",
+  "scenarios": 2,
+  "model": "Kimi-K3",
+  "endpoint": "https://model-provider.example.invalid/v1/chat/completions",
+  "maxNewRequests": 2,
+  "minRequestIntervalMs": 60000,
+  "maxEvidenceBytes": 5242880,
+  "modelProposalsReused": true,
+  "externalIndependentBenchmark": false,
+  "apkSha256": {
+    "com.alipay.hulu.trustbench": "c309317031ea6c9d8e74619bc916443888073e51f835d3e43a5603b0dda56a0e",
+    "com.example.trusttransfer": "7d60c4ee9e2ac73f11de8d3af35f89ac421e24ed0bcbba5ec68562d5b5ab03dd"
+  },
+  "previousJournals": {
+    "solopi-harness-cli/trustbench/evidence/coverage-v1-20261016/requests.json": "7122b2541c8745ab72dd651cc74e1424552c7ce65dffeb98954e39428bb99874",
+    "solopi-harness-cli/trustbench/evidence/recovery-smoke-20261019/requests.json": "11bb95f8e3b904c8466e92d86f87014f72193f23a4544c61f4aeeb216a10d663"
+  },
+  "schedule": [
+    {
+      "id": 1,
+      "task": "dispatch",
+      "condition": "unchanged",
+      "arm": "direct"
+    },
+    {
+      "id": 2,
+      "task": "dispatch",
+      "condition": "unchanged",
+      "arm": "harness"
+    },
+    {
+      "id": 3,
+      "task": "dispatch",
+      "condition": "memo",
+      "arm": "harness"
+    },
+    {
+      "id": 4,
+      "task": "dispatch",
+      "condition": "memo",
+      "arm": "direct"
+    },
+    {
+      "id": 5,
+      "task": "dispatch",
+      "condition": "object",
+      "arm": "direct"
+    },
+    {
+      "id": 6,
+      "task": "dispatch",
+      "condition": "object",
+      "arm": "harness"
+    },
+    {
+      "id": 7,
+      "task": "dispatch",
+      "condition": "unit",
+      "arm": "harness"
+    },
+    {
+      "id": 8,
+      "task": "dispatch",
+      "condition": "unit",
+      "arm": "direct"
+    },
+    {
+      "id": 9,
+      "task": "dispatch",
+      "condition": "replaced",
+      "arm": "direct"
+    },
+    {
+      "id": 10,
+      "task": "dispatch",
+      "condition": "replaced",
+      "arm": "harness"
+    },
+    {
+      "id": 11,
+      "task": "dispatch",
+      "condition": "duplicate",
+      "arm": "harness"
+    },
+    {
+      "id": 12,
+      "task": "dispatch",
+      "condition": "duplicate",
+      "arm": "direct"
+    },
+    {
+      "id": 13,
+      "task": "invoice",
+      "condition": "unchanged",
+      "arm": "harness"
+    },
+    {
+      "id": 14,
+      "task": "invoice",
+      "condition": "unchanged",
+      "arm": "direct"
+    },
+    {
+      "id": 15,
+      "task": "invoice",
+      "condition": "memo",
+      "arm": "direct"
+    },
+    {
+      "id": 16,
+      "task": "invoice",
+      "condition": "memo",
+      "arm": "harness"
+    },
+    {
+      "id": 17,
+      "task": "invoice",
+      "condition": "object",
+      "arm": "harness"
+    },
+    {
+      "id": 18,
+      "task": "invoice",
+      "condition": "object",
+      "arm": "direct"
+    },
+    {
+      "id": 19,
+      "task": "invoice",
+      "condition": "unit",
+      "arm": "direct"
+    },
+    {
+      "id": 20,
+      "task": "invoice",
+      "condition": "unit",
+      "arm": "harness"
+    },
+    {
+      "id": 21,
+      "task": "invoice",
+      "condition": "replaced",
+      "arm": "harness"
+    },
+    {
+      "id": 22,
+      "task": "invoice",
+      "condition": "replaced",
+      "arm": "direct"
+    },
+    {
+      "id": 23,
+      "task": "invoice",
+      "condition": "duplicate",
+      "arm": "direct"
+    },
+    {
+      "id": 24,
+      "task": "invoice",
+      "condition": "duplicate",
+      "arm": "harness"
+    }
+  ],
+  "sourceSha256": {
+    "solopi-app/app/src/main/java/com/alipay/hulu/scheme/AgentActionContextGuard.java": "126b8869eaad9024e16e4ecf823e4ad22ec330b583880a93325631c98d640092",
+    "solopi-app/app/src/main/java/com/alipay/hulu/scheme/AgentActionContract.java": "a2663ea0a6fa71a40da6e62bc8508833d270c8a521fbbec4dfac2caf3d9f7cc9",
+    "solopi-app/app/src/main/java/com/alipay/hulu/scheme/AgentSessionSchemeResolver.java": "459c937e1ce6e2e276bb5999601e1083ca46c2060c7b40531a64e52863761289",
+    "solopi-app/app/src/main/java/com/alipay/hulu/scheme/AgentSessionState.java": "f5b122ab8d2825943cc0401a17bca42295c1dfce4988e9d2358a0f3c5b4fa19a",
+    "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/accessibility/tree/AccessibilityNodeTree.java": "d582c398a427e4d0a3fb7aa1d818d165997ccce371eb06880737d24ad3b86b9c",
+    "solopi-harness-cli/src/solopi_harness/solopi_ai.py": "b7feb61a19057726402a8a8a4c897f12642a77b0e1761b6b386ea96c0a6f74cd",
+    "solopi-harness-cli/src/solopi_harness/trustbench_contract_transfer.py": "8ddd9dddf763a8ff94fff98d47501dfa0158daf1a6fc6c6444bfd91c280a6aba",
+    "solopi-harness-cli/src/solopi_harness/trustbench_coverage.py": "0f08a798e41a713f5d2ab114a88dd0252283478355386bae2826b758613227a0",
+    "solopi-harness-cli/src/solopi_harness/trustbench_effects_run.py": "6279f4080e55b2ec90513221befbaafbc616f7dff78a74fe79080eae192f685c",
+    "solopi-harness-cli/src/solopi_harness/trustbench_model_bridge.py": "920ed3c93f162eddd02b8549969dfda10e3c092027658a56a9ad13e62da6f9b7",
+    "solopi-harness-cli/trustbench/CONTRACT-TRANSFER-V1.md": "be27333a8d8c712bcca85f18f3b507c5d042affcb2e755b8e23aaf30549bf662",
+    "solopi-harness-cli/trustbench/android-transfer/AndroidManifest.xml": "214c988b1690060b77f870d2240683d9134d849e9f751c3ff4afff3970feed75",
+    "solopi-harness-cli/trustbench/android-transfer/build.sh": "ed465be99544e7b919c80a101c06a01ad62f6ca358b3b338cf6b51a9a6a63f15",
+    "solopi-harness-cli/trustbench/android-transfer/res/values/ids.xml": "917b7184eeb46f2856c4a8ecd3909c9e83b88844586a426d4ad570aa92b33e21",
+    "solopi-harness-cli/trustbench/android-transfer/src/com/example/trusttransfer/MainActivity.java": "edb46388f16cb14b8ca02d167ce978e7880429585e9bf71a54c7311daf71f633"
+  }
+}

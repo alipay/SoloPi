@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "solopi.trustbench.agent-ledger-manifest/v1",
+  "note": "Separate host control-service-reuse revision; do not pool with previous host/build trials.",
+  "attempts": [
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-theta-kimi-k3-v3-redmi-isolated-reuse-20261015-live-02", "track": "model", "modelId": "Kimi-K3"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-control-v3-redmi-isolated-reuse-20261015-live-02", "track": "control"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-theta-kimi-k3-v3-redmi-isolated-reuse-20261015-live-01", "track": "model", "modelId": "Kimi-K3"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-control-v3-redmi-isolated-reuse-20261015-live-01", "track": "control"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-revisit-theta-kimi-k3-v2-pixel8-isolated-reuse-20261015-live-03", "track": "model", "modelId": "Kimi-K3"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-revisit-control-v2-pixel8-isolated-reuse-20261015-live-03", "track": "control"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-revisit-theta-kimi-k3-v2-pixel8-isolated-reuse-20261015-live-02", "track": "model", "modelId": "Kimi-K3"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-revisit-control-v2-pixel8-isolated-reuse-20261015-live-02", "track": "control"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-revisit-theta-kimi-k3-v2-pixel8-isolated-reuse-20261015-live-01", "track": "model", "modelId": "Kimi-K3"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-revisit-control-v2-pixel8-isolated-reuse-20261015-live-01", "track": "control"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-theta-kimi-k3-v3-pixel8-isolated-reuse-20261015-live-03", "track": "model", "modelId": "Kimi-K3"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-control-v3-pixel8-isolated-reuse-20261015-live-03", "track": "control"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-control-v3-pixel8-isolated-reuse-20261015-live-01", "track": "control"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-control-v3-pixel8-isolated-reuse-20261015-live-02", "track": "control"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-theta-kimi-k3-v3-pixel8-isolated-reuse-20261015-live-01", "track": "model", "modelId": "Kimi-K3"},
+    {"runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-theta-kimi-k3-v3-pixel8-isolated-reuse-20261015-live-02", "track": "model", "modelId": "Kimi-K3"}
+  ]
+}

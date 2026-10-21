@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "solopi.trustbench.agent-ledger-manifest/v1",
+  "note": "Foreground-ready initial observation diagnostic revision; separate from all earlier APK/host groups.",
+  "attempts": [
+    {
+      "runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-theta-kimi-k3-v3-redmi-ready-foreground-20261015-live-01",
+      "track": "model",
+      "modelId": "Kimi-K3"
+    },
+    {
+      "runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-control-v3-redmi-ready-foreground-20261015-live-01",
+      "track": "control"
+    },
+    {
+      "runDir": "/REDACTED-HOME/code/match/oa2026-solopi/runs/trustbench-agent-notes-theta-kimi-k3-v3-redmi-ready-foreground-20261015-live-02",
+      "track": "model",
+      "modelId": "Kimi-K3"
+    }
+  ]
+}

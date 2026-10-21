@@ -1,0 +1,33 @@
+{
+  "success": true,
+  "session": {
+    "success": true,
+    "sessionId": "agent-session-7dfef62f-14f1-4131-af6c-1ae9a5e79051",
+    "generation": 40,
+    "state": "active",
+    "active": true,
+    "terminal": false,
+    "startedAt": 1792378223428,
+    "lastActivityAt": 1792378225323,
+    "acceptedSteps": 0,
+    "maxSteps": 2,
+    "observationId": "observation-6932968b-c1e6-49ed-8b73-7f15187c607a",
+    "leaseHeld": true
+  },
+  "receipt": {
+    "stepId": "transfer-1",
+    "observationId": "observation-6932968b-c1e6-49ed-8b73-7f15187c607a",
+    "action": {
+      "type": "input",
+      "arguments": {
+        "nodeId": "node-9",
+        "text": "37"
+      }
+    },
+    "status": "rejected",
+    "errorCode": "action_contract_violation",
+    "error": "Trusted session action contract did not match",
+    "acceptedAt": 1792378237294,
+    "finishedAt": 1792378237294
+  }
+}

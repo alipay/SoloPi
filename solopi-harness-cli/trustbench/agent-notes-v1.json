@@ -1,0 +1,115 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "id": "trustbench-notes-agent-v1",
+  "title": "TrustBench notes navigation and form task",
+  "description": "Navigate from an empty list, enter two fields, save, and verify the detail page.",
+  "targetAppPackage": "com.example.trustnotes",
+  "targetAppLabel": "TrustBench Notes",
+  "acceptanceCriteria": [
+    {"id": "AC-NOTE", "text": "Save a note titled Trip checklist with body Passport and charger."}
+  ],
+  "reusableFlows": [
+    {
+      "id": "clear-notes",
+      "steps": [
+        {
+          "id": "tap-reset",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.trustnotes:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.trustnotes"
+            }
+          }
+        },
+        {"id": "settle-reset", "type": "operation", "action": {"type": "wait", "durationMs": 1500}}
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "create-trip-note",
+      "title": "Create and save a trip note",
+      "acceptanceCriteria": ["AC-NOTE"],
+      "dependsOn": [],
+      "steps": [
+        {"use": "clear-notes"},
+        {
+          "id": "create-note",
+          "type": "explore",
+          "goal": "From the empty notes list, create a note titled 'Trip checklist' with body 'Passport and charger'. Save it and stop on the saved note detail page only after both fields are visible.",
+          "allowedActions": ["click", "input", "wait"],
+          "budget": {
+            "maxSteps": 8,
+            "maxDurationMs": 120000,
+            "idleTimeoutMs": 30000,
+            "maxRepeatedActions": 3,
+            "maxNoProgressSteps": 2
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "list-is-empty",
+          "afterStep": "settle-reset",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.trustnotes:id/note_count",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.trustnotes"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "0"
+          }
+        },
+        {
+          "id": "saved-title-matches",
+          "afterStep": "create-note",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.trustnotes:id/saved_title",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.trustnotes"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "Trip checklist"
+          }
+        },
+        {
+          "id": "saved-body-matches",
+          "afterStep": "create-note",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.trustnotes:id/saved_body",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.trustnotes"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "Passport and charger"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "cleanup-reset",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.trustnotes:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.trustnotes"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

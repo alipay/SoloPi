@@ -74,7 +74,8 @@ public class SPService {
     /** Keep the optional FastPath copy from binding the installed app's port. */
     public static int getDefaultControlPort() {
         Context context = LauncherApplication.getContext();
-        return context != null && "com.alipay.hulu.fastpath".equals(context.getPackageName())
+        return context != null && ("com.alipay.hulu.fastpath".equals(context.getPackageName())
+                || "com.alipay.hulu.trustbench".equals(context.getPackageName()))
                 ? 23343 : 23342;
     }
 

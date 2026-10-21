@@ -1,0 +1,1352 @@
+{
+  "schemaVersion": "solopi.trustbench.pilot-closure/v1",
+  "indexSha256": "c62e33610862e2b69eb51cef670af0958b633aed72683cadbe8bfec41f8a7c40",
+  "pilotClosurePassed": true,
+  "eligibleForReliabilityEstimate": false,
+  "eligibleForModelRanking": false,
+  "groups": [
+    {
+      "manifest": "agent-ledger-20261014.json",
+      "manifestSha256": "7eff2f559bf041d11fa1296b774ab003729bd9b57aebca6591cbfac3a0214884",
+      "schemaVersion": "solopi.trustbench.agent-ledger/v1",
+      "attempts": [
+        {
+          "runId": "trustbench-agent-notes-control-v2-20261014-live-01",
+          "track": "control",
+          "planFingerprint": "c9c25fb759af01030345c2440d25540636223696c3c84c7743f2c0d4b287759e",
+          "outcome": "evidence_invalid",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 0,
+          "startedAt": 1791969323787,
+          "finishedAt": 1791969400684,
+          "reportSha256": "34f6e8ed89b786ba3d1bfb3b19acbed63a68517571895ca829b4f6ce20920ff9"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v2-20261014-live-02",
+          "track": "control",
+          "planFingerprint": "c9c25fb759af01030345c2440d25540636223696c3c84c7743f2c0d4b287759e",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 0,
+          "startedAt": 1791969632148,
+          "finishedAt": 1791969708047,
+          "reportSha256": "5b4372146a94caa80c6dc482a6d0ab28abdfb31dff1901b7b44f4017694c632e"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-20261014-live-01",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 0,
+          "startedAt": 1791970268604,
+          "finishedAt": 1791970343587,
+          "reportSha256": "9e4dc59014167570c04024420e59db6d823eeb8c75ed31db0e793494b20eca8d"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v2-20261014-live-01",
+          "track": "model",
+          "planFingerprint": "c9c25fb759af01030345c2440d25540636223696c3c84c7743f2c0d4b287759e",
+          "outcome": "provider_not_tested",
+          "failureReason": "model_decision_failed",
+          "actionErrorCode": null,
+          "actions": 1,
+          "modelDecisionCount": 1,
+          "startedAt": 1791969470366,
+          "finishedAt": 1791969526402,
+          "reportSha256": "43aa2fdf2408ccd3206b88964012f14b9b307f17fd0e352de4a0875ad0760eba"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v2-20261014-live-02",
+          "track": "model",
+          "planFingerprint": "c9c25fb759af01030345c2440d25540636223696c3c84c7743f2c0d4b287759e",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 5,
+          "startedAt": 1791969782235,
+          "finishedAt": 1791969896496,
+          "reportSha256": "bf4db5cabbb2ce8f0b6c97d99cdde9e78947ad8e749757b0cf58f459c165593d"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-20261014-live-01",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "provider_not_tested",
+          "failureReason": "model_decision_failed",
+          "actionErrorCode": null,
+          "actions": 2,
+          "modelDecisionCount": 2,
+          "startedAt": 1791970454469,
+          "finishedAt": 1791970522844,
+          "reportSha256": "f750888845d5f713cc5d03814424c58bbd39c508fa6eb1d56a606c39db8807b0"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-20261014-live-02",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 5,
+          "startedAt": 1791970556157,
+          "finishedAt": 1791970667335,
+          "reportSha256": "7f817e6d9b10613364bab98e13650abe641471c6cc6af3b33ed5774440da33d8"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-20261014-live-03",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "setup_failed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 0,
+          "modelDecisionCount": 0,
+          "startedAt": 1791971871639,
+          "finishedAt": 1791971885147,
+          "reportSha256": "a66a8cc546405e6052a56b8e6f469564ef80ad06b5c3d6a8cd051dcc80ee170e"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-20261014-live-04",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 5,
+          "startedAt": 1791971971853,
+          "finishedAt": 1791972038825,
+          "reportSha256": "f981a59bad46096ed34126ef5fe6b8a5b62c7031a4e2293914ed108aaaef9b95"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-20261014-live-02",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 0,
+          "startedAt": 1791972258909,
+          "finishedAt": 1791972312683,
+          "reportSha256": "326b48b6be6bf92cfc71ab4af28d8a2e501ddbac33c21e3458a7df1c8f5f813c"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-20261014-live-05",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 5,
+          "startedAt": 1791972346476,
+          "finishedAt": 1791972427318,
+          "reportSha256": "6e7501a30b3f584d4853c79960721170dc2db29cfaf4b66c5ad078e3e24de6bf"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-pixel8-20261015-live-01",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "not_tested",
+          "failureReason": "agent_action_failed",
+          "actionErrorCode": "stale_observation",
+          "actions": 3,
+          "modelDecisionCount": 0,
+          "startedAt": 1792031587886,
+          "finishedAt": 1792031628860,
+          "reportSha256": "06b4100b2dde134507595044d4745bcf21d04db9106d69964de21f376283b4c6"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-pixel8-20261015-live-02",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "not_tested",
+          "failureReason": "agent_action_failed",
+          "actionErrorCode": "action_failed",
+          "actions": 1,
+          "modelDecisionCount": 0,
+          "startedAt": 1792031718763,
+          "finishedAt": 1792031751125,
+          "reportSha256": "a2350500b0ef2433ee942d929ca86f085dc4a8af6376d91598a3d44da4e28877"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-pixel8-20261015-live-03",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 0,
+          "startedAt": 1792032502772,
+          "finishedAt": 1792032568745,
+          "reportSha256": "a73741904a56a6e0232ba672283523b66bdee576ca3550efdf08586223b716a5"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-pixel8-20261015-live-01",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 5,
+          "startedAt": 1792032938026,
+          "finishedAt": 1792033013620,
+          "reportSha256": "4a7eab44e836e0581e5e3abdd8c4b7fee0704b5260febb17e2933c090e908e2c"
+        },
+        {
+          "runId": "trustbench-agent-notes-revisit-control-v1-pixel8-20261015-live-01",
+          "track": "control",
+          "planFingerprint": "ac12042e7974a596b4532ba33966abb0cf0f61cfc3924e21a9291e095ebd9cea",
+          "outcome": "task_failed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 6,
+          "modelDecisionCount": 0,
+          "startedAt": 1792033552508,
+          "finishedAt": 1792033658459,
+          "reportSha256": "9c2f95e2d522c842af3b80f2a94c2c2e6fea548a7a0a7f0b746c01a27780f935"
+        },
+        {
+          "runId": "trustbench-agent-notes-revisit-control-v2-pixel8-20261015-live-01",
+          "track": "control",
+          "planFingerprint": "d4910d8a903178528ed7bd1628a2a823deeafb72b1a3c0e5e6aab7d821435643",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 6,
+          "modelDecisionCount": 0,
+          "startedAt": 1792033746984,
+          "finishedAt": 1792033851420,
+          "reportSha256": "380080d74f587560ee1428c8991e092f3f34ebfe7e0999faef56ac652ac11f2c"
+        },
+        {
+          "runId": "trustbench-agent-notes-revisit-theta-kimi-k3-v2-pixel8-20261015-live-01",
+          "track": "model",
+          "planFingerprint": "d4910d8a903178528ed7bd1628a2a823deeafb72b1a3c0e5e6aab7d821435643",
+          "outcome": "provider_not_tested",
+          "failureReason": "model_decision_failed",
+          "actionErrorCode": null,
+          "actions": 5,
+          "modelDecisionCount": 6,
+          "startedAt": 1792033897048,
+          "finishedAt": 1792033999148,
+          "reportSha256": "6b3d685a5929751ad5b0fd9ed3101891e13ab8658a0a6babb38ab7ca2485a2d5"
+        },
+        {
+          "runId": "trustbench-agent-notes-revisit-theta-kimi-k3-v2-pixel8-20261015-live-02",
+          "track": "model",
+          "planFingerprint": "d4910d8a903178528ed7bd1628a2a823deeafb72b1a3c0e5e6aab7d821435643",
+          "outcome": "provider_not_tested",
+          "failureReason": "model_decision_failed",
+          "actionErrorCode": null,
+          "actions": 5,
+          "modelDecisionCount": 6,
+          "startedAt": 1792034313826,
+          "finishedAt": 1792034425812,
+          "reportSha256": "80da41530a0a73375ef408b4f6f87c4d56810d243425ffb8998f2f3edfc6c08a"
+        },
+        {
+          "runId": "trustbench-agent-notes-revisit-theta-kimi-k3-v2-pixel8-20261015-live-03",
+          "track": "model",
+          "planFingerprint": "d4910d8a903178528ed7bd1628a2a823deeafb72b1a3c0e5e6aab7d821435643",
+          "outcome": "provider_not_tested",
+          "failureReason": "model_decision_failed",
+          "actionErrorCode": null,
+          "actions": 6,
+          "modelDecisionCount": 8,
+          "startedAt": 1792035097826,
+          "finishedAt": 1792035230219,
+          "reportSha256": "845979952891174de02cee4d691e6f23c7943e3ac803813958cf2d47d9609f35"
+        },
+        {
+          "runId": "trustbench-agent-notes-revisit-theta-kimi-k3-v2-pixel8-20261015-live-04",
+          "track": "model",
+          "planFingerprint": "d4910d8a903178528ed7bd1628a2a823deeafb72b1a3c0e5e6aab7d821435643",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 6,
+          "modelDecisionCount": 9,
+          "startedAt": 1792035347834,
+          "finishedAt": 1792035481174,
+          "reportSha256": "d495ddf6165d6b828a572ba389ed916a09d73e295bc4ffafd8b668203531d126"
+        },
+        {
+          "runId": "trustbench-agent-notes-revisit-theta-kimi-k3-v2-pixel8-20261015-live-05",
+          "track": "model",
+          "planFingerprint": "d4910d8a903178528ed7bd1628a2a823deeafb72b1a3c0e5e6aab7d821435643",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 6,
+          "modelDecisionCount": 9,
+          "startedAt": 1792036402664,
+          "finishedAt": 1792036547883,
+          "reportSha256": "316c3c7d075abea1e24da9f7ac1961ab0d3aa0e926c5ab6e25eb32750d7d6d96"
+        },
+        {
+          "runId": "trustbench-agent-notes-revisit-control-v2-pixel8-20261015-live-02",
+          "track": "control",
+          "planFingerprint": "d4910d8a903178528ed7bd1628a2a823deeafb72b1a3c0e5e6aab7d821435643",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 6,
+          "modelDecisionCount": 0,
+          "startedAt": 1792036641731,
+          "finishedAt": 1792036749672,
+          "reportSha256": "52177766aabd796da1dcdb772597dccebfc8bfa7c3b8697e3f2393e3b2fdac99"
+        },
+        {
+          "runId": "trustbench-agent-notes-revisit-theta-kimi-k3-v2-pixel8-20261015-live-06",
+          "track": "model",
+          "planFingerprint": "d4910d8a903178528ed7bd1628a2a823deeafb72b1a3c0e5e6aab7d821435643",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 6,
+          "modelDecisionCount": 9,
+          "startedAt": 1792036782242,
+          "finishedAt": 1792036933260,
+          "reportSha256": "7dc704f487c02ef91c66216f055f783a18cd5d54692821c930e4168365949706"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-pixel8-20261015-live-04",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "not_tested",
+          "failureReason": "agent_action_failed",
+          "actionErrorCode": "action_failed",
+          "actions": 1,
+          "modelDecisionCount": 0,
+          "startedAt": 1792036976758,
+          "finishedAt": 1792037010812,
+          "reportSha256": "59449f1bf78a9e840b71cac5fc1de630ff74c230fcae5f3b1b094017d66f580c"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-pixel8-20261015-live-05",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "not_tested",
+          "failureReason": "agent_action_failed",
+          "actionErrorCode": "action_failed",
+          "actions": 1,
+          "modelDecisionCount": 0,
+          "startedAt": 1792037160289,
+          "finishedAt": 1792037194448,
+          "reportSha256": "5b9c80dd446ed82a551bb3a3920134fb966e3ba49faf62df6c6ab69d7deceefb"
+        }
+      ],
+      "rawCounts": {
+        "passed": 14,
+        "setup_failed": 1,
+        "provider_not_tested": 5,
+        "not_tested": 4,
+        "task_failed": 1,
+        "evidence_invalid": 1
+      },
+      "countsByTrack": {
+        "control": {
+          "passed": 6,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 4,
+          "task_failed": 1,
+          "evidence_invalid": 1
+        },
+        "model": {
+          "passed": 8,
+          "setup_failed": 1,
+          "provider_not_tested": 5,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        }
+      },
+      "eligibleForReliabilityEstimate": false,
+      "limitations": [
+        "limited trials on two devices",
+        "small task set",
+        "storage receipt is local fixture truth"
+      ]
+    },
+    {
+      "manifest": "agent-ledger-isolated-20261015.json",
+      "manifestSha256": "6e4f158a6b688394bfa4177fc17fbff791e596e159ce836f008fc5a0e525ab4c",
+      "schemaVersion": "solopi.trustbench.agent-ledger/v1",
+      "attempts": [
+        {
+          "runId": "trustbench-agent-notes-control-v3-pixel8-isolated-20261015-live-01",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "not_tested",
+          "failureReason": "agent_execution_failed",
+          "actionErrorCode": null,
+          "actions": 0,
+          "modelDecisionCount": 0,
+          "startedAt": 1792045854604,
+          "finishedAt": 1792045874192,
+          "reportSha256": "96f9a9789292c3128ed0966f5bfa14b3cdd40fe7a3dd8e8203ba3a2be71f9d92"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-pixel8-isolated-20261015-live-02",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 0,
+          "startedAt": 1792046033502,
+          "finishedAt": 1792046099430,
+          "reportSha256": "878b8a7a1328e15616a5aee275b2165010cb39e316e43e60a463a390b4eb30bb"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-pixel8-isolated-20261015-live-01",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "provider_not_tested",
+          "failureReason": "model_decision_failed",
+          "actionErrorCode": null,
+          "actions": 0,
+          "modelDecisionCount": 0,
+          "startedAt": 1792046481247,
+          "finishedAt": 1792046507641,
+          "reportSha256": "a5aa0dcbf67d56986bb61bcb2c0913636caa6678325085221ae046ad748a133a"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-pixel8-isolated-20261015-live-02",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "not_tested",
+          "failureReason": "agent_action_failed",
+          "actionErrorCode": "terminal_session",
+          "actions": 1,
+          "modelDecisionCount": 1,
+          "startedAt": 1792046678388,
+          "finishedAt": 1792046734688,
+          "reportSha256": "bca3787d2b76e45ec2dee4daf3fa8eed470ef8d1f0c850a14b20d0a7e2e9dd24"
+        }
+      ],
+      "rawCounts": {
+        "passed": 1,
+        "setup_failed": 0,
+        "provider_not_tested": 1,
+        "not_tested": 2,
+        "task_failed": 0,
+        "evidence_invalid": 0
+      },
+      "countsByTrack": {
+        "control": {
+          "passed": 1,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 1,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        },
+        "model": {
+          "passed": 0,
+          "setup_failed": 0,
+          "provider_not_tested": 1,
+          "not_tested": 1,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        }
+      },
+      "eligibleForReliabilityEstimate": false,
+      "limitations": [
+        "limited trials on two devices",
+        "small task set",
+        "storage receipt is local fixture truth"
+      ]
+    },
+    {
+      "manifest": "agent-ledger-isolated-reuse-20261015.json",
+      "manifestSha256": "74d0bb85c97dd98ccb4360a5905175ead05800997f81f22d28aed8feb76fe836",
+      "schemaVersion": "solopi.trustbench.agent-ledger/v1",
+      "attempts": [
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-redmi-isolated-reuse-20261015-live-02",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "not_tested",
+          "failureReason": "agent_action_failed",
+          "actionErrorCode": "stale_observation",
+          "actions": 1,
+          "modelDecisionCount": 1,
+          "startedAt": 1792051338981,
+          "finishedAt": 1792051366205,
+          "reportSha256": "3c63bbc961791e6600c6dee17201c28660456646f5bb4f00697e66d505115bcb"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-redmi-isolated-reuse-20261015-live-02",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 0,
+          "startedAt": 1792051261837,
+          "finishedAt": 1792051315498,
+          "reportSha256": "05a912f8912ffbd349e7818f1a0bf4e57a7456b4e99dd8f3ac1984d88e7f49ec"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-redmi-isolated-reuse-20261015-live-01",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "provider_not_tested",
+          "failureReason": "model_decision_failed",
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 4,
+          "startedAt": 1792050899739,
+          "finishedAt": 1792050967026,
+          "reportSha256": "281549dccc475ce6a354092475aa09f7c47ec836740d453c51ca91481b57179b"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-redmi-isolated-reuse-20261015-live-01",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 0,
+          "startedAt": 1792050814727,
+          "finishedAt": 1792050869994,
+          "reportSha256": "a59e7cbaddf8757adf8eb6d4a2d9fa44bd7cf59c949ea277605f67fc3194d4f2"
+        },
+        {
+          "runId": "trustbench-agent-notes-revisit-theta-kimi-k3-v2-pixel8-isolated-reuse-20261015-live-03",
+          "track": "model",
+          "planFingerprint": "d4910d8a903178528ed7bd1628a2a823deeafb72b1a3c0e5e6aab7d821435643",
+          "outcome": "provider_not_tested",
+          "failureReason": "model_decision_failed",
+          "actionErrorCode": null,
+          "actions": 1,
+          "modelDecisionCount": 1,
+          "startedAt": 1792049700370,
+          "finishedAt": 1792049739612,
+          "reportSha256": "068521c5bcd78b58d6c250d27a354643e62d512c5859996c9500244c42fae4f1"
+        },
+        {
+          "runId": "trustbench-agent-notes-revisit-control-v2-pixel8-isolated-reuse-20261015-live-03",
+          "track": "control",
+          "planFingerprint": "d4910d8a903178528ed7bd1628a2a823deeafb72b1a3c0e5e6aab7d821435643",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 6,
+          "modelDecisionCount": 0,
+          "startedAt": 1792049574981,
+          "finishedAt": 1792049673310,
+          "reportSha256": "05e10c6a5dc5f201af63b79793377b676ccde652cab74c6eb889e5c62ae831a0"
+        },
+        {
+          "runId": "trustbench-agent-notes-revisit-theta-kimi-k3-v2-pixel8-isolated-reuse-20261015-live-02",
+          "track": "model",
+          "planFingerprint": "d4910d8a903178528ed7bd1628a2a823deeafb72b1a3c0e5e6aab7d821435643",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 6,
+          "modelDecisionCount": 9,
+          "startedAt": 1792049347828,
+          "finishedAt": 1792049546109,
+          "reportSha256": "cc084445768407f36c3580a8dad2233dbe2a7fc646af5c250effb558c894b616"
+        },
+        {
+          "runId": "trustbench-agent-notes-revisit-control-v2-pixel8-isolated-reuse-20261015-live-02",
+          "track": "control",
+          "planFingerprint": "d4910d8a903178528ed7bd1628a2a823deeafb72b1a3c0e5e6aab7d821435643",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 6,
+          "modelDecisionCount": 0,
+          "startedAt": 1792049217108,
+          "finishedAt": 1792049320952,
+          "reportSha256": "65e27167e16a38c032bc3db78128de02ccd1efffb38cfd8be25fa8bbe971eb86"
+        },
+        {
+          "runId": "trustbench-agent-notes-revisit-theta-kimi-k3-v2-pixel8-isolated-reuse-20261015-live-01",
+          "track": "model",
+          "planFingerprint": "d4910d8a903178528ed7bd1628a2a823deeafb72b1a3c0e5e6aab7d821435643",
+          "outcome": "provider_not_tested",
+          "failureReason": "model_decision_failed",
+          "actionErrorCode": null,
+          "actions": 0,
+          "modelDecisionCount": 0,
+          "startedAt": 1792049077379,
+          "finishedAt": 1792049103144,
+          "reportSha256": "dddb315a6690dbe2a7b21b22af362ce5272e68912d3b26d80938416ee160b44d"
+        },
+        {
+          "runId": "trustbench-agent-notes-revisit-control-v2-pixel8-isolated-reuse-20261015-live-01",
+          "track": "control",
+          "planFingerprint": "d4910d8a903178528ed7bd1628a2a823deeafb72b1a3c0e5e6aab7d821435643",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 6,
+          "modelDecisionCount": 0,
+          "startedAt": 1792048949212,
+          "finishedAt": 1792049052081,
+          "reportSha256": "ffb9d5685fc0e4a22f9ef3364903e2a7814839942f181a93e313321566a1ee95"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-pixel8-isolated-reuse-20261015-live-03",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "provider_not_tested",
+          "failureReason": "model_decision_failed",
+          "actionErrorCode": null,
+          "actions": 1,
+          "modelDecisionCount": 1,
+          "startedAt": 1792048606860,
+          "finishedAt": 1792048647092,
+          "reportSha256": "19f6a99364d626f86e1ba499573c615f465873d6c1fdc6baff41e74fd41eda0a"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-pixel8-isolated-reuse-20261015-live-03",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 0,
+          "startedAt": 1792048512006,
+          "finishedAt": 1792048575369,
+          "reportSha256": "4d03ce3f26b0d0fef58ef0b6974c9526262cf3db3642722b4b4f17b89bf385fd"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-pixel8-isolated-reuse-20261015-live-01",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 0,
+          "startedAt": 1792046947722,
+          "finishedAt": 1792047010834,
+          "reportSha256": "acbf809b1329efbd340fd5bb61b66027be80eca5a3006107a04062240682f137"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-pixel8-isolated-reuse-20261015-live-02",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 0,
+          "startedAt": 1792048072971,
+          "finishedAt": 1792048136153,
+          "reportSha256": "c76d1732e21d39e93ed87e929a052f27b5fbd86c0030bac0bd00d9006a99de3b"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-pixel8-isolated-reuse-20261015-live-01",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 5,
+          "startedAt": 1792047029384,
+          "finishedAt": 1792047144151,
+          "reportSha256": "79119c52942aa14a8bd00bc728777bf0c97d357df9034766d6a0e8704102b9b3"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-pixel8-isolated-reuse-20261015-live-02",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "provider_not_tested",
+          "failureReason": "model_decision_failed",
+          "actionErrorCode": null,
+          "actions": 1,
+          "modelDecisionCount": 1,
+          "startedAt": 1792048163877,
+          "finishedAt": 1792048203366,
+          "reportSha256": "c528a882a881ba98894c3b98b6c0e86c963cfe32df3ad1ce388a4ea7e1291b70"
+        }
+      ],
+      "rawCounts": {
+        "passed": 10,
+        "setup_failed": 0,
+        "provider_not_tested": 5,
+        "not_tested": 1,
+        "task_failed": 0,
+        "evidence_invalid": 0
+      },
+      "countsByTrack": {
+        "control": {
+          "passed": 8,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        },
+        "model": {
+          "passed": 2,
+          "setup_failed": 0,
+          "provider_not_tested": 5,
+          "not_tested": 1,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        }
+      },
+      "eligibleForReliabilityEstimate": false,
+      "limitations": [
+        "limited trials on two devices",
+        "small task set",
+        "storage receipt is local fixture truth"
+      ]
+    },
+    {
+      "manifest": "agent-ledger-paced10s-20261015.json",
+      "manifestSha256": "b6589da3aa3499a1ee69f73508d02e317f626cb5ff3950dc7f881bf2ed2b7df5",
+      "schemaVersion": "solopi.trustbench.agent-ledger/v1",
+      "attempts": [
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-redmi-paced10s-20261015-live-01",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "setup_failed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 0,
+          "modelDecisionCount": 0,
+          "startedAt": 1792053407412,
+          "finishedAt": 1792053421989,
+          "reportSha256": "bcf215d77d9a23ba12647e21b83a481ce6466ad77040d189d7f0b9e65e213f78"
+        }
+      ],
+      "rawCounts": {
+        "passed": 0,
+        "setup_failed": 1,
+        "provider_not_tested": 0,
+        "not_tested": 0,
+        "task_failed": 0,
+        "evidence_invalid": 0
+      },
+      "countsByTrack": {
+        "control": {
+          "passed": 0,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        },
+        "model": {
+          "passed": 0,
+          "setup_failed": 1,
+          "provider_not_tested": 0,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        }
+      },
+      "eligibleForReliabilityEstimate": false,
+      "limitations": [
+        "limited trials on two devices",
+        "small task set",
+        "storage receipt is local fixture truth"
+      ]
+    },
+    {
+      "manifest": "agent-ledger-paced10s-restart-20261015.json",
+      "manifestSha256": "aa649d5d6c21f6fbaa74838fbbef43db08bafac5b03a16c23843b118e8be9884",
+      "schemaVersion": "solopi.trustbench.agent-ledger/v1",
+      "attempts": [
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-redmi-paced10s-restart-20261015-live-01",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "provider_not_tested",
+          "failureReason": "model_decision_failed",
+          "actionErrorCode": null,
+          "actions": 3,
+          "modelDecisionCount": 3,
+          "startedAt": 1792053612456,
+          "finishedAt": 1792053667298,
+          "reportSha256": "3ae4874ec8ee28aa6d6645923dc37152782d8b6ecacbf1cb2e862c90ad6e8776"
+        }
+      ],
+      "rawCounts": {
+        "passed": 0,
+        "setup_failed": 0,
+        "provider_not_tested": 1,
+        "not_tested": 0,
+        "task_failed": 0,
+        "evidence_invalid": 0
+      },
+      "countsByTrack": {
+        "control": {
+          "passed": 0,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        },
+        "model": {
+          "passed": 0,
+          "setup_failed": 0,
+          "provider_not_tested": 1,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        }
+      },
+      "eligibleForReliabilityEstimate": false,
+      "limitations": [
+        "limited trials on two devices",
+        "small task set",
+        "storage receipt is local fixture truth"
+      ]
+    },
+    {
+      "manifest": "agent-ledger-paced30-long-v1-20261015.json",
+      "manifestSha256": "6bd8d5df0f20fe14ea35484d26c5a7f62bdddfc159b7dbb5abfc1524ffca08aa",
+      "schemaVersion": "solopi.trustbench.agent-ledger/v1",
+      "attempts": [
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-redmi-paced30-long-v1-20261015-live-01",
+          "track": "model",
+          "planFingerprint": "7b9c96b7c9fbcffeba5d1c2449340f09c77cfbbbd6996e1bc03d1e6a0af6a2b6",
+          "outcome": "provider_not_tested",
+          "failureReason": "model_decision_failed",
+          "actionErrorCode": null,
+          "actions": 3,
+          "modelDecisionCount": 3,
+          "startedAt": 1792055194581,
+          "finishedAt": 1792055302711,
+          "reportSha256": "2f048bdfda97bbaf2de613eb80333bae622605fdc696f2db83dfca8e5a68e0a2"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-redmi-paced30-long-v1-20261015-live-02",
+          "track": "model",
+          "planFingerprint": "7b9c96b7c9fbcffeba5d1c2449340f09c77cfbbbd6996e1bc03d1e6a0af6a2b6",
+          "outcome": "not_tested",
+          "failureReason": "agent_action_failed",
+          "actionErrorCode": "stale_observation",
+          "actions": 2,
+          "modelDecisionCount": 2,
+          "startedAt": 1792055537127,
+          "finishedAt": 1792055590611,
+          "reportSha256": "cf9e2f14eac639716e35aebbe657c3c4d50f4428bc306501889a136ef258415d"
+        }
+      ],
+      "rawCounts": {
+        "passed": 0,
+        "setup_failed": 0,
+        "provider_not_tested": 1,
+        "not_tested": 1,
+        "task_failed": 0,
+        "evidence_invalid": 0
+      },
+      "countsByTrack": {
+        "control": {
+          "passed": 0,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        },
+        "model": {
+          "passed": 0,
+          "setup_failed": 0,
+          "provider_not_tested": 1,
+          "not_tested": 1,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        }
+      },
+      "eligibleForReliabilityEstimate": false,
+      "limitations": [
+        "limited trials on two devices",
+        "small task set",
+        "storage receipt is local fixture truth"
+      ]
+    },
+    {
+      "manifest": "agent-ledger-paced30s-restart-20261015.json",
+      "manifestSha256": "d4bd570805dcb010df2bf0661da444189123719f83439717849cc54b76fcc56a",
+      "schemaVersion": "solopi.trustbench.agent-ledger/v1",
+      "attempts": [
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-redmi-paced30s-restart-20261015-live-01",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "provider_not_tested",
+          "failureReason": "model_decision_failed",
+          "actionErrorCode": null,
+          "actions": 0,
+          "modelDecisionCount": 0,
+          "startedAt": 1792054950680,
+          "finishedAt": 1792054968154,
+          "reportSha256": "b12bc97945f1549173495d5ed3fea3e1b3e33b80f91563a617cf9cd0408ac738"
+        }
+      ],
+      "rawCounts": {
+        "passed": 0,
+        "setup_failed": 0,
+        "provider_not_tested": 1,
+        "not_tested": 0,
+        "task_failed": 0,
+        "evidence_invalid": 0
+      },
+      "countsByTrack": {
+        "control": {
+          "passed": 0,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        },
+        "model": {
+          "passed": 0,
+          "setup_failed": 0,
+          "provider_not_tested": 1,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        }
+      },
+      "eligibleForReliabilityEstimate": false,
+      "limitations": [
+        "limited trials on two devices",
+        "small task set",
+        "storage receipt is local fixture truth"
+      ]
+    },
+    {
+      "manifest": "agent-ledger-paced60-long-v1-20261015.json",
+      "manifestSha256": "0165dad27f255be2c6068687a9a90f3d7e2b2f381922b0e06fc2096446067183",
+      "schemaVersion": "solopi.trustbench.agent-ledger/v1",
+      "attempts": [
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-redmi-paced60-long-v1-20261015-live-01",
+          "track": "model",
+          "planFingerprint": "7b9c96b7c9fbcffeba5d1c2449340f09c77cfbbbd6996e1bc03d1e6a0af6a2b6",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 5,
+          "startedAt": 1792055794400,
+          "finishedAt": 1792056060189,
+          "reportSha256": "1f0eac1986d1ed7d5f8cd08be588950eb27b2fcff08fb8cbb6df2b7ae8cd2abc"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-redmi-paced60-long-v1-20261015-live-01",
+          "track": "control",
+          "planFingerprint": "7b9c96b7c9fbcffeba5d1c2449340f09c77cfbbbd6996e1bc03d1e6a0af6a2b6",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 0,
+          "startedAt": 1792056345073,
+          "finishedAt": 1792056395030,
+          "reportSha256": "8360339b5a0ab13d34bad75530d076b1ea1fb8bc693784aafdc0ed22c6e712e4"
+        }
+      ],
+      "rawCounts": {
+        "passed": 2,
+        "setup_failed": 0,
+        "provider_not_tested": 0,
+        "not_tested": 0,
+        "task_failed": 0,
+        "evidence_invalid": 0
+      },
+      "countsByTrack": {
+        "control": {
+          "passed": 1,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        },
+        "model": {
+          "passed": 1,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        }
+      },
+      "eligibleForReliabilityEstimate": false,
+      "limitations": [
+        "limited trials on two devices",
+        "small task set",
+        "storage receipt is local fixture truth"
+      ]
+    },
+    {
+      "manifest": "agent-ledger-ready-foreground-20261015.json",
+      "manifestSha256": "847859c2e1cb8d38855371d305f8e0089244bbeacd35a4b4d709485e11c96525",
+      "schemaVersion": "solopi.trustbench.agent-ledger/v1",
+      "attempts": [
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-redmi-ready-foreground-20261015-live-01",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "provider_not_tested",
+          "failureReason": "model_decision_failed",
+          "actionErrorCode": null,
+          "actions": 0,
+          "modelDecisionCount": 0,
+          "startedAt": 1792052398781,
+          "finishedAt": 1792052416715,
+          "reportSha256": "54495a2ad6eba49ef965120be3dadb2a4814095d1cec09770b6af377c868e7d2"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-redmi-ready-foreground-20261015-live-01",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 0,
+          "startedAt": 1792052447600,
+          "finishedAt": 1792052496242,
+          "reportSha256": "7526efbf10f1e8f426076142697ac25ac46bab77a051fe49e59c4a5c6c3c347a"
+        },
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-redmi-ready-foreground-20261015-live-02",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 5,
+          "startedAt": 1792052754416,
+          "finishedAt": 1792052842917,
+          "reportSha256": "16097cc75d2880bdda4f5e73ca3942147d8b690ca88d5b0d369c4184c1b43a09"
+        }
+      ],
+      "rawCounts": {
+        "passed": 2,
+        "setup_failed": 0,
+        "provider_not_tested": 1,
+        "not_tested": 0,
+        "task_failed": 0,
+        "evidence_invalid": 0
+      },
+      "countsByTrack": {
+        "control": {
+          "passed": 1,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        },
+        "model": {
+          "passed": 1,
+          "setup_failed": 0,
+          "provider_not_tested": 1,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        }
+      },
+      "eligibleForReliabilityEstimate": false,
+      "limitations": [
+        "limited trials on two devices",
+        "small task set",
+        "storage receipt is local fixture truth"
+      ]
+    },
+    {
+      "manifest": "agent-ledger-stable-observation-20261015.json",
+      "manifestSha256": "67c0a8b95c2c1e9cd9255e398213aa763e12f58127b1dd1b1fca3012f0def5fd",
+      "schemaVersion": "solopi.trustbench.agent-ledger/v1",
+      "attempts": [
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-redmi-stable-observation-20261015-live-01",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "not_tested",
+          "failureReason": "agent_start_failed",
+          "actionErrorCode": null,
+          "actions": 0,
+          "modelDecisionCount": 0,
+          "startedAt": 1792051828043,
+          "finishedAt": 1792051848528,
+          "reportSha256": "d7f37a55226ff06c1fc105564d2fcbc5248efc8901ee6bc70e8c3433f185e58c"
+        }
+      ],
+      "rawCounts": {
+        "passed": 0,
+        "setup_failed": 0,
+        "provider_not_tested": 0,
+        "not_tested": 1,
+        "task_failed": 0,
+        "evidence_invalid": 0
+      },
+      "countsByTrack": {
+        "control": {
+          "passed": 0,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        },
+        "model": {
+          "passed": 0,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 1,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        }
+      },
+      "eligibleForReliabilityEstimate": false,
+      "limitations": [
+        "limited trials on two devices",
+        "small task set",
+        "storage receipt is local fixture truth"
+      ]
+    },
+    {
+      "manifest": "agent-ledger-stable-start-20261015.json",
+      "manifestSha256": "6bcd1aab13bdf2112055e227b2f5fbdc11557af3e40f7fa110421bc02002d37d",
+      "schemaVersion": "solopi.trustbench.agent-ledger/v1",
+      "attempts": [
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-redmi-stable-start-20261015-live-01",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "not_tested",
+          "failureReason": "agent_start_failed",
+          "actionErrorCode": null,
+          "actions": 0,
+          "modelDecisionCount": 0,
+          "startedAt": 1792052157329,
+          "finishedAt": 1792052178332,
+          "reportSha256": "36d61cc37c6f0743516c5e1b527b7486157c4ea6193be75ee8d88a3789008a7d"
+        },
+        {
+          "runId": "trustbench-agent-notes-control-v3-redmi-stable-start-20261015-live-01",
+          "track": "control",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "passed",
+          "failureReason": null,
+          "actionErrorCode": null,
+          "actions": 4,
+          "modelDecisionCount": 0,
+          "startedAt": 1792052059369,
+          "finishedAt": 1792052109624,
+          "reportSha256": "a417b438c10e66e08b03a411be4d64e8e80fb4050b31d753e3b0a91fa8a78826"
+        }
+      ],
+      "rawCounts": {
+        "passed": 1,
+        "setup_failed": 0,
+        "provider_not_tested": 0,
+        "not_tested": 1,
+        "task_failed": 0,
+        "evidence_invalid": 0
+      },
+      "countsByTrack": {
+        "control": {
+          "passed": 1,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        },
+        "model": {
+          "passed": 0,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 1,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        }
+      },
+      "eligibleForReliabilityEstimate": false,
+      "limitations": [
+        "limited trials on two devices",
+        "small task set",
+        "storage receipt is local fixture truth"
+      ]
+    },
+    {
+      "manifest": "agent-ledger-stable-start-reuse-20261015.json",
+      "manifestSha256": "633abcac8f61ec361eb7de7d0566091e2572d2eb077afb58b58106c29034d9c3",
+      "schemaVersion": "solopi.trustbench.agent-ledger/v1",
+      "attempts": [
+        {
+          "runId": "trustbench-agent-notes-theta-kimi-k3-v3-redmi-stable-start-reuse-20261015-live-01",
+          "track": "model",
+          "planFingerprint": "200b341d47940ab6f30398b0ff5f9795d312fdbe3bea89a6148b0c1a86f5c45d",
+          "outcome": "not_tested",
+          "failureReason": "agent_start_failed",
+          "actionErrorCode": null,
+          "actions": 0,
+          "modelDecisionCount": 0,
+          "startedAt": 1792052288346,
+          "finishedAt": 1792052309223,
+          "reportSha256": "f2f468c2aad54bd8d665c73d5a47b7c265858dbf44130fd1555d6d0c707e4407"
+        }
+      ],
+      "rawCounts": {
+        "passed": 0,
+        "setup_failed": 0,
+        "provider_not_tested": 0,
+        "not_tested": 1,
+        "task_failed": 0,
+        "evidence_invalid": 0
+      },
+      "countsByTrack": {
+        "control": {
+          "passed": 0,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 0,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        },
+        "model": {
+          "passed": 0,
+          "setup_failed": 0,
+          "provider_not_tested": 0,
+          "not_tested": 1,
+          "task_failed": 0,
+          "evidence_invalid": 0
+        }
+      },
+      "eligibleForReliabilityEstimate": false,
+      "limitations": [
+        "limited trials on two devices",
+        "small task set",
+        "storage receipt is local fixture truth"
+      ]
+    }
+  ],
+  "oracleProbes": [
+    {
+      "kind": "positive",
+      "contractPassed": true,
+      "attempt": {
+        "runId": "trustbench-notes-oracle-holdout-positive-20261015-live-01",
+        "track": "control",
+        "modelId": null,
+        "modelMaxOutputTokens": null,
+        "planFingerprint": "625ef09d0778859949c85832ef3ea6a6cd73c305d80220bf70cbce50ec096071",
+        "taskId": "trustbench-notes-oracle-holdout-v1",
+        "agentBudget": {
+          "maxSteps": 8,
+          "maxDurationMs": 600000,
+          "idleTimeoutMs": 120000,
+          "maxRepeatedActions": 3,
+          "maxNoProgressSteps": 2
+        },
+        "reportId": "verification-run-52578ae144cc4d54808f2def0a0f03e6",
+        "outcome": "passed",
+        "failureReason": null,
+        "actionErrorCode": null,
+        "agentDone": true,
+        "actions": 4,
+        "modelDecisionCount": 0,
+        "startedAt": 1792056424283,
+        "finishedAt": 1792056473066,
+        "evidenceAudit": {
+          "verifiedFiles": 8,
+          "verifiedSegments": 2
+        },
+        "reportSha256": "4d1f11c4095a9782bb610e80881e22ce2193e0057ecb191d517b1e3d7db71352",
+        "planSha256": "fd5f402a9502b458b7296a1c6191c06aa15a90eac28b20c2739f9257fca02534",
+        "eventsSha256": "eaee9cd49c95c5508f41b320262f400536fa7e37ba6fc0f8243bbe86f8f98a01",
+        "transcriptSha256": "b220e51833dc7a99d562933e26d5d460fa9ecd4b65640820136bb95c51bd355c",
+        "transcriptSha256s": {
+          "segment-create-review-note-test-02-9675a90b35d6": "b220e51833dc7a99d562933e26d5d460fa9ecd4b65640820136bb95c51bd355c"
+        },
+        "storageReceiptSha256": "0f7deefa06e01ff3ad21c876491638d1b7214f3883ad611ca196eaf41e52adc2",
+        "deviceSerial": "REDACTED-DEVICE",
+        "apkSha256": "e6c74dec77836d7c354139d2ceaa30cc5e3cb46dd98f8634dab1757212694480",
+        "source": "directory"
+      }
+    },
+    {
+      "kind": "false_done",
+      "contractPassed": true,
+      "attempt": {
+        "runId": "trustbench-notes-oracle-holdout-false-done-20261015-live-01",
+        "track": "control",
+        "modelId": null,
+        "modelMaxOutputTokens": null,
+        "planFingerprint": "625ef09d0778859949c85832ef3ea6a6cd73c305d80220bf70cbce50ec096071",
+        "taskId": "trustbench-notes-oracle-holdout-v1",
+        "agentBudget": {
+          "maxSteps": 8,
+          "maxDurationMs": 600000,
+          "idleTimeoutMs": 120000,
+          "maxRepeatedActions": 3,
+          "maxNoProgressSteps": 2
+        },
+        "reportId": "verification-run-954691e093174a56912de686a7eec733",
+        "outcome": "task_failed",
+        "failureReason": null,
+        "actionErrorCode": null,
+        "agentDone": true,
+        "actions": 0,
+        "modelDecisionCount": 0,
+        "startedAt": 1792056506562,
+        "finishedAt": 1792056525664,
+        "evidenceAudit": {
+          "verifiedFiles": 8,
+          "verifiedSegments": 2
+        },
+        "reportSha256": "2944eb9b4537220ad60f1cefb17acc2ffafb518a0224ca2f9b59a04d6b8df7b5",
+        "planSha256": "fd5f402a9502b458b7296a1c6191c06aa15a90eac28b20c2739f9257fca02534",
+        "eventsSha256": "0644643ab771551dccee7ce68d23c646c651042d06aef4f2c13eb9aa82bccfc3",
+        "transcriptSha256": "0a7be9d77d2333736b1fb73481b0037eb80964b28717828278bcece618e3b9a8",
+        "transcriptSha256s": {
+          "segment-create-review-note-test-02-9675a90b35d6": "0a7be9d77d2333736b1fb73481b0037eb80964b28717828278bcece618e3b9a8"
+        },
+        "storageReceiptSha256": null,
+        "deviceSerial": null,
+        "apkSha256": null,
+        "source": "directory"
+      }
+    }
+  ],
+  "limitations": [
+    "single model and small fixture task set",
+    "new holdout seed, not independently authored tasks",
+    "historical evidence_invalid attempt retained",
+    "local storage truth, not external backend attestation",
+    "no pooled success rate or inferred monetary cost"
+  ]
+}
