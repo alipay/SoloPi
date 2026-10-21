@@ -56,6 +56,7 @@ public class ClassUtil {
     private static final String PATCH_KEY = "patch";
     private static final String PATCH_INFO_RES = "patchInfo";
     private static final String TAG = ClassUtil.class.getSimpleName();
+    private static final PatchLoadResult BUILT_IN_HOT_PATCH = createDefaultHotPatch();
 
     private static boolean init = false;
 
@@ -456,6 +457,10 @@ public class ClassUtil {
      * @return
      */
     private static PatchLoadResult loadDefaultHotPatch() {
+        return BUILT_IN_HOT_PATCH;
+    }
+
+    private static PatchLoadResult createDefaultHotPatch() {
         PatchLoadResult defaultHotPatch = new PatchLoadResult();
         defaultHotPatch.name = Constant.HOTPATCH_NAME;
         defaultHotPatch.version = Constant.HOTPATCH_VERSION;
@@ -489,10 +494,21 @@ public class ClassUtil {
      * @param patches
      */
     private static void initPatches(List<PatchLoadResult> patches) {
-        Queue<PatchLoadResult> result = new LinkedList<>(patches);
+        Queue<PatchLoadResult> result = new LinkedList<>();
         Set<String> names = new HashSet<>();
         for (PatchLoadResult patch: patches) {
-            names.add(patch.name);
+            // Code security: only the in-memory placeholder is exempt; persisted names are untrusted.
+            if (patch != null && (patch == BUILT_IN_HOT_PATCH
+                    || PatchProcessUtil.isTrustedInstalledPatch(patch))) {
+                result.add(patch);
+                names.add(patch.name);
+            } else if (patch != null) {
+                LogUtil.e(TAG, "Refusing untrusted installed patch %s", patch.name);
+            }
+        }
+        if (!names.contains(Constant.HOTPATCH_NAME)) {
+            result.add(loadDefaultHotPatch());
+            names.add(Constant.HOTPATCH_NAME);
         }
 
         //FIXME 9102年了还有goto
@@ -516,11 +532,8 @@ public class ClassUtil {
                 }
             }
 
-            if (matchDependency && (StringUtil.equals(patch.name, Constant.HOTPATCH_NAME)
-                    || PatchProcessUtil.isTrustedInstalledPatch(patch))) {
+            if (matchDependency) {
                 loadPatch(patch);
-            } else if (matchDependency) {
-                LogUtil.e(TAG, "Refusing untrusted installed patch %s", patch.name);
             } else {
                 result.add(patch);
             }
@@ -650,7 +663,8 @@ public class ClassUtil {
      * @return
      */
     public static void installPatch(PatchLoadResult patch) {
-        if (patch == null) {
+        // Code security: validate the same signed executable paths before direct installation.
+        if (patch == null || !PatchProcessUtil.isTrustedInstalledPatch(patch)) {
             return;
         }
 

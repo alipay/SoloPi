@@ -67,4 +67,5 @@ dependencies {
     api project(':mdlibrary')
 
     testImplementation 'junit:junit:4.13.2'
+    testImplementation "com.alibaba:fastjson:${FASTJSON_VERSION}"
 }

@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import dalvik.system.DexClassLoader;
 
@@ -251,6 +252,23 @@ public class PatchProcessUtil {
                     || Float.compare(patch.version, description.getVersion()) != 0) {
                 return false;
             }
+            // Code security: the cached loader metadata must not select unsigned executable content.
+            String jar = description.getJar();
+            boolean hasNativeCode = description.getSoList() != null && description.getSoList().length > 0;
+            if (!matchesPath(root, jar, patch.jarPath)
+                    || !matchesPath(root, hasNativeCode ? "lib" : null, patch.soPath)
+                    || (!StringUtil.isEmpty(patch.assetsPath) && !matchesPath(root, "assets", patch.assetsPath))
+                    || !Arrays.equals(patch.preloadSo, hasNativeCode ? description.getPreloadSo() : null)
+                    || (patch.dependencies != null && !patch.dependencies.isEmpty())) {
+                return false;
+            }
+            boolean hasEntry = !StringUtil.isEmpty(jar) && !StringUtil.isEmpty(description.getMainClass())
+                    && !StringUtil.isEmpty(description.getMainMethod());
+            if (!sameOptional(patch.filter, StringUtil.isEmpty(jar) ? null : description.getFilter())
+                    || !sameOptional(patch.entryClass, hasEntry ? description.getMainClass() : null)
+                    || !sameOptional(patch.entryMethod, hasEntry ? description.getMainMethod() : null)) {
+                return false;
+            }
             if (!StringUtil.isEmpty(description.getJar()) && !FileUtils.checkFileMd5(
                     new File(root, description.getJar()), description.getJarMd5())) {
                 return false;
@@ -272,6 +290,24 @@ public class PatchProcessUtil {
             LogUtil.e(TAG, e, "Installed patch trust check failed");
             return false;
         }
+    }
+
+    private static boolean sameOptional(String first, String second) {
+        return StringUtil.isEmpty(first) ? StringUtil.isEmpty(second) : first.equals(second);
+    }
+
+    private static boolean matchesPath(File root, String relative, String stored) throws IOException {
+        if (StringUtil.isEmpty(relative)) {
+            return StringUtil.isEmpty(stored);
+        }
+        if (StringUtil.isEmpty(stored)) {
+            return false;
+        }
+        File canonicalRoot = root.getCanonicalFile();
+        File expected = new File(root, relative).getCanonicalFile();
+        // Code security: canonical paths also resolve symlinks and reject sibling-prefix escapes.
+        return expected.getPath().startsWith(canonicalRoot.getPath() + File.separator)
+                && expected.equals(new File(stored).getCanonicalFile());
     }
 
     private static byte[] readBounded(File file, long maximum, String label) throws IOException {

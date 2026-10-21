@@ -32,6 +32,7 @@ android {
         minSdkVersion 18
         targetSdkVersion rootProject.ext.targetSdkVersion
         multiDexEnabled true
+        testInstrumentationRunner 'com.alipay.hulu.security.PatchSecurityInstrumentation'
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
         }
@@ -82,6 +83,8 @@ android {
 dependencies {
     implementation "androidx.multidex:multidex:${ANDROIDX_MULTIDEX_VERSION}"
     implementation project(':app')
+    androidTestCompileOnly project(':common')
+    androidTestCompileOnly "commons-io:commons-io:${COMMON_IO_VERSION}"
 }
 
 android.defaultConfig.versionCode = rootProject.ext.appVersionCode
