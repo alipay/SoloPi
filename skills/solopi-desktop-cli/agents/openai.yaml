@@ -1,0 +1,4 @@
+interface:
+  display_name: "solopi-desktop CLI 运行、压测与追踪"
+  short_description: "运行已有用例或按轮数/时长压测，跟踪同一任务及失败报告"
+  default_prompt: "Use $solopi-desktop-cli to run existing solopi-desktop cases or a bounded stress task with the requested rounds or duration, and track the same taskId and reports."

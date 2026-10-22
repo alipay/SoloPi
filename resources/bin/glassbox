@@ -1,0 +1,36 @@
+#!/bin/sh
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ "$(uname -s)" = "Linux" ]; then
+  RESOURCES_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+  APP_DIR=$(CDPATH= cd -- "$RESOURCES_DIR/.." && pwd)
+  ELECTRON_BIN="$APP_DIR/solopi-desktop"
+  if [ ! -x "$ELECTRON_BIN" ]; then ELECTRON_BIN="$APP_DIR/solopi-harness-desktop"; fi
+  if [ ! -x "$ELECTRON_BIN" ]; then ELECTRON_BIN="$APP_DIR/lenswiper"; fi
+  CLI_SCRIPT="$RESOURCES_DIR/cli/glassbox-cli.mjs"
+else
+  CONTENTS_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/../.." && pwd)
+  ELECTRON_BIN="$CONTENTS_DIR/MacOS/solopi-desktop"
+  if [ ! -x "$ELECTRON_BIN" ]; then ELECTRON_BIN="$CONTENTS_DIR/MacOS/solopi-harness-desktop"; fi
+  if [ ! -x "$ELECTRON_BIN" ]; then
+    ELECTRON_BIN="$CONTENTS_DIR/MacOS/LensWiper"
+  fi
+  if [ ! -x "$ELECTRON_BIN" ]; then
+    ELECTRON_BIN="$CONTENTS_DIR/MacOS/Glass Box"
+  fi
+  CLI_SCRIPT="$CONTENTS_DIR/Resources/cli/glassbox-cli.mjs"
+fi
+
+if [ ! -x "$ELECTRON_BIN" ]; then
+  echo "solopi-desktop CLI error: Electron binary not found: $ELECTRON_BIN" >&2
+  exit 127
+fi
+
+if [ ! -f "$CLI_SCRIPT" ]; then
+  echo "solopi-desktop CLI error: CLI script not found: $CLI_SCRIPT" >&2
+  exit 127
+fi
+
+export ELECTRON_RUN_AS_NODE=1
+exec "$ELECTRON_BIN" "$CLI_SCRIPT" "$@"

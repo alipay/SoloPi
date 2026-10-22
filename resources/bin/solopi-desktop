@@ -1,0 +1,3 @@
+#!/bin/sh
+# Public product entry; historical commands remain compatibility aliases.
+exec "$(dirname "$0")/glassbox" "$@"

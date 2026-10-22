@@ -1,0 +1,2248 @@
+{
+  "schemaVersion": 1,
+  "license": "Apache-2.0",
+  "licenseFile": "LICENSE",
+  "thirdPartyNoticesFile": "THIRD_PARTY_NOTICES.md",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sha256": "9b9604b79d37cbb013584bb9cff5129f75b05a22edbd48e5c07d8db801d3e79e",
+      "bytes": 425
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "6f7dcb9394a290f1879e7a3d61607a11539477860b5fc835ef62e4937ca9cc19",
+      "bytes": 11368
+    },
+    {
+      "path": "NOTICE",
+      "sha256": "4fef2a1fe3fe29b35ad0bbb6455341cefcf0b2b0a4aa806cf2f8a025264cfbce",
+      "bytes": 651
+    },
+    {
+      "path": "README.md",
+      "sha256": "5be628507235b42f32af76330d906c52e5e008f26bfdbb535d2543aad3c67914",
+      "bytes": 11037
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "sha256": "031e1fb6c497d7972cf2a3864f44ca25513bd6dccc5926a994be4a903c3f5ad8",
+      "bytes": 4051
+    },
+    {
+      "path": "components.json",
+      "sha256": "9820835141c54e5b5dfbb68b3c3790db73c9ebfb967884ae3fccd058d698a1a6",
+      "bytes": 414
+    },
+    {
+      "path": "docs/CLI_BACKGROUND_RUNTIME.md",
+      "sha256": "5f9c1c2a937cf2ac6bdefab444fb88ed09edbb7a8df3b7e496f4bbe838bce049",
+      "bytes": 3178
+    },
+    {
+      "path": "docs/SOLOPI_IMPORT.md",
+      "sha256": "6ab9adbb1722a69887ef74e2e3e01642f11af0fd0896ba952b0af0ea0b9f1926",
+      "bytes": 5882
+    },
+    {
+      "path": "docs/agent/MODEL_REQUEST_RECOVERY.md",
+      "sha256": "fa03400b962f00c3be646363bdb8a14c148a733ec2dd9f62a31c0e9a7fe9ffcf",
+      "bytes": 2982
+    },
+    {
+      "path": "docs/agent/glassbox-cli-usage.md",
+      "sha256": "a5ef1d2c28019a7d71b1449cc3ed9fc4151b41abd6d028e79b25302ee5a34d29",
+      "bytes": 46918
+    },
+    {
+      "path": "docs/configuration.md",
+      "sha256": "55eecee961e3fe5ee6fcbf262c7d4674d91877f737e4e7e915f3b0291ddf30e5",
+      "bytes": 10344
+    },
+    {
+      "path": "docs/public-source.md",
+      "sha256": "e52ff76ee79a8897a4d2931ca9c4edd2bd099a1a86d4e0bf3b21368df7a82752",
+      "bytes": 1800
+    },
+    {
+      "path": "electron/adb-error.js",
+      "sha256": "5b619f3c69eb031efe30f560ad81ce9ae15e2cbc179eb7629c56e3fbdb7c910c",
+      "bytes": 8018
+    },
+    {
+      "path": "electron/agent/attachments.js",
+      "sha256": "aba5c799fd56be486f68c726de64e76b4fc6babd4c5abe35f4ca3458e93a86c3",
+      "bytes": 2874
+    },
+    {
+      "path": "electron/agent/bounded-summary.js",
+      "sha256": "4d63701949b3564bf2dce767b68cac4e16b583c1afe9f9732f73a274aee7f738",
+      "bytes": 6024
+    },
+    {
+      "path": "electron/agent/case-batch.js",
+      "sha256": "5756b00ea152298ace173a38aac44284f2b1e79fdcb22b8b9c5bf895f143fc40",
+      "bytes": 6132
+    },
+    {
+      "path": "electron/agent/case-contract.js",
+      "sha256": "e62b9c9bd9ee607d687ecdd824ac612cba743c643698315ff467b8caf2da6cae",
+      "bytes": 4107
+    },
+    {
+      "path": "electron/agent/case-discovery.js",
+      "sha256": "8de7671be45f32064fc87e7ac9178092088e246fcdf1b0b905b8a7ac01f7b46e",
+      "bytes": 3961
+    },
+    {
+      "path": "electron/agent/case-evidence-export.js",
+      "sha256": "128eae6f2751ef3955d1091963c4f21569aa346cca7b80023bafe8a88e7f209b",
+      "bytes": 7287
+    },
+    {
+      "path": "electron/agent/case-evidence-summary.js",
+      "sha256": "49928e921ba890ed87c92ede8b75dc42ff7d80ac9581a0d706b99e6e9faa398d",
+      "bytes": 6349
+    },
+    {
+      "path": "electron/agent/case-scope-summary.js",
+      "sha256": "7c3b9c0517c7f2abcbd574781efd22717e7dfefa2d84bc5e0fb66918e359520b",
+      "bytes": 799
+    },
+    {
+      "path": "electron/agent/case-selection.js",
+      "sha256": "1a522b2d3b9fdced6d208fdbbf0e7eebdfff849d75795425e30eb34db438c4d0",
+      "bytes": 2764
+    },
+    {
+      "path": "electron/agent/case-step-query.js",
+      "sha256": "9a2c6632c8275b078e0a8ee44d90b3834bdae5b16e6edf910136c5f8c43f2c0e",
+      "bytes": 2852
+    },
+    {
+      "path": "electron/agent/command.js",
+      "sha256": "1f5e478acc52875143a2229e1916e434ed49f98c2feed9609e87920d9f4a9bed",
+      "bytes": 3556
+    },
+    {
+      "path": "electron/agent/configuration.js",
+      "sha256": "315223734e5d606c0c262db13ec990acbf98cc6560785a7f56fcd8a6ac111612",
+      "bytes": 4351
+    },
+    {
+      "path": "electron/agent/connect-retry.js",
+      "sha256": "097db063b9c6bd6cda8bded7a276f58c2367362587c529527f0655d3a4cdeaab",
+      "bytes": 1079
+    },
+    {
+      "path": "electron/agent/context.js",
+      "sha256": "15a940bd72617d3c846ed4661855d6b05ab8e3004ce6a063127ae6fbd19b69d5",
+      "bytes": 4644
+    },
+    {
+      "path": "electron/agent/continuation-memory.js",
+      "sha256": "cad17d741d42b9963ec874a54026433bdcca194b4c52a47173c3080e709d968d",
+      "bytes": 3693
+    },
+    {
+      "path": "electron/agent/deepseek-compaction.mjs",
+      "sha256": "7c5ec64254d94128dc314eeb7516bb510929464019d93e3044afa4dc1c8e535f",
+      "bytes": 24510
+    },
+    {
+      "path": "electron/agent/dev-model.js",
+      "sha256": "670b34b2558e58d6df643e468290d4406e9b5339f98d1cacc13a1f29588841f7",
+      "bytes": 591
+    },
+    {
+      "path": "electron/agent/device-operation.js",
+      "sha256": "a33534f436ebb11ba7ae4f602e9b2fb06084c9aa29693f66ba2c39d84f492b81",
+      "bytes": 1055
+    },
+    {
+      "path": "electron/agent/device-routing.js",
+      "sha256": "bd5c333f1fa0a25bd937ddd9ae2742b9bac35f0702b61485430e03edc734f42d",
+      "bytes": 164
+    },
+    {
+      "path": "electron/agent/download.js",
+      "sha256": "0d68085e38b0ba9086ec8e19664f911f7f928916ab240ca99980997177ad0fe3",
+      "bytes": 2954
+    },
+    {
+      "path": "electron/agent/duplicate-results.js",
+      "sha256": "3dd06181906005ac51725199b79b9f75fb79abcae0462e0026fa3081a0204d57",
+      "bytes": 1176
+    },
+    {
+      "path": "electron/agent/edit-scope.js",
+      "sha256": "fa77f6e3b591791992909f4ac1eb15fafde5b773d9bd835369e61216442bb68c",
+      "bytes": 2058
+    },
+    {
+      "path": "electron/agent/evidence-projection.js",
+      "sha256": "6311a16b27cc03b06875268c906ed1dc714079f608a017883cbfef8471524d10",
+      "bytes": 2580
+    },
+    {
+      "path": "electron/agent/evidence.js",
+      "sha256": "41a6b1ac04770f33b7a399e48c0838ed76a444c28c58138fba0f3c6e3c4ecb30",
+      "bytes": 4985
+    },
+    {
+      "path": "electron/agent/execution-policy.js",
+      "sha256": "e2b682c40663850d2b301876d42d086f93cecd16e36b54af289b586fba7df741",
+      "bytes": 1497
+    },
+    {
+      "path": "electron/agent/experience-memory.js",
+      "sha256": "893489e1768409331efaa5297d2b74059789f2e2575ba502c9852c21efec444f",
+      "bytes": 11175
+    },
+    {
+      "path": "electron/agent/extensions.js",
+      "sha256": "5ba52a418b0581180c5ab73c3f4f77f3728770db81c5478f444d2a25bf502451",
+      "bytes": 1089
+    },
+    {
+      "path": "electron/agent/fast-path.js",
+      "sha256": "27e8ff4bafb037d86991fe8f2b78655efd4e67652f0313030719f957dae2eaf9",
+      "bytes": 2218
+    },
+    {
+      "path": "electron/agent/index.js",
+      "sha256": "d1a67dacc7524c76ebf6f8e1190dd8092e73e3c474a88d865c9345db1fdafdd8",
+      "bytes": 19263
+    },
+    {
+      "path": "electron/agent/log-search-batch.js",
+      "sha256": "dce369a291f9c9aecdfe2836a3a26a2545882414c5da322bfcbeeb42aed53cad",
+      "bytes": 4770
+    },
+    {
+      "path": "electron/agent/log-source.js",
+      "sha256": "2b2c94fb1a0ef7b968db604d53f9bb6acd905cb400507445deb8176c5799bc90",
+      "bytes": 1368
+    },
+    {
+      "path": "electron/agent/mcp.js",
+      "sha256": "14641503ef063755b9c00ca2ed854bde9f6d0516b0a0a770c4db54c82c62fd6d",
+      "bytes": 2702
+    },
+    {
+      "path": "electron/agent/mirrors.js",
+      "sha256": "290504d9b2ede05e299e097a1709ee0bdbbe1de12ea897540b79ea8ff5bd8482",
+      "bytes": 1129
+    },
+    {
+      "path": "electron/agent/model-capacity.js",
+      "sha256": "d4e6a6bb84990d2e043194a917a07dead72ee307c1fc5555626ae6ec965b574e",
+      "bytes": 1992
+    },
+    {
+      "path": "electron/agent/model-comparison.js",
+      "sha256": "1eb9a65c3abf6d72b37c8a7bedf3f56c5945760de97059f89a5c9bf043210a67",
+      "bytes": 2722
+    },
+    {
+      "path": "electron/agent/model-error.js",
+      "sha256": "40e30b916b39fbb71d217dfbf7b3f9cc758a3f3f73241853293c59853ac1d9ff",
+      "bytes": 7712
+    },
+    {
+      "path": "electron/agent/model-step-recovery.js",
+      "sha256": "f5a9f7091f0e5a724821c65d7611a036ac849ae08387e0436fe9058c2ace9653",
+      "bytes": 6743
+    },
+    {
+      "path": "electron/agent/model.js",
+      "sha256": "86b27c477b9a6cb15631824aa0162775457b5448f41a44d162fb26ecca75ee19",
+      "bytes": 17325
+    },
+    {
+      "path": "electron/agent/progress-policy.js",
+      "sha256": "3e27962899a8a60757c16185e1a4e9e274c32a41fd4f23b2a643d489a107af06",
+      "bytes": 3410
+    },
+    {
+      "path": "electron/agent/rate-limit-retry.js",
+      "sha256": "2bb764f1b96aaa4dcbd35453b6b538340b1ddf872f0f113ec61a94be2f4a80c0",
+      "bytes": 2092
+    },
+    {
+      "path": "electron/agent/reasoning.js",
+      "sha256": "658e8fefcdf56f3d479e42fa95629a2986d5a387419232999e254e02749afc91",
+      "bytes": 1299
+    },
+    {
+      "path": "electron/agent/reference-memory.js",
+      "sha256": "8082d9fc8418ed4efcba458b2ae22ae7ab310b734539f56b940c03cd674b9647",
+      "bytes": 7678
+    },
+    {
+      "path": "electron/agent/request-deadline.js",
+      "sha256": "b88c4f682002365d06f9977a11ca047def0f77ec5a55577a76a2e93c5e307977",
+      "bytes": 1321
+    },
+    {
+      "path": "electron/agent/request-footprint.js",
+      "sha256": "dc8932348ba186ea35f4dcf0bebab50b7ba28e63b2686265d0a10548621c16b8",
+      "bytes": 1098
+    },
+    {
+      "path": "electron/agent/request-history.js",
+      "sha256": "5e04b9b4a260b888bec45f028582e65937851d36e25cb7e791b956a05ed33342",
+      "bytes": 2484
+    },
+    {
+      "path": "electron/agent/request-policy.js",
+      "sha256": "28c4f71141c07394549d6bf2ff6c7e61b6b0e8de43d474c1ca3a926816a94760",
+      "bytes": 1926
+    },
+    {
+      "path": "electron/agent/request-scheduler.js",
+      "sha256": "18e2be2768b1bb44d43cbda681a7b4947e2c81ed538d8ded9f82e0e79b19da41",
+      "bytes": 1746
+    },
+    {
+      "path": "electron/agent/review-events.js",
+      "sha256": "e419d4e3a58387f461a4053f14ca53109e3cbc4904db13aa3aa594aba482b7a2",
+      "bytes": 3064
+    },
+    {
+      "path": "electron/agent/runtime.js",
+      "sha256": "446d7dbc210d052f439b4fbc25f0059eccd72932a59f18e1a0ad5a39e7aa9298",
+      "bytes": 49772
+    },
+    {
+      "path": "electron/agent/selection-receipt.js",
+      "sha256": "4325c8d1f83a2255fd836c687ad7c57bd553e398d67a0c5e78a1d74d40705f9d",
+      "bytes": 1884
+    },
+    {
+      "path": "electron/agent/session-text-store.js",
+      "sha256": "ea3a30706fb0c75d0568109759509fb96919cde215781a17465ec4e77d6c8b45",
+      "bytes": 4613
+    },
+    {
+      "path": "electron/agent/session-updates.js",
+      "sha256": "ce91f0d40773c066640e4bd4d084aa9eb4497ff4b2bec1c2d54eb7e436b6c544",
+      "bytes": 1677
+    },
+    {
+      "path": "electron/agent/session-view.js",
+      "sha256": "d7ad4df732bebc82f92a04ecdc49dbe72c1ad0bd5d170e1e9de74827e0873dd0",
+      "bytes": 1338
+    },
+    {
+      "path": "electron/agent/skill-catalog-frame.js",
+      "sha256": "0aad607036c096e19efc19052ebd2200d10f51f4cf5f610fb0d52fa7d31fc764",
+      "bytes": 1619
+    },
+    {
+      "path": "electron/agent/skill-install.js",
+      "sha256": "52578c35c1420c78c0b740d4d551434bc8ddf7657f65589ad8b165b40085a516",
+      "bytes": 2619
+    },
+    {
+      "path": "electron/agent/skill-names.js",
+      "sha256": "26b47d2b80a10263b93ad16aed3f73646147ae05f82a5c4fe04ee2ce930598e0",
+      "bytes": 357
+    },
+    {
+      "path": "electron/agent/skill-reading.js",
+      "sha256": "73dc88474db82a44a85ebf9d07bdb3b79639a7009ba189eeb72b2d7ff2807890",
+      "bytes": 2895
+    },
+    {
+      "path": "electron/agent/skill-refresh.js",
+      "sha256": "bc14b1f327c5d9ea0b6782fd273e3f2fdd864eabfef736137363f81b144f188e",
+      "bytes": 11288
+    },
+    {
+      "path": "electron/agent/skill-scope.js",
+      "sha256": "7bde292346717e3aeeef8a5016db2237a33accb38d05ebf4e9d08207c1ae3a07",
+      "bytes": 965
+    },
+    {
+      "path": "electron/agent/skills.js",
+      "sha256": "b65b8b367e889c3287cd520b9eee7b3c26d0a835297d0c557afee66edfd919aa",
+      "bytes": 6472
+    },
+    {
+      "path": "electron/agent/store.js",
+      "sha256": "7c873d2daedbe87910fab0cddde72fd18f64ae1717e2b458095d6512b3a30465",
+      "bytes": 6802
+    },
+    {
+      "path": "electron/agent/summary-deadline.js",
+      "sha256": "53278333f00a79c24053563b69cc099b2cea4e9f0fe9c9c0824b9d49ea0fc7e4",
+      "bytes": 1231
+    },
+    {
+      "path": "electron/agent/system-prompt.js",
+      "sha256": "eea24b7bdaf25e758784f8461e86ed0ce3377c5cd08cde68b9484c4074117c17",
+      "bytes": 5278
+    },
+    {
+      "path": "electron/agent/task-execution-contract.js",
+      "sha256": "ffd4c61272488c3da70c723f47cd733fe15893cd2c710ab12630ac2abdb0ebc1",
+      "bytes": 2108
+    },
+    {
+      "path": "electron/agent/task-execution-state.js",
+      "sha256": "4857e683d052e857b3a7d3d087a87e454d1c7b9ec5ffbf7eda02a7ffa7f9b60e",
+      "bytes": 9879
+    },
+    {
+      "path": "electron/agent/task-result-delivery.js",
+      "sha256": "5df5d41acc4a4e9f08a04fc3be6c60650d4f402eeea63b5708f16fd7e5658588",
+      "bytes": 3259
+    },
+    {
+      "path": "electron/agent/task-routing.js",
+      "sha256": "6f983732139c3dcda9f49be29ee0ef317e540334271169512bbff67c098ee590",
+      "bytes": 1874
+    },
+    {
+      "path": "electron/agent/tool-surface.js",
+      "sha256": "aa618ebd61664d1ba37af11d02801954207bc77a37c11a2575a83c7c48ae8526",
+      "bytes": 3008
+    },
+    {
+      "path": "electron/agent/tool-validation.js",
+      "sha256": "e5fd2e90588deb438cd20659a5e5cade241efcdd798d1b611f45adb913b29b83",
+      "bytes": 2736
+    },
+    {
+      "path": "electron/agent/tools.js",
+      "sha256": "1fc260d745ca1911d1b09ba30380f42d9b61e7fc6a9c6c84ad30b9fcb7d7d5c0",
+      "bytes": 43509
+    },
+    {
+      "path": "electron/agent/transport-diagnostics.js",
+      "sha256": "4e7d79abf430eaab8fa43f84a280751308fd25cf779b9b83a58d40a818a07c3e",
+      "bytes": 5347
+    },
+    {
+      "path": "electron/agent/upstream-diagnostics.js",
+      "sha256": "01efd1b5fd9144369cb54183e135dbf223738e54b24e649c18903ea5f4db3ce7",
+      "bytes": 1286
+    },
+    {
+      "path": "electron/agent/usage-anchor.js",
+      "sha256": "0f293f977c93a73e6505fd09d9a984cae404019348c2205382a9790ab843a56e",
+      "bytes": 1330
+    },
+    {
+      "path": "electron/agent/validation-summary.js",
+      "sha256": "79e8b2e54db676bd780238289b859210506a60a89076581c8c448e7d59435e1d",
+      "bytes": 1414
+    },
+    {
+      "path": "electron/android-thread-stacks.js",
+      "sha256": "c5c8620d80e2a64598bf3b9c091f64d38e4b1b582bd3b918323ab8cf6f853569",
+      "bytes": 12352
+    },
+    {
+      "path": "electron/android-top.js",
+      "sha256": "463c09c4eecb6ce77bd1f78da90b45d745722db05a1b67f01c99c17cd1ef8e14",
+      "bytes": 1262
+    },
+    {
+      "path": "electron/apk-install.js",
+      "sha256": "9046ef921da60696e80b415c78e17a657377b04a7ff3202ace11050c243ea75d",
+      "bytes": 5079
+    },
+    {
+      "path": "electron/apk-metadata.js",
+      "sha256": "0e174c2b4b667c12599afa9a63d98a7981ecb7eb0a655356778344ca85fea832",
+      "bytes": 2560
+    },
+    {
+      "path": "electron/audio-metrics.js",
+      "sha256": "0e86278323dcb05cca45dfa6878ba9a4e223f9f0fab4db039ff847acca2db173",
+      "bytes": 5267
+    },
+    {
+      "path": "electron/audio-remote-file.js",
+      "sha256": "8d9426297eaab6894d9a4a401bb00aa204eaac78f87f61bd33ea240c41278510",
+      "bytes": 8305
+    },
+    {
+      "path": "electron/background-runtime.js",
+      "sha256": "7dc9e013a57d33b3fdd59b9cae6d7ecb21052d2697cdf03db3f6c7f400e472f3",
+      "bytes": 1507
+    },
+    {
+      "path": "electron/bugreport/jobs.js",
+      "sha256": "a8152fbaccaf3456f777a9695497698daf799477711de67e04afcefe96333185",
+      "bytes": 11326
+    },
+    {
+      "path": "electron/bugreport/parser.js",
+      "sha256": "bb91482c3f2c59051c77103908dab3c65eed89ad114e3161e99c7d8a4e9474dc",
+      "bytes": 14449
+    },
+    {
+      "path": "electron/bugreport/worker.js",
+      "sha256": "1c52be3f7b47b22cdb12a28faa2bd9c69636efb6ccd608545cb98d5e4bbe796d",
+      "bytes": 1065
+    },
+    {
+      "path": "electron/bugreport/zip.js",
+      "sha256": "6bbaff295ea9bde1adbf850491a7b6dbbae98f54b471656c2ab3af982d6f6c0d",
+      "bytes": 4829
+    },
+    {
+      "path": "electron/case-assets.js",
+      "sha256": "1c7bf82ab086640aabe518718d4ccf696a010ddd4f4580af6a5f2e808e422445",
+      "bytes": 2760
+    },
+    {
+      "path": "electron/case-edit-guard.js",
+      "sha256": "ab615a38013cd7cc9685c53f65a0281f003bf5575ae1dffef73fdddc6d581811",
+      "bytes": 4843
+    },
+    {
+      "path": "electron/case-library-api.js",
+      "sha256": "8af66d4901a639266d79197c31893fb33e7e546f6a3c6226cc42cbf0a5d40cbc",
+      "bytes": 4502
+    },
+    {
+      "path": "electron/case-library-local.js",
+      "sha256": "75eba040803f540509617145ec54453ad3186c4fa41c501ac3ee5aa23f176e19",
+      "bytes": 4127
+    },
+    {
+      "path": "electron/case-library-upload-sync.js",
+      "sha256": "453921ff6394ae96ea0fbf7de1eb5f8b0272fd758838c94f425880c45ef50fe0",
+      "bytes": 2647
+    },
+    {
+      "path": "electron/case-library-watcher.js",
+      "sha256": "7b52ae0fb40c4caa88fc99c2ed59d8f2a0aa3cfab4b03692d88dd4e2e0d9a864",
+      "bytes": 6991
+    },
+    {
+      "path": "electron/case-update.d.ts",
+      "sha256": "5a1e63c4f02f7fe76b7e8d2a8f7e0a774b3da6d1d82f11fbc94f9d1b9d4fccd6",
+      "bytes": 155
+    },
+    {
+      "path": "electron/case-update.js",
+      "sha256": "830109d8f5d7bbd67e30a6a8efff9ccd86612793d6885ed6654e29854af19a60",
+      "bytes": 3017
+    },
+    {
+      "path": "electron/cli-battery.js",
+      "sha256": "5b88e7c47481cf9415e88dd8f2a78c49a9d850086c4979072e5c565ec4552db6",
+      "bytes": 2348
+    },
+    {
+      "path": "electron/cli-performance.js",
+      "sha256": "be45864783949ee67633d8e960e0b92d195f26026a2e6383a2e05ad72d04e857",
+      "bytes": 1766
+    },
+    {
+      "path": "electron/command-result-assertions.js",
+      "sha256": "167c765c63bc5181ab9717ccdd3113a4b7b3827f477dbbc4e38c6ba8c7c98452",
+      "bytes": 4347
+    },
+    {
+      "path": "electron/configuration-lock.js",
+      "sha256": "c9eefa03ce7861de05190e2f8c49a32be0c7bcbe16ef58662f905c6a6a53da38",
+      "bytes": 1965
+    },
+    {
+      "path": "electron/credential-storage.js",
+      "sha256": "f5370118679e2564d0c7cb3d2fd15c97b6d1a0ad9a547bacee1f7a9ca85e1e58",
+      "bytes": 4769
+    },
+    {
+      "path": "electron/data-directory.js",
+      "sha256": "f17d636bd916f18f7f736b6895e860c0129b25e04f737351ae2cf1ddf6a845dc",
+      "bytes": 913
+    },
+    {
+      "path": "electron/development-tasks.js",
+      "sha256": "4fdf3ef4e7499e1bdd333ce87bbef2184c049f2518879cf2e81a9a136b4a7169",
+      "bytes": 7064
+    },
+    {
+      "path": "electron/device-preflight.js",
+      "sha256": "67f163d79a421316f5a344bb7f44ba65c945772b56c9123f3e7bcd1ba6092067",
+      "bytes": 4426
+    },
+    {
+      "path": "electron/diagnostics.js",
+      "sha256": "ac12a83001e7bd32344077963dfb546f5fdf96ea3e2d40d37c2f135a61349bf7",
+      "bytes": 7003
+    },
+    {
+      "path": "electron/git-runtime.js",
+      "sha256": "e12ed206c2c403787491834e08faf15516d3be3ea173a05b8c477dea971cff58",
+      "bytes": 1691
+    },
+    {
+      "path": "electron/headless-configuration.js",
+      "sha256": "26f608f36ce387853d1f1973c21cdc1ea5b5e0c0d9eea8df0f7ad5472d0bbc93",
+      "bytes": 4093
+    },
+    {
+      "path": "electron/http-response.js",
+      "sha256": "1b27845d06ed403d08031ff59f562cbb629fef109b4166ab529ad86f7a2f838f",
+      "bytes": 3106
+    },
+    {
+      "path": "electron/main.js",
+      "sha256": "0601c0fe29595330fca2792bc07fe8628e27a31b52c677e94b0e1ad81d96eb63",
+      "bytes": 540143
+    },
+    {
+      "path": "electron/managed-command.js",
+      "sha256": "3cfd349f87b9fb9a175fc4f955a896aae4097e723d390ea8681c8300524399aa",
+      "bytes": 4931
+    },
+    {
+      "path": "electron/media-process-queue.js",
+      "sha256": "54fb085a564c4adbdd6c3d7ce946acd8305483c510a76415e33fc2a332dcdec5",
+      "bytes": 2675
+    },
+    {
+      "path": "electron/media-runtime.js",
+      "sha256": "fc380009c8302a2518cf8809b9dd2b7134f9291546ae03e5c1d4f58540277d68",
+      "bytes": 4546
+    },
+    {
+      "path": "electron/mobile-ui-coordinate.js",
+      "sha256": "d33fe89a061dc9db69383bf8abe9c5c0ef3f5f0b30d818a5cb7553f96bf5d489",
+      "bytes": 5268
+    },
+    {
+      "path": "electron/mobile-ui-element-swipe.js",
+      "sha256": "72227d7fb01e895ff892115b5aeae4f12fb1ccecbd3a9303e1e4d033f758434c",
+      "bytes": 2221
+    },
+    {
+      "path": "electron/mobile-ui-selector.js",
+      "sha256": "d1e83e3b2c216f9e5493a3e62063a457d7d4cd82cce9bb2df0827b65618b90f4",
+      "bytes": 3275
+    },
+    {
+      "path": "electron/mobile-ui-tap-position.d.ts",
+      "sha256": "b6588299266dbb0c6093ae78dde46af6ff9f6ef8752d9cbcd7d25e69f0cbbfc7",
+      "bytes": 549
+    },
+    {
+      "path": "electron/mobile-ui-tap-position.js",
+      "sha256": "fa4b5b56e4dec5a084c17b397c6db75add5a4df44a34a2b3b4d8fa4eab198f01",
+      "bytes": 2204
+    },
+    {
+      "path": "electron/owned-log-process.js",
+      "sha256": "be293ab990eea7c26d0a9cb61aec44c70fe3a7f5e44bf0f9e2770ce6856c1530",
+      "bytes": 1092
+    },
+    {
+      "path": "electron/performance-battery.js",
+      "sha256": "0044bbfc83afa980ccbeb370bc05698f89800c3018e5eb7544cba729acee26bc",
+      "bytes": 2219
+    },
+    {
+      "path": "electron/performance-crashes.js",
+      "sha256": "b91c448a34da8b93d4b1ca85e2826cd5c4896d4f6075c89eb17675178e2965ac",
+      "bytes": 11564
+    },
+    {
+      "path": "electron/preload.js",
+      "sha256": "14ed46685c995951d035406cc15ae7172a9fd6316d38ba193149610e6def53c4",
+      "bytes": 4699
+    },
+    {
+      "path": "electron/product-identity.js",
+      "sha256": "2acea07a708ed39f853b20386c70407a26f61c46810076a1534007a98fbb9a7e",
+      "bytes": 771
+    },
+    {
+      "path": "electron/quick-action-api.js",
+      "sha256": "e423be2b52d26e0c517f1f048d23e08730c99ee86995c1359a6dc95be185adf9",
+      "bytes": 7221
+    },
+    {
+      "path": "electron/quick-action-git.js",
+      "sha256": "b94b2a689b7fe37ce8baec9a6f276e8b55311915ff09eac7eb8fb10d0c7f0048",
+      "bytes": 9184
+    },
+    {
+      "path": "electron/quick-action-helper.js",
+      "sha256": "df696bf88dcc6fbb23ba08b376f95b35963228237634475d8b0db4fc342f4023",
+      "bytes": 2283
+    },
+    {
+      "path": "electron/quick-action-session.js",
+      "sha256": "94b261a54dbca0319b2faa96f6ed6f3bedc22e7e15787344172aaffc6b68313a",
+      "bytes": 2497
+    },
+    {
+      "path": "electron/quick-actions.js",
+      "sha256": "4656c25b2929149ccb302e7b09dd3550554cbba6fa9329c9d21c7b75ffae61ec",
+      "bytes": 8380
+    },
+    {
+      "path": "electron/recording-readiness.js",
+      "sha256": "e8022baa93a7162498f0cdba212c9b756e34f646d4a0164829f855025f568626",
+      "bytes": 942
+    },
+    {
+      "path": "electron/report-import.js",
+      "sha256": "364316d78dd76e8acdfca675a637a1c38c88d056f35ab7f191587673c3352175",
+      "bytes": 4151
+    },
+    {
+      "path": "electron/runtime-diagnostics.js",
+      "sha256": "df50e886fa3ab6579e390b7790372b83fcca13550cd08a343f361024e91aa631",
+      "bytes": 3607
+    },
+    {
+      "path": "electron/scrcpy-deployment.js",
+      "sha256": "a489f0dea4ad390ca324e458797f1ef7dbf6c0f3722a0083cb98c6597ec8451b",
+      "bytes": 2929
+    },
+    {
+      "path": "electron/scrcpy-mirror.js",
+      "sha256": "54dd49a41dae6ad29c4ecfdaee74f6b10c93ed85492319156d2eff5829f675be",
+      "bytes": 3832
+    },
+    {
+      "path": "electron/scrcpy-packets.js",
+      "sha256": "34c6f05be5c9520a98ff513eb3f5de7cebea0d021ff6435cadbe71e74d5cfb1a",
+      "bytes": 1423
+    },
+    {
+      "path": "electron/scrcpy-preview.js",
+      "sha256": "1e9c761f63ea1d93bd66644fcbe834ec2c7cd0212491ffdfed57ae10857da34e",
+      "bytes": 9612
+    },
+    {
+      "path": "electron/scrcpy-recording.js",
+      "sha256": "83b37a9c2f95594ebab4c570de1ec1d48047bfc84e7676ad7b388c2bb75ccf98",
+      "bytes": 4887
+    },
+    {
+      "path": "electron/scrcpy-stream-observer.js",
+      "sha256": "7c91cbc80c93d986107c364d82ce4e22a8f02c5f71ed5d1bc2bf1e1700abcb0f",
+      "bytes": 2547
+    },
+    {
+      "path": "electron/scrcpy-stream.js",
+      "sha256": "4df591612d944f80ee4eee7dfef1b415f79d171a9faf200dc7833b6914deecdc",
+      "bytes": 5404
+    },
+    {
+      "path": "electron/scrcpy-transport.js",
+      "sha256": "cbaeca2f78fd88991408c2cfab35f986de1d4452ad3655ce175d4e23bcdfb810",
+      "bytes": 13609
+    },
+    {
+      "path": "electron/secret-storage.js",
+      "sha256": "ab650f2d1c47ec8fecd9fee6521cc5d91a5a0583e741a021d875d4dcd1a91470",
+      "bytes": 4368
+    },
+    {
+      "path": "electron/settings-service.js",
+      "sha256": "2b5a66911c5cfb91459663d914554cb9574e2e7bbc6b7bbc6e7b539cbc4decc8",
+      "bytes": 7769
+    },
+    {
+      "path": "electron/solopi-adb-connection.js",
+      "sha256": "de071da319631d5cde056f5e946ab9dfe04ab39204e47d88f9d35a9f9f51e50b",
+      "bytes": 2854
+    },
+    {
+      "path": "electron/solopi-case-converter.js",
+      "sha256": "1904f1a0ddf20fc518ce7cce345147f54edff60b524ca846d794bb01d3d857da",
+      "bytes": 14179
+    },
+    {
+      "path": "electron/solopi-native-case.js",
+      "sha256": "8b203279a19c5f6bcdf3bac8ccd419f9cc2e53db59244f01441854e9b3057259",
+      "bytes": 4912
+    },
+    {
+      "path": "electron/solopi-native-replay.js",
+      "sha256": "83b640bb88b4c1a659f2d81128734afe721e6b3dc70dec74c7740dcba338b219",
+      "bytes": 9462
+    },
+    {
+      "path": "electron/solopi-native-schema.d.ts",
+      "sha256": "466f98961b392fd8cb6a512b74ca7c88200718d16a666bada678818ccb65991b",
+      "bytes": 385
+    },
+    {
+      "path": "electron/solopi-native-schema.js",
+      "sha256": "7cbec3fa84d09518a7cc78b9850599c398f6fdb7694f1d8824375739a98f50e0",
+      "bytes": 5970
+    },
+    {
+      "path": "electron/solopi-permissions.js",
+      "sha256": "c2b986ae4a624113a7916e6364662cffa3db90fe84f412cc607aadf6b7b9c421",
+      "bytes": 4650
+    },
+    {
+      "path": "electron/solopi-provider.js",
+      "sha256": "5d816ad2a567c189f4a20633fecc4f6d53a1e38f56a6fd5a74b7b8f08150cafd",
+      "bytes": 13592
+    },
+    {
+      "path": "electron/solopi-recording.js",
+      "sha256": "5ba544fae2d3d12090a11b0035841bb171ffa23aad7aad5c9e26bb5d67d70e68",
+      "bytes": 10960
+    },
+    {
+      "path": "electron/stress-task.js",
+      "sha256": "4225d0c394ad7dcf4078e6c19caefaa0e98d453b747afc48d5ed006fc9e7025e",
+      "bytes": 1787
+    },
+    {
+      "path": "electron/task-case-coverage.js",
+      "sha256": "03ee7c15313f2a48d0e2eac20c4e80b7ae45191e091917a424442ddcea1b681e",
+      "bytes": 2274
+    },
+    {
+      "path": "electron/task-case-query.js",
+      "sha256": "3885e4f3812c412945b08733ae00147ab84a0f3ca0685724705b888e4ca4ecf1",
+      "bytes": 9196
+    },
+    {
+      "path": "electron/task-cleanup.js",
+      "sha256": "ab1e92064b2a39b48576a3d9d3e0e538c1b6ec2dfad6680bfa8037c516cf3aaa",
+      "bytes": 12718
+    },
+    {
+      "path": "electron/task-creation-diagnostics.js",
+      "sha256": "ef9389695fcf6c4e228da796a5fc33c7a4967952b3b8af47c2a05a5cde9b2763",
+      "bytes": 2762
+    },
+    {
+      "path": "electron/task-device-selection.js",
+      "sha256": "9e5d957601dfc19855d6341b22f007d1afcf9f416095cbfdee12665c9f6f443d",
+      "bytes": 4947
+    },
+    {
+      "path": "electron/task-json-worker.js",
+      "sha256": "f154b0ac4072d37e9366ee64afe53de30c4e88fe3d1d4b6deada2e04a428c59d",
+      "bytes": 935
+    },
+    {
+      "path": "electron/task-log-capture.js",
+      "sha256": "6eea423412ffc9ab9ac0fd27975d31c0b6e9ea4c235aa0653699c940fd65bf9f",
+      "bytes": 5314
+    },
+    {
+      "path": "electron/task-report-writer.js",
+      "sha256": "e043cb06a4a76b82e658a2200adb2206eb1fcc7b30a2f17436d3d33824aef5ea",
+      "bytes": 4315
+    },
+    {
+      "path": "electron/task-screen-recording.js",
+      "sha256": "4412fe1f87142e2a9bb78de9c342bb4dc3086300d9fdf8783ad9305a17558ca1",
+      "bytes": 10241
+    },
+    {
+      "path": "electron/task-summary-cache.js",
+      "sha256": "5882079fa5a0062dab2ca326a9b18e49d7fe375ce7c684c91ada4aad7947b028",
+      "bytes": 2151
+    },
+    {
+      "path": "electron/task-summary-worker.js",
+      "sha256": "58c41f7f71bf9663944e0f20790ad900f5997ddd86db22dbc8dec6dbf1f1c35c",
+      "bytes": 626
+    },
+    {
+      "path": "electron/task-visibility.js",
+      "sha256": "343e2a7dc51104e5f40663669c13698d21bf2692779a52c401955a5c3e7e7cb8",
+      "bytes": 7608
+    },
+    {
+      "path": "electron/team-configuration-ipc.js",
+      "sha256": "8f64bbd04842480886fcdc3117040a1fbb67af46f918ceabc687115c5541bcee",
+      "bytes": 5887
+    },
+    {
+      "path": "electron/team-configuration.js",
+      "sha256": "b5e681821e201ebcfda030ad8cab5d0a204e5cd1522240a8a39dff75afb9357d",
+      "bytes": 16605
+    },
+    {
+      "path": "electron/tts-response.js",
+      "sha256": "fbbc9dd39dec8fcf3c860225fc7b8b4b80c9081d5b127d8fc8d9bfd4353cb39b",
+      "bytes": 3196
+    },
+    {
+      "path": "electron/user-session.js",
+      "sha256": "f3ba1f197f2389d8e3edfd58153853264b3514c92c27ec40f7a422b0322dd11f",
+      "bytes": 3127
+    },
+    {
+      "path": "electron/workflow-assertion.js",
+      "sha256": "754f2896960049b82116907f433748e8cac37afd5a18fbb708570bb8f34ef4c0",
+      "bytes": 2518
+    },
+    {
+      "path": "electron/workflow-execution-gate.js",
+      "sha256": "450e6f35cb9043ee797c17503fd98c20f38a5e9440e940fbe3b03923b3558645",
+      "bytes": 3932
+    },
+    {
+      "path": "electron/workflow-failure-policy.d.ts",
+      "sha256": "2e9915c24554c1fdf9ff85c2c89588e5f8e889ab032c3ddf07ee14dcfcea8f9d",
+      "bytes": 224
+    },
+    {
+      "path": "electron/workflow-failure-policy.js",
+      "sha256": "0dabd135ff430087ac94e7086d3373f318360d2e6dad22b1d4b32da4adbdf674",
+      "bytes": 1655
+    },
+    {
+      "path": "electron/workflow-llm-budgets.js",
+      "sha256": "646f92826158442bad2f0e283e6aedf98f0aee28ef1f825818c2dd0fdb2ce559",
+      "bytes": 2016
+    },
+    {
+      "path": "electron/workflow-llm-candidates.js",
+      "sha256": "bcc97f077b3fa4562f0b8703d70058122fa8bf364442df23bc6d16c6d4579299",
+      "bytes": 1580
+    },
+    {
+      "path": "electron/workflow-llm-output-policy.js",
+      "sha256": "d67f8ec9fced20b5f949a977441fd4df3e3e6129cbaa71eee908dfcbc96873be",
+      "bytes": 1368
+    },
+    {
+      "path": "electron/workflow-llm-retry.js",
+      "sha256": "d0fc47936f8f8a27b9c73c778b3d77813f330f609a9f11527883417145935973",
+      "bytes": 2650
+    },
+    {
+      "path": "electron/workflow-log-diagnostics.d.ts",
+      "sha256": "690af1b03b6439f7a2b66b7aa2dea28abb8c2328fd1fabfdee717f6b56ff3254",
+      "bytes": 203
+    },
+    {
+      "path": "electron/workflow-log-diagnostics.js",
+      "sha256": "ddca7b1d5d93f55d98e9f4fcb0629a3fcf1c05db24af80e662e3b7f34381a236",
+      "bytes": 8488
+    },
+    {
+      "path": "electron/workflow-log-journal.js",
+      "sha256": "282bd64ce23daa8c5491381580e9f0d2cad58238c546ee25b9303233d9193016",
+      "bytes": 2684
+    },
+    {
+      "path": "electron/workflow-log-text.js",
+      "sha256": "7d40ec9781f0f522711f2237bd794a1fb3982330938c5bcb6983873d08a44d97",
+      "bytes": 2770
+    },
+    {
+      "path": "electron/workflow-performance.js",
+      "sha256": "43cfc82562684333ae044618fa4d3b09fdc11384a8658fee2cfccc9d6f7cef86",
+      "bytes": 19896
+    },
+    {
+      "path": "electron/workflow-task-events.js",
+      "sha256": "8a9ab741b2ae6abe6afc1ec88c79c858d842b43878347fa683f8077be9b849dd",
+      "bytes": 7680
+    },
+    {
+      "path": "electron/workflow-task-sync.js",
+      "sha256": "20305309808873159b08b0daf5d0f823d50d923e17c82515de8f96f96941ae62",
+      "bytes": 5980
+    },
+    {
+      "path": "index.html",
+      "sha256": "ec2503eaaf2bdba57df671579c0a7367745901ba7a4199700e6af307455c93c4",
+      "bytes": 722
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "2820fef6064c4a3adc5fe94b0949831ad22ede205143bd7982cf642b63768715",
+      "bytes": 662169
+    },
+    {
+      "path": "package.json",
+      "sha256": "d0d743df39d03e09a85abe72b9871d8ae46a0e0c85a251c7460ac8f117f5c539",
+      "bytes": 7972
+    },
+    {
+      "path": "postcss.config.js",
+      "sha256": "aa5c75db9c1a602c3a54db1bd43facf77e3e385b553ffa63d338690c23bdf4f1",
+      "bytes": 83
+    },
+    {
+      "path": "resources/bin/glassbox",
+      "sha256": "3f267e8ed8d12ed205ccf0fb7d40eaf187f00b0572facf10a04b281bd1ee9c22",
+      "bytes": 1253
+    },
+    {
+      "path": "resources/bin/solopi-desktop",
+      "sha256": "8eca90b8f54dad52b28fe72ef9cd22b922914b28a8cc2b3cf05ef9daec8c54bd",
+      "bytes": 121
+    },
+    {
+      "path": "resources/branding/NOTICE.md",
+      "sha256": "3264ce5264ea141b0ba556924372b35f7f2eeede0eef4be1f185d8fc4e6b9291",
+      "bytes": 968
+    },
+    {
+      "path": "resources/branding/SoloPi-LICENSE.txt",
+      "sha256": "6f7dcb9394a290f1879e7a3d61607a11539477860b5fc835ef62e4937ca9cc19",
+      "bytes": 11368
+    },
+    {
+      "path": "resources/branding/solopi-desktop-app-icon.png",
+      "sha256": "0d87c0daf740745fe366151605ddf21a1a9a0a59876f7fdf48420f5b2db76852",
+      "bytes": 49149
+    },
+    {
+      "path": "resources/branding/solopi-desktop-hero.png",
+      "sha256": "b5fc0a09f4162a5f7c3ac7f9412f544b32cbafadbc67f0dc9fab00a7948108e2",
+      "bytes": 15602
+    },
+    {
+      "path": "resources/branding/solopi-desktop-icon-source.png",
+      "sha256": "b5fc0a09f4162a5f7c3ac7f9412f544b32cbafadbc67f0dc9fab00a7948108e2",
+      "bytes": 15602
+    },
+    {
+      "path": "resources/media-runtime/README.md",
+      "sha256": "f9ca9098783c3159186fffc4433102e994239c02b4e55d91429b4146eaedacd0",
+      "bytes": 3253
+    },
+    {
+      "path": "resources/solopi-recording/LICENSE.txt",
+      "sha256": "6f7dcb9394a290f1879e7a3d61607a11539477860b5fc835ef62e4937ca9cc19",
+      "bytes": 11368
+    },
+    {
+      "path": "resources/solopi-recording/NOTICE.md",
+      "sha256": "fc26d541eec6ba293e6047090bf601b575d6276b726f19951a30d59b12a36124",
+      "bytes": 746
+    },
+    {
+      "path": "resources/solopi-recording/SoloPi.apk",
+      "sha256": "cc153bc9ce94e3f6625ddc24ceec4348ed72ec7eb93a6cb46ca10d466ca48152",
+      "bytes": 5333534
+    },
+    {
+      "path": "resources/solopi-recording/manifest.json",
+      "sha256": "704060ba814adc12248a7e22927eec67e5f10821839f751acda9fe861fa7deec",
+      "bytes": 491
+    },
+    {
+      "path": "resources/team-config.example.json",
+      "sha256": "56ca7b7c0e88aec96fa23eda4205e4eefd8ee4bf05da2f4defa3652682e10325",
+      "bytes": 975
+    },
+    {
+      "path": "resources/third-party/ffmpeg-sources.json",
+      "sha256": "090d2778dd54e0dfd669441ee602a28768eccf8175f75fc32f843383b65b815a",
+      "bytes": 995
+    },
+    {
+      "path": "resources/third-party/npm-supplements/cookie-signature-1.0.7.txt",
+      "sha256": "c0a936e4727a7503020745eaf063acffbb81291fcfd21a0cd8db4b4fce95d902",
+      "bytes": 1111
+    },
+    {
+      "path": "resources/third-party/npm-supplements/embla-carousel-8.6.0.txt",
+      "sha256": "992490064b90ec94c302fe5f29dcc14cb44145857064e46f9ffe6c8f511c1093",
+      "bytes": 1066
+    },
+    {
+      "path": "resources/third-party/npm-supplements/embla-carousel-react-8.6.0.txt",
+      "sha256": "992490064b90ec94c302fe5f29dcc14cb44145857064e46f9ffe6c8f511c1093",
+      "bytes": 1066
+    },
+    {
+      "path": "resources/third-party/npm-supplements/embla-carousel-reactive-utils-8.6.0.txt",
+      "sha256": "992490064b90ec94c302fe5f29dcc14cb44145857064e46f9ffe6c8f511c1093",
+      "bytes": 1066
+    },
+    {
+      "path": "resources/third-party/npm-supplements/input-otp-1.4.2.txt",
+      "sha256": "079031192fea535a245aa64a637d8433c406b82a14f91c3606b1d63e41c00152",
+      "bytes": 1071
+    },
+    {
+      "path": "resources/third-party/npm-supplements/manifest.json",
+      "sha256": "000e475b00952687cec7621c9a5d13492acbef3d766ac49645a56c8e09b780a1",
+      "bytes": 2880
+    },
+    {
+      "path": "resources/third-party/npm-supplements/next-themes-0.3.0.txt",
+      "sha256": "b5acfd21b3b61508365224c40ec1b03ec71091248baaf989d4be916551e7d532",
+      "bytes": 1069
+    },
+    {
+      "path": "resources/third-party/npm-supplements/react-remove-scroll-bar-2.3.8.txt",
+      "sha256": "a79aae0c0f21990d9d963bb3c5a79cdcea9a46f8523ba55c58d7fe776b6ebc84",
+      "bytes": 1093
+    },
+    {
+      "path": "resources/third-party/npm-supplements/victory-vendor-36.9.2.txt",
+      "sha256": "34dee5fd5e5cc756efb5ad4d64652bce719bdf5e900ca5d7538253e737930bc4",
+      "bytes": 1626
+    },
+    {
+      "path": "scripts/agent-dev-control.mjs",
+      "sha256": "fb03237386593aa3d02f18703c93cc91f22f1fceb1aaf507fdd880d76be916ea",
+      "bytes": 5742
+    },
+    {
+      "path": "scripts/audit-quick-action-templates.mjs",
+      "sha256": "0c8645b5296c15030a21587b39481086da4564527935acab857b1dd4f262ab1d",
+      "bytes": 2378
+    },
+    {
+      "path": "scripts/build-ffmpeg-codecs.sh",
+      "sha256": "ce6a59ebb306b2bde4582f4da2214748d54f7abd09053a13fb7eba21754c6d6a",
+      "bytes": 1072
+    },
+    {
+      "path": "scripts/build-ffmpeg-linux.sh",
+      "sha256": "d9755ce63c85b6137c614504202bd99794c32d9a11268d7639ac199dcaad4871",
+      "bytes": 2836
+    },
+    {
+      "path": "scripts/build-ffmpeg-macos.sh",
+      "sha256": "f4be6675297e5d234765eca5b26b5551d5ad47e637e31bd91018e00d6858bd88",
+      "bytes": 4571
+    },
+    {
+      "path": "scripts/build-media-runtime-macos.sh",
+      "sha256": "e8d6cdc5ebdf24239c4cf6ec85db1f152fef78c9b54a4da30f1c3c7bb7e935e4",
+      "bytes": 2480
+    },
+    {
+      "path": "scripts/bundle-glassbox-skills.mjs",
+      "sha256": "b8a1b2bff87797744998eb0be45b242713088e95d8a96fdcc98365c530c2a600",
+      "bytes": 873
+    },
+    {
+      "path": "scripts/compare-agent-models.cjs",
+      "sha256": "6a7f4312c65b1f406d01606532b87012a257aa9c8752f00968204d25a55700dd",
+      "bytes": 4227
+    },
+    {
+      "path": "scripts/completions/_solopi-desktop-package",
+      "sha256": "7002d07bca9275b0b9d8cd6582f07a2d94b7f473f17ecab66aa6f83a0da42ff9",
+      "bytes": 439
+    },
+    {
+      "path": "scripts/create-ffmpeg-source-archive.mjs",
+      "sha256": "4a2ddcddf6b022727115487afeeb7b83ae8cccc939f5f3c69f28ff0a42a1d942",
+      "bytes": 8855
+    },
+    {
+      "path": "scripts/create-mac-dmg.mjs",
+      "sha256": "4c34a56e7788ad844b82d948ef8e6b7efb9b5fc05aa8092acda964fd78633f62",
+      "bytes": 8158
+    },
+    {
+      "path": "scripts/create-mac-update-feed.mjs",
+      "sha256": "e001fcab13680262f97c549045377431d2af82e1dc68c2e0c9fe20d3dc4ec161",
+      "bytes": 1556
+    },
+    {
+      "path": "scripts/create-mac-zip.mjs",
+      "sha256": "7ccd14ed5d6eada52388debcdc6e3d68e4bf030bcca408b7a226ef0eacce1e16",
+      "bytes": 1806
+    },
+    {
+      "path": "scripts/electron-builder-sign.mjs",
+      "sha256": "602f22a25a423a3a5c743fb6457ec722c3b8abf90426f81cca758b89b5aba3b6",
+      "bytes": 3319
+    },
+    {
+      "path": "scripts/export-public-source.mjs",
+      "sha256": "cf743157adc1a1e27f0f6f6eeac747b7cf5249ad66c58d4d295b56cec083f364",
+      "bytes": 7210
+    },
+    {
+      "path": "scripts/ffmpeg-compliance.mjs",
+      "sha256": "dd1527f2d283e6a4a9a34f739815731ef8efd288965f6940347472ee5e7d947c",
+      "bytes": 3080
+    },
+    {
+      "path": "scripts/generate-mac-icon.mjs",
+      "sha256": "361f7e91b93834a99687409c44d1f6841bcf25d1984c4f1f17372bcfe8d9c92c",
+      "bytes": 2363
+    },
+    {
+      "path": "scripts/glassbox-cli.mjs",
+      "sha256": "59cf733de9f0c2b0105e822a762206017706bfe95398b74024d0018c3cc45209",
+      "bytes": 370712
+    },
+    {
+      "path": "scripts/install-glassbox-release-command.mjs",
+      "sha256": "6326c0167b36722538ecc9c2e34cf5c0f465fd0b5269328137a65955479c48c0",
+      "bytes": 1873
+    },
+    {
+      "path": "scripts/install-solopi-desktop-package-command.mjs",
+      "sha256": "2a3e4645898e4a914f5cebca94e5de48ed0b501614b02fc64a81cfaf1a5e90d0",
+      "bytes": 3156
+    },
+    {
+      "path": "scripts/install-solopi-harness-desktop-package-command.mjs",
+      "sha256": "029904e5276f0a0411b88784c645da40677f586c8e848895fc997371c67850d4",
+      "bytes": 210
+    },
+    {
+      "path": "scripts/lenswiper-package.mjs",
+      "sha256": "97e98cd4af4f4a65e05551ce57ded2e15230470290dd9a40c0b9a58c6a407217",
+      "bytes": 265
+    },
+    {
+      "path": "scripts/linux-build-config.mjs",
+      "sha256": "25ef58a4fc490ab9da53a34077d490612ba30528fd72f5716cae101a6ee59c61",
+      "bytes": 1954
+    },
+    {
+      "path": "scripts/linux-runtime.mjs",
+      "sha256": "7439892cb9dc43c09e81712d5262586ea561998b0c79f3a649f913e91c27d990",
+      "bytes": 2363
+    },
+    {
+      "path": "scripts/local-tts-server.mjs",
+      "sha256": "c7cee0981774cefa3dceeed50195ede64fbbf60ba16fdab6ddf1f234375e9fba",
+      "bytes": 4333
+    },
+    {
+      "path": "scripts/media-runtime-pkg-config.mjs",
+      "sha256": "566851394f2184c7ad38fa8229cb522977edf81d27c2d1d9272d631da4188dcf",
+      "bytes": 977
+    },
+    {
+      "path": "scripts/opensource-inventory.mjs",
+      "sha256": "1034b55c70c55e8c0f812b9bc68ba638c8554d3df687469c3127395005d5bb2b",
+      "bytes": 1098
+    },
+    {
+      "path": "scripts/package-and-notarize-mac.mjs",
+      "sha256": "6bce863fe266e47fc01b388df70a601e4268c31a42f6f8fcde3f21ab4508cc2b",
+      "bytes": 16929
+    },
+    {
+      "path": "scripts/package-linux.mjs",
+      "sha256": "eb4382ecf5e8e4dae776db115e9d10ca0c240d0a63a984fb1e804398999a8420",
+      "bytes": 3745
+    },
+    {
+      "path": "scripts/package-mac.mjs",
+      "sha256": "4fceb64a2609a11d6c9feb6892e3704a87917a1c24ea99e34800ec21c0dff2e6",
+      "bytes": 7581
+    },
+    {
+      "path": "scripts/prepare-ffmpeg-sources.mjs",
+      "sha256": "9483ee000c5065bd1579ba1f9216b326897d7be73c77659b0a0766c2852b36c5",
+      "bytes": 2009
+    },
+    {
+      "path": "scripts/prepare-git-runtime.mjs",
+      "sha256": "78ab6cd33ce9912980d24195c6b073f77e7d20ab9b9dc15fa7435458a67871e5",
+      "bytes": 1666
+    },
+    {
+      "path": "scripts/prepare-media-runtime.mjs",
+      "sha256": "27b103f3a45e838b1306d55f29c3fff26b2891c96d3cdbaeafcc4a5403d4bf5f",
+      "bytes": 1665
+    },
+    {
+      "path": "scripts/prepare-packaged-app.mjs",
+      "sha256": "a7f6b0c251bf2a65c68411ac5aa70ec1631c72b484a4d1853ba76d9159fe9846",
+      "bytes": 5087
+    },
+    {
+      "path": "scripts/record-ffmpeg-build.mjs",
+      "sha256": "00c4a5779f4c69c15ca887a02358f8b6a7c62aa96cb78499eaac3ff63d7bff16",
+      "bytes": 2831
+    },
+    {
+      "path": "scripts/record-ffmpeg-macos-build.mjs",
+      "sha256": "e2dc739a470c65b1bc0451bae9cdbfb4b009de8797cf3424c1703fab51ebac0c",
+      "bytes": 2563
+    },
+    {
+      "path": "scripts/replay-agent-compaction.mjs",
+      "sha256": "5c6fb2762bb070ec2e6bcc71c9a705054598d4cb7206a222923a3b9cf16a9cc6",
+      "bytes": 3035
+    },
+    {
+      "path": "scripts/smoke-linux-runtime.mjs",
+      "sha256": "1c7046d0341d3961e8b5d6ed6d1b3c4cf543ea97e66bbfb4e9b94b9dcdb508d9",
+      "bytes": 2711
+    },
+    {
+      "path": "scripts/smoke-scrcpy-recording.cjs",
+      "sha256": "dee508603f0e610fb1b36b553c88398e7a18d86a283e8b58bb79777bf0e24bd8",
+      "bytes": 3343
+    },
+    {
+      "path": "scripts/smoke-scrcpy-session.cjs",
+      "sha256": "e643787a10c162baefc1384381ed1864b15ff607d11e438f0fc2c23fd0183e40",
+      "bytes": 3499
+    },
+    {
+      "path": "scripts/smoke-scrcpy-transport.cjs",
+      "sha256": "469a91821e250fd4272661262ce80031c06b113406e06fd2a34b53b8a5c9acb1",
+      "bytes": 3165
+    },
+    {
+      "path": "scripts/solopi-desktop-dev.mjs",
+      "sha256": "ee0b76736742482d3c3fe8671df3b6e7c62a1e738bd5592cef2811aaf06b73f0",
+      "bytes": 7658
+    },
+    {
+      "path": "scripts/solopi-desktop-package.mjs",
+      "sha256": "e686f4a16b768ebacdbb02fdcc631548ad4049e4a06f31535aa7c9c1c340860d",
+      "bytes": 6774
+    },
+    {
+      "path": "scripts/solopi-harness-desktop-dev.mjs",
+      "sha256": "d2bb959948807055bbad4526dbcc0c09752cafe10492919d5a3270aae4858bc3",
+      "bytes": 170
+    },
+    {
+      "path": "scripts/solopi-harness-desktop-package.mjs",
+      "sha256": "27eec89541c01a4a26908024c873d92186e90d3db25b5c5c9c7e439bf38497c6",
+      "bytes": 180
+    },
+    {
+      "path": "scripts/start-electron-dev.mjs",
+      "sha256": "dd9eff3f1ddf91d880586c745849711e005f1cb9fd49b25d17066123c6478dec",
+      "bytes": 3668
+    },
+    {
+      "path": "scripts/third-party-notices.mjs",
+      "sha256": "5a040ea680ecbe524b181f67bcf9471e6710cd8344616d4ca51b722bbbfc2fea",
+      "bytes": 7436
+    },
+    {
+      "path": "scripts/upgrade-glasses-contract.mjs",
+      "sha256": "5fd260196ebb3456f68f9ce6bf20e981a393705c8ab97fe0940a28b9bcaca32a",
+      "bytes": 4104
+    },
+    {
+      "path": "scripts/verify-agent-summary.cjs",
+      "sha256": "e13489c35fc06c47e6ecf1986df10520f8fb7ef2a7bc43bab0641e96be16a569",
+      "bytes": 2959
+    },
+    {
+      "path": "scripts/verify-cli-readonly.mjs",
+      "sha256": "a1086eb889e7f16e5b10081226bf056466cd7ba98efe2a2571e9e02f0386445d",
+      "bytes": 12227
+    },
+    {
+      "path": "scripts/verify-ffmpeg-capabilities.mjs",
+      "sha256": "3114f2585636c7266166842293fc7a3f5ec67271c15002a843e5129a2d3db2de",
+      "bytes": 2509
+    },
+    {
+      "path": "scripts/verify-git-runtime.mjs",
+      "sha256": "5fcd42c8eae586d8cd9d422ddd218643863655c1bfffde516795a5e506b50559",
+      "bytes": 2254
+    },
+    {
+      "path": "scripts/verify-glassbox-skill-distribution.mjs",
+      "sha256": "7f770c0fca9baf728039c9e041c4ea46f511d4f202acec1f250037ecec75b88e",
+      "bytes": 1263
+    },
+    {
+      "path": "scripts/verify-linux-headless.mjs",
+      "sha256": "750ba5b7a00ebe74bda0f666d65a615f8ff762e15c8a43db3ecbb028a2e451f6",
+      "bytes": 5696
+    },
+    {
+      "path": "scripts/verify-linux-package.mjs",
+      "sha256": "5d29880ab7f4bfc1d276780e3d0b2e56ad6d50270be6f33c1447f3508b3f0aea",
+      "bytes": 5244
+    },
+    {
+      "path": "scripts/verify-mac-entitlements.mjs",
+      "sha256": "eeb606869bf7dfec3d13071c8f41ce678c4f0f6179498b88de6b63e9361ef24a",
+      "bytes": 1230
+    },
+    {
+      "path": "scripts/verify-media-runtime.mjs",
+      "sha256": "3c1482ebf4491d42a434731b4c6156737ac1fab37151c1cccc958aa05ff3fc3b",
+      "bytes": 5010
+    },
+    {
+      "path": "scripts/verify-packaged-app.mjs",
+      "sha256": "838dc1e945afe976e05b4649bf4f2e66b2a7ebe3804d0649efbf46b77dde3bd4",
+      "bytes": 20660
+    },
+    {
+      "path": "scripts/verify-packaged-runtime-after-pack.cjs",
+      "sha256": "0aa00e0bbada1b3bc548365667d945564fad475c9133b27c1333860c7a84977d",
+      "bytes": 2011
+    },
+    {
+      "path": "scripts/verify-packaged-runtime-dependencies.mjs",
+      "sha256": "30be283ab552ad4c826c7dbbada1c64e170b1a862b61b36a81973066bd379111",
+      "bytes": 7731
+    },
+    {
+      "path": "scripts/verify-retired-app-update.mjs",
+      "sha256": "568da3064b7fe3a55e2eadba08c1f3b71983d47e6719d076d0a53c27696a1f04",
+      "bytes": 748
+    },
+    {
+      "path": "scripts/verify-retired-capture-page.mjs",
+      "sha256": "2b8b7ef95a597d3b46441a6e47837ac585fb631df0348c1a481a1bb9a42d8723",
+      "bytes": 879
+    },
+    {
+      "path": "scripts/verify-solopi-runtime.mjs",
+      "sha256": "b604cf83a013bb054aa54c4b30bb5e1760202112a068199e74fd15df0833fb3c",
+      "bytes": 1157
+    },
+    {
+      "path": "skills/solopi-desktop-cli/SKILL.md",
+      "sha256": "06377bf20e325859fed00490c81aa5f7736c775cd87c2a7052d44ba76b64bde3",
+      "bytes": 20296
+    },
+    {
+      "path": "skills/solopi-desktop-cli/agents/openai.yaml",
+      "sha256": "b703d110afa0fed26e9870c9f694cd71b8a52dbed2c0136fb3d750183ba1b5a1",
+      "bytes": 360
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/case-authoring-and-validation.md",
+      "sha256": "6c4993261e01a0a3a32c44cdcd07b5fe43807367bd131ba34159ccfb8bd667b8",
+      "bytes": 3201
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/case-discovery-and-library-sync.md",
+      "sha256": "15d0cb8182afa7618873fd9a752aeec31b27ebbeac7858436630dc92cdb6eae7",
+      "bytes": 1301
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/case-library-git.md",
+      "sha256": "30bf4ccf22a1066e6826dea28bee5b5817535cec542498e8b580afeea70e9f6c",
+      "bytes": 2122
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/cli-kill-ghost-runner-issue.md",
+      "sha256": "dfbecb89185c5f4971c5c13668c4a87a010b85d8000585121c19251da97e38bd",
+      "bytes": 500
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/cli-services.md",
+      "sha256": "2baf2bed636e14e85a428b0ff1b92afc74fc9769dbe506af675b180b02bc1375",
+      "bytes": 1437
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/development-runner.md",
+      "sha256": "ed38eccd1716036d3385aaac031965a13fbbfdc9df3be3cf6d5ae0dce9ea1095",
+      "bytes": 2164
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/device-concurrency.md",
+      "sha256": "6f72664cb7dd02085c8f81efc262b4abde072c888a164f5d011aa56ce3c857ff",
+      "bytes": 2110
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/incremental-task-review.md",
+      "sha256": "ab3cf8e2dabbe1152e669983b5679ce615ab7edc29ab126b8bff2d482e5bfd74",
+      "bytes": 2103
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/offline-log-assert.md",
+      "sha256": "681cab6210739705b23fc1c418466246ecde5dae5b53bc74abd2c733dc760559",
+      "bytes": 2597
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/package-selection.md",
+      "sha256": "4564f8b3eea7c04bb2cfa54ad355e4681c72353ecf34cc1a6cd01566b9b8e010",
+      "bytes": 2200
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/packaging-and-installed-app-boundary.md",
+      "sha256": "50ae722551b62d1899465cef4dbc860e333ac56d6ec1dd412c9b562d11a607b0",
+      "bytes": 848
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/quick-actions.md",
+      "sha256": "1168c8a4a057a3ffb6b8be5333b4c0cf0fa0232f44507ecacbbe3352f703010e",
+      "bytes": 4544
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/recording-performance-and-reports.md",
+      "sha256": "12db202c5e23899349c4b042d0011f56f8fcb77db200b58235451b4a2f34c91a",
+      "bytes": 5490
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/run-task-long-running-issue.md",
+      "sha256": "f284a449a244fb8949ff6118daada68bf8e48ed958940f834bfe0bcd12cf3e39",
+      "bytes": 572
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/solopi-import.md",
+      "sha256": "2099ec79683a8fc101e9d27f7549d88caeee084040ee4bac32cd1dee5ee36e69",
+      "bytes": 1585
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/stress-and-codex-install.md",
+      "sha256": "45d46877550f620f58ca2cbc4f9852c41bfa1d36906197aa2e79a571054605af",
+      "bytes": 1961
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/task-diagnostics-and-performance.md",
+      "sha256": "40fd79411e20dd303c1dd7ec5328fb13e0a72b879693435d6de7d34dcab1062e",
+      "bytes": 6946
+    },
+    {
+      "path": "skills/solopi-desktop-cli/references/troubleshooting-runner-and-adb.md",
+      "sha256": "1039a62266f07816113d3f2fcd51ad0a829b3b5bc556efb271386e4de41f6de2",
+      "bytes": 3870
+    },
+    {
+      "path": "src/App.css",
+      "sha256": "a0715e0a09edbd0fbde65816a75e0fa0fc8b314c5260c0768c19bf3aac22621a",
+      "bytes": 606
+    },
+    {
+      "path": "src/App.tsx",
+      "sha256": "4330671cde4501e8980cf34b8c6cb2a7af50477d9c83c7eab8a86b9c58136c04",
+      "bytes": 396
+    },
+    {
+      "path": "src/App.vue",
+      "sha256": "7091367d5938e30c230b257d5a9b615e1cd3783510e77dedb0eebc4d90c886fe",
+      "bytes": 1121
+    },
+    {
+      "path": "src/assets/glassbox-logo.png",
+      "sha256": "ba92c1e9028fdbb4ce5b9cb139a68d613f97912d5a2a3b3cc0314e45cca23a3a",
+      "bytes": 160301
+    },
+    {
+      "path": "src/assets/solopi-desktop-logo.png",
+      "sha256": "b5fc0a09f4162a5f7c3ac7f9412f544b32cbafadbc67f0dc9fab00a7948108e2",
+      "bytes": 15602
+    },
+    {
+      "path": "src/components/AgentExtensions.tsx",
+      "sha256": "61dc4606ff6857f2c1409ef6a8079105b7671cf523be6a9980d40a93d07c99c1",
+      "bytes": 14233
+    },
+    {
+      "path": "src/components/AgentMarkdown.tsx",
+      "sha256": "54d0458f479a7a90f199f04cbbb546dc556c7e5c9592780d28a82e9cf62236ae",
+      "bytes": 2928
+    },
+    {
+      "path": "src/components/AgentMirrors.tsx",
+      "sha256": "c3958e684eb4636bb62b39d7fac64787320debd703d3c1b649940b84eaa8070d",
+      "bytes": 7128
+    },
+    {
+      "path": "src/components/AgentOperationSummary.tsx",
+      "sha256": "5ad7e40a3be2d2fd3ef0507930b85da12ada357ed69562f7d04d79b494b5128c",
+      "bytes": 2411
+    },
+    {
+      "path": "src/components/AgentPage.tsx",
+      "sha256": "76dd4785e14fcf8ce4019950296ed36c67b89f1313736ccfbb56897e9dc7456a",
+      "bytes": 30166
+    },
+    {
+      "path": "src/components/AgentQueuedMessage.tsx",
+      "sha256": "09d193e8e751f84d3d5692c2a3a193c2c8931ef9451631b3f4ef28aef1730771",
+      "bytes": 2752
+    },
+    {
+      "path": "src/components/AgentRequestSettings.tsx",
+      "sha256": "33df5e721c2bad0f236edda704aef7466c9fb1dfbd6944660e621f2a8259f9de",
+      "bytes": 7680
+    },
+    {
+      "path": "src/components/AgentTurn.tsx",
+      "sha256": "ea1b91948bab4d254a4265a732cf1cba4c8855a98692bb55f8055e33a64cec78",
+      "bytes": 6626
+    },
+    {
+      "path": "src/components/BugreportAnalysisPage.tsx",
+      "sha256": "fa141833a371f70dafe637079d2c40bb2ad0f0f3c02f809200510b6362bfa704",
+      "bytes": 48464
+    },
+    {
+      "path": "src/components/CaseTreeDisclosure.tsx",
+      "sha256": "ce9dac2be7e2ed2e678af8262e1842296eea4c5a8e1b193125a58c060c4d233f",
+      "bytes": 452
+    },
+    {
+      "path": "src/components/CommonSitesPage.tsx",
+      "sha256": "b52d032fe05a2b21a0bd28df3b7cbd54bd419ebf10312aed5364fb732d51adc7",
+      "bytes": 5410
+    },
+    {
+      "path": "src/components/CommonSitesSettings.tsx",
+      "sha256": "0b6b31babb44127ec29903d9ecae104a3ceb75772ff370ba9f5d8b3d1a055841",
+      "bytes": 4006
+    },
+    {
+      "path": "src/components/CopyValueButton.tsx",
+      "sha256": "d41403e919de46ea904f235a0c80fe0018e53240ab37414420564e54eeff1c47",
+      "bytes": 1755
+    },
+    {
+      "path": "src/components/CopyableTaskId.tsx",
+      "sha256": "2a8a85dde2bd23c6ee773b777208af25e3957bf752618c9506e6dcb5d16ab5b7",
+      "bytes": 1405
+    },
+    {
+      "path": "src/components/DeviceHeader.tsx",
+      "sha256": "6474ebf8bf5e088a9d2d7337d019acc2d530fa60a603a0994ae7ba55fa88fcc0",
+      "bytes": 41986
+    },
+    {
+      "path": "src/components/DeviceHeader.vue",
+      "sha256": "0ef950c06dd859b95025bd7ee63cd253fb2127801e8c53531ad054b37136c34f",
+      "bytes": 3293
+    },
+    {
+      "path": "src/components/DeviceRuntimeSelect.tsx",
+      "sha256": "d3592a81bcb7ad55580b53e76c6edee1662b7299b37a2a0506dde750923cc1be",
+      "bytes": 5451
+    },
+    {
+      "path": "src/components/DeviceSelectors.tsx",
+      "sha256": "e6bb6f6f9d17405a1ff69100b877f46906e46c7a888e18a520349347921bb604",
+      "bytes": 7673
+    },
+    {
+      "path": "src/components/PerformanceTestPage.tsx",
+      "sha256": "d33416db9bd24322469a77d150ee621fc25304c7309d3a61fcb6549e81a3d10f",
+      "bytes": 70059
+    },
+    {
+      "path": "src/components/QuickActionArguments.tsx",
+      "sha256": "9602e15b225aacbb0d1196752273a501229ebdd7ee8e38052fc5635785d25a4b",
+      "bytes": 3542
+    },
+    {
+      "path": "src/components/QuickActionFeedback.tsx",
+      "sha256": "c90a84773183074e777a7c743651ea225dfcb48d2e2dcae2b0d9de16d0b62893",
+      "bytes": 3123
+    },
+    {
+      "path": "src/components/QuickActions.tsx",
+      "sha256": "0f049ba022d2ba97b8aab81d927062cbbb5e063e43ab832b430386583c7b388c",
+      "bytes": 24593
+    },
+    {
+      "path": "src/components/QuickActionsSettings.tsx",
+      "sha256": "2a5fccdf0399a3712617b884f55bc0673d2ac3e1087cc328162325c92ee40fe8",
+      "bytes": 35916
+    },
+    {
+      "path": "src/components/RecordingTargetFields.tsx",
+      "sha256": "bd8804e186fe4cfff6e65c181529a9ed85611045aedcbb15ac7dd2f01ccc9f05",
+      "bytes": 3005
+    },
+    {
+      "path": "src/components/SharedEmbeddedWebview.tsx",
+      "sha256": "d73b5e8767969b1eb26aa736ddb4d16475fa508db284d41988550b6cd6c1f011",
+      "bytes": 8915
+    },
+    {
+      "path": "src/components/Sidebar.tsx",
+      "sha256": "875f987ea0edb4aab97d3d5790f5440e004c76f0fa6a8fc3a4a17adb80185bba",
+      "bytes": 14711
+    },
+    {
+      "path": "src/components/Sidebar.vue",
+      "sha256": "dec0d81cc640e6a63e35d6e76ab83903428cb0ca044cb48a507cd3305a50bb42",
+      "bytes": 3024
+    },
+    {
+      "path": "src/components/SoloPiImport.tsx",
+      "sha256": "4a3410c3ea127eabcb0ba6ac9897635d63bc0f2129e920a240641c9d2da10d53",
+      "bytes": 14952
+    },
+    {
+      "path": "src/components/SoloPiNativeEditor.tsx",
+      "sha256": "4f1c1d136912d3e1cc76ac8b0c75179616645d48c76788dd108e262dd92bd3a1",
+      "bytes": 4413
+    },
+    {
+      "path": "src/components/TaskActionNotice.tsx",
+      "sha256": "f894e42ca40c400bef94b05c2df152794568e9a1974235cb49c3bda01060debe",
+      "bytes": 1208
+    },
+    {
+      "path": "src/components/TeamConfiguration.tsx",
+      "sha256": "25b96942b0f865f8c1768bfc5104b5cc6c863192af81a442d2663bd18ec4a6a0",
+      "bytes": 19119
+    },
+    {
+      "path": "src/components/WorkflowEditor.tsx",
+      "sha256": "ee1b9e889d1afe39f588c942014da8dd0e75d5e6d9121f4b85eebc5449dad43d",
+      "bytes": 856124
+    },
+    {
+      "path": "src/components/WorkflowEditor.vue",
+      "sha256": "1887e9398a033e4feafa9b7f90bcb157b588400cd78062b80b1d605dfc7758c0",
+      "bytes": 4163
+    },
+    {
+      "path": "src/components/WorkflowMirrors.tsx",
+      "sha256": "337b316417114f5a6cd3f1d1de5ffb7a18732e55db7b8ef13791d295d61bf132",
+      "bytes": 1546
+    },
+    {
+      "path": "src/components/WorkflowNode.tsx",
+      "sha256": "8b7e236c16bfc661dcf7e998e84e3575b5489d3197ddeb8576525154863b5dc1",
+      "bytes": 11724
+    },
+    {
+      "path": "src/components/WorkflowVariablePanel.tsx",
+      "sha256": "f2b84d0151d6f2cddba868db35b50d169867eff858051c69c3ba115369bafe9e",
+      "bytes": 6815
+    },
+    {
+      "path": "src/components/agent-chat-scroll.ts",
+      "sha256": "4e8df5f7310f20856e15db70b02710154a15000afb57d8d88451ae0e93bdb37b",
+      "bytes": 993
+    },
+    {
+      "path": "src/components/agent-drafts.ts",
+      "sha256": "9bcee62924c41dd4e7402d22154ec4644ed447bade694f7c9b7884457cb10bc6",
+      "bytes": 2423
+    },
+    {
+      "path": "src/components/agent-turns.ts",
+      "sha256": "f49a8e3fac0fe442a42532acfbaec7990675ae2123887503e1431ce720220bb9",
+      "bytes": 2196
+    },
+    {
+      "path": "src/components/ui/accordion.tsx",
+      "sha256": "9587b5ca80cf0aa68bc2a4e6baacebbe07eab14e1c66c6b6420033aeca9219d1",
+      "bytes": 1976
+    },
+    {
+      "path": "src/components/ui/alert-dialog.tsx",
+      "sha256": "c8b01137c7552e63c9ccf2c38ef92e5417bd6616b6980d56d3015db027465283",
+      "bytes": 4313
+    },
+    {
+      "path": "src/components/ui/alert.tsx",
+      "sha256": "6352c232d36b2aeb20cce9692fecd98a472c8bb0b8c3f8a45446c433382e2da7",
+      "bytes": 1546
+    },
+    {
+      "path": "src/components/ui/aspect-ratio.tsx",
+      "sha256": "d72c73d629e37995a0a71647d851d68d6fdcd7ec120797f36ab83a8ee89f2cab",
+      "bytes": 143
+    },
+    {
+      "path": "src/components/ui/avatar.tsx",
+      "sha256": "4a8bc00e5514912c54d414e207266fa100906aec2754d590adcc8ccc46d4c5c9",
+      "bytes": 1365
+    },
+    {
+      "path": "src/components/ui/badge.tsx",
+      "sha256": "b851d9ba385c4d60de471c5f43da38067298bbcc3470807e992acb224041c75c",
+      "bytes": 1089
+    },
+    {
+      "path": "src/components/ui/breadcrumb.tsx",
+      "sha256": "e5589a54c1ed42101bb24cd67bbc72469fbfbe6b694c46e006424375ad77183e",
+      "bytes": 2687
+    },
+    {
+      "path": "src/components/ui/button.tsx",
+      "sha256": "99e5091c618896c9a46eba931d23814039709f9a1d150c4ac99217c1bba044fd",
+      "bytes": 1840
+    },
+    {
+      "path": "src/components/ui/calendar.tsx",
+      "sha256": "2dc96bb31453e989c1b076ea8b35c5d587339b4f22d5f19fe1182adde867f6d9",
+      "bytes": 2537
+    },
+    {
+      "path": "src/components/ui/card.tsx",
+      "sha256": "bdfb74248321c52e89c2129d9d8088a56a3e33dd7850a7c9b0563a7b5ac937a0",
+      "bytes": 1785
+    },
+    {
+      "path": "src/components/ui/carousel.tsx",
+      "sha256": "561cab7fcb619deed3532d027cbf18ef8e3ebae9def4206b0d36bd22b8474c3a",
+      "bytes": 6249
+    },
+    {
+      "path": "src/components/ui/chart.tsx",
+      "sha256": "973f6d9400fe46a0302aceb2eb7d55d2737c70d3cb444a40ef39386c18e568a5",
+      "bytes": 10765
+    },
+    {
+      "path": "src/components/ui/checkbox.tsx",
+      "sha256": "178f8177bedb1704b4dd3e748f4826848981c8af43178c04e1a276a7f017cf1f",
+      "bytes": 1053
+    },
+    {
+      "path": "src/components/ui/collapsible.tsx",
+      "sha256": "fbe07841b794e0d7d08e87ddaaafadf1dc0c63ecc8389cd2c5b4a0a3f5500df1",
+      "bytes": 320
+    },
+    {
+      "path": "src/components/ui/command.tsx",
+      "sha256": "2b640fee593528d494ca19b2888db68a396a96950ea0bb6f1b50536e26e26019",
+      "bytes": 4821
+    },
+    {
+      "path": "src/components/ui/context-menu.tsx",
+      "sha256": "2d294c5e421c41b817f1644f2d54bfdde628cffae2682e69ca504ae754739ad6",
+      "bytes": 7191
+    },
+    {
+      "path": "src/components/ui/dialog.tsx",
+      "sha256": "8f867b5ab97f20f27127d8e6bd56350d269796c8106df4192c27bf84761a617b",
+      "bytes": 3840
+    },
+    {
+      "path": "src/components/ui/drawer.tsx",
+      "sha256": "3739cdfc80503412db604efb3ac0149db5f7cd5fec18508839d18dec195720e1",
+      "bytes": 2941
+    },
+    {
+      "path": "src/components/ui/dropdown-menu.tsx",
+      "sha256": "b1ede0a4144b64853dc7ba62d184c09df479482eada86f936ce5b3d0b67a9a19",
+      "bytes": 7260
+    },
+    {
+      "path": "src/components/ui/form.tsx",
+      "sha256": "7f6f3b157f0c08880937ae41d5e61647703c7163c3d8444656de711fb0576faf",
+      "bytes": 4014
+    },
+    {
+      "path": "src/components/ui/hover-card.tsx",
+      "sha256": "8d606e166ef5f9bc4fc3efb1f6ce2f4bb376177a2c6fef16f67f87ad2d13d005",
+      "bytes": 1193
+    },
+    {
+      "path": "src/components/ui/input-otp.tsx",
+      "sha256": "a301658db5430d30108004cf05cb9469457a882f93dc057097f777ade4ca5423",
+      "bytes": 2166
+    },
+    {
+      "path": "src/components/ui/input.tsx",
+      "sha256": "aacef8933fe99ab553e12a82c874a23c97e2b5602eb6f00018454fa0a8d4f7f2",
+      "bytes": 799
+    },
+    {
+      "path": "src/components/ui/label.tsx",
+      "sha256": "d5dc9497cbb28a5401b864bd44a15f010c302584fbe8e07e015dbe443f103753",
+      "bytes": 696
+    },
+    {
+      "path": "src/components/ui/menubar.tsx",
+      "sha256": "9a44756ba91e4c486b30574910b72f58c136c7a9281ccf0c13bf366962c7cdaf",
+      "bytes": 7863
+    },
+    {
+      "path": "src/components/ui/navigation-menu.tsx",
+      "sha256": "92736fbbe66e31d1b981d10436f9048c76f4b91d8b89e93b679ef2eb54204770",
+      "bytes": 5030
+    },
+    {
+      "path": "src/components/ui/pagination.tsx",
+      "sha256": "ac9da1e191c3485524c1e8d8cdbe0b9fa4ea2729c9554f796e2516485c839260",
+      "bytes": 2683
+    },
+    {
+      "path": "src/components/ui/popover.tsx",
+      "sha256": "ee5f78ece57c9e8eb5f9b4186e2bb9ebe46b69b52f03f1edd9a601883bc64772",
+      "bytes": 1239
+    },
+    {
+      "path": "src/components/ui/progress.tsx",
+      "sha256": "bdc4847f05de3aea1276966e0df9b4a293297f0ca7d7b430a1cb16cf5626728f",
+      "bytes": 765
+    },
+    {
+      "path": "src/components/ui/radio-group.tsx",
+      "sha256": "995ec983735b204597f11ae5dd22ba0175dfc633da2ddecf222847bbca387adb",
+      "bytes": 1447
+    },
+    {
+      "path": "src/components/ui/resizable.tsx",
+      "sha256": "a31af34c14c7c86612d1c2e51c90da59e0edae37dab5210bc1dd2c91dc2f3edd",
+      "bytes": 1696
+    },
+    {
+      "path": "src/components/ui/scroll-area.tsx",
+      "sha256": "998181a10164aa6e508210064ba61b2f772a92958d7bb2141867007f0ebd9783",
+      "bytes": 1608
+    },
+    {
+      "path": "src/components/ui/select.tsx",
+      "sha256": "a2b62120a033b36c8d6c4a1693aa9231645fa69251740e15eacec24c1eea4d82",
+      "bytes": 5575
+    },
+    {
+      "path": "src/components/ui/separator.tsx",
+      "sha256": "6c271e740c3d7b54947bb727383e5355788f0176b7b683c3bb970cad9883dded",
+      "bytes": 698
+    },
+    {
+      "path": "src/components/ui/sheet.tsx",
+      "sha256": "e7d726b34d0f3214f597a844c7f2c4fc869933f7433eddb74e7fd2eb92500be3",
+      "bytes": 4197
+    },
+    {
+      "path": "src/components/ui/sidebar.tsx",
+      "sha256": "5754b54ecb6151d7a138426a44a1057a4937ac5a173dfbd1f596a6c9d75b851b",
+      "bytes": 22837
+    },
+    {
+      "path": "src/components/ui/skeleton.tsx",
+      "sha256": "a229c310b9cbcb01ddd5e580865a6f14a19061aff7f6a97ef82a40b6a83583a4",
+      "bytes": 234
+    },
+    {
+      "path": "src/components/ui/slider.tsx",
+      "sha256": "b81a683197551322cd8f13653bc955ad4c3bca6fe62376d33acb2bcd04361d02",
+      "bytes": 1065
+    },
+    {
+      "path": "src/components/ui/sonner.tsx",
+      "sha256": "0658eb38931405730e9166288482d85e393edfe9f4e8a5cd42f53cee48908d41",
+      "bytes": 904
+    },
+    {
+      "path": "src/components/ui/switch.tsx",
+      "sha256": "99cda942c2d215d8f25dd33ae06ed1278bcf912b262ed0e907b04f35881ac507",
+      "bytes": 1147
+    },
+    {
+      "path": "src/components/ui/table.tsx",
+      "sha256": "fab18d9eeb84781f534330ff4b2c2cbe3a93f9bdf5c449debff2f682a83a4876",
+      "bytes": 2694
+    },
+    {
+      "path": "src/components/ui/tabs.tsx",
+      "sha256": "b313d08a8c85e586a282b615cf30ce0b6ec1eca3ea92149b731f14b4082f4d71",
+      "bytes": 1897
+    },
+    {
+      "path": "src/components/ui/textarea.tsx",
+      "sha256": "2f5b24d28dc5c41817ca69653a396adcb2fe495200f8184777d086a62fc70461",
+      "bytes": 751
+    },
+    {
+      "path": "src/components/ui/toast.tsx",
+      "sha256": "8f4db67ae4633904c3cccee6629a1061472bb23f5368e5b7e72a306cc494f9d3",
+      "bytes": 4798
+    },
+    {
+      "path": "src/components/ui/toaster.tsx",
+      "sha256": "600d661340ddc3ee7b5f9088684e1b3072cf60c9275b2f84bf4860dc29fe0fba",
+      "bytes": 730
+    },
+    {
+      "path": "src/components/ui/toggle-group.tsx",
+      "sha256": "a3ea231230c8fff22ff6e0b457e71addf961fe1f80deaba0c80d17e649d34bf3",
+      "bytes": 1714
+    },
+    {
+      "path": "src/components/ui/toggle.tsx",
+      "sha256": "fb0f786bce638fd414f220e31ad3c902f5c6e25eee9c95ac955cacd50638d6ff",
+      "bytes": 1416
+    },
+    {
+      "path": "src/components/ui/tooltip.tsx",
+      "sha256": "bd9361649477cf9496f4b48415a2eafb9ae1ebca81af58a29b61b1516adc88c1",
+      "bytes": 1155
+    },
+    {
+      "path": "src/components/ui/use-toast.ts",
+      "sha256": "d48c4c490e5101aa42ceed9b8ca49642d66152ba11daf7ee6c29bee0f5172c37",
+      "bytes": 82
+    },
+    {
+      "path": "src/hooks/use-mobile.tsx",
+      "sha256": "21eff740f9e5c965c7f0782925a7e8f67ddfcdf0f58b6613550f99c3e1c454e9",
+      "bytes": 576
+    },
+    {
+      "path": "src/hooks/use-model-configuration.ts",
+      "sha256": "3bb8601862bf2cad312d9a8f54a49d0bd98e9908caaedbb9ead9881aec2da190",
+      "bytes": 6210
+    },
+    {
+      "path": "src/hooks/use-task-action-feedback.ts",
+      "sha256": "97759cef2be4db6f0d92625c2f4a18d3f6635c4b7d53c570210020c254e6cfa3",
+      "bytes": 1768
+    },
+    {
+      "path": "src/hooks/use-toast.ts",
+      "sha256": "0602ac84d95719f2a27075ce60333db73128e09c0b07365dce7f9c77441c9d7c",
+      "bytes": 3935
+    },
+    {
+      "path": "src/index.css",
+      "sha256": "4ef544ac19726f946f7436a8769d47be0ae0599729d71aa9375e1cb7fc9065cc",
+      "bytes": 4069
+    },
+    {
+      "path": "src/lib/automationCase.ts",
+      "sha256": "4a27d954fca3679e10c32cbd972172f910a36c4528ed6866eb5c795ea5fcce89",
+      "bytes": 62220
+    },
+    {
+      "path": "src/lib/commonSites.ts",
+      "sha256": "c478f389cd68196cfe0eaf81c18ce7cbba2407f14c00679e019c8de5470c9cbc",
+      "bytes": 1535
+    },
+    {
+      "path": "src/lib/h264-preview.ts",
+      "sha256": "0e29de5664da7c40a46b8bb2b9ba397b2e32a48cd6149b50a09899a1d28733af",
+      "bytes": 3444
+    },
+    {
+      "path": "src/lib/preview-feedback.ts",
+      "sha256": "e6e6ed82a3531b854c6d3b2f3d9414c5d3a818aea2606503b5b82e8f27726905",
+      "bytes": 1057
+    },
+    {
+      "path": "src/lib/quickActionOrder.ts",
+      "sha256": "8c53b707910950165604cc0eeb3b22e7a5b202f01d6975bc8d617adb38c149ef",
+      "bytes": 510
+    },
+    {
+      "path": "src/lib/quickActionPresentation.ts",
+      "sha256": "f15146e0b0f7f991b074ca3e4eba2c511d5e6c0b12a0b445ea5a7fb500e5ea48",
+      "bytes": 426
+    },
+    {
+      "path": "src/lib/quickActionStatus.ts",
+      "sha256": "189c7af0c4da6907c3e51a917ac83c506fbc27e9c8f87ade9eba6406eb2a817d",
+      "bytes": 782
+    },
+    {
+      "path": "src/lib/task-creation-diagnostics.ts",
+      "sha256": "6da50e9eb385956d740804812a477bbdfe1526443216e0d6e79d770b7ffab38f",
+      "bytes": 753
+    },
+    {
+      "path": "src/lib/task-rerun-source.ts",
+      "sha256": "7c13f416d1f18522bace26ad7cddcb5f2b9fce416f793b890fd1d82d8df869b3",
+      "bytes": 1274
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "sha256": "d1f1e0d62cb8d8d1e04c26e14de842d8a151f75812d81b046c65b5d1fe8e4b27",
+      "bytes": 169
+    },
+    {
+      "path": "src/main.tsx",
+      "sha256": "eac2825779f8a3fb0e09bddacc80f48a4ece1c5926c98f38a8b6fe5dc60e9d5d",
+      "bytes": 635
+    },
+    {
+      "path": "src/pages/NotFound.tsx",
+      "sha256": "6ffbe2628bb320a19d9442d39ecbaf01e5f8ff724e9fa54dddffbdb70c04b075",
+      "bytes": 731
+    },
+    {
+      "path": "src/types/assets.d.ts",
+      "sha256": "4b1fcdf1370bf376b6e7c747472d72946ebea61d7afc6fd38f9a079be235f1cf",
+      "bytes": 356
+    },
+    {
+      "path": "tailwind.config.js",
+      "sha256": "e53e86c146b91bd7ed9090984b88c1bb865d25b86834accfad325546664ab95f",
+      "bytes": 2302
+    },
+    {
+      "path": "tests/agent-case-evidence-export.test.mjs",
+      "sha256": "733997f1fe062015ae2c2da9d83af646837b89e93810aedb96cd6b9654c0505a",
+      "bytes": 6592
+    },
+    {
+      "path": "tests/agent-experience-memory.test.mjs",
+      "sha256": "3dc21c5a60634c24f029a477866b2dd2694c6a2668e5d51c15729e0e9db154b6",
+      "bytes": 11633
+    },
+    {
+      "path": "tests/agent-model-step-recovery.test.mjs",
+      "sha256": "9d97815fcecfdcaae95f76eb66e73bd3a8a3e35aad1bad14349a144563d9e529",
+      "bytes": 12815
+    },
+    {
+      "path": "tests/agent-progress-policy.test.mjs",
+      "sha256": "0ff90a6f45f3c87672e2e9f814e0fdc8fa336850746af8c5d0f621606d25ff2c",
+      "bytes": 14172
+    },
+    {
+      "path": "tests/agent-skill-refresh.test.mjs",
+      "sha256": "82940ab90bfc99db397f5b2190abc6393900a8c222bdcb77f72f7a16806afaf9",
+      "bytes": 30103
+    },
+    {
+      "path": "tests/agent-skill-renames.test.mjs",
+      "sha256": "59db494f517953bdfd23e560dfe2627338ec1648502fcf56ccf0128f8c287185",
+      "bytes": 4190
+    },
+    {
+      "path": "tests/agent-skill-scope.test.mjs",
+      "sha256": "fedd37844d19cae865e60197d1e49f2be7b9b6201b228f9b319b8185d6efc4e1",
+      "bytes": 8536
+    },
+    {
+      "path": "tests/case-edit-guard.test.mjs",
+      "sha256": "8d09be91630176ff0e3513b785a9d32338e355d0c861ecd8e4cef4a53f4632fe",
+      "bytes": 7009
+    },
+    {
+      "path": "tests/case-edit-refresh-regression.test.mjs",
+      "sha256": "613b73ed82d8eb2637e9c0b2d7cbbb783d9c86a0a452b913f20fc99ac9929f92",
+      "bytes": 9472
+    },
+    {
+      "path": "tests/case-scope-selection.test.mjs",
+      "sha256": "61516557e814e5f605981ba0a63b1e40aab52f36a6b87070e7dcec61491d65a4",
+      "bytes": 5903
+    },
+    {
+      "path": "tests/cli-case-list-projection.test.mjs",
+      "sha256": "3cc074b1de3e8836612ce04cfe72515310700171559ecb5eeb329e4b40653093",
+      "bytes": 2126
+    },
+    {
+      "path": "tests/cli-headless-runtime.test.mjs",
+      "sha256": "cda090d57ddb6aa026f4030bd1c00ce75cac0d06f7f2412e8346589742790fc8",
+      "bytes": 5488
+    },
+    {
+      "path": "tests/component-configuration-compatibility.test.mjs",
+      "sha256": "49479706bfbb76cfe43a6bdcd70cff52afdc4316c28c6a3592fc74758e713421",
+      "bytes": 4965
+    },
+    {
+      "path": "tests/device-preflight.test.mjs",
+      "sha256": "ff5c6f703739b789c4110f930f8077230c6d742eb6d39918218f667d3c314620",
+      "bytes": 3576
+    },
+    {
+      "path": "tests/ffmpeg-source-distribution.test.mjs",
+      "sha256": "a3ae651c5b001fd1f9c2b1c05a339985f6da35512f5a8411085345cf9d51de1d",
+      "bytes": 5510
+    },
+    {
+      "path": "tests/glasses-device-contract.test.mjs",
+      "sha256": "af34bbf7db79631f3b94e2f1affd4003d9811ef4b85899036b31922d659b2a51",
+      "bytes": 8270
+    },
+    {
+      "path": "tests/preview-performance-regression.test.mjs",
+      "sha256": "2d9b1098350758aa7ed9580b0b1afa68af38ecb156fbdd914ef5772b1875760a",
+      "bytes": 9535
+    },
+    {
+      "path": "tests/public-source.test.mjs",
+      "sha256": "13152cdf87474615d4325ffd33c55d9042efaede152c557afe027da9badcf355",
+      "bytes": 5486
+    },
+    {
+      "path": "tests/quick-action-template-audit.test.mjs",
+      "sha256": "f0161a3d67be25bf043dee89c8d4478a2a8df483ff71cfaa569fc4657da34a52",
+      "bytes": 2008
+    },
+    {
+      "path": "tests/recording-dialog-ui.test.mjs",
+      "sha256": "d729c51fda244d76df4d5dbc503894de7d225830fed6dbb71797daeb5e6e0e2d",
+      "bytes": 10940
+    },
+    {
+      "path": "tests/retired-app-update.test.mjs",
+      "sha256": "ad12099bf7330840804e0faf88361dfde98863a20bd5ff9f692e5bb500b6cf5a",
+      "bytes": 1494
+    },
+    {
+      "path": "tests/sample-factory-navigation.test.mjs",
+      "sha256": "7029e70442784732d6931c5ebc1641237a3954c8cf877c0de731c47401c757d0",
+      "bytes": 3937
+    },
+    {
+      "path": "tests/solopi-import.test.mjs",
+      "sha256": "d473ebcad3e8cea673335a812593949ce4c6050add15ecd2606148442c601c55",
+      "bytes": 21637
+    },
+    {
+      "path": "tests/solopi-native-replay.test.mjs",
+      "sha256": "f1e314c99b5fd7e308e18913378d0eb048445bfb30bfad1e3285881a282d3b3a",
+      "bytes": 15534
+    },
+    {
+      "path": "tests/solopi-permissions.test.mjs",
+      "sha256": "1fb39ba5dead92fb4217ea8a416455069d50d61af257c4a380296a85d56fb6a4",
+      "bytes": 5383
+    },
+    {
+      "path": "tests/solopi-provider.test.mjs",
+      "sha256": "4659ac56bc8d2dc5f088f137495e9f1120ec6b4bc4fdc3152097364bfdb33758",
+      "bytes": 23738
+    },
+    {
+      "path": "tests/solopi-recording-recovery.test.mjs",
+      "sha256": "3d8b6b9d6e468a2720f1855a3576034b4685f6f84416492c221f209faa67c448",
+      "bytes": 7197
+    },
+    {
+      "path": "tests/solopi-stop-convert.test.mjs",
+      "sha256": "dc7a28e9cbd490afdc4f425df24f9a1b29792c796a5a3cb1fffaad9d7e5dfac2",
+      "bytes": 5699
+    },
+    {
+      "path": "tests/task-result-delivery.test.mjs",
+      "sha256": "505e221082a1baae7fe19ad6649fabe78467fdc993a52ec1eca860a0233fb246",
+      "bytes": 12906
+    },
+    {
+      "path": "tests/third-party-notices.test.mjs",
+      "sha256": "f43b9e42810bbb71367e814ddbed1d350c5356b6bfc362ba792a32ab7aa7e54d",
+      "bytes": 5820
+    },
+    {
+      "path": "tests/workflow-assertion-policy.test.mjs",
+      "sha256": "478bd0592921955345780d58b86f9a92ba5afbe19ac221ad1ac2a6935be1ae1b",
+      "bytes": 19419
+    },
+    {
+      "path": "tests/workflow-editor-image-mock.test.mjs",
+      "sha256": "3ee2074fd8e0efc8dc973b564653cbab452d260fd95df09e0539bbeee3663290",
+      "bytes": 2382
+    },
+    {
+      "path": "tests/workflow-execution-summary.test.mjs",
+      "sha256": "166de158f7c2d02c33c92def2844602586bc272dc03e90d22aea6b00f6a7f577",
+      "bytes": 4080
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "bf86a9efff5a94881fed294de082f8209688127978fc315a5b8ddfd81ebd77cf",
+      "bytes": 623
+    },
+    {
+      "path": "webpack.config.js",
+      "sha256": "24c50891f0d1ecb3efbd3d24439634eb17f0c86ad7dfe86a833283505ec17ee1",
+      "bytes": 1677
+    }
+  ]
+}
