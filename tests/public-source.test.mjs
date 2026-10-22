@@ -77,3 +77,11 @@ test('public entry documents link only to included files',()=>{
 test('latest generic Agent regressions accompany the public source snapshot',()=>{
  for(const name of ['agent-progress-policy.test.mjs','agent-skill-scope.test.mjs','agent-case-evidence-export.test.mjs']) assert.equal(isPublicSourceFile('tests/'+name),true,name);
 });
+
+test('README declares the existing SoloPi Apache license without obsolete pending-authorization text',()=>{
+ const readme=fs.readFileSync(path.join(sourceRoot,'README.md'),'utf8');
+ assert.match(readme,/遵循 SoloPi 项目的 \*\*Apache License 2\.0\*\*/);
+ assert.match(readme,/\[LICENSE\]\(LICENSE\)/);
+ assert.doesNotMatch(readme,/拟采用|尚未提供正式|许可证待办|不能把这段说明视为已经完成/);
+ assert.match(fs.readFileSync(path.join(sourceRoot,'LICENSE'),'utf8'),/Apache License[\s\S]*Version 2\.0/);
+});

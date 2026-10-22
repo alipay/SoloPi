@@ -157,9 +157,9 @@ solopi-desktop 原名 GlassBox。部分历史路径、协议标识、`.glassrepo
 
 ### 许可证
 
-项目拟采用 **Apache License 2.0**。当前仓库尚未提供正式 `LICENSE` 文件；最终授权以仓库正式许可证和发布审核结果为准，不能把这段说明视为已经完成的开源授权。
+本项目是 SoloPi 的桌面补充工具，遵循 SoloPi 项目的 **Apache License 2.0** 开源协议，完整条款见 [LICENSE](LICENSE)。第三方组件的许可证与版权声明见 [NOTICE](NOTICE) 和 [第三方许可声明](THIRD_PARTY_NOTICES.md)。
 
-公开源码范围、导出方法和许可证待办见 [公开源码说明](docs/public-source.md)。
+公开源码范围和导出方法见 [公开源码说明](docs/public-source.md)。
 
 ### Existing installation compatibility
 
