@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "solopi.ai.goalpath-policy/v1",
+  "targetPackage": "com.eg.android.AlipayGphone",
+  "steps": {
+    "draft-library": {
+      "instructions": "从更多服务页面打开搜索，输入冻结的测试文本“图书馆”，保留搜索草稿，不提交搜索。",
+      "stopWhen": {
+        "all": [
+          {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.EditText",
+              "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+            },
+            "field": "text",
+            "equals": "图书馆"
+          },
+          {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.FrameLayout",
+              "resourceId": "com.alipay.mobile.antui:id/search_confirm"
+            },
+            "field": "description",
+            "equals": "搜索"
+          }
+        ]
+      },
+      "readyWhen": {
+        "any": [
+          {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.wallet.homemarket:id/title_bar_content"
+            },
+            "field": "text",
+            "equals": "更多服务"
+          },
+          {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.EditText",
+              "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+            },
+            "field": "className",
+            "equals": "android.widget.EditText"
+          }
+        ]
+      },
+      "inputData": {
+        "query": "图书馆"
+      },
+      "maxCandidates": 64,
+      "minProbability": 0.65,
+      "minMargin": 0.15,
+      "denyLabels": [
+        "支付",
+        "付款",
+        "转账",
+        "收款",
+        "收付款",
+        "扫一扫",
+        "理财",
+        "借钱",
+        "余额宝",
+        "花呗",
+        "网商贷",
+        "信用卡还款",
+        "基金",
+        "股票",
+        "黄金",
+        "允许",
+        "同意",
+        "授权"
+      ],
+      "rules": [
+        {
+          "when": {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.wallet.homemarket:id/title_bar_content"
+            },
+            "field": "text",
+            "equals": "更多服务"
+          },
+          "action": "click",
+          "selector": {
+            "packageName": "com.eg.android.AlipayGphone",
+            "className": "android.widget.FrameLayout",
+            "resourceId": "com.alipay.android.phone.wallet.homemarket:id/title_bar_search",
+            "description": "搜索"
+          }
+        },
+        {
+          "when": {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.EditText",
+              "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+            },
+            "field": "className",
+            "equals": "android.widget.EditText"
+          },
+          "action": "input",
+          "selector": {
+            "packageName": "com.eg.android.AlipayGphone",
+            "className": "android.widget.EditText",
+            "resourceId": "com.alipay.mobile.antui:id/search_input_box"
+          },
+          "inputKey": "query"
+        }
+      ]
+    }
+  }
+}

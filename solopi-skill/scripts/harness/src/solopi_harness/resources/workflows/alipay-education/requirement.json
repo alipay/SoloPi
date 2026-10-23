@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "id": "workflow-alipay-education",
+  "title": "支付宝教育公益分类浏览",
+  "targetAppPackage": "com.eg.android.AlipayGphone",
+  "targetAppLabel": "支付宝",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-CATEGORY",
+      "text": "显示资源 ID 为 homemarket:id/title 的教育公益分类标题。"
+    },
+    {
+      "id": "AC-SERVICE",
+      "text": "教育公益分类下显示支付宝公益服务名称。"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "education-browse",
+      "title": "支付宝教育公益分类浏览",
+      "acceptanceCriteria": [
+        "AC-CATEGORY",
+        "AC-SERVICE"
+      ],
+      "preconditions": [
+        {
+          "id": "home-more-ready",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "更多"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "id": "browse-education",
+          "type": "explore",
+          "goal": "从支付宝首页打开更多服务，再进入教育公益分类，看到该分类下的支付宝公益入口即停止，不打开服务。",
+          "allowedActions": [
+            "click",
+            "scroll",
+            "wait"
+          ],
+          "budget": {
+            "maxSteps": 6,
+            "maxDurationMs": 180000,
+            "idleTimeoutMs": 120000,
+            "maxRepeatedActions": 2,
+            "maxNoProgressSteps": 2
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "education-content-title",
+          "afterStep": "browse-education",
+          "acceptanceCriteria": [
+            "AC-CATEGORY"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.wallet.homemarket:id/title",
+              "text": "教育公益"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "教育公益"
+          }
+        },
+        {
+          "id": "charity-service-visible",
+          "afterStep": "browse-education",
+          "acceptanceCriteria": [
+            "AC-SERVICE"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "text": "支付宝公益",
+              "resourceId": "com.alipay.android.phone.wallet.homemarket:id/app_group_item_name"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "支付宝公益"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "header-return-1",
+          "required": true,
+          "action": {
+            "type": "click",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.FrameLayout",
+              "description": "返回",
+              "resourceId": "com.alipay.android.phone.wallet.homemarket:id/title_bar_back"
+            }
+          }
+        },
+        {
+          "id": "home-more-final",
+          "required": true,
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "更多"
+          }
+        }
+      ]
+    }
+  ]
+}

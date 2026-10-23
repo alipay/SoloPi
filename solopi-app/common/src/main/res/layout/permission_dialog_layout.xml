@@ -1,0 +1,170 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minWidth="@dimen/control_float_title_width"
+    android:paddingTop="@dimen/control_dp8"
+    android:paddingBottom="@dimen/control_dp8"
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/control_dp8"
+        android:layout_marginBottom="@dimen/control_dp8"
+        android:layout_marginLeft="@dimen/control_dp24"
+        android:layout_marginRight="@dimen/control_dp24"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/permission__request_permission"
+            android:textSize="@dimen/permission_title_size"
+            android:textStyle="bold"
+            android:layout_gravity="center_vertical"
+            android:textColor="#212121"/>
+        <TextView
+            android:layout_marginLeft="@dimen/control_dp2"
+            android:layout_marginRight="@dimen/control_dp2"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/permission_success"
+            android:textStyle="bold"
+            android:textColor="#FF4081"
+            android:textSize="@dimen/permission_title_size"
+            android:layout_gravity="center_vertical"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/permission__splash"
+            android:textSize="@dimen/permission_title_size"
+            android:textStyle="bold"
+            android:layout_gravity="center_vertical"
+            android:textColor="#212121"/>
+
+        <TextView
+            android:layout_marginLeft="@dimen/control_dp2"
+            android:layout_marginRight="@dimen/control_dp2"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/permission_all"
+            android:textColor="#212121"
+            android:textStyle="bold"
+            android:layout_gravity="center_vertical"
+            android:textSize="@dimen/permission_title_size"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/permission__right_parentheses"
+            android:textSize="@dimen/permission_title_size"
+            android:textStyle="bold"
+            android:layout_gravity="center_vertical"
+            android:textColor="#212121"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="@dimen/control_dp8"
+        android:layout_marginBottom="@dimen/control_dp8"
+        android:layout_marginLeft="@dimen/permission_info_padding"
+        android:layout_marginRight="@dimen/permission_info_padding"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ProgressBar
+            android:id="@+id/permission_loading_progress"
+            android:layout_width="@dimen/permission_progress_size"
+            android:layout_height="@dimen/permission_progress_size"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="@dimen/control_dp8"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:indeterminateTint="#FF4081"
+            android:visibility="visible"/>
+        <TextView
+            android:id="@+id/permission_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="false"
+            android:textColor="#757575"
+            android:layout_gravity="center_vertical"
+            android:textSize="@dimen/permission_info_text_size"
+            android:text="@string/permission_default"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/permission_action_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="right"
+        android:layout_marginRight="@dimen/control_dp8"
+        android:visibility="visible">
+        <LinearLayout
+            android:id="@+id/permission_third_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/control_dp16"
+            android:paddingRight="@dimen/control_dp16"
+            android:paddingTop="@dimen/control_dp8"
+            android:visibility="gone"
+            android:gravity="center"
+            android:paddingBottom="@dimen/control_dp8"
+            android:foreground="?attr/selectableItemBackground"
+            android:layout_marginRight="@dimen/control_dp8">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/dialog_btn_text_size"
+                android:text="@string/constant__cancel"
+                android:textColor="#FF4081"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/permission_negative_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/control_dp16"
+            android:paddingRight="@dimen/control_dp16"
+            android:paddingTop="@dimen/control_dp8"
+            android:gravity="center"
+            android:paddingBottom="@dimen/control_dp8"
+            android:foreground="?attr/selectableItemBackground"
+            android:layout_marginRight="@dimen/control_dp8">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/dialog_btn_text_size"
+                android:text="@string/constant__cancel"
+                android:textColor="#FF4081"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/permission_positive_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/control_dp16"
+            android:paddingRight="@dimen/control_dp16"
+            android:paddingTop="@dimen/control_dp8"
+            android:gravity="center"
+            android:paddingBottom="@dimen/control_dp8"
+            android:foreground="?attr/selectableItemBackground">
+            <TextView
+                android:layout_width="wrap_content"
+                android:textSize="@dimen/dialog_btn_text_size"
+                android:layout_height="wrap_content"
+                android:text="@string/constant__confirm"
+                android:textColor="#FF4081"
+                />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,4 @@
+interface:
+  display_name: "SoloPi AI 控制框架"
+  short_description: "通过类型化 CLI 管理 SoloPi 设备、测试与性能能力"
+  default_prompt: "使用 $solopi-ai 检查并控制 SoloPi 设备，编写与回放用例，编译需求验证计划，调度托管设备池，并管理端侧 ExecuTorch 模型的签名、安装、基准、发布门禁与回滚，输出可追溯证据。"

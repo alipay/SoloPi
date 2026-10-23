@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "solopi.ai.fastpath-example-inputs/v1",
+  "promptRevision": "prompt-v2",
+  "targetPackage": "com.eg.android.AlipayGphone",
+  "observedTargetVersion": "12.12.30.8000",
+  "executionResultsIncluded": false,
+  "changes": [
+    "scenarios[].steps[id=open-search].goal",
+    "steps.open-search.instructions"
+  ],
+  "unchangedContract": [
+    "allowedActions",
+    "budget",
+    "candidateSelectors",
+    "readyWhen",
+    "stopWhen",
+    "exactText",
+    "maxCandidates",
+    "oracle",
+    "cleanup"
+  ],
+  "developmentProvenance": {
+    "scope": "在同一保存的真实首页帧上开发调优，不是独立测试集，不是设备执行结果或模型优势证据。",
+    "selection": "4 种问法中仅 short 选择 candidate_0，概率为 0.6807；原始问法 preflight 选择 abstain，概率为 0.928。",
+    "promptPilot": {
+      "name": "alipay-prompt-pilot.json",
+      "sha256": "44e2c88ecf9f6c5cbe085220c00ed6511e6bfa5fa03a9078a82b3436a0630b23"
+    },
+    "originalPreflight": {
+      "name": "laya-real-observation-preflight.json",
+      "sha256": "8476cb9e77f8af7afd41aaaaf66090c74b2fa86fd0de1c57199674cd314b8c67"
+    },
+    "homeObservation": {
+      "name": "v5-ready-observation.json",
+      "sha256": "5a0b3c3b6c4aafa94f8d1cafaad04e6b583f9d26b4a5fa2c5c5f4a126a20463b"
+    },
+    "searchObservation": {
+      "name": "v5-search-page.json",
+      "sha256": "f35d654e01b7182cc67862b7ae131e936af49a806fda3f488828721d168a4967"
+    }
+  },
+  "scenarios": {
+    "normal": {
+      "expectedUnderControlledConditions": "passed",
+      "files": {
+        "requirement.json": {
+          "sha256": "83b735f60e518d0fc45bfcb78b90d22ae7c613e73906bc917a0dfda19f6d122b"
+        },
+        "policy.json": {
+          "sha256": "2cb0892335587e9a86ff5202bfcca7f5ec316f1c2ecb397c383869b61a14ab6f"
+        }
+      },
+      "compiledPlanFingerprint": "d8600da25914d6e52c34f8063b0d8d2f9b1cecaad119ef7a9509fac9e9367f30",
+      "policyDigest": "6b937ad1127fca03482c7145bb47ff3c4d3ba32537c7510804d8c1a936e280b6",
+      "localValidation": {
+        "success": true,
+        "valid": true,
+        "checkpointCount": 2,
+        "scenarioCount": 1,
+        "segmentCount": 2
+      }
+    },
+    "wrong-oracle": {
+      "expectedUnderControlledConditions": "failed",
+      "files": {
+        "requirement.json": {
+          "sha256": "a280e3a5ce2eea62a7e9286b03470888123f8668d5cf99f0a3d2c73604915bf9"
+        },
+        "policy.json": {
+          "sha256": "2cb0892335587e9a86ff5202bfcca7f5ec316f1c2ecb397c383869b61a14ab6f"
+        }
+      },
+      "compiledPlanFingerprint": "3bbf252dea10c68d0464cd0361e627de27c08b3b74a0d6fa29fa1239d3f7af04",
+      "policyDigest": "6b937ad1127fca03482c7145bb47ff3c4d3ba32537c7510804d8c1a936e280b6",
+      "localValidation": {
+        "success": true,
+        "valid": true,
+        "checkpointCount": 2,
+        "scenarioCount": 1,
+        "segmentCount": 2
+      }
+    },
+    "blocked": {
+      "expectedUnderControlledConditions": "not_tested",
+      "files": {
+        "requirement.json": {
+          "sha256": "a1b2d1c8a26d418ec259e14c404c6ad7b0b68e4a9e804634b563135119027bc9"
+        },
+        "policy.json": {
+          "sha256": "f0673b0f670eeaa0d30dc7661cb2edb25766de03d0e5fb6ca4452b2b4146cf73"
+        }
+      },
+      "compiledPlanFingerprint": "6cc2e9b72c3e7f7e64e612cf8742fd01d6f9ff07e3e94de8c021f1e2bceffc83",
+      "policyDigest": "5d9b787fae3f34ba0c5fe97e3fa51ddbe90c7460c82ff7860469d80ce0eb0f0d",
+      "localValidation": {
+        "success": true,
+        "valid": true,
+        "checkpointCount": 2,
+        "scenarioCount": 1,
+        "segmentCount": 2
+      }
+    }
+  }
+}

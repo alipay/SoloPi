@@ -1,0 +1,13 @@
+{
+    "status": "success",
+    "reason": "",
+    "version": 2,
+    "data": [
+        {
+            "url": "https://github.com/alipay/SoloPi/releases/download/patch-signing-2026-v1/hulu_screenRecord_v7a.zip",
+            "version": 7,
+            "type": "required",
+            "name": "hulu_screenRecord"
+        }
+    ]
+}

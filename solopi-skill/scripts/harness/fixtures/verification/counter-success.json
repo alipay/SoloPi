@@ -1,0 +1,148 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "id": "demo-counter-repeatable-success",
+  "title": "SoloPiTddDemo 计数器确定性增加",
+  "description": "编译并重复执行稳定的计数器验收条件。",
+  "targetAppPackage": "com.example.counter",
+  "targetAppLabel": "SoloPi TDD Counter",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-SUCCESS",
+      "text": "重置后增加一次，显示值 1 和 Counting。"
+    }
+  ],
+  "parameters": {
+    "expectedValue": "1",
+    "expectedStatus": "Counting"
+  },
+  "reusableFlows": [
+    {
+      "id": "reset-counter",
+      "steps": [
+        {
+          "id": "wait-reset",
+          "type": "operation",
+          "action": {
+            "type": "wait",
+            "durationMs": 500
+          }
+        },
+        {
+          "id": "tap-reset",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "deterministic-success",
+      "title": "稳定重置并增加",
+      "acceptanceCriteria": [
+        "AC-SUCCESS"
+      ],
+      "dependsOn": [],
+      "testData": {
+        "value": "${expectedValue}",
+        "status": "${expectedStatus}"
+      },
+      "steps": [
+        {
+          "use": "reset-counter"
+        },
+        {
+          "id": "tap-increment",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/increment_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "value-is-one",
+          "afterStep": "tap-increment",
+          "acceptanceCriteria": [
+            "AC-SUCCESS"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "${value}"
+          }
+        },
+        {
+          "id": "status-is-counting",
+          "afterStep": "tap-increment",
+          "acceptanceCriteria": [
+            "AC-SUCCESS"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_status",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "${status}"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "cleanup-reset",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        },
+        {
+          "id": "cleanup-is-zero",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "0"
+          }
+        }
+      ],
+      "budget": {
+        "maxSteps": 10,
+        "maxDurationMs": 120000,
+        "idleTimeoutMs": 60000,
+        "maxRepeatedActions": 4,
+        "maxNoProgressSteps": 3
+      }
+    }
+  ]
+}

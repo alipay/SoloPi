@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "solopi.fastpath.multichoice-inputs/v1",
+  "appVersion": "12.12.30.8000",
+  "candidateLabels": [
+    "设置",
+    "首页",
+    "我的"
+  ],
+  "candidateResolution": "self-or-clickable-ancestor",
+  "source": "Actual captured Alipay My page, 2026-09-27; raw account page is not distributed. Inputs were frozen before model evaluation.",
+  "goals": "Two positive targets with three phrasings each; phrasings are correlated variants, not six independent pages.",
+  "filesSha256": {
+    "home-direct/requirement.json": "f6a8db72803806b57ab74eac4a9eecf02ccfc376cd0e84df908ac9713926db20",
+    "home-direct/policy.json": "1614038b01c47ddc3c18ce95ea357a21d24946b9db9774f9c093145934a48073",
+    "home-paraphrase-1/requirement.json": "97475c9e4206c01e7d53858cfef3423457b57460d7d586d19dd17ae80efce0e4",
+    "home-paraphrase-1/policy.json": "1614038b01c47ddc3c18ce95ea357a21d24946b9db9774f9c093145934a48073",
+    "home-paraphrase-2/requirement.json": "071fa86eceb2adfa556c76200ac0e040ad977bd24a9a7314ef4269a43f0064b0",
+    "home-paraphrase-2/policy.json": "1614038b01c47ddc3c18ce95ea357a21d24946b9db9774f9c093145934a48073",
+    "settings-direct/requirement.json": "3cae71c9513e4a305bebd5324a22cc7bc9739c3b2c9c80b142ba31f429d54bc2",
+    "settings-direct/policy.json": "208e5572d6c0ac949db22d89a0b1d34077661c8f271559acdb87156cf3473b25",
+    "settings-paraphrase-1/requirement.json": "d754ad0640b0e8d50397689bdc89ae2081d2551913006e33a7c4d4e6a1499620",
+    "settings-paraphrase-1/policy.json": "208e5572d6c0ac949db22d89a0b1d34077661c8f271559acdb87156cf3473b25",
+    "settings-paraphrase-2/requirement.json": "e53c154189e81a3f9cfa61433f60a1a1d2a7913f54c182455accf66cadcc3e62",
+    "settings-paraphrase-2/policy.json": "208e5572d6c0ac949db22d89a0b1d34077661c8f271559acdb87156cf3473b25",
+    "settings-wrong-oracle/requirement.json": "b173d49dee1d1aa1d7b4533865ea16c741eb33a9e87b3a2b3b8207c241096976",
+    "settings-wrong-oracle/policy.json": "208e5572d6c0ac949db22d89a0b1d34077661c8f271559acdb87156cf3473b25",
+    "settings-paraphrase2-wrong-oracle/requirement.json": "c889d9f8f9db210e0b04c25d2c8dde2dc7986cd19082fe401c42094675ed21d6",
+    "settings-paraphrase2-wrong-oracle/policy.json": "208e5572d6c0ac949db22d89a0b1d34077661c8f271559acdb87156cf3473b25",
+    "settings-paraphrase2-wrong-oracle/control-provenance.json": "9a0cfe5976bf1e89c8c2809f86c778cd05bd08af5c63f5f4a487b67319a066c1"
+  },
+  "controlNote": "settings-paraphrase2-wrong-oracle在离线准入后、真机运行前冻结，仅把已准入表达对应的第二条Oracle预期改为错误哨兵。原settings-wrong-oracle保留为初稿，因其goal离线误选未准入真机。"
+}

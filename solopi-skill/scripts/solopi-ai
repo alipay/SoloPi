@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+
+SOLOPI_SKILL_SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+
+if [ -n "${SOLOPI_HARNESS_CLI:-}" ]; then
+    exec "$SOLOPI_HARNESS_CLI" "$@"
+fi
+
+# Code security: resolve bundled code from this script, preserving the caller's cwd and argv.
+exec "$SOLOPI_SKILL_SCRIPT_DIR/harness/solopi-ai" "$@"

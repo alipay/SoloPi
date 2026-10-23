@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "solopi.ai.fastpath-example-inputs/v1",
+  "targetPackage": "com.eg.android.AlipayGphone",
+  "observedTargetVersion": "12.12.30.8000",
+  "executionResultsIncluded": false,
+  "selectorProvenance": {
+    "observationDate": "2026-09-27",
+    "home": "v5-ready-observation.json",
+    "search": "v5-search-page.json",
+    "note": "由真实支付宝页面观察提取；不分发原始观察、截图、设备标识或会话凭据。"
+  },
+  "scenarios": {
+    "normal": {
+      "files": {
+        "requirement.json": {
+          "sha256": "0e6ae77d6e927ed8e35198beba873b25ab65ff8f576032a0ae923376d83b0ce1"
+        },
+        "policy.json": {
+          "sha256": "5f4c48e7eab7cadc2939aeb073847fa62e53867dfad6c5c352be011e68090cfd"
+        }
+      },
+      "compiledPlanFingerprint": "4e97c943a9a61f8f07bcc7599afdc239e8f528f66c4925d10ca5b7f2eb61b085"
+    },
+    "wrong-oracle": {
+      "files": {
+        "requirement.json": {
+          "sha256": "547676e73d6f759e018a8ce7c5635e48eadc41db3edc7e27ccf2d0e115e95f40"
+        },
+        "policy.json": {
+          "sha256": "5f4c48e7eab7cadc2939aeb073847fa62e53867dfad6c5c352be011e68090cfd"
+        }
+      },
+      "compiledPlanFingerprint": "27a740d42b1e5f3d355aca99964548cd6c1680b266448217d71545687c1b181a"
+    },
+    "blocked": {
+      "files": {
+        "requirement.json": {
+          "sha256": "6add9a72fc156759adcc8e70a28c8f6f194a288192894e402263d63f92387618"
+        },
+        "policy.json": {
+          "sha256": "250d090d4bac76076cde25ef6cb762b73a7f609a3102c101619289490f7ac0ee"
+        }
+      },
+      "compiledPlanFingerprint": "b752e55c6e96eb14e7bbd434617c731ca04034b2cb66d63219595cb320211e10"
+    }
+  }
+}

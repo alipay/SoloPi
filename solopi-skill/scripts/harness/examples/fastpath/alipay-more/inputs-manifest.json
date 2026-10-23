@@ -1,0 +1,11 @@
+{
+  "targetPackage": "com.eg.android.AlipayGphone",
+  "observedTargetVersion": "12.12.30.8000",
+  "selectorSources": [
+    "v6-open-more-before.json",
+    "v6-more-page.json"
+  ],
+  "executionResultsIncluded": false,
+  "requirementSha256": "844113635d4a04a39a17f02a36b33f57d12ff978eb970475b30abd864258aeaf",
+  "compiledPlanFingerprint": "09fc52ca7beb208eac1118ff6f908bba1c7eb3214e7814105da661a6711a99ee"
+}

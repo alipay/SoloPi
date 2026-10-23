@@ -1,0 +1,9 @@
+{
+  "frozenAt": "2026-09-27T14:15:30.937754+00:00",
+  "derivedFrom": "settings-paraphrase-2",
+  "reason": "After offline admission, freeze an independent deliberately wrong Oracle control using the unchanged admitted goal and policy. Not included in the nine offline samples. No phone outcome has been observed for this control.",
+  "changedOracle": "target-2 expected value only; identifiers/titles also renamed",
+  "sourceRequirementSha256": "e53c154189e81a3f9cfa61433f60a1a1d2a7913f54c182455accf66cadcc3e62",
+  "requirementSha256": "c889d9f8f9db210e0b04c25d2c8dde2dc7986cd19082fe401c42094675ed21d6",
+  "policySha256": "208e5572d6c0ac949db22d89a0b1d34077661c8f271559acdb87156cf3473b25"
+}

@@ -1,0 +1,77 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <com.alipay.hulu.ui.GesturePadView
+        android:id="@+id/node_gesture_gesture_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        app:gpv_padding="2dp"
+        app:gpv_gestureFilter="100"
+        app:gpv_backgroundRes="@drawable/bg_custom_input"
+        app:gpv_clearBtn="@drawable/head_icon_delete" />
+
+    <LinearLayout
+        android:layout_marginTop="8dp"
+        android:layout_width="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_height="wrap_content"
+        android:padding="8dp">
+
+        <TextView
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="@string/gesture__gesture_interval"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textColor="@color/primaryText"
+            android:textSize="14dp" />
+        <com.alipay.hulu.ui.FlowRadioGroup
+            android:id="@+id/node_gesture_time_filter"
+            android:layout_marginLeft="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <RadioButton
+                android:id="@+id/node_gesture_time_filter_25"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25ms"/>
+            <RadioButton
+                android:id="@+id/node_gesture_time_filter_50"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="50ms"/>
+            <RadioButton
+                android:id="@+id/node_gesture_time_filter_100"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="100ms"/>
+            <RadioButton
+                android:id="@+id/node_gesture_time_filter_200"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="200ms"/>
+        </com.alipay.hulu.ui.FlowRadioGroup>
+    </LinearLayout>
+</LinearLayout>

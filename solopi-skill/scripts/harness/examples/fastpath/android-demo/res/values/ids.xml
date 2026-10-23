@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="page_state" type="id" />
+    <item name="order_status" type="id" />
+    <item name="action_primary" type="id" />
+    <item name="action_secondary" type="id" />
+    <item name="action_tertiary" type="id" />
+    <item name="dismiss_popup" type="id" />
+    <item name="reset_button" type="id" />
+    <item name="scenario_baseline" type="id" />
+    <item name="scenario_renamed" type="id" />
+    <item name="scenario_popup" type="id" />
+    <item name="scenario_loading" type="id" />
+    <item name="scenario_broken" type="id" />
+    <item name="scenario_unknown" type="id" />
+    <item name="scenario_disabled" type="id" />
+</resources>

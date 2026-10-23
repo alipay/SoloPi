@@ -1,0 +1,112 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "id": "fastpath-alipay-search-normal",
+  "title": "支付宝搜索页 FastPath 接入控制实验：normal",
+  "targetAppPackage": "com.eg.android.AlipayGphone",
+  "targetAppLabel": "支付宝",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-SEARCH-BACK",
+      "text": "探索结束后，真实搜索返回按钮的 description 为返回。"
+    },
+    {
+      "id": "AC-SEARCH-CONFIRM",
+      "text": "搜索确认按钮 description 为搜索。"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "alipay-search-normal",
+      "title": "接入控制实验 normal",
+      "acceptanceCriteria": [
+        "AC-SEARCH-BACK",
+        "AC-SEARCH-CONFIRM"
+      ],
+      "preconditions": [],
+      "steps": [
+        {
+          "id": "open-search",
+          "type": "explore",
+          "goal": "打开搜索页。",
+          "allowedActions": [
+            "click"
+          ],
+          "budget": {
+            "maxSteps": 2,
+            "maxDurationMs": 180000,
+            "idleTimeoutMs": 120000,
+            "maxRepeatedActions": 1,
+            "maxNoProgressSteps": 1
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "search-return-visible",
+          "afterStep": "open-search",
+          "acceptanceCriteria": [
+            "AC-SEARCH-BACK"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.alipay.mobile.antui:id/search_back_button",
+              "className": "android.widget.FrameLayout",
+              "packageName": "com.eg.android.AlipayGphone"
+            },
+            "field": "description",
+            "operator": "equals",
+            "expected": "返回"
+          }
+        },
+        {
+          "id": "search-confirm-visible",
+          "afterStep": "open-search",
+          "acceptanceCriteria": [
+            "AC-SEARCH-CONFIRM"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.alipay.mobile.antui:id/search_confirm",
+              "className": "android.widget.FrameLayout",
+              "packageName": "com.eg.android.AlipayGphone"
+            },
+            "field": "description",
+            "operator": "equals",
+            "expected": "搜索"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "return-home",
+          "required": true,
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.alipay.mobile.antui:id/search_back_button",
+              "className": "android.widget.FrameLayout",
+              "packageName": "com.eg.android.AlipayGphone"
+            }
+          }
+        },
+        {
+          "id": "home-more-visible",
+          "required": true,
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text",
+              "className": "android.widget.TextView",
+              "packageName": "com.eg.android.AlipayGphone"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "更多"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.alipay.hulu.portal"
+    android:versionCode="39"
+    android:versionName="0.10.20051801">
+    <application android:label="${portalAppLabel}" tools:replace="android:label">
+        <activity android:name="com.alipay.hulu.activity.SplashActivity"
+            android:label="${portalAppLabel}" tools:replace="android:label" />
+    </application>
+</manifest>

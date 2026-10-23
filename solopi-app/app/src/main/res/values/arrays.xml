@@ -1,0 +1,75 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<resources>
+    <string-array name="video_resolutions" translatable="false">
+        <item>720x480</item>
+        <item>480x360</item>
+        <item>256x144</item>
+        <item>1280x720</item>
+        <item>1920x1080</item>
+        <item>3860x2160</item>
+    </string-array>
+
+    <string-array name="video_bitrates" translatable="false">
+        <item>2500</item>
+        <item>800</item>
+        <item>1200</item>
+        <item>1600</item>
+        <item>2000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>12000</item>
+        <item>16000</item>
+        <item>20000</item>
+        <item>25000</item>
+    </string-array>
+
+    <string-array name="video_framerates" translatable="false">
+        <item>60</item>
+        <item>15</item>
+        <item>25</item>
+        <item>30</item>
+        <item>90</item>
+        <item>120</item>
+    </string-array>
+    <string-array name="video_except_diff" translatable="false">
+        <item>2</item>
+        <item>1</item>
+        <item>0.5</item>
+        <item>0.2</item>
+        <item>0.1</item>
+        <item>0.05</item>
+        <item>5</item>
+        <item>10</item>
+    </string-array>
+
+    <string-array name="whileMode">
+        <item>@string/constant__while_mode_count</item>
+        <item>@string/constant__while_mode_condition</item>
+    </string-array>
+    <string-array name="default_screen_rotation">
+        <item>@string/rotation_0</item>
+        <item>@string/rotation_90</item>
+        <item>@string/rotation_180</item>
+        <item>@string/rotation_270</item>
+    </string-array>
+
+    <string-array name="language" translatable="false">
+        <item>@string/language__default</item>
+        <item>中文</item>
+        <item>English</item>
+    </string-array>
+</resources>

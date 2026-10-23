@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "solopi.ai.goalpath-policy/v1",
+  "targetPackage": "com.eg.android.AlipayGphone",
+  "steps": {
+    "browse-education": {
+      "instructions": "从支付宝首页打开更多服务，再进入教育公益分类，看到该分类下的支付宝公益入口即停止，不打开服务。",
+      "stopWhen": {
+        "all": [
+          {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.wallet.homemarket:id/title",
+              "text": "教育公益"
+            },
+            "field": "text",
+            "equals": "教育公益"
+          },
+          {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "text": "支付宝公益",
+              "resourceId": "com.alipay.android.phone.wallet.homemarket:id/app_group_item_name"
+            },
+            "field": "text",
+            "equals": "支付宝公益"
+          }
+        ]
+      },
+      "readyWhen": {
+        "any": [
+          {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text"
+            },
+            "field": "text",
+            "equals": "更多"
+          },
+          {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.wallet.homemarket:id/title_bar_content"
+            },
+            "field": "text",
+            "equals": "更多服务"
+          }
+        ]
+      },
+      "inputData": {},
+      "maxCandidates": 64,
+      "minProbability": 0.65,
+      "minMargin": 0.15,
+      "denyLabels": [
+        "支付",
+        "付款",
+        "转账",
+        "收款",
+        "收付款",
+        "扫一扫",
+        "理财",
+        "借钱",
+        "余额宝",
+        "花呗",
+        "网商贷",
+        "信用卡还款",
+        "基金",
+        "股票",
+        "黄金",
+        "允许",
+        "同意",
+        "授权",
+        "支付宝公益"
+      ],
+      "rules": [
+        {
+          "when": {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text"
+            },
+            "field": "text",
+            "equals": "更多"
+          },
+          "action": "click",
+          "selector": {
+            "packageName": "com.eg.android.AlipayGphone",
+            "className": "android.widget.TextView",
+            "text": "更多",
+            "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text"
+          }
+        },
+        {
+          "when": {
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.wallet.homemarket:id/title_bar_content"
+            },
+            "field": "text",
+            "equals": "更多服务"
+          },
+          "action": "click",
+          "selector": {
+            "packageName": "com.eg.android.AlipayGphone",
+            "className": "android.widget.TextView",
+            "text": "教育公益"
+          }
+        }
+      ]
+    }
+  }
+}

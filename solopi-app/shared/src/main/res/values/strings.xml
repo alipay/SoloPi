@@ -1,0 +1,169 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<resources>
+    <string name="app_name">shared</string>
+    <string name="accessibility_description">SoloPi Automation Tools\nFeatures：\n1. Record and replay\n2. Performance testing\n3. Multi-device compatibility testing
+    </string>
+    <string name="assets__load_plugin">Load plugin \'%s\'</string>
+    <string name="loading_plugin_finish">Load plugin finish.</string>
+    <string name="assets__load_plugin_result">Load plugin: %s</string>
+    <string name="node__assert_success">Assert Success</string>
+    <string name="node__assert_fail">Assert Failed</string>
+    <string name="action__cancel">Cancel</string>
+    <string name="action__click">CLICK</string>
+    <string name="action__long_click">LONG PRESS</string>
+    <string name="action__input">INPUT</string>
+    <string name="action__multi_click">REPEAT CLICK</string>
+    <string name="action__find_click">CLICK IF EXISTS</string>
+    <string name="action__quick_click">QUICK CLICK</string>
+    <string name="action__click_and_input">CLICK AND INPUT</string>
+    <string name="action__input_search">INPUT AND SEARCH</string>
+    <string name="action__scroll_to_bottom">SCROLL DOWN</string>
+    <string name="action_scroll_to_top">SCROLL UP</string>
+    <string name="action__scroll_to_right">SCROLL RIGHT</string>
+    <string name="action__scroll_to_left">SCROLL LEFT</string>
+    <string name="action__assert">ASSERT</string>
+    <string name="action__assert_toast">ASSERT TOAST</string>
+    <string name="action__sleep_until">WAIT NODE</string>
+    <string name="action__other_node">EXTRA</string>
+    <string name="action__back">BACK</string>
+    <string name="action__reload">RELOAD</string>
+    <string name="action__handle_alert">HANDLE ALERT</string>
+    <string name="action__scheme_jump">SCHEME</string>
+    <string name="action__install_app">INSTALL</string>
+    <string name="action__change_mode">CHANGE MODE</string>
+    <string name="action__global_scroll_down">SCROLL DOWN</string>
+    <string name="action__global_scroll_up">SCROLL UP</string>
+    <string name="action__global_scroll_right">SCROLL RIGHT</string>
+    <string name="action__global_scroll_left">SCROLL LEFT</string>
+    <string name="action__global_keyboard_input">KEYBOARD INPUT</string>
+    <string name="action__global_global_input">GLOBAL INPUT</string>
+    <string name="action__goto_index">RESTART</string>
+    <string name="action__clear_data">CLEAR DATA</string>
+    <string name="action__kill_process">KILL PROCESS</string>
+    <string name="action__sleep">SLEEP</string>
+    <string name="action__screen_shot">SCREENSHOT</string>
+    <string name="action__home">HOME</string>
+    <string name="action__notification">NOTIFICATION</string>
+    <string name="action__recent_task">RECENT TASK</string>
+    <string name="action__device_info">DEVICE INFO</string>
+    <string name="action__exe_shell">EXECUTE SHELL</string>
+    <string name="action__power">POWER</string>
+    <string name="action__pause">PAUSE</string>
+    <string name="action__other_gloabl">EXTRA</string>
+    <string name="action__finish">FINISH</string>
+    <string name="action__focus">FOCUS</string>
+    <string name="action__let_node">SET PARAMS</string>
+    <string name="action__let">SET PARAMS</string>
+    <string name="action__load_param">LOAD PARAMS</string>
+    <string name="action__check_node">CHECK</string>
+    <string name="action__check">CHECK</string>
+    <string name="action__exit_slave">EXIT</string>
+    <string name="action__permission_alert">PERMISSION ALERT</string>
+    <string name="action__install_alert">INSTALL ALERT</string>
+    <string name="action__hide_input">HIDE IME</string>
+    <string name="action__delete_case">Delete Case</string>
+    <string name="action__export_case">Export Case</string>
+    <string name="action__play_multi_time">Replay Repeat</string>
+    <string name="action__gen_multi_param">Multi Param</string>
+    <string name="action__while">WHILE</string>
+    <string name="action__if">IF</string>
+    <string name="action__continue">CONTINUE</string>
+    <string name="action__break">BREAK</string>
+    <string name="action_param__local_pos">Operation Position</string>
+    <string name="action_param__input_content">Input Content</string>
+    <string name="action_param__search_content">Search Content</string>
+    <string name="action_param__sleep_time">Sleep Time(ms)</string>
+    <string name="action_param__screenshot_name">Screenshot Name</string>
+    <string name="action_param__repeat_click">Repeat Click Count</string>
+    <string name="action_param__max_sleep">Max Wait Time(ms)</string>
+    <string name="action_param__scroll_percent">Scroll Percentage</string>
+    <string name="action_param__shell_command">Shell Command</string>
+    <string name="action_param__press_time">Press Time(ms)</string>
+    <string name="action_param__assert_content">Assert Content</string>
+    <string name="action_param__assert_mode">Assert Mode</string>
+    <string name="action_param__param_type">Param Type</string>
+    <string name="action_param__param_value">Param Value</string>
+    <string name="action_param__param_name">Param Name</string>
+    <string name="action_param__jump_scheme">Scheme</string>
+    <string name="action_param__param_download">Param Load Url</string>
+    <string name="action_param__node_mode">Running Mode</string>
+    <string name="action_param__slave_power">Only Slave Click Power</string>
+    <string name="action_param__check_field">Check Field</string>
+    <string name="action_param__target_action_desc">Target Action Description</string>
+    <string name="action_param__target_action">Target Action</string>
+    <string name="performance__memory">Memory</string>
+    <string name="performance__response_time">Response Time</string>
+    <string name="performance__framerate">Frame Rate</string>
+    <string name="performance__game_fps">Game FPS</string>
+    <string name="performance__battery">Battery</string>
+    <string name="performance__network">Network</string>
+    <string name="downloading__assets">Asset downloading…\n%dKB/%dKB</string>
+    <string name="assets_downloaded">Asset downloaded</string>
+    <string name="assets_to_download">Asset prepare downloading</string>
+    <string name="assets_download_fail">Asset download failed, </string>
+    <string name="action__gesture">Gesture</string>
+    <string name="action__pinch_out">Pinch Out</string>
+    <string name="action__pinch_in">Pinch In</string>
+    <string name="action_param__gesture_path">Gesture path</string>
+    <string name="action_param__gesture_filter">Gesture interval</string>
+    <string name="action__force_stop">Force Stop</string>
+    <string name="action__normal_exit">Exit Replay</string>
+    <string name="running_mode__accessibility_mode">Accessibility Mode</string>
+    <string name="running_mode__capture_mode">Screenshot Mode</string>
+    <string name="action__resume">Resume</string>
+    <string name="performance__process_status">Process Status</string>
+    <string name="performance__temperature">Temperature(BETA)</string>
+    <string name="action__generate_qr_code">GENERATE QR CODE</string>
+    <string name="action_param__qr_code_value">QR Code Value</string>
+    <string name="toast_message__turn_on_gfx_info">Please turn on \"Profile HWUI rendering\" in \"Developer options\"</string>
+    <string name="permission__starting_accessibility_service">Starting Accessibility Service</string>
+    <string name="action__generate_bar_code">GENERATE BAR CODE</string>
+    <string name="display_battery__current_info">Instant Current:%.1fmA/Instant power:%.1fmW</string>
+    <string name="display_battery__load_fail">Load Data Failed</string>
+    <string name="display_battery__real_time_current">Instant Current</string>
+    <string name="display_battery__avg_current">AVG Current</string>
+    <string name="display_battery__real_time_power">Instant Power</string>
+    <string name="display_battery__avg_power">AVG Power</string>
+    <string name="display_temperature__cpu">CPU: %.1f°C</string>
+    <string name="display_cpu__app_process">App Process-</string>
+    <string name="display_cpu__global_usage">Global Usage</string>
+    <string name="display_fps__framerate">Frame rate</string>
+    <string name="display_fps__frame">Frame</string>
+    <string name="display_fps__jank_time">Jank Count</string>
+    <string name="display_fps__count">Times</string>
+    <string name="display_fps__max_jank_time">Max Jank Time</string>
+    <string name="display_fps__jank_percentage">Jank Frame Percentage</string>
+    <string name="display_fps__current_info_activity">Framerate:%d/Jank Count:%d/Max Jank Time:%dms/Jank Percentage:%.2f%%\n%s</string>
+    <string name="display_fps__current_info">Framerate:%d/Jank Count:%d/Max Jank Time:%dms/Jank Percentage:%.2f%%</string>
+    <string name="display_gamefps__current_info">Framerate:%d/Jank Count:%d/Max Jank Time:%dms/Jank Percentage:%.2f%%</string>
+    <string name="display_memory__total_usage">Total Usage</string>
+    <string name="display_memory__current_info">Available:%dMB/Total:%dMB</string>
+    <string name="display_network__current_info">%s:Down%.1fK/Accum%.1fK\n%s:Up%.1fK/Accum%.1fK</string>
+    <string name="display_network__app_current_info">Total:Down%.1fK/Accum%.1fK\nTotal:Up%.1fK/Accum%.1fK</string>
+    <string name="display_network__total_download_flow">Global Download Flow</string>
+    <string name="display_network__global_download_speed">Global Download Speed</string>
+    <string name="display_network__process_download_flow">Process Download Flow-</string>
+    <string name="display_network__process_download_speed">Process Download Speed-</string>
+    <string name="display_network__global_upload_flow">Global Upload Flow</string>
+    <string name="display_network__global_upload_speed">Global Upload Speed</string>
+    <string name="display_network__process_upload_flow">Process Upload Flow-</string>
+    <string name="display_network__process_upload_speed">Process Upload Speed-</string>
+    <string name="display_response__response_time">Response Time</string>
+    <string name="display_response__refresh_time">Refresh Time</string>
+    <string name="display_response__current_info">Response Time: %dms/Refresh Time: %dms</string>
+    <string name="display_status__app_process">App Process-</string>
+</resources>

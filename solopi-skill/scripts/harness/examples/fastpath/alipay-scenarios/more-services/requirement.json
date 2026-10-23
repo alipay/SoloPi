@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "id": "fastpath-alipay-more-services",
+  "title": "支付宝更多服务：两段连续选择与独立验收",
+  "targetAppPackage": "com.eg.android.AlipayGphone",
+  "targetAppLabel": "支付宝",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-MORE",
+      "text": "更多服务页面标题及返回入口正确。"
+    },
+    {
+      "id": "AC-HOME",
+      "text": "返回后恢复首页更多入口。"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "more-services",
+      "title": "首页选择更多，再从三个入口中选择返回首页",
+      "acceptanceCriteria": [
+        "AC-MORE",
+        "AC-HOME"
+      ],
+      "preconditions": [],
+      "steps": [
+        {
+          "id": "open-more",
+          "type": "explore",
+          "goal": "打开更多服务。",
+          "allowedActions": [
+            "click"
+          ],
+          "budget": {
+            "maxSteps": 3,
+            "maxDurationMs": 180000,
+            "idleTimeoutMs": 120000,
+            "maxRepeatedActions": 1,
+            "maxNoProgressSteps": 1
+          }
+        },
+        {
+          "id": "leave-more",
+          "type": "explore",
+          "goal": "返回上一页。",
+          "allowedActions": [
+            "click"
+          ],
+          "budget": {
+            "maxSteps": 3,
+            "maxDurationMs": 180000,
+            "idleTimeoutMs": 120000,
+            "maxRepeatedActions": 1,
+            "maxNoProgressSteps": 1
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "more-title",
+          "afterStep": "open-more",
+          "acceptanceCriteria": [
+            "AC-MORE"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.wallet.homemarket:id/title_bar_content"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "更多服务"
+          }
+        },
+        {
+          "id": "more-back",
+          "afterStep": "open-more",
+          "acceptanceCriteria": [
+            "AC-MORE"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.FrameLayout",
+              "resourceId": "com.alipay.android.phone.wallet.homemarket:id/title_bar_back",
+              "description": "返回"
+            },
+            "field": "description",
+            "operator": "equals",
+            "expected": "返回"
+          }
+        },
+        {
+          "id": "home-restored",
+          "afterStep": "leave-more",
+          "acceptanceCriteria": [
+            "AC-HOME"
+          ],
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "更多"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "home-more-final",
+          "required": true,
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "packageName": "com.eg.android.AlipayGphone",
+              "className": "android.widget.TextView",
+              "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "更多"
+          }
+        }
+      ]
+    }
+  ]
+}

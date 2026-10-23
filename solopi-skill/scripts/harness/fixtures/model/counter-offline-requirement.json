@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "id": "counter-offline-model",
+  "title": "使用离线策略达到计数器目标",
+  "description": "确定性重置后由端侧模型探索，并使用确定性判定器验证目标。",
+  "targetAppPackage": "com.example.counter",
+  "targetAppLabel": "SoloPi TDD Counter",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-OFFLINE-1",
+      "text": "离线探索后，计数器值为 3 且状态为 Completed。"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "offline-counter-goal",
+      "title": "离线模型达到目标",
+      "acceptanceCriteria": ["AC-OFFLINE-1"],
+      "preconditions": [],
+      "testData": {"expectedValue": "3", "expectedStatus": "Completed"},
+      "steps": [
+        {
+          "id": "reset-counter",
+          "type": "operation",
+          "stability": "stable",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        },
+        {
+          "id": "model-reach-goal",
+          "type": "explore",
+          "goal": "只使用增加操作使计数器达到 3，达到后停止探索。",
+          "allowedActions": ["click"],
+          "budget": {
+            "maxSteps": 4,
+            "maxDurationMs": 120000,
+            "idleTimeoutMs": 30000,
+            "maxRepeatedActions": 4,
+            "maxNoProgressSteps": 2
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "counter-is-three",
+          "afterStep": "model-reach-goal",
+          "acceptanceCriteria": ["AC-OFFLINE-1"],
+          "oracle": {
+            "type": "ui",
+            "selector": {"resourceId": "com.example.counter:id/counter_value"},
+            "field": "text",
+            "operator": "equals",
+            "expected": "3"
+          }
+        },
+        {
+          "id": "counter-is-completed",
+          "afterStep": "model-reach-goal",
+          "acceptanceCriteria": ["AC-OFFLINE-1"],
+          "oracle": {
+            "type": "ui",
+            "selector": {"resourceId": "com.example.counter:id/counter_status"},
+            "field": "text",
+            "operator": "equals",
+            "expected": "Completed"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "cleanup-reset",
+          "required": true,
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        },
+        {
+          "id": "cleanup-zero",
+          "required": true,
+          "oracle": {
+            "type": "ui",
+            "selector": {"resourceId": "com.example.counter:id/counter_value"},
+            "field": "text",
+            "operator": "equals",
+            "expected": "0"
+          }
+        }
+      ],
+      "budget": {
+        "maxSteps": 8,
+        "maxDurationMs": 180000,
+        "idleTimeoutMs": 60000,
+        "maxRepeatedActions": 4,
+        "maxNoProgressSteps": 3
+      }
+    }
+  ]
+}

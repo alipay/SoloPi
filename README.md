@@ -1,176 +1,419 @@
-# solopi-desktop
+# <img src="solopi-app/assets/icon.png" width="48" alt="SoloPi" /> SoloPi
 
-**面向 AI 眼镜与穿戴设备的自动化测试工作台。**
+[![GitHub stars](https://img.shields.io/github/stars/alipay/SoloPi.svg)](https://github.com/alipay/SoloPi)
+[![GitHub license](https://img.shields.io/github/license/alipay/SoloPi.svg)](LICENSE)
+[![Main app API](https://img.shields.io/badge/Main_App_API-18%2B-brightgreen.svg)](https://developer.android.com/guide/topics/manifest/uses-sdk-element)
 
-solopi-desktop 帮助设备厂商、应用开发者和测试团队，把眼镜、配套手机和电脑上的测试步骤组织成可重复执行的用例，并集中查看执行结果与失败证据。
+SoloPi 是一套面向移动端研发的开源自动化与 AI Harness 工程。它保留了 SoloPi 在 Android
+真机上的录制、回放、断言和性能诊断能力，并增加 Agent 接入、动态页面安全执行、独立结果
+判定、无人值守托管和同次运行证据，让一次设备操作可以交付为可进入研发与 CI 流程的结论。
 
-你可以在桌面端编排流程，用 CLI 批量运行已有用例，或让 AI Agent 通过同一套 CLI 执行测试、读取报告。已有电脑脚本也能配置成快捷操作，不必为每个团队重新开发一套界面。
+> 产品源码包含 `solopi-app`、`solopi-skill` 和 `solopi-desktop` 三个顶层模块。Harness 随 Skill 放在
+> `solopi-skill/scripts/harness`；配套文档与许可证保留在仓库中。
 
-[快速开始](#快速开始) · [第一个测试](#第一个测试) · [CLI 指南](docs/agent/glassbox-cli-usage.md) · [配置说明](docs/configuration.md)
+## 开源模块
 
-## 它能帮你做什么？
+| 模块 | 定位 | 主要职责 |
+|---|---|---|
+| [`solopi-app/`](solopi-app/README.md) | 真机执行内核 | 录制回放、页面观察、触屏前复核、断言、性能与网络采集、动作回执；当前开源实现为 Android |
+| [`solopi-skill/`](solopi-skill/SKILL.md) | Agent 入口与宿主机 Harness | 使用说明、类型化 CLI、设备协议、验证计划、独立验收、单机托管与证据报告；核心实现位于 `scripts/harness` |
+| [`solopi-desktop/`](solopi-desktop/README.md) | 桌面测试工作台 | Electron 桌面端、可视化用例编排、设备操作、CLI 与测试报告 |
 
-眼镜测试通常不只发生在一个屏幕上：手机发起操作、眼镜响应、电脑收集日志，最后还要把这些信息拼起来判断是否通过。solopi-desktop 将这些工作放进同一个流程：
+被测 App 不需要接入 Agent SDK，也不需要因为使用 Harness 修改业务代码。
 
-- **把多端操作串成用例。** 通过可视化流程组织设备命令、电脑脚本、HTTP 请求、输入和断言，明确每一步在哪台设备上执行。
-- **把重复脚本变成按钮。** 配置脚本参数的名称、默认值、下拉选项或文件路径，让使用者填写必要信息即可执行；支持查询后操作、开始/结束型操作。
-- **让测试资产可以协作。** 通过 Git 管理用例与快捷操作脚本，复用团队已有资产，而不是传递散落的命令和文件。
-- **让失败可以复盘。** 查看步骤状态、耗时和错误；结合实际启用的日志、截图、录屏及报告定位问题，而不只看到“执行失败”。
-
-例如，你可以编排“手机触发操作 → 等待眼镜响应 → 检查日志中的目标文本 → 保存结果”。具体业务指令、日志规则和设备适配由使用者配置，solopi-desktop 不替代厂商 SDK，也不能绕过设备权限。
-
-## 快速开始
-
-下面以 **macOS Apple Silicon + Android/ADB 设备** 为起点。这是当前主要发行验证组合，不代表所有桌面系统和穿戴设备都已验证可用。
-
-### 1. 准备环境
-
-- 已取得本仓库源码，电脑安装 Node.js、npm 和 Git。本次文档校验使用 Node.js 22.14.0；其他版本需验证依赖兼容性。
-- 安装 Android SDK Platform-Tools，确保终端可以执行 `adb`。
-- 设备开启 USB 调试，并允许当前电脑的调试授权。部分厂商固件需要额外开放 ADB 或应用调试权限。
-- 使用 Git LFS 管理素材的仓库，还需要可用的 Git LFS。私有仓库需要使用者自己的访问权限。
-
-### 2. 从源码启动
+## 桌面端编译与运行
 
 在仓库根目录执行：
 
 ```bash
-npm install
-npm run dev
+cd solopi-desktop
+npm ci
+npm run build
+npm start
 ```
 
-这会启动本地前端和 Electron 桌面窗口，不是只启动一个网页。不要将普通浏览器中的开发页面当作完整桌面客户端使用。
+开发热更新使用 `npm run dev`。环境要求与使用说明见 [桌面端 README](solopi-desktop/README.md)。
 
-本仓库不是通过 `npm install solopi-desktop` 安装的公共 npm 产品；请使用源码或维护者提供的正式发行包。
+## 工作方式
 
-### 3. 连接设备
+```text
+用户目标
+   |
+   v
+支持 Skill 的 Agent
+   |
+   v
+solopi-skill
+   |  类型化任务与安全约束
+   v
+solopi-skill/scripts/harness
+   |  ADB + 受控协议
+   v
+solopi-app  -------------------->  被测 App
+   |                                  |
+   `---------- 回执与证据 <-----------'
+                    |
+                    v
+          passed / failed / not_tested
+```
+
+- Agent 可以提出下一步动作，但不能直接触屏，也不能直接判定测试通过。
+- 动态动作绑定当前页面观察；页面已经变化时，旧动作会在真正执行前被拒绝。
+- 验收目标、检查点、安全红线和结束恢复先形成测试合同，最终结果由确定性结果判定器独立裁决。
+- 已提交的托管任务与 Worker 进程分离；可重试基础设施故障能产生新的执行尝试，旧 Worker 的迟到结果不能写回。
+- 报告中的结论必须引用本次执行的检查点、动作回执、页面或时间线证据，不能跨执行尝试拼接。
+
+## solopi-app：无线化、非侵入式 Android 自动化工具
+
+> SoloPi 是一个无线化、非侵入式的 Android 自动化工具，公测版拥有录制回放、性能测试、
+> 一机多控三项主要功能，能为测试开发人员节省宝贵时间。
+>
+> SoloPi 新增鸿蒙版本，欢迎大家试用，切到 `solopi-harmony` 分支。
+
+### 功能特性
+
+#### 录制回放
+
+![录制回放](solopi-app/assets/replay.gif)
+
+**[游戏录制回放使用视频](https://gw.alipayobjects.com/mdn/rms_e29b5f/afts/file/A*ym07T6nACDIAAAAAAAAAAABkARQnAQ)**
+
+**[Native 应用录制回放使用视频](https://gw.alipayobjects.com/os/basement_prod/3472d35c-bd57-4c82-8112-5dcde42fcb32.mov)**
+
+SoloPi 拥有录制操作的能力，用户只需要通过 SoloPi 执行用例步骤，SoloPi 就能够将用户的操作
+记录下来，并且支持在各个设备上进行回放，这一切都能够在手机上独立完成。详见
+[录制回放](#录制回放)。
+
+SoloPi JSON 可以转化为其他自动化脚本，目前支持 Appium 和 Macaca，可以前往
+[SoloPi-Convertor](https://github.com/soloPi/SoloPi-Convertor) 下载体验。
+
+#### 性能工具
+
+![性能工具](solopi-app/assets/performance.gif)
+
+**[性能工具使用视频](https://gw.alipayobjects.com/os/basement_prod/1996390b-9ec8-4046-8ce8-459afa05d6c5.mov)**
+
+**[响应耗时计算使用视频](https://gw.alipayobjects.com/os/basement_prod/4e82ca85-13fc-4de2-82ff-a9079344f5ef.mov)**
+
+> 视频差分响应耗时依赖 `hulu_screenRecord` 插件。SoloPi 默认通过仓库根目录的 ABI
+> 兼容清单获取固定到 `v0.12.0` 的插件资源；可以在 App 设置中清空或替换插件源，也可以
+> 通过 `solopi-skill/scripts/solopi-ai plugin-install --file <插件 ZIP>` 安装本地包。
+> 安装完成后需重启 SoloPi。冷启动、暖启动的 `startup-time` 测量不依赖该插件。
+
+SoloPi 能够记录待测应用的各项指标，你可以在悬浮窗中观察实时更新的数据，也可以对性能数据
+进行录制，在录制结束后查看图表；同时，SoloPi 还支持性能加压，能够对 CPU、内存与网络环境
+进行限制，复现应用在性能较差、网络环境不佳场景下的表现。
+
+除了常规性能指标，SoloPi 还提供了启动耗时计算工具，测试同学只需要点击两次按钮，就可以
+得到最贴近用户体验的启动耗时数据。同时，启动耗时计算工具还可以通过广播调用，可以非常方便
+地与 UI 自动化测试打通。详见[性能工具](#性能工具)。
+
+#### 一机多控
+
+![一机多控](solopi-app/assets/oneToMany.gif)
+
+**[一机多控使用视频](https://gw.alipayobjects.com/os/basement_prod/971b5467-3db0-4781-86e3-15b3907323f6.mov)**
+
+SoloPi 支持通过操作一台主机设备来控制多台从机设备，不需要在各个设备上分别进行重复冗杂的
+兼容性测试，能够极大提升兼容性测试的效率。详见
+[一机多控](#一机多控)。
+
+### 构建
+
+> 开源部分包含录制回放与性能测试工具，一机多控功能由于稳定性原因暂时还没有开源，后续会继续推进。
+
+#### 编译环境
+
+- macOS 10.14.3
+- Android Studio 4.0
+- Gradle 6.1.1
+- CMake 3.6/3.10 均可
+- NDK 16
+- TargetApi 29
+- MinimumApi 18
+- **注意：构建时请将 Android Studio 的 Instant Run 功能关闭，否则打出的安装包可能无法使用。**
+
+### solopi-app 快速开始
+
+#### 下载并配置 Android SDK 路径
+
+前往 [SDK Platform Tools](https://developer.android.com/studio/releases/platform-tools#downloads)
+下载对应系统版本，解压后在系统环境变量中添加 `ANDROID_SDK=${SDK 解压路径}`。也可以参考
+[ADB 配置文档](https://sspai.com/post/40471)。
+
+> Windows 10 以上配置完环境变量后可在新开的命令行中生效；较老 Windows 系统可能需要重启。
+> Linux 和 macOS 可通过 `echo $ANDROID_SDK` 检验是否生效。
+
+#### 开启手机开发者模式
+
+打开手机设置应用，在“关于手机 → 软件信息”菜单下连续点击“编译编号”7 次，系统会提示已进入
+开发者模式。回到设置应用根页面，进入“开发者选项”，开启“USB 调试”。
+
+#### 常见问题
+
+如果使用过程中遇到问题，可以先到[常见问题](#常见问题)查找。
+
+- VIVO：如果开发者选项中包含“USB 安全操作”，需要手动开启；
+- 小米：需要开启“USB 安装”和“USB 调试（安全设置）”，并手动开启 SoloPi 的“后台弹出界面”；
+- 魅族：如果待测应用属于支付、金融类应用，需要在手机管家中关闭安全支付功能；
+- 华为：需要开启“仅充电模式下允许 ADB 调试”；
+- OPPO：系统可能每 10 分钟自动断开 USB 调试，如需保持稳定应连接电脑；
+- 如果设备有安全输入法，请在系统设置中关闭安全输入法，否则部分输入框可能无法正常输入。
+
+#### 连接设备并开启 Wi-Fi 调试端口
+
+先连接设备到电脑，并通过以下命令检查连接。设备会提示“是否允许 USB 调试”，请选择确定。
+
+Windows：
+
+```bat
+%ANDROID_SDK%\platform-tools\adb.exe devices
+```
+
+macOS 或 Linux：
 
 ```bash
-adb devices -l
-npm run solopi-desktop -- devices list --json
+$ANDROID_SDK/platform-tools/adb devices
 ```
 
-设备应显示为 `device`。如果显示 `unauthorized`，先在设备上确认授权；如果是 `offline`，先检查连接和 ADB 状态。
+如果命令行显示出设备号且状态为 `device`，表示连接成功。
 
-在顶部选择手机和/或眼镜的 SN。只操作一端的用例不必连接另一端；涉及应用的用例还需选择实际安装的包名。
+![建立连接](https://raw.githubusercontent.com/wiki/alipay/SoloPi/FirstUse/genConnection.png)
 
-### 4. 运行并看结果
+> Windows 需要安装 Android 设备驱动，可以从手机厂商官网下载；如果设备状态不是 `device`，
+> 请确认已安装驱动、允许 USB 调试，必要时将 USB 连接模式改为“传输图片（MTP）”。
 
-在“自动化 → 用例库”中新建用例，按下面的只读示例添加步骤、保存并运行。完成后到“测试任务”查看该次运行的步骤详情与报告。先跑通这个最小链路，再接入自己的业务脚本与断言。
+单机场景：
 
-## 第一个测试
-
-**目标：检查 Android 设备是否完成启动。** 这个例子只读取系统属性，不写配置、不安装应用、不触发支付，也不需要 root。
-
-1. 在用例编辑器添加一个“通用 ADB 命令”节点，目标设备选择已连接的手机或眼镜。
-2. 将开始节点、该命令节点和结束节点连接起来。
-3. 在命令输入框填写以下完整命令，超时设置为 10 秒，然后保存、运行。
+```bat
+%ANDROID_SDK%\platform-tools\adb.exe tcpip 5555
+```
 
 ```bash
-adb -s {{serial}} shell 'state=$(getprop sys.boot_completed); echo "sys.boot_completed=$state"; test "$state" = "1"'
+$ANDROID_SDK/platform-tools/adb tcpip 5555
 ```
 
-`{{serial}}` 是 solopi-desktop 的变量，执行时使用该节点所选设备的 SN；它不是终端 Shell 的变量。直接在终端试验时，将它替换成 `adb devices -l` 返回的实际 SN。
+多机场景需要先记录设备序列号：
 
-**如何判断结果：**
-
-- 输出 `sys.boot_completed=1`，且命令退出码为 0：本次检查通过。
-- 属性为空或不是 `1`：`test` 返回非零退出码，本次检查失败。
-- 设备断连、未授权或超过 10 秒：查看失败步骤的错误信息，先解决连接或执行问题。
-
-这里的通过依据是“读取到的系统属性等于 1”，而不是“成功发送了一条 ADB 命令”。它只证明系统报告启动完成，不证明某个应用或眼镜业务已经就绪。
-
-在任务详情中检查该步骤的输出、状态和耗时。截图、录屏等证据需要相应采集能力和选项；本示例不要求开启，也不保证每次运行都有这些附件。本文已核对命令形式与 CLI 入口，未在真实设备上执行此示例。
-
-## 桌面端、CLI 与 Agent
-
-| 入口 | 适合什么工作 |
-| --- | --- |
-| 桌面端 | 选择设备、编排流程、配置快捷操作、运行用例、查看报告 |
-| CLI | 查询资产、运行已有用例或批量任务、追踪状态、读取结构化结果 |
-| AI Agent | 调用 CLI 校验和执行用例，再根据报告分析结果；设备操作仍由执行引擎完成 |
-
-源码目录下常用命令：
+```bat
+%ANDROID_SDK%\platform-tools\adb.exe -s <设备序列号> tcpip 5555
+```
 
 ```bash
-# 查看帮助和环境诊断
-npm run solopi-desktop -- --help
-npm run solopi-desktop -- doctor --json
-
-# 找到已有用例，取得 caseId
-npm run solopi-desktop -- cases list --json
-
-# 将 YOUR_CASE_ID / YOUR_DEVICE_SN 替换为实际值
-npm run solopi-desktop -- run case YOUR_CASE_ID --phone YOUR_DEVICE_SN --json
-
-# 使用返回的 taskId 查看报告
-npm run solopi-desktop -- reports show YOUR_TASK_ID --json
+$ANDROID_SDK/platform-tools/adb -s <设备序列号> tcpip 5555
 ```
 
-眼镜设备使用 `--glasses` 指定 SN；双端用例可以同时指定 `--phone` 和 `--glasses`。用例中的业务断言仍须自己配置，CLI 成功提交任务不等于测试通过。
+通常设备会显示 `restarting in TCP mode port: 5555`，表示已开启无线 ADB 调试模式。
 
-Agent 需要纯 JSON 输出时，可用 `npm run --silent solopi-desktop -- ...` 避免 npm 的脚本提示混入输出。批量任务、状态订阅和报告导出详见 [CLI 指南](docs/agent/glassbox-cli-usage.md)。
+> 请确保设备处于安全的网络环境，不要随意允许 ADB 调试请求，以免造成不必要的损失。
 
-## 按需扩展测试能力
+可以从 [GitHub Releases](https://github.com/alipay/SoloPi/releases/latest) 下载打包好的 SoloPi APK，
+或克隆源码后自行编译。具体使用方式参见[solopi-app 快速开始](#solopi-app-快速开始)。
 
-| 能力 | 使用方式与边界 |
-| --- | --- |
-| 脚本快捷操作 | 从本地或 Git 管理脚本，在设置页配置参数表单和顶部展示；依赖电脑上的解释器、工具和权限 |
-| 查询与开始/结束操作 | 配置查询结果展示、操作参数或开始/结束流程；查询脚本应保持只读 |
-| 语音、图片与接口输入 | 通过相应组件或脚本接入；输入注入可能依赖厂商调试接口或设备适配 |
-| 日志与结果断言 | 按目标文本、JSON 等规则验证实际响应；规则需要对应应用和设备的日志格式 |
-| 截图、录屏与性能采样 | 为复盘保留证据；支持情况取决于设备、授权及是否启用采集 |
-| 常用站点 | 配置团队网站并快速切换，共用应用内网页会话；各网站仍需自己的访问权限 |
+### solopi-app 文档
 
-## 支持范围与安全边界
+- [第一次使用与注意事项](#solopi-app-快速开始)
+- [solopi-app 完整文档](solopi-app/README.md)
 
-- **当前主要验证范围：** macOS Apple Silicon 桌面发行与 Android/ADB 设备链路。不同型号和固件仍需验证，能够被 ADB 发现不代表支持所有测试能力。
-- **其他平台：** Windows、Linux、iOS、鸿蒙及其他眼镜系统属于扩展方向，不能仅凭已有入口或脚本格式认定完整支持。
-- **脚本不是沙箱：** 本机脚本以当前用户权限执行。只导入可信脚本与用例，执行前检查其设备写入、文件操作和网络访问行为。
-- **外部服务按需配置：** 模型、语音合成等能力可能连接使用者配置的服务。发送测试数据前确认其数据处理规则；基础 ADB 检查不需要这些服务。
-- **分享前脱敏：** 日志、截图、录屏和报告可能包含设备标识、账号、业务数据或令牌，不应直接作为公开反馈附件上传。
+## 主要能力
 
-## 常见问题
+### 固定自动化
 
-**设备已经连接，为什么某个功能仍失败？**
+- 真机录制、用例编辑、导入导出；
+- 点击、输入、滚动、返回、节点与图片断言；
+- 单次、重复和批量回放；
+- 不可变用例快照、运行标识和结果证据。
 
-USB/ADB 连通只是前提。功能还可能依赖应用安装、调试包、厂商授权或特定服务。先看失败步骤，不要把所有失败都归因于设备连接。
+### 动态 Agent 执行
 
-**已有 Shell 脚本，必须改成 solopi-desktop 专用格式吗？**
+- 当前页面 Observation 与页面结构摘要；
+- 7 类类型化动态动作；
+- 触屏前重新观察、节点重新定位和旧页面拒绝；
+- 动作幂等回执、时间线、步骤和时长预算。
 
-不必。脚本可以保持终端可执行，在设置页配置参数、默认值和输入控件。solopi-desktop 无法可靠猜出任意脚本的业务含义，请核对参数顺序和必填项。`{{phoneSerial}}`、`{{glassSerial}}` 等变量由应用解析，不是 Shell 原生语法。
+### 验证与可信报告
 
-**运行失败后从哪里排查？**
+- 结构化需求、验收条件和测试计划；
+- 检查点、确定性预期规则和 required Cleanup；
+- 独立 Result Judge；
+- `passed`、`failed`、`not_tested` 三态结果及证据引用。
 
-在“测试任务”打开本次运行，先定位失败步骤及其错误，再看实际生成的附件；CLI 可用 `reports show` 读取同一任务的结果。设备响应断言失败与命令执行失败是不同问题。
+### 无人值守托管
 
-**为什么文件名、报告后缀或命令里仍有 GlassBox？**
+- 持久化任务、设备分片和执行尝试；
+- 设备匹配、lease、heartbeat 和有界重试；
+- Worker 接管与旧归属写入隔离；
+- 单主机多 Worker 和 CI 可消费报告。
 
-solopi-desktop 原名 GlassBox。部分历史路径、协议标识、`.glassreport` 后缀和 `glassbox` 兼容入口仍保留，避免破坏已有资产；产品名称统一使用 solopi-desktop。
+### 性能与工程工具
 
-## 文档与贡献
+- CPU、内存、FPS/Jank、电池、温度、进程与网络流量采集；
+- 冷启动、暖启动和多轮启动耗时；
+- 录屏、视觉响应分析、截图与日志；
+- 有界 CPU/内存压力；
+- 可选端侧模型签名、安装、基准、激活和回滚。
 
-- [配置说明](docs/configuration.md)：环境和功能配置。
-- [CLI 指南](docs/agent/glassbox-cli-usage.md)：自动化调用与报告查询。
+具体指标以目标设备实际返回为准；端侧模型是可选增强，不是使用 Harness 的前提。
 
-欢迎贡献可复现的问题、文档修正、脱敏用例和设备适配。反馈时请提供版本、主机系统、设备与固件、最小复现步骤、预期和实际结果，避免上传密钥或内部业务资料。准备贡献较大功能时，先与维护者确认范围及验证方式。
+## 三个开源模块快速开始
 
-### 许可证
+### 环境要求
 
-本项目是 SoloPi 的桌面补充工具，遵循 SoloPi 项目的 **Apache License 2.0** 开源协议，完整条款见 [LICENSE](LICENSE)。第三方组件的许可证与版权声明见 [NOTICE](NOTICE) 和 [第三方许可声明](THIRD_PARTY_NOTICES.md)。
+- macOS 或 Linux；
+- Python 3.9 或更高版本；
+- Android SDK 与可执行的 `adb`；
+- 构建 `solopi-app` 使用 JDK 11；
+- 一台已授权用于测试的 Android 设备。
 
-公开源码范围和导出方法见 [公开源码说明](docs/public-source.md)。
+### 1. 构建并安装 solopi-app
 
-### Existing installation compatibility
+```bash
+./solopi-app/gradlew -p solopi-app \
+  :app:testDebugUnitTest \
+  :agentmodel:testDebugUnitTest \
+  :portal:assembleDebug
 
-The public application, CLI and CLI Skill are named `solopi-desktop`.
-New installations use that name for their data directory. Existing `Glass Box`
-data directories are read in place so saved settings, tasks and reports remain
-available. `SOLOPI_DESKTOP_DATA_DIR` selects an explicit data directory;
-`GLASSBOX_CLI_DATA_DIR` and the previous CLI launcher remain compatible aliases.
-Persisted schema identifiers, report protocols and the application update ID
-remain stable. Internal compatibility identifiers are not public product names.
+adb install -r solopi-app/portal/build/outputs/apk/debug/portal-debug.apk
+```
 
-## SoloPi 操作记录
+辅助功能、悬浮窗、电池优化白名单和必要权限需要由用户在设备上确认，工具不会静默授权。
 
-用例库新建菜单支持导入 SoloPi 历史用例和录制操作生成可编辑草稿。依赖、转换边界和 CLI 用法见 [SoloPi 导入与录制](docs/SOLOPI_IMPORT.md)。
+### 2. 使用 CLI
+
+直接使用源码入口：
+
+```bash
+./solopi-skill/scripts/solopi-ai --pretty actions
+./solopi-skill/scripts/solopi-ai --pretty doctor
+```
+
+也可以在虚拟环境中安装：
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -e ./solopi-skill/scripts/harness
+solopi-ai --pretty actions
+```
+
+`actions`、用例模板和验证计划编译等纯本地命令不需要设备；涉及真机协议的操作应先运行
+`doctor`，并根据返回的就绪缺口完成设置。
+
+### 3. 通过 Agent Skill 调用
+
+`solopi-skill` 包含 Agent 使用规则和 Harness 实现，可以完整复制到仓库外使用。统一入口为：
+
+```bash
+./solopi-skill/scripts/solopi-ai --pretty doctor
+./solopi-skill/scripts/solopi-ai --pretty capabilities
+```
+
+使用前请完整阅读 [`solopi-skill/SKILL.md`](solopi-skill/SKILL.md)。自然语言由 Agent
+结合 Skill 规则解释；Skill 本身不是大模型，也不会绕过 CLI 和设备端安全边界。
+
+## 本地验证
+
+公开源码的基础门禁覆盖 Skill 内的 Harness 与 Android 模块：
+
+```bash
+python3 -m unittest discover -s solopi-skill/scripts/harness/tests -v
+./solopi-skill/scripts/solopi-ai --pretty actions
+./solopi-app/gradlew -p solopi-app \
+  :app:testDebugUnitTest \
+  :agentmodel:testDebugUnitTest \
+  :portal:assembleDebug
+```
+
+真机测试会读取页面、截图、日志和性能数据。请使用专用测试设备与测试账号，不要在生产账号、
+真实支付环境或未获授权的应用上运行。
+
+## solopi-app 代码导读
+
+- `app`：应用业务逻辑；
+- `shared`：应用核心功能，主要包含 node（页面节点获取操作）、event（各类事件监控获取，
+  包含辅助功能事件、触摸事件）、io（数据维护、数据库）、display（性能工具监控项）；
+- `common`：应用框架功能，包含 ADB 能力包装、全局 Service 能力、消息模块与常用工具；
+- `mdlibrary`：ExportService 对应的 Proxy 生成（引用）；
+- `permission`：权限处理包（引用）；
+- `AdbLib`：ADB 连接处理（引用）；
+- `androidWebscokets`：Android 实现的 WebSocket（引用）。
+
+## 内容讨论
+
+面向行业测试相关从业人员，如果对工具有意见或建议，欢迎通过 Issue、PR 或社群讨论。
+
+- 钉钉群（三群）：
+
+![SoloPi 体验与交流群（三群）](solopi-app/assets/dingtalk-group.png)
+
+- 微信群（SoloPi 体验与交流群 2.0）：
+
+![SoloPi 体验与交流群 2.0](solopi-app/assets/wechat-group.png)
+
+- 也可以在 [TesterHome SoloPi 板块](https://testerhome.com/topics/node152)留言。
+
+## 贡献
+
+SoloPi 需要开发者们的共建，也希望能在开发者的支持下更好地发展。如果你基于 SoloPi 开发出
+了更贴近业务场景的能力（商业或非商业），欢迎联系我们，也希望能主动为开源出力，提交各种
+features、bugfix 和 issue，共同维护 SoloPi 这套自动化工具。
+
+### 如何贡献
+
+[代码贡献](CONTRIBUTING.md)：SoloPi 开发参与说明书。
+
+独乐乐不如众乐乐，开源的核心还是技术分享。当你对开源项目产生想法时，也可以有更加 Smart
+的表达方式：
+
+- 我们的业务需要这项功能 → 我加了一个可以用于很多场景的功能，已经提交 MR；
+- 这块有更详细的文档吗 → 我调整了文档，使它更方便使用，请帮忙合并；
+- 我在某款手机上无法使用 → 我修复了该设备上的兼容问题；
+- 功能和文档不一致 → 我整理了踩坑记录，并补充了文档；
+- 这个项目是否持续维护 → 我能做些什么？
+
+Star、Fork、Merge Request 和 Issue 随时欢迎使用。如果你有好的想法，也欢迎直接联系并深入
+讨论，一起推动这套移动端测试工具框架的发展。
+
+## 致谢
+
+开发过程中使用了一些第三方库，相关信息见[版权信息](NOTICE.md)。
+
+## 当前边界
+
+- 当前设备端开源实现为 Android；
+- Managed Execution 是单主机 SQLite WAL 控制面，支持同主机多 Worker，不是云真机供给、
+  多主机高可用或企业 Web 管理平台；
+- 动态 Agent 面向可信工作站、受控测试设备和明确的任务范围；
+- 插件包含可在 App 进程中运行的动态代码；默认兼容清单只引用固定版本资源，也可以安装
+  来源明确且经过授权的本地包；
+- `done` 只是 Agent 的停止信号，正式结论始终来自 Result Judge；
+- 可信交付不等于所有任务都通过，无法可靠观察或缺少证据时应返回 `not_tested`。
+
+## 参与贡献
+
+请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。提交第三方代码、模型、图片或二进制前，必须提供
+准确来源、版本、许可证和修改说明。
+
+## 许可证
+
+SoloPi 以 [Apache License 2.0](LICENSE) 开源。第三方组件继续适用各自的许可证和归属要求。
+
+```text
+Copyright (C) 2015-present, Ant Financial Services Group
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
+## Disclaimer（免责声明）
+
+[免责声明](Disclaimer.md)

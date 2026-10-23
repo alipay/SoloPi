@@ -1,6 +1,4 @@
-node_modules/
-dist/
-build/
-release/
-.private-local/
-*.local
+/docs/
+/doc/
+/output/
+.DS_Store

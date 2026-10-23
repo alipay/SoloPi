@@ -1,0 +1,305 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "id": "demo-counter-outcome-matrix",
+  "title": "SoloPiTddDemo 验证结果矩阵",
+  "description": "通过五种预期结果验证确定性判定权和证据归因。",
+  "targetAppPackage": "com.example.counter",
+  "targetAppLabel": "SoloPi TDD Counter",
+  "acceptanceCriteria": [
+    {"id": "AC-HYBRID", "text": "A hybrid flow increments the counter to 1."},
+    {"id": "AC-PRODUCT-FAILURE", "text": "故意构造的产品失败探针要求增加一次后显示值 2。"},
+    {"id": "AC-AGENT-DONE", "text": "探索必须先增加计数器才能结束。"},
+    {"id": "AC-UNCOVERED", "text": "A blocked exploration must not claim its checkpoint was covered."},
+    {"id": "AC-CLEANUP", "text": "被测行为通过，且必要清理得到验证。"}
+  ],
+  "reusableFlows": [
+    {
+      "id": "reset-counter",
+      "steps": [
+        {
+          "id": "tap-reset",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "increment-counter",
+      "steps": [
+        {
+          "id": "tap-increment",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/increment_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "hybrid-success",
+      "title": "稳定重置加动态增加",
+      "acceptanceCriteria": ["AC-HYBRID"],
+      "dependsOn": [],
+      "steps": [
+        {"use": "reset-counter"},
+        {
+          "id": "explore-increment",
+          "type": "explore",
+          "goal": "将计数器准确增加一次。",
+          "allowedActions": ["click", "wait"],
+          "budget": {
+            "maxSteps": 3,
+            "maxDurationMs": 60000,
+            "idleTimeoutMs": 30000,
+            "maxRepeatedActions": 2,
+            "maxNoProgressSteps": 2
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "hybrid-value-one",
+          "afterStep": "explore-increment",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "1"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "cleanup-reset",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "product-failure",
+      "title": "确定性判定器暴露产品不匹配",
+      "acceptanceCriteria": ["AC-PRODUCT-FAILURE"],
+      "dependsOn": ["hybrid-success"],
+      "steps": [
+        {"use": "reset-counter"},
+        {"use": "increment-counter"}
+      ],
+      "checkpoints": [
+        {
+          "id": "intentional-value-two",
+          "afterStep": "tap-increment",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "2"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "cleanup-reset",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "agent-false-done",
+      "title": "Agent 在满足目标前停止",
+      "acceptanceCriteria": ["AC-AGENT-DONE"],
+      "dependsOn": ["hybrid-success"],
+      "preconditions": [
+        {
+          "id": "counter-starts-zero",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "0"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "id": "explore-before-done",
+          "type": "explore",
+          "goal": "将计数器增加一次后才能声明完成。",
+          "allowedActions": ["click"],
+          "budget": {"maxSteps": 2, "maxDurationMs": 60000}
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "false-done-value-one",
+          "afterStep": "explore-before-done",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "1"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "cleanup-reset",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "uncovered-checkpoint",
+      "title": "探索受阻导致 checkpoint 未测试",
+      "acceptanceCriteria": ["AC-UNCOVERED"],
+      "dependsOn": ["hybrid-success"],
+      "steps": [
+        {
+          "id": "blocked-exploration",
+          "type": "explore",
+          "goal": "将计数器增加一次。",
+          "allowedActions": ["click"],
+          "budget": {"maxSteps": 2, "maxDurationMs": 60000}
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "blocked-value-one",
+          "afterStep": "blocked-exploration",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "1"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "cleanup-reset",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cleanup-failure",
+      "title": "必要清理判定失败",
+      "acceptanceCriteria": ["AC-CLEANUP"],
+      "dependsOn": ["hybrid-success"],
+      "steps": [
+        {"use": "reset-counter"},
+        {"use": "increment-counter"}
+      ],
+      "checkpoints": [
+        {
+          "id": "test-value-one",
+          "afterStep": "tap-increment",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "1"
+          }
+        }
+      ],
+      "cleanup": [
+        {
+          "id": "cleanup-reset",
+          "action": {
+            "type": "click",
+            "selector": {
+              "resourceId": "com.example.counter:id/reset_button",
+              "className": "android.widget.Button",
+              "packageName": "com.example.counter"
+            }
+          }
+        },
+        {
+          "id": "intentional-cleanup-mismatch",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "resourceId": "com.example.counter:id/counter_value",
+              "className": "android.widget.TextView",
+              "packageName": "com.example.counter"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "9"
+          }
+        }
+      ]
+    }
+  ]
+}

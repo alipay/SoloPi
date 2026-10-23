@@ -1,0 +1,69 @@
+/*
+ * Copyright (C) 2015-present, Ant Financial Services Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    defaultConfig {
+        minSdkVersion 18
+        targetSdkVersion rootProject.ext.targetSdkVersion
+    }
+    lintOptions {
+        abortOnError false
+    }
+    buildTypes {
+        release {
+            consumerProguardFiles 'proguard-rules.pro'
+        }
+        debug {
+            consumerProguardFiles 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation "androidx.legacy:legacy-support-v4:${ANDROIDX_SUPPORT_V4_VERSION}"
+    implementation "androidx.legacy:legacy-support-core-utils:${ANDROIDX_SUPPORT_CORE_UTILS_VERSION}"
+    implementation "androidx.appcompat:appcompat:${ANDROIDX_APPCOMPAT_VERSION}"
+    implementation "androidx.recyclerview:recyclerview:${ANDROIDX_RECYCLERVIEW_VERSION}"
+    implementation "com.google.android.material:material:${ANDROIDX_MATERIAL_VERSION}"
+    implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'
+    implementation "com.alibaba:fastjson:${FASTJSON_VERSION}"
+    implementation 'org.greenrobot:greendao:3.3.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.12.3'
+    implementation 'com.liulishuo.filedownloader:library:1.7.7'
+    implementation 'cn.dreamtobe.filedownloader:filedownloader-okhttp3-connection:1.1.0'
+    implementation 'com.hyman:flowlayout-lib:1.1.2'
+    implementation 'com.yydcdut:sdlv:0.7.6'
+    implementation 'com.atlassian.commonmark:commonmark:0.13.0'
+    implementation "com.google.zxing:core:3.4.0"
+
+    implementation('com.theartofdev.edmodo:android-image-cropper:2.5.1') {
+        exclude group: "com.android.support"
+    }
+    implementation('com.github.bumptech.glide:glide:4.11.0') {
+        exclude group: "com.android.support"
+    }
+    implementation "commons-io:commons-io:${COMMON_IO_VERSION}"
+    implementation ('com.orhanobut:logger:2.2.0') {
+        exclude group: "com.android.support"
+    }
+    compileOnly "androidx.multidex:multidex:${ANDROIDX_MULTIDEX_VERSION}"
+    implementation project(':shared')
+
+    testImplementation 'junit:junit:4.13.2'
+}

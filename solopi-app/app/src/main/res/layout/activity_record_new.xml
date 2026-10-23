@@ -1,0 +1,259 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <FrameLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@null">
+
+            <include layout="@layout/head_panel_layout"
+                     android:id="@+id/head_layout"/>
+
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:focusableInTouchMode="true"
+                    android:focusable="true"
+                    android:descendantFocusability="beforeDescendants">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/control_dp12"
+                        android:paddingLeft="@dimen/control_dp16"
+                        android:paddingRight="@dimen/control_dp16">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
+                            android:text="@string/record__test_app"
+                            android:textColor="@color/mainFont"
+                            android:textSize="@dimen/textsize_16"/>
+
+                        <LinearLayout
+                            android:id="@+id/switch_app"
+                            android:layout_width="wrap_content"
+                            android:layout_height="@dimen/control_dp24"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:background="@drawable/bg_round_corner">
+                            <ImageView
+                                android:layout_width="@dimen/control_dp12"
+                                android:layout_height="@dimen/control_dp12"
+                                android:layout_marginLeft="@dimen/control_dp6"
+                                android:layout_marginRight="@dimen/control_dp6"
+                                android:scaleType="centerInside"
+                                android:src="@drawable/swap"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/record__switch_app"
+                                android:textSize="@dimen/textsize_12"
+                                android:layout_marginRight="@dimen/control_dp6"
+                                android:textColor="@color/mainBlue"/>
+                        </LinearLayout>
+                    </RelativeLayout>
+
+                    <ImageView
+                        android:id="@+id/test_app_icon"
+                        android:layout_marginTop="@dimen/control_dp12"
+                        android:layout_width="@dimen/control_dp64"
+                        android:layout_height="@dimen/control_dp64"/>
+                    <TextView
+                        android:id="@+id/test_app_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/control_dp8"
+                        android:textColor="@color/mainFont"
+                        android:textSize="@dimen/textsize_20"/>
+                    <TextView
+                        android:id="@+id/test_app_pkg_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/control_dp4"
+                        android:textColor="@color/subFont"
+                        android:textSize="@dimen/textsize_12"/>
+
+                    <EditText
+                        android:id="@+id/case_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/control_dp40"
+                        android:padding="@dimen/control_dp6"
+                        android:textSize="@dimen/textsize_16"
+                        android:background="@drawable/bg_custom_input"
+                        android:textColorHint="#aaaaaa"
+                        android:hint="@string/record__input_case_name"
+                        android:layout_marginLeft="@dimen/control_dp16"
+                        android:layout_marginRight="@dimen/control_dp16"
+                        android:layout_marginTop="@dimen/control_dp20"
+                        android:textCursorDrawable="@null"/>
+
+                    <EditText
+                        android:id="@+id/case_desc"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/control_dp40"
+                        android:padding="@dimen/control_dp6"
+                        android:textSize="@dimen/textsize_16"
+                        android:background="@drawable/bg_custom_input"
+                        android:textColorHint="#aaaaaa"
+                        android:hint="@string/record__input_case_desc"
+                        android:layout_marginLeft="@dimen/control_dp16"
+                        android:layout_marginRight="@dimen/control_dp16"
+                        android:layout_marginTop="@dimen/control_dp20"
+                        android:textCursorDrawable="@null"/>
+
+
+
+                    <Button
+                        android:id="@+id/start_record"
+                        android:layout_width="@dimen/start_record_btn_width"
+                        android:layout_height="@dimen/dp_48"
+                        android:layout_marginTop="@dimen/control_dp30"
+                        android:textSize="@dimen/textsize_16"
+                        android:text="@string/constant__start_execution"
+                        android:textColor="@color/white"
+                        android:background="@drawable/bg_solid_round_btn"
+                        android:layout_marginBottom="@dimen/control_dp20"/>
+
+                    <LinearLayout
+                        android:id="@+id/recent_case_wrapper"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/control_dp12"
+                            android:background="@color/default_background_color"/>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/control_dp40"
+                            android:paddingLeft="@dimen/control_dp16"
+                            android:paddingRight="@dimen/control_dp16">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/textsize_16"
+                                android:textColor="@color/mainFont"
+                                android:text="@string/record__recent_record"
+                                android:layout_alignParentLeft="true"
+                                android:layout_centerVertical="true"/>
+
+                            <TextView
+                                android:id="@+id/check_all_cases"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/textsize_14"
+                                android:textColor="@color/colorPrimary"
+                                android:text="@string/record__all_cases"
+                                android:layout_alignParentRight="true"
+                                android:layout_centerVertical="true"/>
+
+                        </RelativeLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/control_dp2"
+                            android:layout_marginRight="@dimen/control_dp16"
+                            android:layout_marginLeft="@dimen/control_dp16"
+                            android:background="#f6f6f6"/>
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <com.alipay.hulu.ui.TotalMeasureListView
+                                android:id="@+id/recent_case_list"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:divider="@null"/>
+
+                            <TextView
+                                android:id="@+id/empty_hint"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/textsize_12"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginTop="@dimen/control_dp12"
+                                android:layout_marginBottom="@dimen/control_dp12"
+                                android:text="@string/record__no_local_case"/>
+
+                        </FrameLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </ScrollView>
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/app_list_container"
+        android:layout_width="@dimen/app_list_drawer_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:orientation="vertical"
+        android:background="@color/white">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/control_dp24"
+            android:layout_marginLeft="@dimen/control_dp24"
+            android:text="@string/record__switch_app"
+            android:textSize="@dimen/textsize_20"
+            android:textColor="@color/mainFont"/>
+
+        <ListView
+            android:id="@+id/app_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/control_dp16"
+            android:scrollbars="none"
+            android:overScrollMode="never"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0dp">
+        </ListView>
+
+    </LinearLayout>
+
+</androidx.drawerlayout.widget.DrawerLayout>

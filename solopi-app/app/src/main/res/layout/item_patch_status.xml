@@ -1,0 +1,77 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <RelativeLayout
+        android:id="@+id/item_patch_delete"
+        android:layout_centerVertical="true"
+        android:layout_width="@dimen/control_dp40"
+        android:layout_height="@dimen/control_dp64"
+        android:layout_alignParentEnd="true"
+        android:background="?android:attr/selectableItemBackground">
+        <ImageView
+            android:layout_centerInParent="true"
+            android:layout_width="@dimen/control_dp24"
+            android:layout_height="@dimen/control_dp24"
+            android:tint="@color/mainRed"
+            android:src="@drawable/head_icon_delete" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@id/item_patch_delete"
+        android:layout_marginTop="@dimen/control_dp4"
+        android:layout_marginBottom="@dimen/control_dp4"
+        android:paddingLeft="@dimen/control_dp16"
+        android:paddingRight="@dimen/control_dp8"
+        android:layout_width="match_parent">
+
+        <TextView
+            android:id="@+id/item_patch_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="minicap"
+            android:textSize="@dimen/textsize_16"
+            android:textColor="@color/mainFont"
+            android:layout_alignParentTop="true"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <TextView
+            android:id="@+id/item_patch_version"
+            android:text="version: 6"
+            android:textSize="@dimen/textsize_14"
+            android:textColor="@color/subFont"
+            android:layout_marginTop="@dimen/control_dp4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/item_patch_filter"
+            android:textSize="@dimen/textsize_14"
+            android:textColor="@color/subFont"
+            android:layout_marginTop="@dimen/control_dp2"
+            android:layout_width="wrap_content"
+            android:text="com.alipay.hulu.minicap"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
