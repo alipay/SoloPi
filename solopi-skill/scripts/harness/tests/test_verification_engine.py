@@ -1,6 +1,8 @@
+import argparse
 import copy
 import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -15,6 +17,7 @@ MODULE_PATH = (
 # Reuse one module instance so shared fixtures patch the code under test.
 sys.path.insert(0, str(MODULE_PATH.parent))
 import verification_engine
+import solopi_ai
 
 
 def selector(resource_id):
@@ -210,6 +213,66 @@ class VerificationEngineTests(unittest.TestCase):
                     },
                     step["operationMethod"]["operationParam"],
                 )
+
+    def test_node_and_global_scroll_contracts_pass_existing_case_validate(self):
+        # TOP/LEFT mean a finger swipe toward smaller y/x coordinates. The
+        # percent is encoded as-is, relative to the node or screen respectively.
+        for direction, suffix in (("up", "TOP"), ("down", "BOTTOM"), ("left", "LEFT"), ("right", "RIGHT")):
+            for scoped in (True, False):
+                for distance in (None, 1, 90):
+                    with self.subTest(direction=direction, scoped=scoped, distance=distance):
+                        action = {"type": "scroll", "direction": direction}
+                        if scoped:
+                            action["selector"] = {"resourceId": "com.example.counter:id/scroll_content",
+                                                  "className": "android.widget.ScrollView", "packageName": "com.example.counter"}
+                        if distance is not None:
+                            action["distance"] = distance
+                        step = {"id": "reveal-controls", "type": "operation", "action": action}
+                        requirement = self.requirement(steps=[step])
+                        requirement["scenarios"][0]["checkpoints"][0]["afterStep"] = step["id"]
+                        original = copy.deepcopy(requirement)
+                        plan = verification_engine.compile_verification_plan(requirement)
+                        segment = next(item for item in plan["intent"]["scenarios"][0]["segments"] if item["phase"] == "test")
+                        case = segment["case"]
+                        scroll = case["operationLog"]["steps"][0]
+                        method = scroll["operationMethod"]
+                        self.assertEqual(("" if scoped else "GLOBAL_") + "SCROLL_TO_" + suffix, method["actionEnum"])
+                        self.assertEqual({"text" if scoped else "scrollDistance": str(50 if distance is None else distance)},
+                                         method["operationParam"])
+                        self.assertEqual(action.get("selector"), scroll["operationNode"])
+                        with tempfile.TemporaryDirectory() as directory:
+                            path = Path(directory) / "compiled-case.json"
+                            path.write_text(json.dumps(case), encoding="utf-8")
+                            args = argparse.Namespace(file=str(path), confirm_high_risk=False,
+                                running_params_file=None, clear_running_params=False, output=None)
+                            result, exit_code = solopi_ai.command_case_validate(args, None)
+                        self.assertEqual(0, exit_code)
+                        self.assertTrue(result["valid"])
+                        validated = json.loads(result["case"]["operationLog"])["steps"][0]
+                        self.assertEqual(method, validated["operationMethod"])
+                        self.assertEqual(original, requirement)
+
+    def test_legacy_node_scroll_distance_key_is_still_rejected_by_case_validator(self):
+        case = solopi_ai.build_case_template("invalid-scroll", "com.example.counter", None)
+        case["operationLog"]["steps"] = [
+            {"operationNode": {"className": "android.widget.ScrollView"},
+             "operationMethod": {"actionEnum": "SCROLL_TO_TOP", "operationParam": {"distance": "90"}}}
+        ]
+        with self.assertRaises(solopi_ai.CliError) as raised:
+            solopi_ai.normalize_case(case)
+        self.assertEqual(["text"], raised.exception.details["missingParams"])
+
+    def test_invalid_scroll_distances_are_rejected_before_compilation(self):
+        for distance in (True, False, 0, -1, 91, 50.0, "50", None):
+            for scoped in (True, False):
+                with self.subTest(distance=distance, scoped=scoped):
+                    action = {"type": "scroll", "direction": "up", "distance": distance}
+                    if scoped:
+                        action["selector"] = {"className": "android.widget.ScrollView"}
+                    requirement = self.requirement(steps=[{"id": "increment", "type": "operation", "action": action}])
+                    with self.assertRaises(verification_engine.VerificationError) as raised:
+                        verification_engine.compile_verification_plan(requirement)
+                    self.assertEqual("invalid_action", raised.exception.code)
 
     def test_default_and_explicit_text_oracles_keep_legacy_assert_parameters(self):
         for field in (None, "text"):

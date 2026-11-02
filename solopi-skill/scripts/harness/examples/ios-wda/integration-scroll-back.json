@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "platform": "ios",
+  "targetAppId": "com.facebook.IntegrationApp",
+  "id": "ios-scroll-back",
+  "title": "Scroll a native list and return",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-1",
+      "text": "Scrolling changes visible rows, and Back returns to the scrolling menu"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "scroll-back",
+      "title": "Scroll a native list and return",
+      "acceptanceCriteria": [
+        "AC-1"
+      ],
+      "steps": [
+        {
+          "id": "open",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "accessibilityId": "Scrolling"
+            }
+          }
+        },
+        {
+          "id": "list",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "accessibilityId": "ScrollView"
+            }
+          }
+        },
+        {
+          "id": "scroll",
+          "type": "operation",
+          "action": {
+            "type": "scroll",
+            "selector": {
+              "accessibilityId": "scrollView"
+            },
+            "direction": "down",
+            "distance": 60
+          }
+        },
+        {
+          "id": "back",
+          "type": "operation",
+          "action": {
+            "type": "back"
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "scrolled",
+          "afterStep": "scroll",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "accessibilityId": "25"
+            },
+            "field": "visible",
+            "operator": "equals",
+            "expected": "True"
+          }
+        },
+        {
+          "id": "returned",
+          "afterStep": "back",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "accessibilityId": "ScrollView"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "ScrollView"
+          }
+        }
+      ]
+    }
+  ]
+}

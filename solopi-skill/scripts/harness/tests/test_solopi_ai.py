@@ -1110,6 +1110,86 @@ class SoloPiAiTests(unittest.TestCase):
             thread.join(timeout=2)
             server.server_close()
 
+    def _mock_http_connection(self):
+        connection = mock.Mock()
+        response = mock.MagicMock()
+        response.status = 200
+        response.will_close = False
+        response.read.return_value = b'{"success":true}'
+        response.__enter__.return_value = response
+        connection.getresponse.return_value = response
+        return connection
+
+    def test_http_client_expires_idle_socket_before_request_without_retry(self):
+        for gap, expired in ((3.9, False), (4.0, True), (11.4, True)):
+            with self.subTest(gap=gap):
+                connections = [self._mock_http_connection(), self._mock_http_connection()]
+                clock = [0.0]
+                with mock.patch.object(solopi_ai.http.client, "HTTPConnection", side_effect=connections) as connect, \
+                        mock.patch.object(solopi_ai.time, "monotonic", side_effect=lambda: clock[0]):
+                    client = solopi_ai.HarnessHttpClient(28432, connection_mode="keep-alive")
+                    client.get("agent", {"type": "observe"})
+                    clock[0] = gap
+                    client.get("agent", {"type": "receipt"})
+                    stats = client.summary()
+                    self.assertEqual(2 if expired else 1, connect.call_count)
+                    self.assertEqual(2, sum(item.request.call_count for item in connections))
+                    self.assertEqual(int(expired), stats["idleExpiredConnections"])
+                    self.assertEqual(0 if expired else 1, stats["reusedRequests"])
+                    self.assertEqual(2, stats["requests"])
+                    self.assertEqual(0, stats["automaticRetries"])
+                    self.assertEqual(0, stats["failures"])
+                    self.assertLess(stats["keepAliveIdleTimeoutSeconds"], 5)
+                    self.assertEqual(int(expired), connections[0].close.call_count)
+                    client.close()
+
+    def test_http_idle_age_starts_after_response_and_resets_on_reuse(self):
+        connections = [self._mock_http_connection(), self._mock_http_connection()]
+        clock = [0.0]
+
+        def slow_response():
+            clock[0] = 10.0
+            return b'{"success":true}'
+
+        connections[0].getresponse.return_value.read.side_effect = slow_response
+        with mock.patch.object(solopi_ai.http.client, "HTTPConnection", side_effect=connections) as connect, \
+                mock.patch.object(solopi_ai.time, "monotonic", side_effect=lambda: clock[0]):
+            client = solopi_ai.HarnessHttpClient(28432, connection_mode="keep-alive")
+            client.get("agent", {"type": "observe"})
+            connections[0].getresponse.return_value.read.side_effect = None
+            clock[0] = 13.0
+            client.get("agent", {"type": "observe"})
+            self.assertEqual(1, connect.call_count)
+            clock[0] = 16.0
+            client.get("agent", {"type": "observe"})
+            self.assertEqual(1, connect.call_count)
+            clock[0] = 20.0
+            client.get("agent", {"type": "receipt"})
+            self.assertEqual(2, connect.call_count)
+            self.assertEqual(2, client.summary()["reusedRequests"])
+            self.assertEqual(1, client.summary()["idleExpiredConnections"])
+            client.close()
+
+    def test_http_failure_after_idle_expiry_never_replays_request(self):
+        connections = [self._mock_http_connection(), self._mock_http_connection()]
+        connections[1].request.side_effect = solopi_ai.http.client.RemoteDisconnected()
+        clock = [0.0]
+        with mock.patch.object(solopi_ai.http.client, "HTTPConnection", side_effect=connections) as connect, \
+                mock.patch.object(solopi_ai.time, "monotonic", side_effect=lambda: clock[0]):
+            client = solopi_ai.HarnessHttpClient(28432, connection_mode="keep-alive")
+            client.get("agent", {"type": "observe"})
+            clock[0] = 11.4
+            with self.assertRaises(solopi_ai.CliError):
+                client.get("agent", {"type": "receipt", "ownerToken": "private-token"})
+            self.assertEqual(2, connect.call_count)
+            self.assertEqual(1, connections[1].request.call_count)
+            self.assertIsNone(client._connection)
+            stats = client.summary()
+            self.assertEqual(2, stats["requests"])
+            self.assertEqual(1, stats["idleExpiredConnections"])
+            self.assertEqual(1, stats["failures"])
+            self.assertEqual(0, stats["automaticRetries"])
+
     def test_parser_defaults_to_waiting_for_run(self):
         args = solopi_ai.build_parser().parse_args(["run", "--case", "smoke"])
         self.assertTrue(args.wait)
@@ -1924,7 +2004,7 @@ Complete
         expected_archives = {
             "arm64-v8a.json": "hulu_screenRecord_v8a.zip",
             "armeabi-v7a.json": "hulu_screenRecord_v7a.zip",
-            "armeabi.json": "hulu_screenRecord_armeabi.zip",
+            "armeabi.json": None,
         }
 
         for manifest_name, archive_name in expected_archives.items():
@@ -1933,13 +2013,23 @@ Complete
                     (REPO_ROOT / manifest_name).read_text(encoding="utf-8")
                 )
                 self.assertEqual("success", manifest["status"])
-                self.assertEqual(1, manifest["version"])
+                self.assertEqual(2, manifest["version"])
+                if archive_name is None:
+                    # An ABI without a signed artifact must not fall back to an
+                    # executable archive from the unsigned legacy release.
+                    self.assertEqual([], manifest["data"])
+                    self.assertEqual(
+                        "No signed screen-recording patch is available for armeabi.",
+                        manifest["reason"],
+                    )
+                    continue
+                self.assertEqual("", manifest["reason"])
                 self.assertEqual(
                     [
                         {
                             "url": (
-                                "https://raw.githubusercontent.com/alipay/SoloPi/"
-                                f"v0.12.0/plugins/{archive_name}"
+                                "https://github.com/alipay/SoloPi/releases/download/"
+                                f"patch-signing-2026-v1/{archive_name}"
                             ),
                             "version": 7,
                             "type": "required",
@@ -2481,7 +2571,9 @@ Complete
         parser = solopi_ai.build_parser()
         command_action = next(action for action in parser._actions if action.dest == "command")
 
-        self.assertEqual(103, len(command_action.choices))
+        self.assertEqual(108, len(command_action.choices))
+        self.assertIn("native-doctor", command_action.choices)
+        self.assertIn("control-port-set", command_action.choices)
         self.assertTrue(
             {
                 "agent-session-start", "agent-observe", "agent-act", "agent-status",

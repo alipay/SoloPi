@@ -14,4 +14,15 @@
     <item name="scenario_broken" type="id" />
     <item name="scenario_unknown" type="id" />
     <item name="scenario_disabled" type="id" />
+    <item name="scenario_visual_icons" type="id" />
+    <item name="scenario_visual_layout" type="id" />
+    <item name="scenario_visual_guard" type="id" />
+    <item name="scenario_visual_negative" type="id" />
+    <item name="visual_variant_a" type="id" />
+    <item name="visual_variant_b" type="id" />
+    <item name="visual_variant_c" type="id" />
+    <item name="visual_a7" type="id" />
+    <item name="visual_b2" type="id" />
+    <item name="visual_c9" type="id" />
+    <item name="visual_dialog_reset" type="id" />
 </resources>

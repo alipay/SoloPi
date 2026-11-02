@@ -29,6 +29,8 @@ STABLE_ACTIONS = DYNAMIC_ACTIONS
 UI_OPERATORS = frozenset({"equals", "contains", "matches"})
 UI_FIELDS = frozenset({"text", "description"})
 SELECTOR_FIELDS = ("resourceId", "text", "description", "className", "packageName", "id")
+NATIVE_SELECTOR_FIELDS = ("accessibilityId", "text", "description", "className", "appId", "id")
+SUPPORTED_PLATFORMS = frozenset({"android", "ios", "harmony_next"})
 COMPILED_ACTIONS = frozenset(
     {
         "CLICK",
@@ -186,6 +188,9 @@ def normalize_requirement(payload: Any) -> Dict[str, Any]:
         if requirement_source is not None
         else source
     )
+    platform = source.get("platform", requirement.get("platform", "android"))
+    if platform not in SUPPORTED_PLATFORMS:
+        raise VerificationError("unsupported_platform", "不支持的目标平台", platform=platform)
     requirement_id = _identifier(
         requirement.get("id", requirement.get("requirementId")), "requirement id"
     )
@@ -248,6 +253,7 @@ def normalize_requirement(payload: Any) -> Dict[str, Any]:
                 "targetAppPackage": scenario.get(
                     "targetAppPackage", source.get("targetAppPackage")
                 ),
+                "targetAppId": scenario.get("targetAppId", source.get("targetAppId")),
                 "targetAppLabel": scenario.get("targetAppLabel", source.get("targetAppLabel")),
             }
         )
@@ -261,6 +267,7 @@ def normalize_requirement(payload: Any) -> Dict[str, Any]:
             "description": description,
             "acceptanceCriteria": acceptance_criteria,
         },
+        "platform": platform,
         "parameters": copy.deepcopy(parameters),
         "reusableFlows": normalized_flows,
         "scenarios": normalized_scenarios,
@@ -341,16 +348,17 @@ def _resolve_binding_map(
     raise AssertionError("unreachable")
 
 
-def _normalize_selector(value: Any, location: str) -> Dict[str, Any]:
+def _normalize_selector(value: Any, location: str, platform: str = "android") -> Dict[str, Any]:
     selector = _mapping(value, location)
-    unknown = sorted(set(selector) - set(SELECTOR_FIELDS))
+    fields = SELECTOR_FIELDS if platform == "android" else NATIVE_SELECTOR_FIELDS
+    unknown = sorted(set(selector) - set(fields))
     if unknown:
         raise VerificationError(
             "invalid_selector", "选择器包含不支持的字段", fields=unknown, location=location
         )
     normalized = {
         key: candidate
-        for key in SELECTOR_FIELDS
+        for key in fields
         if (candidate := selector.get(key)) is not None
     }
     if not normalized or not all(isinstance(item, (str, int)) for item in normalized.values()):
@@ -360,7 +368,7 @@ def _normalize_selector(value: Any, location: str) -> Dict[str, Any]:
     return normalized
 
 
-def _normalize_oracle(value: Any, location: str) -> Dict[str, Any]:
+def _normalize_oracle(value: Any, location: str, platform: str = "android") -> Dict[str, Any]:
     oracle = _mapping(value, location)
     oracle_type = oracle.get("type")
     if oracle_type != "ui":
@@ -380,7 +388,8 @@ def _normalize_oracle(value: Any, location: str) -> Dict[str, Any]:
     field = oracle.get("field", "text")
     operator = oracle.get("operator", "equals")
     expected = oracle.get("expected")
-    if field not in UI_FIELDS or operator not in UI_OPERATORS or not isinstance(expected, str):
+    allowed_fields = UI_FIELDS if platform == "android" else UI_FIELDS | {"visible", "enabled"}
+    if field not in allowed_fields or operator not in UI_OPERATORS or not isinstance(expected, str):
         raise VerificationError("invalid_oracle", "界面判定器契约无效", location=location)
     if operator == "matches":
         try:
@@ -391,14 +400,14 @@ def _normalize_oracle(value: Any, location: str) -> Dict[str, Any]:
             ) from exc
     return {
         "type": "ui",
-        "selector": _normalize_selector(oracle.get("selector"), "%s.selector" % location),
+        "selector": _normalize_selector(oracle.get("selector"), "%s.selector" % location, platform),
         "field": field,
         "operator": operator,
         "expected": expected,
     }
 
 
-def _normalize_action(value: Any, location: str) -> Dict[str, Any]:
+def _normalize_action(value: Any, location: str, platform: str = "android") -> Dict[str, Any]:
     action = _mapping(value, location)
     action_type = action.get("type")
     if action_type not in STABLE_ACTIONS:
@@ -421,9 +430,9 @@ def _normalize_action(value: Any, location: str) -> Dict[str, Any]:
         )
     result: Dict[str, Any] = {"type": action_type}
     if action_type in {"click", "longClick", "input"}:
-        result["selector"] = _normalize_selector(action.get("selector"), "%s.selector" % location)
+        result["selector"] = _normalize_selector(action.get("selector"), "%s.selector" % location, platform)
     if action_type == "scroll" and action.get("selector") is not None:
-        result["selector"] = _normalize_selector(action["selector"], "%s.selector" % location)
+        result["selector"] = _normalize_selector(action["selector"], "%s.selector" % location, platform)
     if action_type == "input":
         result["text"] = _text(action.get("text"), "%s.text" % location)
     if action_type in {"longClick", "wait"}:
@@ -538,9 +547,13 @@ def _compile_operation_step(
     else:
         direction = action["direction"]
         prefix = "" if node is not None else "GLOBAL_"
+        # Direction names describe the swipe gesture: TOP/LEFT decrease the
+        # screen coordinate. Node scrolling reads a percentage of node size
+        # from INPUT_TEXT_KEY; global scrolling reads a screen percentage from
+        # SCROLL_DISTANCE. The two replay executors use different wire keys.
         suffix = {"up": "TOP", "down": "BOTTOM", "left": "LEFT", "right": "RIGHT"}[direction]
         action_enum = "%sSCROLL_TO_%s" % (prefix, suffix)
-        params["distance"] = str(action["distance"])
+        params["text" if node is not None else "scrollDistance"] = str(action["distance"])
     return {
         "operationNode": node,
         "operationMethod": {
@@ -630,6 +643,22 @@ def _compile_fixed_segment(
     source_steps: Sequence[Mapping[str, Any]],
     checkpoints_by_step: Optional[Mapping[str, Sequence[Dict[str, Any]]]] = None,
 ) -> Dict[str, Any]:
+    if scenario["platform"] != "android":
+        checkpoint_ids = [
+            checkpoint["id"]
+            for step in source_steps
+            for checkpoint in (checkpoints_by_step or {}).get(step["id"], [])
+        ]
+        semantic = {
+            "platform": scenario["platform"], "phase": phase,
+            "steps": list(source_steps), "checkpoints": checkpoint_ids,
+        }
+        return {
+            "segmentId": _segment_id(scenario["id"], phase, ordinal, semantic),
+            "phase": phase, "route": "deterministic",
+            "sourceStepIds": [step["id"] for step in source_steps],
+            "checkpointIds": checkpoint_ids,
+        }
     operation_id = _safe_name("verification-%s-%s" % (scenario["id"], phase))[:120]
     compiled_steps: List[Dict[str, Any]] = []
     checkpoint_ids: List[str] = []
@@ -674,6 +703,13 @@ def _compile_oracle_segment(
 ) -> Optional[Dict[str, Any]]:
     if not oracles:
         return None
+    if scenario["platform"] != "android":
+        return {
+            "segmentId": _segment_id(scenario["id"], phase, 1, oracles),
+            "phase": phase, "route": "deterministic",
+            "sourceStepIds": [], "checkpointIds": [],
+            "oracleStepIds": [item["id"] for item in oracles],
+        }
     operation_id = _safe_name("verification-%s-%s" % (scenario["id"], phase))[:120]
     steps = [
         _oracle_step(
@@ -701,6 +737,14 @@ def _compile_cleanup_segment(
 ) -> Optional[Dict[str, Any]]:
     if not cleanup:
         return None
+    if scenario["platform"] != "android":
+        return {
+            "segmentId": _segment_id(scenario["id"], "cleanup", 1, cleanup),
+            "phase": "cleanup", "route": "deterministic",
+            "sourceStepIds": [item["id"] for item in cleanup],
+            "checkpointIds": [],
+            "oracleStepIds": [item["id"] for item in cleanup if "oracle" in item],
+        }
     operation_id = _safe_name("verification-%s-cleanup" % scenario["id"])[:120]
     steps: List[Dict[str, Any]] = []
     oracle_step_ids: List[str] = []
@@ -733,6 +777,7 @@ def _normalize_scenario(
     ac_ids: set[str],
 ) -> Dict[str, Any]:
     scenario_id = scenario["id"]
+    platform = normalized["platform"]
     missing_acs = sorted(set(scenario["acceptanceCriteria"]) - ac_ids)
     if missing_acs:
         raise VerificationError(
@@ -750,10 +795,21 @@ def _normalize_scenario(
     target_package = _resolve_value(
         scenario.get("targetAppPackage"), bindings, "%s.targetAppPackage" % scenario_id
     )
-    if not isinstance(target_package, str) or not target_package.strip():
+    target_app_id = _resolve_value(
+        scenario.get("targetAppId"), bindings, "%s.targetAppId" % scenario_id
+    )
+    if platform == "android" and (not isinstance(target_package, str) or not target_package.strip()):
         raise VerificationError(
             "invalid_contract", "场景必须包含 targetAppPackage", scenarioId=scenario_id
         )
+    if platform != "android" and (not isinstance(target_app_id, str) or not target_app_id.strip()):
+        raise VerificationError(
+            "invalid_contract", "非 Android 场景必须包含 targetAppId", scenarioId=scenario_id
+        )
+    if platform != "android" and target_package is not None:
+        raise VerificationError("invalid_contract", "非 Android 场景不能使用 targetAppPackage")
+    if platform == "android" and target_app_id is not None and target_app_id != target_package:
+        raise VerificationError("invalid_contract", "Android targetAppId 与包名不一致")
     target_label = _resolve_value(
         scenario.get("targetAppLabel"), bindings, "%s.targetAppLabel" % scenario_id
     )
@@ -779,7 +835,7 @@ def _normalize_scenario(
                     "id": step_id,
                     "type": "operation",
                     "stability": "stable",
-                    "action": _normalize_action(step.get("action"), "step %s action" % step_id),
+                    "action": _normalize_action(step.get("action"), "step %s action" % step_id, platform),
                 }
             )
         elif step_type == "explore":
@@ -842,7 +898,7 @@ def _normalize_scenario(
                 "afterStep": after_step,
                 "acceptanceCriteria": checkpoint_ac_refs,
                 "oracle": _normalize_oracle(
-                    checkpoint.get("oracle"), "checkpoint %s oracle" % checkpoint_id
+                    checkpoint.get("oracle"), "checkpoint %s oracle" % checkpoint_id, platform
                 ),
             }
         )
@@ -866,7 +922,7 @@ def _normalize_scenario(
             {
                 "id": precondition_id,
                 "oracle": _normalize_oracle(
-                    item.get("oracle"), "precondition %s oracle" % precondition_id
+                    item.get("oracle"), "precondition %s oracle" % precondition_id, platform
                 ),
             }
         )
@@ -889,11 +945,11 @@ def _normalize_scenario(
         normalized_item: Dict[str, Any] = {"id": cleanup_id, "required": True}
         if has_action:
             normalized_item["action"] = _normalize_action(
-                item["action"], "cleanup %s action" % cleanup_id
+                item["action"], "cleanup %s action" % cleanup_id, platform
             )
         else:
             normalized_item["oracle"] = _normalize_oracle(
-                item["oracle"], "cleanup %s oracle" % cleanup_id
+                item["oracle"], "cleanup %s oracle" % cleanup_id, platform
             )
         cleanup.append(normalized_item)
     _unique_ids(cleanup, "scenario cleanup")
@@ -911,7 +967,9 @@ def _normalize_scenario(
         "cleanup": cleanup,
         "budget": scenario["budget"],
         "requestedRoute": scenario["requestedRoute"],
-        "targetAppPackage": target_package.strip(),
+        "platform": platform,
+        "targetAppId": target_app_id.strip() if isinstance(target_app_id, str) else target_package.strip(),
+        "targetAppPackage": target_package.strip() if isinstance(target_package, str) else None,
         "targetAppLabel": target_label,
     }
 
@@ -989,7 +1047,7 @@ def _compile_scenario(requirement_id: str, scenario: Dict[str, Any]) -> Dict[str
         for checkpoint_id in segment["checkpointIds"]:
             checkpoint = checkpoint_by_id[checkpoint_id]
             checkpoint["segmentId"] = segment["segmentId"]
-            if segment["route"] == "deterministic":
+            if segment["route"] == "deterministic" and scenario["platform"] == "android":
                 checkpoint["oracleStepId"] = segment["checkpointOracleSteps"][checkpoint_id]
 
     result = copy.deepcopy(scenario)
@@ -1057,6 +1115,7 @@ def compile_verification_plan(payload: Any) -> Dict[str, Any]:
     compiled_scenarios = [compiled_by_id[scenario_id] for scenario_id in execution_order]
     intent = {
         "schemaVersion": INTENT_SCHEMA,
+        "platform": normalized["platform"],
         "requirement": copy.deepcopy(normalized["requirement"]),
         "parameters": copy.deepcopy(normalized["parameters"]),
         "executionOrder": execution_order,
@@ -1066,6 +1125,7 @@ def compile_verification_plan(payload: Any) -> Dict[str, Any]:
     goal_tree_source["scenarios"] = compiled_scenarios
     plan: Dict[str, Any] = {
         "schemaVersion": PLAN_SCHEMA,
+        "platform": normalized["platform"],
         "sourceFingerprint": canonical_fingerprint(normalized),
         "goalTree": build_goal_tree(goal_tree_source),
         "intent": intent,
@@ -1092,6 +1152,9 @@ def validate_verification_plan(plan: Any) -> Dict[str, Any]:
     intent = _mapping(source.get("intent"), "intent")
     if intent.get("schemaVersion") != INTENT_SCHEMA:
         raise VerificationError("unsupported_schema", "不支持该测试意图 IR 结构")
+    platform = source.get("platform", "android")
+    if platform not in SUPPORTED_PLATFORMS or intent.get("platform", "android") != platform:
+        raise VerificationError("unsupported_platform", "计划平台声明不一致")
     scenarios = _list(intent.get("scenarios"), "intent scenarios")
     _unique_ids(scenarios, "intent scenarios")
     order = _list(intent.get("executionOrder"), "executionOrder")
@@ -1106,6 +1169,11 @@ def validate_verification_plan(plan: Any) -> Dict[str, Any]:
     segment_count = 0
     checkpoint_count = 0
     for scenario in scenarios:
+        if scenario.get("platform", "android") != platform:
+            raise VerificationError("unsupported_platform", "场景平台与计划不一致")
+        if platform != "android" and (not isinstance(scenario.get("targetAppId"), str)
+                                      or not scenario["targetAppId"].strip()):
+            raise VerificationError("invalid_contract", "非 Android 场景缺少应用标识")
         segments = _list(scenario.get("segments"), "scenario segments")
         segment_ids = set()
         test_routes = set()
@@ -1122,6 +1190,26 @@ def validate_verification_plan(plan: Any) -> Dict[str, Any]:
                     raise VerificationError("invalid_step", "动态片段必须保持有界")
             elif segment.get("route") != "deterministic":
                 raise VerificationError("invalid_route", "片段路由无效")
+            elif platform != "android":
+                if "case" in segment:
+                    raise VerificationError("invalid_contract", "非 Android 片段不能包含 Android 用例")
+                source_ids = segment.get("sourceStepIds")
+                if not isinstance(source_ids, list) or not all(
+                    isinstance(item, str) for item in source_ids
+                ):
+                    raise VerificationError("invalid_contract", "原生片段缺少步骤引用")
+                phase_items = scenario["cleanup"] if segment.get("phase") == "cleanup" else scenario["steps"]
+                valid_items = {item["id"]: item for item in phase_items}
+                if len(source_ids) != len(set(source_ids)) or not set(source_ids).issubset(valid_items):
+                    raise VerificationError("unknown_step", "原生片段引用未知步骤")
+                for step_id in source_ids:
+                    item = valid_items[step_id]
+                    if "action" in item:
+                        _normalize_action(item["action"], "native step %s" % step_id, platform)
+                    elif "oracle" in item:
+                        _normalize_oracle(item["oracle"], "native cleanup %s" % step_id, platform)
+                    else:
+                        raise VerificationError("invalid_step", "原生步骤缺少动作或检查")
             else:
                 case = _mapping(segment.get("case"), "compiled SoloPi case")
                 if case.get("targetAppPackage") != scenario.get("targetAppPackage"):
@@ -1189,7 +1277,7 @@ def validate_verification_plan(plan: Any) -> Dict[str, Any]:
         if scenario.get("route") != expected_route:
             raise VerificationError("route_mismatch", "场景路由与其片段不匹配")
         for checkpoint in _list(scenario.get("checkpoints"), "scenario checkpoints"):
-            _normalize_oracle(checkpoint.get("oracle"), "compiled checkpoint oracle")
+            _normalize_oracle(checkpoint.get("oracle"), "compiled checkpoint oracle", platform)
             if checkpoint.get("segmentId") not in segment_ids:
                 raise VerificationError("unknown_segment", "Checkpoint 引用了未知片段")
             refs = set(checkpoint.get("acceptanceCriteria", []))
@@ -1287,6 +1375,7 @@ def _checkpoint_result(
     segment: Mapping[str, Any],
     execution: Mapping[str, Any],
     evidence_refs: Sequence[str],
+    platform: str = "android",
 ) -> Dict[str, Any]:
     base = {
         "checkpointId": checkpoint["id"],
@@ -1296,6 +1385,13 @@ def _checkpoint_result(
     }
     if not evidence_refs:
         return {**base, "status": "not_tested", "reason": "missing_evidence"}
+    if platform != "android":
+        if execution.get("state") not in {"done", "passed"}:
+            return {**base, "status": "not_tested", "reason": execution.get("reason", "checkpoint_not_reached")}
+        status, reason, actual = _evaluate_ui_oracle(
+            checkpoint["oracle"], execution.get("checkpointObservations", {}).get(checkpoint["id"])
+        )
+        return {**base, "status": status, "reason": reason, "actual": actual}
     if segment["route"] == "dynamic":
         if execution.get("state") not in {"done", "passed"}:
             return {
@@ -1343,6 +1439,7 @@ def execute_verification_plan(
 
     validate_verification_plan(plan)
     source = copy.deepcopy(plan)
+    platform = source.get("platform", "android")
     decision_manifest = {} if decisions is None else _mapping(decisions, "agent decisions")
     started_at = int(time.time() * 1000) if now_ms is None else now_ms
     evidence: List[Dict[str, Any]] = []
@@ -1480,7 +1577,7 @@ def execute_verification_plan(
                         item for item in scenario["checkpoints"] if item["id"] == checkpoint_id
                     )
                     checkpoint_results[checkpoint_id] = _checkpoint_result(
-                        checkpoint, segment, result, refs
+                        checkpoint, segment, result, refs, platform
                     )
                 if result.get("state") not in {"passed", "done"}:
                     execution_failure_reason = result.get("reason", "execution_failed_before_checkpoint")

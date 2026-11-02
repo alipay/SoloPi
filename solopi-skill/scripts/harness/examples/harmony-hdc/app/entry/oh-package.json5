@@ -1,0 +1,9 @@
+{
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "SoloPi HarmonyOS Harness entry module",
+  "main": "",
+  "author": "SoloPi",
+  "license": "Apache-2.0",
+  "dependencies": {}
+}
