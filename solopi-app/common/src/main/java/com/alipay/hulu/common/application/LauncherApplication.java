@@ -296,7 +296,7 @@ public abstract class LauncherApplication extends Application {
      * 启动http服务
      * @param port
      */
-    public void startHttpServerAtPort(int port) {
+    public synchronized void startHttpServerAtPort(int port) {
         List<HttpServer.OnUrlRequestListener> listeners = new ArrayList<>();
         if (totalControlHttpServer != null) {
             // 转移注册
@@ -316,11 +316,42 @@ public abstract class LauncherApplication extends Application {
         }
     }
 
+    /** Bind the replacement before retiring the old loopback control server. */
+    public synchronized boolean migrateControlServerPort(int port) {
+        if (port < 1024 || port > 65535) {
+            return false;
+        }
+        HttpServer previous = totalControlHttpServer;
+        if (previous != null && previous.isAlive() && previous.getListeningPort() == port) {
+            SPService.putInt(SPService.KEY_CONTROL_PORT, port);
+            return true;
+        }
+        HttpServer replacement = new HttpServer(port);
+        if (previous != null) {
+            replacement.addAllListeners(previous.getAllListeners());
+        }
+        try {
+            // Code security: retain the current service and setting if the new
+            // loopback bind fails; never stop another installed copy's listener.
+            replacement.start();
+            SPService.putInt(SPService.KEY_CONTROL_PORT, port);
+        } catch (IOException | RuntimeException e) {
+            replacement.stop();
+            return false;
+        }
+        totalControlHttpServer = replacement;
+        if (previous != null) {
+            previous.removeAllListeners();
+            previous.stop();
+        }
+        return true;
+    }
+
     /**
      * 注册控制服务监听器
      * @param listener
      */
-    public boolean registerControlListener(HttpServer.OnUrlRequestListener listener) {
+    public synchronized boolean registerControlListener(HttpServer.OnUrlRequestListener listener) {
         if (totalControlHttpServer == null) {
             LogUtil.w(TAG, "Control server is null, can't register");
             return false;

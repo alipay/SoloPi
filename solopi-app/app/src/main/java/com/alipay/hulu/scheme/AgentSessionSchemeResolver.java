@@ -9,17 +9,24 @@
  */
 package com.alipay.hulu.scheme;
 
+import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
+import android.os.Build;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alipay.hulu.common.application.LauncherApplication;
+import com.alipay.hulu.common.injector.InjectorService;
+import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
 import com.alipay.hulu.common.scheme.AdbSchemeActivity;
 import com.alipay.hulu.common.scheme.AdbAgentActivity;
 import com.alipay.hulu.common.scheme.SchemeActionResolver;
@@ -39,6 +46,7 @@ import com.alipay.hulu.shared.node.action.OperationExecutor;
 import com.alipay.hulu.shared.node.action.OperationMethod;
 import com.alipay.hulu.shared.node.action.PerformActionEnum;
 import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
+import com.alipay.hulu.shared.node.tree.accessibility.tree.AccessibilityNodeTree;
 
 import java.io.File;
 import java.util.Arrays;
@@ -805,11 +813,99 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         Map<String, Object> evidence = new LinkedHashMap<>();
         evidence.put("treeSha256", signature);
         evidence.put("page", page);
+        Map<String, Object> visualContext = captureVisualContext(root);
+        if (visualContext != null) {
+            evidence.put("visualContext", visualContext);
+        }
         evidence.put("timelinePath", EVIDENCE.timelinePath(sessionId));
         if (screenshot) {
             evidence.putAll(captureScreenshot(sessionId));
         }
         return new CapturedPage(signature, packageName, evidence, nodes, context);
+    }
+
+    /** Physical display and window evidence for the host tree-image-tree binding. */
+    private static Map<String, Object> captureVisualContext(AbstractNodeTree root) {
+        if (Build.VERSION.SDK_INT < 21 || !(root instanceof AccessibilityNodeTree)) {
+            return null;
+        }
+        AccessibilityNodeInfo activeRoot = null;
+        List<AccessibilityWindowInfo> windows = null;
+        try {
+            AccessibilityNodeInfo source = ((AccessibilityNodeTree) root).getCurrentNode();
+            AccessibilityService service = InjectorService.g().getMessage(
+                    SubscribeParamEnum.ACCESSIBILITY_SERVICE, AccessibilityService.class);
+            WindowManager manager = (WindowManager) LauncherApplication.getInstance()
+                    .getSystemService(Context.WINDOW_SERVICE);
+            if (source == null || source.getWindowId() < 0 || service == null || manager == null) {
+                return null;
+            }
+            activeRoot = service.getRootInActiveWindow();
+            windows = service.getWindows();
+            if (activeRoot == null || activeRoot.getPackageName() == null
+                    || windows == null || windows.isEmpty() || windows.size() > 128) {
+                return null;
+            }
+            DisplayMetrics metrics = new DisplayMetrics();
+            manager.getDefaultDisplay().getRealMetrics(metrics);
+            if (metrics.widthPixels <= 0 || metrics.heightPixels <= 0) {
+                return null;
+            }
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("screenWidth", metrics.widthPixels);
+            result.put("screenHeight", metrics.heightPixels);
+            result.put("rotation", manager.getDefaultDisplay().getRotation());
+            result.put("foregroundPackage", activeRoot.getPackageName().toString());
+            result.put("windowId", source.getWindowId());
+            JSONArray entries = new JSONArray();
+            for (AccessibilityWindowInfo window : windows) {
+                if (window == null) {
+                    return null;
+                }
+                Rect bounds = new Rect();
+                window.getBoundsInScreen(bounds);
+                JSONObject box = new JSONObject();
+                box.put("left", bounds.left);
+                box.put("top", bounds.top);
+                box.put("right", bounds.right);
+                box.put("bottom", bounds.bottom);
+                JSONObject item = new JSONObject();
+                item.put("id", window.getId());
+                item.put("type", window.getType());
+                item.put("layer", window.getLayer());
+                item.put("active", window.isActive());
+                item.put("focused", window.isFocused());
+                item.put("bounds", box);
+                AccessibilityNodeInfo windowRoot = window.getRoot();
+                try {
+                    CharSequence packageName = windowRoot == null ? null : windowRoot.getPackageName();
+                    item.put("packageName", packageName == null ? null : packageName.toString());
+                } finally {
+                    if (windowRoot != null) {
+                        windowRoot.recycle();
+                    }
+                }
+                entries.add(item);
+            }
+            result.put("windows", entries);
+            return result;
+        } catch (RuntimeException unavailable) {
+            // Code security: no guessed page-derived screen/window metadata and no
+            // raw accessibility data or exception details in logs. Old/unavailable
+            // providers omit visualContext so the host explicitly refuses binding.
+            return null;
+        } finally {
+            if (activeRoot != null) {
+                activeRoot.recycle();
+            }
+            if (windows != null) {
+                for (AccessibilityWindowInfo window : windows) {
+                    if (window != null) {
+                        window.recycle();
+                    }
+                }
+            }
+        }
     }
 
     private Map<String, Object> captureScreenshot(String sessionId) {
