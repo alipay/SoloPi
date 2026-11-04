@@ -75,6 +75,17 @@
 
         <include layout="@layout/divider" />
 
+        <TextView
+            android:id="@+id/info_star"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:padding="16dp"
+            android:background="?attr/selectableItemBackground"
+            android:text="@string/star_prompt_about"
+            android:textColor="@color/primaryText"
+            android:textSize="18sp" />
+
         <LinearLayout
             android:id="@+id/info_license_text"
             android:layout_width="match_parent"

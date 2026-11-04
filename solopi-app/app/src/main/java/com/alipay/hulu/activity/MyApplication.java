@@ -288,6 +288,7 @@ public class MyApplication extends LauncherApplication {
     @Override
     protected void initInMain() {
         super.initInMain();
+        com.alipay.hulu.util.StarPromptController.install(this);
         // 加载版本信息
         try {
             PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
