@@ -17,9 +17,11 @@
 | 电脑端录制与固定回放 | iPhone 已验证 | 模拟器已验证 |
 | 实时候选接口 | iPhone 用本机确定性服务验证过传输、选候选及独立验收 | 相同接口已实现；尚未完成 NEXT 实时服务端到端样本 |
 | 托管执行 | iPhone 已验证领取、执行、结果汇总 | 模拟器五步流程已验证领取、执行、结果汇总 |
-| NEXT 真机、WebView、任意第三方 App、系统级操作 | 不属于本轮交付 | 不属于本轮交付 |
+| 任意第三方 App、WebView DOM、系统级操作 | 尚不支持通用覆盖；桌面已验证支付宝手机营业厅的特定只读流程 | 不属于本轮交付；NEXT 真机尚未验收 |
 
 这里的“实时候选接口已验证”只证明执行链路正确，并未运行 Laya、GPT 或 Qwen 对比，也没有证明小模型带来性能收益。Android 的性能插件、录屏和被动触摸录制没有同步移植。
+
+桌面入口另在 USB iPhone 的真实支付宝上完成连续录制与固定回放：进入手机营业厅，核验标题及两档面额，必要清理返回首页。冻结用例三轮通过，错误标题对照正确失败，四轮清理和 WDA 会话关闭均成功。具体耗时、桌面配置和边界见 [桌面三端使用指南](../../solopi-desktop/docs/THREE_PLATFORM_CONTROL.md)。这是通过已暴露的原生无障碍节点完成的特定流程，不代表任意第三方 App 或 WebView DOM 自动化已验收。
 
 ## 2. 连接设备与检查能力
 
@@ -48,7 +50,7 @@ scripts/solopi-ai native-wda-start \
   --artifacts '/tmp/solopi-wda-logs-new'
 ```
 
-它不代替首次签名构建。出现 `wda_ready` 后，在另一个终端运行用例；Ctrl-C 只停止本次创建的进程。已经有匹配设备的 WDA 时返回 `already_running`；已有端口属于其他进程时拒绝接管。仅绑定 `127.0.0.1`，不会开放网络控制端口。该辅助入口本轮验证了复用已运行 WDA 的分支；重新启动已签名运行器的进程管理有自动测试，尚未单独重启当前手机上的 WDA 做验收。
+它不代替首次签名构建。出现 `wda_ready` 后，在另一个终端运行用例；Ctrl-C 只停止本次创建的进程。已经有匹配设备的 WDA 时返回 `already_running`；已有端口属于其他进程时拒绝接管。仅绑定 `127.0.0.1`，不会开放网络控制端口。该辅助入口已验证复用已运行 WDA，以及从已签名构建启动 USB 运行器并执行桌面回归两条路径。证书未受信任时启动被拒绝；需要用户在手机上完成信任后再启动，不会自动授权。
 
 ## 3. 编译、校验、执行固定用例
 
@@ -92,7 +94,7 @@ scripts/solopi-ai native-record \
   --app-id '<your.IntegrationApp.bundleId>' --artifacts /tmp/solopi-recording-new
 ```
 
-这是保持连接的 JSONL 控制入口，适合 Skill 或电脑端控制界面驱动。不是在 iPhone 上被动捕获自由触控，也没有新增图形录制编辑器。标准输出每行一个 JSON 事件，先返回 `ready`，随后依次发送：
+这是保持连接的 JSONL 控制入口，适合 Skill 或电脑端控制界面驱动，不是在 iPhone 上被动捕获自由触控。图形入口见 [桌面三端使用指南](../../solopi-desktop/docs/THREE_PLATFORM_CONTROL.md)；本节描述 CLI。标准输出每行一个 JSON 事件，先返回 `ready`，随后依次发送：
 
 1. `{"type":"observe"}`：返回当前页面、`observationId` 和截图。
 2. `{"type":"act","observationId":"上一步的真实ID","action":{"type":"click","selector":{"accessibilityId":"Alerts"}}}`：绑定该观察执行一次，并录入步骤。
@@ -161,4 +163,4 @@ scripts/solopi-ai managed-worker-once --database /tmp/native-ci.sqlite \
 
 ## 8. 尚不能宣称对齐的部分
 
-当前已交付原生测试 App 的基础回归链路。还需要完成 NEXT 真机验收、更多 iOS 返回标识适配、复杂输入与替换、图形录制编辑器、真实断连/重连和 Worker 接管故障矩阵、各平台重复运行统计，以及由独立使用者照公开文档完成首次安装与回放。不要把单台 iPhone 和 NEXT 模拟器的样本等同于 Android 全部能力已对齐。
+当前已交付原生测试 App 的基础回归链路，并新增 Android / iPhone 真机及 NEXT 模拟器桌面节点录制、固定回放和错误预期验收。NEXT 桌面验证使用受控原生 App，三轮冻结回放通过、一轮错误标题正确失败；详情见桌面使用指南。还需要完成 NEXT 真机验收、更多 iOS 返回标识适配、复杂输入与替换、更完整的图形编辑体验、真实断连/重连和 Worker 接管故障矩阵、更大规模重复运行，以及由独立使用者照公开文档完成首次安装与回放。不要把单台 iPhone 和 NEXT 模拟器的样本等同于 Android 全部能力已对齐。

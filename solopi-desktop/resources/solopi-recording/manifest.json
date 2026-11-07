@@ -1,0 +1,12 @@
+{
+  "packageName": "com.alipay.hulu",
+  "versionName": "1.0.2",
+  "versionCode": 37,
+  "file": "SoloPi.apk",
+  "sha256": "cc153bc9ce94e3f6625ddc24ceec4348ed72ec7eb93a6cb46ca10d466ca48152",
+  "signerSha256": "421943da4ee90d2d4027cd263809f0dc1fe2b20d5b14c4b9be0cd4f23435773a",
+  "source": "https://github.com/alipay/SoloPi/releases/download/v1.0.2/SoloPi_v1.0.2.apk",
+  "sourceTag": "v1.0.2",
+  "protocolSourceRevision": "3b8c146ab80b0325aece65b8ef417136c251869c",
+  "license": "Apache-2.0"
+}

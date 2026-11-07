@@ -54,7 +54,9 @@ class NativeRecorder:
             if self.current is None or command.get("observationId") != self.current["observationId"]:
                 raise native_runtime.NativeExecutionError("stale_observation")
             action = verification_engine._normalize_action(command.get("action"), "recorded action", self.session.driver.platform)
-            step_id = "recorded-%d" % (len(self.steps) + 1)
+            # Rejected requests remain in the transcript and must not reuse the
+            # device's idempotency key when the user explicitly tries a new action.
+            step_id = "recorded-%d" % (sum(event.get("type") == "act" for event in self.events) + 1)
             # Persist pending intent before any physical send. A crash cannot silently lose a gesture.
             event = {"type": "act", "stepId": step_id, "action": action, "state": "outcome_unknown"}
             self.events.append(event)
@@ -70,11 +72,21 @@ class NativeRecorder:
                 return {"receipt": receipt, "evidence": event["evidence"]}
             except Exception:
                 event["receipt"] = self.session.last_receipt()
+                bound_receipt = (isinstance(event["receipt"], dict)
+                                 and event["receipt"].get("stepId") == step_id)
+                if bound_receipt and event["receipt"].get("state") in {
+                    "succeeded", "failed", "rejected"
+                }:
+                    event["state"] = event["receipt"]["state"]
                 try:
                     event["evidence"] = [self.adapter._capture()]
                 except native_runtime.NativeExecutionError:
                     pass
-                self.state = "interrupted"
+                self.current = None
+                # A definitive rejection did not execute the requested action.
+                # Keep the recording, but require a new observation and explicit
+                # user action. Unknown or failed outcomes still interrupt it.
+                self.state = "recording" if bound_receipt and event["state"] == "rejected" else "interrupted"
                 self._save()
                 raise
         if kind == "assert":

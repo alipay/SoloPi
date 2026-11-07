@@ -93,7 +93,7 @@ solopi-skill/scripts/solopi-ai verify-run --plan /tmp/solopi-iphone-plan.json \
 
 以上是单次样本的 `verification.total`，不含首次签名构建、安装和证书信任时间，也不是 P50/P95 性能结论。每步保存 1290 × 2796 原始整屏 PNG、页面观察、动作回执、冻结计划和独立验收结果；弹窗中止时仍保存最近动作回执和现场截图，报告包含 WDA 会话关闭状态。调试中曾遇到旧测试包不可用提示和首次网络授权弹窗，相应运行保留了失败或未测试结果，不计入上表通过样本。
 
-当前真机验证范围是原生测试 App；长按、滚动、返回、电脑端 JSONL 录制回放和基础 Worker 已新增验收。真实拔线与 Worker 接管故障矩阵、WebView 和第三方 App 尚未完成验收。
+上述驱动样本的真机验证范围是原生测试 App；长按、滚动、返回、电脑端 JSONL 录制回放和基础 Worker 已新增验收。桌面入口另完成了真实支付宝手机营业厅只读流程的三轮正向与一轮错误预期验证，见 [桌面三端使用指南](../../solopi-desktop/docs/THREE_PLATFORM_CONTROL.md)。真实拔线与 Worker 接管故障矩阵、WebView DOM 和任意第三方 App 通用覆盖尚未完成验收。
 
 ## HarmonyOS NEXT 模拟器实测
 
@@ -115,4 +115,4 @@ solopi-skill/scripts/solopi-ai verify-run --plan /tmp/solopi-harmony-plan.json \
 
 原生需求沿用 `solopi.ai.requirement/v1`，在顶层指定 `platform: ios` 或 `platform: harmony_next`，用 `targetAppId` 指定测试 App。选择器契约支持 `accessibilityId`、`text`、`description`、`className`、`appId`、`id`，不接受 Android `resourceId`；当前 WDA 动作定位要求目标具备 `accessibilityId`，NEXT 点击要求目标具备稳定 `id`，否则拒绝执行。固定 checkpoint 仍由独立 Result Judge 判定。iOS 模拟器必须显式传 `--ios-simulator`，iPhone 使用 `--ios-device`，NEXT 模拟器使用 `--harmony-emulator`；未绑定驱动时以 `native_driver_unavailable` 拒绝，且不会连接 ADB 或创建证据目录。
 
-接入真实设备的门槛：iOS 需要可调试 iPhone、签名的 XCUITest/WebDriverAgent 运行器、确定的设备身份和本机控制端口；NEXT 需要真机、HDC、与目标应用匹配的测试 HAP 和经真机验证的 UI 测试接口。NEXT 模拟器已补齐受限输入、滑动、返回及键盘流程；两端已有电脑端 JSONL 录制和基础 Worker 能力匹配。NEXT 真机、真实断线与接管、图形录制界面和独立使用者验收仍是完整交付前的门槛。
+接入真实设备的门槛：iOS 需要可调试 iPhone、签名的 XCUITest/WebDriverAgent 运行器、确定的设备身份和本机控制端口；NEXT 需要真机、HDC、与目标应用匹配的测试 HAP 和经真机验证的 UI 测试接口。NEXT 模拟器已补齐受限输入、滑动、返回及键盘流程；两端已有电脑端 JSONL 录制和基础 Worker 能力匹配。图形桌面入口已完成 Android / iPhone 真机及 NEXT 模拟器受控 App 的录制回放和错误预期验收；NEXT 真机、真实断线与接管及独立使用者验收仍是完整交付前的门槛。

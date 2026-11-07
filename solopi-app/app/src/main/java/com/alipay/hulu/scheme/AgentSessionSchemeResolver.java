@@ -24,6 +24,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alipay.hulu.BuildConfig;
 import com.alipay.hulu.common.application.LauncherApplication;
 import com.alipay.hulu.common.injector.InjectorService;
 import com.alipay.hulu.common.injector.param.SubscribeParamEnum;
@@ -39,6 +40,10 @@ import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.service.DeviceControlLease;
+import com.alipay.hulu.virtualscreen.VirtualAgentSession;
+import com.alipay.hulu.virtualscreen.VirtualActionGuard;
+import com.alipay.hulu.virtualscreen.VirtualOcrTargetGuard;
+import com.alipay.hulu.virtualscreen.LatestFrameBuffer;
 import com.alipay.hulu.shared.event.accessibility.AccessibilityUiEventClock;
 import com.alipay.hulu.shared.node.OperationService;
 import com.alipay.hulu.shared.node.action.OperationContext;
@@ -49,6 +54,7 @@ import com.alipay.hulu.shared.node.tree.AbstractNodeTree;
 import com.alipay.hulu.shared.node.tree.accessibility.tree.AccessibilityNodeTree;
 
 import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -78,6 +84,10 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
     private static final int DEFAULT_MAX_NO_PROGRESS_STEPS = 3;
 
     private static final AgentEvidenceStore EVIDENCE = new AgentEvidenceStore();
+    private static final AgentVirtualResources VIRTUAL_RESOURCES = new AgentVirtualResources(
+            new AgentVirtualResources.Ownership() {
+                @Override public boolean owns(String owner) { return DeviceControlLease.isOwnedBy(owner); }
+            });
     private static final AgentSessionState SESSION = new AgentSessionState(
             new AgentSessionState.Clock() {
                 @Override
@@ -98,6 +108,8 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
 
                 @Override
                 public boolean release(String owner) {
+                    // Code security: do not release the device lease while its virtual screen is unconfirmed.
+                    if (!VIRTUAL_RESOURCES.closeForLease(owner)) return false;
                     return DeviceControlLease.release(owner);
                 }
             },
@@ -110,6 +122,8 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
 
     private static final Object FRAME_LOCK = new Object();
     private static Frame currentFrame;
+    private static final Object VIRTUAL_FRAME_LOCK = new Object();
+    private static VirtualFrame currentVirtualFrame;
     private static final Object OPERATION_LOCK = new Object();
     private static ActiveOperation activeOperation;
     private static final Object TOUCH_LOCK = new Object();
@@ -137,6 +151,9 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
                     return true;
                 case "observe":
                     callback.onResult(observe(context, params));
+                    return true;
+                case "virtual-preview":
+                    callback.onResult(virtualPreview(params));
                     return true;
                 case "receipt":
                     callback.onResult(receipt(params));
@@ -168,6 +185,10 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
                     requireAdb(context);
                     callback.onResult(mutation(params, "cancel"));
                     return true;
+                case "cleanup":
+                    requireAdb(context);
+                    callback.onResult(retryCleanup(params));
+                    return true;
                 default:
                     callback.onResult(error("unsupported_type", "Unsupported Agent type: " + type));
                     return true;
@@ -176,7 +197,8 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
             callback.onResult(error(e.code, e.getMessage()));
             return true;
         } catch (Throwable throwable) {
-            LogUtil.e(TAG, "Dynamic Agent request failed", throwable);
+            // Code security: exception payloads may contain page content or session capabilities.
+            LogUtil.e(TAG, "Dynamic Agent request failed");
             callback.onResult(error("agent_internal_error", "Dynamic Agent request failed"));
             return true;
         }
@@ -186,9 +208,9 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         Map<String, Object> result = success();
         result.put("protocolVersion", PROTOCOL_VERSION);
         result.put("queries", java.util.Arrays.asList(
-                "capabilities", "start-status", "status", "observe", "receipt", "timeline"));
+                "capabilities", "start-status", "status", "observe", "receipt", "timeline", "virtual-preview"));
         result.put("commands", java.util.Arrays.asList(
-                "start", "act", "pause", "resume", "end", "cancel"));
+                "start", "act", "pause", "resume", "end", "cancel", "cleanup"));
         result.put("actions", java.util.Arrays.asList(
                 "click", "longClick", "input", "back", "home", "scroll", "wait"));
         result.put("arbitraryShell", false);
@@ -200,12 +222,29 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         result.put("actionValidationStrategies", java.util.Arrays.asList(
                 AgentTargetContextGuard.FULL_PAGE, AgentTargetContextGuard.TARGET_CONTEXT_V1));
         result.put("defaultActionValidationStrategy", AgentTargetContextGuard.FULL_PAGE);
+        result.put("screenModes", BuildConfig.VIRTUAL_SCREEN_EXPERIMENTAL && Build.VERSION.SDK_INT >= 31
+                ? Arrays.asList("main", "virtual") : Collections.singletonList("main"));
+        if (BuildConfig.VIRTUAL_SCREEN_EXPERIMENTAL) {
+            result.put("virtualActions", Arrays.asList("click", "scroll"));
+            result.put("virtualExperimental", true);
+            // Bundled is a build property; individual observations report runtime OCR errors.
+            result.put("virtualOcrBundled", BuildConfig.VIRTUAL_SCREEN_OCR_BUNDLED);
+        }
         return result;
     }
 
     private Map<String, Object> start(final Map<String, String> params)
             throws AgentProtocolException {
+        // Code security: a virtual request must never silently run on the main screen.
+        final String screenMode = parseScreenMode(params.get("screenMode"));
+        final String targetPackage = "virtual".equals(screenMode) ? require(params, "targetPackage") : null;
         String ownerToken = require(params, "ownerToken");
+        String actionStrategy = parseActionValidationStrategy(params.get("actionValidationStrategy"));
+        if ("virtual".equals(screenMode) && !AgentTargetContextGuard.FULL_PAGE.equals(actionStrategy))
+            throw new AgentProtocolException("virtual_strategy_unsupported", "Virtual sessions require full-page validation");
+        if ("virtual".equals(screenMode) && (targetPackage.length() > 255
+                || !targetPackage.matches("[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)+")))
+            throw new AgentProtocolException("invalid_target_package", "A valid target package is required");
         AgentSessionState.Config config = new AgentSessionState.Config(
                 boundedInt(params, "maxSteps", DEFAULT_MAX_STEPS, 1, 200),
                 boundedLong(params, "maxDurationMs", DEFAULT_MAX_DURATION_MS, 1_000L, 1_800_000L),
@@ -213,12 +252,12 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
                 boundedInt(params, "maxRepeatedActions", DEFAULT_MAX_REPEATED_ACTIONS, 1, 20),
                 boundedInt(params, "maxNoProgressSteps", DEFAULT_MAX_NO_PROGRESS_STEPS, 1, 20),
                 parseSettleStrategy(params.get("settleStrategy")),
-                parseActionValidationStrategy(params.get("actionValidationStrategy")));
+                actionStrategy, screenMode, targetPackage);
         final AgentSessionState.StartResult started = SESSION.start(ownerToken, config);
         if (!started.success) {
             return error(started.errorCode, started.error);
         }
-        if (!startTouchService(started.generation)) {
+        if ("main".equals(screenMode) && !startTouchService(started.generation)) {
             SESSION.fail(started.sessionId, started.ownerToken,
                     "touch_service_unavailable");
             return error("touch_service_unavailable",
@@ -231,6 +270,10 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
             @Override
             public void run() {
                 try {
+                    if ("virtual".equals(screenMode)) {
+                        startVirtualSession(started, targetPackage);
+                        return;
+                    }
                     AgentSessionState.Result<AgentSessionState.Observation> captured =
                             captureAndRecord(started.sessionId, started.ownerToken, true);
                     if (!captured.success) {
@@ -240,7 +283,8 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
                         stopTouchService(started.generation);
                     }
                 } catch (Throwable throwable) {
-                    LogUtil.e(TAG, "Unable to capture initial Agent observation", throwable);
+                    // Code security: exception details may include private page content.
+                    LogUtil.e(TAG, "Unable to capture initial Agent observation");
                     SESSION.fail(started.sessionId, started.ownerToken,
                             "initial_observation_failed");
                     stopTouchService(started.generation);
@@ -252,6 +296,57 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         result.put("accepted", true);
         result.put("session", started.session);
         return result;
+    }
+
+    private void startVirtualSession(final AgentSessionState.StartResult started, final String targetPackage) {
+        try {
+            if (Build.VERSION.SDK_INT < 31) throw new AgentProtocolException("virtual_screen_unsupported", "The trusted display helper requires Android 12 or newer");
+            final AccessibilityService accessibility = InjectorService.g().getMessage(
+                    SubscribeParamEnum.ACCESSIBILITY_SERVICE, AccessibilityService.class);
+            if (accessibility == null) throw new AgentProtocolException("accessibility_unavailable", "SoloPi accessibility service is not bound");
+            final Context app = LauncherApplication.getContext();
+            final DisplayMetrics metrics = displayMetrics();
+            VirtualAgentSession virtual;
+            if (BuildConfig.VIRTUAL_SCREEN_EXPERIMENTAL) {
+                virtual = VIRTUAL_RESOURCES.initializeForLease(started.leaseOwner,
+                        new VirtualAgentSession.TrustedResource(app),
+                        new AgentVirtualResources.Initializer<VirtualAgentSession.TrustedResource, VirtualAgentSession>() {
+                            @Override public VirtualAgentSession initialize(VirtualAgentSession.TrustedResource resource) throws Exception {
+                                return resource.initialize(app, accessibility, targetPackage, started.leaseOwner,
+                                        metrics.widthPixels, metrics.heightPixels, metrics.densityDpi);
+                            }
+                        });
+            } else {
+                virtual = VIRTUAL_RESOURCES.createForLease(started.leaseOwner,
+                    new AgentVirtualResources.Factory<VirtualAgentSession>() {
+                        @Override public VirtualAgentSession create() throws Exception {
+                            return VirtualAgentSession.create(app, accessibility, targetPackage, started.leaseOwner,
+                                    metrics.widthPixels, metrics.heightPixels, metrics.densityDpi);
+                        }
+                    });
+            }
+            requireVirtualSession(started.sessionId, started.ownerToken);
+            String launch = virtual.launch(app);
+            if (!"submitted".equals(launch)) throw new AgentProtocolException("virtual_launch_unconfirmed",
+                    "Target launch was not confirmed: " + launch);
+            long deadline = android.os.SystemClock.uptimeMillis() + ROOT_READY_TIMEOUT_MS;
+            AgentSessionState.Result<AgentSessionState.Observation> result;
+            do {
+                requireVirtualSession(started.sessionId, started.ownerToken);
+                result = captureAndRecordVirtual(started.sessionId, started.ownerToken);
+                if (result.success) return;
+                if ("virtual_protected_or_blank_frame".equals(result.errorCode))
+                    throw new AgentProtocolException(result.errorCode, "The virtual screen is protected or has no visible pixels");
+                if ("virtual_display_geometry_changed".equals(result.errorCode))
+                    throw new AgentProtocolException(result.errorCode, "The virtual screen changed orientation or size; start a new session");
+                Thread.sleep(ROOT_READY_INTERVAL_MS);
+            } while (android.os.SystemClock.uptimeMillis() < deadline);
+            throw new AgentProtocolException(initialVirtualFailureCode(result.errorCode), "Target page or frame is unavailable on the virtual screen");
+        } catch (Exception failure) {
+            if (failure instanceof InterruptedException) Thread.currentThread().interrupt();
+            String reason = failure instanceof AgentProtocolException ? ((AgentProtocolException) failure).code : "virtual_start_failed";
+            SESSION.fail(started.sessionId, started.ownerToken, reason);
+        }
     }
 
     private Map<String, Object> startStatus(String ownerToken) {
@@ -280,6 +375,15 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         return result;
     }
 
+    private Map<String, Object> retryCleanup(Map<String, String> params) throws AgentProtocolException {
+        AgentSessionState.Result<Map<String, Object>> result = SESSION.retryCleanup(
+                require(params, "sessionId"), require(params, "ownerToken"));
+        if (!result.success) return error(result.errorCode, result.error);
+        Map<String, Object> response = success();
+        response.put("session", result.value);
+        return response;
+    }
+
     private Map<String, Object> observe(Context context, Map<String, String> params)
             throws AgentProtocolException {
         requireObservationPermissions(context);
@@ -289,8 +393,11 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         if (!status.success) {
             return error(status.errorCode, status.error);
         }
-        AgentSessionState.Result<AgentSessionState.Observation> captured =
-                captureAndRecord(sessionId, ownerToken, true);
+        boolean skipVirtualOcr = "true".equals(params.get("skipVirtualOcr"));
+        AgentSessionState.Result<AgentSessionState.Observation> captured = skipVirtualOcr
+                && "virtual".equals(requireWorkConfig(sessionId, ownerToken).screenMode)
+                ? captureAndRecordVirtual(sessionId, ownerToken, false)
+                : captureAndRecord(sessionId, ownerToken, true);
         if (!captured.success) {
             return error(captured.errorCode, captured.error);
         }
@@ -311,6 +418,45 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         result.put("receipt", receipt.value.toMap());
         result.put("session", SESSION.snapshot());
         return result;
+    }
+
+    private Map<String, Object> virtualPreview(Map<String, String> params) throws AgentProtocolException {
+        String sessionId = require(params, "sessionId"), ownerToken = require(params, "ownerToken");
+        if (!"virtual".equals(requireWorkConfig(sessionId, ownerToken).screenMode))
+            throw new AgentProtocolException("virtual_screen_unavailable", "The session is not using a virtual screen");
+        VirtualAgentSession virtual = requireVirtualSession(sessionId, ownerToken);
+        try { virtual.verifyDisplayGeometry(); }
+        catch (IllegalStateException changed) {
+            if ("virtual_display_geometry_changed".equals(changed.getMessage()))
+                return error("virtual_display_geometry_changed", "The virtual screen changed orientation or size; start a new session");
+            throw changed;
+        }
+        int displayId = virtual.displayId();
+        LatestFrameBuffer.Frame frame = virtual.frame(virtual.frameGeneration(), 0);
+        if (frame == null) return error("virtual_preview_stale", "No fresh virtual frame is available");
+        Bitmap scaled = null;
+        try {
+            int width = Math.min(360, frame.bitmap.getWidth());
+            int height = Math.max(1, Math.round((float) frame.bitmap.getHeight() * width / frame.bitmap.getWidth()));
+            scaled = Bitmap.createScaledBitmap(frame.bitmap, width, height, true);
+            virtual.verifyDisplayGeometry();
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            if (!scaled.compress(Bitmap.CompressFormat.PNG, 100, output) || output.size() > 4 * 1024 * 1024)
+                return error("virtual_preview_unavailable", "Virtual preview could not be encoded");
+            requireVirtualSession(sessionId, ownerToken);
+            Map<String, Object> response = success();
+            response.put("displayId", displayId);
+            response.put("frameUptimeMs", frame.uptimeMs);
+            response.put("image", android.util.Base64.encodeToString(output.toByteArray(), android.util.Base64.NO_WRAP));
+            return response;
+        } catch (IllegalStateException changed) {
+            if ("virtual_display_geometry_changed".equals(changed.getMessage()))
+                return error("virtual_display_geometry_changed", "The virtual screen changed orientation or size; start a new session");
+            throw changed;
+        } finally {
+            if (scaled != null && scaled != frame.bitmap) scaled.recycle();
+            frame.bitmap.recycle();
+        }
     }
 
     private Map<String, Object> timeline(Map<String, String> params) throws AgentProtocolException {
@@ -348,6 +494,16 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
     private void executeAction(final String sessionId, String ownerToken, String stepId,
                                String observationId, AgentSessionState.Action action) {
         long actionGeneration = 0L;
+        try {
+            if ("virtual".equals(requireWorkConfig(sessionId, ownerToken).screenMode)) {
+                executeVirtualAction(sessionId, ownerToken, stepId, observationId, action);
+                return;
+            }
+        } catch (AgentProtocolException inaccessible) {
+            SESSION.rejectAction(sessionId, ownerToken, stepId, observationId, action,
+                    inaccessible.code, inaccessible.getMessage());
+            return;
+        }
         OperationService service = LauncherApplication.service(OperationService.class);
         if (service == null) {
             failAcceptedAction(sessionId, ownerToken, stepId, observationId, action,
@@ -448,7 +604,8 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
             SESSION.finishAction(actionGeneration, stepId, false,
                     "Action execution was interrupted", null);
         } catch (Throwable throwable) {
-            LogUtil.e(TAG, "Dynamic Agent action failed", throwable);
+            // Code security: do not log exception details derived from action arguments.
+            LogUtil.e(TAG, "Dynamic Agent action failed");
             SESSION.finishAction(actionGeneration, stepId, false,
                     "Action execution failed", null);
         } finally {
@@ -506,6 +663,10 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
             synchronized (FRAME_LOCK) {
                 currentFrame = null;
             }
+            synchronized (VIRTUAL_FRAME_LOCK) {
+                if (currentVirtualFrame != null && sessionId.equals(currentVirtualFrame.sessionId))
+                    currentVirtualFrame = null;
+            }
         }
         Map<String, Object> result = success();
         result.put("session", mutation.value);
@@ -531,6 +692,9 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
     private AgentSessionState.Result<AgentSessionState.Observation> captureAndRecord(
             String sessionId, String ownerToken, boolean screenshot) throws AgentProtocolException {
         AgentSessionState.Config config = requireWorkConfig(sessionId, ownerToken);
+        if ("virtual".equals(config.screenMode)) {
+            return captureAndRecordVirtual(sessionId, ownerToken);
+        }
         String settleStrategy = config.settleStrategy;
         AgentUiWaiter.Guard guard = workGuard(sessionId, ownerToken);
         OperationService service = LauncherApplication.service(OperationService.class);
@@ -565,6 +729,233 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
             }
         }
         return result;
+    }
+
+    private AgentSessionState.Result<AgentSessionState.Observation> captureAndRecordVirtual(
+            String sessionId, String ownerToken) throws AgentProtocolException {
+        return captureAndRecordVirtual(sessionId, ownerToken, true);
+    }
+
+    private AgentSessionState.Result<AgentSessionState.Observation> captureAndRecordVirtual(
+            String sessionId, String ownerToken, boolean includeOcr) throws AgentProtocolException {
+        synchronized (VIRTUAL_FRAME_LOCK) {
+            try {
+                VirtualAgentSession virtual = requireVirtualSession(sessionId, ownerToken);
+                AgentVirtualObservation captured = AgentVirtualObservation.capture(virtual, sessionId, EVIDENCE, includeOcr);
+                requireVirtualSession(sessionId, ownerToken);
+                AgentSessionState.Result<AgentSessionState.Observation> result = SESSION.recordObservation(
+                        sessionId, ownerToken, captured.signature, captured.evidence);
+                if (result.success) currentVirtualFrame = new VirtualFrame(sessionId, result.value.observationId, captured);
+                return result;
+            } catch (AgentProtocolException e) {
+                return AgentSessionState.Result.error(e.code, e.getMessage());
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                return AgentSessionState.Result.error("observation_interrupted", "Virtual observation was interrupted");
+            } catch (IllegalStateException failure) {
+                if ("virtual_display_geometry_changed".equals(failure.getMessage()))
+                    return AgentSessionState.Result.error("virtual_display_geometry_changed", "The virtual screen changed orientation or size; start a new session");
+                if ("virtual_protected_or_blank_frame".equals(failure.getMessage()))
+                    return AgentSessionState.Result.error("virtual_protected_or_blank_frame", "The virtual screen is protected or has no visible pixels");
+                // Code security: expose only fixed internal reason codes, never the raw exception or page text.
+                if (isTransientVirtualObservation(failure.getMessage()))
+                    return AgentSessionState.Result.error(failure.getMessage(), "Virtual observation is temporarily unavailable");
+                return AgentSessionState.Result.error("virtual_observation_failed", "Virtual observation could not be captured");
+            } catch (Exception failure) {
+                return AgentSessionState.Result.error("virtual_observation_failed", "Virtual observation could not be captured");
+            }
+        }
+    }
+
+    private static VirtualAgentSession requireVirtualSession(String sessionId, String ownerToken)
+            throws AgentProtocolException {
+        AgentSessionState.Result<String> owner = SESSION.workLeaseOwner(sessionId, ownerToken);
+        if (!owner.success) throw new AgentProtocolException(owner.errorCode, owner.error);
+        AutoCloseable resource = VIRTUAL_RESOURCES.getForLease(owner.value);
+        if (resource instanceof VirtualAgentSession.TrustedResource)
+            resource = ((VirtualAgentSession.TrustedResource) resource).session();
+        if (!(resource instanceof VirtualAgentSession))
+            throw new AgentProtocolException("virtual_screen_unavailable", "Session virtual screen is unavailable");
+        return (VirtualAgentSession) resource;
+    }
+
+    private void executeVirtualAction(String sessionId, String ownerToken, String stepId,
+                                      String observationId, AgentSessionState.Action action) {
+        synchronized (VIRTUAL_FRAME_LOCK) {
+            String phase = "validation";
+            try {
+                VirtualAgentSession virtual = requireVirtualSession(sessionId, ownerToken);
+                VirtualFrame frame = currentVirtualFrame;
+                boolean supported = "click".equals(action.type) || "scroll".equals(action.type);
+                if (!supported || ("scroll".equals(action.type) && (action.arguments.get("nodeId") == null
+                        || action.arguments.containsKey("distance")))) {
+                    SESSION.rejectAction(sessionId, ownerToken, stepId, observationId, action,
+                            "virtual_action_unsupported", "This virtual action or its parameters are not supported");
+                    return;
+                }
+                String signature = frame != null && sessionId.equals(frame.sessionId)
+                        && observationId.equals(frame.observationId) ? frame.captured.signature : null;
+                AgentSessionState.BeginResult begin = SESSION.beginAction(sessionId, ownerToken, stepId,
+                        observationId, signature, action);
+                if (!begin.accepted) return;
+                Object requestedId = action.arguments.get("nodeId");
+                String path = frame.captured.nodePaths.get(requestedId);
+                String dispatch;
+                if (path != null) {
+                    // Code security: input uses only a private path from this observation, never caller coordinates.
+                    phase = "dispatch";
+                    dispatch = "click".equals(action.type)
+                            ? virtual.click(frame.captured.virtualObservationId, path)
+                            : virtual.scroll(frame.captured.virtualObservationId, path, (String) action.arguments.get("direction"));
+                } else if ("scroll".equals(action.type) && "viewport-1".equals(requestedId)) {
+                    boolean hasVerifiedText = false;
+                    for (VirtualOcrTargetGuard.Line line : frame.captured.ocrLines) {
+                        if (line.pixelsMatch && !line.protectedText && line.text != null && !line.text.trim().isEmpty()) {
+                            hasVerifiedText = true; break;
+                        }
+                    }
+                    if (!hasVerifiedText || VirtualActionGuard.visualScrollArea(frame.captured.guardPage) == null) {
+                        SESSION.finishAction(begin.generation, stepId, false, "viewport_unavailable", null);
+                        return;
+                    }
+                    phase = "dispatch";
+                    dispatch = virtual.scrollVisual(frame.captured.virtualObservationId, (String) action.arguments.get("direction"));
+                } else if ("click".equals(action.type) && requestedId instanceof String
+                        && ((String) requestedId).startsWith("ocr-")) {
+                    String visualError = validateVisualAge(frame.captured);
+                    if (visualError != null) {
+                        SESSION.finishAction(begin.generation, stepId, false, visualError, null);
+                        return;
+                    }
+                    AgentVirtualObservation fresh = AgentVirtualObservation.capture(virtual, sessionId, EVIDENCE);
+                    String targetError = VirtualOcrTargetGuard.check(frame.captured.ocrLines, fresh.ocrLines, (String) requestedId);
+                    VirtualOcrTargetGuard.Line target = null;
+                    for (VirtualOcrTargetGuard.Line line : frame.captured.ocrLines)
+                        if (requestedId.equals(line.id)) target = line;
+                    if (targetError == null && target != null)
+                        targetError = VirtualActionGuard.checkVisual(frame.captured.guardPage, fresh.guardPage, target.bounds);
+                    if (targetError != null || target == null) {
+                        SESSION.finishAction(begin.generation, stepId, false,
+                                targetError == null ? "ocr_target_unavailable" : targetError, null);
+                        return;
+                    }
+                    // Code security: coordinates are derived only from two matched device-side OCR observations.
+                    requireVirtualSession(sessionId, ownerToken);
+                    phase = "dispatch";
+                    dispatch = virtual.clickVisual(fresh.virtualObservationId, target.bounds);
+                } else {
+                    SESSION.finishAction(begin.generation, stepId, false, "Observed target is unavailable", null);
+                    return;
+                }
+                if (!"submitted".equals(dispatch)) {
+                    SESSION.finishAction(begin.generation, stepId, false, "Virtual action: " + dispatch, null);
+                    return;
+                }
+                SESSION.noteVirtualDispatch(begin.generation, stepId);
+                phase = "settle";
+                requireVirtualSession(sessionId, ownerToken);
+                AgentVirtualObservation settled = settleVirtual(virtual, sessionId, ownerToken);
+                Object beforeProgress = frame.captured.evidence.get("progressSignature");
+                Object afterProgress = settled.evidence.get("progressSignature");
+                settled.evidence.put("actionEffect", beforeProgress instanceof String && afterProgress instanceof String
+                        ? (beforeProgress.equals(afterProgress) ? "NO_VISIBLE_CHANGE" : "UI_CHANGED")
+                        : (signature.equals(settled.signature) ? "CHANGE_UNCONFIRMED" : "UI_CHANGED"));
+                AgentSessionState.Receipt receipt = SESSION.finishAction(begin.generation, stepId, true, null,
+                        AgentSessionState.ObservationInput.of(settled.signature, settled.evidence));
+                if (receipt != null && receipt.settledObservation != null)
+                    currentVirtualFrame = new VirtualFrame(sessionId, receipt.settledObservation.observationId, settled);
+            } catch (Exception failure) {
+                // Never retry an action whose dispatch may already have occurred.
+                AgentSessionState.Receipt previous = SESSION.receipt(sessionId, ownerToken, stepId).value;
+                if (previous != null && "accepted".equals(previous.status)) {
+                    Object generation = SESSION.snapshot().get("generation");
+                    if (generation instanceof Number) SESSION.finishAction(((Number) generation).longValue(), stepId,
+                            false, "settle".equals(phase) && failure instanceof AgentProtocolException
+                                    && "virtual_target_on_main".equals(((AgentProtocolException) failure).code)
+                                    ? "Virtual action was submitted; target is active on main display; outcome may be unknown"
+                                    : "settle".equals(phase) && failure instanceof AgentProtocolException
+                                    && "virtual_settle_failed".equals(((AgentProtocolException) failure).code)
+                                    ? failure.getMessage()
+                                    : "settle".equals(phase) && failure instanceof IllegalStateException
+                                    && "virtual_protected_or_blank_frame".equals(failure.getMessage())
+                                    ? "Virtual action was submitted; protected or blank frame prevents confirmation"
+                                    : "Virtual action failed during " + phase + "; dispatch outcome may be unknown", null);
+                } else SESSION.rejectAction(sessionId, ownerToken, stepId, observationId, action,
+                        "virtual_action_failed", "Virtual action could not be started");
+                if (failure instanceof InterruptedException) Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    private static String validateVisualAge(AgentVirtualObservation observation) {
+        Object raw = observation.evidence.get("frameUptimeMs");
+        if (!(raw instanceof Number)) return "stale_observation";
+        long captured = ((Number) raw).longValue(), now = android.os.SystemClock.uptimeMillis();
+        return captured < 0 || now < captured || now - captured > 30_000L ? "stale_observation" : null;
+    }
+
+    private AgentVirtualObservation settleVirtual(VirtualAgentSession virtual, String sessionId, String ownerToken)
+            throws Exception {
+        long deadline = android.os.SystemClock.uptimeMillis() + 10_000L;
+        Thread.sleep(ROOT_TRANSITION_SETTLE_MS);
+        AgentVirtualObservation previous = null;
+        String lastReason = "no_stable_pair";
+        int mainDisplayMatches = 0;
+        do {
+            requireVirtualSession(sessionId, ownerToken);
+            AgentVirtualObservation current;
+            try {
+                current = AgentVirtualObservation.capture(virtual, sessionId, EVIDENCE, true, previous);
+            } catch (IllegalStateException transition) {
+                // Code security: retry observation only, never an input; fail closed on other errors.
+                if (!isTransientVirtualObservation(transition.getMessage())) throw transition;
+                lastReason = transition.getMessage();
+                if ("virtual_window_unavailable".equals(lastReason) && virtual.targetActiveOnDefaultDisplay()) {
+                    if (++mainDisplayMatches >= 2)
+                        throw new AgentProtocolException("virtual_target_on_main", "Target active on main display");
+                } else mainDisplayMatches = 0;
+                previous = null;
+                Thread.sleep(SETTLE_INTERVAL_MS);
+                continue;
+            }
+            if (previous != null && virtualPagesMatch(previous, current)) return current;
+            mainDisplayMatches = 0;
+            lastReason = previous == null ? "no_stable_pair" : "page_changed";
+            previous = current;
+            Thread.sleep(SETTLE_INTERVAL_MS);
+        } while (android.os.SystemClock.uptimeMillis() < deadline);
+        throw new AgentProtocolException("virtual_settle_failed", virtualSettleTimeoutMessage(lastReason));
+    }
+
+    static String virtualSettleTimeoutMessage(String reason) {
+        if (!"no_stable_pair".equals(reason) && !"page_changed".equals(reason)
+                && !isTransientVirtualObservation(reason)) reason = "unknown";
+        return "Virtual action was submitted; settle timed out (reason=" + reason + "); outcome may be unknown";
+    }
+
+    static boolean isTransientVirtualObservation(String code) {
+        return "virtual_window_unavailable".equals(code) || "virtual_observation_unstable".equals(code)
+                || "virtual_frame_unavailable".equals(code) || "stale_observation".equals(code);
+    }
+
+    static String initialVirtualFailureCode(String code) {
+        // Code security: prevent untrusted exception text from entering session evidence.
+        if ("virtual_window_unavailable".equals(code)) return "virtual_initial_window_unavailable";
+        if ("virtual_frame_unavailable".equals(code)) return "virtual_initial_frame_unavailable";
+        if ("virtual_observation_unstable".equals(code)) return "virtual_initial_observation_unstable";
+        if ("stale_observation".equals(code)) return "virtual_initial_observation_stale";
+        return "virtual_initial_observation_failed";
+    }
+
+    static boolean virtualPagesMatch(AgentVirtualObservation a, AgentVirtualObservation b) {
+        if (a == null || b == null || !a.signature.equals(b.signature)) return false;
+        Object firstProgress = a.evidence.get("progressSignature"), secondProgress = b.evidence.get("progressSignature");
+        if (firstProgress instanceof String && secondProgress instanceof String && !firstProgress.equals(secondProgress)) return false;
+        for (String key : Arrays.asList("displayId", "windowId", "screenWidth", "screenHeight", "rotation", "windows")) {
+            Object first = a.evidence.get(key), second = b.evidence.get(key);
+            if (first == null || !first.equals(second)) return false;
+        }
+        return true;
     }
 
     private CapturedPage settle(OperationService service, String sessionId, String baselineSignature,
@@ -674,6 +1065,14 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
             throw new AgentProtocolException("invalid_settle_strategy", "Unsupported UI settle strategy");
         }
         return strategy;
+    }
+
+    static String parseScreenMode(String value) throws AgentProtocolException {
+        if (value == null || "main".equals(value)) return "main";
+        if ("virtual".equals(value) && BuildConfig.VIRTUAL_SCREEN_EXPERIMENTAL) return "virtual";
+        if ("virtual".equals(value)) throw new AgentProtocolException("virtual_screen_unavailable",
+                "Virtual screen execution is not available");
+        throw new AgentProtocolException("invalid_screen_mode", "Unsupported screen mode");
     }
 
     static String parseActionValidationStrategy(String value) throws AgentProtocolException {
@@ -929,7 +1328,7 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
             evidence.put("screenshotPath", file.getAbsolutePath());
             evidence.put("screenshotSha256", AgentEvidenceStore.sha256(file));
         } catch (Throwable throwable) {
-            LogUtil.w(TAG, "Unable to capture Agent observation screenshot", throwable);
+            LogUtil.w(TAG, "Unable to capture Agent observation screenshot");
             evidence.put("screenshotError", "screen_capture_failed");
         } finally {
             if (bitmap != null && !bitmap.isRecycled()) {
@@ -1207,7 +1606,7 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
             }
             return true;
         } catch (Throwable throwable) {
-            LogUtil.e(TAG, "Unable to start Agent touch service", throwable);
+            LogUtil.e(TAG, "Unable to start Agent touch service");
             return false;
         }
     }
@@ -1235,7 +1634,7 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         try {
             service.stop();
         } catch (Throwable throwable) {
-            LogUtil.w(TAG, "Unable to stop Agent touch service", throwable);
+            LogUtil.w(TAG, "Unable to stop Agent touch service");
         }
     }
 
@@ -1251,6 +1650,14 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         result.put("errorCode", code);
         result.put("error", message);
         return result;
+    }
+
+    private static final class VirtualFrame {
+        final String sessionId, observationId;
+        final AgentVirtualObservation captured;
+        VirtualFrame(String sessionId, String observationId, AgentVirtualObservation captured) {
+            this.sessionId = sessionId; this.observationId = observationId; this.captured = captured;
+        }
     }
 
     private static final class Frame {

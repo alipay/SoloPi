@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "licenses": [
+    {
+      "name": "embla-carousel",
+      "version": "8.6.0",
+      "file": "embla-carousel-8.6.0.txt",
+      "source": "https://raw.githubusercontent.com/davidjerleke/embla-carousel/0fe65834136f1aa35e4c1a4a477e5ccb4bb5ee54/LICENSE",
+      "sha256": "992490064b90ec94c302fe5f29dcc14cb44145857064e46f9ffe6c8f511c1093"
+    },
+    {
+      "name": "embla-carousel-react",
+      "version": "8.6.0",
+      "file": "embla-carousel-react-8.6.0.txt",
+      "source": "https://raw.githubusercontent.com/davidjerleke/embla-carousel/0fe65834136f1aa35e4c1a4a477e5ccb4bb5ee54/LICENSE",
+      "sha256": "992490064b90ec94c302fe5f29dcc14cb44145857064e46f9ffe6c8f511c1093"
+    },
+    {
+      "name": "embla-carousel-reactive-utils",
+      "version": "8.6.0",
+      "file": "embla-carousel-reactive-utils-8.6.0.txt",
+      "source": "https://raw.githubusercontent.com/davidjerleke/embla-carousel/0fe65834136f1aa35e4c1a4a477e5ccb4bb5ee54/LICENSE",
+      "sha256": "992490064b90ec94c302fe5f29dcc14cb44145857064e46f9ffe6c8f511c1093"
+    },
+    {
+      "name": "input-otp",
+      "version": "1.4.2",
+      "file": "input-otp-1.4.2.txt",
+      "source": "https://raw.githubusercontent.com/guilhermerodz/input-otp/81ccdb48c010d800b24942aa231909f0c971b1ca/LICENSE",
+      "sha256": "079031192fea535a245aa64a637d8433c406b82a14f91c3606b1d63e41c00152"
+    },
+    {
+      "name": "victory-vendor",
+      "version": "36.9.2",
+      "file": "victory-vendor-36.9.2.txt",
+      "source": "https://raw.githubusercontent.com/FormidableLabs/victory/dd86278d205f3f306e2ab38c317a6f9c56f0a6f8/LICENSE.txt",
+      "sha256": "34dee5fd5e5cc756efb5ad4d64652bce719bdf5e900ca5d7538253e737930bc4"
+    },
+    {
+      "name": "cookie-signature",
+      "version": "1.0.7",
+      "file": "cookie-signature-1.0.7.txt",
+      "source": "https://raw.githubusercontent.com/visionmedia/node-cookie-signature/432ea0c14fbdd8d24354820faff2c6f6d2426757/Readme.md",
+      "sha256": "c0a936e4727a7503020745eaf063acffbb81291fcfd21a0cd8db4b4fce95d902"
+    },
+    {
+      "name": "next-themes",
+      "version": "0.3.0",
+      "file": "next-themes-0.3.0.txt",
+      "source": "https://raw.githubusercontent.com/pacocoursey/next-themes/f5df9660d1c4b977ff31adc3e69ccc50896191fa/license.md",
+      "sha256": "b5acfd21b3b61508365224c40ec1b03ec71091248baaf989d4be916551e7d532"
+    },
+    {
+      "name": "react-remove-scroll-bar",
+      "version": "2.3.8",
+      "file": "react-remove-scroll-bar-2.3.8.txt",
+      "source": "https://raw.githubusercontent.com/theKashey/react-remove-scroll-bar/8ca9ba5ea52de03308fe8ced94f7b159a44d28ff/LICENSE",
+      "sha256": "a79aae0c0f21990d9d963bb3c5a79cdcea9a46f8523ba55c58d7fe776b6ebc84",
+      "reviewNote": "npm gitHead is unavailable in the public repository; full LICENSE taken from public upstream package version 2.3.7 with the same MIT declaration."
+    }
+  ]
+}

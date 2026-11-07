@@ -16,6 +16,7 @@
 package com.alipay.hulu.common.tools;
 
 import android.content.Context;
+import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -703,6 +704,41 @@ public class CmdTools {
         }
     }
 
+    /** Start the fixed display helper once; the private nonce is sent only over stdin. */
+    public static AdbStream startTrustedDisplayHelper(String apkPath, String packageName, int appUid,
+                                                       String certificateSha256, byte[] nonce)
+            throws IOException, InterruptedException {
+        if (Looper.myLooper() == Looper.getMainLooper()) throw new IllegalStateException("helper_requires_worker_thread");
+        if (nonce == null || nonce.length != 32) throw new IllegalArgumentException("invalid_helper_nonce");
+        String command = TrustedHelperCommand.create(apkPath, packageName, appUid, certificateSha256);
+        AdbConnection conn = connection;
+        if (conn == null || !conn.isFine()) throw new IOException("adb_connection_unavailable");
+        final char[] alphabet = "0123456789abcdef".toCharArray();
+        byte[] wire = new byte[65];
+        for (int i = 0; i < nonce.length; i++) {
+            wire[2 * i] = (byte) alphabet[(nonce[i] & 0xff) >>> 4];
+            wire[2 * i + 1] = (byte) alphabet[nonce[i] & 0x0f];
+        }
+        wire[64] = (byte) '\n';
+        AdbStream stream = null;
+        boolean sent = false;
+        try {
+            // Code security: never use CmdLine.writeCommand(), which logs its input; do not retry a failed launch.
+            stream = conn.open(command);
+            streams.add(stream);
+            stream.write(wire);
+            sent = true;
+            return stream;
+        } finally {
+            Arrays.fill(wire, (byte) 0);
+            if (!sent && stream != null) closeAndUntrackAdbStream(stream);
+        }
+    }
+
+    public static void closeTrustedDisplayHelper(AdbStream stream) {
+        if (stream != null) closeAndUntrackAdbStream(stream);
+    }
+
 
     /**
      * 执行adb命令，在超时时间范围内
@@ -1360,6 +1396,81 @@ public class CmdTools {
      */
     public static boolean getConnectionStatus() {
         return connection != null && connection.isFine();
+    }
+
+    /** Submit one constrained launch without reconnecting or replaying an uncertain action. */
+    public static String launchOnDisplayOnce(int displayId, ComponentName component) {
+        if (Looper.myLooper() == Looper.getMainLooper()) throw new IllegalStateException("launch_requires_worker_thread");
+        if (displayId <= 0 || component == null) throw new IllegalArgumentException("invalid_virtual_launch");
+        // Code security: only system-resolved Android identifiers can enter this fixed shell command.
+        String command = VirtualLaunchCommand.create(displayId, component.getPackageName(), component.getClassName());
+        AdbConnection conn = connection;
+        if (conn == null || !conn.isFine()) return "not_dispatched";
+        AdbStream stream = null;
+        try {
+            // Code security: open once only; an exception after dispatch has an unknown outcome.
+            stream = conn.open(command);
+            streams.add(stream);
+            long deadline = android.os.SystemClock.uptimeMillis() + 10000;
+            while (!stream.isClosed() && android.os.SystemClock.uptimeMillis() < deadline) Thread.sleep(10);
+            if (!stream.isClosed()) return "outcome_unknown";
+            StringBuilder out = new StringBuilder();
+            for (byte[] chunk : stream.getReadQueue()) {
+                if (chunk != null && out.length() < 8192) out.append(new String(chunk));
+            }
+            String result = out.toString();
+            if (result.contains("Error:") || result.contains("Exception")) return "rejected";
+            return result.contains("Starting:") ? "submitted" : "outcome_unknown";
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return "outcome_unknown";
+        } catch (Exception e) {
+            return "outcome_unknown";
+        } finally {
+            closeAndUntrackAdbStream(stream);
+        }
+    }
+
+    /** One numeric tap; a closed transport without the exit marker is not a receipt. */
+    public static String tapOnDisplayOnce(int displayId, int x, int y, int width, int height) {
+        if (Looper.myLooper() == Looper.getMainLooper()) throw new IllegalStateException("tap_requires_worker_thread");
+        // Code security: the command consists solely of validated bounded integer arguments.
+        String command = VirtualTapCommand.create(displayId, x, y, width, height);
+        return virtualInputOnce(command, "SOLOPI_TAP_EXIT:0");
+    }
+
+    public static String swipeOnDisplayOnce(int displayId, int x1, int y1, int x2, int y2, int width, int height) {
+        if (Looper.myLooper() == Looper.getMainLooper()) throw new IllegalStateException("swipe_requires_worker_thread");
+        // Code security: only numeric coordinates inside the owned display can enter this fixed command.
+        String command = VirtualSwipeCommand.create(displayId, x1, y1, x2, y2, width, height);
+        return virtualInputOnce(command, "SOLOPI_SWIPE_EXIT:0");
+    }
+
+    private static String virtualInputOnce(String command, String successMarker) {
+        AdbConnection conn = connection;
+        if (conn == null || !conn.isFine()) return "not_dispatched";
+        AdbStream stream = null;
+        try {
+            // Code security: never reconnect or repeat after an uncertain dispatch.
+            stream = conn.open(command);
+            streams.add(stream);
+            long deadline = android.os.SystemClock.uptimeMillis() + 10000;
+            while (!stream.isClosed() && android.os.SystemClock.uptimeMillis() < deadline) Thread.sleep(10);
+            if (!stream.isClosed()) return "outcome_unknown";
+            StringBuilder out = new StringBuilder();
+            for (byte[] chunk : stream.getReadQueue()) {
+                if (chunk != null && out.length() < 8192) out.append(new String(chunk));
+            }
+            String result = out.toString().trim();
+            if (result.endsWith(successMarker)) return "submitted";
+            // A non-zero exit does not prove the physical input was never delivered.
+            return "outcome_unknown";
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return "outcome_unknown";
+        } catch (Exception e) {
+            return "outcome_unknown";
+        } finally { closeAndUntrackAdbStream(stream); }
     }
 
     public static String getTopActivity(String pkg) {

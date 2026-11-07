@@ -40,6 +40,14 @@ class VisualReportTests(unittest.TestCase):
                 visual_report.export_report({"status": "passed"}, root)
             self.assertEqual(original, target.read_bytes())
 
+    def test_custom_desktop_title_is_escaped(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = visual_report.export_report({"status": "passed"}, directory,
+                                                 title="Desktop </title><script>alert(1)</script>")
+            text = target.read_text()
+            self.assertNotIn("<script>", text)
+            self.assertEqual(2, text.count("Desktop &lt;/title&gt;&lt;script&gt;alert(1)&lt;/script&gt;"))
+
 
 if __name__ == "__main__":
     unittest.main()

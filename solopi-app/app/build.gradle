@@ -21,6 +21,18 @@ android {
     defaultConfig {
         minSdkVersion 18
         targetSdkVersion rootProject.ext.targetSdkVersion
+        buildConfigField 'boolean', 'VIRTUAL_SCREEN_EXPERIMENTAL', project.hasProperty('virtualScreenExperimental') ? 'true' : 'false'
+        buildConfigField 'boolean', 'VIRTUAL_SCREEN_OCR_BUNDLED', project.hasProperty('virtualScreenOcr') ? 'true' : 'false'
+        manifestPlaceholders = [trustedDisplayHandoffEnabled: project.hasProperty('virtualScreenExperimental') ? 'true' : 'false']
+        if (project.hasProperty('virtualScreenOcr')) {
+            minSdkVersion 21
+        }
+    }
+    if (project.hasProperty('virtualScreenOcr')) {
+        sourceSets.main.java.srcDir 'src/virtualScreenOcr/java'
+    }
+    if (project.hasProperty('virtualScreenExperimental')) {
+        sourceSets.main.java.srcDir 'src/virtualScreenExperimental/java'
     }
     lintOptions {
         abortOnError false
@@ -64,6 +76,11 @@ dependencies {
     }
     compileOnly "androidx.multidex:multidex:${ANDROIDX_MULTIDEX_VERSION}"
     implementation project(':shared')
+
+    if (project.hasProperty('virtualScreenOcr')) {
+        implementation 'com.google.mlkit:text-recognition:16.0.1'
+        implementation 'com.google.mlkit:text-recognition-chinese:16.0.1'
+    }
 
     testImplementation 'junit:junit:4.13.2'
 }

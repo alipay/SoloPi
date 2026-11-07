@@ -8106,6 +8106,18 @@ def command_agent_session_start(
     args: argparse.Namespace,
     adb: AdbClient,
 ) -> tuple[Dict[str, Any], int]:
+    screen_mode = getattr(args, "screen_mode", "main")
+    target_package = getattr(args, "target_package", None)
+    if screen_mode not in {"main", "virtual"}:
+        raise CliError("无效的屏幕模式", 3)
+    if screen_mode == "virtual":
+        if not target_package:
+            raise CliError("副屏会话需要 --target-package", 3)
+        target_package = validate_android_package(target_package)
+        if getattr(args, "action_validation_strategy", None) not in {None, "full-page"}:
+            raise CliError("副屏会话仅支持 full-page 页面校验", 3)
+    elif target_package:
+        raise CliError("--target-package 仅适用于副屏会话", 3)
     bounds = (
         ("maxSteps", args.max_steps, 1, 200),
         ("maxDurationMs", args.max_duration_ms, 1000, 1_800_000),
@@ -8133,6 +8145,14 @@ def command_agent_session_start(
     }
     session_id: Optional[str] = None
     with session_from_args(args, adb, preserve_foreground=True) as session:
+        if screen_mode == "virtual":
+            capabilities = session.agent("capabilities", {})
+            if (not isinstance(capabilities, dict) or capabilities.get("success") is not True
+                    or not isinstance(capabilities.get("screenModes"), list)
+                    or "virtual" not in capabilities["screenModes"]
+                    or capabilities.get("virtualExperimental") is not True):
+                raise CliError("设备没有声明实验性副屏能力，已停止；不会切换到主屏", 3)
+            mutation.update(screenMode="virtual", targetPackage=target_package)
         settle_selection = agent_settle_selection(args, session)
         validation_selection = agent_action_validation_selection(args, session)
         if (getattr(args, "settle_strategy", None) is not None
@@ -8167,6 +8187,14 @@ def command_agent_session_start(
                         return last_status, 2
                     observation = last_status.get("observation")
                     if session_id and isinstance(observation, dict):
+                        if screen_mode == "virtual" and (
+                            agent_session.get("screenMode") != "virtual"
+                            or agent_session.get("targetPackage") != target_package
+                            or observation.get("screenMode") != "virtual"
+                            or not isinstance(observation.get("displayId"), int)
+                            or observation["displayId"] <= 0
+                        ):
+                            raise CliError("设备没有确认所请求的副屏会话，已停止", 4)
                         actual_strategy = agent_session.get("settleStrategy")
                         # Old APKs omit the field and retain legacy behavior. An
                         # explicitly selected new algorithm must be acknowledged.
@@ -8209,9 +8237,9 @@ def command_agent_observe(
     session_id = validate_agent_id(args.session_id, "sessionId")
     owner_token = validate_agent_owner_token(args.owner_token)
     with session_from_args(args, adb, preserve_foreground=True) as session:
-        result = session.agent(
-            "observe", {"sessionId": session_id, "ownerToken": owner_token}
-        )
+        params = {"sessionId": session_id, "ownerToken": owner_token}
+        if getattr(args, "skip_virtual_ocr", False): params["skipVirtualOcr"] = "true"
+        result = session.agent("observe", params)
     return result, 0 if result.get("success") else 2
 
 
@@ -8356,6 +8384,7 @@ def command_agent_mutation(
         "resume": {"active"},
         "end": {"ended"},
         "cancel": {"cancelled"},
+        "cleanup": AGENT_TERMINAL_STATES,
     }[mutation_type]
     with session_from_args(args, adb, preserve_foreground=True) as session:
         invoke_agent_mutation(adb, params, timeout=args.ack_timeout)
@@ -8373,10 +8402,24 @@ def command_agent_mutation(
             if isinstance(agent_session, dict):
                 state = agent_session.get("state")
                 if state in expected_states:
+                    lease_held = agent_session.get("leaseHeld")
+                    cleanup_pending = agent_session.get("cleanupPending")
+                    if mutation_type in {"end", "cancel", "cleanup"} and (
+                        lease_held is True or cleanup_pending is True or
+                        (mutation_type == "cleanup" and (lease_held is not False or cleanup_pending is not False))
+                    ):
+                        timing.poll_sleep(args.poll_interval, time.sleep)
+                        continue
                     return last_status, 0
                 if state in AGENT_TERMINAL_STATES:
                     return last_status, 2
             timing.poll_sleep(args.poll_interval, time.sleep)
+    if mutation_type in {"end", "cancel", "cleanup"} and isinstance(last_status, dict):
+        agent_session = last_status.get("session")
+        if isinstance(agent_session, dict) and agent_session.get("state") in expected_states:
+            return {"success": False, "errorCode": "cleanup_unconfirmed",
+                    "error": "会话已结束，但设备资源清理或租约释放尚未确认",
+                    "session": agent_session}, 2
     raise CliError(
         "动态 Agent 操作 %s 未被确认" % mutation_type,
         124,
@@ -8391,6 +8434,28 @@ def command_screenshot(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[s
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_bytes(adb.screenshot())
     return {"success": True, "screenshot": str(target.resolve())}, 0
+
+
+def command_ocr_screen(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], int]:
+    """Read the current screen locally; OCR is never an executable node."""
+    if sys.platform != "darwin":
+        raise CliError("本地 OCR 当前仅支持 macOS Vision", 3, errorCode="ocr_unsupported_platform")
+    adb.connect()
+    image = adb.screenshot()
+    source = SCRIPT_DIRECTORY / "resources" / "ocr" / "vision.swift"
+    try:
+        process = subprocess.run(["/usr/bin/swift", str(source)], input=image, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, timeout=90, check=False)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise CliError("本地 OCR 不可用或超时", 4, errorCode="ocr_unavailable") from exc
+    if process.returncode:
+        raise CliError("本地 OCR 识别失败", 4, errorCode="ocr_failed")
+    try:
+        result = json.loads(process.stdout)
+    except (ValueError, UnicodeDecodeError) as exc:
+        raise CliError("本地 OCR 返回格式错误", 4, errorCode="ocr_invalid_output") from exc
+    return {"success": True, "source": "macos-vision", "screenSha256": hashlib.sha256(image).hexdigest(),
+            "coordinateSpace": "normalized_top_left", "actionable": False, **result}, 0
 
 
 def command_logs(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], int]:
@@ -11085,6 +11150,9 @@ def build_parser() -> argparse.ArgumentParser:
     agent_start_parser.add_argument(
         "--owner-token", help="可选 URL-safe 会话所有权令牌；省略时安全生成"
     )
+    agent_start_parser.add_argument("--screen-mode", choices=("main", "virtual"), default="main",
+                                    help="主屏或实验性 Android 副屏；副屏需要专用测试构建")
+    agent_start_parser.add_argument("--target-package", help="实验性副屏启动的 Android 包名")
     agent_start_parser.add_argument("--max-steps", type=positive_int, default=50, help="最大接受动作数，最高 200")
     agent_start_parser.add_argument("--max-duration-ms", type=positive_int, default=300000, help="会话总时长毫秒，最高 1800000")
     agent_start_parser.add_argument("--idle-timeout-ms", type=positive_int, default=30000, help="空闲超时毫秒，最高 300000")
@@ -11105,6 +11173,8 @@ def build_parser() -> argparse.ArgumentParser:
         "agent-observe", help="为准确会话生成新 UI 观察"
     )
     add_agent_identity(agent_observe_parser)
+    agent_observe_parser.add_argument("--skip-virtual-ocr", action="store_true",
+                                      help="副屏观察不运行 OCR（仅用于不依赖 OCR 的固定验收）")
 
     agent_act_parser = subparsers.add_parser(
         "agent-act", help="基于准确 observationId 执行一个类型化动作"
@@ -11131,6 +11201,7 @@ def build_parser() -> argparse.ArgumentParser:
         ("agent-resume", "恢复已暂停的动态 Agent 会话"),
         ("agent-end", "正常结束动态 Agent 会话并释放租约"),
         ("agent-cancel", "取消动态 Agent 会话并释放租约"),
+        ("agent-cleanup", "重试终态会话的设备资源清理"),
     ):
         command_parser = subparsers.add_parser(command_name, help=command_help)
         add_agent_identity(command_parser)
@@ -11539,6 +11610,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     screenshot_parser = subparsers.add_parser("screenshot", help="截取当前设备屏幕")
     screenshot_parser.add_argument("--output", required=True, help="PNG 输出文件")
+    subparsers.add_parser("ocr-screen", help="本机 OCR 只读识别当前屏幕（macOS）")
     logs_parser = subparsers.add_parser("logs", help="采集当前设备 logcat")
     logs_parser.add_argument("--output", required=True, help="日志输出文件")
     return parser
@@ -11673,7 +11745,7 @@ def dispatch(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], 
         return command_agent_query(args, adb, "status")
     if args.command == "agent-timeline":
         return command_agent_query(args, adb, "timeline")
-    if args.command in {"agent-pause", "agent-resume", "agent-end", "agent-cancel"}:
+    if args.command in {"agent-pause", "agent-resume", "agent-end", "agent-cancel", "agent-cleanup"}:
         return command_agent_mutation(args, adb, args.command[len("agent-"):])
     if args.command == "verify-normalize":
         return command_verify_normalize(args, adb)
@@ -11745,6 +11817,8 @@ def dispatch(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], 
         return command_cancel(args, adb)
     if args.command == "screenshot":
         return command_screenshot(args, adb)
+    if args.command == "ocr-screen":
+        return command_ocr_screen(args, adb)
     if args.command == "logs":
         return command_logs(args, adb)
     raise CliError("不支持的命令：%s" % args.command, 3)

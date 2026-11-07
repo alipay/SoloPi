@@ -101,7 +101,9 @@ public class HttpServer extends NanoHTTPD {
 
                 String content = files.get("postData");
 
-                LogUtil.i(TAG, "Receive Post message:::url[%s], requestParam[%s], content=%s", url, requestParam, content);
+                // Code security: Agent requests may contain session capabilities and private page data.
+                if ("/scheme/agent".equals(url)) LogUtil.i(TAG, "Receive Agent POST request");
+                else LogUtil.i(TAG, "Receive Post message:::url[%s], requestParam[%s], content=%s", url, requestParam, content);
 
                 for (OnUrlRequestListener listener: listeners) {
                     Response res = listener.onPost(url, requestParam, content);
@@ -117,7 +119,9 @@ public class HttpServer extends NanoHTTPD {
             /*这里就是为客户端返回的信息了。我这里返回了一个200和一个HelloWorld*/
             return NanoHTTPD.newFixedLengthResponse(Response.Status.OK, "application/json", FAIL_RESPONSE_NO_PROCESS);
         } else {
-            LogUtil.i(TAG, "Receive Get message:::url[%s], requestParam[%s]", url, requestParam);
+            // Code security: never write Agent owner tokens or observation parameters to logs.
+            if ("/scheme/agent".equals(url)) LogUtil.i(TAG, "Receive Agent GET request");
+            else LogUtil.i(TAG, "Receive Get message:::url[%s], requestParam[%s]", url, requestParam);
             for (OnUrlRequestListener listener: listeners) {
                 Response res = listener.onGet(url, requestParam);
                 if (res != null) {

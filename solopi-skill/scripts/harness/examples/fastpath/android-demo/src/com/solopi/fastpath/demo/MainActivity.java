@@ -2,6 +2,8 @@ package com.solopi.fastpath.demo;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ActivityOptions;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -14,8 +16,13 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
+import android.os.Build;
+import android.view.Display;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -124,6 +131,11 @@ public final class MainActivity extends Activity {
     private void showScenarios() {
         base("SCENARIOS", "每一次变化，都可验证。", "选择一个场景，观察相同目标如何执行与验收。");
         scenarioButton(R.id.scenario_baseline, "01  标准订单流程", "baseline");
+        button(body, R.id.scenario_ocr_canvas, "视觉文字入口", false, true, this::showOcrCanvas);
+        button(body, R.id.scenario_replaced_target, "目标自动替换", false, true, this::showReplacedTarget);
+        button(body, R.id.scenario_unstable, "页面持续变化", false, true, this::showUnstablePage);
+        button(body, R.id.scenario_escape_to_main, "模拟应用跳至主屏", false, true, this::escapeToMain);
+        button(body, R.id.scenario_secure_window, "12  受保护窗口", false, true, this::showSecureWindow);
         scenarioButton(R.id.scenario_renamed, "02  文案与位置变化", "renamed");
         scenarioButton(R.id.scenario_popup, "03  出现非关键提示", "popup");
         scenarioButton(R.id.scenario_loading, "04  页面加载等待", "loading");
@@ -140,6 +152,88 @@ public final class MainActivity extends Activity {
         space(body, 8);
         body.addView(text("统一验收：打开订单 FP-20260923，核对状态为“已支付”。", 13, MUTED, false));
         reset();
+    }
+
+    /** The OS blacks out this synthetic dialog on displays without secure output. */
+    private void showSecureWindow() {
+        controlledDialog = new Dialog(this);
+        Button protectedButton = new Button(this);
+        protectedButton.setText("受保护弹窗按钮");
+        protectedButton.setOnClickListener(view -> protectedButton.setText("不应被自动点击"));
+        controlledDialog.setContentView(protectedButton);
+        controlledDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        controlledDialog.show();
+    }
+
+    /** A deterministic visual-only target: its label is drawn, not exposed as node text. */
+    private void showOcrCanvas() {
+        scenario = "baseline";
+        base("OCR_CANVAS", "视觉文字入口", "点击画面中的文字进入订单详情。");
+        View target = new View(this) {
+            private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            @Override protected void onDraw(Canvas canvas) {
+                super.onDraw(canvas);
+                canvas.drawColor(Color.WHITE);
+                paint.setColor(INK);
+                paint.setTextSize(dp(22));
+                paint.setTypeface(Typeface.DEFAULT_BOLD);
+                canvas.drawText("进入订单详情", dp(24), dp(65), paint);
+            }
+            @Override public boolean onTouchEvent(MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) return true;
+                if (event.getAction() == MotionEvent.ACTION_UP) { showDetail(); return true; }
+                return true;
+            }
+        };
+        body.addView(target, new LinearLayout.LayoutParams(-1, dp(110)));
+        reset();
+    }
+
+    /** The original target is replaced while a previously captured observation is still in use. */
+    private void showReplacedTarget() {
+        base("REPLACE_PENDING", "目标自动替换", "稍后原入口会被替换，用于验证旧观察不能点击新入口。");
+        LinearLayout slot = new LinearLayout(this);
+        slot.setOrientation(LinearLayout.VERTICAL);
+        body.addView(slot, new LinearLayout.LayoutParams(-1, -2));
+        button(slot, R.id.action_primary, "原订单入口", false, true, this::showDetail);
+        int currentGeneration = generation;
+        handler.postDelayed(() -> {
+            if (generation != currentGeneration) return;
+            slot.removeAllViews();
+            button(slot, R.id.replacement_target, "替换后的入口", false, true, this::showWrong);
+            TextView state = findViewById(R.id.page_state);
+            if (state != null) state.setText("REPLACED");
+        }, 15000);
+        reset();
+    }
+
+    /** Continuously changing semantics exercise post-dispatch observation timeouts. */
+    private void showUnstablePage() {
+        base("UNSTABLE_0", "页面持续变化", "页面短时持续更新，用于验证动作结果不确定时停止。");
+        final TextView state = findViewById(R.id.page_state);
+        final int currentGeneration = generation;
+        final long until = SystemClock.uptimeMillis() + 16000;
+        handler.post(new Runnable() {
+            int count;
+            @Override public void run() {
+                if (generation != currentGeneration) return;
+                if (SystemClock.uptimeMillis() >= until) { state.setText("STABLE"); return; }
+                state.setText("UNSTABLE_" + (++count));
+                handler.postDelayed(this, 50);
+            }
+        });
+        reset();
+    }
+
+    /** Controlled escape fixture: launch only this offline demo on display 0. */
+    private void escapeToMain() {
+        if (Build.VERSION.SDK_INT < 26) return;
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchDisplayId(Display.DEFAULT_DISPLAY);
+        startActivity(intent, options.toBundle());
+        finish();
     }
 
     private void scenarioButton(int id, String label, String value) {

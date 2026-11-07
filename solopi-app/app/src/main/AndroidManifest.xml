@@ -163,6 +163,14 @@
                 android:resource="@xml/file_provider" />
         </provider>
 
+        <!-- Code security: only the ADB shell may deliver a one-time helper Binder. -->
+        <provider
+            android:name="com.alipay.hulu.virtualscreen.TrustedDisplayAttachProvider"
+            android:authorities="${applicationId}.trustedDisplayAttach"
+            android:enabled="${trustedDisplayHandoffEnabled}"
+            android:exported="true"
+            android:permission="android.permission.DUMP" />
+
 
 
     </application>

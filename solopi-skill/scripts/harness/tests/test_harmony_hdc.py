@@ -25,6 +25,16 @@ def layout(text="Increment", bounds="[10,20][110,80]", window="40"):
 
 
 class HarmonyHDCTests(unittest.TestCase):
+    def test_hdc_cannot_inherit_desktop_control_input(self):
+        driver = self.driver()
+        with mock.patch.object(harmony_hdc.subprocess, 'run',
+                               return_value=mock.Mock(returncode=0, stdout='127.0.0.1:5555\n')) as run:
+            driver.health()
+            driver._run('shell', 'uitest', '--help')
+        self.assertEqual(2, run.call_count)
+        for call in run.call_args_list:
+            self.assertEqual(harmony_hdc.subprocess.DEVNULL, call.kwargs['stdin'])
+
     def test_input_quotes_device_shell_and_refuses_implicit_replacement(self):
         driver = self.driver()
         data = layout(text="")

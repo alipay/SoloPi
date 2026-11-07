@@ -29,6 +29,129 @@ import solopi_ai
 
 
 class SoloPiAiTests(unittest.TestCase):
+    def test_virtual_start_rejects_missing_capability_before_dispatch(self):
+        args = solopi_ai.build_parser().parse_args([
+            "agent-session-start", "--screen-mode", "virtual", "--target-package", "com.example.demo",
+        ])
+        session = mock.MagicMock()
+        session.__enter__.return_value = session
+        session.agent.return_value = {"success": True, "screenModes": ["main"]}
+        with mock.patch.object(solopi_ai, "session_from_args", return_value=session), \
+                mock.patch.object(solopi_ai, "invoke_agent_mutation") as dispatch:
+            with self.assertRaises(solopi_ai.CliError):
+                solopi_ai.command_agent_session_start(args, mock.Mock())
+        dispatch.assert_not_called()
+
+    def test_virtual_start_rejects_main_screen_acknowledgement(self):
+        args = solopi_ai.build_parser().parse_args([
+            "agent-session-start", "--screen-mode", "virtual", "--target-package", "com.example.demo",
+            "--owner-token", "a" * 20,
+        ])
+        session = mock.MagicMock()
+        session.__enter__.return_value = session
+        session.request_timeout = 1
+        session.agent.side_effect = [
+            {"success": True, "screenModes": ["main", "virtual"], "virtualExperimental": True},
+            {"success": True, "session": {"sessionId": "session-1", "state": "active", "screenMode": "main"},
+             "observation": {"screenMode": "main", "displayId": 0}},
+        ]
+        with mock.patch.object(solopi_ai, "session_from_args", return_value=session), \
+                mock.patch.object(solopi_ai, "invoke_agent_mutation") as dispatch, \
+                mock.patch.object(solopi_ai, "best_effort_agent_cancel") as cancel:
+            with self.assertRaises(solopi_ai.CliError):
+                solopi_ai.command_agent_session_start(args, mock.Mock())
+        self.assertEqual("virtual", dispatch.call_args.args[1]["screenMode"])
+        cancel.assert_called_once()
+
+    def test_virtual_start_requires_matching_target_and_display(self):
+        args = solopi_ai.build_parser().parse_args([
+            "agent-session-start", "--screen-mode", "virtual", "--target-package", "com.example.demo",
+            "--owner-token", "a" * 20,
+        ])
+        session = mock.MagicMock()
+        session.__enter__.return_value = session
+        session.request_timeout = 1
+        session.agent.side_effect = [
+            {"success": True, "screenModes": ["main", "virtual"], "virtualExperimental": True},
+            {"success": True, "session": {"sessionId": "session-1", "state": "active", "screenMode": "virtual",
+                                           "targetPackage": "com.example.demo"},
+             "observation": {"screenMode": "virtual", "displayId": 5}},
+        ]
+        with mock.patch.object(solopi_ai, "session_from_args", return_value=session), \
+                mock.patch.object(solopi_ai, "invoke_agent_mutation") as dispatch:
+            result, code = solopi_ai.command_agent_session_start(args, mock.Mock())
+        self.assertEqual(0, code)
+        self.assertEqual("com.example.demo", dispatch.call_args.args[1]["targetPackage"])
+        self.assertEqual(5, result["observation"]["displayId"])
+
+    def test_agent_terminal_cleanup_must_confirm_lease_release(self):
+        args = solopi_ai.build_parser().parse_args([
+            "agent-end", "--session-id", "session-1", "--owner-token", "a" * 20,
+            "--ack-timeout", "0.001", "--poll-interval", "0.001",
+        ])
+        session = mock.MagicMock()
+        session.__enter__.return_value = session
+        session.request_timeout = 1
+        session.agent.return_value = {"success": True, "session": {"state": "ended", "leaseHeld": True}}
+        with mock.patch.object(solopi_ai, "session_from_args", return_value=session), \
+                mock.patch.object(solopi_ai, "invoke_agent_mutation") as invoke:
+            result, exit_code = solopi_ai.command_agent_mutation(args, mock.Mock(), "end")
+        self.assertEqual(2, exit_code)
+        self.assertEqual("cleanup_unconfirmed", result["errorCode"])
+        invoke.assert_called_once()
+
+    def test_agent_cleanup_waits_for_explicit_lease_release(self):
+        args = solopi_ai.build_parser().parse_args([
+            "agent-cleanup", "--session-id", "session-1", "--owner-token", "a" * 20,
+            "--ack-timeout", "1", "--poll-interval", "0.001",
+        ])
+        session = mock.MagicMock()
+        session.__enter__.return_value = session
+        session.request_timeout = 1
+        session.agent.side_effect = [
+            {"success": True, "session": {"state": "cancelled", "leaseHeld": True}},
+            {"success": True, "session": {"state": "cancelled", "leaseHeld": False, "cleanupPending": False}},
+        ]
+        with mock.patch.object(solopi_ai, "session_from_args", return_value=session), \
+                mock.patch.object(solopi_ai, "invoke_agent_mutation") as invoke:
+            result, exit_code = solopi_ai.command_agent_mutation(args, mock.Mock(), "cleanup")
+        self.assertEqual(0, exit_code)
+        self.assertIs(result["session"]["leaseHeld"], False)
+        self.assertEqual("cleanup", invoke.call_args.args[1]["type"])
+        invoke.assert_called_once()
+
+    def test_agent_cleanup_does_not_confuse_lost_lease_with_cleaned_resources(self):
+        args = solopi_ai.build_parser().parse_args([
+            "agent-cleanup", "--session-id", "session-1", "--owner-token", "a" * 20,
+            "--ack-timeout", "0.001", "--poll-interval", "0.001",
+        ])
+        session = mock.MagicMock()
+        session.__enter__.return_value = session
+        session.request_timeout = 1
+        session.agent.return_value = {"success": True, "session": {
+            "state": "failed", "leaseHeld": False, "cleanupPending": True,
+        }}
+        with mock.patch.object(solopi_ai, "session_from_args", return_value=session), \
+                mock.patch.object(solopi_ai, "invoke_agent_mutation"):
+            result, exit_code = solopi_ai.command_agent_mutation(args, mock.Mock(), "cleanup")
+        self.assertEqual(2, exit_code)
+        self.assertEqual("cleanup_unconfirmed", result["errorCode"])
+
+    def test_agent_cleanup_requires_explicit_pending_status_on_old_server(self):
+        args = solopi_ai.build_parser().parse_args([
+            "agent-cleanup", "--session-id", "session-1", "--owner-token", "a" * 20,
+            "--ack-timeout", "0.001", "--poll-interval", "0.001",
+        ])
+        session = mock.MagicMock()
+        session.__enter__.return_value = session
+        session.request_timeout = 1
+        session.agent.return_value = {"success": True, "session": {"state": "ended", "leaseHeld": False}}
+        with mock.patch.object(solopi_ai, "session_from_args", return_value=session), \
+                mock.patch.object(solopi_ai, "invoke_agent_mutation"):
+            result, exit_code = solopi_ai.command_agent_mutation(args, mock.Mock(), "cleanup")
+        self.assertEqual(2, exit_code)
+        self.assertEqual("cleanup_unconfirmed", result["errorCode"])
+
     def test_inspect_reuses_running_service_without_changing_foreground(self):
         args = solopi_ai.build_parser().parse_args(["inspect"])
         original_component = "com.example.target/.DetailActivity"
@@ -293,6 +416,18 @@ class SoloPiAiTests(unittest.TestCase):
         self.assertEqual("start", params["type"])
         self.assertEqual("a" * 32, params["ownerToken"])
         self.assertEqual(("start-status", {"ownerToken": "a" * 32}, 5), session.last_call)
+
+    def test_agent_observe_optional_skip_ocr_is_explicit_and_defaults_off(self):
+        parser = solopi_ai.build_parser()
+        base = ['agent-observe', '--session-id', 'agent-session-1', '--owner-token', 'a' * 32]
+        session = mock.MagicMock()
+        session.__enter__.return_value = session
+        session.agent.return_value = {'success': True}
+        with mock.patch.object(solopi_ai, 'session_from_args', return_value=session):
+            solopi_ai.command_agent_observe(parser.parse_args(base), mock.Mock())
+            self.assertEqual({'sessionId': 'agent-session-1', 'ownerToken': 'a' * 32}, session.agent.call_args.args[1])
+            solopi_ai.command_agent_observe(parser.parse_args(base + ['--skip-virtual-ocr']), mock.Mock())
+            self.assertEqual('true', session.agent.call_args.args[1]['skipVirtualOcr'])
 
     def test_agent_observe_is_read_only_and_agent_act_polls_typed_receipt(self):
         observe_args = solopi_ai.build_parser().parse_args(
@@ -2571,13 +2706,13 @@ Complete
         parser = solopi_ai.build_parser()
         command_action = next(action for action in parser._actions if action.dest == "command")
 
-        self.assertEqual(108, len(command_action.choices))
+        self.assertEqual(110, len(command_action.choices))
         self.assertIn("native-doctor", command_action.choices)
         self.assertIn("control-port-set", command_action.choices)
         self.assertTrue(
             {
                 "agent-session-start", "agent-observe", "agent-act", "agent-status",
-                "agent-timeline", "agent-pause", "agent-resume", "agent-end", "agent-cancel",
+                "agent-timeline", "agent-pause", "agent-resume", "agent-end", "agent-cancel", "agent-cleanup",
                 "verify-normalize", "verify-compile", "verify-validate", "verify-run",
                 "workflow-list", "workflow-run", "workflow-report",
                 "managed-init", "managed-health", "managed-device-register",

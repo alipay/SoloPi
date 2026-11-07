@@ -57,6 +57,8 @@ class HarmonyHDCDriver:
         try:
             result = subprocess.run(
                 [self.hdc, "-t", self.device_id, *device_args],
+                # HDC changes stdin flags; never share the desktop JSONL pipe.
+                stdin=subprocess.DEVNULL,
                 capture_output=True, text=True, timeout=timeout, check=False,
             )
         except (OSError, subprocess.TimeoutExpired) as exc:
@@ -69,7 +71,7 @@ class HarmonyHDCDriver:
         try:
             result = subprocess.run(
                 [self.hdc, "list", "targets"], capture_output=True,
-                text=True, timeout=10, check=False,
+                stdin=subprocess.DEVNULL, text=True, timeout=10, check=False,
             )
             ready = result.returncode == 0 and self.device_id in result.stdout.splitlines()
             return {"ready": ready}

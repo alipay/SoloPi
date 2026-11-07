@@ -8,6 +8,7 @@
     <item name="dismiss_popup" type="id" />
     <item name="reset_button" type="id" />
     <item name="scenario_baseline" type="id" />
+    <item name="scenario_ocr_canvas" type="id" />
     <item name="scenario_renamed" type="id" />
     <item name="scenario_popup" type="id" />
     <item name="scenario_loading" type="id" />
@@ -18,6 +19,11 @@
     <item name="scenario_visual_layout" type="id" />
     <item name="scenario_visual_guard" type="id" />
     <item name="scenario_visual_negative" type="id" />
+    <item name="scenario_secure_window" type="id" />
+    <item name="scenario_replaced_target" type="id" />
+    <item name="replacement_target" type="id" />
+    <item name="scenario_unstable" type="id" />
+    <item name="scenario_escape_to_main" type="id" />
     <item name="visual_variant_a" type="id" />
     <item name="visual_variant_b" type="id" />
     <item name="visual_variant_c" type="id" />
