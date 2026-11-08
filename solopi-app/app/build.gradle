@@ -15,6 +15,11 @@
  */
 apply plugin: 'com.android.library'
 
+def starPromptOverride = project.findProperty('solopiStarPrompt')
+if (starPromptOverride != null && !(starPromptOverride in ['true', 'false'])) {
+    throw new GradleException('solopiStarPrompt must be true or false')
+}
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -39,9 +44,11 @@ android {
     }
     buildTypes {
         release {
+            buildConfigField 'boolean', 'STAR_PROMPT_ENABLED', project.findProperty('solopiStarPrompt') ?: 'true'
             consumerProguardFiles 'proguard-rules.pro'
         }
         debug {
+            buildConfigField 'boolean', 'STAR_PROMPT_ENABLED', project.findProperty('solopiStarPrompt') ?: 'false'
             consumerProguardFiles 'proguard-rules.pro'
         }
     }

@@ -68,6 +68,11 @@ public class InfoActivity extends BaseActivity {
         });
 
         LinearLayout license = (LinearLayout) findViewById(R.id.info_license_text);
+        findViewById(R.id.info_star).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                com.alipay.hulu.util.StarPromptController.openProject(InfoActivity.this);
+            }
+        });
 
         license.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -1,0 +1,37 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:background="@drawable/star_card_background" android:fillViewport="false">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="24dp" android:gravity="center_horizontal">
+        <TextView android:layout_width="64dp" android:layout_height="64dp"
+            android:background="@drawable/star_badge_background" android:gravity="center"
+            android:text="★" android:textSize="34sp" android:textColor="#1677FF"
+            android:importantForAccessibility="no" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="20dp" android:text="@string/star_prompt_title"
+            android:textSize="22sp" android:textStyle="bold" android:textColor="#172B4D"
+            android:gravity="center" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="12dp" android:text="@string/star_prompt_message"
+            android:textSize="15sp" android:textColor="#53627A" android:lineSpacingExtra="4dp"
+            android:gravity="center" />
+        <Button android:id="@+id/star_open" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:minHeight="50dp" android:layout_marginTop="24dp" android:padding="12dp"
+            android:background="@drawable/star_primary_background" android:backgroundTint="@null"
+            android:text="@string/star_prompt_open" android:textAllCaps="false"
+            android:textSize="16sp" android:textStyle="bold" android:textColor="#FFFFFF" />
+        <Button android:id="@+id/star_later" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:minHeight="48dp" android:layout_marginTop="10dp" android:padding="10dp"
+            android:background="@drawable/star_secondary_background" android:backgroundTint="@null"
+            android:text="@string/star_prompt_later" android:textAllCaps="false"
+            android:textSize="15sp" android:textColor="#384B66" />
+        <Button android:id="@+id/star_done" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:minHeight="48dp" android:layout_marginTop="4dp" android:padding="10dp"
+            android:background="@android:color/transparent" android:backgroundTint="@null"
+            android:text="@string/star_prompt_done" android:textAllCaps="false"
+            android:textSize="14sp" android:textColor="#53627A" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/star_prompt_optional" android:textSize="12sp"
+            android:textColor="#627187" android:gravity="center" />
+    </LinearLayout>
+</ScrollView>
