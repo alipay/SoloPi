@@ -1,0 +1,19 @@
+.gitignore
+  s_ddd6123746a6c5::t_216385f0e9196a 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "27552ca3f1677714f5a12692b49130d58a5350e3",
+  "prompts": {},
+  "sessions": {
+    "s_ddd6123746a6c5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b1b0-58e8-7310-99c0-2d6317276d96",
+        "model": "gpt-6.1-terra"
+      },
+      "human_author": "YuriyPikachu <YuriyPikachu@users.noreply.github.com>"
+    }
+  }
+}
