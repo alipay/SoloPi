@@ -57,6 +57,26 @@ public class VirtualActionGuardTest {
         VirtualActionGuard.Page covered = page(3, scroll, overlay);
         assertEquals("target_occluded", VirtualActionGuard.checkScroll(covered, covered, "0.1"));
     }
+    @Test public void inputRequiresAnUnobscuredEditableNodeOnTheSamePage() {
+        VirtualActionGuard.Node editable = new VirtualActionGuard.Node("0.1", "", "", "id", "EditText", TARGET,
+                true, true, false, false, false, true);
+        VirtualActionGuard.Page current = page(3, editable);
+        assertNull(VirtualActionGuard.checkInput(current, current, "0.1"));
+        assertEquals("target_unavailable", VirtualActionGuard.check(current, current, "0.1"));
+        VirtualActionGuard.Page ordinary = page(3, node("0.1", true, TARGET));
+        assertEquals("target_unavailable", VirtualActionGuard.checkInput(ordinary, ordinary, "0.1"));
+        VirtualActionGuard.Window overlay = new VirtualActionGuard.Window(8, 2, new VirtualActionGuard.Box(0, 0, 50, 80));
+        VirtualActionGuard.Page covered = page(3, editable, overlay);
+        assertEquals("target_occluded", VirtualActionGuard.checkInput(covered, covered, "0.1"));
+        assertEquals("stale_observation", VirtualActionGuard.checkInput(current, covered, "0.1"));
+        VirtualActionGuard.Node password = new VirtualActionGuard.Node("0.1", "", "", "id", "EditText", TARGET,
+                true, true, false, true, false, true);
+        VirtualActionGuard.Page secret = page(3, password);
+        assertEquals("target_unavailable", VirtualActionGuard.checkInput(secret, secret, "0.1"));
+        VirtualActionGuard.Node hint = new VirtualActionGuard.Node("0.1", "", "", "id", "EditText", TARGET,
+                true, true, false, false, false, true, true);
+        assertEquals("stale_observation", VirtualActionGuard.checkInput(current, page(3, hint), "0.1"));
+    }
     @Test public void scrollPathRegionContainsGestureAndRejectsOutsideCoordinates() {
         VirtualActionGuard.Box corridor = VirtualActionGuard.scrollPathRegion(SCREEN, 50, 160, 50, 40);
         assertNotNull(corridor);

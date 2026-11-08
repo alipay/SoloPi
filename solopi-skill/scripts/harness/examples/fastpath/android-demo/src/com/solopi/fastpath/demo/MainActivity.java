@@ -3,6 +3,10 @@ package com.solopi.fastpath.demo;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ActivityOptions;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.pm.PackageManager;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -24,6 +28,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -39,6 +44,7 @@ public final class MainActivity extends Activity {
     private String scenario = "baseline";
     private int generation;
     private Dialog controlledDialog;
+    private FixtureChat fixtureChat;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -130,7 +136,21 @@ public final class MainActivity extends Activity {
 
     private void showScenarios() {
         base("SCENARIOS", "每一次变化，都可验证。", "选择一个场景，观察相同目标如何执行与验收。");
+        if (getIntent().getBooleanExtra("inputProbe", false)) {
+            EditText input = new EditText(this);
+            input.setContentDescription("SoloPi input probe");
+            input.setSingleLine(true);
+            input.setText("initial");
+            body.addView(input, new LinearLayout.LayoutParams(-1, dp(52)));
+        }
         scenarioButton(R.id.scenario_baseline, "01  标准订单流程", "baseline");
+        if ("com.solopi.fastpath.replyfixture".equals(getPackageName())) {
+            button(body, R.id.scenario_chat, "受控聊天", false, true, () -> {
+                fixtureChat = new FixtureChat();
+                showFixtureChat();
+            });
+        }
+        button(body, R.id.test_notification, "发送测试通知", false, true, this::sendTestNotification);
         button(body, R.id.scenario_ocr_canvas, "视觉文字入口", false, true, this::showOcrCanvas);
         button(body, R.id.scenario_replaced_target, "目标自动替换", false, true, this::showReplacedTarget);
         button(body, R.id.scenario_unstable, "页面持续变化", false, true, this::showUnstablePage);
@@ -152,6 +172,103 @@ public final class MainActivity extends Activity {
         space(body, 8);
         body.addView(text("统一验收：打开订单 FP-20260923，核对状态为“已支付”。", 13, MUTED, false));
         reset();
+    }
+
+    private void sendTestNotification() {
+        if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission("android.permission.POST_NOTIFICATIONS")
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 10);
+            return;
+        }
+        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Notification.Builder builder;
+        if (Build.VERSION.SDK_INT >= 26) {
+            manager.createNotificationChannel(new NotificationChannel("test-wake", "测试通知", NotificationManager.IMPORTANCE_DEFAULT));
+            builder = new Notification.Builder(this, "test-wake");
+        } else {
+            builder = new Notification.Builder(this);
+        }
+        manager.notify(1, builder.setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle("测试通知").setContentText("这是固定的测试内容").build());
+    }
+
+    private void showFixtureChat() {
+        base("CHAT", "受控聊天", "本机测试数据");
+        TextView identity = text("测试联系人", 16, INK, true);
+        identity.setId(R.id.chat_identity);
+        identity.setContentDescription(fixtureChat.identity());
+        body.addView(identity);
+        TextView count = text("测试消息数量：" + fixtureChat.messages.size(), 12, INK, false);
+        count.setContentDescription(fixtureChat.countDescription());
+        body.addView(count);
+        for (FixtureChat.Message message : fixtureChat.messages) {
+            TextView item = text(message.retracted ? "消息已撤回" : message.text, 14, INK, false);
+            item.setId(R.id.chat_message);
+            item.setContentDescription(message.description());
+            item.setPadding(dp(8), dp(6), dp(8), dp(6));
+            if ("image".equals(message.kind) && !message.retracted) {
+                item.setBackground(surface(Color.rgb(211, 231, 226), 0));
+                item.setOnClickListener(view -> showFixturePicture(message));
+            }
+            body.addView(item, new LinearLayout.LayoutParams(-1, -2));
+        }
+        EditText input = new EditText(this);
+        input.setId(R.id.chat_input);
+        input.setSingleLine(false);
+        input.setHint("输入测试回复");
+        body.addView(input, new LinearLayout.LayoutParams(-1, dp(52)));
+        button(body, R.id.chat_send, "发送", true, true, () -> {
+            String value = input.getText().toString().trim();
+            if (!value.isEmpty() && value.length() <= 4000) {
+                fixtureChat.add("outgoing", "text", value);
+                showFixtureChat();
+            }
+        });
+        button(body, R.id.chat_arrival, "模拟新问题", false, true, () -> {
+            fixtureChat.add("incoming", "text", "营业时间是几点？"); showFixtureChat();
+        });
+        button(body, R.id.chat_duplicate, "模拟相同问题", false, true, () -> {
+            fixtureChat.add("incoming", "text", "营业时间是几点？"); showFixtureChat();
+        });
+        button(body, R.id.chat_nonquestion, "模拟非问题", false, true, () -> {
+            fixtureChat.add("incoming", "text", "收到，谢谢"); showFixtureChat();
+        });
+        button(body, R.id.chat_picture, "模拟图片消息", false, true, () -> {
+            fixtureChat.add("incoming", "image", "测试图片"); showFixtureChat();
+        });
+        button(body, R.id.chat_retract, "撤回最新消息", false, true, () -> {
+            fixtureChat.retractLatestIncoming(); showFixtureChat();
+        });
+        button(body, R.id.chat_group, "切换群聊", false, true, () -> {
+            fixtureChat.group(true); showFixtureChat();
+        });
+        button(body, R.id.chat_ambiguous, "切换同名联系人", false, true, () -> {
+            fixtureChat.ambiguous(true); showFixtureChat();
+        });
+        button(body, R.id.chat_wake, "发送测试通知", false, true, this::sendTestNotification);
+        reset();
+    }
+
+    private void showFixturePicture(FixtureChat.Message message) {
+        base("CHAT_IMAGE", "测试图片", "受控图片");
+        View picture = new View(this) {
+            private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            @Override protected void onDraw(Canvas canvas) {
+                super.onDraw(canvas);
+                canvas.drawColor(Color.rgb(211, 231, 226));
+                paint.setColor(INK);
+                paint.setTextSize(dp(17));
+                paint.setTypeface(Typeface.DEFAULT_BOLD);
+                canvas.drawText("营业时间", dp(18), dp(54), paint);
+                canvas.drawText("9:00 - 18:00", dp(18), dp(88), paint);
+                paint.setColor(ACCENT);
+                canvas.drawRect(dp(18), dp(112), dp(140), dp(118), paint);
+            }
+        };
+        picture.setId(R.id.chat_image_content);
+        picture.setContentDescription("fixture:image:" + message.id);
+        body.addView(picture, new LinearLayout.LayoutParams(-1, dp(240)));
+        button(body, R.id.reset_button, "返回聊天", false, true, this::showFixtureChat);
     }
 
     /** The OS blacks out this synthetic dialog on displays without secure output. */

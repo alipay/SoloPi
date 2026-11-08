@@ -1,6 +1,6 @@
 # FastPath 原生 Android 演示
 
-单 Activity、Java 原生控件、无第三方库、无权限、无网络；订单和金额均为虚构数据。
+单 Activity、Java 原生控件、无第三方库、无网络；订单和金额均为虚构数据。测试通知在 Android 13 及以上需要用户授予通知发送权限。
 此应用专门提供可复现的页面变化和失败样本，不是实际商城。
 
 「12 受保护窗口」会打开使用 `FLAG_SECURE` 的测试弹窗，用于验证虚拟屏遇到黑屏时停止。弹窗只属于演示应用，不涉及真实账号；设备和厂商对受保护窗口的呈现可能不同。
@@ -24,6 +24,27 @@ adb shell am start -n com.solopi.fastpath.demo/.MainActivity
 
 可以使用 `--output` 指定输出目录；调试密钥保留在该目录以便重复覆盖安装。
 APK、密钥、编译中间文件不能提交到 Git。完整 SoloPi 仍使用项目现有 Gradle 构建。
+
+### 受控聊天夹具
+
+使用 `python3 build.py --reply-fixture` 构建独立包 `com.solopi.fastpath.replyfixture`，与原演示应用并存。首页「受控聊天」只在此包中出现，所有消息和联系人都是本地测试数据；发送按钮只追加本地消息，不调用网络。聊天页面可模拟新问题、相同内容的另一条消息、非问题、图片、撤回、群聊及同名联系人，也可单独发送固定测试通知。通知只是唤醒信号，不携带待回复数据。
+
+为便于受控测试，页面的无障碍节点提供以下夹具专用约定。实际安装包为 `com.solopi.fastpath.replyfixture`，资源 ID 前缀仍是 `com.solopi.fastpath.demo:id/`。这些测试标记并不代表任何真实应用提供相同字段。
+
+| 资源 ID | contentDescription / 用途 |
+| --- | --- |
+| `scenario_chat` | 进入新的受控聊天，初始含历史消息 `old-1` |
+| `chat_identity` | `fixture:conversation:<id>:<single|group>:<unique|ambiguous>` |
+| 消息总数 | `fixture:message-count:<count>:<instance>`，由受控聊天模型生成；适配器要求总数与完整连续序列一致，每次重新进入聊天时生成新实例标识 |
+| `chat_message` | `fixture:message:<id>:<incoming|outgoing|system>:<text|image|other>:<active|retracted>`，节点文字为消息正文 |
+| `chat_input`、`chat_send` | 本地回复输入框和发送按钮 |
+| `chat_arrival`、`chat_duplicate` | 增加新问题或另一条相同正文的问题，各自分配不同 ID |
+| `chat_nonquestion`、`chat_picture`、`chat_retract` | 增加非问题、图片消息或撤回最新收到的消息 |
+| `chat_group`、`chat_ambiguous` | 将当前会话改为群聊或同名联系人场景；重进聊天重置 |
+| `chat_wake` | 单独发送固定测试通知 |
+| `chat_image_content` | 打开图片后的画面区域，description 为 `fixture:image:<id>` |
+
+模型契约的纯 Java 测试位于 `tests/com/solopi/fastpath/demo/FixtureChatTest.java`，可用 JDK 编译并运行，不需网络或设备。将聊天页面置于副屏、读取通知、执行安全输入和发送后验收需要单独的集成测试，不能以这个夹具的本地单测代替。
 
 ### 与原 SoloPi 并存的验证副本
 

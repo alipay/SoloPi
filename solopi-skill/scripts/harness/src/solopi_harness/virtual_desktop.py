@@ -4,10 +4,13 @@ from __future__ import annotations
 import base64
 import hashlib
 import html
+import io
 import json
 import os
 import re
 import secrets
+import struct
+import subprocess
 import time
 import uuid
 from collections import Counter
@@ -17,6 +20,43 @@ from . import solopi_ai
 from .native_runtime import NativeExecutionError as Error
 from .strict_png import validate_png
 from . import verification_engine
+
+
+def _fixture_pipe_frame(params, send):
+    fields = ('sessionId', 'ownerToken', 'stepId', 'observationId', 'contactId', 'messageId', 'reply')
+    output = bytearray(b'SPF1' + bytes([int(send)]))
+    for key in fields:
+        value = params.get(key)
+        if not isinstance(value, str) or not value.strip() or '\0' in value:
+            raise Error('invalid_fixture_reply')
+        try:
+            encoded = value.encode('utf-8')
+        except UnicodeError as exc:
+            raise Error('invalid_fixture_reply') from exc
+        if len(encoded) > (8000 if key == 'reply' else 512):
+            raise Error('invalid_fixture_reply')
+        output.extend(struct.pack('>H', len(encoded)))
+        output.extend(encoded)
+    if len(output) > 16384:
+        raise Error('invalid_fixture_reply')
+    return bytes(output)
+
+
+def _write_fixture_pipe(adb, frame):
+    package = adb.control_package
+    if not isinstance(package, str) or not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+', package):
+        raise Error('invalid_control_package')
+    # Code security: only a fixed provider URI is passed as argv; fixture text and
+    # the capability are sent over a no-TTY stdin, never logged or written to disk.
+    command = adb._base() + ['shell', '-T', 'content', 'write', '--uri',
+                             'content://' + package + '.fixtureReplyPipe/write']
+    try:
+        completed = subprocess.run(command, input=frame, stdout=subprocess.DEVNULL,
+                                   stderr=subprocess.DEVNULL, timeout=15, check=False)
+        return completed.returncode == 0
+    except (OSError, subprocess.TimeoutExpired):
+        # The remote side may have received all bytes even when the process fails.
+        return False
 
 
 class _StartTrackingAdb(solopi_ai.AdbClient):
@@ -85,8 +125,16 @@ def _visible_node_reason(target, observation, target_package):
 class VirtualDesktopSession:
     def __init__(self, config, root, cli_args, owner_token=None):
         self.config = config
-        self.root = Path(root).resolve()
-        self.root.mkdir(parents=True, exist_ok=False, mode=0o700)
+        candidate = Path(root)
+        candidate.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        parent = candidate.parent.resolve(strict=True)
+        # Code security: create the exact leaf exclusively before resolving it;
+        # a pre-existing symlink, including a dangling one, must not redirect output.
+        candidate = parent / candidate.name
+        candidate.mkdir(exist_ok=False, mode=0o700)
+        self.root = candidate.resolve(strict=True)
+        if self.root.parent != parent:
+            raise Error('invalid_virtual_artifact_directory')
         self.cli_args = cli_args
         self.adb = _StartTrackingAdb(requested_serial=config["deviceId"], control_package=config["controlPackage"],
                                       executable=os.environ.get("ADB", "adb"))
@@ -306,6 +354,7 @@ class VirtualDesktopSession:
             for line in lines: line['actionCandidate'] = False
             viewport = False
         self.current, self.targets = observation, targets
+        self.current_frame_at = time.monotonic()
         return {"observationId": observation["observationId"], "screenMode": "virtual",
                 "displayId": observation["displayId"], "nodes": nodes, "readableNodes": readable, "ocr": lines,
                 "viewport": {"id": "viewport-1", "actions": ["scroll"], "directions": ["up", "down"]} if viewport else None,
@@ -336,6 +385,130 @@ class VirtualDesktopSession:
         validate_png(raw)
         return {"displayId": result["displayId"], "frameUptimeMs": result.get("frameUptimeMs"),
                 "screenshotDataUrl": "data:image/png;base64," + base64.b64encode(raw).decode("ascii")}
+
+    def notification_status(self):
+        # Code security: only the current owner capability can query the live device session.
+        with solopi_ai.session_from_args(self._args(["agent-status", *self._identity()]), self.adb,
+                                         preserve_foreground=True) as session:
+            return session.notification_status(self.session_id, self.owner_token, timeout=2)
+
+    def fixture_crop(self, value):
+        # Code security: only the fixed test package and the current session's
+        # bound screenshot may supply pixels; callers cannot provide bounds.
+        if self.config['appId'] != 'com.solopi.fastpath.replyfixture': raise Error('fixture_unavailable')
+        if self.action_outcome_unknown: raise Error('virtual_action_outcome_unconfirmed')
+        if (not isinstance(value, dict) or set(value) != {'observationId', 'messageId'}
+                or not isinstance(value['messageId'], str)
+                or not re.fullmatch(r'[A-Za-z0-9-]{1,80}', value['messageId'])):
+            raise Error('invalid_fixture_image')
+        observation = self.current
+        if (not isinstance(observation, dict) or value['observationId'] != observation.get('observationId')
+                or time.monotonic() - getattr(self, 'current_frame_at', 0) > 30
+                or not self.evidence or self.evidence[-1].get('observationId') != value['observationId']):
+            raise Error('stale_observation')
+        nodes = list(solopi_ai.verification_nodes(observation))
+        targets = [node for node in nodes if node.get('resourceId') == 'com.solopi.fastpath.demo:id/chat_image_content'
+                   and node.get('description') == 'fixture:image:' + value['messageId']]
+        if len(targets) != 1 or _visible_node_reason(targets[0], observation, self.config['appId']) is not None:
+            raise Error('fixture_image_unconfirmed')
+        target = targets[0]
+        if target.get('isEnabled') is not True: raise Error('fixture_image_unconfirmed')
+        bounds = target['nodeBound']
+        source = self.root / self.evidence[-1]['screenshot']
+        raw = source.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != self.evidence[-1]['sha256']:
+            raise Error('virtual_screenshot_hash_mismatch')
+        validate_png(raw)
+        try:
+            from PIL import Image
+        except ImportError as exc:
+            raise Error('fixture_image_requires_pillow') from exc
+        try:
+            with Image.open(io.BytesIO(raw)) as frame:
+                frame.load()
+                if frame.size != (observation['screenWidth'], observation['screenHeight']):
+                    raise Error('fixture_image_unconfirmed')
+                crop = frame.crop((bounds['left'], bounds['top'], bounds['right'], bounds['bottom'])).convert('RGB')
+                if all(high == 0 for low, high in crop.getextrema()): raise Error('fixture_image_unconfirmed')
+                output = io.BytesIO()
+                crop.save(output, format='PNG')
+                data = output.getvalue()
+        except Error:
+            raise
+        except Exception as exc:
+            raise Error('fixture_image_unconfirmed') from exc
+        if len(data) > 8 * 1024 * 1024: raise Error('fixture_image_unconfirmed')
+        return {'observationId':value['observationId'], 'messageId':value['messageId'],
+                'verified':True, 'imageData':base64.b64encode(data).decode('ascii')}
+
+    def fixture_reply(self, value, send=False):
+        # Code security: this test-only path is limited to the fixed synthetic fixture.
+        if self.config['appId'] != 'com.solopi.fastpath.replyfixture': raise Error('fixture_unavailable')
+        if self.action_outcome_unknown: raise Error('virtual_action_outcome_unconfirmed')
+        if not isinstance(value, dict) or set(value) != {'observationId', 'contactId', 'messageId', 'reply'}:
+            raise Error('invalid_fixture_reply')
+        if self.current is None or value['observationId'] != self.current.get('observationId'):
+            raise Error('stale_observation')
+        if any(not isinstance(value[key], str) or not re.fullmatch(r'[A-Za-z0-9-]{1,80}', value[key])
+               for key in ('contactId', 'messageId')):
+            raise Error('invalid_fixture_reply')
+        reply = value['reply']
+        if not isinstance(reply, str) or not reply.strip() or len(reply) > 2000:
+            raise Error('invalid_fixture_reply')
+        step_id = 'fixture-' + uuid.uuid4().hex
+        params = {'type': 'fixture-reply-send' if send else 'fixture-reply-input',
+                  'sessionId': self.session_id, 'ownerToken': self.owner_token, 'stepId': step_id, **value}
+        frame = _fixture_pipe_frame(params, send)
+        event = {'type': 'action', 'stepId': step_id, 'observationId': value['observationId'],
+                 'action': 'fixture-send' if send else 'fixture-input', 'state': 'submitted',
+                 'targetId': 'fixture-send' if send else 'fixture-input',
+                 'timestamp': int(time.time() * 1000)}
+        self.events.append(event)
+        self._write_report('pending')
+        self.current, self.targets = None, {}
+        self.action_outcome_unknown = True
+        with solopi_ai.session_from_args(self._args(['agent-status', *self._identity()]), self.adb,
+                                         preserve_foreground=True) as session:
+            # Code security: the write result alone cannot confirm an action. Query
+            # this exact step even after a transport failure; never dispatch it again.
+            _write_fixture_pipe(self.adb, frame)
+            deadline = time.monotonic() + 60
+            receipt = None
+            while time.monotonic() < deadline:
+                response = session.agent('receipt', {'sessionId': self.session_id, 'ownerToken': self.owner_token,
+                                                     'stepId': step_id}, timeout=5)
+                if response.get('errorCode') == 'receipt_not_found':
+                    time.sleep(0.25); continue
+                receipt = response.get('receipt') if response.get('success') is True else None
+                if not isinstance(receipt, dict) or receipt.get('stepId') != step_id: break
+                if receipt.get('status') != 'accepted': break
+                time.sleep(0.25)
+        if (isinstance(receipt, dict) and receipt.get('stepId') == step_id
+                and receipt.get('observationId') == value['observationId']
+                and receipt.get('status') == 'rejected'
+                and receipt.get('errorCode') == 'fixture_pre_dispatch_rejected'):
+            # Code security: only an explicit, bound pre-dispatch receipt is a known rejection.
+            event['state'] = 'rejected'
+            self._write_report('pending')
+            raise Error('fixture_pre_dispatch_rejected')
+        if not isinstance(receipt, dict) or receipt.get('status') != 'succeeded' or not isinstance(receipt.get('settledObservation'), dict):
+            event['state'] = 'unconfirmed'
+            self._write_report('pending')
+            raise Error('virtual_action_outcome_unconfirmed')
+        receipt_file = self.root / ('receipt-%04d.json' % len(self.events))
+        receipt_raw = json.dumps(receipt, ensure_ascii=False).encode('utf-8')
+        receipt_file.write_bytes(receipt_raw)
+        event['receipt'] = receipt_file.name
+        event['receiptSha256'] = hashlib.sha256(receipt_raw).hexdigest()
+        self.action_outcome_unknown = False
+        try:
+            frame = self._frame(receipt['settledObservation'])
+        except BaseException:
+            event['state'] = 'unconfirmed'
+            self.action_outcome_unknown = True
+            raise
+        event['state'] = 'succeeded'
+        return {'receipt': {'status': 'succeeded', 'stepId': step_id}, **frame}
 
     def act(self, value):
         action_started = time.monotonic()

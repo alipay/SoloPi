@@ -243,6 +243,13 @@ public final class VirtualAgentSession implements AutoCloseable {
         finally { clearActionFrame(); }
     }
 
+    public synchronized String input(String observationId, String nodePath, String text) {
+        requireOpen();
+        if (actionFrame == null || !actionObservationId.equals(observationId)) return "stale_observation";
+        try { return nodes.input(observationId, nodePath, text, actionFrame); }
+        finally { clearActionFrame(); }
+    }
+
     public synchronized String scroll(String observationId, String nodePath, String direction) {
         requireOpen();
         if (actionFrame == null || !actionObservationId.equals(observationId)) return "stale_observation";

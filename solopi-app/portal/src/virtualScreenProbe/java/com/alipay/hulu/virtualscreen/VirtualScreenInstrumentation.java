@@ -33,6 +33,7 @@ public final class VirtualScreenInstrumentation extends Instrumentation {
     private boolean tapProbe;
     private boolean destroyContent;
     private boolean boundFrameProbe;
+    private boolean inputProbe;
     @Override public void onCreate(Bundle arguments) {
         super.onCreate(arguments);
         externalLaunch = arguments != null && "true".equals(arguments.getString("externalLaunch"));
@@ -41,6 +42,7 @@ public final class VirtualScreenInstrumentation extends Instrumentation {
         tapProbe = arguments != null && "true".equals(arguments.getString("tapProbe"));
         destroyContent = arguments != null && "true".equals(arguments.getString("destroyContent"));
         boundFrameProbe = arguments != null && "true".equals(arguments.getString("boundFrameProbe"));
+        inputProbe = arguments != null && "true".equals(arguments.getString("inputProbe"));
         start();
     }
 
@@ -59,6 +61,7 @@ public final class VirtualScreenInstrumentation extends Instrumentation {
             final Display display = ((DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE)).getDisplay(id);
             require(display != null && id != Display.DEFAULT_DISPLAY, "display was not created");
             if (shellLaunch) {
+                final String testPackage = inputProbe ? "com.solopi.fastpath.replyfixture" : "com.solopi.fastpath.demo";
                 UiAutomation ui = getUiAutomation(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES);
                 AccessibilityServiceInfo info = ui.getServiceInfo();
                 info.flags |= AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
@@ -66,7 +69,8 @@ public final class VirtualScreenInstrumentation extends Instrumentation {
                         | AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS;
                 ui.setServiceInfo(info);
                 ParcelFileDescriptor descriptor = ui.executeShellCommand("am start --display " + id
-                        + " -n com.solopi.fastpath.demo/.MainActivity");
+                        + (inputProbe ? " --ez inputProbe true" : "") + " -n " + testPackage
+                        + "/com.solopi.fastpath.demo.MainActivity");
                 FileInputStream stream = new FileInputStream(descriptor.getFileDescriptor());
                 ByteArrayOutputStream output = new ByteArrayOutputStream();
                 byte[] bytes = new byte[1024];
@@ -85,13 +89,59 @@ public final class VirtualScreenInstrumentation extends Instrumentation {
                     List<AccessibilityWindowInfo> windows = ui.getWindowsOnAllDisplays().get(id);
                     if (windows != null) {
                         lastState = "window_count=" + windows.size();
-                        try { snapshot = VirtualAccessibility.observeWindows(screen, "com.solopi.fastpath.demo", windows); }
+                        try { snapshot = VirtualAccessibility.observeWindows(screen, testPackage, windows); }
                         catch (IllegalStateException unavailable) { lastState += " error=" + unavailable.getMessage(); }
                     }
                     if (snapshot == null) SystemClock.sleep(200);
                 }
                 require(snapshot != null && snapshot.nodes.size() > 1, "controlled app nodes unavailable: " + lastState
                         + (snapshot == null ? "" : " node_count=" + snapshot.nodes.size()));
+                if (inputProbe) {
+                    VirtualAccessibility.Node field = null;
+                    for (VirtualAccessibility.Node node : snapshot.nodes) {
+                        if ("SoloPi input probe".equals(node.description) && node.editable) {
+                            require(field == null, "ambiguous test input");
+                            field = node;
+                        }
+                    }
+                    require(field != null, "test input missing");
+                    List<AccessibilityWindowInfo> current = ui.getWindowsOnAllDisplays().get(id);
+                    if (current != null) {
+                        StringBuilder geometry = new StringBuilder();
+                        for (AccessibilityWindowInfo window : current) {
+                            android.graphics.Rect bounds = new android.graphics.Rect();
+                            window.getBoundsInScreen(bounds);
+                            geometry.append(window.getType()).append(':').append(bounds).append(';');
+                        }
+                        Bundle geometryStatus = new Bundle(); geometryStatus.putString("windowGeometry", geometry.toString());
+                        sendStatus(Activity.RESULT_OK, geometryStatus);
+                    }
+                    String submitted = VirtualAccessibility.setTextOnWindows(screen, testPackage,
+                            snapshot.guardPage, field.path, "controlled reply", current);
+                    require("submitted".equals(submitted), "input not submitted: " + submitted);
+                    VirtualAccessibility.Snapshot changed = null;
+                    long inputDeadline = SystemClock.uptimeMillis() + 5000;
+                    while (SystemClock.uptimeMillis() < inputDeadline) {
+                        List<AccessibilityWindowInfo> after = ui.getWindowsOnAllDisplays().get(id);
+                        if (after != null) {
+                            changed = VirtualAccessibility.observeWindows(screen, testPackage, after);
+                            boolean matched = false;
+                            for (VirtualAccessibility.Node node : changed.nodes)
+                                if (field.path.equals(node.path) && "controlled reply".equals(node.text)) matched = true;
+                            if (matched) break;
+                        }
+                        SystemClock.sleep(100);
+                    }
+                    require(changed != null, "input result unavailable");
+                    boolean matched = false;
+                    for (VirtualAccessibility.Node node : changed.nodes)
+                        if (field.path.equals(node.path) && "controlled reply".equals(node.text)) matched = true;
+                    require(matched, "input result not observed");
+                    String stale = VirtualAccessibility.setTextOnWindows(screen, testPackage,
+                            snapshot.guardPage, field.path, "must not be written", ui.getWindowsOnAllDisplays().get(id));
+                    require("stale_observation".equals(stale), "changed page did not reject input: " + stale);
+                    result.putString("inputProbe", "PASS: input observed; changed page rejected");
+                }
                 if (boundFrameProbe) {
                     final VirtualScreen ownedScreen = screen;
                     final UiAutomation automation = ui;

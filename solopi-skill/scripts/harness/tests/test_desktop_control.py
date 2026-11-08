@@ -87,6 +87,28 @@ class DesktopControlTests(unittest.TestCase):
         handle = next(n['handle'] for n in frame['elements'] if n['selector'] == {'accessibilityId': 'increment'})
         return self.control.command({'type': 'act', 'action': 'click', 'handle': handle, 'observationId': frame['observationId']})
 
+    def test_virtual_notification_status_requires_owned_session(self):
+        with self.assertRaises(desktop.Error):
+            self.control.dispatch('virtual_notification_status', {})
+        session = mock.Mock()
+        session.notification_status.return_value = {'available': True, 'epoch': 'e', 'sequence': 1}
+        self.control.virtual = session
+        self.assertEqual({'available': True, 'epoch': 'e', 'sequence': 1},
+                         self.control.dispatch('virtual_notification_status', {}))
+        with self.assertRaises(desktop.Error):
+            self.control.dispatch('virtual_notification_status', {'sessionId': 'untrusted'})
+        self.control.virtual = None
+
+    def test_virtual_notification_status_uses_private_session_identity(self):
+        config = {'platform': 'android', 'deviceId': 'device', 'appId': 'com.example.demo', 'controlPackage': 'test', 'controlPort': 23342}
+        owner = virtual_desktop.VirtualDesktopSession(config, Path(self.temp.name) / 'notification', desktop.cli_args)
+        owner.session_id, owner.owner_token = 'session-1', 'owner-token'
+        session = mock.MagicMock()
+        session.__enter__.return_value.notification_status.return_value = {'available': False, 'epoch': 'e', 'sequence': 0}
+        with mock.patch.object(virtual_desktop.solopi_ai, 'session_from_args', return_value=session):
+            self.assertFalse(owner.notification_status()['available'])
+        session.__enter__.return_value.notification_status.assert_called_once_with('session-1', 'owner-token', timeout=2)
+
     def test_stdio_failed_start_reports_confirmed_cleanup_when_no_owner_was_created(self):
         request = json.dumps({'id':'test','operation':'virtual_start','payload':{}}) + '\n'
         result = subprocess.run([sys.executable,'-m','solopi_harness.desktop_control','--artifacts',self.temp.name],
@@ -95,6 +117,38 @@ class DesktopControlTests(unittest.TestCase):
         self.assertFalse(response['success'])
         self.assertTrue(response['cleanupConfirmed'])
         self.assertNotIn('cleanupPending',response)
+
+    def test_virtual_start_uses_only_valid_internal_run_id_and_never_overwrites(self):
+        config = {'platform': 'android', 'deviceId': 'device', 'deviceKind': 'physical',
+                  'appId': 'com.example.demo', '_desktopOwnerToken': 'a' * 64}
+        run_id = 'b' * 32
+        with mock.patch.object(virtual_desktop.VirtualDesktopSession, 'start', return_value={'started': True}):
+            self.control.virtual_start({**config, '_desktopRunId': run_id})
+        self.assertEqual(self.control.virtual.root, (Path(self.temp.name) / ('virtual-' + run_id)).resolve())
+        self.control.virtual = None
+        with self.assertRaises(FileExistsError):
+            self.control.virtual_start({**config, '_desktopRunId': run_id})
+        for invalid in ('../other', 'A' * 32, 'c' * 31, 'c' * 33, 12):
+            with self.subTest(run_id=invalid), self.assertRaises(desktop.Error):
+                self.control.virtual_start({**config, '_desktopRunId': invalid})
+
+    def test_virtual_start_without_internal_run_id_remains_compatible(self):
+        config = {'platform': 'android', 'deviceId': 'device', 'deviceKind': 'physical',
+                  'appId': 'com.example.demo'}
+        with mock.patch.object(virtual_desktop.VirtualDesktopSession, 'start', return_value={}):
+            self.control.virtual_start(config)
+        self.assertRegex(self.control.virtual.root.name, r'^virtual-[a-f0-9]{32}$')
+        self.control.virtual = None
+
+    def test_virtual_start_never_follows_dangling_run_directory_link(self):
+        config = {'platform': 'android', 'deviceId': 'device', 'deviceKind': 'physical',
+                  'appId': 'com.example.demo', '_desktopRunId': 'b' * 32}
+        outside = Path(self.temp.name) / 'outside'
+        leaf = Path(self.temp.name) / ('virtual-' + 'b' * 32)
+        leaf.symlink_to(outside, target_is_directory=True)
+        with self.assertRaises(FileExistsError):
+            self.control.virtual_start(config)
+        self.assertFalse(outside.exists())
 
     def test_virtual_recovery_only_cancels_owned_session_and_confirms_release(self):
         config = {'platform': 'android', 'deviceId': 'device', 'deviceKind': 'physical', 'appId': 'com.example.demo'}

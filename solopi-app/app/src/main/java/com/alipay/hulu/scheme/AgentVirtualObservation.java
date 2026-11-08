@@ -278,11 +278,14 @@ final class AgentVirtualObservation {
             entry.put("enabled", node.enabled);
             entry.put("clickable", node.clickable);
             entry.put("scrollable", node.scrollable);
+            entry.put("editable", node.editable);
             entry.put("password", node.password);
             entry.put("isVisibleToUser", node.visible);
             entry.put("isEnabled", node.enabled);
             entry.put("isClickable", node.clickable);
             entry.put("isScrollable", node.scrollable);
+            entry.put("isEditable", node.editable);
+            entry.put("isShowingHintText", node.showingHintText);
             entry.put("isPassword", node.password);
             JSONObject bounds = new JSONObject(true);
             bounds.put("left", node.bounds.left); bounds.put("top", node.bounds.top);

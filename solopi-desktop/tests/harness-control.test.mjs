@@ -121,6 +121,57 @@ test('virtual session keeps its device lease until cleanup is confirmed', async 
   f.gate.acquire({ reservedDeviceSerials: ['phone'] }).release();
 });
 
+test('notification status only reaches the owner of the active virtual session', async t => {
+  const f = fixture(t, r => r.operation === 'virtual_notification_status'
+    ? { success: true, data: { available: true, epoch: 'e', sequence: 1 } }
+    : { success: true, data: {} });
+  await f.bridge.request('virtual_start', target, { owner: 'owner-a' });
+  await assert.rejects(f.bridge.request('virtual_notification_status', {}, { owner: 'owner-b' }), /virtual_owner_mismatch/);
+  const status = await f.bridge.request('virtual_notification_status', {}, { owner: 'owner-a' });
+  assert.deepEqual(status.data, { available: true, epoch: 'e', sequence: 1 });
+  assert.equal(f.sent.filter(r => r.operation === 'virtual_notification_status').length, 1);
+});
+
+test('fixture reply actions remain bound to the active virtual owner', async t => {
+  const f = fixture(t, () => ({ success:true, data:{} }));
+  await f.bridge.request('virtual_start', target, { owner:'owner-a' });
+  for (const operation of ['virtual_fixture_input', 'virtual_fixture_send']) {
+    await assert.rejects(f.bridge.request(operation, {}, { owner:'owner-b' }), /virtual_owner_mismatch/);
+    await f.bridge.request(operation, {}, { owner:'owner-a' });
+    assert.equal(f.sent.filter(request => request.operation === operation).length, 1);
+  }
+});
+
+test('trusted context binds virtual run ID while payload cannot select bridge fields', async t => {
+  let reportPath;
+  const f = fixture(t, r => r.operation === 'virtual_start'
+    ? {success:true,data:{pendingReport:{status:'not_tested',cleanup:'pending',checkpoints:[],reportPath}}}
+    : {success:true,data:{cleanupConfirmed:true}});
+  const directory = path.join(f.root, 'artifacts', 'virtual-' + 'a'.repeat(32));
+  fs.mkdirSync(directory, {recursive:true}); reportPath = path.join(directory, 'report.html'); fs.writeFileSync(reportPath, '');
+  for (const payload of [{...target,_desktopRunId:'a'.repeat(32)}, {...target,_desktopOwnerToken:'a'.repeat(64)}])
+    await assert.rejects(f.bridge.request('virtual_start', payload, {owner:'owner-a'}), /reserved_desktop_field/);
+  for (const evidenceRunId of ['../other', 'A'.repeat(32), 'a'.repeat(31), 42])
+    await assert.rejects(f.bridge.request('virtual_start', target, {owner:'owner-a',evidenceRunId}), /invalid_evidence_run_id/);
+  await assert.rejects(f.bridge.request('virtual_observe', {}, {owner:'owner-a',evidenceRunId:'a'.repeat(32)}), /invalid_evidence_run_id/);
+  await f.bridge.request('virtual_start', target, {owner:'owner-a',evidenceRunId:'a'.repeat(32)});
+  assert.equal(f.sent[0].payload._desktopRunId, 'a'.repeat(32));
+});
+
+test('bound run refuses missing or mismatched report and keeps ownership for cleanup', async t => {
+  let reportPath;
+  const f = fixture(t, r => r.operation === 'virtual_end'
+    ? {success:true,data:{cleanupConfirmed:true}}
+    : {success:true,data:reportPath ? {pendingReport:{status:'not_tested',cleanup:'pending',checkpoints:[],reportPath}} : {}});
+  await assert.rejects(f.bridge.request('virtual_start', target, {owner:'owner-a',evidenceRunId:'a'.repeat(32)}), /invalid_virtual_report/);
+  assert.throws(() => f.gate.acquire({reservedDeviceSerials:['phone']}), {code:'TEST_TASK_BUSY'});
+  await f.bridge.request('virtual_end', {}, {owner:'owner-a'});
+  const directory = path.join(f.root,'artifacts','virtual-' + 'b'.repeat(32));
+  fs.mkdirSync(directory,{recursive:true}); reportPath=path.join(directory,'report.html'); fs.writeFileSync(reportPath,'');
+  await assert.rejects(f.bridge.request('virtual_start', target, {owner:'owner-a',evidenceRunId:'a'.repeat(32)}), /invalid_virtual_report/);
+  await f.bridge.request('virtual_end', {}, {owner:'owner-a'});
+});
+
 test('losing the virtual owner process does not assert cleanup', async t => {
   const f = fixture(t, r => r.operation === 'virtual_recover'
     ? { success: false, error: 'virtual_cleanup_unconfirmed' } : { success: true, data: {} });
@@ -278,4 +329,6 @@ test('new IPC channels are allowlisted and registered after main-frame sender ga
   for (const op of ['discover', 'connect', 'command', 'disconnect', 'replay', 'stop', 'reveal']) {
     assert.ok(preload.includes(`'harness:${op}'`));
   }
+  assert.ok(preload.includes("'reply-task:simulate-image'"));
+  assert.ok(main.includes("ipcMain.handle('reply-task:simulate-image', () => replyTaskResult(() => replyTask.simulateArrival('image')))"));
 });

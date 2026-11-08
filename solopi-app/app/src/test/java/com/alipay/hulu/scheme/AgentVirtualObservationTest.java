@@ -71,4 +71,18 @@ public class AgentVirtualObservationTest {
         try { AgentVirtualObservation.encode(page); fail("orphan accepted"); }
         catch (IllegalArgumentException expected) { }
     }
+
+    @Test public void reportsEditableStateWithoutExposingPrivatePath() {
+        VirtualActionGuard.Box bounds = new VirtualActionGuard.Box(0, 0, 100, 200);
+        VirtualActionGuard.Node root = new VirtualActionGuard.Node("0", "", "", "root", "Layout", bounds,
+                true, true, false, false);
+        VirtualActionGuard.Node input = new VirtualActionGuard.Node("0.1", "", "", "field", "EditText", bounds,
+                true, true, false, false, false, true);
+        VirtualActionGuard.Page page = new VirtualActionGuard.Page(5, 7, 100, 200, 0, "test.app",
+                Collections.singletonList(new VirtualActionGuard.Window(7, 1, bounds)), Arrays.asList(root, input));
+        JSONObject child = AgentVirtualObservation.encode(page).page.getJSONArray("children").getJSONObject(0);
+        assertTrue(child.getBooleanValue("editable"));
+        assertTrue(child.getBooleanValue("isEditable"));
+        assertFalse(child.containsKey("path"));
+    }
 }

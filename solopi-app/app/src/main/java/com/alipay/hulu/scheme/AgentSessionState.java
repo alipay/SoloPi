@@ -157,6 +157,17 @@ public final class AgentSessionState {
         return rememberRejection(stepId, observationId, action, code, message).receipt;
     }
 
+    synchronized void rejectFixturePipeBeforeDispatch(String expectedSessionId, String expectedOwnerToken,
+                                                      String stepId, String observationId) {
+        // Code security: only a fixture step and its verified session owner may
+        // create this pre-dispatch receipt; rejectAction preserves earlier receipts.
+        if (stepId == null || !stepId.matches("fixture-[0-9a-f]{32}") || observationId == null
+                || observationId.isEmpty()) return;
+        rejectAction(expectedSessionId, expectedOwnerToken, stepId, observationId,
+                Action.of("wait", Collections.<String, Object>singletonMap("durationMs", 100L)),
+                "fixture_pre_dispatch_rejected", "Fixture action was rejected before dispatch");
+    }
+
     synchronized BeginResult beginAction(String expectedSessionId,
                                          String expectedOwnerToken,
                                          String stepId,

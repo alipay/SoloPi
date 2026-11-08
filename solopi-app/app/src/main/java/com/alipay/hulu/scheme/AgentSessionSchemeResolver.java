@@ -40,6 +40,7 @@ import com.alipay.hulu.common.utils.LogUtil;
 import com.alipay.hulu.common.utils.PermissionUtil;
 import com.alipay.hulu.common.utils.StringUtil;
 import com.alipay.hulu.service.DeviceControlLease;
+import com.alipay.hulu.service.MessageWakeListenerService;
 import com.alipay.hulu.virtualscreen.VirtualAgentSession;
 import com.alipay.hulu.virtualscreen.VirtualActionGuard;
 import com.alipay.hulu.virtualscreen.VirtualOcrTargetGuard;
@@ -124,6 +125,7 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
     private static Frame currentFrame;
     private static final Object VIRTUAL_FRAME_LOCK = new Object();
     private static VirtualFrame currentVirtualFrame;
+    private static FixturePending fixturePending;
     private static final Object OPERATION_LOCK = new Object();
     private static ActiveOperation activeOperation;
     private static final Object TOUCH_LOCK = new Object();
@@ -155,6 +157,9 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
                 case "virtual-preview":
                     callback.onResult(virtualPreview(params));
                     return true;
+                case "notification-status":
+                    callback.onResult(notificationStatus(params));
+                    return true;
                 case "receipt":
                     callback.onResult(receipt(params));
                     return true;
@@ -168,6 +173,11 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
                 case "act":
                     requireAdb(context);
                     callback.onResult(scheduleAction(params));
+                    return true;
+                case "fixture-reply-input":
+                case "fixture-reply-send":
+                    requireAdb(context);
+                    callback.onResult(scheduleFixtureReply(params, "fixture-reply-send".equals(type)));
                     return true;
                 case "pause":
                     requireAdb(context);
@@ -208,7 +218,7 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         Map<String, Object> result = success();
         result.put("protocolVersion", PROTOCOL_VERSION);
         result.put("queries", java.util.Arrays.asList(
-                "capabilities", "start-status", "status", "observe", "receipt", "timeline", "virtual-preview"));
+                "capabilities", "start-status", "status", "observe", "receipt", "timeline", "virtual-preview", "notification-status"));
         result.put("commands", java.util.Arrays.asList(
                 "start", "act", "pause", "resume", "end", "cancel", "cleanup"));
         result.put("actions", java.util.Arrays.asList(
@@ -420,6 +430,13 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         return result;
     }
 
+    private Map<String, Object> notificationStatus(Map<String, String> params) throws AgentProtocolException {
+        requireVirtualSession(require(params, "sessionId"), require(params, "ownerToken"));
+        Map<String, Object> result = success();
+        result.put("notification", MessageWakeListenerService.status());
+        return result;
+    }
+
     private Map<String, Object> virtualPreview(Map<String, String> params) throws AgentProtocolException {
         String sessionId = require(params, "sessionId"), ownerToken = require(params, "ownerToken");
         if (!"virtual".equals(requireWorkConfig(sessionId, ownerToken).screenMode))
@@ -489,6 +506,106 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         result.put("accepted", true);
         result.put("stepId", stepId);
         return result;
+    }
+
+    private Map<String, Object> scheduleFixtureReply(Map<String, String> params, final boolean send)
+            throws AgentProtocolException {
+        // Code security: this endpoint handles synthetic test data only, never production chat.
+        if (!BuildConfig.DEBUG) throw new AgentProtocolException("fixture_unavailable", "Fixture endpoint unavailable");
+        final String sessionId = require(params, "sessionId"), ownerToken = require(params, "ownerToken");
+        final String stepId = require(params, "stepId"), observationId = require(params, "observationId");
+        final String contact = require(params, "contactId"), message = require(params, "messageId");
+        final String reply = require(params, "reply");
+        AgentSessionState.Config config = requireWorkConfig(sessionId, ownerToken);
+        if (!"virtual".equals(config.screenMode) || !FixtureReplyGuard.PACKAGE.equals(config.targetPackage))
+            throw new AgentProtocolException("fixture_unavailable", "Fixture endpoint unavailable");
+        requireVirtualSession(sessionId, ownerToken);
+        BackgroundExecutor.execute(new Runnable() {
+            @Override public void run() { executeFixtureReply(sessionId, ownerToken, stepId, observationId, contact, message, reply, send); }
+        });
+        Map<String, Object> result = success(); result.put("accepted", true); result.put("stepId", stepId);
+        return result;
+    }
+
+    static void scheduleFixturePipe(Map<String, String> params, boolean send) throws AgentProtocolException {
+        // Code security: the pipe shares the same fixture-only session and target checks as the scheme endpoint.
+        try {
+            new AgentSessionSchemeResolver().scheduleFixtureReply(params, send);
+        } catch (AgentProtocolException rejected) {
+            // Code security: this exception precedes dispatch; invalid owners cannot write a receipt.
+            SESSION.rejectFixturePipeBeforeDispatch(params.get("sessionId"), params.get("ownerToken"),
+                    params.get("stepId"), params.get("observationId"));
+            throw rejected;
+        }
+    }
+
+    private void executeFixtureReply(String sessionId, String ownerToken, String stepId, String observationId,
+                                     String contact, String message, String reply, boolean send) {
+        synchronized (VIRTUAL_FRAME_LOCK) {
+            AgentSessionState.Action action = null;
+            try {
+                AgentSessionState.Config config = requireWorkConfig(sessionId, ownerToken);
+                if (!BuildConfig.DEBUG || !"virtual".equals(config.screenMode)
+                        || !FixtureReplyGuard.PACKAGE.equals(config.targetPackage)) return;
+                VirtualAgentSession virtual = requireVirtualSession(sessionId, ownerToken);
+                VirtualFrame frame = currentVirtualFrame;
+                if (frame == null || !sessionId.equals(frame.sessionId) || !observationId.equals(frame.observationId))
+                    throw new AgentProtocolException("stale_observation", "Current observation required");
+                String path = FixtureReplyGuard.target(frame.captured.guardPage, contact, message, reply, send);
+                if (path == null) throw new AgentProtocolException("fixture_identity_unconfirmed", "Fixture target not verified");
+                if (fixturePending != null && !fixturePending.sessionId.equals(sessionId)) fixturePending = null;
+                if (send && (fixturePending == null || !fixturePending.matches(sessionId, contact, message, reply)))
+                    throw new AgentProtocolException("fixture_input_unconfirmed", "Fixture input not verified");
+                if (!send && fixturePending != null)
+                    throw new AgentProtocolException("fixture_pending_send", "Previous fixture input is pending");
+                String nodeId = null;
+                for (Map.Entry<String, String> entry : frame.captured.nodePaths.entrySet()) {
+                    if (path.equals(entry.getValue())) {
+                        if (nodeId != null) throw new AgentProtocolException("fixture_identity_unconfirmed", "Fixture target ambiguous");
+                        nodeId = entry.getKey();
+                    }
+                }
+                if (nodeId == null) throw new AgentProtocolException("fixture_identity_unconfirmed", "Fixture target unavailable");
+                Map<String, Object> args = new LinkedHashMap<>(); args.put("nodeId", nodeId);
+                // Code security: synthetic test text is not persisted in the action receipt or timeline.
+                if (!send) args.put("text", "");
+                action = AgentSessionState.Action.of(send ? "click" : "input", args);
+                AgentSessionState.BeginResult begin = SESSION.beginAction(sessionId, ownerToken, stepId, observationId,
+                        frame.captured.signature, action);
+                if (!begin.accepted) return;
+                if (send) fixturePending = null;
+                String dispatch = send ? virtual.click(frame.captured.virtualObservationId, path)
+                        : virtual.input(frame.captured.virtualObservationId, path, reply);
+                if (!"submitted".equals(dispatch)) {
+                    SESSION.finishAction(begin.generation, stepId, false, "Fixture action rejected", null); return;
+                }
+                SESSION.noteVirtualDispatch(begin.generation, stepId);
+                AgentVirtualObservation settled = settleVirtual(virtual, sessionId, ownerToken);
+                boolean verified = send ? FixtureReplyGuard.sent(settled.guardPage, contact, message, reply,
+                        FixtureReplyGuard.outgoingIds(frame.captured.guardPage))
+                        : FixtureReplyGuard.target(settled.guardPage, contact, message, reply, true) != null;
+                if (!verified) {
+                    SESSION.finishAction(begin.generation, stepId, false, "Fixture result unconfirmed", null); return;
+                }
+                if (!send) fixturePending = new FixturePending(sessionId, contact, message, reply);
+                AgentSessionState.Receipt receipt = SESSION.finishAction(begin.generation, stepId, true, null,
+                        AgentSessionState.ObservationInput.of(settled.signature, settled.evidence));
+                if (receipt != null && receipt.settledObservation != null)
+                    currentVirtualFrame = new VirtualFrame(sessionId, receipt.settledObservation.observationId, settled);
+            } catch (Exception failure) {
+                AgentSessionState.Receipt previous = SESSION.receipt(sessionId, ownerToken, stepId).value;
+                if (previous != null && "accepted".equals(previous.status)) {
+                    Object generation = SESSION.snapshot().get("generation");
+                    if (generation instanceof Number) SESSION.finishAction(((Number) generation).longValue(), stepId,
+                            false, "Fixture action outcome unconfirmed", null);
+                } else {
+                    if (action == null) action = AgentSessionState.Action.of("wait", Collections.<String, Object>singletonMap("durationMs", 100L));
+                    SESSION.rejectAction(sessionId, ownerToken, stepId, observationId, action,
+                            "fixture_action_rejected", "Fixture action not authorized");
+                }
+                if (failure instanceof InterruptedException) Thread.currentThread().interrupt();
+            }
+        }
     }
 
     private void executeAction(final String sessionId, String ownerToken, String stepId,
@@ -1657,6 +1774,17 @@ public class AgentSessionSchemeResolver implements SchemeActionResolver {
         final AgentVirtualObservation captured;
         VirtualFrame(String sessionId, String observationId, AgentVirtualObservation captured) {
             this.sessionId = sessionId; this.observationId = observationId; this.captured = captured;
+        }
+    }
+
+    private static final class FixturePending {
+        final String sessionId, contact, message, reply;
+        FixturePending(String sessionId, String contact, String message, String reply) {
+            this.sessionId = sessionId; this.contact = contact; this.message = message; this.reply = reply;
+        }
+        boolean matches(String sessionId, String contact, String message, String reply) {
+            return this.sessionId.equals(sessionId) && this.contact.equals(contact)
+                    && this.message.equals(message) && this.reply.equals(reply);
         }
     }
 

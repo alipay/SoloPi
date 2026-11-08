@@ -11,6 +11,7 @@ function endpoint(baseUrl) {
 }
 async function requestModelOnce({ provider, messages, tools, signal:callerSignal, fetchImpl = fetch, purpose = 'conversation', maxTokens, responseFormat, stream = true, toolChoice, allowArgumentFeedback = false, onProgress = () => {}, onDelta = () => {}, onMetrics=()=>{} }) {
   if (!provider?.model) throw Error('请先在设置中心配置模型名称');
+  const privateReply = purpose === 'reply-text' || purpose === 'reply-image';
   const url = endpoint(provider.baseUrl), startedAt = Date.now();
   const requestId=randomUUID();
   const policy=provider.requestPolicy && require('./request-policy').requestPolicy(provider.requestPolicy);
@@ -39,12 +40,19 @@ async function requestModelOnce({ provider, messages, tools, signal:callerSignal
   waitingTimer.unref?.();
   response = await observation.run(()=>fetchImpl(url, {
     method: 'POST', signal,
+    // Code security: reply data is authorized only for the confirmed endpoint.
+    ...(privateReply ? {redirect:'manual'} : {}),
     headers: { 'Content-Type': 'application/json', ...(provider.apiKey ? {Authorization: `Bearer ${provider.apiKey}`} : {}) },
     body: requestBody,
   }));
   clearInterval(waitingTimer);
   deadline?.headers();
   transport.headersMs = Date.now()-startedAt;
+  if (privateReply && response.status >= 300 && response.status < 400) {
+    // Code security: neither the redirect target nor its response body enters diagnostics.
+    void response.body?.cancel().catch(() => {});
+    throw Object.assign(Error('Model redirect blocked'), {code:'MODEL_REDIRECT_BLOCKED'});
+  }
   if (!response.ok) {
     const retryAfter=response.headers?.get?.('retry-after');
     if(retryAfter){
@@ -67,13 +75,15 @@ async function requestModelOnce({ provider, messages, tools, signal:callerSignal
   stage = 'validate';
   const message = data.choices?.[0]?.message;
   if(!stream && firstOutputMs===undefined)firstOutputMs=Date.now()-startedAt;
-  diagnostics.record({event:'model.response',upstreamRequestId:response.headers?.get?.('x-request-id'),contentType:typeof message?.content,requestId,purpose,model:provider.model,httpStatus:response.status,durationMs:Date.now()-startedAt,firstOutputMs,headersMs:transport.headersMs,requestBytes:transport.requestBytes,responseFields:Object.keys(data || {}),messageFields:Object.keys(message || {}),choiceCount:data.choices?.length,finishReason:data.choices?.[0]?.finish_reason,thinkingDisabledRequested:provider.thinking==='disabled',reasoningReturnedWhileDisabled:provider.thinking==='disabled' && !!message?.reasoning_content,outputCharacters:typeof message?.content==='string'?message.content.length:0,reasoningCharacters:typeof message?.reasoning_content==='string'?message.reasoning_content.length:0,promptTokens:data.usage?.prompt_tokens,completionTokens:data.usage?.completion_tokens,totalTokens:data.usage?.total_tokens});
-  diagnostics.record({event:'model.tool-frames',modelAdapterRevision,requestId,purpose,wireFinishReason:transport.wireFinishReason,wireDone:transport.wireDone,wireToolCallFragments:transport.wireToolCallFragments,unexpectedToolCallFrames:transport.unexpectedToolCallFrames,parsedToolCalls:message?.tool_calls?.length || 0});
-  responseMetadata = {finishReason:data.choices?.[0]?.finish_reason,maxTokens,
+  diagnostics.record({event:'model.response',...(privateReply ? {} : {upstreamRequestId:response.headers?.get?.('x-request-id'),responseFields:Object.keys(data || {}),messageFields:Object.keys(message || {}),finishReason:data.choices?.[0]?.finish_reason,promptTokens:data.usage?.prompt_tokens,completionTokens:data.usage?.completion_tokens,totalTokens:data.usage?.total_tokens}),contentType:typeof message?.content,requestId,purpose,model:provider.model,httpStatus:response.status,durationMs:Date.now()-startedAt,firstOutputMs,headersMs:transport.headersMs,requestBytes:transport.requestBytes,choiceCount:data.choices?.length,thinkingDisabledRequested:provider.thinking==='disabled',reasoningReturnedWhileDisabled:provider.thinking==='disabled' && !!message?.reasoning_content,outputCharacters:typeof message?.content==='string'?message.content.length:0,reasoningCharacters:typeof message?.reasoning_content==='string'?message.reasoning_content.length:0});
+  diagnostics.record({event:'model.tool-frames',modelAdapterRevision,requestId,purpose,...(privateReply ? {} : {wireFinishReason:transport.wireFinishReason}),wireDone:transport.wireDone,wireToolCallFragments:transport.wireToolCallFragments,unexpectedToolCallFrames:transport.unexpectedToolCallFrames,parsedToolCalls:message?.tool_calls?.length || 0});
+  // Code security: private reply diagnostics cannot trust text or usage fields
+  // supplied by a model service, which may echo fragments of the request.
+  responseMetadata = {...(privateReply ? {} : {finishReason:data.choices?.[0]?.finish_reason,
+    promptTokens:data.usage?.prompt_tokens,completionTokens:data.usage?.completion_tokens,totalTokens:data.usage?.total_tokens}),maxTokens,
     outputCharacters:typeof message?.content==='string'?message.content.length:0,
-    reasoningCharacters:typeof message?.reasoning_content==='string'?message.reasoning_content.length:0,
-    promptTokens:data.usage?.prompt_tokens,completionTokens:data.usage?.completion_tokens,totalTokens:data.usage?.total_tokens};
-  if (purpose !== 'compaction' && responseMetadata.finishReason === 'length')
+    reasoningCharacters:typeof message?.reasoning_content==='string'?message.reasoning_content.length:0};
+  if (purpose !== 'compaction' && data.choices?.[0]?.finish_reason === 'length')
     throw Object.assign(Error('模型输出达到上限'), {code:'OUTPUT_LIMIT'});
   if (!message || (purpose !== 'compaction' && !(typeof message.content === 'string' && message.content.trim()) && !message.tool_calls?.length))
     throw Object.assign(Error('模型未返回文本或工具调用'), {code:'EMPTY_RESPONSE'});
@@ -102,7 +112,7 @@ async function requestModelOnce({ provider, messages, tools, signal:callerSignal
   }
 
   if (message.tool_calls?.length > 16) throw Error('单轮工具调用超过限制');
-  onMetrics({durationMs:Date.now()-startedAt,headersMs:transport.headersMs,firstOutputMs,requestBytes:transport.requestBytes,promptTokens:data.usage?.prompt_tokens,completionTokens:data.usage?.completion_tokens});
+  onMetrics({durationMs:Date.now()-startedAt,headersMs:transport.headersMs,firstOutputMs,requestBytes:transport.requestBytes,...(privateReply ? {} : {promptTokens:data.usage?.prompt_tokens,completionTokens:data.usage?.completion_tokens})});
   return { ...(purpose !== 'compaction' ? {usageAnchor:require('./usage-anchor').usageAnchor(data,{provider,messages,tools,maxTokens})} : {}), ...(purpose === 'compaction' ? { finish_reason: data.choices[0].finish_reason, usage: data.usage } : {}), role: 'assistant', content: message.content || null, ...(typeof message.reasoning_content === 'string' ? { reasoning_content: message.reasoning_content } : {}), ...(message.tool_calls?.length ? { tool_calls: message.tool_calls } : {}) };
   } catch (error) {
     if(!callerSignal?.aborted && deadline?.signal.aborted){error=Object.assign(Error('Model request deadline exceeded'),{code:'MODEL_REQUEST_TIMEOUT'});Object.assign(transport,deadline.snapshot());}
@@ -118,9 +128,18 @@ async function requestModelOnce({ provider, messages, tools, signal:callerSignal
       }
     }
     const {redactUpstreamMessage,requestIdentifiers}=require('./upstream-diagnostics');
-    const identifiers=requestIdentifiers(response?.headers);
-    const echoed=[provider.apiKey,...messages.flatMap(m=>[typeof m.content==='string'?m.content:JSON.stringify(m.content),...(m.tool_calls||[]).map(c=>c.function?.arguments)])];
-    error.upstreamMessage=redactUpstreamMessage(error.upstreamMessage,echoed);
+    // Code security: reply-service errors may echo a fragment of private chat or
+    // knowledge, which cannot be reliably redacted by comparing whole messages.
+    const identifiers=privateReply ? {} : requestIdentifiers(response?.headers);
+    if (privateReply) {
+      error.upstreamMessage=undefined;
+      error.upstreamCode=undefined;
+      error.upstreamType=undefined;
+      error.upstreamRequestId=undefined;
+    } else {
+      const echoed=[provider.apiKey,...messages.flatMap(m=>[typeof m.content==='string'?m.content:JSON.stringify(m.content),...(m.tool_calls||[]).map(c=>c.function?.arguments)])];
+      error.upstreamMessage=redactUpstreamMessage(error.upstreamMessage,echoed);
+    }
     diagnostics.record({event:'model.error',requestId,purpose,stage,durationMs:Date.now()-startedAt,...transport,httpStatus:response?.status,code:error.cause?.code || error.code,upstreamCode:error.upstreamCode,upstreamType:error.upstreamType,upstreamRequestId:identifiers.requestId || error.upstreamRequestId,upstreamTraceId:identifiers.traceId,upstreamMessage:error.upstreamMessage});
     throw modelFailure(error, { url, model: provider.model, purpose, stage, startedAt, status: response?.status, requestId: identifiers.requestId, aborted: callerSignal?.aborted, responseMetadata: {...responseMetadata,...transport,clientRequestId:requestId,upstreamTraceId:identifiers.traceId} });
   } finally { deadline?.close();observation.finish(); }

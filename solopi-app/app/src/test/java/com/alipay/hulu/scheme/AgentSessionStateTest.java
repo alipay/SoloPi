@@ -113,6 +113,39 @@ public class AgentSessionStateTest {
         assertEquals(0, state.getAcceptedStepCount());
     }
 
+    @Test public void fixturePreDispatchRejectionRequiresOwnerAndPreservesExistingReceipt() {
+        AgentSessionState.StartResult started = start("owner-token-a-12345", config());
+        String step = "fixture-0123456789abcdef0123456789abcdef";
+        state.rejectFixturePipeBeforeDispatch(started.sessionId, "wrong-owner", step, "obs-1");
+        assertFalse(state.receipt(started.sessionId, started.ownerToken, step).success);
+        state.rejectFixturePipeBeforeDispatch(started.sessionId, started.ownerToken, "arbitrary-step", "obs-1");
+        assertFalse(state.receipt(started.sessionId, started.ownerToken, "arbitrary-step").success);
+        state.rejectFixturePipeBeforeDispatch(started.sessionId, started.ownerToken, step, "obs-1");
+        AgentSessionState.Receipt rejected = state.receipt(started.sessionId, started.ownerToken, step).value;
+        assertEquals("rejected", rejected.status);
+        assertEquals("fixture_pre_dispatch_rejected", rejected.errorCode);
+        assertEquals("obs-1", rejected.observationId);
+        state.rejectAction(started.sessionId, started.ownerToken, step, "obs-2",
+                AgentSessionState.Action.of("home", Collections.<String, Object>emptyMap()), "other", "other");
+        assertEquals("fixture_pre_dispatch_rejected", state.receipt(started.sessionId, started.ownerToken, step).value.errorCode);
+        assertEquals(0, state.getAcceptedStepCount());
+    }
+
+    @Test public void fixturePreDispatchRejectionDoesNotReplaceAcceptedAction() {
+        AgentSessionState.StartResult started = start("owner-token-a-12345", config());
+        AgentSessionState.Observation observation = state.recordObservation(started.sessionId, started.ownerToken,
+                "tree", Collections.<String, Object>emptyMap()).value;
+        String step = "fixture-0123456789abcdef0123456789abcdef";
+        AgentSessionState.BeginResult accepted = state.beginAction(started.sessionId, started.ownerToken, step,
+                observation.observationId, "tree", AgentSessionState.Action.of("wait", singleton("durationMs", 100L)));
+        assertTrue(accepted.accepted);
+        state.rejectFixturePipeBeforeDispatch(started.sessionId, started.ownerToken, step, observation.observationId);
+        assertEquals("accepted", state.receipt(started.sessionId, started.ownerToken, step).value.status);
+        assertNotNull(state.finishAction(accepted.generation, step, true, null,
+                AgentSessionState.ObservationInput.of("new-tree", Collections.<String, Object>emptyMap())));
+        assertEquals("succeeded", state.receipt(started.sessionId, started.ownerToken, step).value.status);
+    }
+
     @Test public void verifiedVisualProgressPreventsFalseNoProgressFailure() {
         AgentSessionState.Config bounds = new AgentSessionState.Config(10, 60000L, 5000L, 3, 1);
         AgentSessionState.StartResult started = start("owner-token-a-12345", bounds);

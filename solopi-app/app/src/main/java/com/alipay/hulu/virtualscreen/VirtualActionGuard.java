@@ -45,16 +45,28 @@ public final class VirtualActionGuard {
     public static final class Node {
         public final String path, text, description, resourceId, role;
         public final Box bounds;
-        public final boolean visible, enabled, clickable, password, scrollable;
+        public final boolean visible, enabled, clickable, password, scrollable, editable, showingHintText;
         public Node(String path, String text, String description, String resourceId, String role, Box bounds,
                     boolean visible, boolean enabled, boolean clickable, boolean password) {
             this(path, text, description, resourceId, role, bounds, visible, enabled, clickable, password, false);
         }
         public Node(String path, String text, String description, String resourceId, String role, Box bounds,
                     boolean visible, boolean enabled, boolean clickable, boolean password, boolean scrollable) {
+            this(path, text, description, resourceId, role, bounds, visible, enabled, clickable, password, scrollable, false);
+        }
+        public Node(String path, String text, String description, String resourceId, String role, Box bounds,
+                    boolean visible, boolean enabled, boolean clickable, boolean password, boolean scrollable,
+                    boolean editable) {
+            this(path, text, description, resourceId, role, bounds, visible, enabled, clickable, password,
+                    scrollable, editable, false);
+        }
+        public Node(String path, String text, String description, String resourceId, String role, Box bounds,
+                    boolean visible, boolean enabled, boolean clickable, boolean password, boolean scrollable,
+                    boolean editable, boolean showingHintText) {
             this.path = path; this.text = text; this.description = description; this.resourceId = resourceId;
             this.role = role; this.bounds = bounds; this.visible = visible; this.enabled = enabled;
-            this.clickable = clickable; this.password = password; this.scrollable = scrollable;
+            this.clickable = clickable; this.password = password; this.scrollable = scrollable; this.editable = editable;
+            this.showingHintText = showingHintText;
         }
         @Override public boolean equals(Object value) {
             if (!(value instanceof Node)) return false;
@@ -63,9 +75,10 @@ public final class VirtualActionGuard {
                     && Objects.equals(description, n.description) && Objects.equals(resourceId, n.resourceId)
                     && Objects.equals(role, n.role) && Objects.equals(bounds, n.bounds)
                     && visible == n.visible && enabled == n.enabled && clickable == n.clickable
-                    && password == n.password && scrollable == n.scrollable;
+                    && password == n.password && scrollable == n.scrollable && editable == n.editable
+                    && showingHintText == n.showingHintText;
         }
-        @Override public int hashCode() { return Objects.hash(path, text, description, resourceId, role, bounds, visible, enabled, clickable, password, scrollable); }
+        @Override public int hashCode() { return Objects.hash(path, text, description, resourceId, role, bounds, visible, enabled, clickable, password, scrollable, editable, showingHintText); }
     }
     public static final class Page {
         public final int displayId, windowId, width, height, rotation;
@@ -82,11 +95,16 @@ public final class VirtualActionGuard {
     }
     /** Returns a stable rejection code or null when the candidate passes all checks. */
     public static String check(Page previous, Page current, String path) {
-        return checkTarget(previous, current, path, false);
+        return checkTarget(previous, current, path, "click");
     }
 
     public static String checkScroll(Page previous, Page current, String path) {
-        return checkTarget(previous, current, path, true);
+        return checkTarget(previous, current, path, "scroll");
+    }
+
+    /** Input targets must be independently verified and never inferred from clickability. */
+    public static String checkInput(Page previous, Page current, String path) {
+        return checkTarget(previous, current, path, "input");
     }
 
     /** Bounds the gesture and a narrow safety margin inside the verified scrollable node. */
@@ -156,7 +174,7 @@ public final class VirtualActionGuard {
         return null;
     }
 
-    private static String checkTarget(Page previous, Page current, String path, boolean scroll) {
+    private static String checkTarget(Page previous, Page current, String path, String action) {
         if (previous == null || current == null || path == null || path.isEmpty()) return "invalid_observation";
         String pageMismatch = comparePages(previous, current);
         if (pageMismatch != null) return pageMismatch;
@@ -169,7 +187,8 @@ public final class VirtualActionGuard {
             }
         }
         if (target == null || !target.visible || !target.enabled || target.password
-                || (scroll ? !target.scrollable : !target.clickable)) return "target_unavailable";
+                || ("scroll".equals(action) ? !target.scrollable
+                    : "input".equals(action) ? !target.editable : !target.clickable)) return "target_unavailable";
         if (target.bounds == null || !target.bounds.valid(current.width, current.height)) return "target_geometry_unknown";
         Window targetWindow = null;
         for (Window w : current.windows) {

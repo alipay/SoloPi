@@ -8,6 +8,21 @@
     <item name="dismiss_popup" type="id" />
     <item name="reset_button" type="id" />
     <item name="scenario_baseline" type="id" />
+    <item name="test_notification" type="id" />
+    <item name="scenario_chat" type="id" />
+    <item name="chat_identity" type="id" />
+    <item name="chat_message" type="id" />
+    <item name="chat_input" type="id" />
+    <item name="chat_send" type="id" />
+    <item name="chat_arrival" type="id" />
+    <item name="chat_duplicate" type="id" />
+    <item name="chat_picture" type="id" />
+    <item name="chat_retract" type="id" />
+    <item name="chat_group" type="id" />
+    <item name="chat_ambiguous" type="id" />
+    <item name="chat_nonquestion" type="id" />
+    <item name="chat_wake" type="id" />
+    <item name="chat_image_content" type="id" />
     <item name="scenario_ocr_canvas" type="id" />
     <item name="scenario_renamed" type="id" />
     <item name="scenario_popup" type="id" />

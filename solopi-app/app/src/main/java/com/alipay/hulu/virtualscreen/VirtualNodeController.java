@@ -13,6 +13,8 @@ public final class VirtualNodeController {
     interface SnapshotSource { VirtualAccessibility.Snapshot observe(); }
     private final SnapshotSource source;
     private final VirtualFrameVerifier verifier;
+    private final AccessibilityService service;
+    private final String packageName;
     private VirtualAccessibility.Snapshot observation;
     private String observationId;
     private long observedAt;
@@ -22,6 +24,8 @@ public final class VirtualNodeController {
         if (screen == null || service == null || packageName == null || packageName.isEmpty())
             throw new IllegalArgumentException("invalid_virtual_controller");
         this.screen = screen;
+        this.service = service;
+        this.packageName = packageName;
         this.source = new SnapshotSource() {
             @Override public VirtualAccessibility.Snapshot observe() {
                 return VirtualAccessibility.observe(screen, service, packageName);
@@ -33,7 +37,7 @@ public final class VirtualNodeController {
     // Package-private injection is used by the on-device instrumentation probe.
     VirtualNodeController(VirtualScreen screen, SnapshotSource source) {
         if (screen == null || source == null) throw new IllegalArgumentException("invalid_virtual_controller");
-        this.screen = screen; this.source = source; this.verifier = null;
+        this.screen = screen; this.source = source; this.verifier = null; this.service = null; this.packageName = null;
     }
 
     public static final class Observation {
@@ -64,6 +68,31 @@ public final class VirtualNodeController {
 
     synchronized VirtualAccessibility.Snapshot peek() {
         synchronized (screen) { return source.observe(); }
+    }
+
+    synchronized String input(String expectedId, String nodePath, String text, LatestFrameBuffer.Frame frame) {
+        if (observation == null || observationId == null || !observationId.equals(expectedId)) return "stale_observation";
+        synchronized (screen) {
+            VirtualAccessibility.Snapshot original = observation;
+            long capturedAt = observedAt, generation = observedGeneration;
+            observation = null; observationId = null;
+            if (service == null || text == null || text.length() > 4096) return "invalid_input";
+            if (!VirtualActionGuard.observationFresh(capturedAt, SystemClock.uptimeMillis(),
+                    MAX_OBSERVATION_AGE_MS, generation, screen.frames().generation())) return "stale_observation";
+            VirtualAccessibility.Snapshot current = source.observe();
+            String rejection = VirtualActionGuard.checkInput(original.guardPage, current.guardPage, nodePath);
+            if (rejection != null) return rejection;
+            VirtualActionGuard.Node target = null;
+            for (VirtualActionGuard.Node node : current.guardPage.nodes) if (node.path.equals(nodePath)) target = node;
+            if (target == null) return "target_unavailable";
+            rejection = verifyTargetFrame(frame, target.bounds);
+            if (rejection != null) return rejection;
+            if (!VirtualActionGuard.observationFresh(capturedAt, SystemClock.uptimeMillis(),
+                    MAX_OBSERVATION_AGE_MS, generation, screen.frames().generation())) return "stale_observation";
+            // Code security: consume the frame before the single input attempt, including failures.
+            screen.frames().invalidate();
+            return VirtualAccessibility.setText(screen, service, packageName, original.guardPage, nodePath, text);
+        }
     }
 
     /** Return a rejection code or a dispatch state; never treat dispatch as business success. */

@@ -13,6 +13,7 @@ import { createJsonExtractRegexFromSample, createTtsExtractRegexFromSelection } 
 import AgentMirrors from './AgentMirrors';
 import WorkflowMirrors from './WorkflowMirrors';
 import AgentPage from './AgentPage';
+import AgentSettingsCenter, { type AgentSettingsSection } from './AgentSettingsCenter';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AudioParameterField, WorkflowVariablePanel } from './WorkflowVariablePanel';
 import { CaseTreeDisclosure, toggleTreeBranch } from './CaseTreeDisclosure';
@@ -2673,7 +2674,7 @@ interface StoredWorkflowEditorState {
   deviceBindings?: DeviceBindings;
 }
 
-type SettingsSection = 'team' | 'model' | 'environment' | 'tts' | 'quick-actions' | 'sites' | 'device';
+type SettingsSection = 'team' | 'model' | 'environment' | 'tts' | 'quick-actions' | 'sites' | 'device' | AgentSettingsSection;
 
 interface TtsProviderParam {
   key: string;
@@ -12576,7 +12577,7 @@ export default function WorkflowEditor() {
             </div>
             <h2 className="mt-3 text-xl font-black text-slate-900">设置中心</h2>
             <p className="mt-1 text-sm font-bold text-slate-500">
-              这里维护通用配置。大模型助手只负责模型对话，solopi-desktop 操作能力后续通过 Skill / MCP / CLI 接入。
+              管理模型、Agent、设备和自动化配置。
             </p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-500">
@@ -12584,13 +12585,16 @@ export default function WorkflowEditor() {
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-[220px_minmax(0,1fr)] items-start gap-4">
-          <section className="sticky top-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+        <div className="mt-5 grid grid-cols-1 items-start gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+          <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm lg:sticky lg:top-0">
             <h3 className="px-2 text-[11px] font-black uppercase tracking-widest text-slate-400">配置导航</h3>
-            <div className="mt-3 grid grid-cols-1 gap-1.5">
+            <div className="mt-3 grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-1">
               {([
                 ['team', '团队配置与入门', Settings2],
                 ['model', '模型配置', Sparkles],
+                ['agent-request', 'Agent 请求与屏幕', Bot],
+                ['agent-reply', '消息自动回复', MessageSquare],
+                ['agent-extensions', 'MCP 与 Skills', Settings2],
                 ['environment', '环境配置', Terminal],
                 ['tts', 'TTS 配置', Mic],
                 ['quick-actions', '快捷操作', FileCode2],
@@ -12662,6 +12666,8 @@ export default function WorkflowEditor() {
 
           {settingsSection === 'team' ? (
             <TeamConfigurationPanel onNavigate={(section) => { if (section === 'cases') setActiveTab('automation-cases'); else if (section === 'agent') setActiveTab('agent'); else { setSettingsSection(section); setActiveTab('settings'); } }} />
+          ) : settingsSection === 'agent-request' || settingsSection === 'agent-reply' || settingsSection === 'agent-extensions' ? (
+          <div className="min-w-0"><AgentSettingsCenter section={settingsSection} sessionId={mirrorSessionId} /></div>
           ) : settingsSection === 'model' ? (
           <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3">
@@ -14456,7 +14462,7 @@ export default function WorkflowEditor() {
           <HarnessControlPage active={activeTab === 'device-control'} />
         </div>
         {activeTab === 'device-control' ? null : activeTab === 'agent' ? (
-          <AgentPage onNavigate={setActiveTab} deviceControls={deviceControls} initialSessionId={mirrorSessionId} onSessionChange={setMirrorSessionId} />
+          <AgentPage onNavigate={setActiveTab} onOpenSettings={(section) => { setSettingsSection(section); setActiveTab('settings'); }} deviceControls={deviceControls} initialSessionId={mirrorSessionId} onSessionChange={setMirrorSessionId} />
         ) : activeTab === 'automation-cases' ? (
           renderAutomationCases()
         ) : activeTab === 'automation-task-report' ? (

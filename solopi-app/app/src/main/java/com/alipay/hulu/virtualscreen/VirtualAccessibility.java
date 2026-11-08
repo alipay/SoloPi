@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.graphics.Rect;
 import android.graphics.Point;
 import android.os.Build;
+import android.os.Bundle;
 import android.util.SparseArray;
 import android.hardware.display.DisplayManager;
 import android.content.Context;
@@ -25,7 +26,7 @@ public final class VirtualAccessibility {
     public static final class Node {
         public final String path, text, description, resourceId, role;
         public final Rect bounds;
-        public final boolean visible, enabled, clickable, password, scrollable;
+        public final boolean visible, enabled, clickable, password, scrollable, editable, showingHintText;
         Node(String path, AccessibilityNodeInfo node, boolean ancestorPassword) {
             this.path = path;
             this.password = ancestorPassword || node.isPassword();
@@ -40,6 +41,8 @@ public final class VirtualAccessibility {
             this.enabled = node.isEnabled();
             this.clickable = node.isClickable();
             this.scrollable = node.isScrollable();
+            this.editable = node.isEditable();
+            this.showingHintText = Build.VERSION.SDK_INT >= 26 && node.isShowingHintText();
         }
     }
 
@@ -93,13 +96,78 @@ public final class VirtualAccessibility {
             }
             List<VirtualActionGuard.Node> guardNodes = new ArrayList<VirtualActionGuard.Node>();
             for (Node node : nodes) guardNodes.add(new VirtualActionGuard.Node(node.path, node.text, node.description,
-                    node.resourceId, node.role, box(node.bounds), node.visible, node.enabled, node.clickable, node.password, node.scrollable));
+                    node.resourceId, node.role, box(node.bounds), node.visible, node.enabled, node.clickable, node.password, node.scrollable, node.editable, node.showingHintText));
             VirtualActionGuard.Page page = new VirtualActionGuard.Page(displayId, selectedId, screen.width(), screen.height(),
                     display.getRotation(), expectedPackage, guardWindows, guardNodes);
             return new Snapshot(displayId, selectedId, nodes, page);
         } finally {
             if (selected != null) selected.recycle();
             for (AccessibilityWindowInfo window : windows) if (window != null) window.recycle();
+        }
+    }
+
+    /** Re-read the owned window and node before issuing a single accessibility input action. */
+    static String setText(VirtualScreen screen, AccessibilityService service, String expectedPackage,
+                          VirtualActionGuard.Page original, String path, String text) {
+        if (service == null || text == null || text.length() > 4096 || path == null)
+            return "invalid_input";
+        return setTextOnWindows(screen, expectedPackage, original, path, text, windows(service, screen.displayId()));
+    }
+
+    // The probe supplies UiAutomation windows; production passes only the accessibility service's owned display.
+    static String setTextOnWindows(VirtualScreen screen, String expectedPackage, VirtualActionGuard.Page original,
+                                   String path, String text, List<AccessibilityWindowInfo> found) {
+        if (screen == null || expectedPackage == null || text == null || text.length() > 4096 || path == null || found == null)
+            return "invalid_input";
+        List<AccessibilityWindowInfo> copies = new ArrayList<AccessibilityWindowInfo>();
+        AccessibilityNodeInfo target = null;
+        try {
+            for (AccessibilityWindowInfo window : found) {
+                if (window == null) return "virtual_window_unavailable";
+                copies.add(AccessibilityWindowInfo.obtain(window));
+            }
+            Snapshot current;
+            try { current = observeWindows(screen, expectedPackage, copies); }
+            finally { copies.clear(); }
+            // Code security: the target is selected only from the unchanged session-owned display.
+            String rejection = VirtualActionGuard.checkInput(original, current.guardPage, path);
+            if (rejection != null) return rejection;
+            AccessibilityWindowInfo selected = null;
+            for (AccessibilityWindowInfo window : found) {
+                if (window.getId() == current.windowId) {
+                    if (selected != null) return "ambiguous_virtual_window";
+                    selected = window;
+                }
+            }
+            if (selected == null || selected.getType() != AccessibilityWindowInfo.TYPE_APPLICATION)
+                return "virtual_window_unavailable";
+            target = selected.getRoot();
+            if (target == null || !(path.equals("0") || path.matches("0(?:\\.[0-9]+)+"))) return "target_unavailable";
+            String[] parts = path.split("\\.");
+            for (int i = 1; i < parts.length; i++) {
+                int index;
+                try { index = Integer.parseInt(parts[i]); } catch (NumberFormatException error) { return "target_unavailable"; }
+                AccessibilityNodeInfo child = target.getChild(index);
+                target.recycle(); target = child;
+                if (target == null) return "target_unavailable";
+            }
+            Node actual = new Node(path, target, false);
+            VirtualActionGuard.Node expected = null;
+            for (VirtualActionGuard.Node node : current.guardPage.nodes) if (path.equals(node.path)) expected = node;
+            VirtualActionGuard.Node checked = new VirtualActionGuard.Node(path, actual.text, actual.description,
+                    actual.resourceId, actual.role, box(actual.bounds), actual.visible, actual.enabled,
+                    actual.clickable, actual.password, actual.scrollable, actual.editable, actual.showingHintText);
+            CharSequence pkg = target.getPackageName();
+            if (expected == null || !expected.equals(checked) || pkg == null || !expectedPackage.contentEquals(pkg))
+                return "target_tree_changed";
+            Bundle arguments = new Bundle();
+            arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text);
+            // Code security: never retry an accessibility action whose effect cannot be confirmed.
+            return target.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments) ? "submitted" : "action_outcome_unknown";
+        } finally {
+            if (target != null) target.recycle();
+            for (AccessibilityWindowInfo window : copies) if (window != null) window.recycle();
+            for (AccessibilityWindowInfo window : found) if (window != null) window.recycle();
         }
     }
 

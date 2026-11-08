@@ -1485,6 +1485,20 @@ class HarnessSession:
             query_params.update(params)
         return self.resolver_get("agent", query_params, timeout=timeout)
 
+    def notification_status(
+        self, session_id: str, owner_token: str, timeout: Optional[float] = None
+    ) -> Dict[str, Any]:
+        # Code security: the device checks both session capabilities and the active lease.
+        response = self.agent(
+            "notification-status", {"sessionId": session_id, "ownerToken": owner_token}, timeout
+        )
+        status = response.get("notification") if response.get("success") is True else None
+        if (not isinstance(status, dict) or type(status.get("available")) is not bool
+                or not isinstance(status.get("epoch"), str) or not status["epoch"]
+                or type(status.get("sequence")) is not int or status["sequence"] < 0):
+            raise CliError("Notification status is unavailable or invalid", 4)
+        return {key: status[key] for key in ("available", "epoch", "sequence")}
+
     def adb_connect_status(
         self,
         request_id: str,

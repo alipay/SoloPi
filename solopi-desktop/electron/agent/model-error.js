@@ -33,6 +33,7 @@ function modelFailure(error, { url, model, stage, startedAt, status, requestId, 
   if (aborted) { category = 'cancelled'; hint = '模型请求已取消。'; }
   else if(codes.includes('INPUT_BUDGET_EXCEEDED')){category='input-budget';hint='请求超过单次输入预算，未发送。历史与完整证据已保留；请压缩历史、按章节读取资料或调整请求预算。';}
   else if(codes.includes('MODEL_REQUEST_TIMEOUT')){category='timeout';hint=`${responseMetadata?.timeoutKind==='first-response'?'等待首个HTTP响应':responseMetadata?.timeoutKind==='idle'?'模型输出停滞':'模型请求总耗时'}达到 ${Math.round((responseMetadata?.timeoutMs || 0)/1000)} 秒时限，已取消本次请求；已完成操作和原始证据保留。${responseMetadata?.timeoutKind==='idle' && Number.isFinite(responseMetadata?.streamIdleMs)?` 最近收到流数据距今 ${Math.round(responseMetadata.streamIdleMs/1000)} 秒；流连接有数据不代表模型产生了有效输出。`:''}`;}
+  else if(codes.includes('MODEL_REDIRECT_BLOCKED')){category='redirect-blocked';hint='模型服务返回重定向，已停止请求；请检查确认的模型服务地址。';}
   else if (codes.includes('OUTPUT_LIMIT')) { category = 'output-limit'; hint = `模型输出达到上限（结束原因 length，输出用量 ${responseMetadata?.completionTokens ?? '未知'} tokens，正文 ${responseMetadata?.outputCharacters ?? 0} 字符，推理 ${responseMetadata?.reasoningCharacters ?? 0} 字符）。本次响应未执行工具；请在模型设置中提高输出上限或调整推理设置。`; }
   else if (codes.includes('EMPTY_RESPONSE')) { category = 'empty-response'; hint = '模型响应没有有效正文或工具调用，未执行操作；请核查模型服务返回。'; }
   else if (codes.includes('INVALID_TOOL_CALL')) { category = 'invalid-tool-call'; hint = '模型返回的工具调用参数不完整或无效，未执行操作。'; }

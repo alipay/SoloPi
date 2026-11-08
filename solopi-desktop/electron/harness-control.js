@@ -8,7 +8,8 @@ const { randomUUID, randomBytes } = require('node:crypto');
 const MAX_RESPONSE = 32 * 1024 * 1024;
 const MAX_REQUEST = 1024 * 1024;
 const OPERATIONS = new Set(['discover', 'apps', 'connect', 'command', 'disconnect', 'replay',
-  'virtual_start', 'virtual_observe', 'virtual_act', 'virtual_end', 'virtual_preview']);
+  'virtual_start', 'virtual_observe', 'virtual_act', 'virtual_end', 'virtual_preview', 'virtual_notification_status',
+  'virtual_fixture_input', 'virtual_fixture_send', 'virtual_fixture_crop']);
 
 function validateVirtualReport(root, candidate) {
   if (typeof candidate !== 'string' || path.basename(candidate) !== 'report.html'
@@ -167,6 +168,12 @@ function createHarnessControl({ sourceDirectory, artifactDirectory, gate, adbPat
 
   async function request(operation, payload = {}, context = {}) {
     if (!OPERATIONS.has(operation)) throw new Error('unsupported_desktop_operation');
+    // Code security: reserved bridge fields can only originate in this main process.
+    if (Object.prototype.hasOwnProperty.call(payload, '_desktopRunId') ||
+        Object.prototype.hasOwnProperty.call(payload, '_desktopOwnerToken')) throw new Error('reserved_desktop_field');
+    if (context.evidenceRunId !== undefined && (operation !== 'virtual_start' ||
+        typeof context.evidenceRunId !== 'string' || !/^[0-9a-f]{32}$/.test(context.evidenceRunId)))
+      throw new Error('invalid_evidence_run_id');
     if (busy) throw new Error('desktop_operation_busy');
     busy = true;
     const reserved = operation === 'connect' || operation === 'replay' || operation === 'virtual_start';
@@ -210,12 +217,17 @@ function createHarnessControl({ sourceDirectory, artifactDirectory, gate, adbPat
       const response = operation === 'virtual_end' && virtualRecoverRequired
         ? await send('virtual_recover', virtualRecovery, markDispatched)
         : await send(operation, operation === 'virtual_start'
-          ? { ...payload, _desktopOwnerToken: virtualRecovery.ownerToken } : payload, markDispatched);
+          ? { ...payload, _desktopOwnerToken: virtualRecovery.ownerToken,
+              ...(context.evidenceRunId === undefined ? {} : { _desktopRunId: context.evidenceRunId }) } : payload, markDispatched);
+      if (operation === 'virtual_start' && context.evidenceRunId !== undefined && response.success && !response.data?.pendingReport)
+        throw Error('invalid_virtual_report');
       if (operation === 'virtual_start' && response.success && response.data?.pendingReport) {
         const report = response.data.pendingReport;
         if (report.status !== 'not_tested' || report.cleanup !== 'pending' || !Array.isArray(report.checkpoints))
           throw Error('invalid_pending_virtual_report');
         report.reportPath = validateVirtualReport(artifactDirectory(), report.reportPath);
+        if (context.evidenceRunId !== undefined && path.basename(path.dirname(report.reportPath)) !== 'virtual-' + context.evidenceRunId)
+          throw Error('invalid_virtual_report');
       }
       if ((operation === 'connect' || operation === 'virtual_start') && response.success) connected = true;
       if (operation === 'virtual_start' && !response.success && response.cleanupPending) virtualOutcomeUnknown = true;

@@ -40,9 +40,10 @@ type Inventory = {
 };
 const statusNames: Record<string, string> = { disabled: '已停用', unconnected: '尚未连接', connecting: '连接中', connected: '已连接', tested: '连接测试通过', error: '连接失败' };
 const inputClass = 'w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm focus:border-blue-400 outline-none';
-export default function AgentExtensions({ invoke, onClose }: {
+export default function AgentExtensions({ invoke, onClose, embedded = false }: {
     invoke: (channel: string, payload?: Record<string, unknown>) => Promise<any>;
-    onClose: () => void;
+    onClose?: () => void;
+    embedded?: boolean;
 }) {
     const [data, setData] = useState<Inventory>();
     const [tab, setTab] = useState<'skills' | 'mcp'>('skills');
@@ -79,9 +80,8 @@ export default function AgentExtensions({ invoke, onClose }: {
     const matches = (...s: string[]) => s.join(' ').toLowerCase().includes(query.toLowerCase());
     const editServer = (s?: ServerConfig) => { setForm('mcp'); setEditing(s?.id); setTransport(s?.url ? 'http' : 'stdio'); setServer(s || { id: '', command: '', enabled: true }); setArgumentsText(s?.args?.join('\n') || ''); setError(''); setTestedTools(undefined); };
     const toggleButton = (enabled: boolean, label: string, action: () => void) => <button type="button" role="switch" aria-checked={enabled} aria-label={label} disabled={busy} onClick={action} className={`shrink-0 w-10 h-6 rounded-full p-0.5 transition-colors disabled:opacity-50 ${enabled ? 'bg-blue-600' : 'bg-slate-300'}`}><span className={`block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${enabled ? 'translate-x-4' : ''}`}/></button>;
-    return <Dialog open onOpenChange={open => { if (!open)
-        onClose(); }}><DialogContent overlayClassName="z-[100]" className="z-[101] max-w-5xl w-[94vw] h-[82vh] flex flex-col gap-0 p-0 rounded-2xl bg-white overflow-hidden">
-    <header className="px-8 pt-8 pb-5 shrink-0"><DialogTitle className="text-2xl font-semibold tracking-tight">MCP 与 Skills</DialogTitle><DialogDescription className="mt-2 text-sm text-slate-500">管理 Agent 可使用的技能与外部工具。</DialogDescription></header>
+    const content = <>
+    <header className="px-4 sm:px-8 pt-6 pb-5 shrink-0">{embedded ? <><h2 className="text-lg font-semibold">MCP 与 Skills</h2><p className="mt-2 text-sm text-slate-500">管理 Agent 可使用的技能与外部工具。</p></> : <><DialogTitle className="text-2xl font-semibold tracking-tight">MCP 与 Skills</DialogTitle><DialogDescription className="mt-2 text-sm text-slate-500">管理 Agent 可使用的技能与外部工具。</DialogDescription></>}</header>
     <div className="px-8 flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-slate-100 shrink-0"><div className="flex gap-1" role="tablist" aria-label="扩展类型">{(['skills', 'mcp'] as const).map(t => <button key={t} role="tab" aria-selected={tab === t} onClick={() => { setTab(t); setForm(undefined); setDetail(undefined); setTestedTools(undefined); setQuery(''); }} className={`px-4 py-2 rounded-lg text-sm ${tab === t ? 'bg-slate-100 text-slate-900' : 'text-slate-500'}`}>{t === 'skills' ? 'Skills' : 'MCP'} <span className="ml-1 text-slate-400">{t === 'skills' ? data?.skills.length ?? '—' : data?.servers.length ?? '—'}</span></button>)}</div><div className="flex items-center gap-2"><label className="flex items-center gap-2 border border-slate-200 rounded-lg px-3"><Search size={15} className="text-slate-400"/><input aria-label="搜索扩展" value={query} onChange={e => setQuery(e.target.value)} placeholder={tab === 'skills' ? '搜索 Skills' : '搜索 MCP'} className="w-36 py-2 text-sm outline-none"/></label><button disabled={busy} onClick={() => void perform(refresh)} aria-label="刷新扩展列表" className="p-2 text-slate-500"><RefreshCw size={16} className={busy ? 'animate-spin' : ''}/></button><button disabled={!data || busy} onClick={() => { setDetail(undefined); if (tab === 'mcp')
         editServer();
     else {
@@ -109,5 +109,7 @@ export default function AgentExtensions({ invoke, onClose }: {
         } })}>测试连接</button><button disabled={busy} onClick={() => editServer(s)}>编辑</button><button disabled={busy} onClick={() => void perform(() => save({ ...data.config, mcpServers: data.config.mcpServers.filter(v => v.id !== s.id) }))}>移除</button></div>{toggleButton(!!s.enabled, `${s.id} 启用`, () => void perform(() => save({ ...data.config, mcpServers: data.config.mcpServers.map(v => v.id === s.id ? { ...v, enabled: !v.enabled } : v) })))}</div>)}{!data.servers.filter(s => matches(s.id, s.command || '', s.url || '')).length && <div className="py-16 text-center text-slate-400 text-sm">{query ? '没有匹配的 MCP' : '尚未配置 MCP 服务'}<p className="text-xs mt-2">solopi-desktop 内置工具无需配置 MCP，不计入此列表。</p></div>}{testedTools && <details open className="mt-6 text-sm"><summary>连接测试返回工具 · {testedTools.length}</summary>{testedTools.map(t => <p key={t.name} className="text-xs text-slate-500 my-3 break-words">{t.description || t.name}</p>)}</details>}</>}
       </>}
     </div><footer className="px-8 py-4 border-t border-slate-100 text-xs text-slate-400 shrink-0">启停仅影响 solopi-desktop，不修改原始 Skill 文件。修改后下一次 Agent 执行生效。</footer>
-  </DialogContent></Dialog>;
+  </>;
+    if (embedded) return <section className="flex min-w-0 flex-col bg-white">{content}</section>;
+    return <Dialog open onOpenChange={open => { if (!open) onClose?.(); }}><DialogContent overlayClassName="z-[100]" className="z-[101] max-w-5xl w-[94vw] h-[82vh] flex flex-col gap-0 p-0 rounded-2xl bg-white overflow-hidden">{content}</DialogContent></Dialog>;
 }

@@ -1,6 +1,10 @@
 // Explicit IPC surface. Never expose Node, Electron, or raw IPC events.
 const { contextBridge, ipcRenderer, webUtils } = require('electron');
 const channels = new Set([
+  'reply-knowledge:list', 'reply-knowledge:get', 'reply-knowledge:save', 'reply-knowledge:import', 'reply-knowledge:remove',
+  'reply-settings:load', 'reply-settings:save',
+  'reply-evidence:list', 'reply-evidence:remove',
+  'reply-task:status', 'reply-task:history', 'reply-task:clear-history', 'reply-task:prepare-fixture', 'reply-task:cancel-fixture-confirmation', 'reply-task:start-fixture', 'reply-task:simulate-arrival', 'reply-task:simulate-image', 'reply-task:stop', 'reply-task:recover', 'reply-task:review-pending',
   'harness:discover', 'harness:apps', 'harness:connect', 'harness:command', 'harness:disconnect', 'harness:replay', 'harness:stop', 'harness:reveal', 'agent:virtual-cleanup', 'agent:virtual-forget-recovery', 'agent:virtual-report',
   "solopi:current", "solopi:record-start", "solopi:record-stop", "solopi:record-discard", "solopi:convert", "solopi:select-file",
   "team-config:devices", "team-config:status", "team-config:validate", "team-config:import", "team-config:export", "team-config:onboarding",
@@ -76,7 +80,7 @@ const channels = new Set([
   "case-library:check-apply",
   "case-library:push-git-repo"
 ]);
-const events = new Set(['settings:workflow-update', 'settings:environment-updated', 'team-config:progress','team-config:changed','agent:comparison','quick-actions:changed', 'agent:environment-update', 'agent:configuration-update', 'agent:mirror-frame', 'agent:virtual-preview', 'agent:changed', 'workflow-case:update', 'workflow-task:changed', 'workflow:progress', 'case-library:local-changed', 'adb:logcat-state']);
+const events = new Set(['reply-task:changed', 'settings:workflow-update', 'settings:environment-updated', 'team-config:progress','team-config:changed','agent:comparison','quick-actions:changed', 'agent:environment-update', 'agent:configuration-update', 'agent:mirror-frame', 'agent:virtual-preview', 'agent:changed', 'workflow-case:update', 'workflow-task:changed', 'workflow:progress', 'case-library:local-changed', 'adb:logcat-state']);
 const listeners = new Map();
 contextBridge.exposeInMainWorld('glassbox', {
   ipcRenderer: {

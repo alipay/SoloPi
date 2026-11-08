@@ -8892,6 +8892,81 @@ const harnessControl = require('./harness-control').createHarnessControl({
   gate: workflowExecutionGate,
   adbPath: () => getAdbPath(),
 });
+// The renderer cannot choose a knowledge storage or import path.
+const replyKnowledge = require('./reply-knowledge').createKnowledgeStore({ directory: path.join(app.getPath('userData'), 'reply-knowledge') });
+const replySettings = require('./reply-settings').createReplySettings({ directory: path.join(app.getPath('userData'), 'reply-automation') });
+const replyStore = require('./message-reply-store').createMessageReplyStore({directory:getGlassBoxDataDir(),storage:safeStorage});
+const replyRunStore = require('./message-reply-store').createMessageReplyStore({directory:getGlassBoxDataDir(),storage:safeStorage,kind:'session'});
+const replyEvidenceIndex = require('./message-reply-store').createMessageReplyStore({directory:getGlassBoxDataDir(),storage:safeStorage,kind:'evidence'});
+const replyEvidence = require('./reply-evidence-store').createReplyEvidenceStore({index:replyEvidenceIndex,
+  artifactDirectory:() => path.join(getGlassBoxDataDir(), 'harness-control')});
+const replyStartConfirmation = require('./reply-start-confirmation').createReplyStartConfirmation();
+const replyFixture = require('./message-reply-fixture').createFixtureSessionFactory({control:harnessControl,evidenceStore:replyEvidence,
+  controlConfig:() => ({packageName:process.env.SOLOPI_ANDROID_CONTROL_PACKAGE || 'com.alipay.hulu.fastpath',
+    port:Number(process.env.SOLOPI_ANDROID_CONTROL_PORT || 23343)})});
+const replyTask = require('./message-reply-task').createMessageReplyTask({ ...replyFixture,
+  engineStore:replyStore, runStore:replyRunStore, evidenceStore:replyEvidence,
+  createGenerate:(config, deviceSession) => require('./message-reply-model').createReplyGenerator({
+    knowledge:replyKnowledge, requestModel:require('./agent/model').requestModel,
+    textProvider:config.textProvider, visionProvider:config.visionProvider, role:config.role,
+    contextLimit:config.contextCount, captureImage:deviceSession.captureImage,
+  }),
+  onChange:status => { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('reply-task:changed',status); },
+});
+function replyProvider(id) {
+  const provider = (readWorkflowState()?.llmProviders || []).find(item => item.id === id);
+  if (!provider || typeof provider.baseUrl !== 'string' || typeof provider.model !== 'string' || !provider.model) throw Error('reply_model_unavailable');
+  // Code security: provider and credential come from saved desktop settings, never message content.
+  return {...provider,...revealSecrets({apiKey:provider.apiKey},safeStorage)};
+}
+const knowledgeResult = async (action) => {
+  try { return { success: true, value: await action() }; }
+  catch (error) { return { success: false, error: error.code || 'knowledge_error' }; }
+};
+ipcMain.handle('reply-knowledge:list', () => knowledgeResult(() => replyKnowledge.list()));
+ipcMain.handle('reply-settings:load', () => knowledgeResult(() => replySettings.load()));
+ipcMain.handle('reply-settings:save', (_event, payload) => knowledgeResult(() => replySettings.save(payload)));
+const replyTaskResult = async action => {
+  try { return {success:true,value:await action()}; }
+  catch (error) {
+    const allowed = new Set(['reply_already_active','reply_configuration_required','reply_model_unavailable',
+      'send_requires_manual_review','cleanup_recovery_required','notification_unavailable','android_setup_required',
+      'conversation_identity_unconfirmed','fixture_entry_unavailable','fixture_device_request_failed','pending_review_changed','reply_not_running','reply_busy',
+      'reply_confirmation_expired','reply_model_address_invalid','reply_evidence_unavailable','reply_evidence_unsafe','reply_evidence_busy']);
+    return {success:false,error:allowed.has(error?.message) ? error.message : 'reply_task_failed'};
+  }
+};
+ipcMain.handle('reply-task:status', () => knowledgeResult(() => replyTask.status()));
+ipcMain.handle('reply-task:history', () => knowledgeResult(() => replyStore.history()));
+ipcMain.handle('reply-evidence:list', () => replyTaskResult(() => replyTask.listEvidence()));
+ipcMain.handle('reply-evidence:remove', (_event, id) => replyTaskResult(() => replyTask.removeEvidence(id)));
+ipcMain.handle('reply-task:clear-history', () => replyTaskResult(() => {
+  if (['starting','running'].includes(replyTask.status().status)) throw Error('reply_already_active');
+  replyStore.clearHistory();
+}));
+ipcMain.handle('reply-task:prepare-fixture', () => replyTaskResult(async () => {
+  const config = await replySettings.load();
+  if (!config.device || !config.textModel) throw Error('reply_configuration_required');
+  return replyStartConfirmation.prepare({deviceId:config.device,contactId:'friend-1',textProvider:replyProvider(config.textModel),
+    visionProvider:config.visionModel ? replyProvider(config.visionModel) : null,role:config.role,contextCount:config.contextCount});
+}));
+ipcMain.handle('reply-task:cancel-fixture-confirmation', (_event, token) => replyTaskResult(() => replyStartConfirmation.cancel(token)));
+ipcMain.handle('reply-task:start-fixture', (_event, token) => replyTaskResult(() => replyTask.start(replyStartConfirmation.consume(token))));
+ipcMain.handle('reply-task:stop', () => replyTaskResult(() => replyTask.stop()));
+ipcMain.handle('reply-task:simulate-arrival', () => replyTaskResult(() => replyTask.simulateArrival()));
+ipcMain.handle('reply-task:simulate-image', () => replyTaskResult(() => replyTask.simulateArrival('image')));
+ipcMain.handle('reply-task:recover', () => replyTaskResult(() => replyTask.recover()));
+ipcMain.handle('reply-task:review-pending', (_event, payload) => replyTaskResult(() => replyTask.reviewPending(payload?.id)));
+ipcMain.handle('reply-knowledge:get', (_event, id) => knowledgeResult(() => replyKnowledge.get(id)));
+ipcMain.handle('reply-knowledge:save', (_event, payload = {}) => knowledgeResult(async () => {
+  if (payload.id) { await replyKnowledge.update(payload.id, { name: payload.name, text: payload.text }); return null; }
+  return replyKnowledge.addText({ name: payload.name, text: payload.text });
+}));
+ipcMain.handle('reply-knowledge:remove', (_event, id) => knowledgeResult(() => replyKnowledge.remove(id)));
+ipcMain.handle('reply-knowledge:import', () => knowledgeResult(async () => {
+  const result = await dialog.showOpenDialog(mainWindow, { properties: ['openFile'], filters: [{ name: '知识文档', extensions: ['txt', 'md', 'markdown', 'pdf', 'docx'] }] });
+  return result.canceled || !result.filePaths[0] ? null : replyKnowledge.importFile(result.filePaths[0]);
+}));
 for (const operation of ['discover', 'apps', 'connect', 'command', 'disconnect', 'replay']) {
   ipcMain.handle(`harness:${operation}`, async (_event, payload = {}) => {
     try { return await harnessControl.request(operation, payload); }
@@ -14013,6 +14088,7 @@ app.on('before-quit', (event) => {
   const stops = [
     soloPiRecording.stopAll(),
     agentService.stopAll(),
+    replyTask.stop(),
     agentPreviewService.close(),
     bugreportJobs.stopAll(),
     ...[...performanceCrashSessions.values()].map(entry => entry.collector.stop()),

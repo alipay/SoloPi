@@ -486,12 +486,16 @@ class DesktopControl:
         if not isinstance(value, dict): raise Error("invalid_device_config")
         value = dict(value)
         owner_token = value.pop('_desktopOwnerToken', None)
+        run_id = value.pop('_desktopRunId', None)
         if owner_token is not None and (not isinstance(owner_token, str) or not re.fullmatch(r'[0-9a-f]{64}', owner_token)):
             raise Error('invalid_virtual_owner')
+        # Code security: the private bridge accepts only a fixed-format run identifier.
+        if run_id is not None and (not isinstance(run_id, str) or not re.fullmatch(r'[0-9a-f]{32}', run_id)):
+            raise Error('invalid_evidence_run_id')
         config = checked_config(value)
         if config["platform"] != "android": raise Error("virtual_android_only")
         from .virtual_desktop import VirtualDesktopSession
-        self.virtual = VirtualDesktopSession(config, self.root / ("virtual-" + uuid.uuid4().hex), cli_args, owner_token)
+        self.virtual = VirtualDesktopSession(config, self.root / ("virtual-" + (run_id or uuid.uuid4().hex)), cli_args, owner_token)
         try:
             return self.virtual.start()
         except BaseException:
@@ -550,9 +554,26 @@ class DesktopControl:
         if self.virtual is None: raise Error("no_virtual_session")
         return self.virtual.act(value)
 
+    def virtual_fixture_input(self, value):
+        if self.virtual is None: raise Error('no_virtual_session')
+        return self.virtual.fixture_reply(value, send=False)
+
+    def virtual_fixture_send(self, value):
+        if self.virtual is None: raise Error('no_virtual_session')
+        return self.virtual.fixture_reply(value, send=True)
+
+    def virtual_fixture_crop(self, value):
+        if self.virtual is None: raise Error('no_virtual_session')
+        return self.virtual.fixture_crop(value)
+
     def virtual_preview(self, _value):
         if self.virtual is None: raise Error("no_virtual_session")
         return self.virtual.preview()
+
+    def virtual_notification_status(self, value):
+        if self.virtual is None: raise Error("no_virtual_session")
+        if not isinstance(value, dict) or value: raise Error("invalid_notification_status_request")
+        return self.virtual.notification_status()
 
     def virtual_end(self, value):
         if self.virtual is None: raise Error("no_virtual_session")
@@ -567,7 +588,11 @@ class DesktopControl:
                       "command": self.command, "disconnect": lambda _: self.close(), "replay": self.replay,
                       "virtual_start": self.virtual_start, "virtual_observe": self.virtual_observe,
                       "virtual_act": self.virtual_act, "virtual_end": self.virtual_end,
-                      "virtual_preview": self.virtual_preview, "virtual_recover": self.virtual_recover}
+                      "virtual_preview": self.virtual_preview, "virtual_recover": self.virtual_recover,
+                      "virtual_notification_status": self.virtual_notification_status}
+        operations.update({'virtual_fixture_input': self.virtual_fixture_input,
+                           'virtual_fixture_send': self.virtual_fixture_send,
+                           'virtual_fixture_crop': self.virtual_fixture_crop})
         if operation not in operations:
             raise Error("unsupported_desktop_operation")
         return operations[operation](payload)

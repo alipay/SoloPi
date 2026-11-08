@@ -2,6 +2,8 @@ package com.alipay.hulu.virtualscreen;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -13,7 +15,8 @@ public final class ForeignUidProbeService extends Service {
     private static final String DESCRIPTOR = "com.alipay.hulu.virtualscreen.ITrustedDisplayHelper";
     private final Binder probe = new Binder() {
         @Override protected boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
-            if (code != FIRST_CALL_TRANSACTION) return super.onTransact(code, data, reply, flags);
+            if (code != FIRST_CALL_TRANSACTION && code != FIRST_CALL_TRANSACTION + 1)
+                return super.onTransact(code, data, reply, flags);
             // Code security: the test service only accepts a Binder from its own instrumented app.
             String testPackage = getPackageName();
             if (!testPackage.endsWith(".test")) throw new SecurityException("invalid_probe_package");
@@ -23,6 +26,25 @@ public final class ForeignUidProbeService extends Service {
                 if (Binder.getCallingUid() != targetUid) throw new SecurityException("probe_caller_mismatch");
             } catch (android.content.pm.PackageManager.NameNotFoundException unavailable) {
                 throw new SecurityException("probe_target_unavailable");
+            }
+            if (code == FIRST_CALL_TRANSACTION + 1) {
+                boolean noDump = checkPermission("android.permission.DUMP", Process.myPid(), Process.myUid())
+                        != PackageManager.PERMISSION_GRANTED;
+                boolean rejected = false;
+                long identity = Binder.clearCallingIdentity();
+                try {
+                    String target = testPackage.substring(0, testPackage.length() - ".test".length());
+                    try (java.io.OutputStream stream = getContentResolver().openOutputStream(
+                            Uri.parse("content://" + target + ".fixtureReplyPipe/write"), "w")) {
+                        // An opened pipe is a failed test even if no bytes are sent.
+                    } catch (SecurityException expected) { rejected = true; }
+                    catch (java.io.IOException unavailable) { /* Not proof of permission denial. */ }
+                } finally { Binder.restoreCallingIdentity(identity); }
+                reply.writeNoException();
+                reply.writeInt(Process.myUid());
+                reply.writeInt(noDump ? 1 : 0);
+                reply.writeInt(rejected ? 1 : 0);
+                return true;
             }
             IBinder helper = data.readStrongBinder();
             int displayId = data.readInt();
