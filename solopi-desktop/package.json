@@ -2,7 +2,7 @@
   "name": "solopi-desktop",
   "productName": "solopi-desktop",
   "private": true,
-  "version": "0.1.139",
+  "version": "0.1.140",
   "main": "electron/main.js",
   "scripts": {
     "dev": "node scripts/start-electron-dev.mjs",

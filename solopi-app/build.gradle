@@ -32,8 +32,8 @@ buildscript {
         compileSdkVersion = (project.hasProperty('virtualScreenOcr') || project.hasProperty('virtualScreenExperimental')) ? 31 : 29
         buildToolsVersion = "29.0.2"
         targetSdkVersion = 29
-        appVersionCode = 38
-        appVersionName = '1.0.3'
+        appVersionCode = 39
+        appVersionName = '1.0.4'
         ndkVersion = '21.1.6352462'
     }
 }

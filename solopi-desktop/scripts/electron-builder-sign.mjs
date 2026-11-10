@@ -46,26 +46,28 @@ export function createIgnorePredicate(inherited) {
 }
 
 export async function sign(options) {
+  const adHoc = process.env.GLASSBOX_FORCE_ADHOC_SIGNING === '1'
+    && process.env.CSC_IDENTITY_AUTO_DISCOVERY === 'false' && options.identity === '-';
   const identityHash = String(process.env.GLASSBOX_CODESIGN_IDENTITY_SHA1 || '').trim().toUpperCase();
-  if (!SHA1_PATTERN.test(identityHash)) {
+  if (!adHoc && !SHA1_PATTERN.test(identityHash)) {
     throw new Error(
       'Electron Builder signing requires GLASSBOX_CODESIGN_IDENTITY_SHA1 to be an exact 40-character SHA-1 hash.',
     );
   }
-  const identityName = resolveIdentityName(identityHash);
+  const identityName = adHoc ? '-' : resolveIdentityName(identityHash);
   const isAppleDevelopment = identityName.startsWith('Apple Development:');
   const inheritedOptionsForFile = options.optionsForFile;
 
   return withTimestampRetry(() => signAsync({
     ...options,
-    identity: identityHash,
+    identity: adHoc ? '-' : identityHash,
     // osx-sign normalizes a single predicate; an array is discarded by some versions.
     ignore: createIgnorePredicate(options.ignore),
     // Apple Development certificates are local QA identities and do not
     // support the secure timestamp required by Developer ID distribution.
     // @electron/osx-sign consumes this setting per file (not at the top level)
     // and documents "none" as the explicit opt-out.
-    ...(isAppleDevelopment
+    ...(isAppleDevelopment || adHoc
       ? {
           optionsForFile: (filePath) => ({
             ...(inheritedOptionsForFile?.(filePath) || {}),

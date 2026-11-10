@@ -70,7 +70,7 @@ test('record dialog uses changing header device selection and exposes no externa
 
 test('distribution includes checksum-pinned companion on Mac and Linux and rejects tampered public artifact',async t=>{
  const {verifySoloPiRuntime}=await import('../scripts/verify-solopi-runtime.mjs');const {linuxBuildConfig}=await import('../scripts/linux-build-config.mjs');const {isPublicSourceFile,checkPublicFile}=await import('../scripts/export-public-source.mjs');
- const root=path.resolve(import.meta.dirname,'..'),resource=path.join(root,'resources/solopi-recording');assert.equal(verifySoloPiRuntime(resource).version,'1.0.2');
+ const root=path.resolve(import.meta.dirname,'..'),resource=path.join(root,'resources/solopi-recording');assert.equal(verifySoloPiRuntime(resource).version,'1.0.4');
  assert.ok(require('../package.json').build.extraResources.some(r=>r.from==='resources/solopi-recording'&&r.to==='solopi-recording'));assert.ok(linuxBuildConfig(root).extraResources.some(r=>r.from==='resources/solopi-recording'&&r.to==='solopi-recording'));
  assert.equal(isPublicSourceFile('resources/solopi-recording/SoloPi.apk'),true);checkPublicFile('resources/solopi-recording/SoloPi.apk',fs.readFileSync(path.join(resource,'SoloPi.apk')));assert.throws(()=>checkPublicFile('resources/solopi-recording/SoloPi.apk',Buffer.from('tampered')),/checksum/);
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'solopi-package-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));fs.cpSync(resource,dir,{recursive:true});fs.appendFileSync(path.join(dir,'SoloPi.apk'),'corruption');assert.throws(()=>verifySoloPiRuntime(dir),/checksum/);

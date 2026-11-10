@@ -172,7 +172,10 @@ try {
     run(process.execPath, [path.join(root, "scripts", "verify-git-runtime.mjs")]);
     run("npm", ["run", "build"]);
     run(process.execPath, [path.join(root, "scripts", "prepare-packaged-app.mjs")]);
-    run(getElectronBuilderBin(), ["--mac", "dir", "--arm64"]);
+    // The initial ad-hoc signing pass must apply Electron's per-process entitlements.
+    const builderArgs = ["--mac", "dir", "--arm64"];
+    if (process.env.GLASSBOX_FORCE_ADHOC_SIGNING === "1") builderArgs.push("--config.mac.identity=-");
+    run(getElectronBuilderBin(), builderArgs);
     run(process.execPath, [path.join(root, "scripts", "create-mac-dmg.mjs")]);
     run(process.execPath, [path.join(root, "scripts", "verify-packaged-app.mjs")]);
     run(process.execPath, [path.join(root, "scripts", "create-mac-zip.mjs")]);
