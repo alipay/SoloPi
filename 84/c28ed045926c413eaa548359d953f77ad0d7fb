@@ -1,0 +1,40 @@
+solopi-desktop/scripts/package-mac.mjs
+  s_59379d7a3ffc39::t_9d5296859192d8 175-178
+solopi-desktop/package.json
+  s_59379d7a3ffc39::t_765972ea4bdd78 5
+solopi-desktop/resources/solopi-recording/manifest.json
+  s_59379d7a3ffc39::t_765972ea4bdd78 3-4,6,8-10
+solopi-desktop/scripts/electron-builder-sign.mjs
+  s_59379d7a3ffc39::t_ec459a40484cb1 49-50,52,57,63,70
+solopi-desktop/tests/solopi-provider.test.mjs
+  s_59379d7a3ffc39::t_2efaf9b47818f4 73
+solopi-desktop/resources/third-party/npm-supplements/manifest.json
+  s_59379d7a3ffc39::t_5d745e223dbaee 67-73
+  s_59379d7a3ffc39::t_a1e1021cbb17d0 60-66
+solopi-desktop/docs/releases/0.1.140.md
+  s_59379d7a3ffc39::t_765972ea4bdd78 1-4
+solopi-app/build.gradle
+  s_59379d7a3ffc39::t_048b399377f42f 35-36
+solopi-desktop/resources/third-party/npm-supplements/isarray-1.0.0.txt
+  s_59379d7a3ffc39::t_5d745e223dbaee 1-60
+solopi-desktop/resources/third-party/npm-supplements/napi-rs-canvas-0.1.100.txt
+  s_59379d7a3ffc39::t_a1e1021cbb17d0 1-21
+solopi-desktop/package-lock.json
+  s_59379d7a3ffc39::t_bb439ace88a7dd 3,9,3650,3680,3700,3720,3740,3760,3783,3806,3829,3852,3875,3895,9015,9222,11356,12008,12020,12035,12041,12155,12273,12382,12404,12413,12419,14107,14241,14421,14448,16286,17397,18343
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "84c28ed045926c413eaa548359d953f77ad0d7fb",
+  "prompts": {},
+  "sessions": {
+    "s_59379d7a3ffc39": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c609-46b4-7582-b63e-3e7e43fd37a3",
+        "model": "gpt-6.1-terra"
+      },
+      "human_author": "YuriyPikachu <YuriyPikachu@users.noreply.github.com>"
+    }
+  }
+}
