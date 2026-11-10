@@ -2,9 +2,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/alipay/SoloPi.svg)](https://github.com/alipay/SoloPi)
 [![License](https://img.shields.io/github/license/alipay/SoloPi.svg)](LICENSE)
-[![GitHub release](https://img.shields.io/github/v/release/alipay/SoloPi)](https://github.com/alipay/SoloPi/releases/latest)
-
-[官方网站](https://www.solopi.cn/) · [下载 APK](https://github.com/alipay/SoloPi/releases/latest) · [English](README_eng.md) · [反馈问题](https://github.com/alipay/SoloPi/issues) · [参与贡献](CONTRIBUTING.md)
+[English](README_eng.md) · [反馈问题](https://github.com/alipay/SoloPi/issues) · [参与贡献](CONTRIBUTING.md)
 
 **面向移动设备的开源自动化测试工具：从真机操作到可复核的测试结论。**
 
