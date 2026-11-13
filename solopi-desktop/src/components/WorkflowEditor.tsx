@@ -1637,6 +1637,9 @@ function summarizeConfig(step: AutomationStep, component: TestComponent | undefi
     }
 
     if (component.kind === 'mobile_ui_action') {
+      if (paramValue('action', 'tap') === 'startup_time') {
+        return { 目标设备: serial ? `${deviceLabel} / ${serial}` : '未选择手机', 包名: paramValue('packageName', '-'), 轮数: paramValue('iterations', '5'), 间隔: `${paramValue('intervalSeconds', '1')} 秒` };
+      }
       if (paramValue('action', 'tap') === 'solopi_replay') {
         let count = 0; try { count = JSON.parse(paramValue('nativeCase', '{}')).operationLog?.steps?.length || 0; } catch { /* validation displays malformed JSON */ }
         return { 目标设备: serial ? `${deviceLabel} / ${serial}` : '未选择手机', 执行引擎: 'SoloPi 原生回放', 动作数: `${count}`, 超时: `${paramValue('runTimeoutMs', '600000')} ms` };
@@ -16298,6 +16301,21 @@ export default function WorkflowEditor() {
                           </div>
                         </div>
                       </div>
+                    ) : selectedStepComponentKind === 'mobile_ui_action' && String(getStepConfigValue(selectedStep, 'action', 'tap')) === 'startup_time' ? (
+                      <div className="space-y-3">
+                        <p className="text-xs text-slate-600">每轮强制停止应用并测量 Android Activity Manager 启动耗时。</p>
+                        <label className="block text-xs font-bold text-slate-600">应用包名
+                          <input value={String(getStepConfigValue(selectedStep, 'packageName', ''))} onChange={event => setStepConfigValue(selectedStep, 'packageName', event.target.value)} className="mt-1 w-full rounded-lg border p-2" />
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <label className="text-xs font-bold text-slate-600">轮数
+                            <input type="number" min="1" max="100" value={String(getStepConfigValue(selectedStep, 'iterations', '5'))} onChange={event => setStepConfigValue(selectedStep, 'iterations', event.target.value)} className="mt-1 w-full rounded-lg border p-2" />
+                          </label>
+                          <label className="text-xs font-bold text-slate-600">间隔（秒）
+                            <input type="number" min="0" max="60" step="any" value={String(getStepConfigValue(selectedStep, 'intervalSeconds', '1'))} onChange={event => setStepConfigValue(selectedStep, 'intervalSeconds', event.target.value)} className="mt-1 w-full rounded-lg border p-2" />
+                          </label>
+                        </div>
+                      </div>
                     ) : selectedStepComponentKind === 'mobile_ui_action' || selectedStepComponentKind === 'mobile_ui_assert' ? (
                       <div className="space-y-3">
                         {String(getStepConfigValue(selectedStep, 'action', 'tap')) !== 'solopi_replay' && <>
@@ -17222,7 +17240,7 @@ export default function WorkflowEditor() {
                         />
                       </div>
                     )}
-                    {Boolean((selectedStep.config.importReview as { required?: boolean } | undefined)?.required) && (
+                    {Boolean((selectedStep.config?.importReview as { required?: boolean } | undefined)?.required) && (
                       <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800" role="alert">
                         <strong>SoloPi 导入待处理：禁止执行</strong>
                         <p className="mt-1">{String((selectedStep.config.importReview as { reason?: string }).reason || '')}</p>

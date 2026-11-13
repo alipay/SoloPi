@@ -5849,6 +5849,19 @@ async function executeMobileUiStep(step, context, config) {
   const serial = getWorkflowSerial({ ...step, device: 'phone' }, context);
   const action = String(config.action || 'tap');
   if (action === 'solopi_replay') return executeSoloPiReplayStep(step, context, config, serial);
+  if (action === 'startup_time') {
+    const requestId = workflowCommandScope.getStore();
+    const result = await require('./startup-time').measure({ ...config, serial }, {
+      runAdb: async (args, timeout) => {
+        const result = await runCommand(getAdbPath(), args, timeout);
+        if (/error:|error type |exception occurred while executing|security\s*exception|permission denial|unable to resolve intent/i.test(result.stderr || '')) throw Error('ADB 报告启动失败');
+        return result.stdout;
+      },
+      sleep: ms => sleepWorkflow(ms, requestId),
+      checkCanceled: () => { if (isWorkflowCanceled(requestId)) throw createWorkflowStoppedError(); },
+    });
+    return { command: 'Android Activity Manager 冷启动耗时采集', stdout: JSON.stringify(result, null, 2), stderr: '', meta: { startupTime: result, nodeOutput: result } };
+  }
   const selector = normalizeMobileSelector(config.selector || {});
   const timeout = step.timeoutMs || Number(config.timeoutMs || 10000);
   const matchMode = String(config.matchMode || 'auto');
