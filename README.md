@@ -107,7 +107,7 @@ Harness 把“动作是否执行”和“业务是否正确”分开处理：
 - `failed`：已确认结果不符合预期。
 - `not_tested`：证据不足，无法可靠判定。
 
-动作结果不明时不应盲目重发。Agent 的完成声明也不直接等于测试通过。
+动作结果不确定时，请先检查执行记录和设备状态，再决定是否重试。测试结果由检查点及其证据判定。
 
 ## 平台与成熟度
 
@@ -118,9 +118,11 @@ Harness 把“动作是否执行”和“业务是否正确”分开处理：
 | Skill / Harness 安全执行 | **Beta** | 已验证受控任务中的动作复核、固定验收与证据产物 |
 | iOS / WebDriverAgent | **实验能力** | 已验证原生测试应用与特定真实 App 只读流程 |
 | HarmonyOS NEXT / HDC | **实验能力** | 当前以模拟器上的受控原生应用流程为限 |
-| 后台屏幕、Laya、视觉辅助与消息自动回复 | **研究原型** | 默认关闭或需要额外环境，不作为通用稳定能力承诺 |
+| 后台屏幕、Laya、视觉辅助与消息自动回复 | **研究原型** | 默认关闭或需要额外环境，使用前请查阅对应模块的配置说明 |
 
-三端共用部分控制入口和结果语义，**不代表 Android 的性能插件、录屏或全部设备能力已经移植到 iOS / NEXT**。SoloPi 也不承诺任意应用、设备和模型上零漏拦或零误拦。完整前提与限制见[三端设备控制指南](solopi-desktop/docs/THREE_PLATFORM_CONTROL.md)和[原生回归指南](solopi-skill/references/native-regression-guide.md)。
+三端共用部分控制入口和结果语义，具体功能支持因平台而异。Android 性能插件、录屏等能力的支持范围，请以各平台文档为准。
+
+Harness 的拦截效果取决于动作约束、页面信息和运行环境，接入新场景时需验证。配置前提与限制见[三端设备控制指南](solopi-desktop/docs/THREE_PLATFORM_CONTROL.md)和[原生回归指南](solopi-skill/references/native-regression-guide.md)。
 
 ## Android 经典功能
 
@@ -131,8 +133,6 @@ Harness 把“动作是否执行”和“业务是否正确”分开处理：
 ### 性能工具
 
 ![Android 性能工具示例](solopi-app/assets/performance.gif)
-
-原项目曾介绍一机多控，但该功能因稳定性原因**尚未开源**，不能按当前仓库能力使用。
 
 ## 构建与测试
 

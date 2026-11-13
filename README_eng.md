@@ -107,7 +107,7 @@ The Harness separates action execution from business correctness:
 - `failed`: the confirmed outcome did not meet the expectation.
 - `not_tested`: the available evidence is insufficient for a reliable result.
 
-An action with an unknown outcome must not be retried blindly. An Agent's completion claim does not directly mean that the test passed.
+If an action outcome is uncertain, inspect the execution record and device state before deciding whether to retry. Test results are determined by checkpoints and their supporting evidence.
 
 ## Platforms and Maturity
 
@@ -118,9 +118,11 @@ An action with an unknown outcome must not be retried blindly. An Agent's comple
 | Skill / Harness safe execution | **Beta** | Action rechecks, fixed acceptance, and evidence artifacts have been verified in controlled tasks |
 | iOS / WebDriverAgent | **Experimental** | Native test apps and selected read-only real-app workflows have been verified |
 | HarmonyOS NEXT / HDC | **Experimental** | Current evidence is limited to controlled native-app workflows on an emulator |
-| Background display, Laya, visual assistance, and message auto-reply | **Research prototypes** | Disabled by default or dependent on additional setup; not presented as generally stable capabilities |
+| Background display, Laya, visual assistance, and message auto-reply | **Research prototypes** | Disabled by default or dependent on additional setup; see the relevant module documentation for configuration |
 
-The platforms share selected control entry points and result semantics. This does **not** mean that Android performance plugins, screen recording, or every device capability are available on iOS or NEXT. SoloPi also does not claim zero missed blocks or zero false blocks across arbitrary apps, devices, and models. See the [three-platform guide](solopi-desktop/docs/THREE_PLATFORM_CONTROL.md) and [native regression guide](solopi-skill/references/native-regression-guide.md) for prerequisites and limitations.
+The platforms share selected control entry points and result semantics, while feature support varies by platform. Consult the platform documentation for support details, including Android performance plugins and screen recording.
+
+Harness protection depends on action constraints, available page information, and the runtime environment; validate it when adding a new workflow. See the [three-platform guide](solopi-desktop/docs/THREE_PLATFORM_CONTROL.md) and [native regression guide](solopi-skill/references/native-regression-guide.md) for prerequisites and limitations.
 
 ## Classic Android Features
 
@@ -131,8 +133,6 @@ The platforms share selected control entry points and result semantics. This doe
 ### Performance Tools
 
 ![Android performance tools](solopi-app/assets/performance.gif)
-
-The original project introduced OneToMany device control, but that feature remains **closed source** because of stability concerns and is not available from the current repository.
 
 ## Build and Test
 
