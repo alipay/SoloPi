@@ -1,0 +1,21 @@
+README.md
+  s_fd5c66a72fb1e8::t_09f4fe70985031 110,121,123-125
+README_eng.md
+  s_fd5c66a72fb1e8::t_ac08b02a8c3abd 110,121,123-125
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ad94485a3a6867f0a322521f4b8bc22c38bebe0f",
+  "prompts": {},
+  "sessions": {
+    "s_fd5c66a72fb1e8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1383c-9f7d-7323-8d7f-6ff60953824b",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Liu Zimu <85295081+Lzm1645@users.noreply.github.com>"
+    }
+  }
+}
