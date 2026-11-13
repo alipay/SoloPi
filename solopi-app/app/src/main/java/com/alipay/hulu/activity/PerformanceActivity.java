@@ -56,6 +56,7 @@ import com.alipay.hulu.shared.node.utils.AssetsManager;
 import com.alipay.hulu.shared.node.utils.PrepareUtil;
 import com.alipay.hulu.ui.HeadControlPanel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -111,7 +112,10 @@ public class PerformanceActivity extends BaseActivity {
         mFloatListView.setFooterDividersEnabled(false);
         mFloatListView.setHeaderDividersEnabled(false);
 
-        final List<ApplicationInfo> listPack = MyApplication.getInstance().loadAppList();
+        final List<ApplicationInfo> listPack;
+        synchronized (MyApplication.class) {
+            listPack = new ArrayList<ApplicationInfo>(MyApplication.getInstance().loadAppList());
+        }
 
         AppCompatSpinner spinner = (AppCompatSpinner) findViewById(R.id.perform_param_spinner);
         spinner.setAdapter(new SpinnerAdapter() {
@@ -129,13 +133,21 @@ public class PerformanceActivity extends BaseActivity {
                     TextView activity = (TextView) v.findViewById(R.id.choose_activity);
                     activity.setText("");
                 } else {
-                    ApplicationInfo info = listPack.get(position - 1);
-                    ImageView img = (ImageView) v.findViewById(R.id.choose_icon);
-                    GlideUtil.loadIcon(PerformanceActivity.this, info.packageName, img);
-                    TextView title = (TextView) v.findViewById(R.id.choose_title);
-                    title.setText(info.loadLabel(getPackageManager()).toString());
-                    TextView activity = (TextView) v.findViewById(R.id.choose_activity);
-                    activity.setText(info.packageName);
+                    int index = AppSpinnerIndex.appIndex(position, listPack.size());
+                    if (index >= 0) {
+                        ApplicationInfo info = listPack.get(index);
+                        ImageView img = (ImageView) v.findViewById(R.id.choose_icon);
+                        GlideUtil.loadIcon(PerformanceActivity.this, info.packageName, img);
+                        TextView title = (TextView) v.findViewById(R.id.choose_title);
+                        title.setText(info.loadLabel(getPackageManager()).toString());
+                        TextView activity = (TextView) v.findViewById(R.id.choose_activity);
+                        activity.setText(info.packageName);
+                    } else {
+                        TextView title = (TextView) v.findViewById(R.id.choose_title);
+                        title.setText("");
+                        TextView activity = (TextView) v.findViewById(R.id.choose_activity);
+                        activity.setText("");
+                    }
                 }
                 return v;
             }
@@ -152,7 +164,7 @@ public class PerformanceActivity extends BaseActivity {
 
             @Override
             public int getCount() {
-                return listPack.size() + 1;
+                return AppSpinnerIndex.count(listPack.size());
             }
 
             @Override
@@ -160,7 +172,11 @@ public class PerformanceActivity extends BaseActivity {
                 if (position == 0) {
                     return 0;
                 }
-                return listPack.get(position - 1);
+                int index = AppSpinnerIndex.appIndex(position, listPack.size());
+                if (index < 0) {
+                    return null;
+                }
+                return listPack.get(index);
             }
 
             @Override
@@ -212,7 +228,11 @@ public class PerformanceActivity extends BaseActivity {
                 if (position == 0) {
                     ((MyApplication)getApplication()).updateAppAndName("-", getString(com.alipay.hulu.common.R.string.constant__global));
                 } else {
-                    ApplicationInfo info = listPack.get(position - 1);
+                    int index = AppSpinnerIndex.appIndex(position, listPack.size());
+                    if (index < 0) {
+                        return;
+                    }
+                    ApplicationInfo info = listPack.get(index);
                     LogUtil.i(TAG, "Select info: " + StringUtil.hide(info.packageName));
 
                     ((MyApplication)getApplication()).updateAppAndName(info.packageName, info.loadLabel(getPackageManager()).toString());
