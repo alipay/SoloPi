@@ -209,18 +209,19 @@ scripts/solopi-ai [全局选项] <命令> [命令选项]
 
 压力会话到时自动停止，但正常、失败、超时和中断路径仍必须显式查询并清理。详细边界见 [性能与压力测试](performance-testing.md)。
 
-### 动态 Agent（9）
+### 动态 Agent（10）
 
 | 命令 | 重要选项 | 行为 |
 |---|---|---|
 | `agent-session-start` | 可选 `--owner-token`；五项预算；`--ack-timeout 15` | 取得共享设备租约，等待首帧 observation，返回 `sessionId`、`ownerToken` 和时间线路径。 |
-| `agent-observe` | `--session-id`、`--owner-token` 必填 | 只读刷新 UI 树，生成新的 `observationId` 和帧内 `nodeId`；旧观察立即失效。 |
+| `agent-observe` | `--session-id`、`--owner-token` 必填；`--skip-virtual-ocr` 可选 | 只读刷新 UI 树，生成新的 `observationId` 和帧内 `nodeId`；旧观察立即失效。支持该选项的新版 Android 副屏仅在明确指定时跳过本地 OCR，仍采集页面树与截图；旧设备可能忽略该选项。 |
 | `agent-act` | 身份、`--step-id`、`--observation-id`、`--action` 必填；动作专属参数 | 通过 ADB 提交显式 typed action，轮询同 step receipt，成功时返回 settle 后新观察。 |
 | `agent-status` | `--session-id`、`--owner-token` 必填 | 查询会话状态、预算计数、当前观察和租约状态。 |
 | `agent-timeline` | `--session-id`、`--owner-token` 必填 | 返回 append-only 有序事件和设备端 JSONL 路径。 |
 | `agent-pause`、`agent-resume` | 身份；确认超时与轮询间隔 | 暂停或恢复准确会话；暂停不释放租约，暂停期间拒绝 act。 |
 | `agent-end` | 身份；确认超时与轮询间隔 | 正常结束准确会话并确认 `ended` 与租约释放。 |
 | `agent-cancel` | 身份；确认超时与轮询间隔 | 取消准确会话并确认 `cancelled` 与租约释放。 |
+| `agent-cleanup` | 原 `--session-id`、`--owner-token`；确认超时与轮询间隔 | 仅对终态会话重试资源清理，明确确认租约释放；不会重发设备动作。需要支持该命令的设备端版本。 |
 
 `agent-act --action` 只有 `click`、`longClick`、`input`、`back`、`home`、`scroll`、`wait`。`click/longClick/input` 必须使用当前观察中的 `--node-id`，`input` 还需 `--text`；`scroll` 需 `--direction`，可选当前 node 与 `1..90` 的 `--distance`；`wait` 需 `100..5000` 的 `--duration-ms`。命令没有 Shell、枚举透传、Provider 或任意 Scheme 参数。
 

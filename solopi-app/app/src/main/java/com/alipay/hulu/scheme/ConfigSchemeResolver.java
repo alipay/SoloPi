@@ -29,6 +29,9 @@ import com.alipay.hulu.common.service.SPService;
 import com.alipay.hulu.common.utils.Callback;
 import com.alipay.hulu.common.utils.FileUtils;
 import com.alipay.hulu.common.utils.StringUtil;
+import com.alipay.hulu.common.utils.RuntimeSessionGuard;
+import com.alipay.hulu.common.utils.SortedList;
+import com.alipay.hulu.screenRecord.ScreenRecorderLease;
 import com.alipay.hulu.upgrade.PatchRequest;
 
 import java.io.File;
@@ -37,6 +40,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 import static com.alipay.hulu.common.service.SPService.*;
 
@@ -51,6 +55,8 @@ public class ConfigSchemeResolver implements SchemeActionResolver {
     private static final String ACTION_LIST = "list";
     private static final String ACTION_GET = "get";
     private static final String ACTION_SET = "set";
+    private static final String ACTION_CONTROL_PORT_SET = "control-port-set";
+    private static final String ACTION_CONTROL_PORT_RECEIPT = "control-port-receipt";
     private static final String KEY = "key";
     private static final String VALUE = "value";
 
@@ -61,11 +67,21 @@ public class ConfigSchemeResolver implements SchemeActionResolver {
     private static final String TYPE_JSON = "json";
 
     private static final Map<String, ConfigSpec> SPECS = buildSpecs();
+    private static final Map<String, Map<String, Object>> PORT_RECEIPTS = new LinkedHashMap<>();
 
     @Override
     public boolean processScheme(Context context, Map<String, String> params,
                                  Callback<Map<String, Object>> callback) {
         String action = params.get(ACTION);
+        if (ACTION_CONTROL_PORT_SET.equals(action)) {
+            callback.onResult(migrateControlPort(params, context instanceof AdbSchemeActivity,
+                    new PortMigrationRuntime()));
+            return true;
+        }
+        if (ACTION_CONTROL_PORT_RECEIPT.equals(action)) {
+            callback.onResult(portReceipt(params.get("requestId")));
+            return true;
+        }
         // 兼容已有 ADB Scheme：config?key=...&value=...
         if (StringUtil.isEmpty(action) && params.containsKey(KEY) && params.containsKey(VALUE)) {
             action = ACTION_SET;
@@ -126,9 +142,9 @@ public class ConfigSchemeResolver implements SchemeActionResolver {
                 "com.alipay.hulu", false, null, null);
         add(result, KEY_BASE_DIR, TYPE_STRING, "SoloPi 数据根目录（修改会切换存储目录）",
                 "", false, null, null);
-        // 控制端口不是设置页控件，但属于既有 Scheme 能力。
+        // 通用 set 保持只读；仅固定、受 DUMP 保护的维护操作可以迁移此端口。
         add(result, KEY_CONTROL_PORT, TYPE_INT, "本地控制服务端口（修改会中断当前控制会话）",
-                SPService.getDefaultControlPort(), false, 5000L, 65535L);
+                SPService.getDefaultControlPort(), false, 1024L, 65535L);
         return result;
     }
 
@@ -204,13 +220,162 @@ public class ConfigSchemeResolver implements SchemeActionResolver {
         } else if (KEY_BASE_DIR.equals(key)) {
             File target = new File(String.valueOf(parsed));
             FileUtils.setSolopiBaseDir(target.getAbsolutePath());
-        } else if (KEY_CONTROL_PORT.equals(key)) {
-            LauncherApplication.getInstance().startHttpServerAtPort((Integer) parsed);
         }
 
         Map<String, Object> result = success();
         result.put("config", spec.toMap(true));
         return result;
+    }
+
+    static Map<String, Object> migrateControlPort(Map<String, String> params,
+                                                 boolean adbTransport, PortMigrationRuntime runtime) {
+        // Code security: this branch has no arbitrary key or host. The trusted
+        // transport comes from the final, manifest DUMP-protected Activity class.
+        if (!adbTransport) {
+            return error("mutation_transport_required", "Port migration requires the ADB scheme transport");
+        }
+        String requestId = params.get("requestId");
+        if (requestId == null || !requestId.matches("[A-Za-z0-9][A-Za-z0-9._-]{0,127}")) {
+            return error("invalid_request_id", "A valid migration requestId is required");
+        }
+        if (!"true".equals(params.get("confirmIdle"))) {
+            return error("idle_confirmation_required", "Explicit idle confirmation is required");
+        }
+        if (params.size() != 4 || !params.containsKey(ACTION) || !params.containsKey("port")) {
+            return error("invalid_port_migration", "Only action, port, confirmIdle and requestId are supported");
+        }
+        final int port;
+        try {
+            String rawPort = params.get("port");
+            if (rawPort == null || !rawPort.matches("[0-9]{4,5}")) {
+                throw new NumberFormatException();
+            }
+            port = Integer.parseInt(rawPort);
+            if (port < 1024 || port > 65535) {
+                throw new NumberFormatException();
+            }
+        } catch (NumberFormatException e) {
+            return error("invalid_control_port", "Control port must be an integer from 1024 to 65535");
+        }
+        synchronized (PORT_RECEIPTS) {
+            Map<String, Object> existing = PORT_RECEIPTS.get(requestId);
+            if (existing != null) {
+                return Integer.valueOf(port).equals(existing.get("devicePort"))
+                        ? new LinkedHashMap<>(existing)
+                        : error("request_id_conflict", "Migration requestId was already used for another port");
+            }
+            String owner = "control-port-migration:" + requestId;
+            Map<String, Object> receipt = success();
+            receipt.put("requestId", requestId);
+            receipt.put("action", ACTION_CONTROL_PORT_SET);
+            receipt.put("devicePort", port);
+            receipt.put("packageName", runtime.packageName());
+            receipt.put("terminal", true);
+            boolean maintenance = false;
+            try {
+                maintenance = runtime.beginMaintenance(owner);
+                if (!maintenance) {
+                    receipt.putAll(error("control_port_busy", "An active session or maintenance operation blocks migration"));
+                } else if (!runtime.idle()) {
+                    receipt.putAll(error("control_port_not_idle", "Unable to verify that all control consumers are idle"));
+                } else {
+                    receipt.put("previousPort", runtime.currentPort());
+                    boolean migrated = runtime.migrate(port);
+                    receipt.putAll(migrated ? success()
+                            : error("control_port_bind_failed", "The new loopback port could not be bound; the previous service was retained"));
+                }
+            } catch (RuntimeException e) {
+                receipt.putAll(error("control_port_migration_failed", "Unable to complete control port migration"));
+            } finally {
+                if (maintenance) {
+                    runtime.endMaintenance(owner);
+                }
+            }
+            receipt.put("state", Boolean.TRUE.equals(receipt.get("success")) ? "completed" : "failed");
+            PORT_RECEIPTS.put(requestId, new LinkedHashMap<>(receipt));
+            while (PORT_RECEIPTS.size() > 32) {
+                PORT_RECEIPTS.remove(PORT_RECEIPTS.keySet().iterator().next());
+            }
+            return receipt;
+        }
+    }
+
+    static Map<String, Object> portReceipt(String requestId) {
+        synchronized (PORT_RECEIPTS) {
+            Map<String, Object> receipt = PORT_RECEIPTS.get(requestId);
+            return receipt == null ? error("control_port_receipt_not_found", "Migration receipt is unavailable")
+                    : new LinkedHashMap<>(receipt);
+        }
+    }
+
+    static class PortMigrationRuntime {
+        String packageName() { return LauncherApplication.getContext().getPackageName(); }
+        int currentPort() { return SPService.getInt(KEY_CONTROL_PORT, SPService.getDefaultControlPort()); }
+        boolean beginMaintenance(String owner) { return RuntimeSessionGuard.beginMaintenance(owner); }
+        void endMaintenance(String owner) { RuntimeSessionGuard.endMaintenance(owner); }
+        boolean migrate(int port) { return LauncherApplication.getInstance().migrateControlServerPort(port); }
+
+        boolean idle() {
+            // Code security: maintenance is held while checking and switching;
+            // guarded record/replay/Agent/performance sessions cannot start here.
+            if (ScreenRecorderLease.isHeld()) {
+                return false;
+            }
+            return queryIdle("record", Collections.singletonMap("recordMode", "status"))
+                    && queryIdle("performance", Collections.singletonMap("mode", "status"))
+                    && queryIdle("performance", displayStatus())
+                    && queryIdle("stress", Collections.singletonMap("action", "status"))
+                    && queryIdle("screen-record", Collections.singletonMap("action", "status"))
+                    && queryIdle("scan", Collections.singletonMap("action", "status"));
+        }
+
+        private Map<String, String> displayStatus() {
+            Map<String, String> params = new LinkedHashMap<>();
+            params.put("mode", "display");
+            params.put("action", "status");
+            return params;
+        }
+
+        private boolean queryIdle(String scheme, Map<String, String> params) {
+            Map<String, SortedList<SchemeActionResolver>> registry = LauncherApplication.getInstance().getSchemeResolver();
+            SortedList<SchemeActionResolver> resolvers = registry == null ? null : registry.get(scheme);
+            if (resolvers == null) {
+                return false;
+            }
+            for (SchemeActionResolver resolver : resolvers) {
+                final Map<String, Object>[] result = new Map[1];
+                final boolean[] failed = {false};
+                boolean handled = resolver.processScheme(LauncherApplication.getContext(), params,
+                        new Callback<Map<String, Object>>() {
+                            @Override public void onResult(Map<String, Object> value) { result[0] = value; }
+                            @Override public void onFailed() { failed[0] = true; }
+                        });
+                if (!handled) {
+                    continue;
+                }
+                Map<String, Object> status = result[0];
+                if (failed[0] || status == null || !Boolean.TRUE.equals(status.get("success"))
+                        || !Boolean.FALSE.equals(status.get("active"))) {
+                    return false;
+                }
+                if (Boolean.TRUE.equals(status.get("manualScanActive"))
+                        || Boolean.TRUE.equals(status.get("protocolActivityAttached"))) {
+                    return false;
+                }
+                Object items = status.get("runningItems");
+                if (items instanceof java.util.Collection && !((java.util.Collection) items).isEmpty()) {
+                    return false;
+                }
+                for (String key : new String[]{"targetCpuCount", "activeCpuCount", "targetMemoryMb", "actualMemoryMb"}) {
+                    Object value = status.get(key);
+                    if (value instanceof Number && ((Number) value).longValue() > 0L) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
     }
 
     private static Object read(ConfigSpec spec) {

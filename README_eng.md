@@ -1,450 +1,177 @@
-# <img src="solopi-app/assets/icon.png" width="48" alt="SoloPi" /> SoloPi
+![SoloPi: Open-source mobile automation and safe agent execution](readme-assets/solopi-readme-hero-en.png)
 
-[![GitHub stars](https://img.shields.io/github/stars/alipay/SoloPi.svg)](https://github.com/alipay/SoloPi)
-[![GitHub license](https://img.shields.io/github/license/alipay/SoloPi.svg)](LICENSE)
-[![Main app API](https://img.shields.io/badge/Main_App_API-18%2B-brightgreen.svg)](https://developer.android.com/guide/topics/manifest/uses-sdk-element)
+<p align="center">
+  <a href="https://www.solopi.cn/">Website</a> ·
+  <a href="https://github.com/alipay/SoloPi/releases/latest">Download APK</a> ·
+  <a href="#quick-start">Quick Start</a> ·
+  <a href="README.md">中文</a>
+</p>
 
-SoloPi is an open-source automation and AI Harness project for mobile development. It preserves
-SoloPi's recording, replay, assertion, and performance-diagnostic capabilities on physical Android
-devices, while adding Agent integration, safe execution on dynamic pages, independent result
-adjudication, unattended managed execution, and same-run evidence. This turns a device interaction
-into a conclusion that can be delivered into development and CI workflows.
+<p align="center">
+  <a href="https://github.com/alipay/SoloPi"><img src="https://img.shields.io/github/stars/alipay/SoloPi.svg" alt="GitHub stars" /></a>
+  <a href="https://github.com/alipay/SoloPi/releases/latest"><img src="https://img.shields.io/github/v/release/alipay/SoloPi" alt="Latest release" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/alipay/SoloPi.svg" alt="License" /></a>
+</p>
 
-> Product source has two top-level modules: `solopi-app` and `solopi-skill`. The Harness lives
-> inside `solopi-skill/scripts/harness`, with supporting documentation and license files in the repository.
+SoloPi brings Android record and replay, cross-platform desktop control, and a Skill / Harness for AI Agents into one testing workflow. The app under test normally does not need to integrate a SoloPi SDK, and every run can retain page observations, action receipts, and result evidence.
 
-## Open-source Modules
+> 6.3k+ GitHub Stars · [Java Trending daily peak: #2, with six consecutive days on the list](https://github.com/frodeaa/github_trending_archive/tree/master/archive/2019-07)
 
-| Module | Role | Primary responsibilities |
-|---|---|---|
-| [`solopi-app/`](solopi-app/README_eng.md) | Physical-device execution kernel | Recording and replay, page observation, pre-touch verification, assertions, performance and network collection, and action receipts; the current open-source implementation is for Android |
-| [`solopi-skill/`](solopi-skill/SKILL.md) | Agent entry point and host-side Harness | Instructions, typed CLI, device protocol, verification plans, independent result judge, single-host managed execution, and evidence reports; the core implementation lives in `scripts/harness` |
+## Three Ways to Use SoloPi
 
-The app under test does not need to integrate an Agent SDK or change its business code in order to
-use the Harness.
+| | Desktop | Skill / Harness | Android App |
+| --- | --- | --- | --- |
+| **Best for** | Visual device operation and case management | Agent, CLI, and automation integration | On-device record/replay and performance diagnosis |
+| **Capabilities** | Page inspection, node selection, recording, replay, and reports | Action constraints, execution rechecks, fixed acceptance, and structured artifacts | Device execution, performance collection, and classic automation tools |
+| **Start here** | [`solopi-desktop/`](solopi-desktop/README.md) | [`solopi-skill/`](solopi-skill/SKILL.md) | [`solopi-app/`](solopi-app/README_eng.md) |
+
+Each component can be used independently or as part of a complete workflow. Desktop provides the workbench, the Skill defines how an Agent should use SoloPi, the Harness orchestrates tasks and acceptance, and the Android App observes and acts on the device.
+
+## Why SoloPi
+
+- **Real devices with low integration cost:** Observe and operate mobile apps directly; the target app normally does not need the SoloPi SDK.
+- **From recording to reproduction:** Capture page nodes, actions, and checks, then repeat a fixed case on a real device.
+- **Keep Agents inside action boundaries:** Recheck the current page and target before execution so a stale action is not sent after the page changes.
+- **An executed action is not automatically a passed test:** Read business state through predefined checkpoints and independently return `passed`, `failed`, or `not_tested`.
+- **Evidence retained with each run:** Keep screenshots, logs, action receipts, and structured reports for diagnosis and review.
+
+## Quick Start
+
+### 1. List Built-in Workflows
+
+Run from the repository root. This command does not connect to or operate a device:
+
+```bash
+./solopi-skill/scripts/solopi-ai --pretty workflow-list
+```
+
+### 2. Check an Android Device
+
+After USB debugging is enabled and the computer is authorized:
+
+```bash
+adb devices -l
+
+./solopi-skill/scripts/solopi-ai \
+  --serial <device-serial> \
+  --pretty doctor
+```
+
+### 3. Start Desktop
+
+Node.js, npm, Python 3.9+, and platform-specific device tools are required. The Desktop documentation is verified with Node.js 22.14.0.
+
+```bash
+cd solopi-desktop
+npm ci
+npm run dev
+```
+
+See the [Desktop guide](solopi-desktop/README.md) and [three-platform device-control guide](solopi-desktop/docs/THREE_PLATFORM_CONTROL.md) for connection, recording, and replay steps.
+
+### 4. Run a Prepared Workflow
+
+The repository includes read-only examples that require a specific app, account, and initial page. Confirm that the environment matches the template before running:
+
+```bash
+./solopi-skill/scripts/solopi-ai \
+  --serial <device-serial> \
+  --pretty workflow-run \
+  --template alipay-more-services
+```
+
+After the run, inspect the path returned in `artifacts`. Templates are not universal smoke tests. Adjust the environment or write a dedicated case when the app version, account state, or initial page differs.
 
 ## How It Works
 
 ```text
-User goal
-   |
-   v
-Skill-capable Agent
-   |
-   v
-solopi-skill
-   |  Typed tasks and safety constraints
-   v
-solopi-skill/scripts/harness
-   |  ADB + controlled protocol
-   v
-solopi-app  -------------------->  App under test
-   |                                  |
-   `---------- Receipts and evidence <-'
-                    |
-                    v
-          passed / failed / not_tested
+Desktop / Agent / CLI
+          |
+          v
+  Skill + Harness
+  Plan, session, action constraints, and evidence
+          |
+          v
+Android SoloPi / iOS WDA / NEXT driver
+          |
+          v
+Observe -> pre-action recheck -> execute
+          |
+          v
+Fixed checkpoints -> independent result judge
 ```
 
-- An Agent may propose the next action, but it cannot touch the screen directly or declare that a
-  test has passed.
-- Dynamic actions are bound to the current page observation. If the page has changed, the stale
-  action is rejected before any real interaction occurs.
-- Acceptance goals, checkpoints, safety boundaries, and final recovery are first captured in a test
-  contract. The final outcome is independently decided by a deterministic Result Judge.
-- Submitted managed jobs are separated from Worker processes. A retryable infrastructure failure
-  can create a new execution attempt, and a late result from an old Worker cannot be written back.
-- Every conclusion in a report must cite checkpoints, action receipts, page evidence, or timeline
-  evidence from the same execution attempt. Evidence cannot be combined across attempts.
+The Harness separates action execution from business correctness:
 
-## solopi-app: A Wireless, Non-invasive Android Automation Tool
+- `passed`: all required checkpoints and cleanup conditions succeeded.
+- `failed`: the confirmed outcome did not meet the expectation.
+- `not_tested`: the available evidence is insufficient for a reliable result.
 
-> SoloPi is a wireless, non-invasive testing tool for automatic Android software testing. The Beta
-> version has 3 main features: record and replay, performance testing, multi-device compatibility
-> testing (OneToMany).
->
-> SoloPi also has a HarmonyOS version. To try it, switch to the `solopi-harmony` branch.
+If an action outcome is uncertain, inspect the execution record and device state before deciding whether to retry. Test results are determined by checkpoints and their supporting evidence.
 
-### Features
+## Platforms and Maturity
 
-#### Record and Replay
+| Capability | Status | Current scope |
+| --- | --- | --- |
+| Android App record/replay and performance tools | **Core** | Support varies by OS, device, target app, and permissions |
+| Desktop control for Android | **Beta** | Page inspection, record/replay, and selected real-app workflows have been verified |
+| Skill / Harness safe execution | **Beta** | Action rechecks, fixed acceptance, and evidence artifacts have been verified in controlled tasks |
+| iOS / WebDriverAgent | **Experimental** | Native test apps and selected read-only real-app workflows have been verified |
+| HarmonyOS NEXT / HDC | **Experimental** | Current evidence is limited to controlled native-app workflows on an emulator |
+| Background display, Laya, visual assistance, and message auto-reply | **Research prototypes** | Disabled by default or dependent on additional setup; see the relevant module documentation for configuration |
 
-![Recording playback](solopi-app/assets/replay.gif)
+The platforms share selected control entry points and result semantics, while feature support varies by platform. Consult the platform documentation for support details, including Android performance plugins and screen recording.
 
-**[Record the testing on a mobile game.](https://gw.alipayobjects.com/mdn/rms_e29b5f/afts/file/A*ym07T6nACDIAAAAAAAAAAABkARQnAQ)**
+Harness protection depends on action constraints, available page information, and the runtime environment; validate it when adding a new workflow. See the [three-platform guide](solopi-desktop/docs/THREE_PLATFORM_CONTROL.md) and [native regression guide](solopi-skill/references/native-regression-guide.md) for prerequisites and limitations.
 
-**[Record the testing on a native phone app.](https://gw.alipayobjects.com/os/basement_prod/3472d35c-bd57-4c82-8112-5dcde42fcb32.mov)**
+## Classic Android Features
 
-SoloPi captures all actions performed during testing sessions so that issues can be identified and
-resolved more quickly. The recording can be played on any device. All these actions can be done on
-just one single phone. See [Record and Replay](#record-and-replay).
+### Record and Replay
 
-SoloPi JSON can be converted into other automation scripts. Appium and Macaca are currently
-supported; download and try [SoloPi-Convertor](https://github.com/soloPi/SoloPi-Convertor).
+![Android record and replay](solopi-app/assets/replay.gif)
 
-#### Performance Testing
+### Performance Tools
 
-![Performance analysis](solopi-app/assets/performance.gif)
+![Android performance tools](solopi-app/assets/performance.gif)
 
-**[Use the performance analysis function](https://gw.alipayobjects.com/os/basement_prod/1996390b-9ec8-4046-8ce8-459afa05d6c5.mov)**
+## Build and Test
 
-**[Use the launch time calculator](https://gw.alipayobjects.com/os/basement_prod/4e82ca85-13fc-4de2-82ff-a9079344f5ef.mov)**
-
-> Video-difference response-time analysis requires the `hulu_screenRecord` plugin. By default,
-> SoloPi uses the ABI compatibility manifests in the repository root to fetch plugin assets pinned to
-> `v0.12.0`. The source can be cleared or replaced in the App settings, or a local archive can be
-> installed with `solopi-skill/scripts/solopi-ai plugin-install --file <plugin ZIP>`. Restart SoloPi
-> after installation. The `startup-time` command for cold or warm launches does not require this plugin.
-
-SoloPi is able to record and show the app's performance data, such as CPU, memory, and internet
-speed, while testing. The performance window with selected testing metrics will float on top. After
-testing, you can check each testing parameter in generated data graphs.
-
-SoloPi can also change the testing environment to simulate certain situations. For instance, it can
-slow down the internet speed to simulate using the app with a poor network connection.
-
-SoloPi also adds a function to calculate app launch time. This tool shows the actual launch time to
-the greatest extent possible. The calculator can be incorporated into UI automation tests by
-sending broadcast messages. See [Performance Testing](#performance-testing).
-
-#### Multi-device Compatibility Testing
-
-![Multi-device testing](solopi-app/assets/oneToMany.gif)
-
-**[Simultaneous multi-device testing](https://gw.alipayobjects.com/os/basement_prod/971b5467-3db0-4781-86e3-15b3907323f6.mov)**
-
-SoloPi supports simultaneous multi-device compatibility testing controlled by one device. This
-enormously improves the efficiency of testing on different devices. See
-[Multi-device Compatibility Testing](#multi-device-compatibility-testing).
-
-### Build
-
-> Open-source SoloPi excludes the multi-device compatibility testing feature because it is still
-> unstable. Work on opening this feature will continue.
-
-#### Build Environment
-
-- macOS 10.14.3
-- Android Studio 3.2
-- **Gradle 4.4 (upgrading is not recommended)**
-- **CMake 3.6.4111459 (upgrading is not recommended)**
-- NDK 15.2.4203819
-- TargetApi 25
-- MinimumApi 18
-- **Note: Turn off Instant Run in Android Studio. Otherwise, the app does not work.**
-
-### solopi-app Quick Start
-
-#### Download and Configure the Android SDK Path
-
-Download the appropriate [SDK Platform Tools](https://developer.android.com/studio/releases/platform-tools#downloads),
-unzip them, and add `ANDROID_SDK=${SDK path}` to your system environment variables. You can also
-refer to an [ADB configuration guide](https://sspai.com/post/40471).
-
-> On Windows 10 and later, the environment variable takes effect in a newly opened command prompt.
-> Older Windows versions may need to be restarted. On Linux and macOS, run `echo $ANDROID_SDK` to
-> verify the setting.
-
-#### Enable Developer Mode on the Device
-
-Open the Settings app. Under "About phone -> Software information," tap "Build number" seven times.
-The system will indicate that developer mode has been enabled. Return to the Settings home page,
-open "Developer options," and enable "USB debugging."
-
-#### Known Issues
-
-If you encounter a problem, first check [Known Issues](#known-issues).
-
-- On VIVO devices, if Developer options contains an option such as "USB security access," it must
-  be enabled manually.
-- On Xiaomi devices, enable "USB installation" and "USB debugging (Security settings)." You also
-  need to enable SoloPi's "后台弹出界面" permission.
-- On MEIZU devices, if the app under test contains highly secured functions such as payments,
-  disable the system's secure-payment function.
-- On HUAWEI devices, enable "Allow ADB debugging in charge only mode."
-- On OPPO devices, the system may disable USB debugging every ten minutes. Keep the phone connected
-  to the computer for a stable connection.
-- If the device has a secure input method, disable it in system settings; otherwise, text may not be
-  entered correctly in some fields.
-
-#### Connect the Device and Enable the Wi-Fi Debugging Port
-
-First connect the device to the computer and verify the connection with the following command. The
-device will ask whether to allow USB debugging; confirm the request.
-
-Windows:
-
-```bat
-%ANDROID_SDK%\platform-tools\adb.exe devices
-```
-
-macOS or Linux:
+Build the Android debug APK:
 
 ```bash
-$ANDROID_SDK/platform-tools/adb devices
-```
-
-If the command lists a device serial number with the status `device`, the connection is successful.
-
-![Establishing a connection](https://raw.githubusercontent.com/wiki/alipay/SoloPi/FirstUse/genConnection.png)
-
-> Windows may require an Android device driver, which can be downloaded from the device vendor's
-> website. If the device status is not `device`, verify that the driver is installed and USB
-> debugging is allowed. If necessary, change the USB connection mode to "Media Transfer Protocol
-> (MTP)."
-
-For a single device:
-
-```bat
-%ANDROID_SDK%\platform-tools\adb.exe tcpip 5555
-```
-
-```bash
-$ANDROID_SDK/platform-tools/adb tcpip 5555
-```
-
-For multiple devices, first record each device serial number:
-
-```bat
-%ANDROID_SDK%\platform-tools\adb.exe -s <device-serial-number> tcpip 5555
-```
-
-```bash
-$ANDROID_SDK/platform-tools/adb -s <device-serial-number> tcpip 5555
-```
-
-The device will usually display `restarting in TCP mode port: 5555`, indicating that wireless ADB
-debugging has been enabled.
-
-> Make sure the device is on a secure network. Do not accept ADB debugging requests casually, as
-> doing so may cause unnecessary loss.
-
-Download a packaged SoloPi APK from [GitHub Releases](https://github.com/alipay/SoloPi/releases/latest), or
-clone the source and build it yourself. See [solopi-app Quick Start](#solopi-app-quick-start)
-for detailed instructions.
-
-### solopi-app Documentation
-
-- [First Use and Notes](#solopi-app-quick-start)
-- [Full solopi-app Documentation](solopi-app/README_eng.md)
-
-## Major Capabilities
-
-### Fixed Automation
-
-- Physical-device recording, case editing, import, and export
-- Click, input, scroll, back, node assertions, and image assertions
-- Single, repeated, and batch replay
-- Immutable case snapshots, run identities, and result evidence
-
-### Dynamic Agent Execution
-
-- Current-page Observation and page-structure summary
-- Seven categories of typed dynamic actions
-- Re-observation before a touch, node relocation, and stale-page rejection
-- Idempotent action receipts, timelines, step budgets, and duration budgets
-
-### Verification and Trustworthy Reports
-
-- Structured requirements, acceptance criteria, and test plans
-- Checkpoints, deterministic oracle rules, and required Cleanup
-- An independent Result Judge
-- Three-state `passed`, `failed`, and `not_tested` outcomes with evidence references
-
-### Unattended Managed Execution
-
-- Persistent jobs, device shards, and execution attempts
-- Device matching, leases, heartbeats, and bounded retries
-- Worker takeover and isolation from writes by a previous owner
-- Multiple Workers on one host and CI-consumable reports
-
-### Performance and Engineering Tools
-
-- CPU, memory, FPS/Jank, battery, temperature, process, and network-traffic collection
-- Cold-start, warm-start, and multi-round launch timing
-- Screen recording, visual response analysis, screenshots, and logs
-- Bounded CPU and memory stress
-- Optional on-device model signing, installation, benchmarking, activation, and rollback
-
-Specific metrics depend on what the target device actually returns. An on-device model is an
-optional enhancement, not a prerequisite for using the Harness.
-
-## Quick Start for the Three Open-source Modules
-
-### Requirements
-
-- macOS or Linux
-- Python 3.9 or later
-- Android SDK with an executable `adb`
-- JDK 11 to build `solopi-app`
-- An Android device authorized for testing
-
-### 1. Build and Install solopi-app
-
-```bash
-./solopi-app/gradlew -p solopi-app \
-  :app:testDebugUnitTest \
-  :agentmodel:testDebugUnitTest \
-  :portal:assembleDebug
-
+./solopi-app/gradlew -p solopi-app :portal:assembleDebug
 adb install -r solopi-app/portal/build/outputs/apk/debug/portal-debug.apk
 ```
 
-Accessibility, display-over-other-apps permission, battery-optimization allowlisting, and other
-required permissions must be confirmed by the user on the device. The tool does not grant them
-silently.
-
-### 2. Use the CLI
-
-Run the source entry point directly:
-
-```bash
-./solopi-skill/scripts/solopi-ai --pretty actions
-./solopi-skill/scripts/solopi-ai --pretty doctor
-```
-
-Alternatively, install it in a virtual environment:
-
-```bash
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install -e ./solopi-skill/scripts/harness
-solopi-ai --pretty actions
-```
-
-Purely local commands such as `actions`, case templates, and verification-plan compilation do not
-require a device. Before using a physical-device protocol operation, run `doctor` and resolve the
-readiness gaps it reports.
-
-### 3. Invoke It Through the Agent Skill
-
-`solopi-skill` contains both Agent instructions and the Harness implementation. Copy the complete
-Skill directory to use it outside the repository, then invoke its bundled entry point:
-
-```bash
-./solopi-skill/scripts/solopi-ai --pretty doctor
-./solopi-skill/scripts/solopi-ai --pretty capabilities
-```
-
-Read [`solopi-skill/SKILL.md`](solopi-skill/SKILL.md) in full before use. Natural language is
-interpreted by the Agent according to the Skill rules. The Skill itself is not a large language
-model, and it does not bypass the CLI or the device-side safety boundaries.
-
-## Local Verification
-
-The basic gate covers the bundled Harness, Skill entry point, and Android module:
+Run Harness unit tests:
 
 ```bash
 python3 -m unittest discover -s solopi-skill/scripts/harness/tests -v
-./solopi-skill/scripts/solopi-ai --pretty actions
-./solopi-app/gradlew -p solopi-app \
-  :app:testDebugUnitTest \
-  :agentmodel:testDebugUnitTest \
-  :portal:assembleDebug
 ```
 
-Physical-device tests read pages, screenshots, logs, and performance data. Use a dedicated test
-device and test account. Do not run them with production accounts, in a real payment environment,
-or against an app you are not authorized to test.
+An existing SoloPi installation with a different signature cannot be overwritten. Android permissions, including accessibility, must be completed on the device. See the module READMEs for Android unit tests, Desktop packaging, and additional development commands.
 
-## solopi-app Code Guide
+## Documentation
 
-- `app`: application business logic
-- `shared`: core application functions, primarily including node (page-node acquisition and
-  operations), event (event monitoring, including accessibility and touch events), io (data
-  maintenance and database), and display (performance-tool metrics)
-- `common`: application-framework functions, including wrappers for ADB capabilities, global
-  Service capabilities, the messaging module, and common utilities
-- `mdlibrary`: Proxy generation for ExportService (referenced)
-- `permission`: permission-handling package (referenced)
-- `AdbLib`: ADB connection handling (referenced)
-- `androidWebscokets`: WebSocket implementation for Android (referenced)
+- [Android usage and features](solopi-app/README_eng.md)
+- [Desktop workbench](solopi-desktop/README.md)
+- [Three-platform device control](solopi-desktop/docs/THREE_PLATFORM_CONTROL.md)
+- [Skill and Harness](solopi-skill/SKILL.md)
+- [Built-in workflows](solopi-skill/references/workflows.md)
+- [Verification plans and result adjudication](solopi-skill/references/verification-engine.md)
+- [Managed execution and device pools](solopi-skill/references/managed-execution.md)
+- [Troubleshooting](solopi-skill/references/troubleshooting.md)
 
-## Community
+## Community and Contributing
 
-SoloPi is intended for professionals working in software testing. If you have feedback or
-suggestions, you are welcome to discuss them through Issues, PRs, or the community.
+Use [Issues](https://github.com/alipay/SoloPi/issues), pull requests, or the [SoloPi board on TesterHome](https://testerhome.com/topics/node152) to discuss problems and improvements. Read the [contribution guide](CONTRIBUTING.md) before submitting a change.
 
-- DingTalk group 3:
+| DingTalk | WeChat |
+| --- | --- |
+| <img src="solopi-app/assets/dingtalk-group.png" width="180" alt="SoloPi DingTalk group" /> | <img src="readme-assets/wechat-group-2.jpg" width="280" alt="SoloPi Experience and Community Group (2.0) WeChat QR code, valid through November 17, 2026" /> |
 
-![SoloPi Experience and Community Group 3](solopi-app/assets/dingtalk-group.png)
+## License and Usage Boundary
 
-- WeChat group (SoloPi Experience and Community Group 2.0):
+Use authorized test environments for devices, accounts, images, and logs. Review personal information before sharing reports. Before enabling an external model or uploading an image, confirm that the destination and data-sharing boundary are appropriate.
 
-![SoloPi Experience and Community Group 2.0](solopi-app/assets/wechat-group.png)
-
-- You can also leave a message in the [TesterHome SoloPi forum](https://testerhome.com/topics/node152).
-
-## Contributing
-
-SoloPi needs developers to build it together and hopes to grow with their support. If you have
-developed a capability based on SoloPi that better fits a business scenario, whether commercial or
-non-commercial, please contact us. We also hope you will contribute features, bug fixes, and Issues
-and help maintain the SoloPi automation tool.
-
-### How to Contribute
-
-See [Contributing Code](CONTRIBUTING.md), the guide for participating in SoloPi development.
-
-The heart of open source is sharing technology. When you have an idea about the project, you can
-express it in a more constructive way:
-
-- "Our business needs this feature" -> "I added a feature that can be used in many scenarios and
-  submitted an MR."
-- "Is there more detailed documentation?" -> "I revised the documentation to make it easier to use;
-  please help merge it."
-- "I cannot use it on this phone" -> "I fixed a compatibility issue on this device."
-- "The behavior does not match the documentation" -> "I documented the pitfalls and supplemented
-  the documentation."
-- "Is this project still maintained?" -> "What can I do?"
-
-Stars, forks, Merge Requests, and Issues are always welcome. If you have a good idea, please contact
-us for a deeper discussion and help move this mobile-testing framework forward.
-
-## Attributions
-
-The project uses third-party libraries. See [Attributions](NOTICE.md) for details.
-
-## Current Scope
-
-- The current open-source device-side implementation is for Android.
-- Managed Execution is a single-host SQLite WAL control plane that supports multiple Workers on the
-  same host. It is not a cloud-device supply service, a multi-host high-availability system, or an
-  enterprise web-management platform.
-- Dynamic Agents are intended for trusted workstations, controlled test devices, and clearly scoped
-  tasks.
-- Plugins contain dynamic code that can run in the app process. The default compatibility manifests
-  reference pinned assets; authorized local packages from known sources can also be installed.
-- `done` is only the Agent's stop signal. The formal conclusion always comes from the Result Judge.
-- Trustworthy delivery does not mean that every task passes. Return `not_tested` when the result
-  cannot be observed reliably or when evidence is missing.
-
-## Contributing to the Project
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md). Before submitting third-party code, models, images, or
-binaries, provide the exact source, version, license, and a description of your changes.
-
-## License
-
-SoloPi is open source under the [Apache License 2.0](LICENSE). Third-party components remain subject
-to their respective license and attribution requirements.
-
-```text
-Copyright (C) 2015-present, Ant Financial Services Group
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-```
-
-## Disclaimer
-
-[Disclaimer](Disclaimer.md)
+SoloPi is available under the [Apache License 2.0](LICENSE). Third-party components and assets retain their own licenses and attribution requirements; see [NOTICE](NOTICE.md). Read the [Disclaimer](Disclaimer.md) before use.

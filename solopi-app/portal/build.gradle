@@ -16,6 +16,29 @@
 apply plugin: 'com.android.application'
 
 android {
+    if (project.hasProperty('virtualScreenExperimental')) {
+        sourceSets.main.res.srcDir 'src/virtualScreenExperimental/res'
+    }
+    if (project.hasProperty('trustedDisplayProbe')) {
+        if (!project.hasProperty('virtualScreenExperimental')) {
+            throw new GradleException('trustedDisplayProbe requires virtualScreenExperimental')
+        }
+        sourceSets.androidTest.manifest.srcFile 'src/trustedDisplayProbe/AndroidManifest.xml'
+        sourceSets.androidTest.java.srcDir 'src/trustedDisplayProbe/java'
+    }
+    if (project.hasProperty('fixturePipeProbe')) {
+        if (!project.hasProperty('virtualScreenExperimental') || project.hasProperty('trustedDisplayProbe') || project.hasProperty('virtualScreenProbe')) {
+            throw new GradleException('fixturePipeProbe requires virtualScreenExperimental and a dedicated test runner')
+        }
+        sourceSets.androidTest.manifest.srcFile 'src/trustedDisplayProbe/AndroidManifest.xml'
+        sourceSets.androidTest.java.srcDir 'src/trustedDisplayProbe/java'
+    }
+    if (project.hasProperty('virtualScreenProbe')) {
+        if (!project.hasProperty('virtualScreenOcr')) {
+            throw new GradleException('virtualScreenProbe requires virtualScreenOcr')
+        }
+        sourceSets.androidTest.java.srcDir 'src/virtualScreenProbe/java'
+    }
     ndkVersion rootProject.ext.ndkVersion
     signingConfigs {
         release {
@@ -30,9 +53,21 @@ android {
         applicationId "com.alipay.hulu"
         manifestPlaceholders = [portalAppLabel: '@string/app_name']
         minSdkVersion 18
+        if (project.hasProperty('virtualScreenOcr')) {
+            minSdkVersion 21
+        }
         targetSdkVersion rootProject.ext.targetSdkVersion
         multiDexEnabled true
         testInstrumentationRunner 'com.alipay.hulu.security.PatchSecurityInstrumentation'
+        if (project.hasProperty('virtualScreenProbe')) {
+            testInstrumentationRunner 'com.alipay.hulu.virtualscreen.VirtualScreenInstrumentation'
+        }
+        if (project.hasProperty('trustedDisplayProbe')) {
+            testInstrumentationRunner 'com.alipay.hulu.virtualscreen.TrustedDisplayHandshakeInstrumentation'
+        }
+        if (project.hasProperty('fixturePipeProbe')) {
+            testInstrumentationRunner 'com.alipay.hulu.virtualscreen.FixturePipePermissionInstrumentation'
+        }
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
         }

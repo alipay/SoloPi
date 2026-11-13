@@ -1,0 +1,8 @@
+#compdef solopi-desktop-package
+# solopi-desktop package command managed completion
+_arguments \
+  '--branch[选择打包分支，不切换开发目录]:分支:(master main agent)' \
+  '(--check --identity)--dev[启动目标分支的 npm run dev，不打包]' \
+  '(--dev)--check[只检查打包环境，不开始构建]' \
+  '(--dev)--identity[指定 Developer ID 完整 SHA-1]:签名 SHA-1:' \
+  '(-h --help)'{-h,--help}'[查看帮助]'

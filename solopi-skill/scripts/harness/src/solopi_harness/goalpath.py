@@ -316,7 +316,7 @@ def _history(raw):
     return result[-MAX_HISTORY:]
 
 
-def _candidates(nodes, parents, package, step, allowed):
+def _candidates(nodes, parents, package, step, allowed, include_unlabeled=False):
     result = {}
     node_map = {}
     denied = {label.casefold() for label in step.get("denyLabels", [])}
@@ -355,6 +355,8 @@ def _candidates(nodes, parents, package, step, allowed):
                 label = "Editable field"
             elif _flag(node, "isScrollable", "scrollable") is True:
                 label = "Scrollable region"
+            elif include_unlabeled and _flag(node, "isClickable", "clickable") is True:
+                label = "Unlabeled control"
             else:
                 continue
         if any(text.casefold() in denied for text in [label] + child_labels + parent_labels):
@@ -474,7 +476,8 @@ class GoalPathDecisionProvider(DecisionProvider):
 
     def __init__(self, policy: Mapping[str, Any], *, mode: str = "rules",
                  laya_predictor: Optional[Callable] = None, llm_predictor: Optional[Callable] = None,
-                 model: str = "laya-multilingual", model_version: str = "unversioned") -> None:
+                 model: str = "laya-multilingual", model_version: str = "unversioned",
+                 visual_observations: bool = False, include_unlabeled: bool = False) -> None:
         self._policy = validate_policy(policy)
         if (not isinstance(mode, str) or mode not in {"rules", "laya", "llm", "hybrid"} or not _text(model, 160)
                 or not _text(model_version, 160)
@@ -484,6 +487,13 @@ class GoalPathDecisionProvider(DecisionProvider):
                 or mode in {"rules", "laya"} and llm_predictor is not None):
             raise _invalid()
         self.mode, self.model, self.model_version = mode, model, model_version
+        if (not isinstance(visual_observations, bool) or not isinstance(include_unlabeled, bool)
+                or include_unlabeled and not visual_observations
+                or visual_observations and mode not in {"rules", "llm"}):
+            raise _invalid()
+        self.requires_visual_observation = visual_observations
+        self._last_request = None
+        self.include_unlabeled = include_unlabeled
         self.laya_predictor, self.llm_predictor = laya_predictor, llm_predictor
         self.llm_model = getattr(llm_predictor, "model", "injected-llm")
         if not _text(self.llm_model, 160):
@@ -501,11 +511,19 @@ class GoalPathDecisionProvider(DecisionProvider):
                                      "viewport": "page.nodeBound and target.nodeBound; target center inside viewport",
                                      "input": "isEditable:true and isPassword:false"},
                                  "occlusionCheck": "not-inferred-from-visibility"}
+        if visual_observations:
+            self.runtime_metadata.update({"visualObservation": "tree-image-tree-v1",
+                                          "candidatePolicy": "expanded-node-v1" if include_unlabeled else "generic-visible-actionable-v1"})
 
     def policy_snapshot(self):
         return copy.deepcopy(self._policy)
 
+    def last_request_snapshot(self):
+        """Return local experiment input, separate from the execution receipt."""
+        return copy.deepcopy(self._last_request)
+
     def decide(self, context: Mapping[str, Any]) -> Dict[str, Any]:
+        self._last_request = None
         started = time.perf_counter()
         receipt = {"provider": "goalpath", "mode": self.mode,
                    "model": self.llm_model if self.mode == "llm" else self.model if self.mode != "rules" else None,
@@ -564,10 +582,12 @@ class GoalPathDecisionProvider(DecisionProvider):
         if (completed_count >= step.get("minCompletedActions", 0)
                 and _condition_matches(step["stopWhen"], nodes, parents, package)):
             return finish("done", "stop_condition_observed")
+        if context.get("terminalOnly") is True:
+            return finish("blocked", "agent_decision_budget_exhausted")
         if "readyWhen" in step and not _condition_matches(step["readyWhen"], nodes, parents, package):
             return finish("blocked", "page_not_ready")
         try:
-            candidates, node_map = _candidates(nodes, parents, package, step, set(allowed))
+            candidates, node_map = _candidates(nodes, parents, package, step, set(allowed), self.include_unlabeled)
         except ValueError as exc:
             return finish("blocked", str(exc))  # Only local, fixed reason codes.
         receipt["candidates"] = copy.deepcopy(candidates)
@@ -578,10 +598,29 @@ class GoalPathDecisionProvider(DecisionProvider):
                    "instructions": step["instructions"], "history": history,
                    "pageText": page_text, "pageTextTruncated": page_text_truncated,
                    "candidates": _public_candidates(candidates)}
+        if self.requires_visual_observation:
+            visual = context.get("visual")
+            fields = {"schemaVersion", "observationId", "imagePath", "sha256", "width", "height",
+                      "treeFingerprint", "attempts"}
+            if (not isinstance(visual, dict) or not fields.issubset(visual)
+                    or visual.get("observationId") != observation["observationId"]
+                    or visual.get("schemaVersion") != "solopi.ai.visual-observation/v1"):
+                return finish("blocked", "visual_observation_unavailable")
+            # Code security: only our captured frame may accompany current candidates.
+            request["visual"] = {key: copy.deepcopy(visual[key]) for key in fields}
+            for key, node in node_map.items():
+                left, top, right, bottom = _bounds(node)
+                # A partially visible node retains its original action identity.
+                # Only its descriptive image region is clipped to the frame.
+                request["candidates"][key]["visualBounds"] = [
+                    max(0, left), max(0, top), min(visual["width"], right), min(visual["height"], bottom)]
+            receipt["visual"] = {key: copy.deepcopy(visual[key]) for key in fields}
         serialized = json.dumps(request, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":"))
         if len(serialized.encode("utf-8")) > MAX_REQUEST_BYTES:
             return finish("blocked", "request_too_large")
         receipt["requestDigest"] = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+        if self.requires_visual_observation:
+            self._last_request = copy.deepcopy(request)
         receipt["historyLength"] = len(history)
         receipt["pageTextSummary"] = {"count": len(page_text), "truncated": page_text_truncated}
         if self.mode == "rules":
@@ -631,6 +670,11 @@ class GoalPathDecisionProvider(DecisionProvider):
                 attempt["usage"] = {k: usage[k] for k in ("prompt_tokens", "completion_tokens", "total_tokens")
                                     if isinstance(usage.get(k), int) and not isinstance(usage[k], bool)
                                     and 0 <= usage[k] <= 100_000_000}
+            for key in ("requestCount", "imageCount"):
+                if _integer(runtime.get(key), 0, 1):
+                    attempt[key] = runtime[key]
+            if isinstance(runtime.get("includeImage"), bool):
+                attempt["includeImage"] = runtime["includeImage"]
         receipt["attempts"].append(attempt)
         receipt["selectedBackend"] = "llm"
         receipt["model"], receipt["modelVersion"] = self.llm_model, None

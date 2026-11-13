@@ -72,6 +72,11 @@ public final class AgentSessionState {
         if (isLive(state)) {
             return StartResult.error("session_conflict", "A dynamic Agent session is already active");
         }
+        // Do not discard the identity of a virtual session whose cleanup was not confirmed,
+        // even if the underlying lease has unexpectedly been lost.
+        if (leaseOwner != null && config != null && "virtual".equals(config.screenMode)) {
+            return StartResult.error("cleanup_unconfirmed", "Previous virtual session cleanup is unconfirmed");
+        }
         if (requestedOwnerToken == null || requestedOwnerToken.length() < 16) {
             return StartResult.error("invalid_owner_token", "ownerToken must contain at least 16 characters");
         }
@@ -139,6 +144,28 @@ public final class AgentSessionState {
                                                 Action action) {
         return beginAction(expectedSessionId, expectedOwnerToken, stepId, observationId,
                 currentSignature, action, null);
+    }
+
+    synchronized Receipt rejectAction(String expectedSessionId, String expectedOwnerToken,
+                                      String stepId, String observationId, Action action,
+                                      String code, String message) {
+        Result<Object> identity = requireIdentity(expectedSessionId, expectedOwnerToken);
+        if (!identity.success) return rejectedReceipt(stepId, observationId, action, identity.errorCode, identity.error);
+        Receipt previous = receipts.get(stepId);
+        if (previous != null) return previous;
+        if (stepId == null || stepId.isEmpty()) return rejectedReceipt(stepId, observationId, action, "invalid_step_id", "stepId is required");
+        return rememberRejection(stepId, observationId, action, code, message).receipt;
+    }
+
+    synchronized void rejectFixturePipeBeforeDispatch(String expectedSessionId, String expectedOwnerToken,
+                                                      String stepId, String observationId) {
+        // Code security: only a fixture step and its verified session owner may
+        // create this pre-dispatch receipt; rejectAction preserves earlier receipts.
+        if (stepId == null || !stepId.matches("fixture-[0-9a-f]{32}") || observationId == null
+                || observationId.isEmpty()) return;
+        rejectAction(expectedSessionId, expectedOwnerToken, stepId, observationId,
+                Action.of("wait", Collections.<String, Object>singletonMap("durationMs", 100L)),
+                "fixture_pre_dispatch_rejected", "Fixture action was rejected before dispatch");
     }
 
     synchronized BeginResult beginAction(String expectedSessionId,
@@ -289,6 +316,15 @@ public final class AgentSessionState {
         return BeginResult.accepted(accepted, generation);
     }
 
+    /** Record dispatch only for the accepted step of the current generation. */
+    public synchronized void noteVirtualDispatch(long expectedGeneration, String stepId) {
+        Receipt accepted = receipts.get(stepId);
+        if (expectedGeneration != generation || !STATE_ACTING.equals(state)
+                || accepted == null || !"accepted".equals(accepted.status)) return;
+        // Code security: persist only a fixed phase, never screen contents or session credentials.
+        appendEvent("action_dispatched", stepId, accepted.observationId, singleton("phase", "submitted"));
+    }
+
     public synchronized Receipt finishAction(long expectedGeneration, String stepId,
                                              boolean performed, String error,
                                              ObservationInput settledInput) {
@@ -312,10 +348,14 @@ public final class AgentSessionState {
 
         Observation settled = new Observation(ids.next("observation"), settledInput.signature,
                 clock.now(), settledInput.evidence);
+        Object oldProgress = currentObservation == null ? null : currentObservation.evidence.get("progressSignature");
         currentObservation = settled;
         observationConsumed = false;
         state = STATE_ACTIVE;
-        noProgressCount = settled.signature.equals(accepted.sourceSignature)
+        Object newProgress = settled.evidence.get("progressSignature");
+        boolean unchanged = oldProgress instanceof String && newProgress instanceof String
+                ? oldProgress.equals(newProgress) : settled.signature.equals(accepted.sourceSignature);
+        noProgressCount = unchanged
                 ? noProgressCount + 1 : 0;
         Receipt succeeded = accepted.finish("succeeded", settled, null, null, clock.now());
         receipts.put(stepId, succeeded);
@@ -378,6 +418,22 @@ public final class AgentSessionState {
             return Result.error(access.errorCode, access.error);
         }
         terminate(STATE_CANCELLED, "client_cancel");
+        return Result.success(snapshotLocked());
+    }
+
+    /** Retry only terminal cleanup for the exact owner; never re-execute a device action. */
+    public synchronized Result<Map<String, Object>> retryCleanup(String expectedSessionId,
+                                                                  String expectedOwnerToken) {
+        // Code security: session identity and the retained device lease are both required.
+        Result<Object> identity = requireIdentity(expectedSessionId, expectedOwnerToken);
+        if (!identity.success) return Result.error(identity.errorCode, identity.error);
+        if (!isTerminal(state)) return Result.error("session_not_terminal", "Cleanup retry requires a terminal session");
+        if (leaseOwner == null) return Result.success(snapshotLocked());
+        if (!lease.isOwnedBy(leaseOwner)) return Result.error("lease_lost", "The session no longer owns device control");
+        boolean released = lease.release(leaseOwner);
+        appendEvent("cleanup_retried", null, observationId(), singleton("released", released));
+        if (!released) return Result.error("cleanup_unconfirmed", "Device cleanup could not be confirmed");
+        leaseOwner = null;
         return Result.success(snapshotLocked());
     }
 
@@ -480,6 +536,13 @@ public final class AgentSessionState {
         return Result.success(config);
     }
 
+    /** Internal lease identity, returned only after the same live-session access check. */
+    synchronized Result<String> workLeaseOwner(String expectedSessionId, String expectedOwnerToken) {
+        Result<Config> access = workConfig(expectedSessionId, expectedOwnerToken);
+        if (!access.success) return Result.error(access.errorCode, access.error);
+        return Result.success(leaseOwner);
+    }
+
     private Result<Object> requireAccess(String expectedSessionId, String expectedOwnerToken,
                                          boolean allowPaused) {
         Result<Object> identity = requireIdentity(expectedSessionId, expectedOwnerToken);
@@ -550,8 +613,9 @@ public final class AgentSessionState {
         finishedAt = clock.now();
         appendEvent("session_terminal", null, observationId(), singleton("reason", reason));
         String owner = leaseOwner;
-        leaseOwner = null;
         boolean released = lease.release(owner);
+        // Keep the owner visible if resource cleanup prevented the lease release.
+        if (released) leaseOwner = null;
         appendEvent("lease_released", null, observationId(), singleton("released", released));
     }
 
@@ -598,8 +662,12 @@ public final class AgentSessionState {
         result.put("maxSteps", config == null ? null : config.maxSteps);
         result.put("settleStrategy", config == null ? null : config.settleStrategy);
         result.put("actionValidationStrategy", config == null ? null : config.actionValidationStrategy);
+        result.put("screenMode", config == null ? null : config.screenMode);
+        result.put("targetPackage", config == null ? null : config.targetPackage);
         result.put("observationId", observationId());
         result.put("leaseHeld", leaseOwner != null && lease.isOwnedBy(leaseOwner));
+        // An unexpectedly lost lease does not prove that its resources were cleaned up.
+        result.put("cleanupPending", isTerminal(state) && leaseOwner != null);
         return result;
     }
 
@@ -646,6 +714,8 @@ public final class AgentSessionState {
         public final int maxNoProgressSteps;
         public final String settleStrategy;
         public final String actionValidationStrategy;
+        public final String screenMode;
+        public final String targetPackage;
 
         public Config(int maxSteps, long maxDurationMs, long idleTimeoutMs,
                       int maxRepeatedActions, int maxNoProgressSteps) {
@@ -662,6 +732,13 @@ public final class AgentSessionState {
         public Config(int maxSteps, long maxDurationMs, long idleTimeoutMs,
                       int maxRepeatedActions, int maxNoProgressSteps, String settleStrategy,
                       String actionValidationStrategy) {
+            this(maxSteps, maxDurationMs, idleTimeoutMs, maxRepeatedActions, maxNoProgressSteps,
+                    settleStrategy, actionValidationStrategy, "main", null);
+        }
+
+        public Config(int maxSteps, long maxDurationMs, long idleTimeoutMs,
+                      int maxRepeatedActions, int maxNoProgressSteps, String settleStrategy,
+                      String actionValidationStrategy, String screenMode, String targetPackage) {
             if (maxSteps <= 0 || maxDurationMs <= 0L || idleTimeoutMs <= 0L
                     || maxRepeatedActions <= 0 || maxNoProgressSteps <= 0) {
                 throw new IllegalArgumentException("All Agent session bounds must be positive");
@@ -672,6 +749,13 @@ public final class AgentSessionState {
             if (!AgentTargetContextGuard.supports(actionValidationStrategy)) {
                 throw new IllegalArgumentException("Unsupported action validation strategy");
             }
+            if (!"main".equals(screenMode) && !"virtual".equals(screenMode))
+                throw new IllegalArgumentException("Unsupported screen mode");
+            if ("virtual".equals(screenMode) && (targetPackage == null || targetPackage.length() > 255
+                    || !targetPackage.matches("[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)+")))
+                throw new IllegalArgumentException("Invalid target package");
+            if ("main".equals(screenMode) && targetPackage != null)
+                throw new IllegalArgumentException("Main screen has no bound target package");
             this.maxSteps = maxSteps;
             this.maxDurationMs = maxDurationMs;
             this.idleTimeoutMs = idleTimeoutMs;
@@ -679,6 +763,8 @@ public final class AgentSessionState {
             this.maxNoProgressSteps = maxNoProgressSteps;
             this.settleStrategy = settleStrategy;
             this.actionValidationStrategy = actionValidationStrategy;
+            this.screenMode = screenMode;
+            this.targetPackage = targetPackage;
         }
     }
 

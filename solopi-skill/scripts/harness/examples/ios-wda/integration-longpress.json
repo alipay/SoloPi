@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "platform": "ios",
+  "targetAppId": "com.facebook.IntegrationApp",
+  "id": "ios-longpress",
+  "title": "Long press on the native touch probe",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-1",
+      "text": "Exactly one touch ends on the coordinate canvas"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "longpress",
+      "title": "Long press on the native touch probe",
+      "acceptanceCriteria": [
+        "AC-1"
+      ],
+      "steps": [
+        {
+          "id": "open-probe",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "accessibilityId": "coordinate-probe"
+            }
+          }
+        },
+        {
+          "id": "hold",
+          "type": "operation",
+          "action": {
+            "type": "longClick",
+            "selector": {
+              "accessibilityId": "coordinate-canvas"
+            },
+            "durationMs": 1000
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "touch-ended",
+          "afterStep": "hold",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "accessibilityId": "probe-status"
+            },
+            "field": "text",
+            "operator": "contains",
+            "expected": "\"phase\":\"ended\""
+          }
+        }
+      ]
+    }
+  ]
+}

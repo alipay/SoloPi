@@ -8,10 +8,42 @@
     <item name="dismiss_popup" type="id" />
     <item name="reset_button" type="id" />
     <item name="scenario_baseline" type="id" />
+    <item name="test_notification" type="id" />
+    <item name="scenario_chat" type="id" />
+    <item name="chat_identity" type="id" />
+    <item name="chat_message" type="id" />
+    <item name="chat_input" type="id" />
+    <item name="chat_send" type="id" />
+    <item name="chat_arrival" type="id" />
+    <item name="chat_duplicate" type="id" />
+    <item name="chat_picture" type="id" />
+    <item name="chat_retract" type="id" />
+    <item name="chat_group" type="id" />
+    <item name="chat_ambiguous" type="id" />
+    <item name="chat_nonquestion" type="id" />
+    <item name="chat_wake" type="id" />
+    <item name="chat_image_content" type="id" />
+    <item name="scenario_ocr_canvas" type="id" />
     <item name="scenario_renamed" type="id" />
     <item name="scenario_popup" type="id" />
     <item name="scenario_loading" type="id" />
     <item name="scenario_broken" type="id" />
     <item name="scenario_unknown" type="id" />
     <item name="scenario_disabled" type="id" />
+    <item name="scenario_visual_icons" type="id" />
+    <item name="scenario_visual_layout" type="id" />
+    <item name="scenario_visual_guard" type="id" />
+    <item name="scenario_visual_negative" type="id" />
+    <item name="scenario_secure_window" type="id" />
+    <item name="scenario_replaced_target" type="id" />
+    <item name="replacement_target" type="id" />
+    <item name="scenario_unstable" type="id" />
+    <item name="scenario_escape_to_main" type="id" />
+    <item name="visual_variant_a" type="id" />
+    <item name="visual_variant_b" type="id" />
+    <item name="visual_variant_c" type="id" />
+    <item name="visual_a7" type="id" />
+    <item name="visual_b2" type="id" />
+    <item name="visual_c9" type="id" />
+    <item name="visual_dialog_reset" type="id" />
 </resources>

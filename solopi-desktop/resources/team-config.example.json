@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "lenswiper.team-config.v1",
+  "id": "example-team",
+  "name": "团队配置示例（请替换占位值）",
+  "version": "1",
+  "caseRepositories": [{"id":"team-cases","name":"团队用例","repoUrl":"https://git.example.test/team/cases.git","branch":"main"}],
+  "shortcutRepositories": [{"id":"team-actions","repoUrl":"https://git.example.test/team/scripts.git","branch":"main","directory":"scripts"}],
+  "llmProviders": [{"id":"team-model","name":"团队模型","baseUrl":"https://model.example.test/v1","model":"your-model","protocol":"openai-compatible"}],
+  "selectedLlmProviderId": "team-model",
+  "ttsProvider": {"enabled":true,"name":"团队 TTS","url":"https://tts.example.test/synthesize","method":"POST","bodyTemplate":"{\"text\":\"{{text}}\"}","responseType":"json-url","urlField":"data.url"},
+  "deviceBindings": {"phoneSerials":[],"glassesSerials":[],"phoneDefaultPackage":"com.example.phone","glassesDefaultPackage":"com.example.glass"}
+}

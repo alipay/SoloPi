@@ -40,6 +40,21 @@ class VerificationTransportTests(unittest.TestCase):
     def borrow(self, args=None):
         return solopi_ai.session_from_args(args or self.args, self.adb, preserve_foreground=True)
 
+    def test_notification_status_uses_owned_session_and_rejects_invalid_responses(self):
+        with self.borrow() as session:
+            self.http.get.return_value = {"success": True, "notification": {
+                "available": True, "epoch": "generation", "sequence": 2, "ignored": "private"}}
+            status = session.notification_status("owned-session", "owned-token", timeout=2)
+            self.assertEqual({"available": True, "epoch": "generation", "sequence": 2}, status)
+            self.http.get.assert_called_with("agent", {"type": "notification-status",
+                "sessionId": "owned-session", "ownerToken": "owned-token"}, timeout=2)
+            for invalid in (None, {}, {"available": True, "epoch": "", "sequence": 0},
+                            {"available": True, "epoch": "e", "sequence": True},
+                            {"available": True, "epoch": "e", "sequence": -1}):
+                self.http.get.return_value = {"success": True, "notification": invalid}
+                with self.assertRaises(solopi_ai.CliError):
+                    session.notification_status("owned-session", "owned-token")
+
     def test_default_shared_scope_reuses_forward_and_probe_but_not_live_queries(self):
         self.assertEqual("shared", self.args.transport_mode)
         transport = solopi_ai.VerificationTransport(self.args, self.adb)

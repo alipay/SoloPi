@@ -20,6 +20,46 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 public class AgentSessionSchemeResolverTest {
+    @Test public void onlyTransientObservationsMayBeResampled() {
+        assertTrue(AgentSessionSchemeResolver.isTransientVirtualObservation("virtual_window_unavailable"));
+        assertTrue(AgentSessionSchemeResolver.isTransientVirtualObservation("virtual_observation_unstable"));
+        assertFalse(AgentSessionSchemeResolver.isTransientVirtualObservation("virtual_display_changed"));
+        assertFalse(AgentSessionSchemeResolver.isTransientVirtualObservation("virtual_lease_lost"));
+        assertFalse(AgentSessionSchemeResolver.isTransientVirtualObservation(null));
+    }
+    @Test public void virtualSettleTimeoutOnlyReportsKnownNonContentReasons() {
+        assertEquals("Virtual action was submitted; settle timed out (reason=virtual_observation_unstable); outcome may be unknown",
+                AgentSessionSchemeResolver.virtualSettleTimeoutMessage("virtual_observation_unstable"));
+        assertEquals("Virtual action was submitted; settle timed out (reason=unknown); outcome may be unknown",
+                AgentSessionSchemeResolver.virtualSettleTimeoutMessage("private page text"));
+    }
+    @Test public void initialVirtualFailureExposesOnlyKnownSafeReasons() {
+        assertEquals("virtual_initial_window_unavailable", AgentSessionSchemeResolver.initialVirtualFailureCode("virtual_window_unavailable"));
+        assertEquals("virtual_initial_frame_unavailable", AgentSessionSchemeResolver.initialVirtualFailureCode("virtual_frame_unavailable"));
+        assertEquals("virtual_initial_observation_unstable", AgentSessionSchemeResolver.initialVirtualFailureCode("virtual_observation_unstable"));
+        assertEquals("virtual_initial_observation_stale", AgentSessionSchemeResolver.initialVirtualFailureCode("stale_observation"));
+        assertEquals("virtual_initial_observation_failed", AgentSessionSchemeResolver.initialVirtualFailureCode("private page text"));
+        assertEquals("virtual_initial_observation_failed", AgentSessionSchemeResolver.initialVirtualFailureCode(null));
+    }
+    @Test
+    public void screenModeNeverFallsBackFromVirtualOrInvalidToMain() throws Exception {
+        assertEquals("main", AgentSessionSchemeResolver.parseScreenMode(null));
+        assertEquals("main", AgentSessionSchemeResolver.parseScreenMode("main"));
+        if (com.alipay.hulu.BuildConfig.VIRTUAL_SCREEN_EXPERIMENTAL)
+            assertEquals("virtual", AgentSessionSchemeResolver.parseScreenMode("virtual"));
+        else {
+            try { AgentSessionSchemeResolver.parseScreenMode("virtual"); org.junit.Assert.fail("virtual must be rejected"); }
+            catch (Exception expected) { assertTrue(expected.getMessage().contains("screen")); }
+        }
+        for (String invalid : new String[] {"", "MAIN", "main\n"}) {
+            try {
+                AgentSessionSchemeResolver.parseScreenMode(invalid);
+                org.junit.Assert.fail("Unsupported screen mode must be rejected");
+            } catch (Exception expected) {
+                assertTrue(expected.getMessage().contains("screen"));
+            }
+        }
+    }
     @Test
     public void frameTargetBindsExactPathEvenWhenSiblingsHaveSameLabelsAndIds() {
         FakeNodeTree root = window("com.example.orders", 0, 0, 1080, 2400);
