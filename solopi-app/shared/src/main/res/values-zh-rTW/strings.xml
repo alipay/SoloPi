@@ -51,7 +51,7 @@
     <string name="action__global_scroll_left">全域向左捲動</string>
     <string name="action__global_keyboard_input">鍵盤輸入</string>
     <string name="action__global_global_input">全域輸入</string>
-    <string name="action__goto_index">回到首頁</string>
+    <string name="action__goto_index">重新啟動應用程式</string>
     <string name="action__clear_data">清除資料</string>
     <string name="action__kill_process">結束處理程序</string>
     <string name="action__sleep">Sleep</string>
@@ -122,8 +122,8 @@
     <string name="action_param__gesture_filter">手勢操作間隔</string>
     <string name="action__force_stop">強制停止</string>
     <string name="action__normal_exit">結束重播</string>
-    <string name="running_mode__accessibility_mode">協助工具模式</string>
-    <string name="running_mode__capture_mode">截圖模式</string>
+    <string name="running_mode__accessibility_mode">通用模式</string>
+    <string name="running_mode__capture_mode">影像查找模式</string>
     <string name="action__resume">繼續</string>
     <string name="performance__process_status">處理程序狀態</string>
     <string name="performance__temperature">溫度 (BETA)</string>
