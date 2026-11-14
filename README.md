@@ -16,6 +16,8 @@
 SoloPi 将 Android 录制回放、跨平台桌面控制和面向 AI Agent 的 Skill / Harness 放在同一条测试链路中。被测应用通常无需接入 SDK；每次任务都可以保留页面观察、动作回执和结果证据。
 
 > 6.3k+ GitHub Stars · [历史 Java Trending 日榜最高第 2，曾连续 6 天上榜](https://github.com/frodeaa/github_trending_archive/tree/master/archive/2019-07)
+>
+> SoloPi Harness 获第四届开放原子大赛「2026 开源行业解决方案创新赛」[开源基础软件与解决方案赛道三等奖](https://www.oschina.net/oa2026/winners)。
 
 ## 三种使用方式
 

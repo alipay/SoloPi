@@ -16,6 +16,8 @@
 SoloPi brings Android record and replay, cross-platform desktop control, and a Skill / Harness for AI Agents into one testing workflow. The app under test normally does not need to integrate a SoloPi SDK, and every run can retain page observations, action receipts, and result evidence.
 
 > 6.3k+ GitHub Stars · [Java Trending daily peak: #2, with six consecutive days on the list](https://github.com/frodeaa/github_trending_archive/tree/master/archive/2019-07)
+>
+> SoloPi Harness won [third prize in the Open-Source Infrastructure Software and Solutions track](https://www.oschina.net/oa2026/winners) at the 2026 Open Source Industry Solutions Innovation Competition, part of the fourth OpenAtom Competition.
 
 ## Three Ways to Use SoloPi
 
