@@ -1,0 +1,23 @@
+solopi-app/app/src/main/java/com/alipay/hulu/scheme/ConfigSchemeResolver.java
+  s_fd5c66a72fb1e8::t_e751cfe71dd1f6 119
+solopi-app/app/src/main/res/values/arrays.xml
+  s_fd5c66a72fb1e8::t_a1337f4a452093 72,74
+solopi-app/common/src/main/java/com/alipay/hulu/common/application/LauncherApplication.java
+  s_fd5c66a72fb1e8::t_331bfdd56e711c 1224-1225
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c62867da2734086783d5cd3ee7288e38783963b6",
+  "prompts": {},
+  "sessions": {
+    "s_fd5c66a72fb1e8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1383c-9f7d-7323-8d7f-6ff60953824b",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Liu Zimu <85295081+Lzm1645@users.noreply.github.com>"
+    }
+  }
+}
