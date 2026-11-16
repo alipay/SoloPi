@@ -54,7 +54,7 @@
     <string name="action__goto_index">重新啟動應用程式</string>
     <string name="action__clear_data">清除資料</string>
     <string name="action__kill_process">結束處理程序</string>
-    <string name="action__sleep">Sleep</string>
+    <string name="action__sleep">等待指定時間</string>
     <string name="action__screen_shot">截圖</string>
     <string name="action__home">主畫面鍵</string>
     <string name="action__notification">通知面板</string>
