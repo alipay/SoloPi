@@ -1,0 +1,1393 @@
+.gitignore
+  s_fd5c66a72fb1e8::t_2a1ee183186449 4
+README.md
+  s_fd5c66a72fb1e8::t_06a54baac630fd 1,3-8,10-14,16,18,20,22,24,26-30,32,34,36-40,42,44,46,49,52,54,57-61,64,66,69-71,74,76,78,80-85,87,89,91-93,95,97-112,114,116-118,120,122,124-131,133,135,137,139,141,143,145,147,149,152-153,156,162,164,166-173,175,177,179-181,183,185,187
+README_eng.md
+  s_fd5c66a72fb1e8::t_983e7e1c55d58e 1,3-8,10-14,16,18,20,22,24-28,30,32,34-38,40,42,44,47,50,52,55-59,62,64,67-69,72,74,76,78-83,85,87,89-104,106,108-110,112,114,116-123,125,127,129,131,133,135,137,139,141,144,148,154,156,158-165,167,169,171-173,175,177,179
+solopi-app/app/build.gradle
+  s_fd5c66a72fb1e8::t_53ae9c05016af7 18-22,29-40,47,51,87-91
+solopi-app/app/src/main/AndroidManifest.xml
+  s_fd5c66a72fb1e8::t_bdf53562ceb59f 142-149,174-188
+solopi-app/app/src/main/aidl/com/alipay/hulu/virtualscreen/ITrustedDisplayHelper.aidl
+  s_fd5c66a72fb1e8::t_55da8b5a11ffd9 1-12
+solopi-app/app/src/main/java/com/alipay/hulu/activity/IndexActivity.java
+  s_fd5c66a72fb1e8::t_81f7e723d725f4 92-97,122,289
+solopi-app/app/src/main/java/com/alipay/hulu/activity/InfoActivity.java
+  s_fd5c66a72fb1e8::t_b3f9215f1aedc8 71-75
+solopi-app/app/src/main/java/com/alipay/hulu/activity/MyApplication.java
+  s_fd5c66a72fb1e8::t_13fec521a1c8af 291
+solopi-app/app/src/main/java/com/alipay/hulu/scheme/AgentSessionSchemeResolver.java
+  s_fd5c66a72fb1e8::t_8c4cb5086172b1 12,15-16,20-21,27,29-30,44-48,56,59,91-94,115-116,129-131,160-165,183-187,204-207,216-217,227,229,242-249,255-257,259-264,272,277,290-293,303-304,318-368,395-403,413-417,440-485,518-617,621-630,739-740,798-801,827-829,867-1093,1201-1208,1466-1469,1477-1560,1582,1876,1904,1922-1940
+solopi-app/app/src/main/java/com/alipay/hulu/scheme/AgentSessionState.java
+  s_fd5c66a72fb1e8::t_ea660f3a2a504f 75-79,149-170,347-355,379,383-386,452-467,567-573,645-646,693-694,697-698,746-747,765,771-785,796-802,814-815
+solopi-app/app/src/main/java/com/alipay/hulu/scheme/AgentVirtualObservation.java
+  s_fd5c66a72fb1e8::t_ca218cafaf7ead 1-323
+solopi-app/app/src/main/java/com/alipay/hulu/scheme/AgentVirtualResources.java
+  s_fd5c66a72fb1e8::t_c492cf3c193652 1-88
+solopi-app/app/src/main/java/com/alipay/hulu/scheme/ConfigSchemeResolver.java
+  s_fd5c66a72fb1e8::t_047654bd9cfe8f 32-34,43,58-59,70,76-84,119,145,147,230-380
+solopi-app/app/src/main/java/com/alipay/hulu/scheme/FixturePipeFrame.java
+  s_fd5c66a72fb1e8::t_440d5c3023b533 1-49
+solopi-app/app/src/main/java/com/alipay/hulu/scheme/FixtureReplyGuard.java
+  s_fd5c66a72fb1e8::t_660edcfc899ef3 1-93
+solopi-app/app/src/main/java/com/alipay/hulu/scheme/FixtureReplyPipeProvider.java
+  s_fd5c66a72fb1e8::t_a5c76049a1b66e 1-85
+solopi-app/app/src/main/java/com/alipay/hulu/service/MessageWakeListenerService.java
+  s_fd5c66a72fb1e8::t_cde830373e0c74 1-42
+solopi-app/app/src/main/java/com/alipay/hulu/service/NotificationWakeState.java
+  s_fd5c66a72fb1e8::t_6eccfa7605ca9a 1-58
+solopi-app/app/src/main/java/com/alipay/hulu/util/StarPromptController.java
+  s_fd5c66a72fb1e8::t_e3874018b0df50 1-204
+solopi-app/app/src/main/java/com/alipay/hulu/util/StarPromptPolicy.java
+  s_fd5c66a72fb1e8::t_15aa05e5c6a927 1-84
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/AgentDisplayBridge.java
+  s_fd5c66a72fb1e8::t_6d4ecae0cd1c07 1-43
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/DisplayGeometryGuard.java
+  s_fd5c66a72fb1e8::t_72331619f245de 1-22
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/FrameEpoch.java
+  s_fd5c66a72fb1e8::t_6e890ec3915df2 1-36
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/LatestFrameBuffer.java
+  s_fd5c66a72fb1e8::t_67536530c52733 1-215
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/LocalDisplayBridge.java
+  s_fd5c66a72fb1e8::t_f9cfbf29077da4 1-55
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/TrustedAppIdentity.java
+  s_fd5c66a72fb1e8::t_a5a0904fe978c8 1-38
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/TrustedDisplayAttachProvider.java
+  s_fd5c66a72fb1e8::t_5d7ec5e71a027d 1-107
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/TrustedDisplayBridge.java
+  s_fd5c66a72fb1e8::t_9850f5b7d17ff5 1-74
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/TrustedDisplayFlags.java
+  s_fd5c66a72fb1e8::t_75b688984922c6 1-13
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/TrustedDisplayHandoff.java
+  s_fd5c66a72fb1e8::t_e9a656b9cbe451 1-52
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/TrustedDisplayHelperService.java
+  s_fd5c66a72fb1e8::t_3c8c844e0ba2ef 1-146
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/TrustedDisplayLease.java
+  s_fd5c66a72fb1e8::t_def2e0db2206dd 1-67
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/VirtualAccessibility.java
+  s_fd5c66a72fb1e8::t_e28d1c0e353918 1-248
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/VirtualActionGuard.java
+  s_fd5c66a72fb1e8::t_f90e2aedf1d4eb 1-222
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/VirtualAgentSession.java
+  s_fd5c66a72fb1e8::t_6257997db95526 1-308
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/VirtualFrameGuard.java
+  s_fd5c66a72fb1e8::t_72fbb884f04bee 1-28
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/VirtualFrameVerifier.java
+  s_fd5c66a72fb1e8::t_e9348baebd59d9 1-9
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/VirtualNodeController.java
+  s_fd5c66a72fb1e8::t_21cb2720e61aa6 1-258
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/VirtualOcrEngine.java
+  s_fd5c66a72fb1e8::t_8031e98b9affa7 1-31
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/VirtualOcrTargetGuard.java
+  s_fd5c66a72fb1e8::t_2d8a0dc3b34d98 1-37
+solopi-app/app/src/main/java/com/alipay/hulu/virtualscreen/VirtualScreen.java
+  s_fd5c66a72fb1e8::t_834f679953cbee 1-131
+solopi-app/app/src/main/res/drawable/star_badge_background.xml
+  s_fd5c66a72fb1e8::t_a06d45ce98f809 1-4
+solopi-app/app/src/main/res/drawable/star_card_background.xml
+  s_fd5c66a72fb1e8::t_d5ea6486180b31 1-4
+solopi-app/app/src/main/res/drawable/star_primary_background.xml
+  s_fd5c66a72fb1e8::t_386571efbb1837 1-4
+solopi-app/app/src/main/res/drawable/star_secondary_background.xml
+  s_fd5c66a72fb1e8::t_1039b4f27507a6 1-4
+solopi-app/app/src/main/res/layout/activity_info.xml
+  s_fd5c66a72fb1e8::t_4aa3d18cd2e16a 78-88,151
+solopi-app/app/src/main/res/layout/dialog_star_prompt.xml
+  s_fd5c66a72fb1e8::t_169d482ebc9d86 1-37
+solopi-app/app/src/main/res/values-zh-rTW/strings.xml
+  s_fd5c66a72fb1e8::t_a24a7ff875ca97 1-444
+solopi-app/app/src/main/res/values-zh/star_prompt.xml
+  s_fd5c66a72fb1e8::t_4faace7b04d4a4 1-10
+solopi-app/app/src/main/res/values-zh/strings.xml
+  s_fd5c66a72fb1e8::t_a6247796c46033 33
+solopi-app/app/src/main/res/values/arrays.xml
+  s_fd5c66a72fb1e8::t_9db642c77c85e3 72,74
+solopi-app/app/src/main/res/values/star_prompt.xml
+  s_fd5c66a72fb1e8::t_73074c2af8c36b 1-10
+solopi-app/app/src/main/res/values/strings.xml
+  s_fd5c66a72fb1e8::t_ac83a667e19505 34
+solopi-app/app/src/test/java/com/alipay/hulu/scheme/AgentSessionSchemeResolverTest.java
+  s_fd5c66a72fb1e8::t_529f9f79f7b9cf 34-74
+solopi-app/app/src/test/java/com/alipay/hulu/scheme/AgentSessionStateTest.java
+  s_fd5c66a72fb1e8::t_0fead66515b02e 39,50-190,196-197,200,614,632
+solopi-app/app/src/test/java/com/alipay/hulu/scheme/AgentVirtualObservationTest.java
+  s_fd5c66a72fb1e8::t_d17745b1a2992c 1-88
+solopi-app/app/src/test/java/com/alipay/hulu/scheme/AgentVirtualResourcesTest.java
+  s_fd5c66a72fb1e8::t_26d1f62e2017ef 1-152
+solopi-app/app/src/test/java/com/alipay/hulu/scheme/ConfigControlPortMigrationTest.java
+  s_fd5c66a72fb1e8::t_59e3033ad44c27 1-143
+solopi-app/app/src/test/java/com/alipay/hulu/scheme/FixturePipeFrameTest.java
+  s_fd5c66a72fb1e8::t_3faa41cfc579bf 1-43
+solopi-app/app/src/test/java/com/alipay/hulu/scheme/FixtureReplyGuardTest.java
+  s_fd5c66a72fb1e8::t_f772b3b3428431 1-95
+solopi-app/app/src/test/java/com/alipay/hulu/service/NotificationWakeStateTest.java
+  s_fd5c66a72fb1e8::t_1897e61105192e 1-52
+solopi-app/app/src/test/java/com/alipay/hulu/util/StarPromptPolicyTest.java
+  s_fd5c66a72fb1e8::t_0d760865470265 1-101
+solopi-app/app/src/test/java/com/alipay/hulu/virtualscreen/DisplayGeometryGuardTest.java
+  s_fd5c66a72fb1e8::t_11b3b5acb8c6c8 1-39
+solopi-app/app/src/test/java/com/alipay/hulu/virtualscreen/FrameEpochTest.java
+  s_fd5c66a72fb1e8::t_781b5c54ca5c2e 1-31
+solopi-app/app/src/test/java/com/alipay/hulu/virtualscreen/TrustedDisplayFlagsTest.java
+  s_fd5c66a72fb1e8::t_e9bff605d2e43a 1-17
+solopi-app/app/src/test/java/com/alipay/hulu/virtualscreen/TrustedDisplayHandoffTest.java
+  s_fd5c66a72fb1e8::t_ad191ec4ee1abe 1-62
+solopi-app/app/src/test/java/com/alipay/hulu/virtualscreen/TrustedDisplayLeaseTest.java
+  s_fd5c66a72fb1e8::t_57088e931d5be9 1-81
+solopi-app/app/src/test/java/com/alipay/hulu/virtualscreen/VirtualActionGuardTest.java
+  s_fd5c66a72fb1e8::t_10e35402ef6534 1-123
+solopi-app/app/src/test/java/com/alipay/hulu/virtualscreen/VirtualFrameGuardTest.java
+  s_fd5c66a72fb1e8::t_4400d9a499e15e 1-13
+solopi-app/app/src/test/java/com/alipay/hulu/virtualscreen/VirtualOcrTargetGuardTest.java
+  s_fd5c66a72fb1e8::t_6394291f996bd2 1-25
+solopi-app/app/src/virtualScreenExperimental/java/com/alipay/hulu/virtualscreen/OnDemandFrameVerifier.java
+  s_fd5c66a72fb1e8::t_0aa2dd4a56f37e 1-113
+solopi-app/app/src/virtualScreenExperimental/java/com/alipay/hulu/virtualscreen/TrustedDisplayHelperMain.java
+  s_fd5c66a72fb1e8::t_cdace8e102c9b6 1-138
+solopi-app/app/src/virtualScreenOcr/java/com/alipay/hulu/virtualscreen/OnDeviceOcr.java
+  s_fd5c66a72fb1e8::t_c90ab6c1e956fa 1-168
+solopi-app/build.gradle
+  s_fd5c66a72fb1e8::t_89af5e95dbfd40 32,35-36
+solopi-app/common/build.gradle
+  s_fd5c66a72fb1e8::t_ceca9a85f90804 70
+solopi-app/common/src/main/java/com/alipay/hulu/common/application/LauncherApplication.java
+  s_fd5c66a72fb1e8::t_b0d9867635ed6c 299,319-349,354,1224-1225
+solopi-app/common/src/main/java/com/alipay/hulu/common/http/HttpServer.java
+  s_fd5c66a72fb1e8::t_f80bc4eff1f5c2 104-106,122-124
+solopi-app/common/src/main/java/com/alipay/hulu/common/scheme/SchemeActivity.java
+  s_fd5c66a72fb1e8::t_b2d3c8f9814958 117,123-125,142-143
+solopi-app/common/src/main/java/com/alipay/hulu/common/scheme/SchemeHttpListener.java
+  s_fd5c66a72fb1e8::t_d7f69686aee958 47-49,77-80
+solopi-app/common/src/main/java/com/alipay/hulu/common/tools/CmdTools.java
+  s_fd5c66a72fb1e8::t_df3482c6e4d95c 19,707-741,1401-1475
+solopi-app/common/src/main/java/com/alipay/hulu/common/tools/TrustedHelperCommand.java
+  s_fd5c66a72fb1e8::t_b7c5c0ceaed7fd 1-19
+solopi-app/common/src/main/java/com/alipay/hulu/common/tools/VirtualLaunchCommand.java
+  s_fd5c66a72fb1e8::t_7e7d038387aff0 1-14
+solopi-app/common/src/main/java/com/alipay/hulu/common/tools/VirtualSwipeCommand.java
+  s_fd5c66a72fb1e8::t_18b2cee0a3e0fe 1-14
+solopi-app/common/src/main/java/com/alipay/hulu/common/tools/VirtualTapCommand.java
+  s_fd5c66a72fb1e8::t_f46306e24ccb63 1-11
+solopi-app/common/src/main/java/com/alipay/hulu/common/utils/ClassUtil.java
+  s_fd5c66a72fb1e8::t_2a25327c701641 59,460-463,497,500-511,535,666-667
+solopi-app/common/src/main/java/com/alipay/hulu/common/utils/PatchProcessUtil.java
+  s_fd5c66a72fb1e8::t_a9e3b996b1f965 29,255-271,295-312
+solopi-app/common/src/main/res/values-sw600dp/dimens.xml
+  s_fd5c66a72fb1e8::t_afe92564471373 47
+solopi-app/common/src/main/res/values-sw720dp/dimens.xml
+  s_fd5c66a72fb1e8::t_fd9f93b3a2cbad 48
+solopi-app/common/src/main/res/values-zh-rTW/strings.xml
+  s_fd5c66a72fb1e8::t_d7876a2cf41bb1 1-85
+solopi-app/common/src/main/res/values/dimens.xml
+  s_fd5c66a72fb1e8::t_a522a2a8045a07 46
+solopi-app/common/src/test/java/com/alipay/hulu/common/tools/TrustedHelperCommandTest.java
+  s_fd5c66a72fb1e8::t_13bdf8394f8068 1-29
+solopi-app/common/src/test/java/com/alipay/hulu/common/tools/VirtualLaunchCommandTest.java
+  s_fd5c66a72fb1e8::t_7cec6fcca9a796 1-25
+solopi-app/common/src/test/java/com/alipay/hulu/common/tools/VirtualSwipeCommandTest.java
+  s_fd5c66a72fb1e8::t_a42fc7cea29910 1-18
+solopi-app/common/src/test/java/com/alipay/hulu/common/tools/VirtualTapCommandTest.java
+  s_fd5c66a72fb1e8::t_6dabb2f58f9a68 1-17
+solopi-app/common/src/test/java/com/alipay/hulu/common/utils/ClassUtilPatchSecurityTest.java
+  s_fd5c66a72fb1e8::t_56d070a37ffb4a 1-61
+solopi-app/common/src/test/java/com/alipay/hulu/common/utils/InstalledPatchSecurityTest.java
+  s_fd5c66a72fb1e8::t_058777346cb289 1-66
+solopi-app/common/src/test/java/com/alipay/hulu/common/utils/PatchSignatureVerifierTest.java
+  s_fd5c66a72fb1e8::t_6a709515294d24 32,34
+solopi-app/portal/build.gradle
+  s_fd5c66a72fb1e8::t_e2c94d13831598 19-41,56-58,61-70,78,124-125
+solopi-app/portal/src/androidTest/java/com/alipay/hulu/security/PatchSecurityInstrumentation.java
+  s_fd5c66a72fb1e8::t_0ffa7870851679 1-147
+solopi-app/portal/src/trustedDisplayProbe/AndroidManifest.xml
+  s_fd5c66a72fb1e8::t_1e50329d7d5a80 1-6
+solopi-app/portal/src/trustedDisplayProbe/java/com/alipay/hulu/virtualscreen/FixturePipePermissionInstrumentation.java
+  s_fd5c66a72fb1e8::t_35a7113f32aa40 1-66
+solopi-app/portal/src/trustedDisplayProbe/java/com/alipay/hulu/virtualscreen/ForeignUidProbeService.java
+  s_fd5c66a72fb1e8::t_e3e4acbbdf8094 1-80
+solopi-app/portal/src/trustedDisplayProbe/java/com/alipay/hulu/virtualscreen/TrustedDisplayHandshakeInstrumentation.java
+  s_fd5c66a72fb1e8::t_3e4d4ee2c1077c 1-173
+solopi-app/portal/src/virtualScreenExperimental/res/xml/accessibility.xml
+  s_fd5c66a72fb1e8::t_96e58384205169 1-12
+solopi-app/portal/src/virtualScreenProbe/java/com/alipay/hulu/virtualscreen/VirtualScreenInstrumentation.java
+  s_fd5c66a72fb1e8::t_1056749db69fb7 1-354
+solopi-app/shared/src/main/res/values-zh-rTW/strings.xml
+  s_fd5c66a72fb1e8::t_72e01de326d801 1-169
+solopi-app/shared/src/main/res/values-zh/strings.xml
+  s_fd5c66a72fb1e8::t_6f818acba30c79 54
+solopi-desktop/.gitattributes
+  s_fd5c66a72fb1e8::t_b652ded1a5946a 1-6
+solopi-desktop/.gitignore
+  s_fd5c66a72fb1e8::t_2683c9e430c2ae 1-10
+solopi-desktop/LICENSE
+  s_fd5c66a72fb1e8::t_06bdf4cc1c323c 1-202
+solopi-desktop/NOTICE
+  s_fd5c66a72fb1e8::t_57996307d29361 1-13
+solopi-desktop/PUBLIC_SOURCE_MANIFEST.json
+  s_fd5c66a72fb1e8::t_c7c4bad53d26a0 1-2283
+solopi-desktop/README.md
+  s_fd5c66a72fb1e8::t_1c89a4bb8f114c 1-181
+solopi-desktop/THIRD_PARTY_NOTICES.md
+  s_fd5c66a72fb1e8::t_a4b14e9a6038e9 1-34
+solopi-desktop/components.json
+  s_fd5c66a72fb1e8::t_3344543c758acf 1-20
+solopi-desktop/docs/CLI_BACKGROUND_RUNTIME.md
+  s_fd5c66a72fb1e8::t_574e4b28c1107f 1-23
+solopi-desktop/docs/SOLOPI_IMPORT.md
+  s_fd5c66a72fb1e8::t_60abe63b01e4e3 1-52
+solopi-desktop/docs/THREE_PLATFORM_CONTROL.md
+  s_fd5c66a72fb1e8::t_330cfca37f2a47 1-123
+solopi-desktop/docs/agent/MODEL_REQUEST_RECOVERY.md
+  s_fd5c66a72fb1e8::t_239996243df9c9 1-30
+solopi-desktop/docs/agent/glassbox-cli-usage.md
+  s_fd5c66a72fb1e8::t_8fac4301d475e5 1-833
+solopi-desktop/docs/android-virtual-agent.md
+  s_fd5c66a72fb1e8::t_c81a6260618784 1-118
+solopi-desktop/docs/configuration.md
+  s_fd5c66a72fb1e8::t_e58f4f0ef58713 1-240
+solopi-desktop/docs/public-source.md
+  s_fd5c66a72fb1e8::t_dcd2d18d367230 1-15
+solopi-desktop/docs/releases/0.1.140.md
+  s_fd5c66a72fb1e8::t_06ade4f2970a20 1-4
+solopi-desktop/electron/adb-error.js
+  s_fd5c66a72fb1e8::t_87389348bc5768 1-187
+solopi-desktop/electron/agent/attachments.js
+  s_fd5c66a72fb1e8::t_092d5eaae4906e 1-40
+solopi-desktop/electron/agent/bounded-summary.js
+  s_fd5c66a72fb1e8::t_1c5a7f28ae5a10 1-57
+solopi-desktop/electron/agent/case-batch.js
+  s_fd5c66a72fb1e8::t_4ff47e749d893a 1-84
+solopi-desktop/electron/agent/case-contract.js
+  s_fd5c66a72fb1e8::t_59a232129da6ee 1-47
+solopi-desktop/electron/agent/case-discovery.js
+  s_fd5c66a72fb1e8::t_ce84eefc9ea929 1-46
+solopi-desktop/electron/agent/case-evidence-export.js
+  s_fd5c66a72fb1e8::t_a18d1d7607a4ad 1-81
+solopi-desktop/electron/agent/case-evidence-summary.js
+  s_fd5c66a72fb1e8::t_73f87dbf37f14b 1-64
+solopi-desktop/electron/agent/case-scope-summary.js
+  s_fd5c66a72fb1e8::t_a67343efb4821e 1-15
+solopi-desktop/electron/agent/case-selection.js
+  s_fd5c66a72fb1e8::t_5d4c1429d17fcd 1-29
+solopi-desktop/electron/agent/case-step-query.js
+  s_fd5c66a72fb1e8::t_60033d6eb58afd 1-40
+solopi-desktop/electron/agent/command.js
+  s_fd5c66a72fb1e8::t_0759d090687036 1-48
+solopi-desktop/electron/agent/configuration.js
+  s_fd5c66a72fb1e8::t_944ab330c24d21 1-53
+solopi-desktop/electron/agent/connect-retry.js
+  s_fd5c66a72fb1e8::t_b1c1b45ea4d4b1 1-22
+solopi-desktop/electron/agent/context.js
+  s_fd5c66a72fb1e8::t_c80b7f15128605 1-66
+solopi-desktop/electron/agent/continuation-memory.js
+  s_fd5c66a72fb1e8::t_b8907800a407c2 1-43
+solopi-desktop/electron/agent/deepseek-compaction.mjs
+  s_fd5c66a72fb1e8::t_f2d4b6d2e460e8 1-303
+solopi-desktop/electron/agent/dev-model.js
+  s_fd5c66a72fb1e8::t_da90fd2ab55be7 1-8
+solopi-desktop/electron/agent/device-operation.js
+  s_fd5c66a72fb1e8::t_22a4a00ecadf60 1-16
+solopi-desktop/electron/agent/device-routing.js
+  s_fd5c66a72fb1e8::t_2c0601417655ae 1-3
+solopi-desktop/electron/agent/download.js
+  s_fd5c66a72fb1e8::t_07b28dca3670a2 1-42
+solopi-desktop/electron/agent/duplicate-results.js
+  s_fd5c66a72fb1e8::t_249934be02f642 1-17
+solopi-desktop/electron/agent/edit-scope.js
+  s_fd5c66a72fb1e8::t_7f1360012b4f5e 1-36
+solopi-desktop/electron/agent/evidence-projection.js
+  s_fd5c66a72fb1e8::t_568f93f51ada9d 1-39
+solopi-desktop/electron/agent/evidence.js
+  s_fd5c66a72fb1e8::t_e15b3111342fbd 1-52
+solopi-desktop/electron/agent/execution-policy.js
+  s_fd5c66a72fb1e8::t_035216144725df 1-11
+solopi-desktop/electron/agent/experience-memory.js
+  s_fd5c66a72fb1e8::t_479642237c1350 1-104
+solopi-desktop/electron/agent/extensions.js
+  s_fd5c66a72fb1e8::t_78a2cf25c2351e 1-12
+solopi-desktop/electron/agent/fast-path.js
+  s_fd5c66a72fb1e8::t_f653b1217ffe56 1-32
+solopi-desktop/electron/agent/index.js
+  s_fd5c66a72fb1e8::t_c10f11b5aa4c84 1-253
+solopi-desktop/electron/agent/log-search-batch.js
+  s_fd5c66a72fb1e8::t_164a421152da57 1-56
+solopi-desktop/electron/agent/log-source.js
+  s_fd5c66a72fb1e8::t_d79ac9b027c8d5 1-15
+solopi-desktop/electron/agent/mcp.js
+  s_fd5c66a72fb1e8::t_2ad332bd67a1cb 1-33
+solopi-desktop/electron/agent/mirrors.js
+  s_fd5c66a72fb1e8::t_04c5b82ca8dc9b 1-17
+solopi-desktop/electron/agent/model-capacity.js
+  s_fd5c66a72fb1e8::t_76a0cafd7fae5d 1-31
+solopi-desktop/electron/agent/model-comparison.js
+  s_fd5c66a72fb1e8::t_1e44016ff81c2a 1-30
+solopi-desktop/electron/agent/model-error.js
+  s_fd5c66a72fb1e8::t_113d75155e47c1 1-67
+solopi-desktop/electron/agent/model-step-recovery.js
+  s_fd5c66a72fb1e8::t_c0652e98c97f41 1-110
+solopi-desktop/electron/agent/model.js
+  s_fd5c66a72fb1e8::t_7d90e55b4c3ef6 1-220
+solopi-desktop/electron/agent/progress-policy.js
+  s_fd5c66a72fb1e8::t_a054cd35507f73 1-39
+solopi-desktop/electron/agent/rate-limit-retry.js
+  s_fd5c66a72fb1e8::t_451f9c53ea4dfb 1-38
+solopi-desktop/electron/agent/reasoning.js
+  s_fd5c66a72fb1e8::t_a72a2c14f68762 1-20
+solopi-desktop/electron/agent/reference-memory.js
+  s_fd5c66a72fb1e8::t_7a89443541e220 1-74
+solopi-desktop/electron/agent/request-deadline.js
+  s_fd5c66a72fb1e8::t_1bbce4e92c029d 1-13
+solopi-desktop/electron/agent/request-footprint.js
+  s_fd5c66a72fb1e8::t_9f70ad399b019b 1-11
+solopi-desktop/electron/agent/request-history.js
+  s_fd5c66a72fb1e8::t_1c05b0468c4f23 1-34
+solopi-desktop/electron/agent/request-policy.js
+  s_fd5c66a72fb1e8::t_ea5d48069dd984 1-30
+solopi-desktop/electron/agent/request-scheduler.js
+  s_fd5c66a72fb1e8::t_4967c69af22410 1-27
+solopi-desktop/electron/agent/review-events.js
+  s_fd5c66a72fb1e8::t_e9976cd5b0c51b 1-46
+solopi-desktop/electron/agent/runtime.js
+  s_fd5c66a72fb1e8::t_479fe3ba5fc550 1-690
+solopi-desktop/electron/agent/selection-receipt.js
+  s_fd5c66a72fb1e8::t_d6307ba2a6014d 1-25
+solopi-desktop/electron/agent/session-text-store.js
+  s_fd5c66a72fb1e8::t_5bbe300c6351c1 1-67
+solopi-desktop/electron/agent/session-updates.js
+  s_fd5c66a72fb1e8::t_b499e4834fb7e9 1-31
+solopi-desktop/electron/agent/session-view.js
+  s_fd5c66a72fb1e8::t_2ca0d41712b966 1-16
+solopi-desktop/electron/agent/skill-catalog-frame.js
+  s_fd5c66a72fb1e8::t_b67d0c57824943 1-16
+solopi-desktop/electron/agent/skill-install.js
+  s_fd5c66a72fb1e8::t_93e095c5620c0a 1-36
+solopi-desktop/electron/agent/skill-names.js
+  s_fd5c66a72fb1e8::t_c755938d70165a 1-5
+solopi-desktop/electron/agent/skill-reading.js
+  s_fd5c66a72fb1e8::t_7b4442afc6b9a1 1-47
+solopi-desktop/electron/agent/skill-refresh.js
+  s_fd5c66a72fb1e8::t_33c44b502c7e5c 1-140
+solopi-desktop/electron/agent/skill-scope.js
+  s_fd5c66a72fb1e8::t_00bdcc812b3544 1-16
+solopi-desktop/electron/agent/skills.js
+  s_fd5c66a72fb1e8::t_840a4c627895f3 1-83
+solopi-desktop/electron/agent/store.js
+  s_fd5c66a72fb1e8::t_90d11d37efa4d8 1-107
+solopi-desktop/electron/agent/summary-deadline.js
+  s_fd5c66a72fb1e8::t_c9c257b71d8e3a 1-28
+solopi-desktop/electron/agent/system-prompt.js
+  s_fd5c66a72fb1e8::t_b58d2123294721 1-10
+solopi-desktop/electron/agent/task-execution-contract.js
+  s_fd5c66a72fb1e8::t_ac985c14afeeab 1-23
+solopi-desktop/electron/agent/task-execution-state.js
+  s_fd5c66a72fb1e8::t_901acdc2d7d8a3 1-117
+solopi-desktop/electron/agent/task-result-delivery.js
+  s_fd5c66a72fb1e8::t_9ba6203fdd5da9 1-38
+solopi-desktop/electron/agent/task-routing.js
+  s_fd5c66a72fb1e8::t_dc6e77667e1d1d 1-29
+solopi-desktop/electron/agent/tool-surface.js
+  s_fd5c66a72fb1e8::t_c3e7e218fe584c 1-29
+solopi-desktop/electron/agent/tool-validation.js
+  s_fd5c66a72fb1e8::t_c13bbc6e5d08f5 1-40
+solopi-desktop/electron/agent/tools.js
+  s_fd5c66a72fb1e8::t_3632c650c2da4c 1-267
+solopi-desktop/electron/agent/transport-diagnostics.js
+  s_fd5c66a72fb1e8::t_cb1ffa94c7d90b 1-85
+solopi-desktop/electron/agent/upstream-diagnostics.js
+  s_fd5c66a72fb1e8::t_45d67f80f3b8a8 1-21
+solopi-desktop/electron/agent/usage-anchor.js
+  s_fd5c66a72fb1e8::t_94289a8120e52d 1-23
+solopi-desktop/electron/agent/validation-summary.js
+  s_fd5c66a72fb1e8::t_b6d04055a08c2a 1-12
+solopi-desktop/electron/agent/virtual-observation-context.js
+  s_fd5c66a72fb1e8::t_6beb6db5ea8425 1-48
+solopi-desktop/electron/agent/virtual-system-prompt.js
+  s_fd5c66a72fb1e8::t_e2f89f2047c0a1 1-6
+solopi-desktop/electron/agent/virtual-tools.js
+  s_fd5c66a72fb1e8::t_4be33b122862d9 1-168
+solopi-desktop/electron/android-thread-stacks.js
+  s_fd5c66a72fb1e8::t_9e38250e8701cd 1-148
+solopi-desktop/electron/android-top.js
+  s_fd5c66a72fb1e8::t_ff4cf00bdb8b77 1-24
+solopi-desktop/electron/apk-install.js
+  s_fd5c66a72fb1e8::t_57dacac3c305f4 1-134
+solopi-desktop/electron/apk-metadata.js
+  s_fd5c66a72fb1e8::t_18e88891fc2588 1-46
+solopi-desktop/electron/audio-metrics.js
+  s_fd5c66a72fb1e8::t_19abda71e22bc1 1-140
+solopi-desktop/electron/audio-remote-file.js
+  s_fd5c66a72fb1e8::t_9a6c81c2a22950 1-205
+solopi-desktop/electron/background-runtime.js
+  s_fd5c66a72fb1e8::t_09778e16851ac5 1-25
+solopi-desktop/electron/bugreport/jobs.js
+  s_fd5c66a72fb1e8::t_da729ce486adb8 1-140
+solopi-desktop/electron/bugreport/parser.js
+  s_fd5c66a72fb1e8::t_ea94d845e2064f 1-149
+solopi-desktop/electron/bugreport/worker.js
+  s_fd5c66a72fb1e8::t_59ca597e673ed0 1-15
+solopi-desktop/electron/bugreport/zip.js
+  s_fd5c66a72fb1e8::t_3b70cd09a54efb 1-50
+solopi-desktop/electron/case-assets.js
+  s_fd5c66a72fb1e8::t_4c6089698320eb 1-32
+solopi-desktop/electron/case-edit-guard.js
+  s_fd5c66a72fb1e8::t_64d8582799481a 1-75
+solopi-desktop/electron/case-library-api.js
+  s_fd5c66a72fb1e8::t_baa4f9c6f48d8b 1-32
+solopi-desktop/electron/case-library-local.js
+  s_fd5c66a72fb1e8::t_c90c9b863945ed 1-133
+solopi-desktop/electron/case-library-upload-sync.js
+  s_fd5c66a72fb1e8::t_419d0ae2f1f110 1-44
+solopi-desktop/electron/case-library-watcher.js
+  s_fd5c66a72fb1e8::t_88dee1ff7eafe5 1-215
+solopi-desktop/electron/case-update.d.ts
+  s_fd5c66a72fb1e8::t_3322868cd618fb 1
+solopi-desktop/electron/case-update.js
+  s_fd5c66a72fb1e8::t_d921fb159d4bb4 1-37
+solopi-desktop/electron/cli-battery.js
+  s_fd5c66a72fb1e8::t_b633b0d0f4f7dc 1-44
+solopi-desktop/electron/cli-performance.js
+  s_fd5c66a72fb1e8::t_e8b5f5c65d723c 1-16
+solopi-desktop/electron/command-result-assertions.js
+  s_fd5c66a72fb1e8::t_a3f7fc23da5d3f 1-63
+solopi-desktop/electron/configuration-lock.js
+  s_fd5c66a72fb1e8::t_d028b0d85820b1 1-30
+solopi-desktop/electron/credential-storage.js
+  s_fd5c66a72fb1e8::t_10923a408b5f77 1-72
+solopi-desktop/electron/data-directory.js
+  s_fd5c66a72fb1e8::t_b880a2344b9d47 1-15
+solopi-desktop/electron/development-tasks.js
+  s_fd5c66a72fb1e8::t_68eb77e9dccc2f 1-80
+solopi-desktop/electron/device-preflight.js
+  s_fd5c66a72fb1e8::t_58b0db78f94a75 1-134
+solopi-desktop/electron/diagnostics.js
+  s_fd5c66a72fb1e8::t_f828b82a423069 1-61
+solopi-desktop/electron/git-runtime.js
+  s_fd5c66a72fb1e8::t_6e1cbfacd48500 1-22
+solopi-desktop/electron/harness-control.js
+  s_fd5c66a72fb1e8::t_7ea7b84625e67e 1-302
+solopi-desktop/electron/headless-configuration.js
+  s_fd5c66a72fb1e8::t_f4c3acf6a45032 1-43
+solopi-desktop/electron/http-response.js
+  s_fd5c66a72fb1e8::t_38e75cdbfaf317 1-87
+solopi-desktop/electron/main.js
+  s_fd5c66a72fb1e8::t_f3f7f5b51b4577 1-14162
+solopi-desktop/electron/managed-command.js
+  s_fd5c66a72fb1e8::t_be63f8d0dd1195 1-92
+solopi-desktop/electron/media-process-queue.js
+  s_fd5c66a72fb1e8::t_ca95cf8b2d5fc6 1-99
+solopi-desktop/electron/media-runtime.js
+  s_fd5c66a72fb1e8::t_d56918e356cb7d 1-118
+solopi-desktop/electron/message-reply-engine.js
+  s_fd5c66a72fb1e8::t_87d97bf53271ab 1-172
+solopi-desktop/electron/message-reply-fixture.js
+  s_fd5c66a72fb1e8::t_98e7c17cfe31c2 1-205
+solopi-desktop/electron/message-reply-model.js
+  s_fd5c66a72fb1e8::t_842d182163ad29 1-54
+solopi-desktop/electron/message-reply-store.js
+  s_fd5c66a72fb1e8::t_c00f907754ce1f 1-94
+solopi-desktop/electron/message-reply-task.js
+  s_fd5c66a72fb1e8::t_0cf9d571a59a20 1-220
+solopi-desktop/electron/mobile-ui-coordinate.js
+  s_fd5c66a72fb1e8::t_6e75b456d2d2b0 1-154
+solopi-desktop/electron/mobile-ui-element-swipe.js
+  s_fd5c66a72fb1e8::t_09c4e1ba78e28d 1-25
+solopi-desktop/electron/mobile-ui-selector.js
+  s_fd5c66a72fb1e8::t_53cb0be98d4ec2 1-98
+solopi-desktop/electron/mobile-ui-tap-position.d.ts
+  s_fd5c66a72fb1e8::t_6f57bd0b89e4f7 1-13
+solopi-desktop/electron/mobile-ui-tap-position.js
+  s_fd5c66a72fb1e8::t_cc1e68c6bc422e 1-58
+solopi-desktop/electron/owned-log-process.js
+  s_fd5c66a72fb1e8::t_b6c58ec69cdee3 1-20
+solopi-desktop/electron/performance-battery.js
+  s_fd5c66a72fb1e8::t_108a9e674045ae 1-44
+solopi-desktop/electron/performance-crashes.js
+  s_fd5c66a72fb1e8::t_4aed2f1950ba32 1-186
+solopi-desktop/electron/preload.js
+  s_fd5c66a72fb1e8::t_9925a34528a844 1-108
+solopi-desktop/electron/product-identity.js
+  s_fd5c66a72fb1e8::t_9bb50f1c5e0432 1-14
+solopi-desktop/electron/quick-action-api.js
+  s_fd5c66a72fb1e8::t_709a55d6173b7d 1-71
+solopi-desktop/electron/quick-action-git.js
+  s_fd5c66a72fb1e8::t_dc328a99f881b1 1-133
+solopi-desktop/electron/quick-action-helper.js
+  s_fd5c66a72fb1e8::t_287c4feda54de7 1-67
+solopi-desktop/electron/quick-action-session.js
+  s_fd5c66a72fb1e8::t_53d357845592bb 1-47
+solopi-desktop/electron/quick-actions.js
+  s_fd5c66a72fb1e8::t_46a3b8a8ee31ac 1-190
+solopi-desktop/electron/recording-readiness.js
+  s_fd5c66a72fb1e8::t_4be6b677f41d2f 1-20
+solopi-desktop/electron/reply-evidence-store.js
+  s_fd5c66a72fb1e8::t_c23405d9aedd08 1-73
+solopi-desktop/electron/reply-knowledge.js
+  s_fd5c66a72fb1e8::t_fbcd9013a963d7 1-276
+solopi-desktop/electron/reply-settings.js
+  s_fd5c66a72fb1e8::t_967520a7833f17 1-44
+solopi-desktop/electron/reply-start-confirmation.js
+  s_fd5c66a72fb1e8::t_a155286b9a249a 1-50
+solopi-desktop/electron/report-import.js
+  s_fd5c66a72fb1e8::t_fabc0910bea604 1-56
+solopi-desktop/electron/runtime-diagnostics.js
+  s_fd5c66a72fb1e8::t_7d04a144a42249 1-54
+solopi-desktop/electron/scrcpy-deployment.js
+  s_fd5c66a72fb1e8::t_23c779bdf9d246 1-40
+solopi-desktop/electron/scrcpy-mirror.js
+  s_fd5c66a72fb1e8::t_609eff81d1bfb6 1-110
+solopi-desktop/electron/scrcpy-packets.js
+  s_fd5c66a72fb1e8::t_4d7ab99c7f5f33 1-26
+solopi-desktop/electron/scrcpy-preview.js
+  s_fd5c66a72fb1e8::t_377c7bd72941d4 1-111
+solopi-desktop/electron/scrcpy-recording.js
+  s_fd5c66a72fb1e8::t_652a9c7e338018 1-131
+solopi-desktop/electron/scrcpy-stream-observer.js
+  s_fd5c66a72fb1e8::t_b277c52247f8a4 1-52
+solopi-desktop/electron/scrcpy-stream.js
+  s_fd5c66a72fb1e8::t_f94235cdf6cce9 1-80
+solopi-desktop/electron/scrcpy-transport.js
+  s_fd5c66a72fb1e8::t_03d2a798576cb9 1-188
+solopi-desktop/electron/secret-storage.js
+  s_fd5c66a72fb1e8::t_816bef3ca9e29f 1-87
+solopi-desktop/electron/settings-service.js
+  s_fd5c66a72fb1e8::t_a5904d7f51722b 1-84
+solopi-desktop/electron/solopi-adb-connection.js
+  s_fd5c66a72fb1e8::t_5f402963ef3b30 1-41
+solopi-desktop/electron/solopi-case-converter.js
+  s_fd5c66a72fb1e8::t_39dab625be5e04 1-151
+solopi-desktop/electron/solopi-native-case.js
+  s_fd5c66a72fb1e8::t_b427c225e9407e 1-41
+solopi-desktop/electron/solopi-native-replay.js
+  s_fd5c66a72fb1e8::t_9b59f51fd90a5a 1-109
+solopi-desktop/electron/solopi-native-schema.d.ts
+  s_fd5c66a72fb1e8::t_0e6789f558d9df 1-5
+solopi-desktop/electron/solopi-native-schema.js
+  s_fd5c66a72fb1e8::t_80395a6a5c4b6d 1-176
+solopi-desktop/electron/solopi-permissions.js
+  s_fd5c66a72fb1e8::t_6b6949553d142f 1-79
+solopi-desktop/electron/solopi-provider.js
+  s_fd5c66a72fb1e8::t_bb335b9cfdf70d 1-168
+solopi-desktop/electron/solopi-recording.js
+  s_fd5c66a72fb1e8::t_252cddacb6adab 1-171
+solopi-desktop/electron/startup-adb-tcpip.js
+  s_fd5c66a72fb1e8::t_11c6115a434669 1-26
+solopi-desktop/electron/startup-time.js
+  s_fd5c66a72fb1e8::t_89023955b215da 1-82
+solopi-desktop/electron/stress-task.js
+  s_fd5c66a72fb1e8::t_50862b82735917 1-35
+solopi-desktop/electron/task-case-coverage.js
+  s_fd5c66a72fb1e8::t_6900f8eb22bd4d 1-25
+solopi-desktop/electron/task-case-query.js
+  s_fd5c66a72fb1e8::t_93091da08f9821 1-123
+solopi-desktop/electron/task-cleanup.js
+  s_fd5c66a72fb1e8::t_f313a99bda98ff 1-94
+solopi-desktop/electron/task-creation-diagnostics.js
+  s_fd5c66a72fb1e8::t_5cef678db2e91f 1-36
+solopi-desktop/electron/task-device-selection.js
+  s_fd5c66a72fb1e8::t_05df68be355443 1-84
+solopi-desktop/electron/task-json-worker.js
+  s_fd5c66a72fb1e8::t_c5d7381cd2e90c 1-20
+solopi-desktop/electron/task-log-capture.js
+  s_fd5c66a72fb1e8::t_c9c8471eebbcb5 1-81
+solopi-desktop/electron/task-report-writer.js
+  s_fd5c66a72fb1e8::t_354cca58e9cd9d 1-86
+solopi-desktop/electron/task-screen-recording.js
+  s_fd5c66a72fb1e8::t_9fcc4830fdbf34 1-286
+solopi-desktop/electron/task-summary-cache.js
+  s_fd5c66a72fb1e8::t_c7c397cd1a8b7e 1-44
+solopi-desktop/electron/task-summary-worker.js
+  s_fd5c66a72fb1e8::t_2426da0f7fb944 1-12
+solopi-desktop/electron/task-visibility.js
+  s_fd5c66a72fb1e8::t_dad1e156a97436 1-97
+solopi-desktop/electron/team-configuration-ipc.js
+  s_fd5c66a72fb1e8::t_4f48e5ed26951a 1-63
+solopi-desktop/electron/team-configuration.js
+  s_fd5c66a72fb1e8::t_f0bf1f1d19862a 1-188
+solopi-desktop/electron/tts-response.js
+  s_fd5c66a72fb1e8::t_6cf33580e4e330 1-110
+solopi-desktop/electron/user-session.js
+  s_fd5c66a72fb1e8::t_d8319e2b55ec75 1-100
+solopi-desktop/electron/virtual-recovery-store.js
+  s_fd5c66a72fb1e8::t_7d4dd782ea15cd 1-60
+solopi-desktop/electron/workflow-assertion.js
+  s_fd5c66a72fb1e8::t_ce58d0910c738b 1-55
+solopi-desktop/electron/workflow-execution-gate.js
+  s_fd5c66a72fb1e8::t_dcef62656f7d34 1-76
+solopi-desktop/electron/workflow-failure-policy.d.ts
+  s_fd5c66a72fb1e8::t_3e0c7df9a0811c 1-3
+solopi-desktop/electron/workflow-failure-policy.js
+  s_fd5c66a72fb1e8::t_7baf064b4181f5 1-27
+solopi-desktop/electron/workflow-llm-budgets.js
+  s_fd5c66a72fb1e8::t_6eddcebe386a5f 1-27
+solopi-desktop/electron/workflow-llm-candidates.js
+  s_fd5c66a72fb1e8::t_6d0d664481b9dc 1-26
+solopi-desktop/electron/workflow-llm-output-policy.js
+  s_fd5c66a72fb1e8::t_f6a4350d50744d 1-26
+solopi-desktop/electron/workflow-llm-retry.js
+  s_fd5c66a72fb1e8::t_4eeff2ab2d6aea 1-42
+solopi-desktop/electron/workflow-log-diagnostics.d.ts
+  s_fd5c66a72fb1e8::t_2b58ba2fc8328e 1-2
+solopi-desktop/electron/workflow-log-diagnostics.js
+  s_fd5c66a72fb1e8::t_ed5eb1e1782de2 1-280
+solopi-desktop/electron/workflow-log-journal.js
+  s_fd5c66a72fb1e8::t_5598002ad9ad70 1-63
+solopi-desktop/electron/workflow-log-text.js
+  s_fd5c66a72fb1e8::t_677c5994b18463 1-58
+solopi-desktop/electron/workflow-performance.js
+  s_fd5c66a72fb1e8::t_81da9c42fb0943 1-406
+solopi-desktop/electron/workflow-task-events.js
+  s_fd5c66a72fb1e8::t_0c322d00e155c6 1-204
+solopi-desktop/electron/workflow-task-sync.js
+  s_fd5c66a72fb1e8::t_090b6969fc919e 1-160
+solopi-desktop/index.html
+  s_fd5c66a72fb1e8::t_23330b6e57a19c 1-15
+solopi-desktop/package-lock.json
+  s_fd5c66a72fb1e8::t_5c1d6b32f4b02b 1-18423
+solopi-desktop/package.json
+  s_fd5c66a72fb1e8::t_b6d6ed38c1fe39 1-260
+solopi-desktop/postcss.config.js
+  s_fd5c66a72fb1e8::t_44e4f9f7d6fa84 1-3
+solopi-desktop/resources/bin/glassbox
+  s_fd5c66a72fb1e8::t_7be660ec2cc661 1-36
+solopi-desktop/resources/bin/solopi-desktop
+  s_fd5c66a72fb1e8::t_a7a0b1adf8ab2b 1-3
+solopi-desktop/resources/branding/NOTICE.md
+  s_fd5c66a72fb1e8::t_c34d79aa2fe733 1-12
+solopi-desktop/resources/branding/SoloPi-LICENSE.txt
+  s_fd5c66a72fb1e8::t_dffd1c5c464b57 1-202
+solopi-desktop/resources/media-runtime/README.md
+  s_fd5c66a72fb1e8::t_1f2258a196ab75 1-65
+solopi-desktop/resources/solopi-recording/LICENSE.txt
+  s_fd5c66a72fb1e8::t_c5227ec9d3ae83 1-202
+solopi-desktop/resources/solopi-recording/NOTICE.md
+  s_fd5c66a72fb1e8::t_555fc8845da2c7 1-15
+solopi-desktop/resources/solopi-recording/manifest.json
+  s_fd5c66a72fb1e8::t_35948a48b6dbc5 1-12
+solopi-desktop/resources/team-config.example.json
+  s_fd5c66a72fb1e8::t_a5eca95be1514f 1-12
+solopi-desktop/resources/third-party/ffmpeg-sources.json
+  s_fd5c66a72fb1e8::t_d02eaaccf88f15 1-9
+solopi-desktop/resources/third-party/npm-supplements/cookie-signature-1.0.7.txt
+  s_fd5c66a72fb1e8::t_f7f7a039a3fd15 1-24
+solopi-desktop/resources/third-party/npm-supplements/embla-carousel-8.6.0.txt
+  s_fd5c66a72fb1e8::t_db720e06eed1d3 1-21
+solopi-desktop/resources/third-party/npm-supplements/embla-carousel-react-8.6.0.txt
+  s_fd5c66a72fb1e8::t_af994489e4f5ce 1-21
+solopi-desktop/resources/third-party/npm-supplements/embla-carousel-reactive-utils-8.6.0.txt
+  s_fd5c66a72fb1e8::t_672f5e978b3379 1-21
+solopi-desktop/resources/third-party/npm-supplements/input-otp-1.4.2.txt
+  s_fd5c66a72fb1e8::t_690a7fab15f7cf 1-21
+solopi-desktop/resources/third-party/npm-supplements/isarray-1.0.0.txt
+  s_fd5c66a72fb1e8::t_25675186c11158 1-60
+solopi-desktop/resources/third-party/npm-supplements/manifest.json
+  s_fd5c66a72fb1e8::t_fe7133690b5158 1-76
+solopi-desktop/resources/third-party/npm-supplements/napi-rs-canvas-0.1.100.txt
+  s_fd5c66a72fb1e8::t_e6b965eb28c078 1-21
+solopi-desktop/resources/third-party/npm-supplements/next-themes-0.3.0.txt
+  s_fd5c66a72fb1e8::t_aad5376df49147 1-21
+solopi-desktop/resources/third-party/npm-supplements/react-remove-scroll-bar-2.3.8.txt
+  s_fd5c66a72fb1e8::t_e2d08ee4c613fd 1-21
+solopi-desktop/resources/third-party/npm-supplements/victory-vendor-36.9.2.txt
+  s_fd5c66a72fb1e8::t_340aad3dfc4ad4 1-30
+solopi-desktop/scripts/agent-dev-control.mjs
+  s_fd5c66a72fb1e8::t_e611255cbb61d7 1-29
+solopi-desktop/scripts/audit-quick-action-templates.mjs
+  s_fd5c66a72fb1e8::t_fd987f1ddb96e6 1-33
+solopi-desktop/scripts/build-ffmpeg-codecs.sh
+  s_fd5c66a72fb1e8::t_1e694b070c06b3 1-25
+solopi-desktop/scripts/build-ffmpeg-linux.sh
+  s_fd5c66a72fb1e8::t_ab76a2918041b2 1-40
+solopi-desktop/scripts/build-ffmpeg-macos.sh
+  s_fd5c66a72fb1e8::t_b171934c42b8e9 1-65
+solopi-desktop/scripts/build-media-runtime-macos.sh
+  s_fd5c66a72fb1e8::t_8d363e36dd271a 1-29
+solopi-desktop/scripts/bundle-glassbox-skills.mjs
+  s_fd5c66a72fb1e8::t_fb77c5bb6d843f 1-13
+solopi-desktop/scripts/compare-agent-models.cjs
+  s_fd5c66a72fb1e8::t_c0d60177b81ce3 1-32
+solopi-desktop/scripts/completions/_solopi-desktop-package
+  s_fd5c66a72fb1e8::t_c379664db292f3 1-8
+solopi-desktop/scripts/create-ffmpeg-source-archive.mjs
+  s_fd5c66a72fb1e8::t_e7751411f775cc 1-88
+solopi-desktop/scripts/create-mac-dmg.mjs
+  s_fd5c66a72fb1e8::t_03a1796b3c2a96 1-233
+solopi-desktop/scripts/create-mac-update-feed.mjs
+  s_fd5c66a72fb1e8::t_0199f011edaafa 1-49
+solopi-desktop/scripts/create-mac-zip.mjs
+  s_fd5c66a72fb1e8::t_6cd2a6bb4a30e3 1-53
+solopi-desktop/scripts/electron-builder-sign.mjs
+  s_fd5c66a72fb1e8::t_dcfb34ba6a374f 1-81
+solopi-desktop/scripts/export-public-source.mjs
+  s_fd5c66a72fb1e8::t_a66f02aa3fcabd 1-75
+solopi-desktop/scripts/ffmpeg-compliance.mjs
+  s_fd5c66a72fb1e8::t_2cda47b14c582f 1-45
+solopi-desktop/scripts/generate-mac-icon.mjs
+  s_fd5c66a72fb1e8::t_57ae09b0d1ccbe 1-74
+solopi-desktop/scripts/glassbox-cli.mjs
+  s_fd5c66a72fb1e8::t_cc3d137adab428 1-9094
+solopi-desktop/scripts/install-glassbox-release-command.mjs
+  s_fd5c66a72fb1e8::t_b6972c1af48ed4 1-53
+solopi-desktop/scripts/install-solopi-desktop-package-command.mjs
+  s_fd5c66a72fb1e8::t_1fe6f5de64d240 1-38
+solopi-desktop/scripts/install-solopi-harness-desktop-package-command.mjs
+  s_fd5c66a72fb1e8::t_5ed3bb582494eb 1-3
+solopi-desktop/scripts/lenswiper-package.mjs
+  s_fd5c66a72fb1e8::t_f5c853f4d50d3e 1-4
+solopi-desktop/scripts/linux-build-config.mjs
+  s_fd5c66a72fb1e8::t_fe45e0126d7862 1-27
+solopi-desktop/scripts/linux-runtime.mjs
+  s_fd5c66a72fb1e8::t_24d393314605ba 1-30
+solopi-desktop/scripts/local-tts-server.mjs
+  s_fd5c66a72fb1e8::t_909e5b83431712 1-149
+solopi-desktop/scripts/media-runtime-pkg-config.mjs
+  s_fd5c66a72fb1e8::t_3892da0c94a9b2 1-33
+solopi-desktop/scripts/opensource-inventory.mjs
+  s_fd5c66a72fb1e8::t_2c77e34b80c492 1-12
+solopi-desktop/scripts/package-and-notarize-mac.mjs
+  s_fd5c66a72fb1e8::t_782dfb67d77b41 1-538
+solopi-desktop/scripts/package-linux.mjs
+  s_fd5c66a72fb1e8::t_a2bf8b6fe5cb71 1-46
+solopi-desktop/scripts/package-mac.mjs
+  s_fd5c66a72fb1e8::t_6a6d2201596ed4 1-213
+solopi-desktop/scripts/prepare-ffmpeg-sources.mjs
+  s_fd5c66a72fb1e8::t_05821029b64c49 1-32
+solopi-desktop/scripts/prepare-git-runtime.mjs
+  s_fd5c66a72fb1e8::t_0fbcea63c58874 1-22
+solopi-desktop/scripts/prepare-media-runtime.mjs
+  s_fd5c66a72fb1e8::t_39c762d4df84be 1-36
+solopi-desktop/scripts/prepare-packaged-app.mjs
+  s_fd5c66a72fb1e8::t_1537d7ed55bdf2 1-67
+solopi-desktop/scripts/record-ffmpeg-build.mjs
+  s_fd5c66a72fb1e8::t_532632ab5e0267 1-31
+solopi-desktop/scripts/record-ffmpeg-macos-build.mjs
+  s_fd5c66a72fb1e8::t_b59316d731ae17 1-25
+solopi-desktop/scripts/replay-agent-compaction.mjs
+  s_fd5c66a72fb1e8::t_8c9eb72db6fb32 1-34
+solopi-desktop/scripts/smoke-linux-runtime.mjs
+  s_fd5c66a72fb1e8::t_d5eb5562fb42e9 1-31
+solopi-desktop/scripts/smoke-scrcpy-recording.cjs
+  s_fd5c66a72fb1e8::t_8b3c6cdb7b21cb 1-34
+solopi-desktop/scripts/smoke-scrcpy-session.cjs
+  s_fd5c66a72fb1e8::t_ef9c264b76fb07 1-32
+solopi-desktop/scripts/smoke-scrcpy-transport.cjs
+  s_fd5c66a72fb1e8::t_a53020df6f2209 1-39
+solopi-desktop/scripts/solopi-desktop-dev.mjs
+  s_fd5c66a72fb1e8::t_52b9ea5b207ebd 1-96
+solopi-desktop/scripts/solopi-desktop-package.mjs
+  s_fd5c66a72fb1e8::t_864b339c92abeb 1-86
+solopi-desktop/scripts/solopi-harness-desktop-dev.mjs
+  s_fd5c66a72fb1e8::t_c86c66fd4b65da 1-3
+solopi-desktop/scripts/solopi-harness-desktop-package.mjs
+  s_fd5c66a72fb1e8::t_9de6d0018abbe6 1-3
+solopi-desktop/scripts/start-electron-dev.mjs
+  s_fd5c66a72fb1e8::t_cb39f752b8ae6f 1-139
+solopi-desktop/scripts/third-party-notices.mjs
+  s_fd5c66a72fb1e8::t_4fd25658de6957 1-99
+solopi-desktop/scripts/upgrade-glasses-contract.mjs
+  s_fd5c66a72fb1e8::t_5ed2ed1bd00011 1-67
+solopi-desktop/scripts/verify-agent-summary.cjs
+  s_fd5c66a72fb1e8::t_03cec626a8a1e5 1-22
+solopi-desktop/scripts/verify-cli-readonly.mjs
+  s_fd5c66a72fb1e8::t_ee5ee271bfba60 1-330
+solopi-desktop/scripts/verify-ffmpeg-capabilities.mjs
+  s_fd5c66a72fb1e8::t_8830ab52492f22 1-36
+solopi-desktop/scripts/verify-git-runtime.mjs
+  s_fd5c66a72fb1e8::t_6ebb6101f59f2b 1-31
+solopi-desktop/scripts/verify-glassbox-skill-distribution.mjs
+  s_fd5c66a72fb1e8::t_a3d01d0c1f6d07 1-23
+solopi-desktop/scripts/verify-linux-headless.mjs
+  s_fd5c66a72fb1e8::t_4ff55942e18c0d 1-70
+solopi-desktop/scripts/verify-linux-package.mjs
+  s_fd5c66a72fb1e8::t_024c859b4091b6 1-47
+solopi-desktop/scripts/verify-mac-entitlements.mjs
+  s_fd5c66a72fb1e8::t_a186465fd9955a 1-21
+solopi-desktop/scripts/verify-media-runtime.mjs
+  s_fd5c66a72fb1e8::t_9dae51037295d8 1-123
+solopi-desktop/scripts/verify-packaged-app.mjs
+  s_fd5c66a72fb1e8::t_beef4cdb832a07 1-376
+solopi-desktop/scripts/verify-packaged-harness.mjs
+  s_fd5c66a72fb1e8::t_35c1bf324c3b05 1-27
+solopi-desktop/scripts/verify-packaged-runtime-after-pack.cjs
+  s_fd5c66a72fb1e8::t_b7d254ddd7bf99 1-24
+solopi-desktop/scripts/verify-packaged-runtime-dependencies.mjs
+  s_fd5c66a72fb1e8::t_5910170420f412 1-98
+solopi-desktop/scripts/verify-retired-app-update.mjs
+  s_fd5c66a72fb1e8::t_0eda8318d3d2df 1-12
+solopi-desktop/scripts/verify-retired-capture-page.mjs
+  s_fd5c66a72fb1e8::t_5b95973e1d2140 1-19
+solopi-desktop/scripts/verify-solopi-runtime.mjs
+  s_fd5c66a72fb1e8::t_30fe19dc5fd476 1-12
+solopi-desktop/skills/solopi-desktop-cli/SKILL.md
+  s_fd5c66a72fb1e8::t_b3004b9e7343c2 1-229
+solopi-desktop/skills/solopi-desktop-cli/agents/openai.yaml
+  s_fd5c66a72fb1e8::t_c4511d04bcba44 1-4
+solopi-desktop/skills/solopi-desktop-cli/references/case-authoring-and-validation.md
+  s_fd5c66a72fb1e8::t_1d1c434e575e3a 1-42
+solopi-desktop/skills/solopi-desktop-cli/references/case-discovery-and-library-sync.md
+  s_fd5c66a72fb1e8::t_e12cc96eccf5d7 1-31
+solopi-desktop/skills/solopi-desktop-cli/references/case-library-git.md
+  s_fd5c66a72fb1e8::t_941b8ef9425a34 1-21
+solopi-desktop/skills/solopi-desktop-cli/references/cli-kill-ghost-runner-issue.md
+  s_fd5c66a72fb1e8::t_9f5fcb7e7dd579 1-5
+solopi-desktop/skills/solopi-desktop-cli/references/cli-services.md
+  s_fd5c66a72fb1e8::t_01f9c2e00442b2 1-8
+solopi-desktop/skills/solopi-desktop-cli/references/development-runner.md
+  s_fd5c66a72fb1e8::t_5d8c9d3c9d3c5f 1-15
+solopi-desktop/skills/solopi-desktop-cli/references/device-concurrency.md
+  s_fd5c66a72fb1e8::t_a0740415a0d71b 1-10
+solopi-desktop/skills/solopi-desktop-cli/references/incremental-task-review.md
+  s_fd5c66a72fb1e8::t_9de4c23177ad58 1-34
+solopi-desktop/skills/solopi-desktop-cli/references/offline-log-assert.md
+  s_fd5c66a72fb1e8::t_8596d3af7c5c0d 1-23
+solopi-desktop/skills/solopi-desktop-cli/references/package-selection.md
+  s_fd5c66a72fb1e8::t_c4250c8964e947 1-19
+solopi-desktop/skills/solopi-desktop-cli/references/packaging-and-installed-app-boundary.md
+  s_fd5c66a72fb1e8::t_d7eca8844f11fc 1-12
+solopi-desktop/skills/solopi-desktop-cli/references/quick-actions.md
+  s_fd5c66a72fb1e8::t_23fc2a37445098 1-56
+solopi-desktop/skills/solopi-desktop-cli/references/recording-performance-and-reports.md
+  s_fd5c66a72fb1e8::t_f321ec526ff5eb 1-67
+solopi-desktop/skills/solopi-desktop-cli/references/run-task-long-running-issue.md
+  s_fd5c66a72fb1e8::t_8e6af84426a4b5 1-7
+solopi-desktop/skills/solopi-desktop-cli/references/solopi-import.md
+  s_fd5c66a72fb1e8::t_fe1be8f999e73e 1-16
+solopi-desktop/skills/solopi-desktop-cli/references/stress-and-codex-install.md
+  s_fd5c66a72fb1e8::t_1909bdb27c7dee 1-27
+solopi-desktop/skills/solopi-desktop-cli/references/task-diagnostics-and-performance.md
+  s_fd5c66a72fb1e8::t_768a43ef9fe9dc 1-58
+solopi-desktop/skills/solopi-desktop-cli/references/troubleshooting-runner-and-adb.md
+  s_fd5c66a72fb1e8::t_f70f9646de2d72 1-53
+solopi-desktop/src/App.css
+  s_fd5c66a72fb1e8::t_f8ac0d4f401828 1-42
+solopi-desktop/src/App.tsx
+  s_fd5c66a72fb1e8::t_353159b99ad87b 1-15
+solopi-desktop/src/App.vue
+  s_fd5c66a72fb1e8::t_53e8347237ed88 1-39
+solopi-desktop/src/components/AgentExtensions.tsx
+  s_fd5c66a72fb1e8::t_6d732214131a91 1-115
+solopi-desktop/src/components/AgentMarkdown.tsx
+  s_fd5c66a72fb1e8::t_28442aa4a08bf2 1-41
+solopi-desktop/src/components/AgentMirrors.tsx
+  s_fd5c66a72fb1e8::t_95837dafd18b19 1-99
+solopi-desktop/src/components/AgentOperationSummary.tsx
+  s_fd5c66a72fb1e8::t_354ec4db09c2d3 1-18
+solopi-desktop/src/components/AgentPage.tsx
+  s_fd5c66a72fb1e8::t_c5159c483cb22e 1-264
+solopi-desktop/src/components/AgentQueuedMessage.tsx
+  s_fd5c66a72fb1e8::t_845dc6a3d2e4c8 1-25
+solopi-desktop/src/components/AgentRequestSettings.tsx
+  s_fd5c66a72fb1e8::t_5d0a446550a5ad 1-37
+solopi-desktop/src/components/AgentSettingsCenter.tsx
+  s_fd5c66a72fb1e8::t_3c326d333469c7 1-45
+solopi-desktop/src/components/AgentTurn.tsx
+  s_fd5c66a72fb1e8::t_ddd50e81861714 1-67
+solopi-desktop/src/components/BugreportAnalysisPage.tsx
+  s_fd5c66a72fb1e8::t_54fef49f1508d3 1-268
+solopi-desktop/src/components/CaseTreeDisclosure.tsx
+  s_fd5c66a72fb1e8::t_329088cf375cac 1-12
+solopi-desktop/src/components/CommonSitesPage.tsx
+  s_fd5c66a72fb1e8::t_da88e2acea661b 1-69
+solopi-desktop/src/components/CommonSitesSettings.tsx
+  s_fd5c66a72fb1e8::t_e9d0ae7f68bfc5 1-25
+solopi-desktop/src/components/CopyValueButton.tsx
+  s_fd5c66a72fb1e8::t_fa2e97c82be4f5 1-31
+solopi-desktop/src/components/CopyableTaskId.tsx
+  s_fd5c66a72fb1e8::t_c1bc460ecbfc2f 1-31
+solopi-desktop/src/components/DeviceHeader.tsx
+  s_fd5c66a72fb1e8::t_95fca4989404e4 1-1061
+solopi-desktop/src/components/DeviceHeader.vue
+  s_fd5c66a72fb1e8::t_b517b3fd945f27 1-73
+solopi-desktop/src/components/DeviceRuntimeSelect.tsx
+  s_fd5c66a72fb1e8::t_bef1bd4862e66b 1-30
+solopi-desktop/src/components/DeviceSelectors.tsx
+  s_fd5c66a72fb1e8::t_e97cb7e977519b 1-152
+solopi-desktop/src/components/HarnessControlPage.tsx
+  s_fd5c66a72fb1e8::t_8688174275907e 1-273
+solopi-desktop/src/components/PerformanceTestPage.tsx
+  s_fd5c66a72fb1e8::t_d2a99d9d9a6134 1-1555
+solopi-desktop/src/components/QuickActionArguments.tsx
+  s_fd5c66a72fb1e8::t_1a082d04d426e5 1-36
+solopi-desktop/src/components/QuickActionFeedback.tsx
+  s_fd5c66a72fb1e8::t_94b387fab5f6e8 1-26
+solopi-desktop/src/components/QuickActions.tsx
+  s_fd5c66a72fb1e8::t_63a71725a8beb5 1-268
+solopi-desktop/src/components/QuickActionsSettings.tsx
+  s_fd5c66a72fb1e8::t_76a8f94d14bb4c 1-373
+solopi-desktop/src/components/RecordingTargetFields.tsx
+  s_fd5c66a72fb1e8::t_190d2e5d5cd8f7 1-41
+solopi-desktop/src/components/ReplyAutomationSettings.tsx
+  s_fd5c66a72fb1e8::t_1b04aeebba8453 1-137
+solopi-desktop/src/components/ReplyKnowledgePanel.tsx
+  s_fd5c66a72fb1e8::t_1f540eaeeda13f 1-52
+solopi-desktop/src/components/SharedEmbeddedWebview.tsx
+  s_fd5c66a72fb1e8::t_9700490d27d632 1-289
+solopi-desktop/src/components/Sidebar.tsx
+  s_fd5c66a72fb1e8::t_0dae04eb387bb8 1-338
+solopi-desktop/src/components/Sidebar.vue
+  s_fd5c66a72fb1e8::t_1c28266e0eb70c 1-82
+solopi-desktop/src/components/SoloPiImport.tsx
+  s_fd5c66a72fb1e8::t_af8ed2434793aa 1-134
+solopi-desktop/src/components/SoloPiNativeEditor.tsx
+  s_fd5c66a72fb1e8::t_dea11828957470 1-40
+solopi-desktop/src/components/TaskActionNotice.tsx
+  s_fd5c66a72fb1e8::t_e2cc051be83906 1-12
+solopi-desktop/src/components/TeamConfiguration.tsx
+  s_fd5c66a72fb1e8::t_0553189bf22837 1-106
+solopi-desktop/src/components/WorkflowEditor.tsx
+  s_fd5c66a72fb1e8::t_b1d7c72afa7177 1-17303
+solopi-desktop/src/components/WorkflowEditor.vue
+  s_fd5c66a72fb1e8::t_e679baa12e4b4f 1-97
+solopi-desktop/src/components/WorkflowMirrors.tsx
+  s_fd5c66a72fb1e8::t_08be82144456fd 1-26
+solopi-desktop/src/components/WorkflowNode.tsx
+  s_fd5c66a72fb1e8::t_e8f88ef30dcaa3 1-281
+solopi-desktop/src/components/WorkflowVariablePanel.tsx
+  s_fd5c66a72fb1e8::t_ff6c0272085149 1-106
+solopi-desktop/src/components/agent-chat-scroll.ts
+  s_fd5c66a72fb1e8::t_ec294c0a4d36c9 1-12
+solopi-desktop/src/components/agent-drafts.ts
+  s_fd5c66a72fb1e8::t_48c5fbde72ba29 1-56
+solopi-desktop/src/components/agent-turns.ts
+  s_fd5c66a72fb1e8::t_cc59f48669e2d0 1-31
+solopi-desktop/src/components/ui/accordion.tsx
+  s_fd5c66a72fb1e8::t_0176f077643152 1-52
+solopi-desktop/src/components/ui/alert-dialog.tsx
+  s_fd5c66a72fb1e8::t_6c0bbfb7a30a77 1-104
+solopi-desktop/src/components/ui/alert.tsx
+  s_fd5c66a72fb1e8::t_a6c6d1bb9463b1 1-43
+solopi-desktop/src/components/ui/aspect-ratio.tsx
+  s_fd5c66a72fb1e8::t_d2a4ea0918a3e2 1-5
+solopi-desktop/src/components/ui/avatar.tsx
+  s_fd5c66a72fb1e8::t_4859cceb3ec20f 1-38
+solopi-desktop/src/components/ui/badge.tsx
+  s_fd5c66a72fb1e8::t_d8df3136cb6aa2 1-29
+solopi-desktop/src/components/ui/breadcrumb.tsx
+  s_fd5c66a72fb1e8::t_459c6c02189bb5 1-90
+solopi-desktop/src/components/ui/button.tsx
+  s_fd5c66a72fb1e8::t_d156f10cf3f210 1-47
+solopi-desktop/src/components/ui/calendar.tsx
+  s_fd5c66a72fb1e8::t_a326c89df2d926 1-54
+solopi-desktop/src/components/ui/card.tsx
+  s_fd5c66a72fb1e8::t_655b16be09a4c7 1-43
+solopi-desktop/src/components/ui/carousel.tsx
+  s_fd5c66a72fb1e8::t_eaa4a22f65475b 1-224
+solopi-desktop/src/components/ui/chart.tsx
+  s_fd5c66a72fb1e8::t_a294ccd8a73d49 1-302
+solopi-desktop/src/components/ui/checkbox.tsx
+  s_fd5c66a72fb1e8::t_099460f525e1c9 1-26
+solopi-desktop/src/components/ui/collapsible.tsx
+  s_fd5c66a72fb1e8::t_b0bdabe1594577 1-9
+solopi-desktop/src/components/ui/command.tsx
+  s_fd5c66a72fb1e8::t_0e5140bf890a6b 1-132
+solopi-desktop/src/components/ui/context-menu.tsx
+  s_fd5c66a72fb1e8::t_49d42659b49cda 1-178
+solopi-desktop/src/components/ui/dialog.tsx
+  s_fd5c66a72fb1e8::t_d9a9ceae1bf9d7 1-95
+solopi-desktop/src/components/ui/drawer.tsx
+  s_fd5c66a72fb1e8::t_c4de7eae8934b6 1-87
+solopi-desktop/src/components/ui/dropdown-menu.tsx
+  s_fd5c66a72fb1e8::t_68144a3d242d98 1-179
+solopi-desktop/src/components/ui/form.tsx
+  s_fd5c66a72fb1e8::t_d8311746754d9e 1-129
+solopi-desktop/src/components/ui/hover-card.tsx
+  s_fd5c66a72fb1e8::t_c40cca05675fd9 1-27
+solopi-desktop/src/components/ui/input-otp.tsx
+  s_fd5c66a72fb1e8::t_6e0d9cfcea684f 1-61
+solopi-desktop/src/components/ui/input.tsx
+  s_fd5c66a72fb1e8::t_63b16e064ea8b1 1-22
+solopi-desktop/src/components/ui/label.tsx
+  s_fd5c66a72fb1e8::t_5599e6d1d19582 1-17
+solopi-desktop/src/components/ui/menubar.tsx
+  s_fd5c66a72fb1e8::t_2f27ccacc1fd1d 1-207
+solopi-desktop/src/components/ui/navigation-menu.tsx
+  s_fd5c66a72fb1e8::t_6e051ad4b0e39c 1-120
+solopi-desktop/src/components/ui/pagination.tsx
+  s_fd5c66a72fb1e8::t_09ce98126f3d65 1-81
+solopi-desktop/src/components/ui/popover.tsx
+  s_fd5c66a72fb1e8::t_ed13e9399ad91e 1-29
+solopi-desktop/src/components/ui/progress.tsx
+  s_fd5c66a72fb1e8::t_28ead2c45ad9e0 1-23
+solopi-desktop/src/components/ui/radio-group.tsx
+  s_fd5c66a72fb1e8::t_ac999df5e4f2d9 1-36
+solopi-desktop/src/components/ui/resizable.tsx
+  s_fd5c66a72fb1e8::t_9cc07cca3b6d0c 1-37
+solopi-desktop/src/components/ui/scroll-area.tsx
+  s_fd5c66a72fb1e8::t_38353a237cb58e 1-38
+solopi-desktop/src/components/ui/select.tsx
+  s_fd5c66a72fb1e8::t_e7b384f7d5ef7b 1-143
+solopi-desktop/src/components/ui/separator.tsx
+  s_fd5c66a72fb1e8::t_234e721b579833 1-20
+solopi-desktop/src/components/ui/sheet.tsx
+  s_fd5c66a72fb1e8::t_cf6573a74238e1 1-107
+solopi-desktop/src/components/ui/sidebar.tsx
+  s_fd5c66a72fb1e8::t_29ef5277508e52 1-637
+solopi-desktop/src/components/ui/skeleton.tsx
+  s_fd5c66a72fb1e8::t_c7348cdef256ca 1-7
+solopi-desktop/src/components/ui/slider.tsx
+  s_fd5c66a72fb1e8::t_2ebc4ca8aeb417 1-23
+solopi-desktop/src/components/ui/sonner.tsx
+  s_fd5c66a72fb1e8::t_1fe9dcf1c7396d 1-28
+solopi-desktop/src/components/ui/switch.tsx
+  s_fd5c66a72fb1e8::t_6712a38020e059 1-27
+solopi-desktop/src/components/ui/table.tsx
+  s_fd5c66a72fb1e8::t_74930b51ce3cd9 1-72
+solopi-desktop/src/components/ui/tabs.tsx
+  s_fd5c66a72fb1e8::t_9c55de89e62630 1-53
+solopi-desktop/src/components/ui/textarea.tsx
+  s_fd5c66a72fb1e8::t_0909f03e73129d 1-21
+solopi-desktop/src/components/ui/toast.tsx
+  s_fd5c66a72fb1e8::t_f02670428f76d1 1-111
+solopi-desktop/src/components/ui/toaster.tsx
+  s_fd5c66a72fb1e8::t_9d73fe0f2c91bb 1-24
+solopi-desktop/src/components/ui/toggle-group.tsx
+  s_fd5c66a72fb1e8::t_3b237b01d90a02 1-49
+solopi-desktop/src/components/ui/toggle.tsx
+  s_fd5c66a72fb1e8::t_e246f167442bc5 1-37
+solopi-desktop/src/components/ui/tooltip.tsx
+  s_fd5c66a72fb1e8::t_b55eb9ce3464b7 1-28
+solopi-desktop/src/components/ui/use-toast.ts
+  s_fd5c66a72fb1e8::t_4989ee64b79e84 1-3
+solopi-desktop/src/hooks/use-mobile.tsx
+  s_fd5c66a72fb1e8::t_2833eb1b3ba919 1-19
+solopi-desktop/src/hooks/use-model-configuration.ts
+  s_fd5c66a72fb1e8::t_cdb1e14040dd32 1-112
+solopi-desktop/src/hooks/use-task-action-feedback.ts
+  s_fd5c66a72fb1e8::t_3da69dea94ef6a 1-26
+solopi-desktop/src/hooks/use-toast.ts
+  s_fd5c66a72fb1e8::t_3cd08c3b11d3b5 1-186
+solopi-desktop/src/index.css
+  s_fd5c66a72fb1e8::t_f8f50176462c8c 1-200
+solopi-desktop/src/lib/automationCase.ts
+  s_fd5c66a72fb1e8::t_ad41f20a0b1e52 1-2035
+solopi-desktop/src/lib/commonSites.ts
+  s_fd5c66a72fb1e8::t_924fa970daed3e 1-50
+solopi-desktop/src/lib/h264-preview.ts
+  s_fd5c66a72fb1e8::t_f99e62e8cd6634 1-49
+solopi-desktop/src/lib/preview-feedback.ts
+  s_fd5c66a72fb1e8::t_9d2de53e680801 1-27
+solopi-desktop/src/lib/quickActionOrder.ts
+  s_fd5c66a72fb1e8::t_3818acb60d67c3 1-8
+solopi-desktop/src/lib/quickActionPresentation.ts
+  s_fd5c66a72fb1e8::t_2513b1590b93b8 1-6
+solopi-desktop/src/lib/quickActionStatus.ts
+  s_fd5c66a72fb1e8::t_07d81c1752a60f 1-15
+solopi-desktop/src/lib/task-creation-diagnostics.ts
+  s_fd5c66a72fb1e8::t_c130785df9389e 1-9
+solopi-desktop/src/lib/task-rerun-source.ts
+  s_fd5c66a72fb1e8::t_08a46fce1a0964 1-24
+solopi-desktop/src/lib/utils.ts
+  s_fd5c66a72fb1e8::t_781cf33835cb1c 1-6
+solopi-desktop/src/main.tsx
+  s_fd5c66a72fb1e8::t_883d64893d7f5c 1-21
+solopi-desktop/src/pages/NotFound.tsx
+  s_fd5c66a72fb1e8::t_cbec600fce44ab 1-24
+solopi-desktop/src/types/assets.d.ts
+  s_fd5c66a72fb1e8::t_af47d204942e66 1-24
+solopi-desktop/tailwind.config.js
+  s_fd5c66a72fb1e8::t_ec8005b5cef44f 1-78
+solopi-desktop/tests/agent-approval-default.test.mjs
+  s_fd5c66a72fb1e8::t_45a027dccec5ed 1-47
+solopi-desktop/tests/agent-case-evidence-export.test.mjs
+  s_fd5c66a72fb1e8::t_a8ad37287fb20e 1-67
+solopi-desktop/tests/agent-experience-memory.test.mjs
+  s_fd5c66a72fb1e8::t_390e8121154a20 1-86
+solopi-desktop/tests/agent-model-step-recovery.test.mjs
+  s_fd5c66a72fb1e8::t_d784fdebef6d95 1-180
+solopi-desktop/tests/agent-progress-policy.test.mjs
+  s_fd5c66a72fb1e8::t_eee00f20344f44 1-61
+solopi-desktop/tests/agent-screen-mode.test.mjs
+  s_fd5c66a72fb1e8::t_2701b978c6ce07 1-473
+solopi-desktop/tests/agent-skill-refresh.test.mjs
+  s_fd5c66a72fb1e8::t_5bbfbc0f7adf48 1-327
+solopi-desktop/tests/agent-skill-renames.test.mjs
+  s_fd5c66a72fb1e8::t_68a3210e48f27a 1-59
+solopi-desktop/tests/agent-skill-scope.test.mjs
+  s_fd5c66a72fb1e8::t_e9371327e17e8d 1-87
+solopi-desktop/tests/case-edit-guard.test.mjs
+  s_fd5c66a72fb1e8::t_f1f909198b1f7c 1-51
+solopi-desktop/tests/case-edit-refresh-regression.test.mjs
+  s_fd5c66a72fb1e8::t_88a71676e17778 1-179
+solopi-desktop/tests/case-scope-selection.test.mjs
+  s_fd5c66a72fb1e8::t_31e13f4f70e789 1-40
+solopi-desktop/tests/cli-case-list-projection.test.mjs
+  s_fd5c66a72fb1e8::t_a17cf387fcd37f 1-23
+solopi-desktop/tests/cli-headless-runtime.test.mjs
+  s_fd5c66a72fb1e8::t_c941c8783517ef 1-76
+solopi-desktop/tests/component-configuration-compatibility.test.mjs
+  s_fd5c66a72fb1e8::t_b2153d963d63e2 1-56
+solopi-desktop/tests/device-preflight.test.mjs
+  s_fd5c66a72fb1e8::t_2ebdf801b3a816 1-98
+solopi-desktop/tests/ffmpeg-source-distribution.test.mjs
+  s_fd5c66a72fb1e8::t_60bb75845d147e 1-66
+solopi-desktop/tests/glasses-device-contract.test.mjs
+  s_fd5c66a72fb1e8::t_e885833484bcbd 1-99
+solopi-desktop/tests/harness-control.test.mjs
+  s_fd5c66a72fb1e8::t_20f39ce96473d1 1-334
+solopi-desktop/tests/message-reply-engine.test.mjs
+  s_fd5c66a72fb1e8::t_d6a61b12018887 1-155
+solopi-desktop/tests/message-reply-fixture.test.mjs
+  s_fd5c66a72fb1e8::t_41cb3d28ea1b4b 1-261
+solopi-desktop/tests/message-reply-image-capability.test.mjs
+  s_fd5c66a72fb1e8::t_5361cc0386af64 1-90
+solopi-desktop/tests/message-reply-integration.test.mjs
+  s_fd5c66a72fb1e8::t_cd9fbae2c5aa8b 1-52
+solopi-desktop/tests/message-reply-model.test.mjs
+  s_fd5c66a72fb1e8::t_2d1cf5f52e1172 1-172
+solopi-desktop/tests/message-reply-notification-boundaries.test.mjs
+  s_fd5c66a72fb1e8::t_f07cca75e83140 1-76
+solopi-desktop/tests/message-reply-redirect.test.mjs
+  s_fd5c66a72fb1e8::t_c8950b4c9275cd 1-64
+solopi-desktop/tests/message-reply-store.test.mjs
+  s_fd5c66a72fb1e8::t_a2dca24e26eeb0 1-69
+solopi-desktop/tests/message-reply-task.test.mjs
+  s_fd5c66a72fb1e8::t_5ca7d26b137f30 1-329
+solopi-desktop/tests/packaged-harness.test.mjs
+  s_fd5c66a72fb1e8::t_d0cf3d0c9043d2 1-31
+solopi-desktop/tests/preview-performance-regression.test.mjs
+  s_fd5c66a72fb1e8::t_8ddd271ecbb898 1-85
+solopi-desktop/tests/public-source.test.mjs
+  s_fd5c66a72fb1e8::t_ef59dcef1ea994 1-87
+solopi-desktop/tests/quick-action-template-audit.test.mjs
+  s_fd5c66a72fb1e8::t_dedd679b2f8595 1-17
+solopi-desktop/tests/recording-dialog-ui.test.mjs
+  s_fd5c66a72fb1e8::t_59994f1205f784 1-128
+solopi-desktop/tests/reply-evidence-preload.test.mjs
+  s_fd5c66a72fb1e8::t_17798e86e768e8 1-20
+solopi-desktop/tests/reply-evidence-store.test.mjs
+  s_fd5c66a72fb1e8::t_e14da6c943f105 1-71
+solopi-desktop/tests/reply-knowledge.test.mjs
+  s_fd5c66a72fb1e8::t_18335c1f78d8e0 1-170
+solopi-desktop/tests/reply-settings.test.mjs
+  s_fd5c66a72fb1e8::t_3e8c93526184d6 1-22
+solopi-desktop/tests/reply-start-confirmation.test.mjs
+  s_fd5c66a72fb1e8::t_3e7e44c9009e72 1-54
+solopi-desktop/tests/retired-app-update.test.mjs
+  s_fd5c66a72fb1e8::t_c68a301b9a06b8 1-15
+solopi-desktop/tests/sample-factory-navigation.test.mjs
+  s_fd5c66a72fb1e8::t_346382b3daa5cd 1-66
+solopi-desktop/tests/solopi-import.test.mjs
+  s_fd5c66a72fb1e8::t_9bcd53c2b5168f 1-275
+solopi-desktop/tests/solopi-native-replay.test.mjs
+  s_fd5c66a72fb1e8::t_40929d47f60f94 1-129
+solopi-desktop/tests/solopi-permissions.test.mjs
+  s_fd5c66a72fb1e8::t_5417e19b7f021d 1-78
+solopi-desktop/tests/solopi-provider.test.mjs
+  s_fd5c66a72fb1e8::t_dcc38cc883f2d4 1-202
+solopi-desktop/tests/solopi-recording-recovery.test.mjs
+  s_fd5c66a72fb1e8::t_075ef090ce6662 1-74
+solopi-desktop/tests/solopi-stop-convert.test.mjs
+  s_fd5c66a72fb1e8::t_cdb4202302755d 1-65
+solopi-desktop/tests/startup-adb-tcpip.test.mjs
+  s_fd5c66a72fb1e8::t_0980f882cf90cd 1-42
+solopi-desktop/tests/startup-time-workflow.test.mjs
+  s_fd5c66a72fb1e8::t_3f6588bc584dc0 1-80
+solopi-desktop/tests/task-result-delivery.test.mjs
+  s_fd5c66a72fb1e8::t_0232e96054c205 1-140
+solopi-desktop/tests/third-party-notices.test.mjs
+  s_fd5c66a72fb1e8::t_f7eafce024d9de 1-77
+solopi-desktop/tests/virtual-observation-context.test.mjs
+  s_fd5c66a72fb1e8::t_a41e626e962875 1-89
+solopi-desktop/tests/virtual-recovery-record-ipc.test.mjs
+  s_fd5c66a72fb1e8::t_6037f0f4b05a36 1-30
+solopi-desktop/tests/virtual-recovery-store.test.mjs
+  s_fd5c66a72fb1e8::t_72936fa50ac836 1-45
+solopi-desktop/tests/virtual-tools.test.mjs
+  s_fd5c66a72fb1e8::t_1e27c04e96e577 1-259
+solopi-desktop/tests/workflow-assertion-policy.test.mjs
+  s_fd5c66a72fb1e8::t_3e4e76ce398306 1-249
+solopi-desktop/tests/workflow-editor-image-mock.test.mjs
+  s_fd5c66a72fb1e8::t_08c744bcdbb961 1-37
+solopi-desktop/tests/workflow-execution-summary.test.mjs
+  s_fd5c66a72fb1e8::t_a125ace4650d38 1-45
+solopi-desktop/tsconfig.json
+  s_fd5c66a72fb1e8::t_38d4108710a0fb 1-32
+solopi-desktop/webpack.config.js
+  s_fd5c66a72fb1e8::t_ce10939311a7c7 1-70
+solopi-skill/SKILL.md
+  s_fd5c66a72fb1e8::t_96f339e5409ada 18-22,86-87
+solopi-skill/references/cli-reference.md
+  s_fd5c66a72fb1e8::t_63724a9085851c 212,217,224
+solopi-skill/references/native-platforms.md
+  s_fd5c66a72fb1e8::t_ab5b7a24a733d1 1-118
+solopi-skill/references/native-regression-guide.md
+  s_fd5c66a72fb1e8::t_1c67642c123525 1-166
+solopi-skill/references/vision-regression.md
+  s_fd5c66a72fb1e8::t_22229f9f743668 1-370
+solopi-skill/scripts/harness/examples/fastpath/android-demo/AndroidManifest.xml
+  s_fd5c66a72fb1e8::t_262f7667b867fa 5,8
+solopi-skill/scripts/harness/examples/fastpath/android-demo/README.md
+  s_fd5c66a72fb1e8::t_0788b81070ae94 3,6-13,28-48
+solopi-skill/scripts/harness/examples/fastpath/android-demo/build.py
+  s_fd5c66a72fb1e8::t_c2a701612d8311 23-24,48,69-70,88-89
+solopi-skill/scripts/harness/examples/fastpath/android-demo/fixture_pipe_probe.py
+  s_fd5c66a72fb1e8::t_4c86e455928ca9 1-185
+solopi-skill/scripts/harness/examples/fastpath/android-demo/res/values/ids.xml
+  s_fd5c66a72fb1e8::t_7f7f3c358145a5 11-26,33-48
+solopi-skill/scripts/harness/examples/fastpath/android-demo/src/com/solopi/fastpath/demo/FixtureChat.java
+  s_fd5c66a72fb1e8::t_6248821d164fd5 1-44
+solopi-skill/scripts/harness/examples/fastpath/android-demo/src/com/solopi/fastpath/demo/MainActivity.java
+  s_fd5c66a72fb1e8::t_e88f60741eccce 4-11,13-16,18,23-25,27,29,31,46-47,81-84,139-145,147-158,165-171,177-355,365-524,621-624
+solopi-skill/scripts/harness/examples/fastpath/android-demo/tests/com/solopi/fastpath/demo/FixtureChatTest.java
+  s_fd5c66a72fb1e8::t_e49bf319dfeec0 1-30
+solopi-skill/scripts/harness/examples/harmony-hdc/app/.gitignore
+  s_fd5c66a72fb1e8::t_5032700a75576e 1-6
+solopi-skill/scripts/harness/examples/harmony-hdc/app/AppScope/app.json5
+  s_fd5c66a72fb1e8::t_f1c4395b38ee14 1-10
+solopi-skill/scripts/harness/examples/harmony-hdc/app/AppScope/resources/base/element/string.json
+  s_fd5c66a72fb1e8::t_8d1c0c1f4a5f4f 1-8
+solopi-skill/scripts/harness/examples/harmony-hdc/app/AppScope/resources/base/media/app_icon.svg
+  s_fd5c66a72fb1e8::t_1e7b56e051bf2b 1-4
+solopi-skill/scripts/harness/examples/harmony-hdc/app/build-profile.json5
+  s_fd5c66a72fb1e8::t_0c95d7e036e631 1-34
+solopi-skill/scripts/harness/examples/harmony-hdc/app/entry/build-profile.json5
+  s_fd5c66a72fb1e8::t_12874c05c36a23 1-9
+solopi-skill/scripts/harness/examples/harmony-hdc/app/entry/hvigorfile.ts
+  s_fd5c66a72fb1e8::t_7a3402e96c68ff 1-6
+solopi-skill/scripts/harness/examples/harmony-hdc/app/entry/oh-package.json5
+  s_fd5c66a72fb1e8::t_f3cab43e95ffb8 1-9
+solopi-skill/scripts/harness/examples/harmony-hdc/app/entry/src/main/ets/entryability/EntryAbility.ets
+  s_fd5c66a72fb1e8::t_9f4b8d8ca8659c 1-19
+solopi-skill/scripts/harness/examples/harmony-hdc/app/entry/src/main/ets/pages/Index.ets
+  s_fd5c66a72fb1e8::t_8368832838fe31 1-89
+solopi-skill/scripts/harness/examples/harmony-hdc/app/entry/src/main/module.json5
+  s_fd5c66a72fb1e8::t_79ef0322c816db 1-38
+solopi-skill/scripts/harness/examples/harmony-hdc/app/entry/src/main/resources/base/element/color.json
+  s_fd5c66a72fb1e8::t_8a489d26bfeb87 1-8
+solopi-skill/scripts/harness/examples/harmony-hdc/app/entry/src/main/resources/base/element/string.json
+  s_fd5c66a72fb1e8::t_41d695a63534fb 1-12
+solopi-skill/scripts/harness/examples/harmony-hdc/app/entry/src/main/resources/base/media/app_icon.svg
+  s_fd5c66a72fb1e8::t_db71ce462d078e 1-4
+solopi-skill/scripts/harness/examples/harmony-hdc/app/entry/src/main/resources/base/profile/main_pages.json
+  s_fd5c66a72fb1e8::t_bef1ad5196e0bd 1-5
+solopi-skill/scripts/harness/examples/harmony-hdc/app/hvigor/hvigor-config.json5
+  s_fd5c66a72fb1e8::t_f76d81c709f420 1-17
+solopi-skill/scripts/harness/examples/harmony-hdc/app/hvigorfile.ts
+  s_fd5c66a72fb1e8::t_d5612652e227d2 1-6
+solopi-skill/scripts/harness/examples/harmony-hdc/app/oh-package.json5
+  s_fd5c66a72fb1e8::t_357ffc418c821e 1-5
+solopi-skill/scripts/harness/examples/harmony-hdc/counter-wrong-result.json
+  s_fd5c66a72fb1e8::t_ced139c2ab6139 1-30
+solopi-skill/scripts/harness/examples/harmony-hdc/counter.json
+  s_fd5c66a72fb1e8::t_f6c127b4d4a951 1-30
+solopi-skill/scripts/harness/examples/harmony-hdc/native-actions.json
+  s_fd5c66a72fb1e8::t_bfcf570e6cdac9 1-125
+solopi-skill/scripts/harness/examples/ios-wda/integration-alerts-wrong.json
+  s_fd5c66a72fb1e8::t_e256a1f627ff04 1-37
+solopi-skill/scripts/harness/examples/ios-wda/integration-alerts.json
+  s_fd5c66a72fb1e8::t_bfb819e64e24d3 1-37
+solopi-skill/scripts/harness/examples/ios-wda/integration-input.json
+  s_fd5c66a72fb1e8::t_8fae34e9edff7a 1-46
+solopi-skill/scripts/harness/examples/ios-wda/integration-longpress.json
+  s_fd5c66a72fb1e8::t_16bf1dc71141a9 1-60
+solopi-skill/scripts/harness/examples/ios-wda/integration-scroll-back.json
+  s_fd5c66a72fb1e8::t_b289f040df9b97 1-91
+solopi-skill/scripts/harness/examples/vision-regression/README.md
+  s_fd5c66a72fb1e8::t_afb3c613241c8b 1-101
+solopi-skill/scripts/harness/examples/vision-regression/prepare_controlled.py
+  s_fd5c66a72fb1e8::t_8bd8c054b807e0 1-223
+solopi-skill/scripts/harness/examples/vision-regression/protocol.json
+  s_fd5c66a72fb1e8::t_c58787e068fb12 1-322
+solopi-skill/scripts/harness/pyproject.toml
+  s_fd5c66a72fb1e8::t_980718944a9879 11-13
+solopi-skill/scripts/harness/src/solopi_harness/desktop_control.py
+  s_fd5c66a72fb1e8::t_c6bf468c53a334 1-647
+solopi-skill/scripts/harness/src/solopi_harness/goalpath.py
+  s_fd5c66a72fb1e8::t_45bba2e5a986c6 319,358-359,479-480,490-496,514-516,521-524,526,585-586,590,601-617,622-623,673-677
+solopi-skill/scripts/harness/src/solopi_harness/goalpath_vision.py
+  s_fd5c66a72fb1e8::t_c11b83ef8e5ac3 1-333
+solopi-skill/scripts/harness/src/solopi_harness/harmony_hdc.py
+  s_fd5c66a72fb1e8::t_f47072e9ee15ea 1-251
+solopi-skill/scripts/harness/src/solopi_harness/ios_wda.py
+  s_fd5c66a72fb1e8::t_efceeba19ee417 1-357
+solopi-skill/scripts/harness/src/solopi_harness/native_decision.py
+  s_fd5c66a72fb1e8::t_528f2c54968e6f 1-82
+solopi-skill/scripts/harness/src/solopi_harness/native_recording.py
+  s_fd5c66a72fb1e8::t_28c692fa7db181 1-130
+solopi-skill/scripts/harness/src/solopi_harness/native_report.py
+  s_fd5c66a72fb1e8::t_5c5cea318b1669 1-31
+solopi-skill/scripts/harness/src/solopi_harness/native_runtime.py
+  s_fd5c66a72fb1e8::t_c985facf508d5d 1-497
+solopi-skill/scripts/harness/src/solopi_harness/resources/ocr/vision.swift
+  s_fd5c66a72fb1e8::t_f5ec6640d9647d 1-27
+solopi-skill/scripts/harness/src/solopi_harness/solopi_ai.py
+  s_fd5c66a72fb1e8::t_4595e0558a108e 44-50,1258-1261,1272,1274-1275,1279,1284-1285,1301-1304,1331-1332,1390,1423-1430,1439,1443-1444,1488-1501,5384-5439,8123-8134,8162-8169,8204-8211,8254-8256,8401,8419-8426,8431-8436,8453-8474,9116,9164-9166,9168-9201,9214-9215,9220-9232,9302-9315,9317-9319,9550-9628,9817-9819,9840-9847,9868-9883,9955-9980,10079-10083,10093-10094,10098-10188,10275-10287,10292,10295,10355-10361,10372,10501-10526,10528,10571-10572,10697-10701,11167-11169,11190-11191,11218,11337-11368,11408-11415,11418,11463-11465,11531,11627,11656-11657,11762,11770-11777,11834-11835
+solopi-skill/scripts/harness/src/solopi_harness/strict_png.py
+  s_fd5c66a72fb1e8::t_f602c3eb0f11f7 1-162
+solopi-skill/scripts/harness/src/solopi_harness/timing.py
+  s_fd5c66a72fb1e8::t_2f0e4147b9d198 23-24
+solopi-skill/scripts/harness/src/solopi_harness/verification_engine.py
+  s_fd5c66a72fb1e8::t_2fe0a38d1c6447 32-33,191-193,256,270,351,353-354,361,371,391-392,403,410,433,435,550-553,556,646-661,706-712,740-747,780,798-801,805-812,838,901,925,948,952,970-972,1050,1118,1128,1155-1157,1172-1176,1193-1212,1280,1378,1388-1394,1442,1580
+solopi-skill/scripts/harness/src/solopi_harness/virtual_desktop.py
+  s_fd5c66a72fb1e8::t_633d0d27d93dbf 1-730
+solopi-skill/scripts/harness/src/solopi_harness/vision_benchmark.py
+  s_fd5c66a72fb1e8::t_14c74499297064 1-727
+solopi-skill/scripts/harness/src/solopi_harness/vision_collect.py
+  s_fd5c66a72fb1e8::t_916d53fef8a004 1-367
+solopi-skill/scripts/harness/src/solopi_harness/vision_evaluate.py
+  s_fd5c66a72fb1e8::t_bba090dc85f426 1-260
+solopi-skill/scripts/harness/src/solopi_harness/visual_observation.py
+  s_fd5c66a72fb1e8::t_2ee8c769bfc53c 1-327
+solopi-skill/scripts/harness/src/solopi_harness/visual_report.py
+  s_fd5c66a72fb1e8::t_e57a44f8cb8376 1-36
+solopi-skill/scripts/harness/tests/test_desktop_control.py
+  s_fd5c66a72fb1e8::t_c9d09825bbbacf 1-1012
+solopi-skill/scripts/harness/tests/test_fixture_crop.py
+  s_fd5c66a72fb1e8::t_6fa0e375d8f3ba 1-61
+solopi-skill/scripts/harness/tests/test_fixture_pipe_probe.py
+  s_fd5c66a72fb1e8::t_8cebdaa9d88dbc 1-72
+solopi-skill/scripts/harness/tests/test_fixture_reply_transport.py
+  s_fd5c66a72fb1e8::t_f5d3f5a5631d0c 1-151
+solopi-skill/scripts/harness/tests/test_goalpath_vision.py
+  s_fd5c66a72fb1e8::t_82c98812e4f069 1-379
+solopi-skill/scripts/harness/tests/test_harmony_hdc.py
+  s_fd5c66a72fb1e8::t_0253357d83fa47 1-140
+solopi-skill/scripts/harness/tests/test_ios_wda.py
+  s_fd5c66a72fb1e8::t_c3cd30527d89c4 1-148
+solopi-skill/scripts/harness/tests/test_native_decision.py
+  s_fd5c66a72fb1e8::t_217513d87b8081 1-66
+solopi-skill/scripts/harness/tests/test_native_managed.py
+  s_fd5c66a72fb1e8::t_f264393af2d857 1-66
+solopi-skill/scripts/harness/tests/test_native_recording.py
+  s_fd5c66a72fb1e8::t_c002f36ef3d578 1-56
+solopi-skill/scripts/harness/tests/test_native_report.py
+  s_fd5c66a72fb1e8::t_0343c6fd929a16 1-28
+solopi-skill/scripts/harness/tests/test_native_runtime.py
+  s_fd5c66a72fb1e8::t_059779087f2d98 1-284
+solopi-skill/scripts/harness/tests/test_prepare_controlled.py
+  s_fd5c66a72fb1e8::t_125f4389725276 1-268
+solopi-skill/scripts/harness/tests/test_solopi_ai.py
+  s_fd5c66a72fb1e8::t_5db1fb9a7b520c 32-154,420-431,1248-1327,2142,2152-2154,2156-2159,2161,2709-2711,2715
+solopi-skill/scripts/harness/tests/test_strict_png.py
+  s_fd5c66a72fb1e8::t_c134583a736032 1-175
+solopi-skill/scripts/harness/tests/test_verification_engine.py
+  s_fd5c66a72fb1e8::t_e653f697ac9ecb 1,5,20,217-276
+solopi-skill/scripts/harness/tests/test_verification_transport.py
+  s_fd5c66a72fb1e8::t_229b2da9a2951d 43-57
+solopi-skill/scripts/harness/tests/test_vision_benchmark.py
+  s_fd5c66a72fb1e8::t_5a64a677d6a390 1-550
+solopi-skill/scripts/harness/tests/test_vision_collect.py
+  s_fd5c66a72fb1e8::t_c9919f5262c75d 1-397
+solopi-skill/scripts/harness/tests/test_vision_evaluate.py
+  s_fd5c66a72fb1e8::t_c454dc778c67b9 1-294
+solopi-skill/scripts/harness/tests/test_visual_integration.py
+  s_fd5c66a72fb1e8::t_42eb2ee1054890 1-413
+solopi-skill/scripts/harness/tests/test_visual_observation.py
+  s_fd5c66a72fb1e8::t_d58e90ba3117a2 1-429
+solopi-skill/scripts/harness/tests/test_visual_report.py
+  s_fd5c66a72fb1e8::t_713ca3b8c90ee4 1-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "caaa930f5967bd4795085a85e5a00ca44ed8c7a2",
+  "prompts": {},
+  "sessions": {
+    "s_fd5c66a72fb1e8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1383c-9f7d-7323-8d7f-6ff60953824b",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Liu Zimu <85295081+Lzm1645@users.noreply.github.com>"
+    }
+  }
+}
