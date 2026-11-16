@@ -1,6 +1,7 @@
 /docs/
 /doc/
 /output/
+/STAR_PROMPT.md
 .DS_Store
 __pycache__/
 *.py[cod]

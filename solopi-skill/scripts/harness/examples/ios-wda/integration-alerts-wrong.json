@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "platform": "ios",
+  "targetAppId": "com.facebook.IntegrationApp",
+  "id": "ios-integration-alerts-wrong",
+  "title": "Wrong expectation must fail",
+  "acceptanceCriteria": [
+    {"id": "AC-1", "text": "The alerts screen shows a nonexistent entry"}
+  ],
+  "scenarios": [
+    {
+      "id": "open-alerts",
+      "title": "Open alerts",
+      "acceptanceCriteria": ["AC-1"],
+      "steps": [
+        {
+          "id": "tap-alerts",
+          "type": "operation",
+          "action": {"type": "click", "selector": {"accessibilityId": "Alerts"}}
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "alerts-visible",
+          "afterStep": "tap-alerts",
+          "oracle": {
+            "type": "ui",
+            "selector": {"accessibilityId": "Create Camera Roll Alert"},
+            "field": "text",
+            "operator": "equals",
+            "expected": "Not present"
+          }
+        }
+      ]
+    }
+  ]
+}

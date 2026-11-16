@@ -20,6 +20,8 @@ LABELS = frozenset({
     "observation.initial_wait",
     "dynamic.start", "dynamic.action_and_settle", "dynamic.finalize",
     "evidence.export", "evidence.json", "host.poll_sleep",
+    "native.health", "native.launch", "native.observe", "native.action", "native.screenshot",
+    "visual.capture", "visual.observe", "visual.screenshot",
 })
 
 _active: contextvars.ContextVar[Any] = contextvars.ContextVar("verification_timing", default=None)

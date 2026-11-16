@@ -29,9 +29,9 @@ import static org.junit.Assert.assertTrue;
 /** Covers the detached signature primitive used before executable patch loading. */
 public class PatchSignatureVerifierTest {
     private static final Charset UTF_8 = Charset.forName("UTF-8");
-    private static final String PRODUCTION_VECTOR_CONTENT =
+    static final String PRODUCTION_VECTOR_CONTENT =
             "eyJuYW1lIjoidHJ1c3QtdmVjdG9yIiwidmVyc2lvbiI6MX0=";
-    private static final String PRODUCTION_VECTOR_SIGNATURE =
+    static final String PRODUCTION_VECTOR_SIGNATURE =
             "mT2eQJDM+oRVllC+x+J7lZs/xlvXACiU2ZiUWYtcpKpyXNZzC5BaCxShmnDP4pPLne9rnmZPqM9Hil4YyWq5GcV2AC1TEREbSO4r7az+H37bMGwrhpqUpb0itTupipz0F7hHxXMXZmG4rnYpdLWZeDX2p7cnznHJ1NGg5kJ+xSTDOAdReD02g6iOFel+fKK/uoyxTcuoZcXK0kkWXqvbTeSVb6APLx89dqsRfVy3kPjis6SxqHsF6jD7vYghGIBo3nbUi0whEKkv0qrlULdYmCoZn3/5FZxeWw6Msnw16fSDx+Mtj4C2c4gKO+cL7DOmnb4AcsSFjFK2i1VpYNjHeuDOyOTXBgJVNxtxp3IXvd//Vmqy21SsA1V+sAKULXg3mkFweLK0ZSkknl6J8Vi4iNqB9C5KLLRQwV1IawtLpiIYaaT/2ZMlrvn0g95XMxFWut5pA0nupcWM+kJq6wb2pzSEVMfmBSl11vEtaV5uH7V+oFOZ9xKtHIGsfsb0AD+3";
 
     @Test

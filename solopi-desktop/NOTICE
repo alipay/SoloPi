@@ -1,0 +1,13 @@
+SoloPi Desktop
+
+This module is part of the SoloPi project: https://github.com/alipay/SoloPi
+Project source is licensed under the Apache License, Version 2.0.
+See LICENSE. This notice does not replace third-party license terms.
+
+SoloPi artwork and recording companion attribution is preserved in
+resources/branding/NOTICE.md and resources/solopi-recording/NOTICE.md.
+The desktop icon includes the padding and scaling changes documented there.
+
+Binary distributions include platform-specific third-party notices under
+resources/third-party/ (Contents/Resources/third-party/ on macOS).
+See THIRD_PARTY_NOTICES.md for generation and verification details.

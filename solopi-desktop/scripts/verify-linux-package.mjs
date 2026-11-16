@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+import { verifyThirdPartyNotices } from './third-party-notices.mjs';
+import { verifyFFmpegSourceArchive } from './create-ffmpeg-source-archive.mjs';
+import {verifyRetiredAppUpdate} from './verify-retired-app-update.mjs';
+import { verifyRetiredCapturePage } from './verify-retired-capture-page.mjs';
+import { verifyPackagedRuntimeDependencies } from './verify-packaged-runtime-dependencies.mjs';
+import fs from 'node:fs';
+import {verifyLinuxRuntime} from './linux-runtime.mjs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const directory=path.resolve(process.argv[2]||path.join(root,'release/linux-x64/linux-unpacked'));
+const required=['solopi-desktop','chrome-sandbox','resources/app.asar','resources/cli/glassbox-cli.mjs','resources/cli/headless-configuration.cjs','resources/cli/adb-error.cjs','resources/cli/workflow-task-events.cjs','resources/cli/task-visibility.cjs','resources/cli/workflow-performance.cjs','resources/cli/task-case-query.cjs','resources/cli/task-device-selection.cjs','resources/cli/workflow-failure-policy.cjs','resources/cli/case-selection.cjs','resources/cli/case-discovery.cjs','resources/cli/product-identity.cjs','resources/bin/solopi-desktop','resources/bin/glassbox'];
+required.push('resources/cli/selection-receipt.cjs','resources/cli/solopi-native-case.js','resources/cli/solopi-native-schema.js','resources/cli/background-runtime.cjs','resources/cli/runtime-build.json');
+for(const file of required)if(!fs.statSync(path.join(directory,file)).isFile())throw Error(`Missing package file: ${file}`);
+for(const file of ['solopi-desktop','resources/bin/solopi-desktop','resources/bin/glassbox'])if(!(fs.statSync(path.join(directory,file)).mode&0o111))throw Error(`Not executable: ${file}`);
+const header=fs.readFileSync(path.join(directory,'solopi-desktop')).subarray(0,20);
+if(!header.subarray(0,4).equals(Buffer.from([0x7f,0x45,0x4c,0x46])))throw Error('Application is not a Linux ELF executable');
+const arch=header.readUInt16LE(18)===62?'x64':header.readUInt16LE(18)===183?'arm64':'unknown';
+if(arch==='unknown')throw Error('Unsupported ELF machine');
+if(fs.existsSync(path.join(directory,'resources/media-runtime/darwin-arm64')))throw Error('macOS runtime leaked into Linux artifact');
+const {createRequire}=await import('node:module');const require=createRequire(import.meta.url);const asar=require('@electron/asar');
+const archive=path.join(directory,'resources/app.asar');
+verifyPackagedRuntimeDependencies(archive);
+verifyThirdPartyNotices(path.join(directory, 'resources/third-party'), { targetPlatform: 'linux' });
+verifyRetiredCapturePage(file => asar.extractFile(archive, file));
+verifyRetiredAppUpdate(file => asar.extractFile(archive, file));
+for(const file of ['electron/main.js','electron/preload.js','electron/task-json-worker.js','electron/scrcpy-transport.js','electron/scrcpy-stream-observer.js','electron/recording-readiness.js','dist/index.html'])if(!asar.statFile(archive,file))throw Error(`Missing application entry: ${file}`);
+for(const skill of ['solopi-desktop-cli'])if(!fs.existsSync(path.join(directory,'resources/skills',skill,'SKILL.md')))throw Error(`Missing bundled Agent skill: ${skill}`);
+execFileSync(process.execPath,[path.join(root,'scripts/verify-git-runtime.mjs'),'--runtime',path.join(directory,'resources/git-runtime',`linux-${arch}`),'--static'],{stdio:'inherit',env:{...process.env,GLASSBOX_GIT_PLATFORM:'linux',GLASSBOX_GIT_ARCH:arch}});
+for (const name of fs.readdirSync(path.join(directory, 'resources/skills'))) if(name !== 'solopi-desktop-cli') throw Error('Unexpected bundled skill: ' + name);
+const runtime=path.join(directory,'resources/media-runtime',`linux-${arch}`);
+for(const file of ['bin/scrcpy','bin/ffmpeg','bin/adb','share/scrcpy/scrcpy-server','manifest.json'])if(!fs.existsSync(path.join(runtime,file)))throw Error(`Missing bundled Linux media: ${file}`);
+if(!fs.existsSync(path.join(runtime,'LICENSES'))||!fs.readdirSync(path.join(runtime,'LICENSES')).length)throw Error('Missing Linux runtime licenses');
+verifyLinuxRuntime(runtime,arch);
+const version=JSON.parse(asar.extractFile(archive,'package.json').toString()).version;
+await verifyFFmpegSourceArchive(path.join(path.dirname(directory),`solopi-desktop-${version}-linux-${arch}-ffmpeg-sources.tar.gz`),{requireChecksum:true});
+const sha256=crypto.createHash('sha256').update(fs.readFileSync(archive)).digest('hex');
+console.log(JSON.stringify({success:true,platform:'linux',arch,appAsarSha256:sha256,checkedFiles:required.length}));
+if(process.platform==='linux' && process.arch===arch){
+ execFileSync(process.execPath,[path.join(root,'scripts/verify-ffmpeg-capabilities.mjs'),path.join(runtime,'bin/ffmpeg')],{stdio:'inherit'});
+ execFileSync(path.join(directory,'resources/bin/solopi-desktop'),['--help'],{stdio:'inherit'});
+ console.log('Native CLI startup passed; verifying real no-display execution.');
+ execFileSync(process.execPath,[path.join(root,'scripts/verify-linux-headless.mjs'),directory,path.join(root,'build',`headless-gate-${arch}-${Date.now()}`)],{stdio:'inherit'});
+}

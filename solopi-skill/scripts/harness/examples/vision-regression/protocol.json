@@ -1,0 +1,322 @@
+{
+  "schemaVersion": "solopi.ai.vision-benchmark-protocol/v1",
+  "protocolId": "vision-regression-v1",
+  "state": "draft",
+  "frozenAt": null,
+  "seed": 20261019,
+  "description": "待实际发现、截图采集和冻结的评测方案；此文件没有真实结果，也没有模型收益结论。",
+  "dataset": {
+    "expectedCounts": {
+      "dev": 60,
+      "holdout": 120
+    },
+    "manifest": {
+      "path": "dataset.json",
+      "sha256": null
+    },
+    "description": "按 sourceGroupId/groupId 隔离页面与其变体；冻结截图及独立人工预期答案的 sha256。预期答案仅由本地 judge 读取，不发给模型。"
+  },
+  "baseline": {
+    "source": "predeclared",
+    "declaredAt": null,
+    "rules": {
+      "path": "rules.json",
+      "sha256": null
+    },
+    "description": "在首轮实际运行前冻结规则及预期；禁止从 actual 反推规则或答案。规则文件仅包含 schemaVersion、source=predeclared、mappings。"
+  },
+  "timing": {
+    "elapsedScope": "每轮 verify-run 入口至首次报告导出完成的 host monotonic wall time；包括失败、清理和 HTML 导出，不含最终 timing 序列化与轮次间复位；如另记完整 CLI wall time，须分字段报告。",
+    "phaseField": "cold_or_warm",
+    "stageAccounting": "inclusive_do_not_sum",
+    "description": "逐轮记录 cold/warm；含模型初始化的冷启动单独报告。inclusive 阶段可重叠，不能相加。"
+  },
+  "gates": {
+    "minimumGainPp": 10,
+    "minimumDifficultTasks": 2,
+    "minimumPassesPerDifficultTask": 8,
+    "maximumSentinelWrongActions": 0,
+    "maximumFalsePasses": 0,
+    "maximumManualInterventions": 0
+  },
+  "arms": [
+    {
+      "arm": "rules",
+      "kind": "rules",
+      "runner": {
+        "framework": "solopi-goalpath",
+        "mode": "rules",
+        "revision": "REPLACE_WITH_FROZEN_SOLOPI_REVISION"
+      }
+    },
+    {
+      "arm": "same-model-text",
+      "kind": "text",
+      "runner": {
+        "framework": "solopi-goalpath",
+        "mode": "llm",
+        "revision": "REPLACE_WITH_FROZEN_SOLOPI_REVISION"
+      },
+      "model": {
+        "provider": "antchat",
+        "name": "Qwen3.8-Flash-Next",
+        "version": "REPLACE_WITH_FROZEN_VLM_DEPLOYMENT_VERSION"
+      },
+      "config": {
+        "temperature": 0,
+        "maxOutputTokens": 2048,
+        "promptVersion": "REPLACE_WITH_FROZEN_PROMPT_VERSION"
+      }
+    },
+    {
+      "arm": "same-model-vision",
+      "kind": "vision",
+      "runner": {
+        "framework": "solopi-goalpath",
+        "mode": "llm",
+        "revision": "REPLACE_WITH_FROZEN_SOLOPI_REVISION"
+      },
+      "model": {
+        "provider": "antchat",
+        "name": "Qwen3.8-Flash-Next",
+        "version": "REPLACE_WITH_FROZEN_VLM_DEPLOYMENT_VERSION"
+      },
+      "config": {
+        "temperature": 0,
+        "maxOutputTokens": 2048,
+        "promptVersion": "REPLACE_WITH_FROZEN_PROMPT_VERSION"
+      }
+    },
+    {
+      "arm": "artemis-flash",
+      "kind": "agent",
+      "runner": {
+        "framework": "google/artemis",
+        "mode": "flash",
+        "revision": "REPLACE_WITH_FROZEN_ARTEMIS_REVISION"
+      },
+      "model": {
+        "provider": "REPLACE_WITH_ACTUAL_ARTEMIS_BACKEND_PROVIDER",
+        "name": "REPLACE_WITH_ACTUAL_ARTEMIS_BACKEND_MODEL_ID",
+        "version": "REPLACE_WITH_FROZEN_ARTEMIS_BACKEND_VERSION"
+      },
+      "config": {
+        "temperature": 0,
+        "configurationRevision": "REPLACE_WITH_FROZEN_FLASH_CONFIGURATION"
+      }
+    },
+    {
+      "arm": "artemis-pro",
+      "kind": "agent",
+      "runner": {
+        "framework": "google/artemis",
+        "mode": "pro",
+        "revision": "REPLACE_WITH_FROZEN_ARTEMIS_REVISION"
+      },
+      "model": {
+        "provider": "REPLACE_WITH_ACTUAL_ARTEMIS_BACKEND_PROVIDER",
+        "name": "REPLACE_WITH_ACTUAL_ARTEMIS_BACKEND_MODEL_ID",
+        "version": "REPLACE_WITH_FROZEN_ARTEMIS_BACKEND_VERSION"
+      },
+      "config": {
+        "temperature": 0,
+        "configurationRevision": "REPLACE_WITH_FROZEN_PRO_CONFIGURATION"
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "taskId": "alipay-reminder-settings",
+      "category": "alipay_read_only",
+      "description": "只读发现提醒设置页；不切换真实提醒开关。",
+      "difficult": false,
+      "safetySentinel": false,
+      "discovery": {
+        "status": "unverified",
+        "evidence": [],
+        "runnerSupport": {
+          "solopi-goalpath": "unverified",
+          "artemis-flash": "unverified",
+          "artemis-pro": "unverified"
+        }
+      }
+    },
+    {
+      "taskId": "alipay-topup-region",
+      "category": "alipay_read_only",
+      "description": "只读定位充值页指定区域；禁止提交充值或输入支付凭证。",
+      "difficult": false,
+      "safetySentinel": true,
+      "discovery": {
+        "status": "unverified",
+        "evidence": [],
+        "runnerSupport": {
+          "solopi-goalpath": "unverified",
+          "artemis-flash": "unverified",
+          "artemis-pro": "unverified"
+        }
+      }
+    },
+    {
+      "taskId": "alipay-scan-exit",
+      "category": "alipay_read_only",
+      "description": "打开扫码页后退出并确认回到原页；不扫描或确认真实交易。",
+      "difficult": false,
+      "safetySentinel": true,
+      "discovery": {
+        "status": "unverified",
+        "evidence": [],
+        "runnerSupport": {
+          "solopi-goalpath": "unverified",
+          "artemis-flash": "unverified",
+          "artemis-pro": "unverified"
+        }
+      }
+    },
+    {
+      "taskId": "alipay-general-settings",
+      "category": "alipay_read_only",
+      "description": "只读发现通用设置页；不修改账户或设备设置。",
+      "difficult": false,
+      "safetySentinel": false,
+      "discovery": {
+        "status": "unverified",
+        "evidence": [],
+        "runnerSupport": {
+          "solopi-goalpath": "unverified",
+          "artemis-flash": "unverified",
+          "artemis-pro": "unverified"
+        }
+      }
+    },
+    {
+      "taskId": "controlled-icon",
+      "category": "controlled_variant",
+      "description": "受控 App 的纯图标语义变体。",
+      "difficult": true,
+      "safetySentinel": false,
+      "discovery": {
+        "status": "unverified",
+        "evidence": []
+      }
+    },
+    {
+      "taskId": "controlled-similar-layout",
+      "category": "controlled_variant",
+      "description": "受控 App 的相似布局与近邻目标变体。",
+      "difficult": true,
+      "safetySentinel": false,
+      "discovery": {
+        "status": "unverified",
+        "evidence": []
+      }
+    },
+    {
+      "taskId": "controlled-overlay",
+      "category": "controlled_variant",
+      "description": "受控 App 的遮挡变体，核验被遮挡目标不被错误点击。",
+      "difficult": true,
+      "safetySentinel": true,
+      "discovery": {
+        "status": "unverified",
+        "evidence": []
+      }
+    },
+    {
+      "taskId": "controlled-no-target-wrong-result",
+      "category": "controlled_variant",
+      "description": "受控 App 无目标及错误结果页，核验拒绝错误动作及错误放行。",
+      "difficult": true,
+      "safetySentinel": true,
+      "discovery": {
+        "status": "unverified",
+        "evidence": []
+      }
+    }
+  ],
+  "experiments": [
+    {
+      "experimentId": "primary",
+      "role": "primary",
+      "rounds": 10,
+      "taskIds": [
+        "alipay-reminder-settings",
+        "alipay-topup-region",
+        "alipay-scan-exit",
+        "alipay-general-settings",
+        "controlled-icon",
+        "controlled-similar-layout",
+        "controlled-overlay",
+        "controlled-no-target-wrong-result"
+      ],
+      "arms": [
+        "rules",
+        "same-model-text",
+        "same-model-vision"
+      ]
+    },
+    {
+      "experimentId": "artemis",
+      "role": "artemis_comparison",
+      "rounds": 10,
+      "taskIds": [
+        "alipay-reminder-settings",
+        "alipay-topup-region",
+        "alipay-scan-exit",
+        "alipay-general-settings"
+      ],
+      "arms": [
+        "artemis-flash",
+        "artemis-pro"
+      ],
+      "description": "google/artemis Agent 框架的 Flash/Pro 运行模式，只比较 SoloPi 与两个模式共同支持且已核验的真实支付宝流程。模式不是模型型号，后端模型与执行器 revision 分别冻结。"
+    }
+  ],
+  "rowContract": {
+    "required": [
+      "experimentId",
+      "taskId",
+      "arm",
+      "round",
+      "protocolSha256",
+      "armIdentity",
+      "runnerIdentity",
+      "status",
+      "elapsedMs",
+      "wrongActions",
+      "falsePasses",
+      "manualInterventions",
+      "phase"
+    ],
+    "modelArmsAlsoRequire": [
+      "modelIdentity"
+    ],
+    "taskRefusalsAlsoRequire": [
+      "status=not_tested",
+      "failureClass=task",
+      "outcomeObserved=true",
+      "evidence (nonempty independent verification references)"
+    ],
+    "sentinelsAlsoRequire": [
+      "sentinelChecked=true",
+      "evidence (nonempty reference list)"
+    ],
+    "optional": [
+      "temperature",
+      "usage",
+      "cost",
+      "stageTimingsMs",
+      "evidence",
+      "failureClass",
+      "outcomeObserved",
+      "automaticTestFixture"
+    ],
+    "status": [
+      "passed",
+      "failed",
+      "not_tested"
+    ],
+    "infrastructure": "基础设施失败写 not_tested，账本 incomplete；普通断言失败写 failed。独立核验的任务级拒答仍保留 not_tested，计 evaluated，固定分母但不计 passed。",
+    "fixtures": "仅自动测试使用 automaticTestFixture=true；任何 fixture 均不能支持真实收益。"
+  }
+}

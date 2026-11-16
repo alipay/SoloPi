@@ -20,6 +20,8 @@ def main():
     parser.add_argument("--java-home", type=Path, default=os.environ.get("JAVA_HOME"))
     parser.add_argument("--build-tools", default="35.0.0")
     parser.add_argument("--platform", default="android-35")
+    parser.add_argument("--reply-fixture", action="store_true",
+                        help="Build an isolated notification fixture alongside the demo")
     parser.add_argument("--output", type=Path, default=Path(tempfile.gettempdir()) /
                         ("solopi-fastpath-demo-" + str(os.getuid())))
     args = parser.parse_args()
@@ -43,7 +45,7 @@ def main():
             parser.error("Required local build tool does not exist: " + str(path))
     env = dict(os.environ, JAVA_HOME=str(java_home))
     env["PATH"] = str(java_home / "bin") + os.pathsep + env.get("PATH", "")
-    apk = out / "fastpath-demo.apk"
+    apk = out / ("fastpath-reply-fixture.apk" if args.reply_fixture else "fastpath-demo.apk")
     keystore = out / "demo-debug.keystore"
     # A persistent local debug certificate permits adb install -r across builds.
     # This key and the APK stay outside version control; they are not release assets.
@@ -64,7 +66,8 @@ def main():
         unsigned = work / "unsigned.apk"
         aligned = work / "aligned.apk"
         run([build_tools / "aapt2", "compile", "--dir", source / "res", "-o", resources], env)
-        run([build_tools / "aapt2", "link", "-o", unsigned, "-I", android_jar,
+        rename_args = ["--rename-manifest-package", "com.solopi.fastpath.replyfixture"] if args.reply_fixture else []
+        run([build_tools / "aapt2", "link", "-o", unsigned, "-I", android_jar, *rename_args,
              "--manifest", source / "AndroidManifest.xml", "--java", generated,
              "--min-sdk-version", "23", "--target-sdk-version", "35", resources], env)
         sources = sorted((source / "src").rglob("*.java")) + sorted(generated.rglob("*.java"))
@@ -82,7 +85,8 @@ def main():
              "--key-pass", "pass:android", "--out", apk, aligned], env)
         run([build_tools / "apksigner", "verify", "--verbose", apk], env)
     print("APK: " + str(apk))
-    print("Activity: com.solopi.fastpath.demo/.MainActivity")
+    package = "com.solopi.fastpath.replyfixture" if args.reply_fixture else "com.solopi.fastpath.demo"
+    print("Activity: " + package + "/com.solopi.fastpath.demo.MainActivity")
 
 
 if __name__ == "__main__":

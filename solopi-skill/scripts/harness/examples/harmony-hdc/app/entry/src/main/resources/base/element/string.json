@@ -1,0 +1,12 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "SoloPi HarmonyOS Harness controlled application"
+    },
+    {
+      "name": "entry_ability_desc",
+      "value": "SoloPi Harness entry ability"
+    }
+  ]
+}

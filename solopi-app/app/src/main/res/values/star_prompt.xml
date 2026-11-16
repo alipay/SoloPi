@@ -1,0 +1,10 @@
+<resources>
+    <string name="star_prompt_title">Enjoying SoloPi?</string>
+    <string name="star_prompt_message">If SoloPi makes testing easier, give it a Star and help this open-source project grow.</string>
+    <string name="star_prompt_optional">Always optional. All features remain available.</string>
+    <string name="star_prompt_open">Star on GitHub</string>
+    <string name="star_prompt_done">Already starred / Don’t remind me</string>
+    <string name="star_prompt_later">Maybe later</string>
+    <string name="star_prompt_about">Support SoloPi on GitHub ☆</string>
+    <string name="star_prompt_copied">Could not open a browser. The GitHub URL was copied.</string>
+</resources>

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "platform": "harmony_next",
+  "targetAppId": "com.alipay.solopi.harnessdemo",
+  "id": "harmony-counter",
+  "title": "Increment native counter",
+  "acceptanceCriteria": [
+    {"id": "AC-1", "text": "Counter shows one"}
+  ],
+  "scenarios": [
+    {
+      "id": "increment", "title": "Reset then increment",
+      "acceptanceCriteria": ["AC-1"],
+      "steps": [
+        {"id": "reset", "type": "operation", "action": {
+          "type": "click", "selector": {"id": "reset_button"}
+        }},
+        {"id": "tap-increment", "type": "operation", "action": {
+          "type": "click", "selector": {"id": "increment_button"}
+        }}
+      ],
+      "checkpoints": [
+        {"id": "counter-one", "afterStep": "tap-increment", "oracle": {
+          "type": "ui", "selector": {"id": "counter_value"},
+          "field": "text", "operator": "equals", "expected": "1"
+        }}
+      ]
+    }
+  ]
+}

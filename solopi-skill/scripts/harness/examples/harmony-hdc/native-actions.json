@@ -1,0 +1,125 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "platform": "harmony_next",
+  "targetAppId": "com.alipay.solopi.harnessdemo",
+  "id": "native-actions",
+  "title": "Input, scroll and return",
+  "acceptanceCriteria": [
+    {
+      "id": "AC-1",
+      "text": "Frozen text is read back, scrolling reveals Row 5, and Back returns home"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "native-actions",
+      "title": "Input, scroll and return",
+      "acceptanceCriteria": [
+        "AC-1"
+      ],
+      "steps": [
+        {
+          "id": "open",
+          "type": "operation",
+          "action": {
+            "type": "click",
+            "selector": {
+              "id": "open_details_button"
+            }
+          }
+        },
+        {
+          "id": "input",
+          "type": "operation",
+          "action": {
+            "type": "input",
+            "selector": {
+              "id": "test_input"
+            },
+            "text": "SoloPi"
+          }
+        },
+        {
+          "id": "hide-keyboard",
+          "type": "operation",
+          "action": {
+            "type": "back"
+          }
+        },
+        {
+          "id": "scroll",
+          "type": "operation",
+          "action": {
+            "type": "scroll",
+            "selector": {
+              "id": "test_list"
+            },
+            "direction": "up",
+            "distance": 80
+          }
+        },
+        {
+          "id": "return-home",
+          "type": "operation",
+          "action": {
+            "type": "back"
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "input-readback",
+          "afterStep": "input",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "id": "test_input"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "SoloPi"
+          }
+        },
+        {
+          "id": "still-details",
+          "afterStep": "hide-keyboard",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "id": "details_title"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "Harness Details"
+          }
+        },
+        {
+          "id": "row-revealed",
+          "afterStep": "scroll",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "id": "row_5"
+            },
+            "field": "visible",
+            "operator": "equals",
+            "expected": "True"
+          }
+        },
+        {
+          "id": "home-restored",
+          "afterStep": "return-home",
+          "oracle": {
+            "type": "ui",
+            "selector": {
+              "id": "home_title"
+            },
+            "field": "text",
+            "operator": "equals",
+            "expected": "SoloPi Harness Home"
+          }
+        }
+      ]
+    }
+  ]
+}

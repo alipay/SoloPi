@@ -36,6 +36,7 @@ public class AgentSessionStateTest {
     public void strategyIsFrozenPerSessionAndLegacyConstructorRemainsCompatible() {
         AgentSessionState.StartResult first = start("owner-token-a-12345", config());
         assertEquals("legacy", first.session.get("settleStrategy"));
+        assertEquals("main", first.session.get("screenMode"));
         state.end(first.sessionId, first.ownerToken);
         AgentSessionState.Config optimized = new AgentSessionState.Config(10, 60_000L, 5_000L,
                 3, 3, "event-stable-v1");
@@ -47,12 +48,156 @@ public class AgentSessionStateTest {
     }
 
     @Test
+    public void screenModeAndTargetAreFrozenForEachSession() {
+        AgentSessionState.Config virtual = new AgentSessionState.Config(10, 60000L, 5000L, 3, 3,
+                "legacy", "full-page", "virtual", "com.example.demo");
+        AgentSessionState.StartResult started = start("owner-token-a-12345", virtual);
+        assertEquals("virtual", started.session.get("screenMode"));
+        assertEquals("com.example.demo", started.session.get("targetPackage"));
+        assertEquals("virtual", state.workConfig(started.sessionId, started.ownerToken).value.screenMode);
+        state.end(started.sessionId, started.ownerToken);
+        AgentSessionState.StartResult main = start("owner-token-b-12345", config());
+        assertEquals("main", main.session.get("screenMode"));
+        assertNull(main.session.get("targetPackage"));
+    }
+
+    @Test
+    public void virtualSessionRejectsInvalidPackageAndUnknownMode() {
+        for (String pkg : new String[] {null, "", "com.example;id", "bad"}) {
+            try {
+                new AgentSessionState.Config(10, 60000L, 5000L, 3, 3, "legacy", "full-page", "virtual", pkg);
+                org.junit.Assert.fail("invalid target accepted");
+            } catch (IllegalArgumentException expected) { }
+        }
+        try {
+            new AgentSessionState.Config(10, 60000L, 5000L, 3, 3, "legacy", "full-page", "other", null);
+            org.junit.Assert.fail("unknown mode accepted");
+        } catch (IllegalArgumentException expected) { }
+    }
+
+    @Test
+    public void failedResourceCleanupKeepsLeaseVisibleAndBlocksNewSession() {
+        AgentSessionState.StartResult started = start("owner-token-a-12345", config());
+        lease.failRelease = true;
+        assertTrue(state.end(started.sessionId, started.ownerToken).success);
+        assertEquals(Boolean.TRUE, state.snapshot().get("leaseHeld"));
+        assertFalse(state.start("owner-token-b-12345", config()).success);
+        assertFalse(state.retryCleanup(started.sessionId, "wrong-owner-token").success);
+        assertEquals("cleanup_unconfirmed", state.retryCleanup(started.sessionId, started.ownerToken).errorCode);
+        lease.failRelease = false;
+        assertTrue(state.retryCleanup(started.sessionId, started.ownerToken).success);
+        assertTrue(state.retryCleanup(started.sessionId, started.ownerToken).success);
+        assertEquals(Boolean.FALSE, state.snapshot().get("leaseHeld"));
+        assertTrue(state.start("owner-token-b-12345", config()).success);
+    }
+
+    @Test
+    public void cleanupCannotTerminateLiveSession() {
+        AgentSessionState.StartResult started = start("owner-token-a-12345", config());
+        assertEquals("session_not_terminal", state.retryCleanup(started.sessionId, started.ownerToken).errorCode);
+        assertTrue(lease.isOwnedBy(started.leaseOwner));
+    }
+
+    @Test public void rejectedVirtualActionIsRecordedOnceForTheOwner() {
+        AgentSessionState.StartResult started = start("owner-token-a-12345", config());
+        AgentSessionState.Action action = AgentSessionState.Action.of("home", Collections.<String, Object>emptyMap());
+        AgentSessionState.Receipt wrong = state.rejectAction(started.sessionId, "owner-token-b-12345",
+                "step-1", "obs-1", action, "virtual_action_unsupported", "unsupported");
+        assertEquals("owner_mismatch", wrong.errorCode);
+        assertFalse(state.receipt(started.sessionId, started.ownerToken, "step-1").success);
+        AgentSessionState.Receipt rejected = state.rejectAction(started.sessionId, started.ownerToken,
+                "step-1", "obs-1", action, "virtual_action_unsupported", "unsupported");
+        assertEquals("virtual_action_unsupported", rejected.errorCode);
+        assertEquals(rejected.errorCode, state.rejectAction(started.sessionId, started.ownerToken,
+                "step-1", "obs-1", action, "other", "other").errorCode);
+        assertEquals(0, state.getAcceptedStepCount());
+    }
+
+    @Test public void fixturePreDispatchRejectionRequiresOwnerAndPreservesExistingReceipt() {
+        AgentSessionState.StartResult started = start("owner-token-a-12345", config());
+        String step = "fixture-0123456789abcdef0123456789abcdef";
+        state.rejectFixturePipeBeforeDispatch(started.sessionId, "wrong-owner", step, "obs-1");
+        assertFalse(state.receipt(started.sessionId, started.ownerToken, step).success);
+        state.rejectFixturePipeBeforeDispatch(started.sessionId, started.ownerToken, "arbitrary-step", "obs-1");
+        assertFalse(state.receipt(started.sessionId, started.ownerToken, "arbitrary-step").success);
+        state.rejectFixturePipeBeforeDispatch(started.sessionId, started.ownerToken, step, "obs-1");
+        AgentSessionState.Receipt rejected = state.receipt(started.sessionId, started.ownerToken, step).value;
+        assertEquals("rejected", rejected.status);
+        assertEquals("fixture_pre_dispatch_rejected", rejected.errorCode);
+        assertEquals("obs-1", rejected.observationId);
+        state.rejectAction(started.sessionId, started.ownerToken, step, "obs-2",
+                AgentSessionState.Action.of("home", Collections.<String, Object>emptyMap()), "other", "other");
+        assertEquals("fixture_pre_dispatch_rejected", state.receipt(started.sessionId, started.ownerToken, step).value.errorCode);
+        assertEquals(0, state.getAcceptedStepCount());
+    }
+
+    @Test public void fixturePreDispatchRejectionDoesNotReplaceAcceptedAction() {
+        AgentSessionState.StartResult started = start("owner-token-a-12345", config());
+        AgentSessionState.Observation observation = state.recordObservation(started.sessionId, started.ownerToken,
+                "tree", Collections.<String, Object>emptyMap()).value;
+        String step = "fixture-0123456789abcdef0123456789abcdef";
+        AgentSessionState.BeginResult accepted = state.beginAction(started.sessionId, started.ownerToken, step,
+                observation.observationId, "tree", AgentSessionState.Action.of("wait", singleton("durationMs", 100L)));
+        assertTrue(accepted.accepted);
+        state.rejectFixturePipeBeforeDispatch(started.sessionId, started.ownerToken, step, observation.observationId);
+        assertEquals("accepted", state.receipt(started.sessionId, started.ownerToken, step).value.status);
+        assertNotNull(state.finishAction(accepted.generation, step, true, null,
+                AgentSessionState.ObservationInput.of("new-tree", Collections.<String, Object>emptyMap())));
+        assertEquals("succeeded", state.receipt(started.sessionId, started.ownerToken, step).value.status);
+    }
+
+    @Test public void verifiedVisualProgressPreventsFalseNoProgressFailure() {
+        AgentSessionState.Config bounds = new AgentSessionState.Config(10, 60000L, 5000L, 3, 1);
+        AgentSessionState.StartResult started = start("owner-token-a-12345", bounds);
+        AgentSessionState.Observation first = state.recordObservation(started.sessionId, started.ownerToken,
+                "same-tree", singleton("progressSignature", "before")).value;
+        AgentSessionState.BeginResult action = state.beginAction(started.sessionId, started.ownerToken, "step-1",
+                first.observationId, "same-tree", AgentSessionState.Action.of("wait", singleton("durationMs", 100L)));
+        assertTrue(action.accepted);
+        state.finishAction(action.generation, "step-1", true, null,
+                AgentSessionState.ObservationInput.of("same-tree", singleton("progressSignature", "after")));
+        assertEquals(AgentSessionState.STATE_ACTIVE, state.snapshot().get("state"));
+    }
+
+    @Test public void dispatchEvidenceOnlyBelongsToAcceptedCurrentAction() {
+        AgentSessionState.StartResult started = start("owner-token-a-12345", config());
+        AgentSessionState.Observation observed = state.recordObservation(started.sessionId, started.ownerToken,
+                "same-tree", Collections.<String, Object>emptyMap()).value;
+        AgentSessionState.BeginResult action = state.beginAction(started.sessionId, started.ownerToken, "step-1",
+                observed.observationId, "same-tree", AgentSessionState.Action.of("wait", singleton("durationMs", 100L)));
+        assertTrue(action.accepted);
+        state.noteVirtualDispatch(action.generation + 1, "step-1");
+        state.noteVirtualDispatch(action.generation, "unknown-step");
+        state.noteVirtualDispatch(action.generation, "step-1");
+        List<Map<String, Object>> events = state.timeline(started.sessionId, started.ownerToken).value;
+        int count = 0;
+        for (Map<String, Object> event : events) if ("action_dispatched".equals(event.get("type"))) count++;
+        assertEquals(1, count);
+    }
+
+    @Test
+    public void lostVirtualLeaseDoesNotDiscardUnconfirmedCleanupIdentity() {
+        AgentSessionState.Config virtual = new AgentSessionState.Config(10, 60000L, 5000L, 3, 3,
+                "legacy", "full-page", "virtual", "com.example.demo");
+        AgentSessionState.StartResult started = start("owner-token-a-12345", virtual);
+        assertTrue(lease.release(started.leaseOwner));
+        assertEquals("lease_lost", state.workConfig(started.sessionId, started.ownerToken).errorCode);
+        assertEquals(Boolean.FALSE, state.snapshot().get("leaseHeld"));
+        assertEquals(Boolean.TRUE, state.snapshot().get("cleanupPending"));
+        assertEquals("cleanup_unconfirmed", state.start("owner-token-b-12345", config()).errorCode);
+        assertEquals("lease_lost", state.retryCleanup(started.sessionId, started.ownerToken).errorCode);
+    }
+
+    @Test
     public void uiWorkGuardRejectsWrongOwnerCancellationLeaseLossAndExpiry() {
         AgentSessionState.StartResult first = start("owner-token-a-12345", config());
         assertFalse(state.workConfig(first.sessionId, "owner-token-b-12345").success);
         assertTrue(state.workConfig(first.sessionId, first.ownerToken).success);
+        assertFalse(state.workLeaseOwner(first.sessionId, "owner-token-b-12345").success);
+        assertEquals(first.leaseOwner, state.workLeaseOwner(first.sessionId, first.ownerToken).value);
         state.cancel(first.sessionId, first.ownerToken);
         assertFalse(state.workConfig(first.sessionId, first.ownerToken).success);
+        assertFalse(state.workLeaseOwner(first.sessionId, first.ownerToken).success);
 
         AgentSessionState.StartResult second = start("owner-token-b-12345", config());
         lease.release(second.leaseOwner);
@@ -466,6 +611,7 @@ public class AgentSessionStateTest {
 
     private static final class FakeLease implements AgentSessionState.Lease {
         private String owner;
+        private boolean failRelease;
 
         @Override
         public boolean acquire(String requestedOwner) {
@@ -483,7 +629,7 @@ public class AgentSessionStateTest {
 
         @Override
         public boolean release(String expectedOwner) {
-            if (!isOwnedBy(expectedOwner)) {
+            if (failRelease || !isOwnedBy(expectedOwner)) {
                 return false;
             }
             owner = null;

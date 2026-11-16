@@ -44,7 +44,9 @@ public class SchemeHttpListener implements HttpServer.OnUrlRequestListener {
             return null;
         }
 
-        LogUtil.i(TAG, "Begin to process scheme, action: %s, params: %s", action, params);
+        // Code security: Agent parameters can include session capabilities and private content.
+        if ("agent".equals(action)) LogUtil.i(TAG, "Begin to process Agent scheme");
+        else LogUtil.i(TAG, "Begin to process scheme, action: %s, params: %s", action, params);
 
         try {
             SortedList<SchemeActionResolver> resolverList = resolvers.get(action);
@@ -72,6 +74,10 @@ public class SchemeHttpListener implements HttpServer.OnUrlRequestListener {
                 }
             }
         } catch (Throwable t) {
+            if ("agent".equals(action)) {
+                LogUtil.e(TAG, "Agent scheme processing failed");
+                return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", "{\"success\": false, \"error\": \"Agent processing failed\"}");
+            }
             LogUtil.e(TAG, "handle resolver failed: " + t.getMessage(), t);
             return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", "{\"success\": false, \"error\": \"Process failed, throw exception: " + t.getMessage() + "\"}");
         }

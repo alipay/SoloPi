@@ -41,6 +41,13 @@ import fastpath
 import goalpath
 import timing
 import workflows
+import native_runtime
+import ios_wda
+import harmony_hdc
+import native_recording
+import native_decision
+import native_report
+import visual_observation
 
 
 DEFAULT_PACKAGE = "com.alipay.hulu"
@@ -1248,6 +1255,10 @@ class AdbClient:
 
 
 class HarnessHttpClient:
+    # NanoHTTPD expires idle sockets after five seconds. Model inference can
+    # exceed that; retire our socket before sending the next distinct request.
+    KEEP_ALIVE_IDLE_TIMEOUT_SECONDS = 4.0
+
     def __init__(self, port: int, timeout: float = 5, connection_mode: str = "close") -> None:
         if type(port) is not int or not 1 <= port <= 65535:
             raise CliError("无效的本地转发端口", 3)
@@ -1258,16 +1269,20 @@ class HarnessHttpClient:
         self.timeout = timeout
         self.connection_mode = connection_mode
         self._connection: Optional[http.client.HTTPConnection] = None
+        self._last_response_at: Optional[float] = None
         self._counts = {"requests": 0, "connectionsOpened": 0, "reusedRequests": 0,
-                        "serverClosedConnections": 0, "failures": 0}
+                        "serverClosedConnections": 0, "idleExpiredConnections": 0,
+                        "failures": 0}
 
     def close(self) -> None:
         connection, self._connection = self._connection, None
+        self._last_response_at = None
         if connection is not None:
             connection.close()
 
     def summary(self) -> Dict[str, Any]:
-        return {"mode": self.connection_mode, **self._counts, "automaticRetries": 0}
+        return {"mode": self.connection_mode, **self._counts, "automaticRetries": 0,
+                "keepAliveIdleTimeoutSeconds": self.KEEP_ALIVE_IDLE_TIMEOUT_SECONDS}
 
     @timing.measured("transport.http_roundtrip")
     def get(
@@ -1283,6 +1298,10 @@ class HarnessHttpClient:
         effective_timeout = self.timeout if timeout is None else timeout
         self._counts["requests"] += 1
         try:
+            if (self._connection is not None and self._last_response_at is not None
+                    and time.monotonic() - self._last_response_at >= self.KEEP_ALIVE_IDLE_TIMEOUT_SECONDS):
+                self.close()
+                self._counts["idleExpiredConnections"] += 1
             # Code security: connect only to the exact loopback ADB forward;
             # HTTPConnection uses neither environment proxies nor redirects.
             if self._connection is None:
@@ -1309,6 +1328,8 @@ class HarnessHttpClient:
                 raise CliError("SoloPi 返回的 JSON 无效", 4) from exc
             if not isinstance(parsed, dict):
                 raise CliError("SoloPi 返回的响应不是对象", 4)
+            if self._connection is not None:
+                self._last_response_at = time.monotonic()
             return parsed
         except BaseException as exc:
             self._counts["failures"] += 1
@@ -1366,6 +1387,7 @@ class HarnessSession:
                 except CliError:
                     response = {}
                 if response.get("success"):
+                    self.validate_control_identity(response)
                     self.capabilities = copy.deepcopy(response)
                     # Reuse the running service without recreating the target Activity.
                     return self
@@ -1398,6 +1420,14 @@ class HarnessSession:
                 self.adb.remove_forward(self.local_port)
                 self.local_port = None
 
+    def validate_control_identity(self, response: Mapping[str, Any]) -> None:
+        # A different installed SoloPi copy may own the selected TCP port.
+        # Never combine its observations/receipts with this package's commands.
+        if (response.get("packageName") is not None
+                and response["packageName"] != self.package_name):
+            raise CliError("控制端口由另一个 SoloPi 应用占用，请选择该应用的准确端口", 4,
+                           errorCode="control_identity_mismatch")
+
     def wait_until_available(self) -> None:
         assert self.http is not None
         deadline = time.monotonic() + self.startup_timeout
@@ -1406,9 +1436,12 @@ class HarnessSession:
             try:
                 response = self.http.get("harness", {"type": "capabilities"})
                 if response.get("success"):
+                    self.validate_control_identity(response)
                     self.capabilities = copy.deepcopy(response)
                     return
             except CliError as exc:
+                if exc.details.get("errorCode") == "control_identity_mismatch":
+                    raise
                 last_error = exc
             timing.poll_sleep(0.4, time.sleep)
         raise CliError(
@@ -1451,6 +1484,20 @@ class HarnessSession:
         if params:
             query_params.update(params)
         return self.resolver_get("agent", query_params, timeout=timeout)
+
+    def notification_status(
+        self, session_id: str, owner_token: str, timeout: Optional[float] = None
+    ) -> Dict[str, Any]:
+        # Code security: the device checks both session capabilities and the active lease.
+        response = self.agent(
+            "notification-status", {"sessionId": session_id, "ownerToken": owner_token}, timeout
+        )
+        status = response.get("notification") if response.get("success") is True else None
+        if (not isinstance(status, dict) or type(status.get("available")) is not bool
+                or not isinstance(status.get("epoch"), str) or not status["epoch"]
+                or type(status.get("sequence")) is not int or status["sequence"] < 0):
+            raise CliError("Notification status is unavailable or invalid", 4)
+        return {key: status[key] for key in ("available", "epoch", "sequence")}
 
     def adb_connect_status(
         self,
@@ -5334,6 +5381,62 @@ def command_config_get(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[s
     return result, 0 if result["success"] else 2
 
 
+def command_control_port_set(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], int]:
+    """Recover an idle installed copy from a port collision, through ADB only."""
+    if isinstance(args.port, bool) or not isinstance(args.port, int) or not 1024 <= args.port <= 65535:
+        raise CliError("控制端口必须在 1024～65535 之间", 3)
+    if getattr(args, "confirm_idle", False) is not True:
+        raise CliError("端口迁移会中断该应用的连接；确认其无活动任务后添加 --confirm-idle", 3)
+    package = validate_android_package(args.package)
+    if adb.control_package != package:
+        raise CliError("ADB 控制目标与指定应用不一致", 3, errorCode="control_identity_mismatch")
+    adb.connect()
+    if not adb.package_installed(args.package):
+        raise CliError("所选设备未安装准确的 SoloPi 应用", 3)
+    # Code security: the destination is the explicit, DUMP-protected Activity of
+    # args.package. No HTTP mutation, arbitrary Scheme, host, or setting key.
+    request_id = "control-port-" + uuid.uuid4().hex
+    try:
+        adb.invoke_scheme("config", {"action": "control-port-set", "port": str(args.port),
+                                     "confirmIdle": "true", "requestId": request_id})
+    except CliError as exc:
+        raise CliError("端口迁移传输未确认，请按 requestId 查询回执；不要自动重放迁移", 4,
+                       errorCode="control_port_unconfirmed", requestId=request_id,
+                       package=package, devicePort=args.port) from exc
+    migrated = copy.copy(args)
+    migrated.device_port = args.port
+    try:
+        with session_from_args(migrated, adb, preserve_foreground=True) as session:
+            identity = session.capabilities or {}
+            if identity.get("packageName") != package or identity.get("devicePort") != args.port:
+                raise CliError("端口变更后无法确认准确应用身份", 4, errorCode="control_port_unconfirmed")
+            receipt = session.resolver_get("config", {"action": "control-port-receipt", "requestId": request_id})
+            # Code security: a matching setting alone could predate this request.
+            # Require the exact package, port, random request and terminal receipt.
+            if (not isinstance(receipt, dict) or receipt.get("requestId") != request_id
+                    or receipt.get("action") != "control-port-set"
+                    or receipt.get("packageName") != package
+                    or receipt.get("devicePort") != args.port
+                    or receipt.get("success") is not True or receipt.get("state") != "completed"
+                    or receipt.get("terminal") is not True):
+                raise CliError("端口迁移没有匹配本次请求的成功回执", 4, errorCode="control_port_unconfirmed")
+            result = session.config("get", "KEY_CONTROL_PORT")
+            validate_config_response(result, "KEY_CONTROL_PORT")
+            if (result.get("success") is not True or result["config"].get("type") != "int"
+                    or type(result["config"].get("value")) is not int
+                    or result["config"].get("value") != args.port):
+                raise CliError("端口变更未得到应用配置确认", 4, errorCode="control_port_unconfirmed")
+    except CliError as exc:
+        # No replay: a timeout may follow a successful migration. The request ID
+        # remains available for a read-only receipt query on the actual port.
+        raise CliError("端口迁移未确认，请按 requestId 查询准确应用回执；不要自动重放迁移", 4,
+                       errorCode="control_port_unconfirmed", requestId=request_id,
+                       package=package, devicePort=args.port,
+                       causeCode=exc.details.get("errorCode")) from exc
+    return {"success": True, "package": args.package, "devicePort": args.port,
+            "requestId": request_id, "receipt": receipt, "config": result["config"]}, 0
+
+
 def command_config_set(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], int]:
     key = require_non_blank(args.key, "配置键")
     if not isinstance(args.value, str):
@@ -8017,6 +8120,18 @@ def command_agent_session_start(
     args: argparse.Namespace,
     adb: AdbClient,
 ) -> tuple[Dict[str, Any], int]:
+    screen_mode = getattr(args, "screen_mode", "main")
+    target_package = getattr(args, "target_package", None)
+    if screen_mode not in {"main", "virtual"}:
+        raise CliError("无效的屏幕模式", 3)
+    if screen_mode == "virtual":
+        if not target_package:
+            raise CliError("副屏会话需要 --target-package", 3)
+        target_package = validate_android_package(target_package)
+        if getattr(args, "action_validation_strategy", None) not in {None, "full-page"}:
+            raise CliError("副屏会话仅支持 full-page 页面校验", 3)
+    elif target_package:
+        raise CliError("--target-package 仅适用于副屏会话", 3)
     bounds = (
         ("maxSteps", args.max_steps, 1, 200),
         ("maxDurationMs", args.max_duration_ms, 1000, 1_800_000),
@@ -8044,6 +8159,14 @@ def command_agent_session_start(
     }
     session_id: Optional[str] = None
     with session_from_args(args, adb, preserve_foreground=True) as session:
+        if screen_mode == "virtual":
+            capabilities = session.agent("capabilities", {})
+            if (not isinstance(capabilities, dict) or capabilities.get("success") is not True
+                    or not isinstance(capabilities.get("screenModes"), list)
+                    or "virtual" not in capabilities["screenModes"]
+                    or capabilities.get("virtualExperimental") is not True):
+                raise CliError("设备没有声明实验性副屏能力，已停止；不会切换到主屏", 3)
+            mutation.update(screenMode="virtual", targetPackage=target_package)
         settle_selection = agent_settle_selection(args, session)
         validation_selection = agent_action_validation_selection(args, session)
         if (getattr(args, "settle_strategy", None) is not None
@@ -8078,6 +8201,14 @@ def command_agent_session_start(
                         return last_status, 2
                     observation = last_status.get("observation")
                     if session_id and isinstance(observation, dict):
+                        if screen_mode == "virtual" and (
+                            agent_session.get("screenMode") != "virtual"
+                            or agent_session.get("targetPackage") != target_package
+                            or observation.get("screenMode") != "virtual"
+                            or not isinstance(observation.get("displayId"), int)
+                            or observation["displayId"] <= 0
+                        ):
+                            raise CliError("设备没有确认所请求的副屏会话，已停止", 4)
                         actual_strategy = agent_session.get("settleStrategy")
                         # Old APKs omit the field and retain legacy behavior. An
                         # explicitly selected new algorithm must be acknowledged.
@@ -8120,9 +8251,9 @@ def command_agent_observe(
     session_id = validate_agent_id(args.session_id, "sessionId")
     owner_token = validate_agent_owner_token(args.owner_token)
     with session_from_args(args, adb, preserve_foreground=True) as session:
-        result = session.agent(
-            "observe", {"sessionId": session_id, "ownerToken": owner_token}
-        )
+        params = {"sessionId": session_id, "ownerToken": owner_token}
+        if getattr(args, "skip_virtual_ocr", False): params["skipVirtualOcr"] = "true"
+        result = session.agent("observe", params)
     return result, 0 if result.get("success") else 2
 
 
@@ -8267,6 +8398,7 @@ def command_agent_mutation(
         "resume": {"active"},
         "end": {"ended"},
         "cancel": {"cancelled"},
+        "cleanup": AGENT_TERMINAL_STATES,
     }[mutation_type]
     with session_from_args(args, adb, preserve_foreground=True) as session:
         invoke_agent_mutation(adb, params, timeout=args.ack_timeout)
@@ -8284,10 +8416,24 @@ def command_agent_mutation(
             if isinstance(agent_session, dict):
                 state = agent_session.get("state")
                 if state in expected_states:
+                    lease_held = agent_session.get("leaseHeld")
+                    cleanup_pending = agent_session.get("cleanupPending")
+                    if mutation_type in {"end", "cancel", "cleanup"} and (
+                        lease_held is True or cleanup_pending is True or
+                        (mutation_type == "cleanup" and (lease_held is not False or cleanup_pending is not False))
+                    ):
+                        timing.poll_sleep(args.poll_interval, time.sleep)
+                        continue
                     return last_status, 0
                 if state in AGENT_TERMINAL_STATES:
                     return last_status, 2
             timing.poll_sleep(args.poll_interval, time.sleep)
+    if mutation_type in {"end", "cancel", "cleanup"} and isinstance(last_status, dict):
+        agent_session = last_status.get("session")
+        if isinstance(agent_session, dict) and agent_session.get("state") in expected_states:
+            return {"success": False, "errorCode": "cleanup_unconfirmed",
+                    "error": "会话已结束，但设备资源清理或租约释放尚未确认",
+                    "session": agent_session}, 2
     raise CliError(
         "动态 Agent 操作 %s 未被确认" % mutation_type,
         124,
@@ -8302,6 +8448,28 @@ def command_screenshot(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[s
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_bytes(adb.screenshot())
     return {"success": True, "screenshot": str(target.resolve())}, 0
+
+
+def command_ocr_screen(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], int]:
+    """Read the current screen locally; OCR is never an executable node."""
+    if sys.platform != "darwin":
+        raise CliError("本地 OCR 当前仅支持 macOS Vision", 3, errorCode="ocr_unsupported_platform")
+    adb.connect()
+    image = adb.screenshot()
+    source = SCRIPT_DIRECTORY / "resources" / "ocr" / "vision.swift"
+    try:
+        process = subprocess.run(["/usr/bin/swift", str(source)], input=image, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, timeout=90, check=False)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise CliError("本地 OCR 不可用或超时", 4, errorCode="ocr_unavailable") from exc
+    if process.returncode:
+        raise CliError("本地 OCR 识别失败", 4, errorCode="ocr_failed")
+    try:
+        result = json.loads(process.stdout)
+    except (ValueError, UnicodeDecodeError) as exc:
+        raise CliError("本地 OCR 返回格式错误", 4, errorCode="ocr_invalid_output") from exc
+    return {"success": True, "source": "macos-vision", "screenSha256": hashlib.sha256(image).hexdigest(),
+            "coordinateSpace": "normalized_top_left", "actionable": False, **result}, 0
 
 
 def command_logs(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], int]:
@@ -8945,6 +9113,7 @@ class SoloPiVerificationAdapter:
                     "evidence": evidence,
                 }
             transcript["events"].append({"type": "target_app_restored"})
+            dynamic_deadline = time.monotonic() + int(dynamic_step["budget"]["maxDurationMs"]) / 1000
             started, start_exit = command_agent_session_start(start_args, self.adb)
             if isinstance(started.get("settle"), dict):
                 self.settle_sessions.append({"scenarioId": scenario["id"],
@@ -8992,7 +9161,44 @@ class SoloPiVerificationAdapter:
             # the last proposal slot. This extra check may never dispatch an act.
             decision_checks = max_decisions + (1 if self.decision_provider is not None else 0)
             for index in range(decision_checks):
+                if time.monotonic() >= dynamic_deadline:
+                    final_reason = "agent_duration_budget_exhausted"
+                    break
                 if self.decision_provider is not None:
+                    visual = None
+                    if getattr(self.decision_provider, "requires_visual_observation", False) is True:
+                        def observe_visual():
+                            refresh_args = copy.copy(self.args)
+                            refresh_args.session_id = session_id
+                            refresh_args.owner_token = owner_token
+                            with timing.span("visual.observe"):
+                                refreshed, code = command_agent_query(refresh_args, self.adb, "observe")
+                            fresh_session = refreshed.get("session", {})
+                            if (code or refreshed.get("success") is not True
+                                    or fresh_session.get("sessionId") != session_id
+                                    or not isinstance(refreshed.get("observation"), dict)):
+                                raise visual_observation.VisualObservationError("visual_observe_failed")
+                            return refreshed["observation"]
+
+                        def screenshot_visual(path):
+                            with timing.span("visual.screenshot"):
+                                path.write_bytes(self.adb.screenshot())
+
+                        try:
+                            with timing.span("visual.capture"):
+                                observation, visual = visual_observation.capture_visual_observation(
+                                    observation, observe_visual, screenshot_visual,
+                                    segment_root, scenario["targetAppPackage"])
+                            transcript["events"].append({"type": "visual_observation", "visual": visual,
+                                "observation": sanitize_verification_evidence(observation)})
+                            evidence.append(verification_file_evidence(Path(visual["imagePath"]), "decision_screenshot"))
+                        except visual_observation.VisualObservationError as exc:
+                            final_reason = exc.code
+                            transcript["events"].append({"type": "visual_capture_failed", "errorCode": exc.code})
+                            break
+                    if time.monotonic() >= dynamic_deadline:
+                        final_reason = "agent_duration_budget_exhausted"
+                        break
                     with timing.span("provider.decide"):
                         decision = self.decision_provider.decide(
                             {
@@ -9005,10 +9211,25 @@ class SoloPiVerificationAdapter:
                                 "observation": sanitize_verification_evidence(observation),
                                 "history": copy.deepcopy(action_history[-8:]),
                                 "completedActionCount": accepted_actions,
+                                "terminalOnly": index >= max_decisions or accepted_actions >= max_actions,
+                                **({"visual": visual} if visual is not None else {}),
                             }
                         )
                     if not isinstance(decision, dict):
                         raise CliError("DecisionProvider 必须返回对象", 3)
+                    if visual is not None and isinstance(self.decision_provider, goalpath.GoalPathDecisionProvider):
+                        request = self.decision_provider.last_request_snapshot()
+                        if request is not None:
+                            request_path = segment_root / ("decision-%03d-request.json" % index)
+                            item = self._write_json_evidence(request_path, request, "decision_request")
+                            request_path.chmod(0o600)
+                            evidence.append(item)
+                            decision.setdefault("modelReceipt", {})["requestEvidence"] = item
+                    if time.monotonic() >= dynamic_deadline:
+                        final_reason = "agent_duration_budget_exhausted"
+                        transcript["events"].append({"type": "duration_budget_exhausted",
+                            "decision": sanitize_verification_evidence(decision)})
+                        break
                 else:
                     if index >= len(decisions):
                         break
@@ -9078,14 +9299,24 @@ class SoloPiVerificationAdapter:
                 act_args.distance = action.get("distance")
                 act_args.action_timeout = self.args.agent_action_timeout
                 act_args.poll_interval = self.args.poll_interval
-                acted, act_exit = command_agent_act(act_args, self.adb)
-                transcript["events"].append(
-                    {
-                        "type": "act",
-                        "decision": sanitize_verification_evidence(decision),
-                        "result": sanitize_verification_evidence(acted, owner_token),
-                    }
+                # Persist the proposal before dispatch: an ADB mutation may be
+                # applied even when its HTTP receipt cannot be retrieved. Only
+                # an actual result below can confirm what happened on device.
+                act_event = {
+                    "type": "act",
+                    "state": "submitted",
+                    "stepId": act_args.step_id,
+                    "observationId": act_args.observation_id,
+                    "decision": sanitize_verification_evidence(decision, owner_token),
+                }
+                transcript["events"].append(act_event)
+                self._write_json_evidence(
+                    segment_root / "agent-transcript.json", transcript,
+                    "agent_transcript", owner_token,
                 )
+                acted, act_exit = command_agent_act(act_args, self.adb)
+                act_event["state"] = "result_received"
+                act_event["result"] = sanitize_verification_evidence(acted, owner_token)
                 receipt = acted.get("receipt")
                 if isinstance(receipt, dict) and receipt.get("status") in AGENT_RECEIPT_TERMINAL_STATES:
                     # Code security: bounded semantic history omits owner tokens,
@@ -9316,6 +9547,85 @@ def command_verify_validate(
     return {"success": True, **result}, 0
 
 
+def command_native_doctor(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], int]:
+    del adb
+    result = native_runtime.native_doctor(args.platform)
+    if getattr(args, "ios_device", None):
+        if args.platform != "ios":
+            raise CliError("--ios-device 仅用于 iOS 诊断", 3)
+        try:
+            driver = ios_wda.IOSPhysicalWDADriver(args.ios_device, args.wda_port)
+        except native_runtime.NativeExecutionError as exc:
+            raise CliError("iOS 真机参数无效", 3, errorCode=exc.code) from exc
+        ready = driver.health().get("ready") is True
+        result["physicalDevice"] = {"deviceId": driver.device_id, "driverReady": ready}
+        result["driverReady"] = ready
+        result["runnerReady"] = ready
+        result["availableActions"] = sorted(driver.supported_actions) if ready else []
+        if ready:
+            result["missing"] = [item for item in result["missing"]
+                                 if item not in {"signed_test_runner", "native_driver"}]
+    return {"success": True, **result}, 0
+
+
+def command_native_record(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], int]:
+    del adb
+    driver = None
+    recorder = None
+    try:
+        driver = native_runtime.create_driver(args.platform, args.device, args.device_kind, args.wda_port)
+        session = native_runtime.NativeSession(driver, args.app_id)
+        session.ensure_ready()
+        recorder = native_recording.NativeRecorder(session, Path(args.artifacts))
+        print(json.dumps({"event": "ready", "sessionId": session.session_id}), flush=True)
+        while True:
+            line = sys.stdin.readline(1024 * 1024 + 1)
+            if not line:
+                raise native_runtime.NativeExecutionError("recording_input_closed")
+            if len(line) > 1024 * 1024:
+                raise native_runtime.NativeExecutionError("recording_command_too_large")
+            command = json.loads(line)
+            if not isinstance(command, dict):
+                raise native_runtime.NativeExecutionError("invalid_recording_command")
+            result = recorder.command(command)
+            print(json.dumps({"event": "result", **result}, ensure_ascii=False), flush=True)
+            if recorder.state == "completed":
+                return {"success": True, **result}, 0
+    except (native_runtime.NativeExecutionError, ValueError, OSError) as exc:
+        raise CliError("原生录制中止", 4, errorCode=getattr(exc, "code", "recording_failed")) from exc
+    finally:
+        if recorder is not None:
+            recorder.interrupt()
+        if driver is not None:
+            driver.close()
+
+
+def command_native_capabilities(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], int]:
+    del adb
+    try:
+        driver = native_runtime.create_driver(args.platform, args.device, args.device_kind, args.wda_port)
+    except native_runtime.NativeExecutionError as exc:
+        raise CliError("原生设备配置无效", 3, errorCode=exc.code) from exc
+    ready = driver.health().get("ready") is True
+    return {"success": ready, "platform": args.platform, "deviceId": args.device,
+            "deviceKind": args.device_kind, "driverReady": ready,
+            "availableActions": sorted(driver.supported_actions) if ready else [],
+            "constraints": {"scrollRequiresSelector": True, "coordinateActions": False,
+                            "input": "empty-field-only" if args.platform == "harmony_next" else "replace",
+                            "back": "foreground-app" if args.platform == "harmony_next" else "identified-navigation-button",
+                            "physicalActionRetry": False}}, 0 if ready else 2
+
+
+def command_native_wda_start(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], int]:
+    del adb
+    try:
+        result = ios_wda.run_usb_wda(args.device, args.wda_port, Path(args.project),
+                                    Path(args.derived_data), Path(args.artifacts))
+    except (native_runtime.NativeExecutionError, OSError) as exc:
+        raise CliError("WDA 启动失败；检查独立日志目录", 4, errorCode=getattr(exc, "code", "wda_start_failed")) from exc
+    return result, 0
+
+
 def model_runtime_from_args(args: argparse.Namespace, adb: AdbClient) -> AndroidExecuTorchRuntime:
     public_key = Path(getattr(args, "public_key", None) or DEFAULT_MODEL_PUBLIC_KEY)
     return AndroidExecuTorchRuntime(adb, public_key)
@@ -9504,6 +9814,9 @@ def decision_provider_from_args(
     args: argparse.Namespace, adb: AdbClient
 ) -> Optional[model_deployment.DecisionProvider]:
     provider_type = getattr(args, "decision_provider", "static")
+    if provider_type != "goalpath" and (getattr(args, "goalpath_visual_input", "none") != "none"
+            or getattr(args, "goalpath_candidate_pool", "semantic") != "semantic"):
+        raise CliError("视觉候选实验需要 --decision-provider goalpath", 3)
     if provider_type == "static":
         return None
     if getattr(args, "agent_decisions", None):
@@ -9524,6 +9837,14 @@ def decision_provider_from_args(
         if getattr(args, "cloud_fallback_endpoint", None):
             raise CliError("GoalPath 使用 --goalpath-mode hybrid 配置路由", 3)
         kwargs: Dict[str, Any] = {"mode": mode}
+        visual_input = getattr(args, "goalpath_visual_input", "none")
+        include_unlabeled = getattr(args, "goalpath_candidate_pool", "semantic") == "expanded"
+        if visual_input != "none":
+            if mode not in {"rules", "llm"}:
+                raise CliError("视觉实验仅支持 rules 或 llm，避免混入 Laya 路由变量", 3)
+            kwargs.update(visual_observations=True, include_unlabeled=include_unlabeled)
+        elif include_unlabeled:
+            raise CliError("expanded 候选池需要显式 --goalpath-visual-input text 或 image", 3)
         laya_predictor = llm_predictor = None
         if mode in {"laya", "hybrid"}:
             backend = getattr(args, "fastpath_backend", "mlx")
@@ -9544,11 +9865,22 @@ def decision_provider_from_args(
                 laya_predictor = model_call(lambda: GoalPathMlxPredictor(Path(model)))
                 kwargs.update(model="laya-multilingual-mlx", model_version=laya_predictor.model_digest)
         if mode in {"llm", "hybrid"}:
-            from goalpath_runtime import LoopbackOpenAIPredictor
-            llm_predictor = model_call(lambda: LoopbackOpenAIPredictor(
-                getattr(args, "goalpath_llm_endpoint", None),
-                getattr(args, "goalpath_llm_model", None),
-                getattr(args, "goalpath_llm_timeout", 30.0)))
+            if visual_input != "none":
+                from goalpath_vision import GoalPathVisionPredictor
+                llm_predictor = model_call(lambda: GoalPathVisionPredictor(
+                    getattr(args, "goalpath_llm_endpoint", None),
+                    getattr(args, "goalpath_llm_model", None),
+                    api_key_env=getattr(args, "goalpath_api_key_env", "OPENAI_API_KEY"),
+                    allowed_hosts=tuple(getattr(args, "goalpath_allowed_host", None) or ["api.openai.com"]),
+                    include_image=visual_input == "image",
+                    timeout=getattr(args, "goalpath_llm_timeout", 30.0),
+                    max_output_tokens=getattr(args, "goalpath_max_output_tokens", 128)))
+            else:
+                from goalpath_runtime import LoopbackOpenAIPredictor
+                llm_predictor = model_call(lambda: LoopbackOpenAIPredictor(
+                    getattr(args, "goalpath_llm_endpoint", None),
+                    getattr(args, "goalpath_llm_model", None),
+                    getattr(args, "goalpath_llm_timeout", 30.0)))
             if mode == "llm":
                 kwargs.update(model=llm_predictor.model, model_version="configured-endpoint")
         provider = model_call(lambda: goalpath.GoalPathDecisionProvider(
@@ -9620,6 +9952,32 @@ def _command_verify_run(
     with timing.span("verification.plan"):
         plan = load_json_file(Path(args.plan))
         verification_call(lambda: verification_engine.validate_verification_plan(plan))
+    if plan.get("platform", "android") != "android" and (
+            getattr(args, "goalpath_visual_input", "none") != "none"
+            or getattr(args, "goalpath_candidate_pool", "semantic") != "semantic"):
+        raise CliError("视觉候选实验当前仅支持 Android 计划", 3)
+    if getattr(args, "native_device", None):
+        if any(getattr(args, name, None) for name in ("ios_simulator", "ios_device", "harmony_emulator")):
+            raise CliError("统一设备参数不能与旧平台设备参数混用", 3)
+        try:
+            driver = native_runtime.create_driver(plan.get("platform"), args.native_device,
+                                                  args.device_kind, args.wda_port)
+        except native_runtime.NativeExecutionError as exc:
+            raise CliError("原生设备绑定无效", 3, errorCode=exc.code) from exc
+        return _command_verify_run_native(args, plan, driver)
+    if plan.get("platform", "android") == "ios" and getattr(args, "ios_simulator", None):
+        return _command_verify_run_ios(args, plan)
+    if plan.get("platform", "android") == "ios" and getattr(args, "ios_device", None):
+        return _command_verify_run_ios_device(args, plan)
+    if plan.get("platform", "android") == "harmony_next" and getattr(args, "harmony_emulator", None):
+        return _command_verify_run_harmony(args, plan)
+    if plan.get("platform", "android") != "android":
+        raise CliError(
+            "iOS/HarmonyOS NEXT 计划的真机驱动尚未接入，不能使用 Android verify-run 执行",
+            3,
+            errorCode="native_driver_unavailable",
+            platform=plan["platform"],
+        )
     decision_provider = decision_provider_from_args(args, adb)
     if isinstance(decision_provider, (fastpath.FastPathDecisionProvider, goalpath.GoalPathDecisionProvider)):
         policy = decision_provider.policy_snapshot()
@@ -9718,6 +10076,11 @@ def _command_verify_run(
         report["goalpath"] = goalpath_evidence
     report_path = artifact_root / "report.json"
     write_json_file(report_path, report)
+    visual_html = None
+    if getattr(decision_provider, "requires_visual_observation", False) is True:
+        import visual_report
+        with timing.span("evidence.export"):
+            visual_html = visual_report.export_report(report, artifact_root)
     payload = {
         "success": report["status"] == "passed",
         "status": report["status"],
@@ -9727,7 +10090,100 @@ def _command_verify_run(
         "report": str(report_path.resolve()),
         "events": str(events_path.resolve()),
     }
+    if visual_html is not None:
+        payload["html"] = str(visual_html.resolve())
     return payload, 0 if payload["success"] else 2
+
+
+def _command_verify_run_ios(
+    args: argparse.Namespace, plan: Mapping[str, Any]
+) -> tuple[Dict[str, Any], int]:
+    try:
+        driver = ios_wda.IOSWDADriver(args.ios_simulator, args.wda_port)
+    except native_runtime.NativeExecutionError as exc:
+        raise CliError("iOS 模拟器或 WDA 端口参数无效", 3, errorCode=exc.code) from exc
+    return _command_verify_run_native(args, plan, driver)
+
+
+def _command_verify_run_harmony(
+    args: argparse.Namespace, plan: Mapping[str, Any]
+) -> tuple[Dict[str, Any], int]:
+    try:
+        driver = harmony_hdc.HarmonyHDCDriver(args.harmony_emulator)
+    except native_runtime.NativeExecutionError as exc:
+        raise CliError("鸿蒙模拟器或 HDC 参数无效", 3, errorCode=exc.code) from exc
+    return _command_verify_run_native(args, plan, driver)
+
+
+def _command_verify_run_ios_device(
+    args: argparse.Namespace, plan: Mapping[str, Any]
+) -> tuple[Dict[str, Any], int]:
+    try:
+        driver = ios_wda.IOSPhysicalWDADriver(args.ios_device, args.wda_port)
+    except native_runtime.NativeExecutionError as exc:
+        raise CliError("iOS 真机或 WDA 端口参数无效", 3, errorCode=exc.code) from exc
+    return _command_verify_run_native(args, plan, driver)
+
+
+def _command_verify_run_native(
+    args: argparse.Namespace, plan: Mapping[str, Any], driver: native_runtime.NativeDriver
+) -> tuple[Dict[str, Any], int]:
+    platform = driver.platform
+    scenarios = plan["intent"]["scenarios"]
+    app_ids = {item["targetAppId"] for item in scenarios}
+    if len(app_ids) != 1:
+        raise CliError("原生设备单次运行只能绑定一个测试 App", 3)
+    if getattr(args, "decision_provider", "static") != "static":
+        raise CliError("原生候选决策使用 --native-decision-endpoint；不能复用 Android 专用 provider", 3)
+    provider = None
+    if getattr(args, "native_decision_endpoint", None):
+        if args.agent_decisions:
+            raise CliError("原生实时决策不能与静态决策文件混用", 3)
+        try:
+            provider = native_decision.NativeCandidateProvider(args.native_decision_endpoint)
+        except native_runtime.NativeExecutionError as exc:
+            raise CliError("原生决策端点无效", 3, errorCode=exc.code) from exc
+    decisions = load_json_file(Path(args.agent_decisions)) if args.agent_decisions else {}
+    if not isinstance(decisions, dict):
+        raise CliError("Agent 决策文件必须包含对象", 3)
+    artifact_root = Path(args.artifacts)
+    if artifact_root.exists():
+        raise CliError("验证证据目录已存在", 3, artifacts=str(artifact_root))
+    if driver.health().get("ready") is not True:
+        raise CliError("所选原生设备驱动未就绪", 4, errorCode="native_driver_unavailable")
+    artifact_root.mkdir(parents=True)
+    plan_path = artifact_root / "plan.json"
+    write_json_file(plan_path, plan)
+    session = native_runtime.NativeSession(driver, next(iter(app_ids)), getattr(args, "native_action_guard", None))
+    adapter = native_runtime.NativeVerificationAdapter(session, artifact_root, provider)
+    driver_cleanup = "succeeded"
+    try:
+        report = verification_call(
+            lambda: verification_engine.execute_verification_plan(plan, adapter, decisions)
+        )
+    finally:
+        try:
+            driver.close()
+        except native_runtime.NativeExecutionError:
+            driver_cleanup = "failed"
+    report["platform"] = platform
+    report["deviceId"] = driver.device_id
+    report["deviceKind"] = ("physical" if isinstance(driver, ios_wda.IOSPhysicalWDADriver)
+                            else "simulator")
+    report["driverCleanup"] = driver_cleanup
+    report["artifacts"] = {"plan": str(plan_path.resolve())}
+    report_path = artifact_root / "report.json"
+    write_json_file(report_path, report)
+    html_path = native_report.export_report(report, artifact_root)
+    return {
+        "success": report["status"] == "passed",
+        "status": report["status"],
+        "reportId": report["reportId"],
+        "planFingerprint": report["planFingerprint"],
+        "outcomeFingerprint": report["outcomeFingerprint"],
+        "report": str(report_path.resolve()),
+        "htmlReport": str(html_path),
+    }, 0 if report["status"] == "passed" else 2
 
 
 def _write_timing_json_atomic(target: Path, payload: Any) -> None:
@@ -9816,14 +10272,27 @@ def command_managed_device_register(
     args: argparse.Namespace, adb: AdbClient
 ) -> tuple[Dict[str, Any], int]:
     del adb
+    platform = getattr(args, "platform", "android")
+    labels = parse_cli_labels(args.label)
+    if platform != "android":
+        kind = getattr(args, "device_kind", None)
+        if kind is None:
+            raise CliError("原生设备注册必须指定 --device-kind", 3)
+        try:
+            driver = native_runtime.create_driver(platform, args.device_serial, kind, args.wda_port)
+        except native_runtime.NativeExecutionError as exc:
+            raise CliError("原生设备配置无效", 3, errorCode=exc.code) from exc
+        if driver.health().get("ready") is not True:
+            raise CliError("原生驱动未就绪，不能注册为可用设备", 4)
+        labels.update({"native-kind": kind, "wda-port": str(args.wda_port)})
     result = managed_call(
         lambda: managed_store(args).register_device(
             args.device_id,
             args.device_serial,
-            "android",
+            platform,
             args.api_level,
             args.capability,
-            parse_cli_labels(args.label),
+            labels,
             args.health,
         )
     )
@@ -9883,6 +10352,13 @@ def command_managed_submit(
     plan = load_json_file(Path(args.plan))
     verification_call(lambda: verification_engine.validate_verification_plan(plan))
     matrix = load_json_file(Path(args.matrix))
+    managed_call(lambda: managed_execution.normalize_matrix(matrix))
+    platform = plan.get("platform", "android")
+    for target in matrix:
+        selector = target.setdefault("selector", {})
+        if selector.get("platform", platform) != platform:
+            raise CliError("设备矩阵平台必须与验证计划一致", 3)
+        selector["platform"] = platform
     decisions = (
         load_json_file(Path(args.agent_decisions)) if args.agent_decisions else {}
     )
@@ -9893,7 +10369,7 @@ def command_managed_submit(
             idempotency_key=args.idempotency_key,
             owner_token=args.owner_token,
             decisions=decisions,
-            max_retries=args.max_retries,
+            max_retries=(args.max_retries if platform == "android" else 0),
             lease_duration_ms=args.lease_duration_ms,
             retention_ms=args.retention_ms,
         )
@@ -10022,13 +10498,34 @@ def run_managed_assignment(
             if assignment["decisions"]:
                 write_json_file(decisions_path, assignment["decisions"])
                 decisions = decisions_path
-            worker_adb = AdbClient(
-                args.adb,
-                assignment["serial"],
-                control_package=args.package,
-            )
+            run_args = _managed_verification_args(args, plan_path, decisions, artifact_root)
+            platform = assignment["plan"].get("platform", "android")
+            worker_adb = None
+            if platform == "android":
+                worker_adb = AdbClient(args.adb, assignment["serial"], control_package=args.package)
+            else:
+                device = store.get_device(assignment["deviceId"])
+                if device["platform"] != platform or device["serial"] != assignment["serial"]:
+                    raise CliError("托管设备平台或身份不匹配", 3)
+                run_args.native_device = assignment["serial"]
+                run_args.device_kind = device["labels"].get("native-kind")
+                try:
+                    run_args.wda_port = int(device["labels"].get("wda-port", "8100"))
+                except ValueError as exc:
+                    raise CliError("托管 WDA 端口无效", 3) from exc
+                # Code security: fence every observation/physical action against the exact lease.
+                # On cancellation or lost generation, stop before sending the next gesture.
+                def native_guard() -> None:
+                    if lease_lost:
+                        raise native_runtime.NativeExecutionError("managed_lease_lost")
+                    try:
+                        store.heartbeat(assignment)
+                    except managed_execution.ManagedExecutionError as exc:
+                        lease_lost.append(exc)
+                        raise native_runtime.NativeExecutionError("managed_lease_lost") from exc
+                run_args.native_action_guard = native_guard
             payload, _ = command_verify_run(
-                _managed_verification_args(args, plan_path, decisions, artifact_root),
+                run_args,
                 worker_adb,
             )
         stop_heartbeat.set()
@@ -10071,7 +10568,8 @@ def run_managed_assignment(
         category = "transport_error" if isinstance(exc, OSError) or getattr(exc, "exit_code", 3) == 4 else "worker_error"
         try:
             failure = store.fail_assignment(
-                assignment, category, retryable=category == "transport_error"
+                assignment, category, retryable=(category == "transport_error"
+                                                 and assignment["plan"].get("platform", "android") == "android")
             )
         except managed_execution.ManagedExecutionError as stale:
             raise CliError(str(stale), 4, errorCode=stale.code, **stale.details) from exc
@@ -10195,6 +10693,11 @@ def build_parser() -> argparse.ArgumentParser:
     config_set_parser.add_argument("--value", required=True, help="待写入的字符串值")
     config_set_parser.add_argument("--ack-timeout", type=positive_float, default=15, help="写入确认超时秒数")
     config_set_parser.add_argument("--poll-interval", type=positive_float, default=0.2, help="状态轮询间隔秒数")
+
+    control_port_parser = subparsers.add_parser(
+        "control-port-set", help="在准确 SoloPi 包空闲时迁移其控制端口，并重连核对应用身份")
+    control_port_parser.add_argument("--port", required=True, type=int, help="新的本机控制端口，1024～65535")
+    control_port_parser.add_argument("--confirm-idle", action="store_true", help="确认准确包没有活动录制、回放或 Agent 任务")
 
     result_parser = subparsers.add_parser("result", help="查询最近一次终态回放结果")
     result_parser.add_argument("--run-id", help="仅接受匹配该 runId 的结果")
@@ -10661,6 +11164,9 @@ def build_parser() -> argparse.ArgumentParser:
     agent_start_parser.add_argument(
         "--owner-token", help="可选 URL-safe 会话所有权令牌；省略时安全生成"
     )
+    agent_start_parser.add_argument("--screen-mode", choices=("main", "virtual"), default="main",
+                                    help="主屏或实验性 Android 副屏；副屏需要专用测试构建")
+    agent_start_parser.add_argument("--target-package", help="实验性副屏启动的 Android 包名")
     agent_start_parser.add_argument("--max-steps", type=positive_int, default=50, help="最大接受动作数，最高 200")
     agent_start_parser.add_argument("--max-duration-ms", type=positive_int, default=300000, help="会话总时长毫秒，最高 1800000")
     agent_start_parser.add_argument("--idle-timeout-ms", type=positive_int, default=30000, help="空闲超时毫秒，最高 300000")
@@ -10681,6 +11187,8 @@ def build_parser() -> argparse.ArgumentParser:
         "agent-observe", help="为准确会话生成新 UI 观察"
     )
     add_agent_identity(agent_observe_parser)
+    agent_observe_parser.add_argument("--skip-virtual-ocr", action="store_true",
+                                      help="副屏观察不运行 OCR（仅用于不依赖 OCR 的固定验收）")
 
     agent_act_parser = subparsers.add_parser(
         "agent-act", help="基于准确 observationId 执行一个类型化动作"
@@ -10707,6 +11215,7 @@ def build_parser() -> argparse.ArgumentParser:
         ("agent-resume", "恢复已暂停的动态 Agent 会话"),
         ("agent-end", "正常结束动态 Agent 会话并释放租约"),
         ("agent-cancel", "取消动态 Agent 会话并释放租约"),
+        ("agent-cleanup", "重试终态会话的设备资源清理"),
     ):
         command_parser = subparsers.add_parser(command_name, help=command_help)
         add_agent_identity(command_parser)
@@ -10825,6 +11334,38 @@ def build_parser() -> argparse.ArgumentParser:
         "verify-run", help="按 deterministic、dynamic 或 hybrid 路由执行验证计划"
     )
     verify_run_parser.add_argument("--plan", required=True, help="已通过静态校验的验证计划 JSON")
+    ios_target = verify_run_parser.add_mutually_exclusive_group()
+    ios_target.add_argument("--ios-simulator", help="明确绑定一台已启动的 iOS Simulator UDID")
+    ios_target.add_argument("--ios-device", help="明确绑定一台 USB 连接的 iPhone UDID")
+    ios_target.add_argument("--native-device", help="统一原生设备 ID；平台取自冻结计划")
+    verify_run_parser.add_argument("--device-kind", choices=("physical", "simulator"), default="simulator")
+    verify_run_parser.add_argument("--native-decision-endpoint", help="本机 HTTP 候选决策服务；只接受 127.0.0.1")
+    verify_run_parser.add_argument("--harmony-emulator", help="明确绑定一台已启动的 HarmonyOS NEXT 模拟器 HDC ID")
+    verify_run_parser.add_argument("--wda-port", type=positive_int, default=8100,
+                                   help="本机 WebDriverAgent 监听端口，默认 8100")
+    native_doctor_parser = subparsers.add_parser(
+        "native-doctor", help="检查 iOS/NEXT 发现工具、设备和测试运行器状态"
+    )
+    native_doctor_parser.add_argument("--platform", required=True, choices=("ios", "harmony_next"))
+    native_doctor_parser.add_argument("--ios-device", help="检查指定 iPhone 的 USB WDA 转发")
+    native_doctor_parser.add_argument("--wda-port", type=positive_int, default=8100)
+    def add_native_target(command_parser: argparse.ArgumentParser) -> None:
+        command_parser.add_argument("--platform", required=True, choices=("ios", "harmony_next"))
+        command_parser.add_argument("--device", required=True)
+        command_parser.add_argument("--device-kind", required=True, choices=("physical", "simulator"))
+        command_parser.add_argument("--wda-port", type=positive_int, default=8100)
+    native_record_parser = subparsers.add_parser("native-record", help="电脑端 JSONL 控制并录制原生步骤与固定断言")
+    add_native_target(native_record_parser)
+    native_capabilities_parser = subparsers.add_parser("native-capabilities", help="报告指定原生设备的实时能力与限制")
+    add_native_target(native_capabilities_parser)
+    native_wda_parser = subparsers.add_parser("native-wda-start", help="前台托管已签名 WDA 和仅本机 USB 转发；Ctrl-C 停止本次创建的进程")
+    native_wda_parser.add_argument("--device", required=True)
+    native_wda_parser.add_argument("--wda-port", type=positive_int, default=18100)
+    native_wda_parser.add_argument("--project", required=True, help="可信 WDA xcodeproj 目录")
+    native_wda_parser.add_argument("--derived-data", required=True, help="已完成真机签名构建的 DerivedData")
+    native_wda_parser.add_argument("--artifacts", required=True, help="新的日志目录")
+    native_record_parser.add_argument("--app-id", required=True)
+    native_record_parser.add_argument("--artifacts", required=True)
     verify_run_parser.add_argument("--artifacts", required=True, help="必须不存在的统一证据目录")
     verify_run_parser.add_argument("--segment-screenshots", action="store_true",
                                    help="每个执行段后导出原始整屏 PNG；额外耗时单独记录")
@@ -10864,9 +11405,17 @@ def build_parser() -> argparse.ArgumentParser:
     verify_run_parser.add_argument("--fastpath-model-version", help="HTTP 模型版本标签；MLX 自动计算模型摘要")
     verify_run_parser.add_argument("--fastpath-endpoint", help="仅允许本机 IP 的 Laya /v1/systemone 地址")
     verify_run_parser.add_argument("--goalpath-policy", help="冻结的目标驱动候选、输入和停止条件策略 JSON")
+    verify_run_parser.add_argument("--goalpath-visual-input", choices=("none", "text", "image"), default="none",
+                                   help="视觉对照：none 保留原入口；text/image 均采集关联截图，仅 image 发送图片")
+    verify_run_parser.add_argument("--goalpath-candidate-pool", choices=("semantic", "expanded"), default="semantic",
+                                   help="expanded 增加真实可点击但无语义标签的节点，独立于图文对照")
+    verify_run_parser.add_argument("--goalpath-api-key-env", default="OPENAI_API_KEY", help="视觉兼容 API 凭据的环境变量名")
+    verify_run_parser.add_argument("--goalpath-max-output-tokens", type=int, default=128,
+                                   help="视觉对照的输出 token 预算，1～4096；同模型 text/image 必须一致")
+    verify_run_parser.add_argument("--goalpath-allowed-host", action="append", help="显式批准的 HTTPS 模型域名；默认 api.openai.com")
     verify_run_parser.add_argument("--goalpath-mode", choices=("rules", "laya", "llm", "hybrid"), default="rules",
                                    help="GoalPath 默认规则；小模型、生成式模型或混合路由需显式选择，Laya 使用 --fastpath-* 配置")
-    verify_run_parser.add_argument("--goalpath-llm-endpoint", help="显式 loopback OpenAI-compatible 地址，可经 SSH 转发")
+    verify_run_parser.add_argument("--goalpath-llm-endpoint", help="OpenAI-compatible 地址；视觉实验支持显式允许的 HTTPS 服务或 loopback")
     verify_run_parser.add_argument("--goalpath-llm-model", help="生成式服务的实际模型 ID")
     verify_run_parser.add_argument("--goalpath-llm-timeout", type=positive_float, default=30.0,
                                    help="单次生成式选择请求超时秒数，最高 120")
@@ -10911,6 +11460,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     add_managed_database(managed_register_parser)
     managed_register_parser.add_argument("--device-id", required=True, help="稳定设备 ID")
+    managed_register_parser.add_argument("--platform", choices=("android", "ios", "harmony_next"), default="android")
+    managed_register_parser.add_argument("--device-kind", choices=("physical", "simulator"))
+    managed_register_parser.add_argument("--wda-port", type=positive_int, default=8100)
     managed_register_parser.add_argument("--device-serial", required=True, help="准确 ADB serial")
     managed_register_parser.add_argument("--api-level", type=positive_int, required=True, help="Android API 级别")
     managed_register_parser.add_argument("--capability", action="append", default=[], help="可重复的能力标签")
@@ -10976,6 +11528,7 @@ def build_parser() -> argparse.ArgumentParser:
     def add_managed_worker_options(command_parser: argparse.ArgumentParser) -> None:
         add_managed_database(command_parser)
         command_parser.add_argument("--worker-id", required=True, help="稳定 worker ID")
+        command_parser.add_argument("--native-decision-endpoint", help="原生任务本机候选决策端点；静态任务省略")
         command_parser.add_argument("--artifacts-root", required=True, help="证据父目录")
         command_parser.add_argument(
             "--restart-app", action=argparse.BooleanOptionalAction, default=None,
@@ -11071,6 +11624,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     screenshot_parser = subparsers.add_parser("screenshot", help="截取当前设备屏幕")
     screenshot_parser.add_argument("--output", required=True, help="PNG 输出文件")
+    subparsers.add_parser("ocr-screen", help="本机 OCR 只读识别当前屏幕（macOS）")
     logs_parser = subparsers.add_parser("logs", help="采集当前设备 logcat")
     logs_parser.add_argument("--output", required=True, help="日志输出文件")
     return parser
@@ -11099,6 +11653,8 @@ def dispatch(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], 
         return command_config_list(args, adb)
     if args.command == "config-get":
         return command_config_get(args, adb)
+    if args.command == "control-port-set":
+        return command_control_port_set(args, adb)
     if args.command == "config-set":
         return command_config_set(args, adb)
     if args.command == "result":
@@ -11203,7 +11759,7 @@ def dispatch(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], 
         return command_agent_query(args, adb, "status")
     if args.command == "agent-timeline":
         return command_agent_query(args, adb, "timeline")
-    if args.command in {"agent-pause", "agent-resume", "agent-end", "agent-cancel"}:
+    if args.command in {"agent-pause", "agent-resume", "agent-end", "agent-cancel", "agent-cleanup"}:
         return command_agent_mutation(args, adb, args.command[len("agent-"):])
     if args.command == "verify-normalize":
         return command_verify_normalize(args, adb)
@@ -11211,6 +11767,14 @@ def dispatch(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], 
         return command_verify_compile(args, adb)
     if args.command == "verify-validate":
         return command_verify_validate(args, adb)
+    if args.command == "native-doctor":
+        return command_native_doctor(args, adb)
+    if args.command == "native-record":
+        return command_native_record(args, adb)
+    if args.command == "native-capabilities":
+        return command_native_capabilities(args, adb)
+    if args.command == "native-wda-start":
+        return command_native_wda_start(args, adb)
     if args.command == "verify-run":
         return command_verify_run(args, adb)
     if args.command == "model-verify":
@@ -11267,6 +11831,8 @@ def dispatch(args: argparse.Namespace, adb: AdbClient) -> tuple[Dict[str, Any], 
         return command_cancel(args, adb)
     if args.command == "screenshot":
         return command_screenshot(args, adb)
+    if args.command == "ocr-screen":
+        return command_ocr_screen(args, adb)
     if args.command == "logs":
         return command_logs(args, adb)
     raise CliError("不支持的命令：%s" % args.command, 3)

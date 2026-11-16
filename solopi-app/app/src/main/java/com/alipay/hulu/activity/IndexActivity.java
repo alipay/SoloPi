@@ -90,6 +90,12 @@ public class IndexActivity extends BaseActivity {
     private GridView mGridView;
 
     @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        com.alipay.hulu.util.StarPromptController.userInteracted();
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_index);
@@ -113,6 +119,7 @@ public class IndexActivity extends BaseActivity {
 
                         @Override
                         public void onNewUpdate(final GithubReleaseBean release) {
+                            com.alipay.hulu.util.StarPromptController.suppressForProcess();
                             Parser parser = Parser.builder().build();
                             Node document = parser.parse(release.getBody());
 
@@ -279,6 +286,7 @@ public class IndexActivity extends BaseActivity {
                 for (final File errorLog: children) {
                     final long time = errorLog.lastModified();
                     if (time > lastCheckTime) {
+                        com.alipay.hulu.util.StarPromptController.suppressForProcess();
                         // 只上传一条，根据修改时间查看
                         LauncherApplication.getInstance().showDialog(
                                 IndexActivity.this,

@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "Host-side control plane for the SoloPi AI Harness"
 requires-python = ">=3.9"
 
+[project.optional-dependencies]
+vision = ["Pillow>=10.4,<13"]
+
 [project.scripts]
 solopi-ai = "solopi_harness.solopi_ai:main"
 

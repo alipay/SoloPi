@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "solopi.ai.requirement/v1",
+  "platform": "ios",
+  "targetAppId": "com.facebook.IntegrationApp",
+  "id": "ios-integration-input",
+  "title": "Input text on alerts screen",
+  "acceptanceCriteria": [
+    {"id": "AC-1", "text": "Text field contains the frozen input"}
+  ],
+  "scenarios": [
+    {
+      "id": "enter-text",
+      "title": "Open alerts and enter text",
+      "acceptanceCriteria": ["AC-1"],
+      "steps": [
+        {
+          "id": "tap-alerts",
+          "type": "operation",
+          "action": {"type": "click", "selector": {"accessibilityId": "Alerts"}}
+        },
+        {
+          "id": "enter-text",
+          "type": "operation",
+          "action": {
+            "type": "input",
+            "selector": {"accessibilityId": "textField"},
+            "text": "SoloPi"
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "input-visible",
+          "afterStep": "enter-text",
+          "oracle": {
+            "type": "ui",
+            "selector": {"accessibilityId": "textField"},
+            "field": "text",
+            "operator": "equals",
+            "expected": "SoloPi"
+          }
+        }
+      ]
+    }
+  ]
+}

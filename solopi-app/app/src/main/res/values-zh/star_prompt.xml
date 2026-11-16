@@ -1,0 +1,10 @@
+<resources>
+    <string name="star_prompt_title">给 SoloPi 一点鼓励</string>
+    <string name="star_prompt_message">如果 SoloPi 让测试更轻松，\n欢迎点个 Star，支持开源项目持续成长。</string>
+    <string name="star_prompt_optional">完全自愿，不影响任何功能使用</string>
+    <string name="star_prompt_open">去 GitHub 点 Star</string>
+    <string name="star_prompt_done">已 Star / 不再提醒</string>
+    <string name="star_prompt_later">稍后再说</string>
+    <string name="star_prompt_about">给 SoloPi 点个 Star ☆</string>
+    <string name="star_prompt_copied">未能打开浏览器，已复制 GitHub 地址。</string>
+</resources>

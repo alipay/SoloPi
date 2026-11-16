@@ -15,7 +15,11 @@ scripts/solopi-ai --pretty <命令>
 
 安装时完整复制本 Skill 目录，保留脚本执行权限；运行需要 Python 3.9+ 和设备操作所需的 ADB。Laya 权重、虚拟环境、APK 和真机证据不随 Skill 打包。独立安装与本地验证见[内置工作流](references/workflows.md#安装与目录)。
 
-全局参数必须放在子命令前。多台设备在线时，每次调用都必须添加 `--serial <adb-serial>`。
+iOS 与 NEXT 原生任务先读取[原生回归使用指南](references/native-regression-guide.md)：使用 `native-doctor`、`native-capabilities`、`native-record` 和 `verify-run --native-device`；iPhone 的 USB WDA、NEXT 模拟器的输入/滚动/返回、电脑端 JSONL 录制回放及基础 Worker 已有设备样本。NEXT 真机和真实断线接管矩阵尚未验收。不要把这些基础链路表述为 Android 全能力对齐。
+
+用户需要验证视觉增益、无文字节点或同模型图文对照时，读取[视觉回归使用与评测](references/vision-regression.md)。Android `verify-run --decision-provider goalpath` 提供可选 `--goalpath-visual-input text|image` 和独立候选池开关；默认仍为规则。先明确实际 API 服务、模型和允许发送的截图范围，凭据只取环境变量；当前会话 GPT 不能冒充可调用 API。180 样本及 240+80 轮是待冻结执行的实验量，自动测试和草稿清单不能当作视觉收益。
+
+全局参数必须放在子命令前。多台 Android 设备在线时，每次 Android 调用都必须添加 `--serial <adb-serial>`。原生平台使用准确的 `--native-device` / `--device`，不得把 iOS 或 NEXT 计划路由到 ADB。
 
 ## 快速使用
 
@@ -78,6 +82,8 @@ scripts/solopi-ai --pretty workflow-report --artifacts <上一步返回的artifa
 6. 超时或中断后，先查询准确标识对应的状态，再停止属于本任务的活动会话；未确认清理完成前不得启动同类新会话。
 
 SoloPi 设备状态变更经受 `android.permission.DUMP` 保护的显式 ADB Activity 发送；普通 App、网页深链和 ADB 转发后的 HTTP 不能进入该变更通道。HTTP 只用于查询。`adb-connect` 只调用 SoloPi 既有的内部连接流程，不接受 RSA 弹窗、不修改内部地址、不执行 `adb tcpip 5555`。`startup-time` 只允许内部固定的 Launcher 解析和 `am start -W` 命令。CLI 不提供任意 Shell、任意 Scheme、任意 HTTP 或 Wi-Fi 直连设备端口的后门。
+
+同一手机安装多个 SoloPi 调试副本时，控制服务声明的包名必须匹配 `--package`；端口指向其他副本会返回 `control_identity_mismatch`。准确副本已初始化且无活动任务时，可使用 `--package <准确包名> control-port-set --port <新端口> --confirm-idle` 恢复端口冲突，之后每次带上 `--device-port <新端口>`。该命令只修改固定控制端口，经 ADB 提交后重连核对包名、端口和配置回执；超时表示未确认，不能当作成功。首次免责声明和辅助功能仍由用户在手机上完成。
 
 ## 动态 Agent
 

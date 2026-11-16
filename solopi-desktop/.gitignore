@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+release/
+.private-local/
+*.local
+resources/git-runtime/
+resources/media-runtime/darwin-*/
+resources/media-runtime/linux-*/
+resources/media-runtime/win32-*/

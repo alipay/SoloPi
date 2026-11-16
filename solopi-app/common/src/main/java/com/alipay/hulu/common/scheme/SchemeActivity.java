@@ -114,12 +114,15 @@ public class SchemeActivity extends Activity {
             return;
         }
 
+        final boolean privateAgent = "agent".equals(action);
         try {
             SortedList<SchemeActionResolver> resolverList = resolvers.get(action);
             Callback<Map<String, Object>> emptyCallback = new Callback<Map<String, Object>>() {
                 @Override
                 public void onResult(Map<String, Object> item) {
-                    LogUtil.i(TAG, "Receive callback: " + item);
+                    // Code security: Agent callbacks can contain page data and session capabilities.
+                    if (privateAgent) LogUtil.i(TAG, "Agent callback received");
+                    else LogUtil.i(TAG, "Receive callback: " + item);
                 }
 
                 @Override
@@ -136,7 +139,8 @@ public class SchemeActivity extends Activity {
                 }
             }
         } catch (Throwable t) {
-            LogUtil.e(TAG, "handle resolver failed: " + t.getMessage(), t);
+            if (privateAgent) LogUtil.e(TAG, "Agent scheme dispatch failed");
+            else LogUtil.e(TAG, "handle resolver failed: " + t.getMessage(), t);
         }
 
         startOrigin();

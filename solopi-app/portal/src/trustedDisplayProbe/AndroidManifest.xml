@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.alipay.hulu.test">
+    <application>
+        <service android:name="com.alipay.hulu.virtualscreen.ForeignUidProbeService"
+            android:exported="true" />
+    </application>
+</manifest>
