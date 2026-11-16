@@ -1,0 +1,85 @@
+<!--
+  ~ Copyright (C) 2015-present, Ant Financial Services Group
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ 	http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<resources>
+    <string name="app_name">SoloPi</string>
+    <string name="permission_default">正在檢查權限</string>
+    <string name="scheme_app_desc">自動化測試工具</string>
+    <string name="android_version_error">此功能需要 Android API %d，目前版本為 %d</string>
+    <string name="request_dynamic_permission">SoloPi 需要以下權限：「%s」，共 %d 項，請點選「確定」授權</string>
+    <string name="record_screen_permission">SoloPi 需要螢幕錄製權限，請點選「確定」允許使用螢幕錄製功能</string>
+    <string name="record_screen_android_version_error">螢幕錄製需要 Android API 21 以上，目前版本為 %d</string>
+    <string name="accessibility_permission">SoloPi 需要使用協助工具，請點選「確定」前往開啟。如果系統顯示已開啟，請先關閉再重新開啟。\n<![CDATA[<b style=\'color:red\'>如果重新開啟協助工具後仍然無效，請強制停止 SoloPi 再重新啟動。</b>]]></string>
+    <string name="adb_permission"><![CDATA[SoloPi 需要無線 ADB，請連接電腦，在終端機執行「adb tcpip 5555」後點選「確定」連線。\n<b style=\'color:red\'>請注意資料安全，開啟無線 ADB 可能導致資料外洩。</b>]]></string>
+    <string name="root_permission">SoloPi 需要 Root 權限，請先授予 Root 權限。</string>
+    <string name="float_permission">SoloPi 需要浮動視窗權限，請點選「確定」前往授權。</string>
+    <string name="permission_list_error">權限要求發生錯誤</string>
+    <string name="device_usage_permission">SoloPi 需要使用情形存取權，請點選「確定」前往開啟。</string>
+    <string name="adb_open_advice">如果出現 ADB 連線提示，請點選「允許」。</string>
+    <string name="open_adb_permission_failed">無線 ADB 連線失敗，請在終端機執行「adb tcpip 5555」後重試。</string>
+    <string name="constant__start_execution">開始執行</string>
+    <string name="cmd__adb_break">無線 ADB 連線中斷，請在終端機執行「adb tcpip 5555」後重試。</string>
+    <string name="constant__sure">好</string>
+    <string name="constant__cancel">取消</string>
+    <string name="constant__global">全域</string>
+    <string name="constant__app">應用程式</string>
+    <string name="constant__confirm">確定</string>
+    <string name="permission__request_permission">權限要求(</string>
+    <string name="constant__no_inform">不再提示</string>
+    <string name="file_choose__create_folder">新增資料夾</string>
+    <string name="device_info__to_string">型號：%s\n品牌：%s\n製造商：%s\n產品名稱：%s\n系統版本：%s\nAPI：%d\nSN：%s\n螢幕實體尺寸：%s\n螢幕顯示尺寸：%s\n螢幕密度：%s\n螢幕 DPI：%d\nIP：%s\nMAC：%s\nRAM：%dGB\nCPU ABI：%s</string>
+    <string name="permission__no_float_permission">未取得浮動視窗權限</string>
+    <string name="permission__i_grant">我已授權</string>
+    <string name="permission__i_know">我知道了</string>
+    <string name="permission__valid_fail">檢查失敗</string>
+    <string name="permission__no_record_info">未取得螢幕錄製資訊</string>
+    <string name="permission__splash">/</string>
+    <string name="permission__right_parentheses">)</string>
+    <string name="file_choose__select_dir">選擇資料夾</string>
+    <string name="permission__open_background_permission">請在 MIUI 中開啟「在背景顯示彈出式視窗」權限</string>
+    <string name="permission__ignore_battery_optimization_permission">請允許「忽略電池最佳化」，讓 ADB、螢幕錄製等服務能正常運作</string>
+    <string name="permission__opened">我已開啟</string>
+    <string name="permission__go_to_open">前往開啟</string>
+    <string name="permission__read_calendar">讀取日曆</string>
+    <string name="permission__write_calendar">寫入日曆</string>
+    <string name="permission__camera">相機</string>
+    <string name="permission__read_contacts">讀取聯絡人</string>
+    <string name="permission__write_contacts">寫入聯絡人</string>
+    <string name="permission__get_accounts">取得帳號</string>
+    <string name="permission__access_fine_location">取得精確位置</string>
+    <string name="permission__access_coarse_location">取得大略位置</string>
+    <string name="permission__record_audio">錄音</string>
+    <string name="permission__read_phone_state">讀取電話狀態</string>
+    <string name="permission__call_phone">撥打電話</string>
+    <string name="permission__read_call_log">讀取通話記錄</string>
+    <string name="permission__write_call_log">寫入通話記錄</string>
+    <string name="permission__add_voicemail">新增語音留言</string>
+    <string name="permission__use_sip">使用 SIP</string>
+    <string name="permission__body_sensors">取得人體感應器資料</string>
+    <string name="permission__send_sms">傳送簡訊</string>
+    <string name="permission__receive_sms">接收簡訊</string>
+    <string name="permission__read_sms">讀取簡訊</string>
+    <string name="permission__receive_wap_push">接收 WAP Push</string>
+    <string name="permission__receive_mms">接收 MMS</string>
+    <string name="permission__read_external_storage">讀取外部儲存空間</string>
+    <string name="permission__write_external_storage">寫入外部儲存空間</string>
+    <string name="permission__restarting_accessibility">正在重新啟動協助工具，請稍候…</string>
+    <string name="permission__kill_app">強制結束應用程式：%s</string>
+    <string name="permission__open_accessibility">正在啟動協助工具服務</string>
+    <string name="permission__try_kil_uiautomator">嘗試結束 UIAutomator 與 Instrument 處理程序</string>
+    <string name="permission__force_stop">強制停止</string>
+    <string name="ime__click_change">點選切換輸入法</string>
+    <string name="ime__click_to_input">點選輸入</string>
+</resources>
