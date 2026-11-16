@@ -1221,6 +1221,8 @@ public abstract class LauncherApplication extends Application {
                 return Locale.CHINA;
             case 2:
                 return Locale.US;
+            case 3:
+                return Locale.TRADITIONAL_CHINESE;
             default:
                 return DEFAULT_LOCALE;
         }

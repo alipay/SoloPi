@@ -116,7 +116,7 @@ public class ConfigSchemeResolver implements SchemeActionResolver {
         add(result, KEY_RECORD_SCREEN_UPLOAD, TYPE_STRING, "响应耗时录屏上传地址", "", false, null, null);
         add(result, KEY_PATCH_URL, TYPE_STRING, "插件源地址", PatchRequest.DEFAULT_PATCH_URL, false, null, null);
         add(result, KEY_OUTPUT_CHARSET, TYPE_STRING, "导出文件编码", "GBK", true, null, null);
-        add(result, KEY_USE_LANGUAGE, TYPE_INT, "界面语言：0 跟随系统，1 中文，2 English", 0, true, 0L, 2L);
+        add(result, KEY_USE_LANGUAGE, TYPE_INT, "界面语言：0 跟随系统，1 简体中文，2 English，3 繁體中文", 0, true, 0L, 3L);
         add(result, KEY_ALLOW_REPLAY_DIFFERENT_APP, TYPE_BOOLEAN, "允许跨应用回放", false, true, null, null);
         add(result, KEY_RESTART_APP_ON_PLAY, TYPE_BOOLEAN, "回放前重启目标应用", true, true, null, null);
         add(result, KEY_DISPLAY_SYSTEM_APP, TYPE_BOOLEAN, "目标应用列表显示系统应用", false, true, null, null);
