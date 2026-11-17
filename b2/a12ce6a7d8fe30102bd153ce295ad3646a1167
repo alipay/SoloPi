@@ -1,0 +1,35 @@
+solopi-desktop/tests/third-party-notices.test.mjs
+  s_aa2d5489c46e4b::t_66b68b8048298e 78-88
+solopi-desktop/PUBLIC_SOURCE_MANIFEST.json
+  s_aa2d5489c46e4b::t_db9fbe7b2f56fd 1967-1971,1977-1981,1987-1991,1997-2006,2012-2016,2064-2065,3774-3775
+solopi-desktop/resources/third-party/npm-supplements/-aws-sdk-credential-provider-http-3.972.86.txt
+  s_aa2d5489c46e4b::t_d190c7839d81ed 1-201
+solopi-desktop/resources/third-party/npm-supplements/-aws-sdk-credential-provider-login-3.972.92.txt
+  s_aa2d5489c46e4b::t_9a908c4f3941bf 1-201
+solopi-desktop/resources/third-party/npm-supplements/-aws-sdk-nested-clients-3.998.3.txt
+  s_aa2d5489c46e4b::t_f059b81ba16a46 1-201
+solopi-desktop/resources/third-party/npm-supplements/-earendil-works-pi-ai-1.5.2.txt
+  s_aa2d5489c46e4b::t_7b1fb26fbd139f 1-21
+solopi-desktop/resources/third-party/npm-supplements/-earendil-works-pi-schema-1.5.2.txt
+  s_aa2d5489c46e4b::t_63bbb1f9d4c0c7 1-21
+solopi-desktop/resources/third-party/npm-supplements/-earendil-works-pi-telemetry-1.5.2.txt
+  s_aa2d5489c46e4b::t_8b6e466cf6b93a 1-21
+solopi-desktop/resources/third-party/npm-supplements/manifest.json
+  s_aa2d5489c46e4b::t_8d452d33a2618a 145-192
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b2a12ce6a7d8fe30102bd153ce295ad3646a1167",
+  "prompts": {},
+  "sessions": {
+    "s_aa2d5489c46e4b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1e59f-35db-7713-b022-05e7683ebe13",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "珏乐 <zhangwenbo.zwb@antgroup.com>"
+    }
+  }
+}
