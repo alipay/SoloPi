@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { verifyFFmpegCompliance } from './ffmpeg-compliance.mjs';
+import { verifyFFmpegDistribution } from './ffmpeg-compliance.mjs';
 import { execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -64,11 +64,11 @@ if (platform === 'darwin' && nativeChecks) {
   }
 }
 
-verifyFFmpegCompliance(runtimeRoot);
+verifyFFmpegDistribution(runtimeRoot);
 
 if (nativeChecks) {
   const encoders = execFileSync(required[1], ['-hide_banner', '-encoders'], { encoding: 'utf8' });
-  for (const codec of ['libopus', 'libspeex']) {
+  for (const codec of ['libopus', 'libspeex', ...(platform === 'linux' ? ['libopenh264'] : [])]) {
     if (!encoders.split(/\s+/).includes(codec)) throw new Error(`Bundled FFmpeg is missing encoder: ${codec}`);
   }
 }

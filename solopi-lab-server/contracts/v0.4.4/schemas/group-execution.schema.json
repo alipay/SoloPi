@@ -1,0 +1,233 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://solopi-lab/contracts/v0.4.4/group-execution.schema.json",
+ "title": "GroupExecutionTypes",
+ "$defs": {
+  "uuidv4": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+  },
+  "clientId": {
+   "type": "string",
+   "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+  },
+  "snapshot": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "groupId",
+    "revision",
+    "members"
+   ],
+   "properties": {
+    "groupId": {
+     "$ref": "#/$defs/uuidv4"
+    },
+    "revision": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "members": {
+     "type": "array",
+     "minItems": 1,
+     "maxItems": 128,
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "deviceId",
+       "role"
+      ],
+      "properties": {
+       "deviceId": {
+        "type": "string",
+        "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+       },
+       "role": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64
+       }
+      }
+     }
+    }
+   },
+   "description": "\u4e0d\u53ef\u53d8\u6267\u884c\u5feb\u7167\uff1a\u7ec4\u5220\u9664\u540e\u4ecd\u81ea\u8bc1\uff1bServer\u53ea\u6295\u5f71\u4e0d\u91cd\u5199"
+  },
+  "receipt": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "taskId",
+    "terminal",
+    "resourcesReleased",
+    "outcome"
+   ],
+   "properties": {
+    "taskId": {
+     "$ref": "#/$defs/uuidv4"
+    },
+    "terminal": {
+     "const": true
+    },
+    "resourcesReleased": {
+     "const": true
+    },
+    "outcome": {
+     "enum": [
+      "succeeded",
+      "failed",
+      "cancelled"
+     ]
+    },
+    "reportRef": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "minLength": 1,
+     "maxLength": 512,
+     "description": "\u53ef\u4fe1native\u7ed3\u679c\u5f15\u7528"
+    }
+   }
+  },
+  "executionProjection": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "groupExecutionId",
+    "clientId",
+    "groupSnapshot",
+    "requestId",
+    "taskId",
+    "phase",
+    "eventSeq"
+   ],
+   "properties": {
+    "groupExecutionId": {
+     "$ref": "#/$defs/uuidv4"
+    },
+    "clientId": {
+     "$ref": "#/$defs/clientId"
+    },
+    "groupSnapshot": {
+     "$ref": "#/$defs/snapshot"
+    },
+    "requestId": {
+     "$ref": "#/$defs/uuidv4",
+     "description": "native\u8bf7\u6c42\u8eab\u4efd\u2014\u2014\u53ea\u7ed1\u5b9a\u4e00\u4e2agroupExecutionId"
+    },
+    "taskId": {
+     "$ref": "#/$defs/uuidv4",
+     "description": "native\u51c6\u5907\u94a9\u5b50\u7684\u771f\u5b9erunner\u4efb\u52a1ID\uff0c\u975eServer\u731c\u6d4bUUID\uff1b\u53ea\u7ed1\u5b9a\u4e00\u4e2agroupExecutionId"
+    },
+    "phase": {
+     "enum": [
+      "prepared",
+      "dispatching",
+      "unknown",
+      "done"
+     ]
+    },
+    "stopRequestedAt": {
+     "type": "string",
+     "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d+)?Z$",
+     "description": "RFC3339 UTC\u2014\u2014\u4ec5\u8bb0\u5f55\u53d6\u6d88\u610f\u56fe\uff0c\u4e0d\u662f\u505c\u6b62/\u91ca\u653e\u8bc1\u660e\uff1b\u4e00\u7ecf\u6301\u4e45\u5316\u4e0d\u5f97\u88ab\u7701\u7565\u53ef\u9009\u5b57\u6bb5\u7684\u540e\u7eed\u4e8b\u4ef6\u64e6\u9664\uff08\u6a21\u5757\u5f3a\u5236\u6301\u4e45\u4e8b\u5b9e\u5c42\uff09"
+    },
+    "receipt": {
+     "$ref": "#/$defs/receipt"
+    },
+    "eventSeq": {
+     "type": "integer",
+     "minimum": 0,
+     "maximum": 9007199254740991,
+     "description": "Desktop\u672c\u5730\u7ec4\u4e8b\u4ef6\u6e38\u6807\u2014\u2014\u4e0e\u7ec4revision\u3001\u65e2\u6709\u4efb\u52a1event\u6d41\u5747\u4e3a\u4e0d\u540c\u6e38\u6807"
+    },
+    "steps": {
+     "type": "array",
+     "minItems": 0,
+     "maxItems": 512,
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "index",
+       "action",
+       "status"
+      ],
+      "properties": {
+       "index": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 512
+       },
+       "action": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9._:-]{1,64}$"
+       },
+       "deviceId": {
+        "$ref": "#/$defs/clientId"
+       },
+       "status": {
+        "enum": [
+         "pending",
+         "running",
+         "succeeded",
+         "failed",
+         "skipped"
+        ]
+       },
+       "note": {
+        "type": "string",
+        "maxLength": 128
+       },
+       "atMs": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+       }
+      }
+     }
+    }
+   }
+  },
+  "executionAck": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "groupExecutionId",
+    "phase",
+    "eventSeq",
+    "accepted"
+   ],
+   "properties": {
+    "groupExecutionId": {
+     "$ref": "#/$defs/uuidv4"
+    },
+    "phase": {
+     "enum": [
+      "prepared",
+      "dispatching",
+      "unknown",
+      "done"
+     ]
+    },
+    "eventSeq": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "accepted": {
+     "type": "boolean"
+    },
+    "currentEventSeq": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "stale": {
+     "type": "boolean"
+    }
+   }
+  }
+ },
+ "description": "v0.4.4 = v0.4.0 executionProjection + \u53ef\u9009steps\uff08\u76ee\u68074\u6700\u5c0f\u65b0\u589e\u2014\u2014\u670d\u52a1\u5668\u5141\u8bb8steps\u6570\u7ec4\u6295\u5f71\u4e0a\u62a5\uff1b\u5176\u4f59\u51bb\u7ed3\u5b57\u6bb5\u9010\u5b57\u8282\u540cv0.4.0\uff09"
+}

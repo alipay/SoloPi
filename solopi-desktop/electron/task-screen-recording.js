@@ -19,8 +19,11 @@ function buildFfmpegSegmentArgs(inputPath, outputPath, marker, recordingStartedA
   const window = getCaseWindow(marker, recordingStartedAtMs);
   const args = [
     '-y', '-hide_banner', '-loglevel', 'error',
-    '-i', inputPath,
+    // Seek to the preceding keyframe before decoding; accurate_seek discards
+    // only that short preroll instead of decoding every earlier case again.
     '-ss', window.startSeconds.toFixed(3),
+    '-accurate_seek', '-threads', '2',
+    '-i', inputPath,
     '-t', window.durationSeconds.toFixed(3),
     '-map', '0:v:0', '-map', '0:a?',
   ];
@@ -30,9 +33,16 @@ function buildFfmpegSegmentArgs(inputPath, outputPath, marker, recordingStartedA
   } else if (platform === 'win32') {
     args.push('-c:v', 'h264_mf', '-b:v', '8M');
   } else {
-    args.push('-c:v', 'mpeg4', '-q:v', '2');
+    // Use the H.264 encoder shipped by the LGPL Linux runtime. x264-specific
+    // preset/CRF options are unavailable in that distribution.
+    // scrcpy emits no new video frames while the screen is static. Decode the
+    // preceding frame before trimming so a case inside that gap remains visible.
+    args.splice(args.indexOf('-ss'), 2);
+    args.splice(args.indexOf('-accurate_seek'), 1);
+    args.splice(args.indexOf('-t'), 0, '-vf', 'fps=10', '-ss', window.startSeconds.toFixed(3));
+    args.push('-c:v', 'libopenh264', '-b:v', '8M', '-pix_fmt', 'yuv420p');
   }
-  args.push('-c:a', 'aac', '-movflags', '+faststart', outputPath);
+  args.push('-threads', '2', '-c:a', 'aac', '-movflags', '+faststart', outputPath);
   return args;
 }
 
@@ -40,11 +50,11 @@ function buildSoftwareFallbackSegmentArgs(args = []) {
   const fallback = [...args];
   const codecIndex = fallback.indexOf('h264_videotoolbox');
   if (codecIndex < 0) return fallback;
-  fallback[codecIndex] = 'mpeg4';
+  fallback.splice(codecIndex,1,'libx264','-preset','veryfast','-crf','23','-pix_fmt','yuv420p');
   const allowSoftwareIndex = fallback.indexOf('-allow_sw');
   if (allowSoftwareIndex >= 0) fallback.splice(allowSoftwareIndex, 2);
   const bitrateIndex = fallback.indexOf('-b:v');
-  if (bitrateIndex >= 0) fallback.splice(bitrateIndex, 2, '-q:v', '2');
+  if (bitrateIndex >= 0) fallback.splice(bitrateIndex, 2);
   return fallback;
 }
 
@@ -111,6 +121,8 @@ class TaskScreenRecordingCoordinator {
           deviceType: source.deviceType,
           serial: source.serial,
           sourcePath: source.path,
+          diagnosticPath: source.diagnosticPath,
+          diagnosticWriteError: source.diagnosticWriteError || source.diagnosticJournal?.writeError || '',
           caseId: marker.caseId,
           caseName: marker.caseName,
           success: false,
@@ -241,6 +253,9 @@ class TaskScreenRecordingCoordinator {
             evidenceReady: true,
             segmented: true,
             segmentationPhase: 'finalized-source',
+            diagnosticPath: source.diagnosticPath,
+            diagnosticWriteError: source.diagnosticWriteError,
+            transportDiagnostics: source.transportDiagnostics,
             ...sourceFailure,
             recordingStartedAtMs: Number(source.recordingStartedAtMs || this.startedAtMs),
             recordingStoppedAtMs: Number(source.recordingStoppedAtMs || nowMs),

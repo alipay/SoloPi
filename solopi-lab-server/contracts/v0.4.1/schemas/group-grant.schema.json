@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.4.1/group-grant.schema.json",
+  "title": "Group execution grant HTTP envelope (v0.4.1 candidate; NOT frozen/schema-anchored)",
+  "$defs": {
+    "issueRequest": {
+      "type": "object", "additionalProperties": false,
+      "required": ["targetClientId", "groupId", "expectedRevision", "memberSha256", "payloadSha256", "payloadBytes", "dispatchPlanSha256"],
+      "properties": {
+        "targetClientId": { "type": "string", "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
+        "groupId": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+        "expectedRevision": { "type": "integer", "minimum": 1 },
+        "memberSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "payloadSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "payloadBytes": { "type": "integer", "minimum": 0, "maximum": 262144 },
+        "dispatchPlanSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "ttlSec": { "type": "integer", "minimum": 1, "maximum": 604800 }
+      },
+      "$comment": "模块执法=签发事务内角色/scope/归属/时间；schema只验结构。UTF-8字节域与MAX_PAYLOAD_BYTES常量同口径"
+    },
+    "issueAck": {
+      "type": "object", "additionalProperties": false,
+      "required": ["grantId", "targetClientId", "groupId", "stepProfile", "issuedAtMs", "expiresAtMs", "ttlSec"],
+      "properties": {
+        "grantId": { "type": "string" }, "targetClientId": { "type": "string" },
+        "groupId": { "type": "string" }, "stepProfile": { "const": "bound-payload" },
+        "issuedAtMs": { "type": "integer" }, "expiresAtMs": { "type": "integer" },
+        "ttlSec": { "type": "integer" }
+      }
+    },
+    "revokeRequest": {
+      "type": "object", "additionalProperties": false, "required": ["grantId"],
+      "properties": { "grantId": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" } }
+    },
+    "revokeAck": {
+      "type": "object", "additionalProperties": false, "required": ["grantId", "revoked", "replay"],
+      "properties": {
+        "grantId": { "type": "string" }, "revoked": { "const": true }, "replay": { "type": "boolean" },
+        "revokedAtMs": { "type": "integer" }
+      }
+    },
+    "verifyRequest": {
+      "type": "object", "additionalProperties": false, "required": ["clientId", "requestId"],
+      "properties": {
+        "clientId": { "type": "string", "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
+        "requestId": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" }
+      },
+      "$comment": "绑定字段全部由服务端从group_dispatch账本按requestId权威取值——客户端不传摘要/re revision/payload，传亦拒"
+    },
+    "verifyVerdict": {
+      "type": "object", "additionalProperties": false,
+      "required": ["authorized", "grantId", "stepProfile", "targetClientId", "groupId", "expectedRevision",
+        "memberSha256", "payloadSha256", "payloadBytes", "dispatchPlanSha256", "issuedAtMs", "expiresAtMs",
+        "revoked", "consumedByRequest", "cancelRequestedAt", "sessionEpoch"],
+      "properties": {
+        "authorized": { "const": true }, "grantId": { "type": "string" },
+        "stepProfile": { "const": "bound-payload" }, "targetClientId": { "type": "string" },
+        "groupId": { "type": "string" }, "expectedRevision": { "type": "integer", "minimum": 1 },
+        "memberSha256": { "type": "string" }, "payloadSha256": { "type": "string" },
+        "payloadBytes": { "type": "integer" }, "dispatchPlanSha256": { "type": "string" },
+        "issuedAtMs": { "type": "integer" }, "expiresAtMs": { "type": "integer" },
+        "revoked": { "const": false }, "consumedByRequest": { "type": "string" },
+        "cancelRequestedAt": { "type": ["string", "null"] },
+        "sessionEpoch": { "type": "integer" },
+        "approverLabel": { "type": "string" }
+      },
+      "$comment": "verdict自带全绑定哈希+会话epoch（服务端权威取值）——客户端消费前必须用checkGrantVerdict核对再采信"
+    }
+  }
+}

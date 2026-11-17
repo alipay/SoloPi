@@ -2,6 +2,18 @@
 
 GlassBox CLI 是 GlassBox 同一工程内的 Agent 调用入口，不是另一个独立应用。它用于让 Claude Code、Codex 等 Agent 平台发现组件、校验用例，并在后续阶段触发执行和读取报告。
 
+## 与内置 Agent 共用平台工具
+
+`tools list` 查询平台目录，`tools describe NAME` 获取当前 JSON schema，`tools call NAME --file arguments.json --json` 直接调用与内置 Agent 相同的测试工具。支持原始 caseOrdinal、批量 steps、单例证据视图、覆盖校验和受限批量编辑；执行不增加模型请求。实现复用工具工厂与应用处理器，不通过自然语言驱动内置 Agent。
+
+```bash
+solopi-desktop tools call read_case_results --args '{"taskId":"TASK","caseOrdinal":17,"view":"summary"}' --json
+solopi-desktop tools call read_task_report --args '{"taskId":"TASK","caseIds":["A","B"],"view":"steps"}' --json
+solopi-desktop tools describe submit_task --json
+```
+
+参数可用 `--args` 或 `--file`，二者互斥；大结果可写 `--out result.json`。每次调用返回 requestId；超时先 `tools result REQUEST_ID --json` 回读。相同 requestId 和参数不会重复派发，未知结果不自动重试。新接口需要配套 App/CLI，不支持的旧 Broker 明确报错，不降级写入用户数据。现有快捷命令保留；Shell、模型会话与 MCP 属于各自 Agent 的宿主能力。
+
 ## Agent 一条命令原则
 
 CLI 的核心职责是让其他 Agent 通过一条命令完成一次完整执行。正常 Agent 不应先自行调用 `cases validate`、再解析组件、再选择设备、再启动 runner 或拼装报告；这些步骤由 CLI 内部统一完成。
@@ -831,3 +843,25 @@ Agent 原生工具对应 `case_library_list`、`case_library_configure`、`case_
 ### Preserve source samples during migration
 
 For an explicitly requested exact migration, `cases update <id> --file <case.json> --preserve-source-samples --dry-run --json` can retain mismatched sampleLog/sampleExtractText metadata and return sampleDiagnostics. Use the same explicit flag to save after reviewing the diagnostic receipt. The default editing path remains strict. Invalid regex syntax and unreadable assets still fail; all runtime assertions and business expectations remain unchanged. This option does not execute cases or certify a migrated case as passed. Do not edit the source machine to satisfy a destination sample warning.
+
+## 并行断言与最新状态汇合
+
+使用已有 `cases show/update`、`run case/task`，没有新增子命令或开关。上一动作多条无条件出线连接已有只读断言，各断言直接连接同一后继；全部通过后只执行一次后继。日志文本断言步骤可设置 `config.observationMode: "latest"`，持续检查最新值，普通断言保持单次命中结果；状态回退后继续等待。分支必须卡点，IF 保持原选择语义。
+
+完整连线、JSON 与 CLI 保存回读示例见[CLI Skill 并行用法](../../skills/solopi-desktop-cli/references/parallel-listeners.md)；执行语义和画布标识见[并行监听](../PARALLEL_LISTENERS.md)。旧执行器需更新，不添加 `parallel/join/log_state` 控制节点。
+
+
+### Agent 本地运行时模型
+
+设置中心的模型配置包含「API 模型配置」「本地运行时配置」两个 Tab。选择运行时和模型后，点击测试连接，再保存并使用；新一轮 Agent 对话使用已保存的后端，正在执行的对话不切换。API 模型原有配置保留。
+
+本地运行时指当前宿主的已安装、已登录 CLI；不启动常驻上报服务。内置运行时为 Codex 和 Claude Code；其他兼容运行时通过宿主的 runtime-definitions.json 配置命令、协议和可选的 modelsCommand。模型目录由已配置运行时提供，支持手填模型名后测试；读取失败时显示具体错误，不返回伪造的空目录。检测到程序不等于已经登录或模型可用。CLI 负责模型推理，工具、记忆、审批和执行仍由原有 Agent Harness 管理。
+
+```sh
+solopi-desktop config runtime --action discover --json
+solopi-desktop config runtime --action models --runtime codex --json
+solopi-desktop config runtime --action test --runtime codex --model <实际模型名> --json
+solopi-desktop config runtime --file selection.json --json
+```
+
+selection.json 内容示例：`{"action":"save","selection":{"mode":"local-runtime","runtimeId":"codex","model":"实际模型名"}}`。切回 API：`{"action":"save","selection":{"mode":"api"}}`。Server 网页 Superagent → 模型设置复用同一协议，运行时属于 Server 所在电脑，不能直接使用浏览器所在电脑的 CLI。

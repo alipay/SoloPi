@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.1.2/event.schema.json",
+  "title": "EventTypes",
+  "$defs": {
+    "ulid": { "type": "string", "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
+    "utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+    },
+    "streamKey": {
+      "type": "string",
+      "pattern": "^(client|org|project):[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "event": {
+      "type": "object",
+      "required": ["eventId", "stream", "seq", "epoch", "type", "data", "occurredAt"],
+      "additionalProperties": false,
+      "properties": {
+        "eventId": { "$ref": "#/$defs/ulid" },
+        "stream": { "$ref": "#/$defs/streamKey" },
+        "seq": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+        "epoch": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+        "type": {
+          "enum": [
+            "heartbeat.missed", "enrollment.approved", "enrollment.rejected",
+            "client.revoked", "client.renewed",
+            "task.dispatched", "task.cancel_requested", "task.state_changed",
+            "command.result", "asset.updated", "media.state", "media.authorized",
+            "device.connected", "device.offline"
+          ]
+        },
+        "data": { "type": "object", "additionalProperties": true },
+        "occurredAt": { "$ref": "#/$defs/utc" }
+      }
+    },
+    "eventsPage": {
+      "type": "object",
+      "required": ["events", "snapshotSeq", "hasMore"],
+      "additionalProperties": false,
+      "properties": {
+        "events": { "type": "array", "items": { "$ref": "#/$defs/event" } },
+        "snapshotSeq": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+        "hasMore": { "type": "boolean" }
+      }
+    },
+    "ackRequest": {
+      "description": "§2.1②：body 回显 sessionId（与 heartbeat 一致）；v0.1.1 漏列已修",
+      "type": "object",
+      "required": ["stream", "lastSeq", "sessionId", "epoch"],
+      "additionalProperties": false,
+      "properties": {
+        "stream": { "$ref": "#/$defs/streamKey" },
+        "lastSeq": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+        "sessionId": { "type": "string", "minLength": 32 },
+        "epoch": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 }
+      }
+    },
+    "ackResponse": {
+      "type": "object",
+      "required": ["stream", "ackedSeq"],
+      "additionalProperties": false,
+      "properties": {
+        "stream": { "$ref": "#/$defs/streamKey" },
+        "ackedSeq": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 }
+      }
+    },
+    "clientState": {
+      "description": "§5.3 快照的权威当前状态（client流）：在快照读取事务边界内与流水位同拍",
+      "type": "object",
+      "required": ["clientId", "status", "online", "lastEpoch", "lastHeartbeatAt", "leaseExpiresAt", "validUntil", "occupancy"],
+      "additionalProperties": false,
+      "properties": {
+        "clientId": { "$ref": "#/$defs/ulid" },
+        "status": { "enum": ["approved", "revoked", "expired"] },
+        "online": { "enum": ["online", "offline", "unknown"] },
+        "lastEpoch": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "lastHeartbeatAt": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/utc" }] },
+        "leaseExpiresAt": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/utc" }] },
+        "validUntil": { "$ref": "#/$defs/utc" },
+        "occupancy": {
+          "type": "object",
+          "required": ["localUiTasks", "cliTasks"],
+          "additionalProperties": false,
+          "properties": {
+            "localUiTasks": { "type": "integer", "minimum": 0, "maximum": 100000 },
+            "cliTasks": { "type": "integer", "minimum": 0, "maximum": 100000 }
+          }
+        }
+      }
+    },
+    "snapshotResponse": {
+      "description": "GET /v1/events/snapshot：权威当前状态+安装水位stateInstalledSeq+保留窗事件+低水位snapshotSeq（§5.3.1）。",
+      "type": "object",
+      "required": ["stream", "state", "stateInstalledSeq", "events", "snapshotSeq", "hasMore"],
+      "additionalProperties": false,
+      "properties": {
+        "stream": { "$ref": "#/$defs/streamKey" },
+        "state": { "oneOf": [{ "$ref": "#/$defs/clientState" }, { "type": "null" }] },
+        "stateInstalledSeq": { "type": "integer", "minimum": 0, "maximum": 9007199254740991,
+          "description": "安装水位：读取事务内state已包含效果的最高事件seq（0=从未有事件）；消费者权威字段迁移仅由seq>stateInstalledSeq的事件驱动" },
+        "events": { "type": "array", "items": { "$ref": "#/$defs/event" }, "maxItems": 1000 },
+        "snapshotSeq": { "type": "integer", "minimum": 1, "maximum": 9007199254740991,
+          "description": "保留窗低水位（trim边界）；与安装水位语义不同：前者是历史边界，后者是state截止" },
+        "hasMore": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "solopi-lab-server-web",
+  "private": true,
+  "version": "0.1.0",
+  "description": "SoloPi lab-server 网页端（阶段A骨架：Client注册引导 / 审批列表 / Client状态）",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit && vite build && node scripts/build-desktop-report.mjs",
+    "test": "vitest run",
+    "predev": "node scripts/prepare-desktop-source.mjs",
+    "pretest": "npm run build",
+    "pretypecheck": "node scripts/prepare-desktop-source.mjs",
+    "prebuild": "node scripts/prepare-desktop-source.mjs"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.1.0",
+    "@types/node": "^26.6.6",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^26.0.0",
+    "picomatch": "file:../../solopi-desktop/vendor/picomatch",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.11",
+    "vitest": "5.1.0"
+  },
+  "overrides": {
+    "picomatch": "$picomatch"
+  }
+}

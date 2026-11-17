@@ -1,4 +1,5 @@
 import ReactMarkdown from 'react-markdown';
+import { memo } from 'react';
 import remarkGfm from 'remark-gfm';
 import { parseDocument, stringify } from 'yaml';
 
@@ -19,7 +20,7 @@ function skillMetadata(source: string) {
   }
 }
 
-export default function AgentMarkdown({ children, showMetadata = false }: { children: string; showMetadata?: boolean }) {
+function AgentMarkdown({ children, showMetadata = false }: { children: string; showMetadata?: boolean }) {
   const { body, rows, raw } = showMetadata ? skillMetadata(children) : { body: children };
   return <>
     {(rows || raw !== undefined) && <section aria-label="Skill metadata" className="my-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 sm:px-5">
@@ -33,9 +34,10 @@ export default function AgentMarkdown({ children, showMetadata = false }: { chil
     </section>}
     <div className="prose prose-sm prose-slate max-w-none break-words prose-p:my-3 prose-headings:mt-5 prose-headings:mb-2 prose-ul:my-3 prose-ol:my-3 prose-li:my-1 prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-code:before:content-none prose-code:after:content-none prose-table:text-xs">
     <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml components={{
-      a: ({ href, children }) => <a href={href} onClick={e => { e.preventDefault(); if (href && /^https?:\/\//i.test(href)) void window.glassbox?.ipcRenderer.invoke('shell:open-external', href); }}>{children}</a>,
+      a: ({ href, children }) => <a href={href} target={href && /^https?:\/\//i.test(href) ? '_blank' : undefined} rel="noreferrer" onClick={e => { const api=window.glassbox?.ipcRenderer; if (api) { e.preventDefault(); if (href && /^https?:\/\//i.test(href)) void api.invoke('shell:open-external', href); } }}>{children}</a>,
       img: ({ alt }) => <span className="text-slate-500">[图片：{alt || '未加载'}]</span>,
       table: ({ children }) => <div className="overflow-x-auto"><table>{children}</table></div>,
     }}>{body}</ReactMarkdown>
   </div></>;
 }
+export default memo(AgentMarkdown);

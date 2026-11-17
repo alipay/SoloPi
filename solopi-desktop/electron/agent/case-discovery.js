@@ -1,3 +1,4 @@
+const {caseGraphErrors}=require('./case-graph');
 // Discovery is a small, current-state index. Full documents remain available via read_case.
 function listCases(state, args = {}, domain = '') {
   const libraries = state.caseLibraries || [], folders = state.caseFolders || [];
@@ -29,7 +30,7 @@ function listCases(state, args = {}, domain = '') {
       && (!query || matches(c.name) || matches(c.id) || matches(byLibrary.get(libraryId)?.name) || parents.some(f => matches(f.name)));
   });
   const offset = args.offset || 0, end = offset + (args.limit || 20);
-  const page = cases.slice(offset, end).map(c => ({ id: c.id, name: c.name, libraryId: c.libraryId || ancestors(c.folderId).find(f => f.libraryId)?.libraryId, folderId: c.folderId, reviewStatus: c.reviewStatus }));
+  const page = cases.slice(offset, end).map(c => {const errors=caseGraphErrors(c,state.caseEdges?.[c.id]||c.edges||[]),steps=c.steps||[];return { id: c.id, name: c.name, libraryId: c.libraryId || ancestors(c.folderId).find(f => f.libraryId)?.libraryId, folderId: c.folderId, reviewStatus: c.reviewStatus,runnable:steps.some(s=>s.type==='start')&&steps.some(s=>s.type==='end')&&!errors.length,...(errors.length?{validationErrors:errors}:{}) };});
   // Include navigation relevant to this page, never repository credentials or component documents.
   const relatedFolders = new Set(page.flatMap(c => ancestors(c.folderId).map(f => f.id)));
   const relatedLibraries = new Set(page.map(c => c.libraryId));
@@ -43,4 +44,4 @@ function listCases(state, args = {}, domain = '') {
     folders: folders.filter(f => relatedFolders.has(f.id) || ((!args.libraryId || f.libraryId === args.libraryId) && (args.folderId ? f.id === args.folderId : matches(f.name)))).slice(0, 50).map(({ id, name, libraryId, parentId }) => ({ id, name, libraryId, parentId })),
   };
 }
-module.exports = { listCases };
+module.exports = { listCases,caseGraphErrors };

@@ -1,0 +1,19 @@
+// Shared metadata protocol only. Never message text, arguments or credentials.
+const strings=new Set(['basePromptRevision','connectionErrorCode','transportPhase','connectionId','connectionUse','clientRequestId','upstreamTraceId','upstreamCode','upstreamType','source','timeoutKind','processType','validationReason','thinking','reasoningEffort','event','sessionId','status','toolName','contextPhase','upstreamRequestId','contentType','requestId','purpose','stage','category','code','finishReason','model','version','platform','arch']);
+const numbers=new Set(['retryAfterMs','systemCharacters','basePromptCharacters','toolSchemaCharacters','historyCharacters','skillCharacters','workStateCharacters','recoveryBudgetMs','semanticIdleMs','streamIdleMs','sseDataEventCount','sseCommentCount','semanticDeltaCount','connectionAttemptMs','transportRequestCount','connectionRetryCount','automaticRetryCount','firstOutputMs','connectionEstablishMs','requestSendStartMs','requestBodySentMs','requestUploadMs','responseWaitMs','beforeTokensEstimate','afterTokensEstimate','requestBytes','serializeMs','socketBytesWritten','socketBytesRead','contextWindowTokens','timeoutMs','idleMs','cpuPercent','workingSetKb','eventLoopMaxMs','eventLoopP99Ms','sessionBytes','toolIndex','argumentCharacters','decodedFrames','deliveredFrames','acknowledgedFrames','headersMs','streamBytes','streamElapsedMs','setupMs','decodeWaitMs','maxTokens','durationMs','httpStatus','messageCount','toolCount','outputCharacters','reasoningCharacters','promptTokens','completionTokens','totalTokens','choiceCount','attempt']);
+for(const key of ['firstFrameMs','captureMs','resolveMs','connectMs'])numbers.add(key);
+strings.add('taskId');strings.add('caseId');strings.add('libraryId');numbers.add('protectedCaseCount');numbers.add('conflictCount');
+for(const key of ['pid','heapUsedBytes','rssBytes','externalBytes','arrayBuffersBytes','uptimeSeconds','manifestBytes','blobBytesWritten','blobsWritten','blobCacheHits','blobReferences','historyMessageCount','historyToolCount','rendererHeapUsedBytes','rendererHeapLimitBytes','diskFreeBytes'])numbers.add(key);
+for(const key of ['writeMs','diskWriteMs','indexReadMs','indexMergeMs','indexWriteMs','indexCommitMs','queueMs','uiSyncMs','bytes','coalescedCount','stateUpdateMs','payloadBytes','ipcToFrameMs','renderMs','maxRenderMs','commitCount'])numbers.add(key);
+strings.add('reason');for(const k of ['requestTokensEstimate','fixedTokensEstimate','newHistoryTokensEstimate','growthRequiredTokens','currentChunk','totalChunks'])numbers.add(k);
+strings.add('runtimeRevision');strings.add('toolChoice');strings.add('modelAdapterRevision');strings.add('wireFinishReason');
+for(const key of ['executionContractRevision','approvalMode','taskOpsReadState','cliReadState'])strings.add(key);
+for(const key of ['wireToolCallFragments','parsedToolCalls','unexpectedToolCallFrames'])numbers.add(key);
+for(const key of ['creationId','sourceTaskId','folderId','node','field','errorName'])strings.add(key);
+for(const key of ['caseCount','errorCount','warningCount'])numbers.add(key);
+for(const key of ['endpointOrigin','endpointPathHash','configuredModel','outcome'])strings.add(key);
+for(const key of ['transportAttempt','firstResponseByteMs','responseBytes'])numbers.add(key);
+for(const key of ['uncachedInputTokens','cacheReadTokens','cacheWriteTokens','totalInputTokens','thresholdTokens','retainTokens'])numbers.add(key);
+strings.add('pressureReason');for(const key of ['requestTokensEstimate','fixedTokensEstimate','newHistoryTokensEstimate','growthRequiredTokens','inputBudgetTokens'])numbers.add(key);
+strings.add('streamId');for(const key of ['socketAgeMs','sourcePackets','sourceBytes','sourceAgeMs','ackAgeMs','presentAgeMs','pendingFrameAgeMs','queueMessages','gopBytes','pendingAcks'])numbers.add(key);
+module.exports={strings:[...strings],numbers:[...numbers]};

@@ -1,0 +1,8 @@
+{
+  "id": "group-a1", "nodeId": "linux-a", "enabled": true,
+  "attributes": {"platform": "android", "model": "configured-model"},
+  "devices": {
+    "phone": {"serial": "REPLACE_CONFIRMED_PHONE_SN", "runtime": "android", "packageName": "configured.phone.package"},
+    "glasses": {"serial": "REPLACE_CONFIRMED_GLASSES_SN", "runtime": "android", "packageName": "configured.glasses.package"}
+  }
+}

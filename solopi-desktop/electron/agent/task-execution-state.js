@@ -47,18 +47,34 @@ function definitionRevision(snapshot, args, domain='') {
     caseEdges:Object.fromEntries([...ids].sort().map(id=>[id,snapshot.caseEdges?.[id] || null]))});
 }
 function observeSave(session,call,result){
-  if(call.args?.dryRun || result?.dryRun || !Array.isArray(result?.saved) || !result.saved.length)return;
+  if(call.args?.dryRun || result?.dryRun)return;
+  if(call.name==='save_case') {
+    if(result?.success!==true || result.uiUpdated!==true || result.caseId!==call.args?.caseId)return;
+    result={...result,saved:[result.caseId],savedScopeSummary:[{libraryId:result.libraryId,caseCount:1,caseIds:[result.caseId]}]};
+  }
+  if(!Array.isArray(result?.saved) || !result.saved.length)return;
   const s=state(session);
   s.latestSave={callId:call.modelCallId,sourceUserIndex:call.scopeUserIndex ?? scope(session),saved:[...result.saved],libraries:result.savedScopeSummary || []};
+}
+function restoreSaveProvenance(session) {
+  const calls=session.calls || [],latest=session.taskExecutionState?.latestSave;
+  const index=latest ? calls.findIndex(c=>c.modelCallId===latest.callId) : -1;
+  if(latest && index<0)return;
+  for(const call of calls.slice(index+1))if(['save_case','save_cases_from_file'].includes(call.name)&&['done','failed'].includes(call.status))observeSave(session,call,call.result);
 }
 function guard(session, call) {
   const saved=session.taskExecutionState?.latestSave;
   if(saved){
     const edit=call.args.editScope;
-    if(!edit || edit.saveCallId!==saved.callId)return {success:false,code:'TASK_EDIT_SCOPE_REQUIRED',message:'存在修改成功的用例：修改后重跑必须绑定最新保存回执并取saved与用户指定范围的交集；明确独立任务才标记independent-task。未提交。',saveCallId:saved.callId,savedScopeSummary:saved.libraries};
+    if(!edit || edit.saveCallId!==saved.callId)return {success:false,code:'TASK_EDIT_SCOPE_REQUIRED',message:'存在修改成功的用例：修改后重跑须绑定最新保存回执；saved-cases仅保存集合。原用户明确要求完整组合验证时用requested-selection绑定完整查询回执和原话索引；独立任务用independent-task。未提交。',saveCallId:saved.callId,savedScopeSummary:saved.libraries};
     if(edit.mode==='saved-cases'){
       const allowed=new Set(saved.saved),extra=(call.resolvedCaseIds || []).filter(id=>!allowed.has(id));
       if(!call.resolvedCaseIds?.length || extra.length)return {success:false,code:'TASK_EDIT_SCOPE_EXCEEDED',message:'提交包含本次未修改成功的用例；使用saved与指定库的交集，不使用整个库或导出清单。未提交。',extraCaseIds:extra,savedScopeSummary:saved.libraries};
+    }else if(edit.mode==='requested-selection'){
+      const selection=session.taskExecutionState?.selections.find(item=>item.callId===edit.selectionCallId);
+      const source=session.messages[edit.sourceUserIndex];
+      if(!Number.isInteger(edit.sourceUserIndex)||source?.role!=='user'||source.source==='platform')return {success:false,code:'TASK_SCOPE_SOURCE_REQUIRED',message:'组合验证须引用本会话明确要求完整范围的原始用户消息索引；未提交。'};
+      if(!selection?.selectionId || selection.selectionId!==call.args.selectionId || !call.resolvedCaseIds?.length || call.resolvedCaseIds.length!==selection.count)return {success:false,code:'TASK_SELECTION_SCOPE_REQUIRED',message:'组合验证须绑定成功list_cases的selectionCallId及同一完整selectionId，不能替换或扩大集合；未提交。'};
     }else if(edit.mode!=='independent-task')return {success:false,code:'TASK_EDIT_SCOPE_INVALID',message:'无效的修改后执行范围'};
   }
   const key = requestKey(session, call.args);
@@ -110,8 +126,8 @@ function frame(session) {
   const currentUserIndex = scope(session);
   const selections = s.selections.map(item => ({ ...item,
     equivalentSelectionCallIds: s.selections.filter(other => other.callId !== item.callId && other.membership === item.membership).map(other => other.callId) }));
-  return '\n<task-execution-state>以下由执行器从实际工具调用保留，不是模型生成的授权。latestSave是实际保存成功集合；修改后重跑须用editScope绑定该回执并与用户指定库取交集。用户缩小范围不能扩大为整库；同名不同ID是不同用例。仅原始用户明确要求独立于本次修改的任务才标记independent-task，不能用于绕过范围错误。selection是已查询集合；requestedOptions是曾请求的参数，acknowledgedOptions才是提交回执返回的参数，两者均不能代替原始用户授权。sourceUserIndex可用read_user_messages回读。不同来源用户消息可能是延续、更正、暂停或新任务，不能自动沿用或自动恢复；先核对原文。已有taskId只查询订阅，不重复提交；dispatching/unknown先核实实际状态，failed不代表已有任务。\n'
+  return '\n<task-execution-state>以下由执行器从实际工具调用保留，不是模型生成的授权。latestSave是实际保存成功集合；修改后重跑须用editScope绑定该回执并与用户指定库取交集。原始用户明确要求主链与边界一起验证时，requested-selection须绑定同一完整list_cases回执(selectionCallId/selectionId)、最新saveCallId及原话sourceUserIndex；它不自动授予扩大范围的权限。用户仅要求重跑修改集合时仍必须saved-cases。用户缩小范围不能扩大为整库；同名不同ID是不同用例。仅原始用户明确要求独立于本次修改的任务才标记independent-task，不能用于绕过范围错误。selection是已查询集合；requestedOptions是曾请求的参数，acknowledgedOptions才是提交回执返回的参数，两者均不能代替原始用户授权。sourceUserIndex可用read_user_messages回读。不同来源用户消息可能是延续、更正、暂停或新任务，不能自动沿用或自动恢复；先核对原文。已有taskId只查询订阅，不重复提交；dispatching/unknown先核实实际状态，failed不代表已有任务。\n'
     + JSON.stringify({ version: s.version, currentUserIndex, latestSave:s.latestSave || null, selections, submissions: s.submissions,
       conversationInterruption: session.lastInterruption || null }) + '\n</task-execution-state>';
 }
-module.exports = { scope, observeSave, observeSelection, requestKey, definitionRevision, guard, begin, settle, observeTask, frame };
+module.exports = { scope, observeSave, restoreSaveProvenance, observeSelection, requestKey, definitionRevision, guard, begin, settle, observeTask, frame };

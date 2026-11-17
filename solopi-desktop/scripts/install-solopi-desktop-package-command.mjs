@@ -25,7 +25,7 @@ export function install({ home = os.homedir(), repository = root, identity = pro
   }
   const block = `${start}\nexport PATH="$HOME/.local/bin:$PATH"\nfpath=("$HOME/.local/share/zsh/site-functions" $fpath)\nif ! (( $+functions[compdef] )); then\n  autoload -Uz compinit\n  compinit\nfi\nautoload -Uz _solopi-desktop-package\ncompdef _solopi-desktop-package solopi-desktop-package\n${end}`;
   const next = first >= 0 ? previous.slice(0, first) + block + previous.slice(last + oldEndLength) : previous + (previous.endsWith('\n') ? '' : '\n') + '\n' + block + '\n';
-  const wrapper = `#!/bin/sh\n${marker}\nset -eu\n: "\${GLASSBOX_CODESIGN_IDENTITY_SHA1:=${identity}}"\nexport GLASSBOX_CODESIGN_IDENTITY_SHA1\nexec /usr/bin/env node ${quote(path.join(repository, 'scripts/solopi-desktop-package.mjs'))} "$@"\n`;
+  const wrapper = `#!/bin/sh\n${marker}\nset -eu\n: "\${GLASSBOX_CODESIGN_IDENTITY_SHA1:=${identity}}"\nexport GLASSBOX_CODESIGN_IDENTITY_SHA1\nexport PATH=${quote(path.dirname(process.execPath))}:"$PATH"\nexec ${quote(process.execPath)} ${quote(path.join(repository, 'scripts/solopi-desktop-package.mjs'))} "$@"\n`;
   fs.mkdirSync(path.dirname(command), { recursive: true });
   fs.mkdirSync(path.dirname(completion), { recursive: true });
   fs.writeFileSync(command, wrapper, { mode: 0o755 }); fs.chmodSync(command, 0o755);

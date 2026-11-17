@@ -4,6 +4,21 @@ import fs from 'node:fs';
 
 const SHA1_PATTERN = /^[A-F0-9]{40}$/;
 
+// An explicit RFC3161 authority changes transport routing, never signature requirements.
+export function timestampAuthority(env = process.env) {
+  const value = env.GLASSBOX_TIMESTAMP_URL;
+  if (value === undefined) return undefined;
+  const url = new URL(value);
+  if ((url.protocol !== 'https:' && !(url.protocol === 'http:' && ['timestamp.apple.com', '127.0.0.1', '[::1]'].includes(url.hostname))) || url.username || url.password || url.search || url.hash || !url.pathname || value.length > 2048) throw Error('Invalid timestamp authority URL');
+  return url.href;
+}
+
+export function timestampFileOptions(inherited, env = process.env) {
+  const authority = timestampAuthority(env);
+  if (!authority) return inherited;
+  return filePath => ({...(inherited?.(filePath) || {}), timestamp:authority});
+}
+
 function resolveIdentityName(identityHash) {
   const output = execFileSync('security', ['find-identity', '-v', '-p', 'codesigning'], {
     encoding: 'utf8',
@@ -59,6 +74,7 @@ export async function sign(options) {
   return withTimestampRetry(() => signAsync({
     ...options,
     identity: identityHash,
+    ...(!isAppleDevelopment && timestampAuthority() ? {optionsForFile: timestampFileOptions(inheritedOptionsForFile)} : {}),
     // osx-sign normalizes a single predicate; an array is discarded by some versions.
     ignore: createIgnorePredicate(options.ignore),
     // Apple Development certificates are local QA identities and do not

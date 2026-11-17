@@ -2,12 +2,13 @@ const net = require('node:net');
 const { randomBytes } = require('node:crypto');
 const { execFile } = require('node:child_process');
 const {scrcpyVersion,deployServer}=require('./scrcpy-deployment');
+const {resolveScrcpyEndpoint,createScrcpyTransport,scopedAdbEnvironment}=require('./scrcpy-transport');
 const run = (file, args, options) => new Promise((resolve, reject) => execFile(file, args, options, (error, stdout) => error ? reject(error) : resolve(stdout.trim())));
 
 // scrcpy's documented raw stream protocol avoids the recorder/muxer buffer.
 // Each preview owns its ADB forward and server process; recordings are separate.
-async function openScrcpyStream(media, serial, { spawnProcess, signal, onChild, onError, execute = run, connect = net.createConnection, startupTimeoutMs = 45000, onMetrics = () => {} }) {
-  const adb = media.adb || media.env?.ADB;
+async function openScrcpyStream(media, serial, { spawnProcess, signal, onChild, onError, execute = run, connect = net.createConnection, startupTimeoutMs = 45000, onMetrics = () => {}, resolveEndpoint=resolveScrcpyEndpoint, openTransport=createScrcpyTransport }) {
+  let adb = media.adb || media.env?.ADB, transport;
   if (!adb || !media.scrcpyServer) throw Error('缺少 ADB 或 scrcpy server 运行时');
   const options = { env: media.env, timeout: 10000, maxBuffer: 65536, signal };
   const scid = randomBytes(4).readUInt32BE() & 0x7fffffff;
@@ -19,10 +20,19 @@ async function openScrcpyStream(media, serial, { spawnProcess, signal, onChild, 
     if (child && child.exitCode === null && !child.signalCode) child.kill('SIGTERM');
     // Remove only this preview's forward and temporary server, never another task's.
     const cleanup = { env: media.env, timeout: 3000, maxBuffer: 65536 };
-    if (port) await execute(adb, ['-s',serial,'forward','--remove',`tcp:${port}`], cleanup).catch(()=>{});
+    try { if (port) await execute(adb, ['-s',serial,'forward','--remove',`tcp:${port}`], cleanup).catch(()=>{}); }
+    finally { transport?.close(); }
   })();
   try {
     signal.throwIfAborted();
+    const endpoint=await resolveEndpoint(adb,serial,{run:execute,env:media.env,signal});
+    if(endpoint){
+      if(!media.transportAdb)throw Error('远程预览缺少配套 ADB 客户端');
+      transport=await openTransport({endpoint,serial,signal});
+      adb=media.transportAdb;
+      media={...media,adb,env:scopedAdbEnvironment(media.env,adb,transport.socket)};
+      options.env=media.env;
+    }
     let version;
     const preparationStartedAt=Date.now();
     // The forward does not depend on deployment or version probing. Await both
@@ -38,7 +48,7 @@ async function openScrcpyStream(media, serial, { spawnProcess, signal, onChild, 
     const streamStartedAt=Date.now();
     child = spawnProcess(adb, ['-s',serial,'shell',`CLASSPATH=${remote}`,'app_process','/','com.genymobile.scrcpy.Server',version,
       `scid=${scid.toString(16)}`,'log_level=info','tunnel_forward=true','audio=false','control=false','cleanup=false',
-      'send_device_meta=false','send_dummy_byte=false','send_codec_meta=false','send_frame_meta=true',
+      'send_device_meta=false','send_dummy_byte=false',Number.parseInt(version,10)>=4?'send_stream_meta=false':'send_codec_meta=false','send_frame_meta=true',
       'video_codec=h264','video_codec_options=i-frame-interval=1','max_size=960','max_fps=30'], {env:media.env,stdio:['ignore','pipe','pipe']});
     onChild(child);
     // ADB forward may accept before the device socket exists. Retry empty closes,
@@ -69,7 +79,7 @@ async function openScrcpyStream(media, serial, { spawnProcess, signal, onChild, 
         onMetrics({stage:'first-packet',durationMs:Date.now()-streamStartedAt});
         socket.on('error',onError);
         signal.addEventListener('abort',()=>socket.destroy(),{once:true});
-        return {socket,first,close};
+        return {socket,first,close,protocolMajor:Number.parseInt(version,10)};
       }
       socket.destroy();
       await new Promise(resolve=>setTimeout(resolve,50));

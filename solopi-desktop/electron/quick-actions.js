@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const {normalizeUsageInstructions,missingHiddenInputMessage}=require('./quick-action-usage');
 
 const SUPPORTED_QUICK_ACTION_EXTENSIONS = new Set(['.sh', '.ps1', '.cmd', '.bat']);
 const INPUT_TYPES = new Set(['text', 'number', 'boolean', 'select', 'file', 'directory', 'multiline']);
@@ -41,6 +42,7 @@ function parseEmbeddedMetadata(content) {
     const [, field, rawValue] = match;
     if (field === 'name') definition.name = rawValue;
     if (field === 'description') definition.description = rawValue;
+    if (field === 'usage') definition.usageInstructions = [definition.usageInstructions,rawValue].filter(Boolean).join('\n');
     if (field === 'timeout') definition.timeoutSeconds = Number(rawValue);
     if (field === 'arg') definition.args.push(rawValue);
     if (field === 'param') {
@@ -104,7 +106,7 @@ function readQuickActionDefinition(scriptPath) {
   const embedded = parseEmbeddedMetadata(content);
   const raw = embedded;
   const inferred = inferScriptDefinition(content, extension);
-  const hasEmbeddedMetadata = Boolean(raw.name || raw.description || raw.inputs.length || raw.args.length);
+  const hasEmbeddedMetadata = Boolean(raw.name || raw.description || raw.usageInstructions || raw.inputs.length || raw.args.length);
   const inputs = Array.isArray(raw.inputs) && raw.inputs.length ? raw.inputs.map(normalizeInput) : inferred.inputs;
   const args = Array.isArray(raw.args) && raw.args.length
     ? raw.args.map(String)
@@ -113,6 +115,7 @@ function readQuickActionDefinition(scriptPath) {
   return {
     name: String(raw.name || path.basename(absolutePath, extension)).trim(),
     description: String(raw.description || '在当前电脑执行脚本').trim(),
+    usageInstructions: normalizeUsageInstructions(raw.usageInstructions),
     scriptPath: absolutePath,
     metadataSource: hasEmbeddedMetadata ? 'script-comments' : 'positional-arguments',
     detectedInputCount: inferred.inputs.length,
@@ -153,7 +156,7 @@ function resolveQuickActionInputValues(action, inputValues = {}, context = {}) {
       : input.defaultValue;
     const resolved = resolveTemplate(rawValue == null ? '' : rawValue, inputValues, context);
     if (input.required && (!String(resolved).trim() || /\{\{[^}]+\}\}/.test(String(resolved)))) {
-      throw new Error(input.userInput === false ? `隐藏参数“${input.label}”未获得有效默认值，请检查设备选择或在快捷操作设置中修改默认值` : `请填写${input.label}`);
+      throw new Error(input.userInput === false ? missingHiddenInputMessage(input,action.inputs||[]) : `请填写${input.label}`);
     }
     values[input.key] = resolved;
   }

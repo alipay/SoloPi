@@ -127,6 +127,14 @@ const WorkflowNode = ({ data, type, isConnectable }: any) => {
         )}
       </div>
       
+      {data.parallelHints?.map((hint: {status: string; label: string; detail: string}, index: number) => (
+        <div key={index} role={hint.status === 'invalid' ? 'alert' : 'note'} title={hint.detail}
+          aria-label={`${hint.label}：${hint.detail}`}
+          className={cn('border-t px-3 py-2 text-[11px] font-bold leading-4',hint.status === 'invalid' ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-emerald-100 bg-emerald-50 text-emerald-800')}>
+          <span>{hint.status === 'invalid' ? '⚠ ' : ''}{hint.label}</span>
+          {hint.status === 'invalid' && <p className="mt-1 font-normal">{hint.detail}</p>}
+        </div>
+      ))}
       <div className="p-3 space-y-2 bg-card">
         {data.config && Object.entries(data.config).map(([key, value]: [string, any]) => {
           const isAdbPreview = key === 'ADB' || key === 'ADB命令预览' || key === 'adb命令预览';

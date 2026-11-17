@@ -1,5 +1,6 @@
 import {
   MessageSquare,
+  MonitorSmartphone,
   Settings,
   ChevronRight,
   PanelLeftClose,
@@ -23,6 +24,7 @@ function cn(...inputs: ClassValue[]) {
 
 const topNavItems = [
   { id: 'agent', label: 'Agent 对话', icon: MessageSquare },
+  { id: 'device-control', label: '三端设备控制', icon: MonitorSmartphone },
 ];
 
 const navItems = [
@@ -129,6 +131,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
         {topNavItems.map((item) => (
           <button
             key={item.id}
+            data-onboarding-target={`nav-${item.id}`}
             onClick={() => setActiveTab(item.id)}
             title={item.label}
             className={cn(
@@ -180,6 +183,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
             {automationItems.map((item) => (
               <button
                 key={item.id}
+                data-onboarding-target={`nav-${item.id}`}
                 onClick={() => setActiveTab(item.id)}
                 className={cn(
                   "w-full flex items-center gap-2 rounded-lg px-2.5 py-2 text-left transition-colors",
@@ -273,6 +277,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
             {performanceItems.map((item) => (
               <button
                 key={item.id}
+                data-onboarding-target={`nav-${item.id}`}
                 onClick={() => setActiveTab(item.id)}
                 className={cn(
                   "w-full flex items-center gap-2 rounded-lg px-2.5 py-2 text-left transition-colors",
@@ -316,6 +321,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
       <div className={cn("mt-auto border-t border-slate-200 space-y-1", collapsed ? "p-2" : "p-3")}>
         <button
           type="button"
+          data-onboarding-target="nav-settings"
           onClick={() => setActiveTab('settings')}
           title="设置中心"
           className={cn(

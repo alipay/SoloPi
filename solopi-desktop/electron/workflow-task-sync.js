@@ -17,7 +17,8 @@ function isWorkflowTaskActive(task) {
 function getWorkflowTaskCounts(task) {
   const cases = Array.isArray(task?.cases) ? task.cases : [];
   const summary = task?.summary || {};
-  if (!cases.length) {
+  const expectedCount = Math.max(Number(task?.total || 0), Number(summary.caseCount || 0));
+  if (!cases.length || cases.length < expectedCount) {
     return {
       successCount: Number(summary.successCount || 0),
       failedCount: Number(summary.failedCount || 0),
@@ -25,7 +26,7 @@ function getWorkflowTaskCounts(task) {
       runningCount: Number(summary.runningCount || 0),
       pendingCount: Number(summary.pendingCount || 0),
       completed: Number(summary.completed || task?.completed || 0),
-      caseCount: Number(summary.caseCount || task?.total || 0),
+      caseCount: expectedCount,
     };
   }
   const successCount = cases.filter((item) => item?.status === 'success').length;

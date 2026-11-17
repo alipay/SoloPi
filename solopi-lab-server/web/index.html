@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SoloPi 实验室集群 · 网页端</title>
+  </head>
+  <body>
+    <div id="root">
+      <!-- W10 可观测性占位：JS子资源被网络/浏览器策略阻止时，不再呈现纯白屏。
+           React createRoot().render() 首次渲染会替换本节点内容，正常路径无影响。 -->
+      <div id="boot-placeholder" style="font-family: -apple-system, 'PingFang SC', sans-serif; max-width: 720px; margin: 80px auto; padding: 0 16px; color: #1f2329; line-height: 1.8;">
+        <h1 style="font-size: 18px;">SoloPi 实验室集群 · 网页端</h1>
+        <p style="color: #7a8492; font-size: 14px;">
+          页面正在加载…（应在一两秒内完成）
+        </p>
+        <p style="color: #c02b21; font-size: 13px;">
+          若此处长时间停留且未出现「未连接 / 连接设置」等界面，说明页面脚本（./assets/*.js）未成功加载或执行——
+          常见原因为浏览器证书/代理/网络策略阻止子资源请求。请检查当前网络环境与证书信任，
+          或通过内网 HTTP 入口访问；服务器未连接时页面也会正常显示「未连接」状态。
+        </p>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

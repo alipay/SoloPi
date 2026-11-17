@@ -1,0 +1,11 @@
+import {cleanup,render,screen} from '@testing-library/react';
+import {afterEach,expect,it,vi} from 'vitest';
+import App from '../src/App';
+vi.mock('../src/pages/CaseQuality',()=>({CaseQuality:()=> <p>质量数据区域</p>}));
+vi.mock('../src/pages/Overview',()=>({Overview:()=> <p>总览数据区域</p>}));
+vi.mock('../src/api/readonly-proxy',()=>({probeReadonlyProxy:async()=>false}));
+vi.mock('../src/api/devices-ro',()=>({probeRoDevices:async()=>false}));
+vi.stubGlobal('matchMedia',()=>({matches:false,addEventListener:()=>{},removeEventListener:()=>{}}));
+afterEach(()=>{cleanup();vi.unstubAllGlobals()});
+it('server-hosted quality page does not require browser admin configuration or duplicate disconnected banners',()=>{vi.stubGlobal('matchMedia',()=>({matches:false,addEventListener:()=>{},removeEventListener:()=>{}}));vi.stubGlobal('fetch',vi.fn(async()=>({ok:false})));location.hash='#/agents/quality';render(<App/>);expect(screen.getByText('质量数据区域')).toBeTruthy();expect(screen.queryAllByTestId('unconnected-notice')).toHaveLength(0);expect(screen.queryByRole('button',{name:'连接设置'})).toBeNull()});
+it('legacy connection page renders its disconnected banner only once',()=>{vi.stubGlobal('matchMedia',()=>({matches:false,addEventListener:()=>{},removeEventListener:()=>{}}));vi.stubGlobal('fetch',vi.fn(async()=>({ok:false})));location.hash='#/overview';render(<App/>);expect(screen.getAllByTestId('unconnected-notice')).toHaveLength(1)});

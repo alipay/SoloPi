@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.3.0/error.schema.json",
+  "title": "ErrorEnvelope",
+  "type": "object",
+  "required": [
+    "error"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "error": {
+      "type": "object",
+      "required": [
+        "code",
+        "message",
+        "retryable"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "VALIDATION_FAILED",
+            "AUTH_REQUIRED",
+            "AUTH_TOKEN_INVALID",
+            "AUTH_CHALLENGE_EXPIRED",
+            "AUTH_REVOKED",
+            "AUTH_SCOPE_DENIED",
+            "ENROLL_NOT_FOUND",
+            "CLIENT_NOT_FOUND",
+            "TASK_NOT_FOUND",
+            "SESSION_EPOCH_CONFLICT",
+            "ENROLL_KEY_ROTATION_CONFLICT",
+            "ENROLL_ALREADY_DECIDED",
+            "CMD_DIGEST_CONFLICT",
+            "RESOURCE_BUSY",
+            "ENROLL_RECOVERY_KEY_MISMATCH",
+            "SNAPSHOT_CONFLICT",
+            "SNAPSHOT_SEQ_GAP",
+            "DEVICE_IDENTITY_CONFLICT",
+            "MEDIA_SESSION_INVALID",
+            "MEDIA_TICKET_INVALID",
+            "RATE_LIMITED",
+            "INTERNAL",
+            "UNAVAILABLE",
+            "AGENT_TASK_INVALID",
+            "AGENT_TASK_CONFLICT"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "details": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "retryAfterSec": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      }
+    }
+  }
+}

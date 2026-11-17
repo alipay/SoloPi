@@ -8,7 +8,7 @@ function installTeamConfiguration(deps) {
   const readMeta=()=>{try{return JSON.parse(fs.readFileSync(metaPath(),'utf8'));}catch(e){if(e.code==='ENOENT')return {};throw e;}};
   const writeMeta=m=>{fs.mkdirSync(path.dirname(metaPath()),{recursive:true,mode:0o700});const temp=metaPath()+'.tmp';fs.writeFileSync(temp,JSON.stringify(m),{mode:0o600});fs.renameSync(temp,metaPath());};
   let codec;
-  const importer=createImporter({readState,readEnvironment,saveEnvironment,savePatch,pullCases:async r=>{codec ||= await loadCaseCodec();return pullCases(r);},parseCases:r=>codec.parseCaseLibraryFilesForCli(r),mergeCases:(...args)=>codec.mergePulledCaseLibraryIntoStateForCli(...args),
+  const importer=createImporter({saveRuntimes:(items,options)=>require('./agent/runtime-registry.cjs').save(directory(),items,options),readState,readEnvironment,saveEnvironment,savePatch,pullCases:async r=>{codec ||= await loadCaseCodec();return pullCases(r);},parseCases:r=>codec.parseCaseLibraryFilesForCli(r),mergeCases:(...args)=>codec.mergePulledCaseLibraryIntoStateForCli(...args),
     importScripts,
     importAction:async(teamId,a,{overwrite})=>{
       const id='team-'+crypto.createHash('sha256').update(JSON.stringify([teamId,a.id])).digest('hex').slice(0,24);
@@ -28,13 +28,14 @@ function installTeamConfiguration(deps) {
   const status=()=>{
     const s=readState(),e=readEnvironment(),m=readMeta();
     const counts={caseRepositories:(s.caseLibraries||[]).filter(l=>l.repoUrl).length,quickActions:readActions().length,llmProviders:(s.llmProviders||[]).length,tts:!!e.ttsProvider?.url,phone:(s.deviceBindings?.phoneSerials||[]).length,glasses:(s.deviceBindings?.glassesSerials||[]).length,phonePackage:s.deviceBindings?.phoneDefaultPackage||'',glassesPackage:s.deviceBindings?.glassesDefaultPackage||''};
-    const configured=readActions().some(a=>a.userConfigured||a.gitSource||a.teamSource)||counts.caseRepositories||counts.llmProviders||counts.tts||counts.phone||counts.glasses||counts.phonePackage||counts.glassesPackage;
-    return {success:true,counts,deviceBindings:s.deviceBindings||{},onboarding:m.onboarding||null,showWelcome:!m.onboarding&&!configured,lastImport:m.lastImport||null};
+    return {success:true,counts,deviceBindings:s.deviceBindings||{},onboarding:m.onboarding||null,showWelcome:!m.onboarding,lastImport:m.lastImport||null};
   };
   register('team-config:status',async()=>status());
   register('team-config:onboarding',async(_e,p={})=>{
     if(!Number.isInteger(p.step)||p.step<0||p.step>2||!['active','dismissed','completed'].includes(p.status))throw Error('引导状态无效');
-    const m=readMeta();m.onboarding={step:p.step,status:p.status,version:1};writeMeta(m);notify('team-config:changed',{});return {success:true};
+    if(p.route!==undefined&&!['choice','team','manual'].includes(p.route))throw Error('引导路径无效');
+    if(p.demoIndex!==undefined&&(!Number.isInteger(p.demoIndex)||p.demoIndex<0||p.demoIndex>100))throw Error('演示进度无效');
+    const m=readMeta();m.onboarding={step:p.step,status:p.status,version:2,...(p.route!==undefined?{route:p.route}:{}),...(p.demoIndex!==undefined?{demoIndex:p.demoIndex}:{})};writeMeta(m);notify('team-config:changed',{});return {success:true};
   });
   register('team-config:devices',async(_e,p={})=>{
     const m=validateManifest({schemaVersion:'lenswiper.team-config.v1',id:'local',name:'local',version:'1',deviceBindings:p.deviceBindings});
@@ -42,7 +43,7 @@ function installTeamConfiguration(deps) {
     const result=await savePatch(s=>configurationPatch(s,m,true));notify('team-config:changed',{});return result;
   });
   register('team-config:validate',async(_e,p={})=>{
-    try{const m=validateManifest(p.manifest);return {success:true,summary:{id:m.id,name:m.name,version:m.version,caseRepositories:m.caseRepositories?.length||0,shortcutRepositories:m.shortcutRepositories?.length||0,quickActions:m.quickActions?.length||0,llmProviders:m.llmProviders?.length||0,tts:!!m.ttsProvider,devices:!!m.deviceBindings}};}
+    try{const m=validateManifest(p.manifest);return {success:true,summary:{id:m.id,name:m.name,version:m.version,caseRepositories:m.caseRepositories?.length||0,shortcutRepositories:m.shortcutRepositories?.length||0,quickActions:m.quickActions?.length||0,llmProviders:m.llmProviders?.length||0,tts:!!m.ttsProvider,devices:!!m.deviceBindings,localRuntimes:m.localRuntimes?.length||0}};}
     catch(error){return {success:false,error:error.message};}
   });
   register('team-config:import',async(_e,p={})=>{
@@ -55,7 +56,7 @@ function installTeamConfiguration(deps) {
     if(typeof p.includeKeys!=='boolean')return {success:false,error:'请选择是否包含 Key'};
     const state=readState(),environment=readEnvironment();
     // Do not request OS secret access when the user excluded credentials.
-    const manifest=exportManifest({state:p.includeKeys?reveal(state):state,environment:p.includeKeys?reveal(environment):environment,actions:readActions(),includeKeys:p.includeKeys,id:p.id||'my-team',name:p.name||'我的团队配置',version:p.version||'1',readScript:file=>fs.readFileSync(file,'utf8')});
+    const manifest=exportManifest({state:p.includeKeys?reveal(state):state,environment:p.includeKeys?reveal(environment):environment,actions:readActions(),includeKeys:p.includeKeys,id:p.id||'my-team',name:p.name||'我的团队配置',version:p.version||'1',localRuntimes:require('./agent/runtime-registry.cjs').configured(directory()),readScript:file=>fs.readFileSync(file,'utf8')});
     return saveFile(JSON.stringify(manifest,null,2)+'\n');
   });
   return {status};

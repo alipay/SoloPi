@@ -1,0 +1,10 @@
+{
+  "endpoint": "https://lab.example.invalid",
+  "tokenEnv": "LAB_NODE_A_TOKEN",
+  "capacity": 2,
+  "pollSeconds": 2,
+  "commandTimeout": 30,
+  "artifactAttempts": 5,
+  "solopiCommand": ["/opt/solopi-desktop/bin/solopi-desktop"],
+  "artifactRoots": ["/var/lib/solopi-desktop"]
+}

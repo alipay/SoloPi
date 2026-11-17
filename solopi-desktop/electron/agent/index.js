@@ -2,11 +2,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 const { AgentStore } = require('./store');
-const { AgentRuntime } = require('./runtime');
+const { createDesktopRuntime } = require('./desktop-runtime');
 const { McpConnections } = require('./mcp');
 const { extensionInventory, skillDetails } = require('./extensions');
 const { createTools } = require('./tools');
-function installAgent({ ipcMain, directory, invoke, readState, saveCase, provider, registerUpload, protect, reveal, getMirrorTargets, previewService, saveConfiguration, subscribeOperations, model, deviceOperation, getAgentModelOverride, getAgentModelProviderId }) {
+function installAgent({ ipcMain, registerService, directory, invoke, readState, saveCase, provider, registerUpload, protect, reveal, getMirrorTargets, previewService, saveConfiguration, subscribeOperations, model, deviceOperation, getAgentModelOverride, getAgentModelProviderId, virtualControl, getVirtualControlConfig, getVirtualDevice }) {
   require('../diagnostics').configure(directory());
   require('../diagnostics').record({event:'agent.start',version:require('../../package.json').version,platform:process.platform,arch:process.arch});
   const store = new AgentStore(() => path.join(directory(), 'agent', 'sessions'));
@@ -46,14 +46,18 @@ function installAgent({ ipcMain, directory, invoke, readState, saveCase, provide
     const file = configFile(); fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(`${file}.tmp`, JSON.stringify(protect(next)), { mode: 0o600 }); fs.renameSync(`${file}.tmp`, file);
     return { success: true };
   }
-  const runtime = new AgentRuntime({ store, refreshSkills: s => require('./skill-refresh').refreshLoadedSkills(s, skillsRoots(), config()), provider:async()=>require('./reasoning').conversationReasoning({...await provider(),requestPolicy:readPolicy()}), model, tools: createTools({ invoke, readState, saveCase, config, mcp, registerUpload, saveConfiguration, saveExtensions, deviceOperation,
+  const screenSettings = require('./screen-settings').createScreenSettings(directory);
+  const virtual = virtualControl && require('./virtual-tools').createVirtualTools({control:virtualControl,
+    controlConfig:getVirtualControlConfig, preview:(id,frame)=>{const sender=owners.get(id);if(sender&&!sender.isDestroyed())sender.send('agent:virtual-preview',{id,...frame});}});
+  const platformToolFactory = createTools({ invoke, readState, saveCase, config, mcp, registerUpload, saveConfiguration, saveExtensions, deviceOperation,
     commandDirectory: directory,
     executeCommand: (args, signal) => require('./command').executeCommand(args, { signal, directory: directory() }),
     installSkill: (args, signal) => require('./skill-install').installSkill(args, { signal, roots: skillsRoots, config, saveExtensions, directory: directory() }),
     downloadFile: (args, signal) => require('./download').downloadFile(args, { directory: path.join(directory(), 'agent', 'downloads'), signal }),
-    readAttachment: args => require('./attachments').readAttachment(path.join(directory(), 'agent', 'attachments'), args),
-    skillsRoots,
-  }), emit: s => {
+    readAttachment: args => require('./attachments').readAttachment(path.join(directory(), 'agent', 'attachments'), args), skillsRoots,
+  });
+  const platformApi = require('../platform-tool-api').createPlatformToolApi({ tools: (event, signal) => platformToolFactory(event, signal, { platformOnly: true }), directory });
+  const runtime = createDesktopRuntime({ store, provider:async()=>require('./reasoning').conversationReasoning({...await provider(),requestPolicy:readPolicy()}), model, refreshSkills:s=>require('./skill-refresh').refreshLoadedSkills(s,skillsRoots(),config()), getScreenMode:()=>screenSettings.load().screenMode, getVirtualChecks:()=>screenSettings.load().virtualChecks, getVirtualDevice, finishScreen:s=>virtual.finish(s), clearScreenRecovery:s=>virtualControl?.acknowledgeVirtualCleanup(s.id)===true, tools:(event,signal,session)=>session?.screenMode==='virtual' ? virtual.tools(session) : platformToolFactory(event,signal), emit: s => {
     const sender = owners.get(s.id);
     if(sender && !sender.isDestroyed() && !sender.isCrashed?.()) {
       try{const started=performance.now();const patch=updates.next(sessionView(s));const prepared=performance.now();sender.send('agent:changed',patch);require('../diagnostics').record({event:'agent.ui-sync',sessionId:s.id,stateUpdateMs:prepared-started,uiSyncMs:performance.now()-prepared,messageCount:patch.messages.length,toolCount:patch.calls.length,payloadBytes:Buffer.byteLength(JSON.stringify(patch)),historyMessageCount:s.messages.length,historyToolCount:s.calls.length,heapUsedBytes:process.memoryUsage().heapUsed,rssBytes:process.memoryUsage().rss});}
@@ -90,10 +94,12 @@ function installAgent({ ipcMain, directory, invoke, readState, saveCase, provide
       } catch (_) { /* Keep persisted wait; next entry retries reconciliation. */ }
     }
   }
+  // Share the same runtime service with renderer IPC and native CLI/remote tools.
+  (registerService || ((channel, handler) => ipcMain.handle(channel, handler)))('agent:runtime-config', (_event, args = {}) => require('./local-runtime.cjs').handle(directory(), args));
   const bound = new WeakSet();
   const rendererMeasurements = new WeakMap();
-  for (const action of ['performance','request-policy','save-request-policy','compare-model','comparison','stop-comparison','list','create','get','call-details','send','edit-queued','delete-queued','steer-queued','approve','approval-mode','stop','extensions','extension-inventory','skill-detail','test-mcp','save-extensions','models','select-model','mirror-targets','mirror-start','mirror-stop']) {
-    ipcMain.handle(`agent:${action}`, async (event, args = {}) => {
+  for (const action of ['screen-settings','save-screen-settings','virtual-cleanup','virtual-forget-recovery','virtual-report','performance','request-policy','save-request-policy','compare-model','comparison','stop-comparison','list','create','get','call-details','send','edit-queued','delete-queued','steer-queued','approve','approval-mode','stop','extensions','extension-inventory','skill-detail','test-mcp','save-extensions','models','select-model','mirror-targets','mirror-start','mirror-stop']) {
+    (registerService && require('./session-control-actions').includes(action) ? registerService : ipcMain.handle.bind(ipcMain))(`agent:${action}`, async (event, args = {}) => {
       try {
         if (!recovered) { store.list(true); recovered = true; }
         if (!bound.has(event.sender)) {
@@ -111,6 +117,8 @@ function installAgent({ ipcMain, directory, invoke, readState, saveCase, provide
           require('../diagnostics').record({event:'agent.renderer-performance',...measurements});
           return {success:true};
         }
+        if(action==='screen-settings')return {settings:screenSettings.load()};
+        if(action==='save-screen-settings')return {settings:screenSettings.save(args)};
         if (action === 'list') { await recoverWaiting(event); return { sessions: store.list() }; }
         if (action === 'create') { const s = store.create(); owners.set(s.id, event.sender); return { session: sessionView(s) }; }
         if(action==='request-policy')return {policy:readPolicy()};
@@ -147,13 +155,18 @@ function installAgent({ ipcMain, directory, invoke, readState, saveCase, provide
           const state = readState();
           const override=getAgentModelOverride?.();
           const models = (state.llmProviders || []).map(p => ({ id: p.id, name: override&&p.id===selectedId()?p.name+' / '+override:p.name, model: override&&p.id===selectedId()?override:p.model }));
+          const selection=require('./local-runtime.cjs').readSelection(directory());
+          if(selection.runtimeId){const local=await require('./local-runtime.cjs').chatModels(directory());return{models:[...models,...local.models],selectedModelId:selection.mode==='local-runtime'?local.selectedModelId:(models.some(p=>p.id===selectedId())?selectedId():models[0]?.id||'')};}
           return { models, selectedModelId: models.some(p => p.id === selectedId()) ? selectedId() : models[0]?.id || '' };
         }
         if (action === 'select-model') {
           if(getAgentModelOverride?.())throw Error('本次开发入口固定了 Agent 诊断模型；工作流模型配置未改变。重启时不指定模型覆盖即可正常切换。');
           if (runtime.active.size || comparisonRuns.size) throw Error('请先停止正在执行的对话或对照再切换模型');
+          if(typeof args.modelId==='string'&&args.modelId.startsWith('runtime:'))return{success:true,selection:await require('./local-runtime.cjs').selectChatModel(directory(),args.modelId)};
           if (typeof args.modelId !== 'string' || !readState().llmProviders?.some(p => p.id === args.modelId)) throw Error('模型配置不存在，请刷新模型列表');
-          return await saveConfiguration({ selectedModelId: args.modelId });
+          const result=await saveConfiguration({ selectedModelId: args.modelId });
+          if(result.success!==false)await require('./local-runtime.cjs').saveSelection(directory(),{mode:'api'});
+          return result;
         }
         if (action === 'extension-inventory') return extensionInventory(skillsRoots(), protect(config()), mcp.statuses);
         if (action === 'skill-detail') return skillDetails(skillsRoots(), config(), args.name);
@@ -179,7 +192,7 @@ function installAgent({ ipcMain, directory, invoke, readState, saveCase, provide
           if (action === 'mirror-stop') { await previewService.stop(event.sender.id, args.taskId && args.role ? args : undefined, args.force === true); return { success: true }; }
           const target = targets.find(t => t.role === args.role && t.taskId === args.taskId);
           if (!target) throw Error('当前用例未开启此设备投屏或任务已结束');
-          return await previewService.start(event.sender, target, args.id);
+          return await previewService.start(event.sender, {...target,restart:args.restart===true}, args.id);
         }
         owners.set(args.id, event.sender);
         if (action === 'call-details') {
@@ -195,9 +208,12 @@ function installAgent({ ipcMain, directory, invoke, readState, saveCase, provide
         }
         if (action === 'send') {
           if(comparisonRuns.size)throw Error('模型对照进行中，请等待或停止对照后发送');
-          store.get(args.id);
+          // Validate before importing attachments without hydrating the entire
+          // history twice: start/enqueue owns the actual session read.
+          fs.accessSync(store.file(args.id), fs.constants.R_OK);
           const attachments = require('./attachments').importAttachments(path.join(directory(), 'agent', 'attachments'), args.attachments || []);
-          if (args.enqueue === true || runtime.active.has(args.id)) return { session: sessionView(runtime.enqueue(args.id, args.text || (attachments.length ? '请查看附件' : ''), attachments)) };
+          runtime.contexts.set(args.id,event);
+          if (args.enqueue === true || runtime.active.has(args.id)) return { session: sessionView(await runtime.enqueue(args.id, args.text || (attachments.length ? '请查看附件' : ''), attachments)) };
           return { session: sessionView(await runtime.start(args.id, args.text || (attachments.length ? '请查看附件' : ''), event, attachments)) };
         }
         if (action === 'edit-queued') return {session:sessionView(runtime.editQueued(args.id,args.messageId,{text:args.text,editing:args.editing}))};
@@ -205,10 +221,27 @@ function installAgent({ ipcMain, directory, invoke, readState, saveCase, provide
         if (action === 'steer-queued') return { session: sessionView(await runtime.steerQueued(args.id, args.messageId, event)) };
         if (action === 'approval-mode') return { session: sessionView(await runtime.setApprovalMode(args.id, args.mode, event)) };
         if (action === 'approve') return { session: sessionView(await runtime.approve(args.id, args.callId, args.allow === true, event)) };
+        if(action==='virtual-cleanup')return {session:sessionView(await runtime.retryScreenCleanup(args.id))};
+        if(action==='virtual-forget-recovery')return {session:sessionView(runtime.retryScreenRecoveryRecord(args.id))};
+        if(action==='virtual-report'){
+          const session=store.get(args.id);
+          const file=require('../harness-control').validateVirtualReport(path.join(directory(),'harness-control'),session.screenReport?.reportPath);
+          if(await require('electron').shell.openPath(file))throw Error('无法打开本地报告');
+          return {success:true};
+        }
         if (action === 'stop') { runtime.stop(args.id); return { success: true }; }
       } catch (error) { return { success: false, error: error.message }; }
     });
   }
-  return { stopAll: async () => { for(const run of comparisonRuns.values())run.controller.abort();unsubscribe?.(); runtime.stopAll(); await mcp.closeAll(); } };
+  const remoteExecutors=new Set();
+  const remoteExecutor = (folder,options={}) => { const executor=require('../cluster-client/agent-executor.cjs').createAgentExecutor({...options,directory:folder,tools:platformToolFactory,provider,model});const close=executor.close.bind(executor);executor.close=async()=>{try{await close();}finally{remoteExecutors.delete(executor);}};remoteExecutors.add(executor);return executor; };
+  const inferContext=async(input,signal)=>{
+    if(!Array.isArray(input.messages)||!input.messages.length||input.messages.length>64||JSON.stringify(input.messages).length>280000||input.messages.some(m=>!['system','user','assistant'].includes(m.role)||typeof m.content!=='string'))throw Error('CONTEXT_MODEL_INPUT_INVALID');
+    if(Date.now()>input.expiresAt)throw Error('CONTEXT_MODEL_EXPIRED');
+    const selected=await provider();
+    const response=await require('./model').requestModel({provider:{...selected,thinking:'disabled',reasoningEffort:undefined},messages:input.messages,tools:[],signal:AbortSignal.any([signal,AbortSignal.timeout(Math.max(1,Math.min(90000,input.expiresAt-Date.now())))]),stream:false,retry:false,purpose:'context-retrieval',maxTokens:Math.max(64,Math.min(4096,input.maxTokens||2048))});
+    return {text:response.content,model:selected.model};
+  };
+  return { platformApi, remoteExecutor, inferContext, stopAll: async () => { for(const run of comparisonRuns.values())run.controller.abort();unsubscribe?.(); await Promise.all([...remoteExecutors].map(e=>e.close()));remoteExecutors.clear(); await runtime.stopAll(); await mcp.closeAll(); } };
 }
 module.exports = { installAgent };

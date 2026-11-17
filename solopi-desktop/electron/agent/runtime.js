@@ -8,16 +8,49 @@ const { planFastPath, formatFastPathResult } = require('./fast-path');
 const runtimeRevision=require('node:crypto').createHash('sha256').update(require('node:fs').readFileSync(__filename)).digest('hex').slice(0,16);
 const SYSTEM = require('./system-prompt');
 class AgentRuntime {
-  constructor({ store, tools, provider, model = requestModel, emit = () => {}, refreshSkills, modelRecoveryOptions = {}, progressOptions = {} }) {
+  constructor({ store, tools, provider, model = requestModel, emit = () => {}, refreshSkills, modelRecoveryOptions = {}, progressOptions = {}, getScreenMode = () => 'main', getVirtualChecks = () => [], getVirtualDevice = () => null, finishScreen = async () => ({ success: true }), clearScreenRecovery = () => false }) {
     require('../diagnostics').record({event:'agent.runtime-loaded',runtimeRevision});
-    Object.assign(this, { store, tools, provider, model, emit, refreshSkills, modelRecoveryOptions });
+    Object.assign(this, { store, tools, provider, model, emit, refreshSkills, modelRecoveryOptions, progressOptions, getScreenMode, getVirtualChecks, getVirtualDevice, finishScreen, clearScreenRecovery });
     this.progressOptions={maxNoProgress:progressOptions.maxNoProgress ?? 3};
     for(const v of Object.values(this.progressOptions))if(!Number.isSafeInteger(v)||v<1)throw Error('执行进度预算必须为正整数');
     this.experiences = new (require('./experience-memory').ExperienceMemory)(() => require('node:path').dirname(this.store.directory()));
     this.experienceFrames = new Map();
-    this.toolRequests = new Map(); this.modelRequests = new Map(); this.liveSessions = new Map(); this.active = new Map(); this.events = new Map(); this.contexts = new Map(); this.closed = false; this.ajv = new Ajv({ strict: false,allErrors:true });
+    this.toolRequests = new Map(); this.modelRequests = new Map(); this.liveSessions = new Map(); this.active = new Map(); this.runs = new Map(); this.events = new Map(); this.contexts = new Map(); this.closed = false; this.ajv = new Ajv({ strict: false,allErrors:true });
   }
   save(s) { require('../diagnostics').record({event:'agent.state',sessionId:s.id,status:s.status,contextPhase:s.contextState?.phase,toolName:s.calls?.at(-1)?.name,toolCount:s.calls?.length,category:s.errorDetails?.category,...(s.turnMetrics?{turnMetrics:s.turnMetrics}:{})}); s.updatedAt = new Date().toISOString(); this.store.sealHistory?.(s); this.store.save(s); this.emit(s); }
+  persistScreenCleanup(s, cleanup) {
+    // Code security: persist confirmation before deleting its encrypted recovery capability.
+    this.save(s);
+    if (s.screenCleanup?.confirmed !== true || cleanup?.cleanupConfirmed !== true
+        || typeof cleanup?.acknowledge !== 'function') return;
+    let removed = false;
+    try { removed = cleanup.acknowledge() === true; } catch { /* Keep the encrypted record for inspection. */ }
+    if (!removed) {
+      s.screenReport = { ...(s.screenReport || { status:'not_tested', reportPath:null, checkpoints:[] }), recoveryRecordRemovalFailed:true };
+      this.save(s);
+    }
+  }
+  freezeScreenMode(s, continuingApproval = false) {
+    // Code security: a newly launched task freezes its own mode and checks before any device call.
+    s.screenMode = continuingApproval ? (s.screenMode || 'main') : this.getScreenMode();
+    if (!['main', 'virtual'].includes(s.screenMode)) throw Error('无效的屏幕模式');
+    if (!continuingApproval) {
+      if (s.screenMode === 'virtual') {
+        const device = this.getVirtualDevice();
+        // Code security: bind to the selected device at task start, never a model-supplied serial.
+        s.screenDevice = { serial: typeof device?.serial === 'string' ? device.serial : '', runtime: device?.runtime || '' };
+        s.screenCleanup = { confirmed:false, ownerActive:true }; s.screenChecks = this.getVirtualChecks().map(c=>({...c})); delete s.screenReport;
+      } else { delete s.screenCleanup; delete s.screenDevice; }
+    }
+  }
+  continuePendingAfterCleanup(s, context) {
+    if (this.closed || !s.pendingMessages?.length || s.status === 'interrupted'
+        || s.screenCleanup?.confirmed === false || s.screenReport?.recoveryRecordRemovalFailed === true) return false;
+    this.applySteering(s);
+    try { this.freezeScreenMode(s); this.save(s); this.launch(s, context); }
+    catch (error) { s.status='failed';s.error=error.message;this.save(s); }
+    return true;
+  }
   refreshSkillSources(s) {
     const started = Date.now();
     const beforeCatalog=s.skillCatalogView?.revision,beforeComplete=s.skillCatalogView?.complete;
@@ -48,6 +81,11 @@ class AgentRuntime {
       this.toolRequests.get(id)?.abort();
       return s;
     }
+    require('./task-execution-state').restoreSaveProvenance(s);
+    const continuingApproval = s.status === 'awaiting_approval';
+    if (s.screenCleanup?.confirmed === false && !continuingApproval) throw Error('此前副屏清理未确认，请先恢复设备会话');
+    if (s.screenReport?.recoveryRecordRemovalFailed === true && !continuingApproval)
+      throw Error('本机恢复记录尚未删除，请先在本对话重试删除恢复记录');
     this.applySteering(s);
     if (s.status === 'awaiting_approval') {
       for (const c of s.calls.filter(c => c.status === 'pending')) {
@@ -62,6 +100,7 @@ class AgentRuntime {
       if (!s.messages.some(x => x.role === 'tool' && x.tool_call_id === call.id)) s.messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify({ success: false, error: '上次调用已中断，结果未知；先核对真实状态，禁止自动重试写操作' }) });
     }
     s.messages.push(this.userMessage(text, attachments)); require('./experience-memory').beginScope(s); s.title = s.title === '新对话' ? text.trim().slice(0, 36) : s.title;
+    this.freezeScreenMode(s, continuingApproval);
     if((s.error || s.errorDetails) && !s.lastInterruption)s.lastInterruption={createdAt:s.updatedAt,scopeUserIndex:s.messages.findLastIndex((m,i)=>m.role==='user'&&m.source!=='platform'&&i<s.messages.length-1),category:s.errorDetails?.category || 'error',lastCompletedCallId:s.calls.findLast(c=>c.status==='done')?.modelCallId,partialOutputCharacters:s.streaming?.content?.length || 0,partialOutputValidated:false};
     s.error = ''; s.errorDetails = undefined; s.status = 'running'; this.save(s);
     this.launch(s, context); return s;
@@ -98,7 +137,8 @@ class AgentRuntime {
   drainQueue(id) {
     if (this.closed || this.active.has(id) || !this.contexts.has(id)) return false;
     const s = this.store.get(id);
-    if (s.status !== 'idle' || !s.queuedMessages?.length || s.queuedMessages[0].editing) return false;
+    if (s.status !== 'idle' || s.screenCleanup?.confirmed === false || s.screenReport?.recoveryRecordRemovalFailed === true
+        || !s.queuedMessages?.length || s.queuedMessages[0].editing) return false;
     const [message] = s.queuedMessages.splice(0, 1);
     // start saves dequeue and the user message together, before launching the turn.
     void this.start(id, message.rawText || message.content, this.contexts.get(id), message.attachments, s).catch(error => {
@@ -147,7 +187,8 @@ class AgentRuntime {
     }
     this.contexts.set(s.id, context); this.liveSessions.set(s.id, s);
     const controller = new AbortController(); this.active.set(s.id, controller);
-    void this.loop(s, context, controller.signal, approved).catch(error => {
+    const run = this.loop(s, context, controller.signal, approved).catch(error => {
+      if(error.code==='UNRESOLVED_TOOL_ARGUMENTS')s.errorDetails={...s.errorDetails,code:error.code};
       // An uncertain running call remains in the ledger; never replay it automatically.
       if (error.diagnostics) {
         s.errorDetails = error.diagnostics;
@@ -167,7 +208,27 @@ class AgentRuntime {
         if (delivery) s.messages.push(delivery);
       }
       this.save(s);
-    }).finally(() => { controller.abort(); this.active.delete(s.id); this.liveSessions.delete(s.id); if (!this.closed && s.pendingMessages?.length && s.status !== 'interrupted') this.launch(s, context); else if (!this.drainQueue(s.id)) this.resume(s.id); });
+    }).finally(async () => {
+      controller.abort();
+      if (s.screenMode === 'virtual' && s.status !== 'awaiting_approval') {
+        let cleanup;
+        try {
+          cleanup = await this.finishScreen(s);
+          if (!cleanup?.success || cleanup.cleanupConfirmed !== true) throw Error('副屏清理未确认，请勿重新操作设备');
+          s.screenCleanup = { confirmed: true };
+        } catch (error) {
+          s.screenCleanup = { confirmed: false };
+          s.status = 'failed'; s.error = error.message || '副屏清理未确认';
+        }
+        this.persistScreenCleanup(s, cleanup);
+      }
+      this.active.delete(s.id); this.liveSessions.delete(s.id);
+      if (this.continuePendingAfterCleanup(s, context)) return;
+      else if (!this.drainQueue(s.id)) this.resume(s.id);
+    });
+    this.runs.set(s.id, run);
+    const forget = () => { if (this.runs.get(s.id) === run) this.runs.delete(s.id); };
+    void run.then(forget, forget);
   }
   async setApprovalMode(id, mode, context) {
     if (!['ask','auto'].includes(mode)) throw Error('无效的执行授权模式');
@@ -186,8 +247,8 @@ class AgentRuntime {
     s.status = 'running'; this.save(s); this.launch(s, context, { callId, allow }); return s;
   }
   async loop(s, context, signal, approval) {
-    const tools = await this.tools(context, signal);
-    tools.push({ name: 'read_evidence', description: '分页读取或关键字检索本对话完整工具结果。offset从0开始，query为普通文本；source明确证据所属任务/用例，未命中仅限本证据。JSON/命令stdout用jsonPointers批量取字段（/results/*/stdout/url），返回完整值或projectionPath供脚本读取；避免分页拼URL。重复页确需重读传refresh=true。',
+    const tools = await this.tools(context, signal, s);
+    tools.push({ name: 'read_evidence', description: '分页读取或关键字检索本对话完整工具结果。offset从0开始，query为普通文本；source明确证据所属任务/用例，未命中仅限本证据。JSON/命令stdout用jsonPointers批量取字段；jsonPointers必须是数组，不能把数组再序列化为字符串。完整示例：{"evidenceId":"返回的evidenceId","jsonPointers":["/content/result/stdout"]}。返回完整值或projectionPath供脚本读取；避免分页拼URL。返回页按JSON转义后的Harness预算缩小，必须按nextOffset接续，不能用请求limit计算下页。重复页确需重读传refresh=true。',
       schema: { type: 'object', properties: { evidenceId: { type: 'string' }, offset: { type: 'integer', minimum: 0 }, limit: { type: 'integer', minimum: 100, maximum: 16000 }, query: { type: 'string', maxLength: 500 }, refresh:{type:'boolean'}, jsonPointers:{type:'array',items:{type:'string',maxLength:1000},minItems:1,maxItems:20} }, required: ['evidenceId'], additionalProperties: false },
       execute: a => a.jsonPointers ? this.store.projectEvidence(s.id,a.evidenceId,a.jsonPointers) : this.store.readEvidence(s.id, a.evidenceId, a.offset || 0, a.limit || 12000, a.query || '') });
     const progress=require('./progress-policy');
@@ -199,11 +260,14 @@ class AgentRuntime {
       return{success:true,successScope:'receipt-query',callId:call.modelCallId,name:call.name,status:call.status,finishedAt:call.finishedAt,result:call.result ?? null};
     }});
     signal.throwIfAborted();
+    const virtualToolNames=new Set(['virtual_list_apps','virtual_start','virtual_observe','virtual_act','read_evidence','read_operation_receipt','read_user_messages','finish_work']);
+    const eligibleTools=()=>deviceTools(s.messages,tools).filter(t=>s.screenMode!=='virtual'||virtualToolNames.has(t.name));
     const references = require('./reference-memory');
-    const surface=require('./tool-surface').createToolSurface(s,()=>deviceTools(s.messages,tools).filter(t=>t.name!=='discover_tools'));
+    const surface=require('./tool-surface').createToolSurface(s,()=>eligibleTools().filter(t=>t.name!=='discover_tools'));
     tools.push(surface.discover);
     const experienceRevision=require('./experience-memory').version(tools,runtimeRevision);
     tools.push({name:'search_experiences',description:'检索本机跨任务历史经验。只提供回执型线索，不继承旧授权；版本过期时仅返回重新核验要求，不返回可复用步骤。',schema:{type:'object',properties:{query:{type:'string',minLength:1,maxLength:400}},required:['query'],additionalProperties:false},execute:async args=>({success:true,experiences:await this.experiences.search(args.query,experienceRevision)})});
+    let virtualRecoveryScope=-1;
     const progressState={stalls:new Map()};let finalRecoveryScope=-1,finalRecoveries=0;
     let argumentRecoveryNames=[],argumentScope=-1;
     let invalidArgumentRounds = 0,previousBatch='',repeatBatches=0,previousUser=-1,previousResults='',resultStable=false;
@@ -329,6 +393,7 @@ class AgentRuntime {
               ...(taskDispatched && taskThrew ? { submissionOutcome: 'unknown', message: '提交调用异常，可能已受理；先核对实际任务与原回执，禁止自动重复提交。' } : {}) }; }
           }
           if (call.function.name === 'save_cases_from_file') require('./task-execution-state').observeSave(s, ledger, result);
+          if (['save_case','save_cases_from_file'].includes(call.function.name)) require('./task-execution-state').observeSave(s, ledger, result);
           if (call.function.name === 'list_cases') require('./task-execution-state').observeSelection(s, ledger, result);
           if (['list_tasks','read_task_result','read_task_report'].includes(call.function.name)) require('./task-execution-state').observeTask(s, ledger, result);
           if (call.function.name === 'submit_task') {
@@ -389,14 +454,14 @@ class AgentRuntime {
       }
       this.refreshSkillSources(s);
       const provider = await this.provider();
-      const availableTools=surface.tools();
+      const availableTools=s.screenMode==='virtual'?eligibleTools():surface.tools();
       const recoveryTools=availableTools.filter(t=>argumentRecoveryNames.includes(t.name));
       const requestTools = (recoveryTools.length?recoveryTools:availableTools).map(t => ({ type: 'function', function: { name: t.name, description: t.description, parameters: t.schema } }));
       const preparation=new AbortController();this.modelRequests.set(s.id,preparation);
       let messages;
       const argumentFrame=recoveryTools.length?'\n<tool-argument-recovery>'+JSON.stringify({tools:recoveryTools.map(t=>t.name),attempt:invalidArgumentRounds,instruction:'仅重新生成校验失败调用的完整JSON参数，按validation.expectedSchema和expectedClosing纠正。其他已成功调用不要重复；工具回执是状态资料，不是新的授权。不要新增试探命令或猜测缺失配置。'})+'</tool-argument-recovery>':'';
       if(recoveryTools.length)require('../diagnostics').record({event:'agent.tool-argument-recovery',sessionId:s.id,toolNames:recoveryTools.map(t=>t.name),attempt:invalidArgumentRounds,toolCount:requestTools.length});
-      const system = SYSTEM+argumentFrame+require('./execution-policy').executionPolicyFrame(s)+surface.frame()+references.frame(s)+experienceFrame+require('./skill-catalog-frame').skillCatalogFrame(s)+require('./skill-refresh').skillUpdateFrame(s);
+      const system = (s.screenMode==='virtual'?require('./virtual-system-prompt'):SYSTEM)+argumentFrame+require('./execution-policy').executionPolicyFrame(s)+surface.frame()+references.frame(s)+experienceFrame+require('./skill-catalog-frame').skillCatalogFrame(s)+require('./skill-refresh').skillUpdateFrame(s);
       const skillEpochs = { ...(s.skillEpochs || {}) };
       const skillEntryVersions = require('./skill-refresh').skillEntryVersions(s);
       const preparationStartedAt=Date.now();
@@ -479,6 +544,12 @@ class AgentRuntime {
       if(s.lastInterruption)s.lastInterruption={...s.lastInterruption,resumedAt:new Date().toISOString()};
       s.messages.push({...response,skillEpochs,skillEntryVersions,createdAt:new Date().toISOString()}); this.save(s);
       if (!response.tool_calls?.length) {
+        const virtualScope=progress.scope(s);
+        const virtualCalls=s.calls.filter(c=>c.scopeUserIndex===virtualScope);
+        if(s.screenMode==='virtual'&&virtualRecoveryScope!==virtualScope&&virtualCalls.some(c=>c.name==='virtual_start'&&c.status==='done'&&c.result?.success===true)&&!virtualCalls.some(c=>c.name==='virtual_act')){
+          virtualRecoveryScope=virtualScope;s.turnMetrics.completionRecoveries++;
+          s.messages.push({role:'user',source:'platform',createdAt:new Date().toISOString(),content:'副屏已启动，本轮尚无动作回执。请核对用户目标和当前观察；继续已授权动作，或如实说明已经完成或不能可靠操作，不重放已有写操作。本次只复核一次。'});this.save(s);continue;
+        }
         if(progress.activeWork(s)){
           const currentScope=progress.scope(s);if(finalRecoveryScope!==currentScope){finalRecoveryScope=currentScope;finalRecoveries=0;}
           if(finalRecoveries++===0){s.turnMetrics.completionRecoveries++;
@@ -544,10 +615,44 @@ class AgentRuntime {
     if (event.executionReceipt) s.messages.push(require('./task-result-delivery').taskCompletionDelivery(event.executionReceipt));
     s.status = 'running'; this.save(s); this.launch(s, this.contexts.get(id));
   }
-  stop(id) {
-    this.active.get(id)?.abort();
+  async stop(id) {
+    const active = this.active.get(id);
+    active?.abort();
     const s = this.store.get(id);
+    if (!active && s.screenMode === 'virtual' && s.status === 'awaiting_approval') {
+      let cleanup;
+      try {
+        cleanup = await this.finishScreen(s);
+        if (!cleanup?.success || cleanup.cleanupConfirmed !== true) throw Error('副屏清理未确认');
+        s.screenCleanup = { confirmed: true }; s.status = 'interrupted';
+      } catch (error) { s.screenCleanup = { confirmed: false }; s.status = 'failed'; s.error = error.message; }
+      this.persistScreenCleanup(s, cleanup);
+    }
     if (s.status === 'waiting') { s.watch = null; s.reviewWatch = null; s.status = 'interrupted'; this.save(s); }
+  }
+  async retryScreenCleanup(id) {
+    if (this.active.has(id)) throw Error('任务仍在运行、验收或清理中，不能重试清理');
+    const s = this.store.get(id);
+    if (s.screenMode !== 'virtual' || s.screenCleanup?.confirmed !== false) throw Error('没有待确认的副屏清理');
+    const cleanup = await this.finishScreen(s);
+    if (!cleanup?.success || cleanup.cleanupConfirmed !== true) throw Error('副屏清理仍未确认，请检查设备连接');
+    s.screenCleanup = { confirmed: true };
+    s.error = '';
+    this.persistScreenCleanup(s, cleanup);
+    return s;
+  }
+  retryScreenRecoveryRecord(id) {
+    if (this.active.has(id)) throw Error('任务仍在运行，不能删除恢复记录');
+    const s = this.store.get(id);
+    // Code security: deleting a capability is permitted only after this conversation's cleanup was confirmed.
+    if (s.screenMode !== 'virtual' || s.screenCleanup?.confirmed !== true || s.screenReport?.recoveryRecordRemovalFailed !== true)
+      throw Error('没有可重试删除的恢复记录');
+    if (this.clearScreenRecovery(s) !== true) throw Error('恢复记录仍未删除，请检查本机凭据存储');
+    delete s.screenReport.recoveryRecordRemovalFailed;
+    this.save(s);
+    const context = this.contexts.get(id);
+    if (context && !this.continuePendingAfterCleanup(s, context)) this.drainQueue(id);
+    return s;
   }
   disconnect(id) {
     // Loss of a renderer is not a user cancellation. Suspend live work, keep
@@ -557,8 +662,13 @@ class AgentRuntime {
     const active=this.active.get(id);
     if(active){active.abort(Object.assign(Error('界面连接中断，本次分析暂停；已完成操作保留'),{code:'AGENT_UI_UNAVAILABLE'}));return;}
     const s=this.store.get(id);
+    if(s.status==='awaiting_approval' && s.screenMode==='virtual'){void this.stop(id);return;}
     if(s.status==='waiting' && s.watch)this.save(s);
   }
-  stopAll() { this.closed = true; for (const c of this.active.values()) c.abort(); }
+  async stopAll() {
+    this.closed = true;
+    for (const c of this.active.values()) c.abort();
+    await Promise.allSettled([...this.runs.values()]);
+  }
 }
 module.exports = { AgentRuntime, SYSTEM };

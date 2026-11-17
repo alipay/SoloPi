@@ -8,7 +8,11 @@ function compactionReasoning(provider = {}) {
   return { ...provider, reasoningReplay: undefined };
 }
 function conversationReasoning(provider={}) {
-  return provider.requestPolicy?.conversationReasoning==='low' ? {...provider,reasoningEffort:'low'} : {...provider};
+  if(provider.requestPolicy?.conversationReasoning!=='low')return {...provider};
+  // An explicit per-purpose effort overrides a stale provider-level off flag.
+  // Do not invent a provider-specific thinking option without capability proof.
+  return {...provider,reasoningEffort:'low',...(provider.thinking==='disabled'
+    ? {thinking:provider.capabilities?.thinking==='supported'?'enabled':undefined} : {})};
 }
 // Only a positively probed capability permits sending a new provider option.
 // Recovery affects this summary attempt alone, never the saved conversation config.

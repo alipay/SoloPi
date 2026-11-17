@@ -1,9 +1,9 @@
-// Use the executing case snapshot, never current editor defaults or model guesses.
+// Use the executing snapshot plus this task's explicit overrides, never editor defaults.
 function mirrorTargets(task) {
   if (!task || task.source !== 'agent' || !['running', 'submitted'].includes(task.status)) return [];
   const record = task.cases?.find(c => c.status === 'running') || task.cases?.find(c => c.status === 'pending');
   const c = record?.caseSnapshot;
-  const config = c?.steps?.find(s => s.type === 'start')?.config || {};
+  const config = { ...(c?.steps?.find(s => s.type === 'start')?.config || {}), ...task.startOptions };
   return ['phone', 'glasses'].flatMap(role => {
     const enabled = config[role === 'phone' ? 'showPhoneScreen' : 'showGlassesScreen'];
     const serial = c?.defaults?.[`${role}Serial`];

@@ -171,6 +171,8 @@ test('real fs.watch atomic replacement reaches the persisted conflict check with
     });
   });
   manager.sync([{ libraryId: 'library', repoPath: dir, casesRoot: 'cases' }]);
+  // macOS arms the underlying FSEvents stream asynchronously. Let registration settle before the atomic replacement.
+  await new Promise(resolve => setTimeout(resolve, 100));
   const temporary = path.join(casesDir, 'library.tmp');
   fs.writeFileSync(temporary, `${JSON.stringify(oldSource)}\n`); fs.renameSync(temporary, sourceFile);
   const result = await observed;

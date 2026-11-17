@@ -1,3 +1,20 @@
+import DiagnosticLogExport from './DiagnosticLogExport';
+import { WorkflowCleanupToolbar } from './WorkflowCleanupToolbar';
+import { moveWorkflowStepToPhase, migrateLegacyCleanupEdges } from '../../electron/workflow-cleanup';
+import {ApiModelSettings} from './ApiModelSettings';
+import {ModelBackendSettings, type RuntimeApi} from './ModelBackendSettings';
+const runtimeModelApi:RuntimeApi=async input=>{if(!window.glassbox?.ipcRenderer)throw Error('需要 Desktop 主进程');return window.glassbox.ipcRenderer.invoke('agent:runtime-config',input);};
+import { useReportPerformance } from '../hooks/use-report-performance';
+import ReportViewport from './ReportViewport';
+import ReportScreenshot from './ReportScreenshot';
+import { createReportThumbnailStore } from '../lib/report-thumbnail-store';
+import { LabConnectionSettings } from './LabConnectionSettings';
+import { DeviceGroupsSettings } from './DeviceGroupsSettings';
+import { captureLibraryRefreshState, assertLibraryRefreshState } from '../../electron/case-library-refresh-state';
+import { createReportDetailRequests } from '../lib/report-detail-request';
+import { CaseLibrarySyncHint } from './CaseLibrarySyncHint';
+import { parallelPresentation, decorateParallelEdges } from '../../electron/workflow-parallel';
+import { canonicalCaseLibraryRepoUrl } from '../../electron/case-library-identity';
 import { loadTaskForFailedRerun } from '../lib/task-rerun-source';
 import { useTaskActionFeedback } from '../hooks/use-task-action-feedback';
 import TaskActionNotice from './TaskActionNotice';
@@ -13,7 +30,9 @@ import { createJsonExtractRegexFromSample, createTtsExtractRegexFromSelection } 
 import AgentMirrors from './AgentMirrors';
 import WorkflowMirrors from './WorkflowMirrors';
 import AgentPage from './AgentPage';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { HarnessControlPage } from './HarnessControlPage';
+import AgentSettingsCenter, { type AgentSettingsSection } from './AgentSettingsCenter';
+import { useCallback, useEffect, useMemo, useRef, useState, Profiler } from 'react';
 import { AudioParameterField, WorkflowVariablePanel } from './WorkflowVariablePanel';
 import { CaseTreeDisclosure, toggleTreeBranch } from './CaseTreeDisclosure';
 import { mergeCaseUpdate } from '../../electron/case-update';
@@ -54,6 +73,7 @@ import {
   GitBranch,
   Globe2,
   Image as ImageIcon,
+  Info,
   ListChecks,
   Loader2,
   MessageSquare,
@@ -88,7 +108,7 @@ import { QuickActions } from './QuickActions';
 import { QuickActionsSettings } from './QuickActionsSettings';
 import { CommonSitesPage } from './CommonSitesPage';
 import { CommonSitesSettings } from './CommonSitesSettings';
-import { PerformanceTestPage, CrashSummary, crashSummary, type CrashStats } from './PerformanceTestPage';
+import { PerformanceTestPage, exportReport, CrashSummary, crashSummary, type CrashStats } from './PerformanceTestPage';
 import { BugreportAnalysisPage } from './BugreportAnalysisPage';
 import {
   getMobileUiTapPoint,
@@ -225,6 +245,7 @@ interface AutomationTaskRecord {
   reportRoot?: string;
   reportDetailPath?: string;
   reportDetailLoaded?: boolean;
+  reportDetailRetained?: boolean;
   reportPersistenceError?: string;
   reportPackage?: { success?: boolean; path?: string; error?: string };
   validationSummary?: {
@@ -243,6 +264,8 @@ interface AutomationTaskRecord {
   threadStacks?: Array<{ id: string; target: string; packageName: string; pid?: string; caseId?: string; round?: number; reason: string; startedAt: string; status: string; errorCode?: string; error?: string; files: Array<{ path: string; remotePath: string }>; commands?: unknown[] }>;
   performanceOptions?: AutomationTaskPerformanceOptions;
   performanceReports?: AutomationTaskPerformanceReports;
+  performanceLoading?: Partial<Record<AutomationTaskPerformanceTarget, boolean>>;
+  performanceErrors?: Partial<Record<AutomationTaskPerformanceTarget, string>>;
   startOptions?: AutomationTaskStartOptions;
   devices?: Record<string, unknown>;
   runtimeEnvironment?: Record<string, unknown>;
@@ -277,13 +300,21 @@ function mergeAutomationTaskRecords(
     const incomingIsNewer = incomingTime > existingTime
       || (incomingTime === existingTime && incomingSequence >= existingSequence);
     if (!incomingIsNewer) return;
+    const sameReportSource = !task.reportDetailPath || task.reportDetailPath === existing.reportDetailPath;
+    const reportDetailLoaded = sameReportSource && task.taskRevision && task.taskRevision === existing.taskRevision
+      ? (task.reportDetailLoaded === true ? true : existing.reportDetailLoaded) : task.reportDetailLoaded;
+    // Keep the last complete snapshot visible while the latest revision is being read.
+    const keepReportSnapshot = task.reportDetailLoaded === false && sameReportSource
+      && (existing.reportDetailLoaded === true || existing.reportDetailRetained === true);
+    const cases = keepReportSnapshot || (sameReportSource && task.reportDetailLoaded !== true && !task.cases?.length)
+      ? existing.cases : task.cases;
     merged.set(task.id, {
       ...existing,
       ...task,
-      cases: task.cases?.length ? task.cases : existing.cases,
-      performanceReports: task.performanceReports || existing.performanceReports,
-      reportDetailLoaded: task.taskRevision && task.taskRevision === existing.taskRevision
-        ? existing.reportDetailLoaded : task.reportDetailLoaded,
+      cases,
+      performanceReports: task.performanceReports || (sameReportSource ? existing.performanceReports : undefined),
+      reportDetailLoaded,
+      reportDetailRetained: keepReportSnapshot && reportDetailLoaded === false ? true : undefined,
     });
   });
   return Array.from(merged.values()).sort((left, right) => (
@@ -1074,7 +1105,7 @@ function ensureAssertScreenshotParam(component: TestComponent) {
     param.key === 'captureScreenshotOnPass'
       ? {
           ...param,
-          defaultValue: 'true',
+          defaultValue: param.defaultValue ?? 'true',
           helperText: param.helperText || 'true / false；无论检测通过或失败都会截屏',
         }
       : param
@@ -2027,6 +2058,7 @@ function stepsToNodes(
 }
 
 function stepsToEdges(steps: AutomationStep[]): Edge[] {
+  steps = steps.filter(step => step.phase !== 'cleanup');
   return steps.slice(1).map((step, index) => ({
     id: `edge-${steps[index].id}-${step.id}`,
     source: steps[index].id,
@@ -2188,18 +2220,18 @@ function normalizeStoredCase(testCase: AutomationCase) {
             ...step,
             config: {
               ...(step.config || {}),
-              recordGlassesScreen: false,
+              recordGlassesScreen: step.config?.recordGlassesScreen ?? false,
             },
           }
         : step.type === 'component' && getAssertExtractionDefaultName(step, componentMap)
           ? ensureAssertExtractionInputs({
               ...step,
               timeoutMs: getAssertExtractionDefaultName(step, componentMap) === DEFAULT_JSON_ASSERT_VARIABLE_NAME
-                ? Math.max(Number(step.timeoutMs || 0), 45000)
+                ? (step.timeoutMs ?? 45000)
                 : step.timeoutMs,
               inputs: {
                 ...(step.inputs || {}),
-                captureScreenshotOnPass: 'true',
+                captureScreenshotOnPass: step.inputs?.captureScreenshotOnPass ?? 'true',
               },
             }, normalizedCase.steps, getAssertExtractionDefaultName(step, componentMap))
           : isAssertComponentStep(step, componentMap)
@@ -2207,11 +2239,11 @@ function normalizeStoredCase(testCase: AutomationCase) {
                 ...step,
                 inputs: {
                   ...(step.inputs || {}),
-                  captureScreenshotOnPass: 'true',
+                  captureScreenshotOnPass: step.inputs?.captureScreenshotOnPass ?? 'true',
                 },
                 config: {
                   ...(step.config || {}),
-                  captureScreenshotOnPass: true,
+                  captureScreenshotOnPass: step.config?.captureScreenshotOnPass ?? true,
                 },
               }
             : step
@@ -2239,8 +2271,13 @@ function migrateCaseNodePositions(testCase: AutomationCase, rawPositions: unknow
 }
 
 function ensureBoundaryEdges(testCase: AutomationCase, edges: Edge[]) {
+  const migration = migrateLegacyCleanupEdges(testCase, edges || []);
+  // Preserve an ambiguous legacy graph for validation/review instead of
+  // persisting a filtered graph with lost business connections.
+  if (migration.errors.length) return edges || [];
+  testCase = {...testCase, steps:testCase.steps.filter(step => step.phase !== 'cleanup')};
   const stepIds = new Set(testCase.steps.map((step) => step.id));
-  const validEdges = (edges || []).filter((edge) => stepIds.has(edge.source) && stepIds.has(edge.target));
+  const validEdges = migration.edges.filter((edge) => stepIds.has(edge.source) && stepIds.has(edge.target));
   const sourceEdges = normalizeConditionalEdgeHandles(
     testCase,
     validEdges.length ? validEdges : stepsToEdges(testCase.steps)
@@ -2672,7 +2709,7 @@ interface StoredWorkflowEditorState {
   deviceBindings?: DeviceBindings;
 }
 
-type SettingsSection = 'team' | 'model' | 'environment' | 'tts' | 'quick-actions' | 'sites' | 'device';
+type SettingsSection = AgentSettingsSection | 'device-groups' | 'lab' | 'team' | 'model' | 'environment' | 'tts' | 'quick-actions' | 'sites' | 'device';
 
 interface TtsProviderParam {
   key: string;
@@ -2792,7 +2829,8 @@ function slimAutomationTaskForLocalStorage(task: AutomationTaskRecord): Automati
 
   return {
     ...task,
-    cases: taskCases.slice(0, maxLocalStorageTaskCases).map((caseRecord) => ({
+    // Persisted reports are loaded by ID; browser storage keeps their summary only.
+    cases: (task.reportDetailPath ? [] : taskCases.slice(0, maxLocalStorageTaskCases)).map((caseRecord) => ({
       ...caseRecord,
       results: (caseRecord.results || []).slice(-maxLocalStorageCaseResults),
       artifacts: slimWorkflowRunArtifacts(caseRecord.artifacts),
@@ -2808,7 +2846,8 @@ function slimAutomationTaskForLocalStorage(task: AutomationTaskRecord): Automati
           ])
         ) as AutomationTaskPerformanceReports
       : undefined,
-    reportDetailLoaded: task.reportDetailLoaded === false ? false : undefined,
+    reportDetailLoaded: task.reportDetailPath || task.reportDetailLoaded === false || taskCases.length > maxLocalStorageTaskCases ? false : undefined,
+    reportDetailRetained: undefined,
     summary: task.summary || {
       successCount,
       failedCount,
@@ -3362,10 +3401,21 @@ function AssertVariableExtractionCard({
   );
 }
 
-export default function WorkflowEditor() {
-  const storedWorkflowState = useMemo(() => readStoredWorkflowState(), []);
+// The report host supplies immutable native execution evidence. Both Desktop and
+// the remote viewer render this same flow, sidebar and node-output implementation.
+export interface WorkflowReportHost {
+  task: AutomationTaskRecord;
+  caseId?: string;
+  onCase: (caseId: string) => void;
+  onBack: () => void;
+  onArtifact: (path: string) => void;
+  readImage?: (channel: string, request: {path:string;maxDimension:number}) => Promise<unknown>;
+}
+export default function WorkflowEditor({ reportHost }: { reportHost?: WorkflowReportHost } = {}) {
+  const reportDefaults = reportHost?.task.cases?.find(item => item.caseId === reportHost.caseId)?.caseSnapshot?.defaults;
+  const storedWorkflowState = useMemo(() => reportHost ? {} as StoredWorkflowEditorState : readStoredWorkflowState(), []);
   const [uiSmoke] = useState(() => new URLSearchParams(window.location.search).get('ui-smoke') === 'tasks');
-  const [activeTab, setActiveTab] = useState(uiSmoke ? 'automation-tasks' : 'agent');
+  const [activeTab, setActiveTab] = useState(reportHost ? (reportHost.caseId ? 'automation-flow' : 'automation-task-report') : uiSmoke ? 'automation-tasks' : 'agent');
   const [mirrorSessionId, setMirrorSessionId] = useState('');
   const [isMainSidebarCollapsed, setIsMainSidebarCollapsed] = useState(() => {
     try {
@@ -3374,14 +3424,14 @@ export default function WorkflowEditor() {
       return false;
     }
   });
-  const [selectedPhoneSerial, setSelectedPhoneSerial] = useState('');
+  const [selectedPhoneSerial, setSelectedPhoneSerial] = useState(() => reportDefaults?.phoneSerial || '');
   const [deviceRefreshKey, setDeviceRefreshKey] = useState(0);
-  const [selectedGlassesSerial, setSelectedGlassesSerial] = useState('');
+  const [selectedGlassesSerial, setSelectedGlassesSerial] = useState(() => reportDefaults?.glassesSerial || '');
   const [selectedPhonePackage, setSelectedPhonePackage] = useState(
-    () => storedWorkflowState.deviceBindings?.phoneDefaultPackage || defaultPhonePackageName
+    () => reportDefaults?.phonePackage || storedWorkflowState.deviceBindings?.phoneDefaultPackage || defaultPhonePackageName
   );
   const [selectedGlassesPackage, setSelectedGlassesPackage] = useState(
-    () => storedWorkflowState.deviceBindings?.glassesDefaultPackage || defaultGlassesPackageName
+    () => reportDefaults?.glassesPackage || storedWorkflowState.deviceBindings?.glassesDefaultPackage || defaultGlassesPackageName
   );
   const [selectedPhoneRuntime, setSelectedPhoneRuntime] = useState<AutomationDeviceRuntime>('android');
   const [selectedGlassesRuntime, setSelectedGlassesRuntime] = useState<AutomationDeviceRuntime>('android');
@@ -3416,7 +3466,7 @@ export default function WorkflowEditor() {
       : createDefaultCaseFolders()
   );
   const [automationTasks, setAutomationTasks] = useState<AutomationTaskRecord[]>(
-    () => storedWorkflowState.automationTasks || []
+    () => reportHost ? [{ ...reportHost.task, imported: true }] : storedWorkflowState.automationTasks || []
   );
   useEffect(() => {
     if (!uiSmoke || activeTab !== 'automation-tasks') return;
@@ -3429,7 +3479,7 @@ export default function WorkflowEditor() {
     }));
     console.info(`[ui-smoke:tasks] ${JSON.stringify({ schemaVersion: 1, rows })}`);
   }, [uiSmoke, activeTab, automationTasks]);
-  const [selectedAutomationTaskId, setSelectedAutomationTaskId] = useState('');
+  const [selectedAutomationTaskId, setSelectedAutomationTaskId] = useState(reportHost?.task.id || '');
   const [selectedAutomationTaskIds, setSelectedAutomationTaskIds] = useState<Set<string>>(() => new Set());
   const [purgeTaskArtifacts,setPurgeTaskArtifacts]=useState(false);
   const [taskCleanupBusy,setTaskCleanupBusy]=useState(false);
@@ -3458,6 +3508,8 @@ export default function WorkflowEditor() {
     testProvider: provider => electronApi?.ipcRenderer?.invoke('llm:test-provider', { provider }) || Promise.resolve(undefined),
   });
   const [settingsSection, setSettingsSection] = useState<SettingsSection>('model');
+  const [onboardingDemonstrating, setOnboardingDemonstrating] = useState(false);
+  const onboardingNavigationSnapshot = useRef<{tab:string;section:SettingsSection;componentTab:ComponentLibraryTab;addMenu:boolean}|null>(null);
   const [environmentDraft, setEnvironmentDraft] = useState<EnvironmentConfig>({ adbPath: '' });
   const [environmentMessage, setEnvironmentMessage] = useState('');
   const [effectiveAdbPath, setEffectiveAdbPath] = useState('');
@@ -3501,13 +3553,14 @@ export default function WorkflowEditor() {
   const [taskPickerCollapsed, setTaskPickerCollapsed] = useState<Set<string>>(new Set());
   const [runLogs, setRunLogs] = useState<WorkflowRunLog[]>([]);
   const [runArtifacts, setRunArtifacts] = useState<WorkflowRunResult['artifacts'] | null>(null);
-  const [screenshotPreviewUrls, setScreenshotPreviewUrls] = useState<Record<string, string>>({});
+  const reportThumbnailStore = useMemo(() => createReportThumbnailStore(), [selectedAutomationTaskId, activeTab === 'automation-task-report']);
+
   const [edgeRuntimeLabels, setEdgeRuntimeLabels] = useState<Record<string, string>>({});
   const [runLogDisplayMode, setRunLogDisplayMode] = useState<RunLogDisplayMode>('compact');
   const [reportCaseSearch, setReportCaseSearch] = useState('');
   const [reportCaseStatusFilter, setReportCaseStatusFilter] = useState<ReportCaseStatusFilter>('all');
   const [reportCaseArtifactFilter, setReportCaseArtifactFilter] = useState<ReportCaseArtifactFilter>('all');
-  const [flowCaseSnapshot, setFlowCaseSnapshot] = useState<AutomationCase | null>(null);
+  const [flowCaseSnapshot, setFlowCaseSnapshot] = useState<AutomationCase | null>(() => reportHost?.task.cases?.find(item => item.caseId === reportHost.caseId)?.caseSnapshot || null);
   const [flowCaseEdgesSnapshot, setFlowCaseEdgesSnapshot] = useState<Edge[] | null>(null);
   const [flowReturnTarget, setFlowReturnTarget] = useState<FlowReturnTarget>({ tab: 'automation-cases' });
   const [flowRenderVersion, setFlowRenderVersion] = useState(0);
@@ -3537,6 +3590,7 @@ export default function WorkflowEditor() {
   const taskSubmitLockRef = useRef(false);
   const [quickTaskCreateError, setQuickTaskCreateError] = useState('');
   const [quickTaskPerformanceDialog, setQuickTaskPerformanceDialog] = useState<QuickTaskPerformanceDialogState | null>(null);
+  const [performanceExportState, setPerformanceExportState] = useState({ busy: false, message: '' });
   const [performanceReportDialog, setPerformanceReportDialog] = useState<AutomationTaskPerformanceReport | null>(null);
   const [pendingNewFolderParentId, setPendingNewFolderParentId] = useState<string | undefined>(undefined);
   const [remoteCasesUrl, setRemoteCasesUrl] = useState(storedWorkflowState.remoteCasesUrl || '');
@@ -3561,6 +3615,7 @@ export default function WorkflowEditor() {
     () => storedWorkflowState.caseEdges || { [initialAutomationCase.id]: stepsToEdges(initialAutomationCase.steps) }
   );
   const [isFlowOpening, setIsFlowOpening] = useState(false);
+  const [workflowRegion, setWorkflowRegion] = useState<'main'|'cleanup'>('main');
   const [nodes, setNodes, onNodesChangeBase] = useNodesState([]);
   const [edges, setEdges, onEdgesChangeBase] = useEdgesState([]);
   const [mobileUiInspector, setMobileUiInspector] = useState<MobileUiInspectorState>({
@@ -3609,34 +3664,11 @@ export default function WorkflowEditor() {
     () => flowCaseSnapshot || cases.find((testCase) => testCase.id === selectedCaseId) || cases[0] || initialAutomationCase,
     [cases, flowCaseSnapshot, selectedCaseId]
   );
-  const isReportFlowReadOnly = flowReturnTarget.tab === 'automation-task-report';
-  const isImportedReportFlow = isReportFlowReadOnly && Boolean(
-    automationTasks.find((task) => task.id === flowReturnTarget.taskId)?.imported
+  const isReportFlowReadOnly = Boolean(reportHost) || flowReturnTarget.tab === 'automation-task-report';
+  const isImportedReportFlow = Boolean(reportHost) || isReportFlowReadOnly && Boolean(
+    automationTasks.find((task) => task.id === ('taskId' in flowReturnTarget ? flowReturnTarget.taskId : ''))?.imported
   );
   const selectedStep = selectedCase?.steps.find((step) => step.id === selectedStepId) || selectedCase?.steps[0];
-  const displayEdges = useMemo(() => (
-    edges.map((edge) => {
-      const runtimeLabel = edgeRuntimeLabels[edge.id];
-
-      if (!runtimeLabel) {
-        return edge;
-      }
-
-      return {
-        ...edge,
-        label: runtimeLabel,
-        labelBgPadding: [6, 3] as [number, number],
-        labelBgBorderRadius: 8,
-        labelBgStyle: { fill: '#eff6ff', fillOpacity: 0.96 },
-        labelStyle: { fill: '#2563eb', fontSize: 11, fontWeight: 800 },
-        style: {
-          ...(edge.style || {}),
-          stroke: '#60a5fa',
-          strokeWidth: 2,
-        },
-      };
-    })
-  ), [edgeRuntimeLabels, edges]);
   const legacyDefaultComponents = useMemo(() => createDefaultComponents(), []);
   const templateComponents = useMemo(() => {
     const makeTemplate = (kind: TestComponentKind, id: string, name: string, description: string) => ({
@@ -3684,6 +3716,9 @@ export default function WorkflowEditor() {
     selectedCaseComponents.forEach((component) => mergedComponents.set(component.id, mergeWorkflowComponent(mergedComponents.get(component.id), component)));
     return Array.from(mergedComponents.values());
   }, [customComponents, legacyDefaultComponents, selectedCaseComponents, templateComponents]);
+  const parallelHints = useMemo(() => parallelPresentation(selectedCase?.steps || [], edges,
+    Object.fromEntries(allWorkflowComponents.map(component=>[component.id,component]))), [selectedCase,edges,allWorkflowComponents]);
+  const displayEdges = useMemo(() => decorateParallelEdges(edges,parallelHints,edgeRuntimeLabels), [edges,parallelHints,edgeRuntimeLabels]);
   const selectedStepComponent = selectedStep?.componentId
     ? allWorkflowComponents.find((component) => component.id === selectedStep.componentId)
     : undefined;
@@ -3707,7 +3742,9 @@ export default function WorkflowEditor() {
   const selectedLlmProvider = useMemo(() => (
     llmProviders.find((provider) => provider.id === selectedLlmProviderId) || llmProviders[0]
   ), [llmProviders, selectedLlmProviderId]);
-  const electronApi = useMemo(() => getElectronApi(), []);
+  const electronApi = useMemo(() => reportHost ? undefined : getElectronApi(), []);
+  const reportOnRender = useReportPerformance(activeTab === 'automation-task-report' ? selectedAutomationTaskId : '',
+    automationTasks.find(task => task.id === selectedAutomationTaskId)?.cases?.length || 0, reportThumbnailStore, electronApi?.ipcRenderer?.invoke);
   useEffect(() => {
     void electronApi?.ipcRenderer.invoke('workflow:set-header-devices', {
       phone: {serial:selectedPhoneSerial, runtime:selectedPhoneRuntime},
@@ -4038,7 +4075,7 @@ export default function WorkflowEditor() {
     return folderMap;
   }, [caseLibraryFolders, cases]);
   const getConfiguredGitBranch = (library?: CaseLibrary) => (library?.gitBranch || library?.branch || 'master').trim() || 'master';
-  const getCaseLibraryGitKey = (repoUrl: string, branch?: string) => `${repoUrl.trim()}#${(branch || 'master').trim() || 'master'}`;
+  const getCaseLibraryGitKey = (repoUrl: string, branch?: string) => `${canonicalCaseLibraryRepoUrl(repoUrl)}#${(branch || 'master').trim() || 'master'}`;
   const findDuplicateGitLibrary = (libraryId: string, repoUrl: string, branch?: string) => {
     const nextKey = getCaseLibraryGitKey(repoUrl, branch);
     return normalizedCaseLibraries.find((library) => (
@@ -4319,10 +4356,10 @@ export default function WorkflowEditor() {
   };
 
   useEffect(() => {
-    if (settingsSection === 'device') {
+    if (settingsSection === 'device' && !onboardingDemonstrating) {
       void refreshSettingsDevices();
     }
-  }, [settingsSection]);
+  }, [settingsSection, onboardingDemonstrating]);
 
   const bindDeviceSerial = (target: 'phone' | 'glasses', rawSerial = deviceBindingDraft) => {
     const serial = rawSerial.trim();
@@ -4581,7 +4618,6 @@ export default function WorkflowEditor() {
       instance.fitView({ padding: 0.18, duration: 0 });
     });
   };
-  void restoreWorkflowCanvasAfterLayout;
 
   const getFlowViewportCenterPosition = (): NodePosition => {
     const pane = document.querySelector('.react-flow')?.getBoundingClientRect();
@@ -4625,7 +4661,8 @@ export default function WorkflowEditor() {
       return;
     }
 
-    const nextStep = createDefaultStep(type);
+    if (workflowRegion === 'cleanup' && ['start','end','if'].includes(type)) { setRunMessage('清理区域仅添加操作节点，按列表顺序执行。'); return; }
+    const nextStep = {...createDefaultStep(type), phase:workflowRegion};
     if (type === 'llm_text_generate') {
       const provider = selectedLlmProvider || llmProviders[0];
       const variableName = createUniqueLlmTextVariableName(selectedCase.steps);
@@ -4676,7 +4713,7 @@ export default function WorkflowEditor() {
       return;
     }
 
-    const createdStep = createComponentStep(component);
+    const createdStep = {...createComponentStep(component), phase:workflowRegion};
     const extractionDefaultName = component.kind === 'tts_assert'
       ? DEFAULT_TEXT_ASSERT_VARIABLE_NAME
       : component.kind === 'json_assert'
@@ -4769,8 +4806,10 @@ export default function WorkflowEditor() {
       return;
     }
 
+    if (workflowRegion === 'cleanup' && ['if','parallel','join'].includes(payload.step.type)) { setRunMessage('清理区域仅添加操作节点。'); return; }
     const nextStep: AutomationStep = {
       ...cloneWorkflowStep(payload.step),
+      phase: workflowRegion,
       id: createStepId(payload.step.type),
     };
     const endIndex = selectedCase.steps.findIndex((step) => step.type === 'end');
@@ -5076,6 +5115,8 @@ export default function WorkflowEditor() {
 
   useEffect(() => {
     if (activeTab !== 'automation-flow') {
+      // Returning to the same case is a new visit, even if its id did not change.
+      lastRenderedFlowCaseIdRef.current = '';
       return;
     }
 
@@ -5085,9 +5126,10 @@ export default function WorkflowEditor() {
       return;
     }
 
+    const isEnteringCase = lastRenderedFlowCaseIdRef.current !== selectedCase.id;
     const shouldPreserveViewport = (
       activeTab === 'automation-flow'
-      && lastRenderedFlowCaseIdRef.current === selectedCase.id
+      && !isEnteringCase
       && reactFlowInstanceRef.current
     );
     const instance = reactFlowInstanceRef.current;
@@ -5098,17 +5140,22 @@ export default function WorkflowEditor() {
       ? flowCaseEdgesSnapshot
       : caseEdges[selectedCase.id] || [];
     const layoutEdges = ensureBoundaryEdges(selectedCase, sourceEdgesForLayout);
-    const layoutPositions = createWorkflowAutoLayoutPositions(selectedCase.steps, layoutEdges);
-    const storedCasePositions = getCaseNodePositions(selectedCase);
+    const visibleSteps = selectedCase.steps.filter(step => (step.phase || 'main') === workflowRegion);
+    const visibleEdges = workflowRegion === 'cleanup' ? visibleSteps.slice(1).map((step,index)=>({id:`cleanup-${step.id}`,source:visibleSteps[index].id,target:step.id})) : layoutEdges;
+    const layoutPositions = createWorkflowAutoLayoutPositions(visibleSteps, visibleEdges);
+    const storedCasePositions = isEnteringCase && !isReportFlowReadOnly
+      ? layoutPositions
+      : getCaseNodePositions(selectedCase);
     const missingPositions = Object.fromEntries(
       Object.entries(layoutPositions).filter(([stepId]) => !isNodePosition(storedCasePositions[stepId]))
     );
-    if (Object.keys(missingPositions).length > 0 && !isReportFlowReadOnly) {
+    const positionsToStore = isEnteringCase ? layoutPositions : missingPositions;
+    if (Object.keys(positionsToStore).length > 0 && !isReportFlowReadOnly) {
       setNodePositions((current) => ({
         ...current,
         [selectedCase.id]: {
           ...(current[selectedCase.id] || {}),
-          ...missingPositions,
+          ...positionsToStore,
         },
       }));
     }
@@ -5116,7 +5163,7 @@ export default function WorkflowEditor() {
 
     setNodes(() => {
       return stepsToNodes(
-        selectedCase.steps,
+        visibleSteps,
         runStatuses,
         allWorkflowComponents,
         previewContext,
@@ -5128,7 +5175,7 @@ export default function WorkflowEditor() {
           forceLayoutPositions: isReportFlowReadOnly,
           runtimePreviews,
         }
-      );
+      ).map(node=>({...node,data:{...node.data,parallelHints:parallelHints.nodes[node.id] || []}}));
     });
     lastRenderedFlowCaseIdRef.current = selectedCase.id;
 
@@ -5137,7 +5184,7 @@ export default function WorkflowEditor() {
         reactFlowInstanceRef.current?.setViewport(previousViewport, { duration: 0 });
       });
     }
-  }, [selectedCase, runStatuses, allWorkflowComponents, previewContext, nodePositions, activeTab, setNodes, isReportFlowReadOnly, caseEdges, flowCaseSnapshot, flowCaseEdgesSnapshot, runLogs, runArtifacts]);
+  }, [selectedCase, runStatuses, allWorkflowComponents, previewContext, nodePositions, activeTab, setNodes, isReportFlowReadOnly, caseEdges, flowCaseSnapshot, flowCaseEdgesSnapshot, runLogs, runArtifacts, parallelHints, workflowRegion]);
 
   useEffect(() => {
     const sourceEdges = flowCaseSnapshot && isReportFlowReadOnly && flowCaseEdgesSnapshot
@@ -5157,55 +5204,6 @@ export default function WorkflowEditor() {
     runLogPanelRef.current.scrollTop = runLogPanelRef.current.scrollHeight;
   }, [runLogs, runLogDisplayMode]);
 
-  useEffect(() => {
-    if (!electronApi?.ipcRenderer || activeTab !== 'automation-task-report' || !selectedAutomationTaskId) {
-      return;
-    }
-
-    const selectedTask = automationTasks.find((task) => task.id === selectedAutomationTaskId);
-    const screenshotPaths = Array.from(new Set(
-      (selectedTask?.cases || []).flatMap((caseRecord) => (
-        (caseRecord.artifacts?.screenshots || []).map((screenshot) => screenshot.path).filter(Boolean)
-      ))
-    ));
-    const missingPaths = screenshotPaths.filter((pathValue) => !screenshotPreviewUrls[pathValue]);
-
-    if (missingPaths.length === 0) {
-      return;
-    }
-
-    let cancelled = false;
-    void Promise.all(missingPaths.map(async (pathValue) => {
-      try {
-        const result = await electronApi.ipcRenderer.invoke('file:read-image-data-url', pathValue) as {
-          success?: boolean;
-          dataUrl?: string;
-        };
-
-        return result?.success && result.dataUrl ? [pathValue, result.dataUrl] as const : null;
-      } catch (_error) {
-        return null;
-      }
-    })).then((entries) => {
-      if (cancelled) {
-        return;
-      }
-
-      const nextEntries = entries.filter(Boolean) as Array<readonly [string, string]>;
-      if (nextEntries.length === 0) {
-        return;
-      }
-
-      setScreenshotPreviewUrls((current) => ({
-        ...current,
-        ...Object.fromEntries(nextEntries),
-      }));
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [activeTab, automationTasks, electronApi, screenshotPreviewUrls, selectedAutomationTaskId]);
 
   useEffect(() => {
     if (activeTab !== 'automation-task-report' || !selectedAutomationTaskId) {
@@ -5214,9 +5212,7 @@ export default function WorkflowEditor() {
 
     const selectedTask = automationTasks.find((task) => task.id === selectedAutomationTaskId);
     if (selectedTask?.reportDetailLoaded === false) {
-      const elapsed = Date.now() - (detailLoadedAtRef.current.get(selectedTask.id) || 0);
-      const timer = window.setTimeout(() => void ensureAutomationTaskDetail(selectedTask), Math.max(0, 2000 - elapsed));
-      return () => window.clearTimeout(timer);
+      void ensureAutomationTaskDetail(selectedTask);
     }
   }, [activeTab, selectedAutomationTaskId, automationTasks]);
 
@@ -5345,7 +5341,7 @@ export default function WorkflowEditor() {
   );
 
   useEffect(() => {
-    if (!workflowStateHydratedRef.current || typeof window === 'undefined') {
+    if (reportHost || !workflowStateHydratedRef.current || typeof window === 'undefined') {
       return;
     }
 
@@ -5466,6 +5462,7 @@ export default function WorkflowEditor() {
       const normalizedResults = normalizeRunLogsTiming(payload.results || []);
       const normalizedResult = normalizeRunLogTiming(payload.result);
 
+
       if (activeTaskRun?.requestId === payload.requestId) {
         setAutomationTasks((current) => current.map((task) => {
           if (task.id !== activeTaskRun.taskId) {
@@ -5505,7 +5502,7 @@ export default function WorkflowEditor() {
       setEdgeRuntimeLabels(buildEdgeRuntimeLabels(normalizedResults, edges));
       setRunStatuses((current) => ({
         ...current,
-        [normalizedResult.stepId]: normalizedResult.status === 'success'
+        [normalizedResult.stepId]: normalizedResult.status === 'running' ? 'running' : normalizedResult.status === 'success'
           ? 'success'
           : normalizedResult.status === 'stopped'
             ? 'stopped'
@@ -5521,7 +5518,7 @@ export default function WorkflowEditor() {
           return nextStepId ? { [nextStepId]: 'running' as RunStatus } : {};
         })(),
       }));
-      setRunMessage(`正在执行工作流：${normalizedResult.stepName} ${normalizedResult.status === 'success' ? '完成' : normalizedResult.status === 'stopped' ? '已强制停止' : '失败'}`);
+      setRunMessage(`${normalizedResult.phase === 'cleanup' ? '正在执行清理区域' : '正在执行工作流'}：${normalizedResult.stepName} ${normalizedResult.status === 'running' ? '执行中' : normalizedResult.status === 'success' ? '完成' : normalizedResult.status === 'stopped' ? '已停止' : '失败'}`);
     };
 
     electronApi.ipcRenderer.on('workflow:progress', handleProgress);
@@ -5956,6 +5953,8 @@ export default function WorkflowEditor() {
   void mergeRemoteWorkspace;
 
   const mergeCaseLibraryFiles = async (result: PullCaseLibraryResult) => {
+    // Capture the state this render actually uses, before the asynchronous durable check.
+    const beforeApply = captureLibraryRefreshState({ cases, components, caseEdges, nodePositions, caseLibraries, caseFolders });
     const files = result.files || [];
     const manifest = result.manifest || {};
     const repoId = result.repoId || 'remote';
@@ -5992,13 +5991,16 @@ export default function WorkflowEditor() {
           // Case snapshots always win over same-id library definitions.
           const caseComponentMap = new Map((parsed.components || []).map((component) => [component.id, component]));
           (testCase.components || []).forEach((component) => {
-            caseComponentMap.set(component.id, mergeWorkflowComponent(caseComponentMap.get(component.id), component));
+            caseComponentMap.set(component.id, { ...caseComponentMap.get(component.id), ...component });
           });
-          const normalizedCase = normalizeStoredCase(normalizeCase({
+          // Import saved configuration verbatim; editor convenience migrations must
+          // not rewrite component defaults/timeouts while comparing a repository.
+          const normalizedCase = normalizeCase({
             ...testCase,
+            assetBaseDir: result.repoPath || testCase.assetBaseDir,
             components: Array.from(caseComponentMap.values()),
             schemaVersion: testCase.schemaVersion || 'glassbox.workflow.v1',
-          }));
+          });
           const folderId = getCaseFolderId(normalizedCase);
 
           if (!folderMap.has(folderId)) {
@@ -6104,16 +6106,13 @@ export default function WorkflowEditor() {
 
     // Check durable edits in the main process, including edits saved by CLI or
     // before a restart. An editor 'clean' flag does not mean Git is in sync.
-    const beforeApply = liveCaseStateRef.current;
     if (electronApi?.ipcRenderer) {
       const checked = await electronApi.ipcRenderer.invoke('case-library:check-apply', {
         libraryId, cases: importedCases, caseEdges: importedCaseEdges, components: importedComponents,
         source: result.source || 'pull',
       }) as { success: boolean; error?: string; errorCode?: string };
       if (!checked.success) throw Object.assign(new Error(checked.error || '已保存用例与用例库内容冲突，未覆盖'), { code: checked.errorCode });
-      if (beforeApply.cases !== liveCaseStateRef.current.cases || beforeApply.caseEdges !== liveCaseStateRef.current.caseEdges) {
-        throw new Error('检查期间用例已被编辑或由CLI更新，已保留新版本，请重新刷新比较');
-      }
+      assertLibraryRefreshState(beforeApply, liveCaseStateRef.current);
     }
 
     const currentLibraryFolderIds = new Set(caseFolders
@@ -6283,17 +6282,18 @@ export default function WorkflowEditor() {
         strictLocalReload: true,
         preserveSelection: true,
       });
-      setPendingLocalCaseLibraryChange(null);
+      setPendingLocalCaseLibraryChange((current) => current?.libraryId === change.libraryId && (!current.revision || current.revision === change.revision) ? null : current);
       return true;
     } catch (error) {
       caseLibraryRefreshApplyingRef.current = false;
+      const editorChanged = (error as { code?: string })?.code === 'CASE_LIBRARY_EDITOR_CHANGED';
       setPendingLocalCaseLibraryChange({
         ...change,
-        type: 'library-error',
+        type: editorChanged ? 'library-changed' : 'library-error',
         errorCode: (error as { code?: string })?.code || 'CASE_LIBRARY_LOCAL_APPLY_FAILED',
         error: error instanceof Error ? error.message : String(error),
         recoveryActions: [
-          '当前编辑器状态已保留，请修复本地文件后等待再次自动读取。',
+          editorChanged ? '当前页面版本已保留，请重新比较更新。' : '当前编辑器状态已保留，请修复本地文件后等待再次自动读取。',
           '也可点击“刷新用例”手动重试。',
         ],
       });
@@ -6652,6 +6652,7 @@ export default function WorkflowEditor() {
       folderCount?: number;
       caseCount?: number;
       workspaceFile?: string;
+      repoPath?: string;
       error?: string;
     };
 
@@ -6694,9 +6695,9 @@ export default function WorkflowEditor() {
         return next;
       });
     }
-    if (result.gitInfo) {
+    if (result.gitInfo || result.repoPath) {
       setCaseLibraries((current) => current.map((item) => (
-        item.id === library.id ? { ...item, ...result.gitInfo, gitBranch: branch } : item
+        item.id === library.id ? { ...item, ...result.gitInfo, gitBranch: branch, localRepoPath: result.repoPath || item.localRepoPath } : item
       )));
     }
     setCaseLibraryStatus((!uploadSync ? '上传已完成，但当前运行版本未返回同步确认，请重新加载新版后比较' : uploadSync.warning) || (keptNewEdits ? '上传已完成；上传期间的新修改已保留，尚未包含在本次上传中' : result.message || `「${library.name}」已上传到云端`));
@@ -7429,6 +7430,7 @@ export default function WorkflowEditor() {
   };
 
   const openPathInFolder = async (targetPath?: string, mode: 'reveal' | 'open' = 'reveal') => {
+    if (reportHost && targetPath) { reportHost.onArtifact(targetPath); return; }
     if (!targetPath || !electronApi?.ipcRenderer) {
       return;
     }
@@ -7492,12 +7494,13 @@ export default function WorkflowEditor() {
   const getAutomationTaskCounts = (task: AutomationTaskRecord) => {
     const taskCases = task.cases || [];
 
-    if ((task.reportDetailLoaded === false || taskCases.length === 0) && task.summary) {
+    if ((task.reportDetailLoaded === false || taskCases.length === 0
+      || Math.max(task.summary?.caseCount || 0, task.total || 0) > taskCases.length) && task.summary) {
       return {
         successCount: task.summary.successCount || 0,
         failedCount: task.summary.failedCount || 0,
         stoppedCount: task.summary.stoppedCount || 0,
-        caseCount: task.summary.caseCount || task.total || 0,
+        caseCount: Math.max(task.summary.caseCount || 0, task.total || 0),
       };
     }
 
@@ -7509,45 +7512,31 @@ export default function WorkflowEditor() {
     };
   };
 
-  const detailLoadsRef = useRef(new Set<string>());
-  const detailLoadedAtRef = useRef(new Map<string, number>());
-  const ensureAutomationTaskDetail = async (task: AutomationTaskRecord) => {
-    if (task.reportDetailLoaded !== false) {
-      return task;
-    }
-
-    if (!electronApi?.ipcRenderer) {
-      setRunMessage('当前环境无法加载报告详情');
-      return task;
-    }
-
-    if (detailLoadsRef.current.has(task.id)) return task;
-    detailLoadsRef.current.add(task.id);
-    let result: { success?: boolean; task?: AutomationTaskRecord; error?: string };
+  const detailRequestsRef = useRef(createReportDetailRequests<AutomationTaskRecord>());
+  const [reportDetailErrors, setReportDetailErrors] = useState<Record<string, string>>({});
+  const reportDetailKey = (task: AutomationTaskRecord) => JSON.stringify([task.id, task.taskRevision, task.reportDetailPath]);
+  const ensureAutomationTaskDetail = async (task: AutomationTaskRecord, retry = false) => {
+    if (task.reportDetailLoaded !== false) return task;
+    const key = reportDetailKey(task);
     try {
-    result = await electronApi.ipcRenderer.invoke('workflow-report:load-task', {
-      taskId: task.id,
-      reportDetailPath: task.reportDetailPath,
-    }) as {
-      success?: boolean;
-      task?: AutomationTaskRecord;
-      error?: string;
-    };
-
+      const detailedTask = await detailRequestsRef.current.load(key, async () => {
+        setReportDetailErrors(current => ({ ...current, [key]: '' }));
+        if (!electronApi?.ipcRenderer) throw new Error('当前环境无法加载报告详情');
+        const result = await electronApi.ipcRenderer.invoke('workflow-report:load-task', {
+          taskId: task.id, reportDetailPath: task.reportDetailPath,
+        }) as { success?: boolean; task?: AutomationTaskRecord; error?: string };
+        if (!result?.success || !result.task) throw new Error(result?.error || '未知错误');
+        if (result.task.id !== task.id || !Array.isArray(result.task.cases)) throw new Error('报告详情与任务不匹配或格式无效');
+        return result.task;
+      }, retry);
+      setAutomationTasks(current => mergeAutomationTaskRecords(current, [detailedTask], removedAutomationTaskIdsRef.current));
+      return detailedTask;
     } catch (error) {
-      setRunMessage(`加载报告详情失败：${error instanceof Error ? error.message : String(error)}`);
-      return task;
-    } finally { detailLoadsRef.current.delete(task.id); }
-    detailLoadedAtRef.current.set(task.id, Date.now());
-    if (!result?.success || !result.task) {
-      setRunMessage(`加载报告详情失败：${result?.error || '未知错误'}`);
+      const message = error instanceof Error ? error.message : String(error);
+      setReportDetailErrors(current => current[key] === message ? current : ({ ...current, [key]: message }));
+      setRunMessage(`加载报告详情失败：${message}`);
       return task;
     }
-
-    const detailedTask = result.task;
-    setAutomationTasks((current) => mergeAutomationTaskRecords(current, [detailedTask],removedAutomationTaskIdsRef.current));
-
-    return { ...detailedTask, id: task.id };
   };
 
   const openAutomationTaskReport = async (task: AutomationTaskRecord) => {
@@ -8735,7 +8724,7 @@ export default function WorkflowEditor() {
 
   const getOrderedCaseSteps = (testCase: AutomationCase) => {
     const sourceEdges = testCase.id === selectedCase?.id ? edges : ensureBoundaryEdges(testCase, caseEdges[testCase.id] || []);
-    return orderStepsByEdges(testCase.steps, sourceEdges);
+    return [...orderStepsByEdges(testCase.steps.filter(step=>step.phase !== 'cleanup'), sourceEdges), ...testCase.steps.filter(step=>step.phase === 'cleanup')];
   };
 
   const getWorkflowScrcpyRequirement = (steps: AutomationStep[], options: { ignoreScreenMirror?: boolean; startOptions?: AutomationTaskStartOptions } = {}) => {
@@ -9224,6 +9213,7 @@ export default function WorkflowEditor() {
   };
 
   const handleFlowBack = () => {
+    if (reportHost) { reportHost.onBack(); return; }
     if (flowReturnTarget.tab === 'automation-task-report') {
       setSelectedAutomationTaskId(flowReturnTarget.taskId);
       setFlowCaseSnapshot(null);
@@ -9612,23 +9602,34 @@ export default function WorkflowEditor() {
     const library = normalizedCaseLibraries.find((item) => item.id === pendingLocalCaseLibraryChange.libraryId);
     if (!library) return null;
     const isConflict = pendingLocalCaseLibraryChange.errorCode === 'CASE_LIBRARY_LOCAL_EDITS_CONFLICT';
-    const isError = pendingLocalCaseLibraryChange.type !== 'library-changed';
+    // Routine local edits are explained by the icon beside the case name.
+    if (isConflict) return null;
+    const editorChanged = pendingLocalCaseLibraryChange.errorCode === 'CASE_LIBRARY_EDITOR_CHANGED';
+    const isError = pendingLocalCaseLibraryChange.type !== 'library-changed' && !isConflict && !editorChanged;
     const missingDirectory = pendingLocalCaseLibraryChange.errorCode === 'CASE_LIBRARY_LOCAL_REPO_NOT_FOUND';
     return (
-      <div className={`flex min-w-0 items-start justify-between gap-4 border-b px-5 py-3 ${
-        isError
+      <div role={isError ? 'alert' : 'status'} className={`flex min-w-0 items-start justify-between gap-4 border-b px-5 py-3 ${
+        isConflict
+          ? 'border-slate-200 bg-slate-50 text-slate-700'
+          : isError
           ? 'border-rose-200 bg-rose-50 text-rose-900'
           : 'border-amber-200 bg-amber-50 text-amber-950'
       }`}>
         <div className="flex min-w-0 items-start gap-3">
-          <AlertTriangle className={`mt-0.5 h-4 w-4 shrink-0 ${isError ? 'text-rose-600' : 'text-amber-600'}`} />
+          {isConflict
+            ? <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+            : <AlertTriangle className={`mt-0.5 h-4 w-4 shrink-0 ${isError ? 'text-rose-600' : 'text-amber-600'}`} />}
           <div className="min-w-0">
             <div className="text-xs font-black">
-              「{library.name}」{isConflict ? '用例版本冲突，已保留当前修改' : isError ? (missingDirectory ? '本地仓库目录不存在' : '本地用例读取失败') : '检测到本地用例更新'}
+              「{library.name}」{isConflict ? '本地修改未同步' : editorChanged ? '页面内容已更新' : isError ? (missingDirectory ? '本地仓库目录不存在' : '本地用例读取失败') : '检测到本地用例更新'}
             </div>
-            {isError && <div className="mt-1 text-[11px] opacity-80">{isConflict ? '当前版本已保存到应用。请先核对并同步用例库；刷新不会覆盖已保存修改。' : <>当前页面内容未清空；此提示不表示编辑已保存到磁盘。{missingDirectory ? '请检查仓库地址和分支，或重新拉取。' : '请修复文件后重试。'}</>}</div>}
+            {isError && <div className="mt-1 text-[11px] opacity-80">当前页面内容未清空；此提示不表示编辑已保存到磁盘。{missingDirectory ? '请检查仓库地址和分支，或重新拉取。' : '请修复文件后重试。'}</div>}
             <div className="mt-1 break-words text-[11px] font-medium opacity-80">
-              {isError
+              {isConflict
+                ? '当前应用内容与仓库版本不同，本地修改已保存。可继续编辑，按需同步到仓库；刷新不会覆盖本地修改。'
+                : editorChanged
+                ? '检查期间页面内容发生变化，当前版本已保留。可重新比较，不需要修复用例文件。'
+                : isError
                 ? pendingLocalCaseLibraryChange.error || '请检查本地用例文件后重试'
                 : `「${pendingLocalCaseLibraryChange.libraryName || pendingLocalCaseLibraryChange.libraryId}」已有新 revision，当前未保存编辑不会被自动覆盖。`}
             </div>
@@ -9645,8 +9646,8 @@ export default function WorkflowEditor() {
                 if (success) setPendingLocalCaseLibraryChange((current) => current?.libraryId === library.id ? null : current);
               });
             }}
-            className={`rounded-lg px-3 py-1.5 text-[11px] font-black text-white ${
-              isError ? 'bg-rose-600 hover:bg-rose-700' : 'bg-amber-600 hover:bg-amber-700'
+            className={`rounded-lg px-3 py-1.5 text-[11px] font-black ${
+              isConflict ? 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-100' : isError ? 'bg-rose-600 text-white hover:bg-rose-700' : 'bg-amber-600 text-white hover:bg-amber-700'
             }`}
           >
             {isPullingCaseLibrary ? '拉取中…' : isRefreshingCaseLibrary ? '读取中…' : missingDirectory ? '重新拉取' : isConflict ? '重新比较' : isError ? '重新读取' : '刷新'}
@@ -10117,6 +10118,7 @@ export default function WorkflowEditor() {
   );
 
   const openTaskCaseFlow = (task: AutomationTaskRecord, caseRecord: AutomationTaskCaseRecord) => {
+    if (reportHost && !reportHost.caseId) { reportHost.onCase(caseRecord.caseId); return; }
     const targetCase = caseRecord.caseSnapshot || cases.find((testCase) => testCase.id === caseRecord.caseId);
 
     if (!targetCase) {
@@ -10141,13 +10143,35 @@ export default function WorkflowEditor() {
     }
   };
 
+  const hostedReportIdentityRef = useRef('');
+  useEffect(() => {
+    if (!reportHost) return;
+    setAutomationTasks([{ ...reportHost.task, imported: true, readonly:true }]);
+    if (!reportHost.caseId) { setSelectedAutomationTaskId(reportHost.task.id); setActiveTab('automation-task-report'); return; }
+    const record = reportHost.task.cases?.find(item => item.caseId === reportHost.caseId);
+    if (!record?.caseSnapshot) { setRunMessage('报告缺少原始用例快照'); return; }
+    setAutomationTasks([{ ...reportHost.task, imported: true }]);
+    const identity = JSON.stringify([reportHost.task.id, reportHost.caseId]);
+    if (hostedReportIdentityRef.current !== identity) {
+      hostedReportIdentityRef.current = identity;
+      openTaskCaseFlow(reportHost.task, record);
+    } else {
+      // Live evidence updates must preserve the reader's selected node/viewport.
+      const logs = normalizeRunLogsTiming(record.results || []);
+      setRunLogs(logs);
+      setRunArtifacts(record.artifacts || null);
+      setRunStatuses(Object.fromEntries(logs.map(item => [item.stepId, item.status === 'success' ? 'success' : item.status === 'stopped' ? 'stopped' : 'failed'])));
+      setEdgeRuntimeLabels(buildEdgeRuntimeLabels(logs, record.edges || []));
+    }
+  }, [reportHost]);
+
   const renderTaskCaseLatestStep = (caseRecord: AutomationTaskCaseRecord) => {
     const latest = (caseRecord.results || []).slice(-1)[0];
 
     if (!latest) {
       return (
         <div className="rounded-lg border border-dashed border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-400">
-          {caseRecord.status === 'pending' ? '等待执行' : '暂无执行步骤'}
+          {reportHost && (caseRecord as AutomationTaskCaseRecord & {detailLoading?:boolean}).detailLoading ? <span role="status" aria-live="polite">正在加载操作步骤…</span> : caseRecord.status === 'pending' ? '等待执行' : '暂无执行步骤'}
         </div>
       );
     }
@@ -10185,7 +10209,7 @@ export default function WorkflowEditor() {
   const renderTaskPerformanceCard = (
     label: string,
     report?: AutomationTaskPerformanceReport,
-    state: { enabled?: boolean; running?: boolean } = {}
+    state: { enabled?: boolean; running?: boolean; loading?: boolean; error?: string } = {}
   ) => {
     const validSamples = report?.samples.filter((sample) => !sample.error) || [];
     const failedSamples = report?.samples.filter((sample) => sample.error).length || 0;
@@ -10194,7 +10218,7 @@ export default function WorkflowEditor() {
     const threadSummary = summarizePerformanceValues(validSamples.map((sample) => sample.threadCount));
     const temperatureSummary = summarizePerformanceValues(validSamples.map((sample) => sample.batteryTemperatureC));
     const isCollecting = !report && state.enabled && state.running;
-    const badgeLabel = report ? `${validSamples.length} 次` : isCollecting ? '采集中' : '未启用';
+    const badgeLabel = report ? `${validSamples.length} 次` : state.loading ? '加载中' : state.error ? '读取失败' : isCollecting ? '采集中' : state.enabled ? '暂无采样' : '未启用';
 
     return (
       <button
@@ -10237,7 +10261,7 @@ export default function WorkflowEditor() {
           </div>
         ) : (
           <div className={`mt-3 text-xs font-bold ${isCollecting ? 'text-blue-600' : 'text-slate-400'}`}>
-            {isCollecting ? '后台性能采样中，任务结束后生成报告' : '创建任务时勾选后自动生成'}
+            {state.loading ? '正在加载性能采样…' : state.error || (isCollecting ? '后台性能采样中，任务结束后生成报告' : state.enabled ? '尚无性能采样数据' : '创建任务时勾选后自动生成')}
           </div>
         )}
       </button>
@@ -10320,6 +10344,17 @@ export default function WorkflowEditor() {
     );
   };
 
+  const exportTaskPerformance = async (format: 'html' | 'md') => {
+    if (!performanceReportDialog || performanceExportState.busy) return;
+    setPerformanceExportState({ busy: true, message: '正在导出…' });
+    try {
+      const filePath = await exportReport({ ...performanceReportDialog, packageVersion: '', intervalSeconds: 0 }, format);
+      setPerformanceExportState({ busy: false, message: filePath ? `已导出：${filePath}` : '已取消导出' });
+    } catch (error) {
+      setPerformanceExportState({ busy: false, message: `导出失败：${error instanceof Error ? error.message : String(error)}` });
+    }
+  };
+
   const renderPerformanceReportDialog = () => {
     if (!performanceReportDialog) {
       return null;
@@ -10344,15 +10379,24 @@ export default function WorkflowEditor() {
                 {performanceReportDialog.runtime === 'android' ? 'Android / adb' : '鸿蒙 / hdc'} · {performanceReportDialog.serial || '-'} · {performanceReportDialog.packageName || '-'}
               </div>
             </div>
+            <div className="flex shrink-0 items-center gap-2">
+              {(['html', 'md'] as const).map(format => <button key={format} type="button"
+                disabled={performanceExportState.busy} onClick={() => void exportTaskPerformance(format)}
+                title={format === 'html' ? '独立 HTML，内嵌图表，可离线打开' : 'Markdown 和同目录下的 PNG 图片文件夹，分享时请一起发送'}
+                className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50">
+                导出 {format === 'html' ? 'HTML' : 'Markdown + 图片'}
+              </button>)}
             <button
               type="button"
-              onClick={() => setPerformanceReportDialog(null)}
+              onClick={() => { setPerformanceReportDialog(null); setPerformanceExportState(state => ({ ...state, message: '' })); }}
               className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
               title="关闭"
             >
               <X className="h-4 w-4" />
             </button>
+            </div>
           </div>
+          {performanceExportState.message && <div role="status" className="break-all border-b border-slate-100 px-5 py-2 text-xs text-slate-600">{performanceExportState.message}</div>}
           <div className="min-h-0 flex-1 overflow-auto p-5">
             <div className="grid grid-cols-4 gap-3">
               <div className="rounded-2xl border border-slate-200 p-4">
@@ -10454,7 +10498,7 @@ export default function WorkflowEditor() {
             <div className="mt-3 text-sm font-black text-slate-700">未选择测试报告</div>
             <button
               type="button"
-              onClick={() => setActiveTab('automation-tasks')}
+              onClick={() => reportHost ? reportHost.onBack() : setActiveTab('automation-tasks')}
               className="mt-4 rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white hover:bg-blue-700"
             >
               返回任务列表
@@ -10465,9 +10509,11 @@ export default function WorkflowEditor() {
     }
 
     const selectedTaskCases = selectedTask?.cases || [];
-    const isReportDetailLoading = selectedTask.reportDetailLoaded === false && selectedTaskCases.length === 0;
+    const reportDetailError = selectedTask.reportDetailLoaded === false ? reportDetailErrors[reportDetailKey(selectedTask)] : '';
+    const isReportDetailUnavailable = selectedTask.reportDetailLoaded === false && !selectedTask.reportDetailRetained;
+    const isInitialReportDetailLoading = isReportDetailUnavailable && !reportDetailError;
     const { successCount, failedCount, stoppedCount, caseCount } = getAutomationTaskCounts(selectedTask);
-    const finishedCount = selectedTaskCases.filter((item) => item.status === 'success' || item.status === 'failed' || item.status === 'stopped').length;
+    const finishedCount = successCount + failedCount + stoppedCount;
     const normalizedReportSearch = reportCaseSearch.trim().toLowerCase();
     const getReportCaseSearchText = (caseRecord: AutomationTaskCaseRecord) => [
       caseRecord.caseName,
@@ -10485,12 +10531,12 @@ export default function WorkflowEditor() {
         result.command,
       ]),
     ].filter(Boolean).join('\n').toLowerCase();
-    const selectedTaskFilteredCases = selectedTaskCases.filter((caseRecord) => {
+    const selectedTaskFilteredCases = selectedTaskCases.map((caseRecord, caseIndex) => ({ caseRecord, caseIndex })).filter(({ caseRecord }) => {
       if (reportCaseStatusFilter !== 'all' && caseRecord.status !== reportCaseStatusFilter) {
         return false;
       }
 
-      if (reportCaseArtifactFilter === 'withArtifacts' && !caseRecord.artifacts?.runDir) {
+      if (reportCaseArtifactFilter === 'withArtifacts' && !(caseRecord.artifacts?.runDir || reportHost && Object.values(caseRecord.artifacts || {}).some(value => Array.isArray(value) && value.length))) {
         return false;
       }
 
@@ -10548,7 +10594,7 @@ export default function WorkflowEditor() {
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <button
                 type="button"
-                onClick={() => setActiveTab('automation-tasks')}
+                onClick={() => reportHost ? reportHost.onBack() : setActiveTab('automation-tasks')}
                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -10574,7 +10620,7 @@ export default function WorkflowEditor() {
 	              <button
 	                type="button"
 	                onClick={() => void exportAutomationTaskReport(selectedTask)}
-                disabled={selectedTaskActive}
+                disabled={Boolean(reportHost) || selectedTaskActive}
                 className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <FileDown className="h-3.5 w-3.5" />
@@ -10583,7 +10629,7 @@ export default function WorkflowEditor() {
               <button
                 type="button"
                 onClick={() => deleteAutomationTasks([selectedTask.id])}
-                disabled={selectedTaskActive}
+                disabled={Boolean(reportHost) || selectedTaskActive}
                 className="inline-flex items-center gap-1.5 rounded-xl border border-rose-100 bg-rose-50 px-3 py-1.5 text-xs font-black text-rose-700 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-45"
                 title={selectedTaskActive ? '执行中的任务不能删除' : '删除当前测试报告'}
               >
@@ -10677,10 +10723,14 @@ export default function WorkflowEditor() {
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               {renderTaskPerformanceCard('手机性能报告', selectedTask.performanceReports?.phone, {
                 enabled: selectedTask.performanceOptions?.phone,
+                loading: selectedTask.performanceLoading?.phone,
+                error: selectedTask.performanceErrors?.phone,
                 running: selectedTaskActive,
               })}
               {renderTaskPerformanceCard('眼镜性能报告', selectedTask.performanceReports?.glasses, {
                 enabled: selectedTask.performanceOptions?.glasses,
+                loading: selectedTask.performanceLoading?.glasses,
+                error: selectedTask.performanceErrors?.glasses,
                 running: selectedTaskActive,
               })}
             </div>
@@ -10707,7 +10757,7 @@ export default function WorkflowEditor() {
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {([
-                    ['all', `全部 ${selectedTaskCases.length}`],
+                    ['all', `全部 ${caseCount}`],
                     ['failed', `失败 ${failedCount}`],
                     ['success', `成功 ${successCount}`],
                     ['running', '执行中'],
@@ -10756,7 +10806,7 @@ export default function WorkflowEditor() {
                 </div>
                 <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500">
                   <span>
-                    当前显示 <span className="font-black text-slate-900">{selectedTaskFilteredCases.length}</span> / {selectedTaskCases.length}
+                    当前显示 <span className="font-black text-slate-900">{selectedTaskFilteredCases.length}</span> / {caseCount}{isReportDetailUnavailable && '（明细未加载）'}
                   </span>
                   {hasReportCaseFilter && (
                     <button
@@ -10775,142 +10825,154 @@ export default function WorkflowEditor() {
               </div>
             </div>
             <div className="mt-5 space-y-4">
-              {isReportDetailLoading && (
-                <div className="rounded-2xl border border-dashed border-blue-100 bg-blue-50 px-5 py-8 text-center">
-                  <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-600" />
-                  <div className="mt-3 text-sm font-black text-slate-800">正在加载报告详情</div>
-                  <div className="mt-1 text-xs font-bold text-slate-500">列表只保存摘要，详情会在打开报告时按需读取。</div>
+              {reportDetailError && (
+                <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-6 text-sm text-rose-800">
+                  <div className="font-black">报告详情加载失败</div>
+                  <div className="mt-2 break-all">{reportDetailError}</div>
+                  <div className="mt-2 text-xs">任务摘要仍然保留。请检查报告源目录，或恢复原报告文件后重试。</div>
+                  <button type="button" className="mt-3 rounded-lg border border-rose-200 bg-white px-3 py-2 font-bold" onClick={() => void ensureAutomationTaskDetail(selectedTask, true)}>重新加载</button>
                 </div>
               )}
-              {selectedTaskFilteredCases.length === 0 && !isReportDetailLoading && (
+              {isInitialReportDetailLoading && (
+                <p role="status" className="px-2 py-2 text-xs font-medium text-slate-500">正在读取报告明细…</p>
+              )}
+              {selectedTaskFilteredCases.length === 0 && !isInitialReportDetailLoading && !reportDetailError && (
                 <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-5 py-10 text-center">
                   <Search className="mx-auto h-7 w-7 text-slate-300" />
                   <div className="mt-3 text-sm font-black text-slate-700">没有匹配的用例</div>
                   <div className="mt-1 text-xs font-bold text-slate-400">换个关键词，或清空状态/产物筛选。</div>
                 </div>
               )}
-              {selectedTaskFilteredCases.map((caseRecord) => {
-                const caseIndex = selectedTaskCases.findIndex((item) => item.caseId === caseRecord.caseId);
-                const caseProgress = caseRecord.total > 0 ? Math.round((caseRecord.completed / caseRecord.total) * 100) : 0;
-                const screenshots = (caseRecord.artifacts?.screenshots || []).filter((item) => item?.path);
-                const hasArtifacts = Boolean(caseRecord.artifacts?.runDir);
-                const caseStartedAt = getCaseStartedAt(caseRecord);
+              {selectedTaskFilteredCases.map(({ caseRecord, caseIndex }) => (
+                <ReportViewport key={`${selectedTask.id}:${caseRecord.caseId}:${caseIndex}`} label={caseRecord.caseName}
+                  estimate={caseRecord.artifacts?.screenshots?.length ? 700 : 300}>
+                  {() => {
+                    const caseProgress = caseRecord.total > 0 ? Math.round((caseRecord.completed / caseRecord.total) * 100) : 0;
+                    const screenshots = (caseRecord.artifacts?.screenshots || []).filter((item) => item?.path);
+                    const hasArtifacts = Boolean(caseRecord.artifacts?.runDir || reportHost && Object.values(caseRecord.artifacts || {}).some(value => Array.isArray(value) && value.length));
+                    const caseStartedAt = getCaseStartedAt(caseRecord);
 
-                return (
-                  <div key={caseRecord.caseId} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <button
-                        type="button"
-                        onClick={() => openTaskCaseFlow(selectedTask, caseRecord)}
-                        className="inline-flex min-w-0 items-center text-left text-sm font-black text-slate-900 hover:text-blue-600"
-                      >
-                        <span className="mr-2 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-white px-2 font-mono text-[11px] font-black text-blue-600 ring-1 ring-blue-100">
-                          #{caseIndex + 1}
-                        </span>
-                        <span>{caseRecord.caseName}</span>
-                      </button>
-                      <div className="flex items-center gap-2">
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
-                          caseRecord.status === 'success' ? 'bg-emerald-50 text-emerald-600' : caseRecord.status === 'failed' ? 'bg-rose-50 text-rose-600' : caseRecord.status === 'stopped' ? 'bg-slate-800 text-white' : caseRecord.status === 'running' ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-500'
-                        }`}>
-                          {caseRecord.status === 'success' ? '成功' : caseRecord.status === 'failed' ? '失败' : caseRecord.status === 'stopped' ? '强制停止' : caseRecord.status === 'running' ? '执行中' : '等待'}
-                        </span>
-                        <span className="rounded-full bg-white px-2 py-0.5 font-mono text-[10px] font-black text-slate-500">
-                          {caseRecord.completed}/{caseRecord.total}
-                        </span>
-                        {hasArtifacts && (
+                    return (
+                      <div key={caseRecord.caseId} data-report-case-detail data-report-case-id={reportHost ? caseRecord.caseId : undefined} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
                           <button
                             type="button"
-                            onClick={() => void openPathInFolder(caseRecord.artifacts?.runDir, 'open')}
-                            className="rounded-lg border border-blue-100 px-2 py-1 text-[10px] font-black text-blue-600 hover:bg-blue-50"
+                            onClick={() => openTaskCaseFlow(selectedTask, caseRecord)}
+                            className="inline-flex min-w-0 items-center text-left text-sm font-black text-slate-900 hover:text-blue-600"
                           >
-                            产物
+                            <span className="mr-2 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-white px-2 font-mono text-[11px] font-black text-blue-600 ring-1 ring-blue-100">
+                              #{caseIndex + 1}
+                            </span>
+                            <span>{caseRecord.caseName}</span>
                           </button>
-                        )}
-                      </div>
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-bold text-slate-500">
-                      <span className="rounded-full bg-white px-2 py-1">
-                        开始 {formatRunTime(caseStartedAt)}
-                      </span>
-                      {caseRecord.endedAt && (
-                        <span className="rounded-full bg-white px-2 py-1">
-                          结束 {formatRunTime(caseRecord.endedAt)}
-                        </span>
-                      )}
-                      <span className="rounded-full bg-white px-2 py-1">
-                        耗时 {formatCaseDuration(caseRecord)}
-                      </span>
-                    </div>
-                    {(caseRecord.terminationReason || caseRecord.reachedEnd !== undefined || caseRecord.duplicateStepId) && (
-                      <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-bold">
-                        <span className={`rounded-full px-2 py-1 ${caseRecord.reachedEnd ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
-                          到达 End：{caseRecord.reachedEnd ? '是' : '否'}
-                        </span>
-                        {caseRecord.terminationReason && (
-                          <span className="rounded-full bg-white px-2 py-1 text-slate-600">
-                            终止：{caseRecord.terminationReason}
-                          </span>
-                        )}
-                        {caseRecord.duplicateStepId && (
-                          <span className="rounded-full bg-rose-50 px-2 py-1 text-rose-700">
-                            异常重复节点：{caseRecord.duplicateStepId}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white">
-                      <div
-                        className={`h-full rounded-full ${
-                          caseRecord.status === 'success'
-                            ? 'bg-emerald-500'
-                            : caseRecord.status === 'failed'
-                              ? 'bg-rose-500'
-                              : caseRecord.status === 'stopped'
-                                ? 'bg-slate-700'
-                              : 'bg-blue-500'
-                        }`}
-                        style={{ width: `${caseProgress}%` }}
-                      />
-                    </div>
-                    <div className="mt-3">
-                      {renderTaskCaseLatestStep(caseRecord)}
-                    </div>
-                    {screenshots.length > 0 && (
-                      <div className="mt-4">
-                        <div className="mb-2 text-[11px] font-black uppercase tracking-wide text-slate-500">校验截图</div>
-                        <div className="flex gap-3 overflow-x-auto pb-2">
-                          {screenshots.map((screenshot, index) => (
-                            <button
-                              type="button"
-                              key={`${screenshot.path}-${index}`}
-                              onClick={() => void openPathInFolder(screenshot.path, 'open')}
-                              className="group w-[260px] min-w-[260px] overflow-hidden rounded-xl border border-slate-200 bg-white text-left shadow-sm hover:border-blue-200 hover:bg-blue-50"
-                            >
-                              <div className="flex h-[360px] w-full items-center justify-center overflow-hidden bg-slate-950">
-                                {screenshotPreviewUrls[screenshot.path] ? (
-                                  <img
-                                    src={screenshotPreviewUrls[screenshot.path]}
-                                    alt={`截图 ${index + 1}`}
-                                    className="h-full w-full object-contain transition-transform group-hover:scale-[1.02]"
-                                  />
-                                ) : (
-                                  <div className="px-3 text-center text-[11px] font-black text-slate-400">
-                                    点击打开截图
-                                  </div>
-                                )}
-                              </div>
-                              <div className="p-2">
-                                <div className="truncate text-xs font-black text-slate-800">截图 {index + 1}</div>
-                              </div>
-                            </button>
-                          ))}
+                          <div className="flex items-center gap-2">
+                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
+                              caseRecord.status === 'success' ? 'bg-emerald-50 text-emerald-600' : caseRecord.status === 'failed' ? 'bg-rose-50 text-rose-600' : caseRecord.status === 'stopped' ? 'bg-slate-800 text-white' : caseRecord.status === 'running' ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-500'
+                            }`}>
+                              {caseRecord.status === 'success' ? '成功' : caseRecord.status === 'failed' ? '失败' : caseRecord.status === 'stopped' ? '强制停止' : caseRecord.status === 'running' ? '执行中' : '等待'}
+                            </span>
+                            <span className="rounded-full bg-white px-2 py-0.5 font-mono text-[10px] font-black text-slate-500">
+                              {caseRecord.completed}/{caseRecord.total}
+                            </span>
+                            {hasArtifacts && (
+                              <button
+                                type="button"
+                                onClick={() => reportHost ? reportHost.onCase(caseRecord.caseId) : void openPathInFolder(caseRecord.artifacts?.runDir, 'open')}
+                                className="rounded-lg border border-blue-100 px-2 py-1 text-[10px] font-black text-blue-600 hover:bg-blue-50"
+                              >
+                                产物
+                              </button>
+                            )}
+                          </div>
                         </div>
+                        <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-bold text-slate-500">
+                          <span className="rounded-full bg-white px-2 py-1">
+                            开始 {formatRunTime(caseStartedAt)}
+                          </span>
+                          {caseRecord.endedAt && (
+                            <span className="rounded-full bg-white px-2 py-1">
+                              结束 {formatRunTime(caseRecord.endedAt)}
+                            </span>
+                          )}
+                          <span className="rounded-full bg-white px-2 py-1">
+                            耗时 {formatCaseDuration(caseRecord)}
+                          </span>
+                        </div>
+                        {(caseRecord.terminationReason || caseRecord.reachedEnd !== undefined || caseRecord.duplicateStepId) && (
+                          <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-bold">
+                            <span className={`rounded-full px-2 py-1 ${caseRecord.reachedEnd ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                              到达 End：{caseRecord.reachedEnd ? '是' : '否'}
+                            </span>
+                            {caseRecord.terminationReason && (
+                              <span className="rounded-full bg-white px-2 py-1 text-slate-600">
+                                终止：{caseRecord.terminationReason}
+                              </span>
+                            )}
+                            {caseRecord.duplicateStepId && (
+                              <span className="rounded-full bg-rose-50 px-2 py-1 text-rose-700">
+                                异常重复节点：{caseRecord.duplicateStepId}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white">
+                          <div
+                            className={`h-full rounded-full ${
+                              caseRecord.status === 'success'
+                                ? 'bg-emerald-500'
+                                : caseRecord.status === 'failed'
+                                  ? 'bg-rose-500'
+                                  : caseRecord.status === 'stopped'
+                                    ? 'bg-slate-700'
+                                  : 'bg-blue-500'
+                            }`}
+                            style={{ width: `${caseProgress}%` }}
+                          />
+                        </div>
+                        <div className="mt-3">
+                          {renderTaskCaseLatestStep(caseRecord)}
+                          {reportHost && (caseRecord as AutomationTaskCaseRecord & {detailError?:string}).detailError && <div role="alert" className="mt-2 text-xs text-rose-600">{(caseRecord as AutomationTaskCaseRecord & {detailError?:string}).detailError}</div>}
+                          {reportHost && (caseRecord as AutomationTaskCaseRecord & {artifactsLoading?:boolean}).artifactsLoading && <div role="status" aria-live="polite" aria-label="截图加载中" className="mt-3 rounded-xl border border-dashed border-slate-200 bg-white p-4 text-xs text-slate-500">正在加载截图及执行产物…</div>}
+
+                        </div>
+                        {screenshots.length > 0 && (
+                          <div className="mt-4">
+                            <div className="mb-2 text-[11px] font-black uppercase tracking-wide text-slate-500">校验截图</div>
+                            <div className="flex gap-3 overflow-x-auto pb-2">
+                              {screenshots.map((screenshot, index) => (
+                                <button
+                                  type="button"
+                                  key={`${screenshot.path}-${index}`}
+                                  disabled={screenshot.success === false}
+                                  onClick={() => void openPathInFolder(screenshot.path, 'open')}
+                                  className="group w-[260px] min-w-[260px] overflow-hidden rounded-xl border border-slate-200 bg-white text-left shadow-sm hover:border-blue-200 hover:bg-blue-50"
+                                >
+                                  <div className="flex h-[360px] w-full items-center justify-center overflow-hidden bg-slate-950">
+                                    {screenshot.success === false ? (
+                                      <div role="status" className="space-y-2 px-4 text-center text-xs text-slate-300">
+                                        <AlertTriangle className="mx-auto h-6 w-6 text-amber-400" />
+                                        <div className="font-bold">截图采集失败</div>
+                                        <div className="break-words">{screenshot.error || '未生成截图文件'}</div>
+                                      </div>
+                                    ) : (
+                                      <ReportViewport label={`截图 ${index + 1}`} estimate={360} className="h-full w-full">
+                                        {() => <ReportScreenshot path={screenshot.path} index={index} store={reportThumbnailStore} invoke={electronApi?.ipcRenderer?.invoke || reportHost?.readImage} />}
+                                      </ReportViewport>
+                                    )}
+                                  </div>
+                                  <div className="p-2">
+                                    <div className="truncate text-xs font-black text-slate-800">截图 {index + 1}{screenshot.success === false ? ' · 采集失败' : ''}</div>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
+                    );
+                  }}
+                </ReportViewport>
+              ))}
             </div>
           </div>
         </div>
@@ -11692,6 +11754,7 @@ export default function WorkflowEditor() {
               <div className="relative mt-3">
                 <button
                   type="button"
+                  data-onboarding-target="component-add"
                   onClick={() => setIsAddComponentMenuOpen((current) => !current)}
                   className="w-full rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100"
                 >
@@ -11703,6 +11766,7 @@ export default function WorkflowEditor() {
                       <button
                         key={kind}
                         type="button"
+                        data-onboarding-target={`component-template-${kind}`}
                         onClick={() => createComponent(kind)}
                         className="w-full border-b border-slate-100 px-3 py-3 text-left last:border-b-0 hover:bg-slate-50"
                       >
@@ -12569,239 +12633,34 @@ export default function WorkflowEditor() {
       <div className="mx-auto max-w-7xl">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-black uppercase tracking-widest text-blue-600">
-              <Settings2 className="h-3.5 w-3.5" />
-              Settings Center
-            </div>
             <h2 className="mt-3 text-xl font-black text-slate-900">设置中心</h2>
             <p className="mt-1 text-sm font-bold text-slate-500">
-              这里维护通用配置。大模型助手只负责模型对话，solopi-desktop 操作能力后续通过 Skill / MCP / CLI 接入。
+              管理连接、Agent 与工具配置。
             </p>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-500">
-            配置保存后立即对 CLI 与 Flow 生效
-          </div>
+          <DiagnosticLogExport invoke={electronApi?.ipcRenderer ? channel=>electronApi.ipcRenderer.invoke(channel) : undefined} />
         </div>
 
         <div className="mt-5 grid grid-cols-[220px_minmax(0,1fr)] items-start gap-4">
           <section className="sticky top-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-            <h3 className="px-2 text-[11px] font-black uppercase tracking-widest text-slate-400">配置导航</h3>
-            <div className="mt-3 grid grid-cols-1 gap-1.5">
-              {([
-                ['team', '团队配置与入门', Settings2],
-                ['model', '模型配置', Sparkles],
-                ['environment', '环境配置', Terminal],
-                ['tts', 'TTS 配置', Mic],
-                ['quick-actions', '快捷操作', FileCode2],
-                ['sites', '常用站点', Globe2],
-                ['device', '设备管理', MonitorSmartphone],
-              ] satisfies Array<[SettingsSection, string, React.ComponentType<{ className?: string }>]>) .map(([key, label, Icon]) => (
-                <button
-                  key={String(key)}
-                  type="button"
-                  onClick={() => setSettingsSection(key as SettingsSection)}
-                  className={`rounded-2xl border px-3 py-3 text-left transition-all ${
-                    settingsSection === key
-                      ? 'border-blue-200 bg-blue-50 text-blue-700'
-                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Icon className="h-4 w-4 shrink-0" />
-                    <span className="truncate text-xs font-black">{label}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-            {settingsSection === 'model' && (
-              <>
-                <div className="mt-5 flex items-center justify-between">
-                  <h3 className="text-sm font-black text-slate-900">模型列表</h3>
-                  <button
-                    type="button"
-                    onClick={addLlmProvider}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-blue-50 hover:text-blue-600"
-                    title="新增模型配置"
-                    aria-label="新增模型配置"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
-                </div>
-                <div className="mt-3 space-y-2">
-                  {isNewLlmProvider && <div aria-current="true" className="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-700">新增模型配置<span className="ml-2 text-xs font-normal">待保存</span></div>}
-                  {llmProviders.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
-                      <Bot className="mx-auto h-7 w-7 text-slate-300" />
-                      <div className="mt-3 text-xs font-bold text-slate-500">还没有模型配置</div>
-                    </div>
-                  ) : llmProviders.map((provider) => (
-                    <button
-                      key={provider.id}
-                      type="button"
-                      onClick={() => {
-                        selectLlmProvider(provider);
-                      }}
-                      className={`w-full rounded-2xl border px-4 py-3 text-left transition-all ${
-                        llmProviderDraft.id === provider.id
-                          ? 'border-blue-200 bg-blue-50 text-blue-700'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 shrink-0" />
-                        <span className="truncate text-sm font-black">{provider.name || '未命名模型'}</span>
-                      </div>
-                      <div className="mt-1 truncate text-[11px] font-bold text-slate-400">{provider.model || '未填写模型'}</div>
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
+            {([
+              ['连接与设备', [['team','团队配置与入门',Settings2],['lab','实验室连接',Globe2],['device-groups','设备与设备组',MonitorSmartphone],['device','设备管理',MonitorSmartphone]]],
+              ['Agent', [['model','运行时与模型',Sparkles],['agent-screen','Agent 后台屏幕',MonitorSmartphone],['agent-reply','消息自动回复',MessageSquare]]],
+              ['工具与环境', [['environment','环境配置',Terminal],['tts','TTS 配置',Mic],['quick-actions','快捷操作',FileCode2],['sites','常用站点',Globe2]]],
+            ] as [string,[SettingsSection,string,React.ComponentType<{className?:string}>][]][]).map(([group,links])=><div key={group} className="mb-5 last:mb-0"><h3 className="px-3 py-2 text-xs font-medium text-slate-400">{group}</h3><div className="grid gap-1">{links.map(([key,label,Icon])=><button key={key} type="button" data-onboarding-target={`settings-${key}`} onClick={()=>setSettingsSection(key)} className={`flex items-center gap-2 rounded-lg border-0 px-3 py-2.5 text-left text-xs font-medium transition-colors ${settingsSection===key?'bg-blue-50 text-blue-700':'bg-white text-slate-600 hover:bg-slate-50'}`}><Icon className="h-4 w-4 shrink-0"/>{label}</button>)}</div></div>)}
+
           </section>
 
-          {settingsSection === 'team' ? (
-            <TeamConfigurationPanel onNavigate={(section) => { if (section === 'cases') setActiveTab('automation-cases'); else if (section === 'agent') setActiveTab('agent'); else { setSettingsSection(section); setActiveTab('settings'); } }} />
+          {settingsSection === 'agent-screen' || settingsSection === 'agent-reply' ? (
+            <AgentSettingsCenter section={settingsSection} />
+          ) : settingsSection === 'lab' ? (
+            <LabConnectionSettings />
+          ) : settingsSection === 'device-groups' ? (
+            <DeviceGroupsSettings cases={cases} onOpenCases={() => setActiveTab('automation-cases')} />
+          ) : settingsSection === 'team' ? (
+            <TeamConfigurationPanel onNavigate={(section) => { if (section === 'cases') setActiveTab('automation-cases'); else if (section === 'agent') setActiveTab('agent'); else if (section === 'tasks') setActiveTab('automation-tasks'); else if (section === 'settings') setActiveTab('settings'); else if (section === 'components' || section === 'components-add') { setComponentLibraryTab('execute'); setIsAddComponentMenuOpen(section === 'components-add'); setActiveTab('automation-components'); } else { setSettingsSection(section); setActiveTab('settings'); } }} />
           ) : settingsSection === 'model' ? (
-          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <h3 className="text-sm font-black text-slate-900">{isNewLlmProvider ? '新增模型配置 · 待保存' : '编辑模型配置'}</h3>
-                <p className="mt-1 text-xs font-bold text-slate-400">兼容所有提供 Chat Completions 风格接口的云端模型平台。</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => isNewLlmProvider ? cancelLlmProviderDraft() : removeLlmProvider(llmProviderDraft.id)}
-                  className="rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100"
-                >
-                  {isNewLlmProvider ? '取消新增' : '删除'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => saveLlmProvider()}
-                  className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white hover:bg-blue-700"
-                >
-                  保存配置
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-5 grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">配置名称</label>
-                <input
-                  value={llmProviderDraft.name}
-                  onChange={(event) => setLlmProviderDraft((current) => ({ ...current, name: event.target.value }))}
-                  className="mt-1 h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-bold outline-none focus:border-blue-300 focus:bg-white"
-                  placeholder="例如 OpenAI / DashScope / DeepSeek"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">模型名称</label>
-                <input
-                  value={llmProviderDraft.model}
-                  onChange={(event) => {
-                    setLlmProviderDraft((current) => ({ ...current, model: event.target.value }));
-                    setLlmCapabilityStatus({ responseFormat: 'unknown', thinking: 'unknown' });
-                  }}
-                  className="mt-1 h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-bold outline-none focus:border-blue-300 focus:bg-white"
-                  placeholder="gpt-4.1 / deepseek-chat / qwen-plus"
-                />
-              </div>
-              <div className="col-span-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Base URL</label>
-                <input
-                  value={llmProviderDraft.baseUrl}
-                  onChange={(event) => {
-                    setLlmProviderDraft((current) => ({ ...current, baseUrl: event.target.value }));
-                    setLlmCapabilityStatus({ responseFormat: 'unknown', thinking: 'unknown' });
-                  }}
-                  className="mt-1 h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 font-mono text-sm font-bold outline-none focus:border-blue-300 focus:bg-white"
-                  placeholder="https://api.example.com/v1"
-                />
-              </div>
-              <div className="col-span-2 grid grid-cols-2 gap-3">
-                <label className="text-xs text-slate-500">上下文容量（tokens）
-                  <input type="number" min="1" placeholder="自动读取服务容量；缺失时借用 DeepSeek 1,048,576" value={llmProviderDraft.contextWindowTokens ?? ''}
-                    onChange={e => setLlmProviderDraft(p => ({ ...p, contextWindowTokens: e.target.value ? Number(e.target.value) : undefined }))}
-                    className="mt-1 h-11 w-full rounded-2xl border border-slate-200 px-4" />
-                </label>
-                <label className="text-xs text-slate-500">Agent 单次输出上限（tokens）
-                  <input type="number" min="1" placeholder="对话默认 16384；摘要使用 Harness 默认预算" value={llmProviderDraft.maxOutputTokens ?? ''}
-                    onChange={e => setLlmProviderDraft(p => ({ ...p, maxOutputTokens: e.target.value ? Number(e.target.value) : undefined }))}
-                    className="mt-1 h-11 w-full rounded-2xl border border-slate-200 px-4" />
-                </label>
-                <p className="col-span-2 text-xs text-slate-400">请按服务商实际限额填写，用于提前压缩和预留输出空间；默认预算不代表已探测到模型容量。</p>
-              </div>
-              <div className="col-span-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">API Key</label>
-                <input
-                  type="password"
-                  value={llmProviderDraft.apiKey}
-                  onChange={(event) => setLlmProviderDraft((current) => ({ ...current, apiKey: event.target.value }))}
-                  className="mt-1 h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 font-mono text-sm font-bold outline-none focus:border-blue-300 focus:bg-white"
-                  placeholder="sk-..."
-                />
-              </div>
-            </div>
-
-            <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="mb-4 grid gap-3 md:grid-cols-2">
-                <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-3">
-                  <input
-                    type="checkbox"
-                    checked={llmCapabilityStatus.responseFormat === 'supported' && llmProviderDraft.responseFormat === 'json_object'}
-                    disabled={llmCapabilityStatus.responseFormat !== 'supported'}
-                    onChange={(event) => setLlmProviderDraft((current) => ({
-                      ...current,
-                      responseFormat: event.target.checked ? 'json_object' : 'default',
-                    }))}
-                    className="mt-0.5 h-4 w-4 accent-blue-600 disabled:cursor-not-allowed disabled:opacity-40"
-                  />
-                  <span>
-                    <span className="block text-xs font-black text-slate-900">启用 JSON 输出模式 <em className="ml-1 not-italic text-[10px] text-blue-600">{llmCapabilityStatus.responseFormat === 'supported' ? '已探测支持' : llmCapabilityStatus.responseFormat === 'unsupported' ? '不支持' : '待测试'}</em></span>
-                    <span className="mt-1 block text-[11px] font-bold leading-5 text-slate-400">测试连接后按实际响应开放。适合 LLM 断言节点。</span>
-                  </span>
-                </label>
-                <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-3">
-                  <input
-                    type="checkbox"
-                    checked={llmCapabilityStatus.thinking === 'supported' && llmProviderDraft.thinking === 'disabled'}
-                    disabled={llmCapabilityStatus.thinking !== 'supported'}
-                    onChange={(event) => setLlmProviderDraft((current) => ({
-                      ...current,
-                      thinking: event.target.checked ? 'disabled' : 'default',
-                    }))}
-                    className="mt-0.5 h-4 w-4 accent-blue-600 disabled:cursor-not-allowed disabled:opacity-40"
-                  />
-                  <span>
-                    <span className="block text-xs font-black text-slate-900">关闭 Thinking <em className="ml-1 not-italic text-[10px] text-blue-600">{llmCapabilityStatus.thinking === 'supported' ? '已探测支持' : llmCapabilityStatus.thinking === 'unsupported' ? '不支持' : '待测试'}</em></span>
-                    <span className="mt-1 block text-[11px] font-bold leading-5 text-slate-400">测试连接后按实际响应开放，减少推理内容占用输出预算。</span>
-                  </span>
-                </label>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-xs font-black text-slate-900">连接测试</div>
-                  <div className="mt-1 text-[11px] font-bold leading-5 text-slate-400">点击后会向模型发送一条极短测试消息。</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => void testLlmProvider()}
-                  disabled={isTestingProvider}
-                  className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-black text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isTestingProvider ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                  测试连接
-                </button>
-              </div>
-              {providerTestMessage && (
-                <div className="mt-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-600">
-                  {providerTestMessage}
-                </div>
-              )}
-            </div>
-          </section>
+          <ModelBackendSettings api={runtimeModelApi}><ApiModelSettings items={llmProviders} draft={llmProviderDraft} isNew={isNewLlmProvider} onAdd={addLlmProvider} onSelect={id=>{const p=llmProviders.find(x=>x.id===id);if(p)selectLlmProvider(p)}} onChange={patch=>{setLlmProviderDraft(current=>({...current,...patch} as typeof current));if('model' in patch||'baseUrl' in patch)setLlmCapabilityStatus({responseFormat:'unknown',thinking:'unknown'})}} onSave={()=>void saveLlmProvider()} onDelete={()=>removeLlmProvider(llmProviderDraft.id)} onTest={()=>void testLlmProvider()} capabilities={llmCapabilityStatus} busy={isTestingProvider} message={providerTestMessage} onCancel={isNewLlmProvider?cancelLlmProviderDraft:undefined}/></ModelBackendSettings>
           ) : settingsSection === 'environment' ? (
           <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3">
@@ -13487,7 +13346,14 @@ export default function WorkflowEditor() {
   return (
     <div className="flex h-screen bg-white text-slate-900 overflow-hidden">
       {soloPiDialog && <SoloPiImport api={electronApi} mode={soloPiDialog.mode} phoneSerial={selectedPhoneSerial} phonePackage={selectedPhonePackage} phoneRuntime={selectedPhoneRuntime} glassesSerial={selectedGlassesSerial} onRefreshDevices={() => setDeviceRefreshKey(value => value + 1)} onImport={importSoloPiDraft} onClose={() => setSoloPiDialog(null)} />}
-      <TeamOnboarding onNavigate={(section) => { if (section === 'cases') setActiveTab('automation-cases'); else if (section === 'agent') setActiveTab('agent'); else { setSettingsSection(section); setActiveTab('settings'); } }} />
+      {!reportHost && <TeamOnboarding onDemonstrationChange={(active) => {
+        if (active && !onboardingNavigationSnapshot.current) onboardingNavigationSnapshot.current = {tab:activeTab,section:settingsSection,componentTab:componentLibraryTab,addMenu:isAddComponentMenuOpen};
+        if (!active && onboardingNavigationSnapshot.current) {
+          const previous=onboardingNavigationSnapshot.current;onboardingNavigationSnapshot.current=null;
+          setActiveTab(previous.tab);setSettingsSection(previous.section);setComponentLibraryTab(previous.componentTab);setIsAddComponentMenuOpen(previous.addMenu);
+        }
+        setOnboardingDemonstrating(active);
+      }} onNavigate={(section) => { if (section === 'cases') setActiveTab('automation-cases'); else if (section === 'agent') setActiveTab('agent'); else if (section === 'tasks') setActiveTab('automation-tasks'); else if (section === 'settings') setActiveTab('settings'); else if (section === 'components' || section === 'components-add') { setComponentLibraryTab('execute'); setIsAddComponentMenuOpen(section === 'components-add'); setActiveTab('automation-components'); } else { setSettingsSection(section); setActiveTab('settings'); } }} />}
       {caseTreeDragItem && caseTreeDragPosition && (
         <div
           className="pointer-events-none fixed z-[120] flex max-w-xs items-center gap-2 rounded-xl border border-blue-200 bg-white/95 px-3 py-2 text-xs font-black text-slate-700 shadow-2xl"
@@ -14438,25 +14304,26 @@ export default function WorkflowEditor() {
         </div>
       )}
       {renderAssistantPanel()}
-      <Sidebar
+      {!reportHost && <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        collapsed={isMainSidebarCollapsed}
+        collapsed={isMainSidebarCollapsed && !onboardingDemonstrating}
         onToggleCollapsed={toggleMainSidebarCollapsed}
         onAssistantOpen={() => {
           setIsAssistantOpen(true);
           setIsAssistantCollapsed(false);
         }}
-      />
+      />}
 
       <main className="flex-1 flex min-h-0 min-w-0 flex-col overflow-hidden bg-white">
-        {activeTab !== 'agent' && deviceControls}
-        {activeTab === 'agent' ? (
-          <AgentPage onNavigate={setActiveTab} deviceControls={deviceControls} initialSessionId={mirrorSessionId} onSessionChange={setMirrorSessionId} />
+        {!reportHost && activeTab !== 'agent' && deviceControls}
+        {!reportHost && <div className={activeTab === 'device-control' ? 'flex min-h-0 flex-1 flex-col' : 'hidden'}><HarnessControlPage active={activeTab === 'device-control'} /></div>}
+        {activeTab === 'device-control' ? null : activeTab === 'agent' ? (
+          <AgentPage onOpenSettings={section => {setSettingsSection(section);setActiveTab('settings');}} onNavigate={setActiveTab} deviceControls={deviceControls} initialSessionId={mirrorSessionId} onSessionChange={setMirrorSessionId} />
         ) : activeTab === 'automation-cases' ? (
           renderAutomationCases()
         ) : activeTab === 'automation-task-report' ? (
-          renderAutomationTaskReport()
+          <Profiler id="automation-report" onRender={reportOnRender}>{renderAutomationTaskReport()}</Profiler>
         ) : activeTab === 'automation-tasks' ? (
           renderAutomationTasks()
         ) : activeTab === 'automation-components' ? (
@@ -14479,7 +14346,14 @@ export default function WorkflowEditor() {
                   className="flex min-w-0 items-center gap-2 rounded-xl px-2 py-1.5"
                   title={isReportFlowReadOnly ? '报告查看模式，用例不可编辑' : '双击重命名用例'}
                 >
-                  <Zap className="w-4 h-4 text-blue-600 fill-blue-600" />
+                  {!isReportFlowReadOnly && <CaseLibrarySyncHint
+                    key={selectedCaseLibraryId}
+                    libraryName={selectedCaseLibrary?.name}
+                    hasLocalChanges={pendingLocalCaseLibraryChange?.libraryId === selectedCaseLibraryId
+                      && pendingLocalCaseLibraryChange.errorCode === 'CASE_LIBRARY_LOCAL_EDITS_CONFLICT'}
+                    busy={isPullingCaseLibrary || isRefreshingCaseLibrary}
+                    onCompare={confirmPendingLocalCaseLibraryChange}
+                  />}
                   {!isReportFlowReadOnly && editingName?.type === 'case' && editingName.id === selectedCase.id ? (
                     <input
                       autoFocus
@@ -14605,6 +14479,37 @@ export default function WorkflowEditor() {
                   )}
                 </div>
               )}
+              <WorkflowCleanupToolbar region={workflowRegion} count={selectedCase.steps.filter(step=>step.phase === 'cleanup').length}
+                readOnly={isReportFlowReadOnly} movable={Boolean(selectedStep && !['start','end','if'].includes(selectedStep.type))}
+                onRegionChange={region=>{
+                  setWorkflowRegion(region);
+                  setSelectedStepId(selectedCase.steps.find(step=>(step.phase || 'main') === region)?.id || '');
+                  window.setTimeout(()=>reactFlowInstanceRef.current?.fitView({padding:0.2}), 100);
+                }}
+                onMove={()=>{
+                  if (!selectedStep) return;
+                  try {
+                    const phase = selectedStep.phase === 'cleanup' ? 'main' : 'cleanup';
+                    const moved = moveWorkflowStepToPhase(selectedCase, ensureBoundaryEdges(selectedCase, caseEdges[selectedCase.id] || []), selectedStep.id, phase);
+                    updateSelectedCase(testCase=>({...testCase, steps:moved.steps, edges:moved.edges}));
+                    setCaseEdges(current=>({...current, [selectedCase.id]:moved.edges}));
+                    setWorkflowRegion(phase);
+                    window.setTimeout(()=>reactFlowInstanceRef.current?.fitView({padding:0.2}), 100);
+                  } catch(error) { setRunMessage(error instanceof Error ? error.message : String(error)); }
+                }}
+                onReorder={direction=>{
+                  if (!selectedStep) return;
+                  const cleanup = selectedCase.steps.filter(step=>step.phase === 'cleanup');
+                  const index = cleanup.findIndex(step=>step.id === selectedStep.id);
+                  const other = cleanup[index + direction];
+                  if (!other) return;
+                  updateSelectedCase(testCase=>{
+                    const steps = [...testCase.steps];
+                    const a = steps.findIndex(step=>step.id === selectedStep.id), b = steps.findIndex(step=>step.id === other.id);
+                    [steps[a],steps[b]] = [steps[b],steps[a]];
+                    return {...testCase,steps};
+                  });
+                }} />
               {!isReportFlowReadOnly && (
               <div className="border-b border-slate-200 bg-white px-3 py-1.5">
                 <div className="grid min-w-0 grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.1fr)] gap-1.5 overflow-visible">
@@ -14799,7 +14704,7 @@ export default function WorkflowEditor() {
                   <ReactFlow
                     key={`${selectedCase.id}-${flowRenderVersion}`}
                     nodes={nodes}
-                    edges={displayEdges}
+                    edges={workflowRegion === 'cleanup' ? nodes.slice(1).map((node,index)=>({id:`cleanup-${node.id}`,source:nodes[index].id,target:node.id,animated:false})) : displayEdges}
                     nodeTypes={nodeTypes}
                     onNodesChange={handleNodesChange}
                     onNodeDragStop={handleNodeDragStop}
@@ -14807,16 +14712,17 @@ export default function WorkflowEditor() {
                     onNodeClick={onNodeClick}
                     onInit={(instance) => {
                       reactFlowInstanceRef.current = instance;
+                      restoreWorkflowCanvasAfterLayout();
                     }}
-                    onConnect={handleConnect}
-                    onEdgeUpdate={handleEdgeUpdate}
-                    onReconnect={handleEdgeUpdate}
+                    onConnect={workflowRegion === 'cleanup' ? undefined : handleConnect}
+                    onEdgeUpdate={workflowRegion === 'cleanup' ? undefined : handleEdgeUpdate}
+                    onReconnect={workflowRegion === 'cleanup' ? undefined : handleEdgeUpdate}
                     deleteKeyCode={isReportFlowReadOnly ? null : ['Backspace', 'Delete']}
                     nodesDraggable={!isReportFlowReadOnly}
-                    nodesConnectable={!isReportFlowReadOnly}
+                    nodesConnectable={!isReportFlowReadOnly && workflowRegion === 'main'}
                     elementsSelectable
                     edgesFocusable={!isReportFlowReadOnly}
-                    edgesUpdatable={!isReportFlowReadOnly}
+                    edgesUpdatable={!isReportFlowReadOnly && workflowRegion === 'main'}
                     edgeUpdaterRadius={18}
                     reconnectRadius={18}
                     connectOnClick={false}
@@ -14956,16 +14862,16 @@ export default function WorkflowEditor() {
                         <div className="flex items-center justify-between gap-3">
                           <div className="min-w-0">
                             <div className="text-[11px] font-black text-blue-800">执行产物</div>
-                            <div className="mt-0.5 truncate font-mono text-[10px] text-blue-500">{runArtifacts.runDir}</div>
+                            {!reportHost && <div className="mt-0.5 truncate font-mono text-[10px] text-blue-500">{runArtifacts.runDir}</div>}
                           </div>
-                          <button
+                          {!reportHost && <button
                             type="button"
                             onClick={() => void openPathInFolder(runArtifacts.runDir, 'open')}
                             className="flex shrink-0 items-center gap-1 rounded-lg bg-white px-2 py-1 text-[10px] font-bold text-blue-700 hover:bg-blue-100"
                           >
                             <FolderOpen className="h-3.5 w-3.5" />
                             打开目录
-                          </button>
+                          </button>}
                         </div>
                         {runArtifacts.logs.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-2">
@@ -15138,6 +15044,18 @@ export default function WorkflowEditor() {
                           默认开启。关闭后，该断言未通过、超时或执行异常均按节点成功继续，不影响用例成败；报告保留原始结果。用户主动停止仍会终止执行。
                         </div>
                       </div>
+                    )}
+                    {selectedStepComponentKind === 'tts_assert' && (
+                      <label className="block space-y-1 text-xs font-bold text-slate-600">
+                        <span>并行断言完成方式</span>
+                        <select aria-label="并行断言完成方式" value={String(selectedStep.config.observationMode || 'latched')}
+                          onChange={event=>updateStep(selectedStep.id,{config:{...selectedStep.config,observationMode:event.target.value}})}
+                          className="h-9 w-full rounded-xl border border-slate-200 px-3 text-xs">
+                          <option value="latched">命中一次后保留通过结果</option>
+                          <option value="latest">持续检查最新提取值，直到共同后继放行</option>
+                        </select>
+                        <p className="font-normal leading-5">从同一节点拉出多条断言分支，再连接到同一个后续节点，即自动并行汇合。持续模式的正则须覆盖所有状态，比较方式和期望文本沿用下方配置。</p>
+                      </label>
                     )}
                     {selectedStep.type === 'if' ? (
                       <div className="space-y-3">
@@ -17269,7 +17187,7 @@ export default function WorkflowEditor() {
         )}
       </main>
       {mirrorSessionId && <AgentMirrors sessionId={mirrorSessionId} />}
-      <WorkflowMirrors />
+      {!reportHost && <WorkflowMirrors />}
     </div>
   );
 }

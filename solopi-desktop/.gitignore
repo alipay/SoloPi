@@ -4,3 +4,11 @@ build/
 release/
 .private-local/
 *.local
+.env
+.env.*
+lab-server/data/
+deploy/stage-a/data/
+deploy/stage-a/handoff/
+lab-web/.desktop-*
+__pycache__/
+*.egg-info/

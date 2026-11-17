@@ -10,7 +10,7 @@ type InputType = 'text' | 'number' | 'boolean' | 'select' | 'file' | 'directory'
 interface SelectOption { label: string; value: string }
 interface ActionInput { key: string; label: string; type: InputType; required: boolean; userInput?: boolean; defaultValue: string; placeholder?: string; options?: Array<SelectOption | string> }
 interface QueryConfig { enabled: boolean; args: string[]; resultPath: string; targetInputKey: string; rerunAfterExecute: boolean; showOnCard?: boolean }
-interface QuickAction { showInToolbar?: boolean; sessionConfig?: { enabled: boolean; startArgs: string[]; stopArgs: string[]; exportArgs: string[] }; id: string; name: string; description: string; scriptPath: string; inputs: ActionInput[]; queryConfig?: QueryConfig }
+interface QuickAction { showInToolbar?: boolean; sessionConfig?: { enabled: boolean; startArgs: string[]; stopArgs: string[]; exportArgs: string[] }; id: string; name: string; description: string; usageInstructions?: string; scriptPath: string; inputs: ActionInput[]; queryConfig?: QueryConfig }
 interface IpcResult { success?: boolean; canceled?: boolean; error?: string; stdout?: string; stderr?: string; actions?: QuickAction[]; action?: QuickAction; importedActions?: QuickAction[]; path?: string; resultValue?: string; queryResult?: { resultValue?: string } }
 
 const COLLAPSED_KEY = 'glassbox.quickActions.collapsed';
@@ -240,6 +240,7 @@ export function QuickActions({ phoneSerial, glassesSerial, phonePackage, glasses
 
     {selected && <Modal onClose={() => setSelected(null)}>
       <div className="flex items-start justify-between gap-4"><div><h2 className="text-base font-black text-slate-900">{selected.name}</h2><p className="mt-1 text-xs font-bold text-slate-400">{selected.description}</p></div><CloseButton onClick={() => setSelected(null)} /></div>
+      {selected.usageInstructions && <details className="mt-3 text-xs text-slate-600"><summary className="cursor-pointer font-bold">使用说明</summary><p className="mt-2 whitespace-pre-wrap leading-5">{selected.usageInstructions}</p></details>}
       {selected.queryConfig?.enabled && <div className="mt-4 flex items-center justify-between rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3"><span className="text-xs font-bold text-blue-600">查询到的当前状态</span><strong className="font-mono text-xs text-blue-800">{currentQueryValue || '未知'}</strong></div>}
       {queryWarning && <p role="alert" className="mt-3 rounded-xl bg-amber-50 px-4 py-3 text-xs font-bold text-amber-800">{queryWarning}</p>}
       <div className="mt-5 max-h-[55vh] space-y-4 overflow-auto pr-1">

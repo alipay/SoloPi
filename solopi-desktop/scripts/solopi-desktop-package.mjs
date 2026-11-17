@@ -3,7 +3,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import * as zlib from 'node:zlib';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+export function assertBuildNode(runtime = zlib, version = process.version) {
+  if (['createZstdCompress','createZstdDecompress','zstdCompress','zstdDecompress','zstdDecompressSync'].some(name => typeof runtime[name] !== 'function')) {
+    throw new Error(`当前 Node ${version} 缺少 Harness 必需的 Zstandard API。请使用 Node 24 LTS 重新安装打包命令；未开始测试或签名。`);
+  }
+}
 export function parseOptions(args) {
   const options = { check: false, dev: false, help: false, branch: '', identity: process.env.GLASSBOX_CODESIGN_IDENTITY_SHA1 || '' };
   for (let i = 0; i < args.length; i++) {
@@ -55,6 +61,7 @@ export function main(args, run = spawnSync, repository = root) {
     return;
   }
   if (process.platform !== 'darwin') throw new Error('macOS 打包命令只能在 macOS 运行');
+  assertBuildNode();
   if (!/^[A-F0-9]{40}$/.test(options.identity)) throw new Error('缺少完整签名 SHA-1，请重新安装命令或使用 --identity');
   if (process.env.GLASSBOX_FORCE_ADHOC_SIGNING === '1' || process.env.GLASSBOX_ALLOW_ADHOC_SIGNING === '1') throw new Error('请移除 ad-hoc 签名环境变量后重试');
   const buildRoot = resolveBuildRoot(options.branch, repository, run);
@@ -65,16 +72,26 @@ export function main(args, run = spawnSync, repository = root) {
   const identities = run('/usr/bin/security', ['find-identity', '-v', '-p', 'codesigning'], { encoding: 'utf8' });
   if (identities.error || identities.status !== 0) throw new Error('无法读取签名身份，请检查登录钥匙串');
   if (!String(identities.stdout).split('\n').some(line => line.includes(options.identity) && line.includes('"Developer ID Application:'))) throw new Error('指定的 Developer ID 身份不可用，请运行 security find-identity -v -p codesigning 检查');
-  const env = { ...process.env, GLASSBOX_CODESIGN_IDENTITY_SHA1: options.identity };
+  const env = { ...process.env, PATH: `${path.dirname(process.execPath)}${path.delimiter}${process.env.PATH || ''}`, GLASSBOX_CODESIGN_IDENTITY_SHA1: options.identity };
   console.log(`仓库：${buildRoot}\n分支选择：${options.branch || '命令安装仓库'}\n版本：${pkg.version}\n签名：${options.identity}\n输出：${path.join(buildRoot, 'release')}`);
   if (options.check) { console.log('预检查通过（尚未测试 Apple 时间戳服务）。'); return; }
   const whitespace = run('git', ['diff', '--check'], { cwd: buildRoot, env, stdio: 'inherit' });
   if (whitespace.error || whitespace.status !== 0) throw new Error('git diff --check 未通过，请修复后重试');
+  const logRoot = path.join(buildRoot, 'build', 'package-logs');
+  fs.mkdirSync(logRoot, {recursive:true});
+  fs.writeFileSync(path.join(logRoot, '.metadata_never_index'), '');
+  const logDir = fs.mkdtempSync(path.join(logRoot, `${new Date().toISOString().replace(/[:.]/g,'-')}-`));
+  fs.writeFileSync(path.join(logDir, '.metadata_never_index'), '');
   for (const task of ['test', 'typecheck', 'package:mac']) {
-    console.log(`\n▶ npm run ${task}`);
-    const result = run('npm', ['run', task], { cwd: buildRoot, env, stdio: 'inherit' });
+    const logFile = path.join(logDir, `${task.replaceAll(':','-')}.log`);
+    console.log(`\n▶ npm run ${task}\n完整日志（执行中持续写入）：${logFile}`);
+    const fd = fs.openSync(logFile, 'wx', 0o600);
+    let result;
+    try { result = run('npm', ['run', task], { cwd: buildRoot, env, stdio: ['inherit', fd, fd] }); }
+    finally { fs.closeSync(fd); }
+    process.stdout.write(fs.readFileSync(logFile));
     if (result.error || result.status !== 0) {
-      const error = new Error(`${task} 未完成，请查看上方原始错误；未自动重试或降低签名要求。`);
+      const error = new Error(`${task} 未完成，完整原始日志：${logFile}${result.error ? `；${result.error.message}` : ''}；未自动重试或降低签名要求。`);
       error.exitCode = result.status || 1;
       throw error;
     }

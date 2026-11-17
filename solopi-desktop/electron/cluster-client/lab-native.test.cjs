@@ -1,0 +1,8 @@
+const test=require('node:test'),assert=require('node:assert/strict'),{createHash}=require('node:crypto');const {classifyDevices}=require('./lab-native.cjs');
+test('device kinds derive only from explicit saved group roles with matching physical fingerprints',()=>{const row={stableId:'stable',serial:'route-serial',kind:'other'},fp='sha256:'+createHash('sha256').update('android:ro.serialno\0stable').digest('hex');const connection={deviceReporter:{data:{mappings:{[fp]:{deviceId:'id'}}}},groupService:{store:{list:()=>[{members:[{deviceId:'id',role:'phone',sourceIdentity:fp}]}]}}};assert.equal(classifyDevices([row],connection)[0].kind,'phone');connection.groupService.store.list=()=>[{members:[{deviceId:'id',role:'glasses',sourceIdentity:'different'}]}];assert.equal(classifyDevices([row],connection)[0].kind,'other');assert.equal(classifyDevices([row],null)[0].kind,'other');connection.groupService.store.list=()=>[{members:['phone','glasses'].map(role=>({deviceId:'id',role,sourceIdentity:fp}))}];assert.equal(classifyDevices([row],connection)[0].kind,'other');});
+test('submission catalog reads current groups and cases without probing unrelated devices',async()=>{
+ const {catalog}=require('./lab-native.cjs');let scans=0;const connection={discoverDevices:async()=>{scans++;throw Error('unrelated router timeout');},deviceReporter:{data:{mappings:{}}},groupService:{store:{list:()=>[{groupId:'target',revision:3}]}}};
+ const input={connection,readState:()=>({cases:[{id:'saved',steps:[]}]}),hostname:'fixture'};
+ await assert.rejects(catalog(input),/unrelated router timeout/);
+ const result=await catalog({...input,includeDevices:false});assert.equal(scans,1);assert.equal(result.groups[0].revision,3);assert.equal(result.cases[0].caseId,'saved');
+});

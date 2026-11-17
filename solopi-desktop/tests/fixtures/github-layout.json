@@ -1,0 +1,5386 @@
+{
+  "ref": "4c58fa2d957a75e573b5f28cd5738182fa7043ec",
+  "roots": [
+    ".gitignore",
+    "CONTRIBUTING.md",
+    "Disclaimer.md",
+    "ISSUE_TRIAGE_2026-10-19.md",
+    "LICENSE",
+    "NOTICE.md",
+    "PATCH_SIGNING.md",
+    "README.md",
+    "README_eng.md",
+    "arm64-v8a.json",
+    "armeabi-v7a.json",
+    "armeabi.json",
+    "solopi-app",
+    "solopi-desktop",
+    "solopi-skill"
+  ],
+  "files": [
+    {
+      "path": "solopi-app/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "62ef981a2939f40f3b4e19c35dadd9c43c1dc10c"
+    },
+    {
+      "path": "solopi-app/AdbLib/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d9030b1fe5a38119ead84b9aff3b4754baeeecd8"
+    },
+    {
+      "path": "solopi-app/AdbLib/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1651dae6748fa99b31f6fe952714071ceb17bb57"
+    },
+    {
+      "path": "solopi-app/AdbLib/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6a64bfcefdc9bc82610031b55f7637e6b9dfdc18"
+    },
+    {
+      "path": "solopi-app/AdbLib/build.gradle",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "49706b45349159c01e0e602236c0f9d74c939e25"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/allclasses-frame.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "af98f24170a9c9393a0f26bce6bd7c3993842268"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/allclasses-noframe.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "037c33f9d3eb6d989c17d044bbe0ea94f354153f"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/com/cgutman/adblib/AdbBase64.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "31f2c1acddd1d2a05ab4a69772ac829b74ed6ed2"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/com/cgutman/adblib/AdbConnection.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "added2d89935cf7a0c0baa92ba2c1624277f13c6"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/com/cgutman/adblib/AdbCrypto.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cf6f84f3b2ab953fd212ed4fa119975f9c821a5c"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/com/cgutman/adblib/AdbProtocol.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "733540caf16cb61d6d8073c32cd0bc7bb6f72517"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/com/cgutman/adblib/AdbStream.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "96081e43ba7bb09aff663d7d0b417f5ba5812f7a"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/com/cgutman/adblib/class-use/AdbBase64.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f3f54374903b6365068b54555d34e179e1ae8558"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/com/cgutman/adblib/class-use/AdbConnection.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "486ef14da5df0057056551d85ed3d139a976a337"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/com/cgutman/adblib/class-use/AdbCrypto.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bba5ee4d27fd39f228847b08ea6dc5b8ecaab8b1"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/com/cgutman/adblib/class-use/AdbProtocol.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d6cc5d2b1504b2455f87c8b26a97005c171b2e7f"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/com/cgutman/adblib/class-use/AdbStream.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dfca350b4af523b7aca524f0e918e4f84d4bf80d"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/com/cgutman/adblib/package-frame.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b0dbe1d20a5ace8eebe61b840eec0cc3b5620899"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/com/cgutman/adblib/package-summary.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c04b359f331e37a9741951c5a44b8e3ac132bd7d"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/com/cgutman/adblib/package-tree.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "39d356cf9bb405d3860cb9b7fca2bb460f30e147"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/com/cgutman/adblib/package-use.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9320751c28fa1e8e81927c01d446e4a74c540d76"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/constant-values.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "649474d2b239e56031c183f4fea824b3789da108"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/deprecated-list.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1693d44031e3917b73011e9e18052ab5ab09d9af"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/help-doc.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b030c9674868c432fb4febc3047b8cbd9b4e6aae"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/index-files/index-1.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "84e55e0681bd372aad2bf361a96a06ccc75eb02f"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/index-files/index-10.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7c9b1ef6fe872c3c22410fd334e568df944c36b0"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/index-files/index-11.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "069bf0ae678b9198026972198842486599dee77a"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/index-files/index-12.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f351e9fa28c37f1411e22ac6b0b995a652203c1e"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/index-files/index-2.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f44cdab66e3af5176cd341e73359e3d516ff6262"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/index-files/index-3.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b15228d87561f64336edae5563af6180574b2c43"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/index-files/index-4.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "05d3091aa94a474aa99c7d8863d25cfaf560892f"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/index-files/index-5.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b1195ecbb81507615e2354785414ff3770bac5d1"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/index-files/index-6.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e9eff7cbb70d1955dab31d6ae0a5af80a27321ab"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/index-files/index-7.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5907c7da7e5f7e2a897faa7f86a0f330a506283d"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/index-files/index-8.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9f6cac1ebc8b4f258ca46c87a0f0d359fcadc659"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/index-files/index-9.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "294852b88bfe8449411f74249b20d2866fd3f17a"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/index.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4de82424526101fb6f0af0382030f1cc8149b0c1"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/overview-tree.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "30ad68f5c021125a6143c33178aa167584366ef2"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/package-list",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7bf8c250cc13516714a99ce9a0c2d903c2a9bb57"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/resources/background.gif",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f471940fde2f39ef8943a6af9569bcf986b1579b"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/resources/tab.gif",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1a73a83be11dde2d0003b716ca778fafc6f34ad7"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/resources/titlebar.gif",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "17443b3e16942feb776754978f8a8485ffbcaf84"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/resources/titlebar_end.gif",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3ad78d461b2b332860475cd35c9459fbbf4eab0a"
+    },
+    {
+      "path": "solopi-app/AdbLib/doc/stylesheet.css",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0aeaa97fe05f89f7f1290a2d66d812f7f05bcf7e"
+    },
+    {
+      "path": "solopi-app/AdbLib/src/com/cgutman/adblib/AdbBase64.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4c20f682cdb637c2260bc3a169a728d943f892ca"
+    },
+    {
+      "path": "solopi-app/AdbLib/src/com/cgutman/adblib/AdbConnection.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bba372e1599c6d5b66eefb5a68c0049dea58a6da"
+    },
+    {
+      "path": "solopi-app/AdbLib/src/com/cgutman/adblib/AdbCrypto.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c3cfd0dc34f2bd1016543582394145009a1584ca"
+    },
+    {
+      "path": "solopi-app/AdbLib/src/com/cgutman/adblib/AdbMessageManager.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6bc377b17758a6c280228775b22793a9cbbd2d36"
+    },
+    {
+      "path": "solopi-app/AdbLib/src/com/cgutman/adblib/AdbProtocol.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "be703625d311e5888046fceef9d0f10ad36f5882"
+    },
+    {
+      "path": "solopi-app/AdbLib/src/com/cgutman/adblib/AdbStream.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "abd697bb0482407ec194a5878adccc7c66abb029"
+    },
+    {
+      "path": "solopi-app/AdbLib/src/com/cgutman/adblib/ByteQueueInputStream.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ac542660c6113a159a0335433aaa6881a3c68459"
+    },
+    {
+      "path": "solopi-app/AdbLib/test/com/cgutman/adblib/AdbConcurrencyTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a194b70f81f481bcced50ffd8242c108167ae14c"
+    },
+    {
+      "path": "solopi-app/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "38936933f68ffe6f74780d72f4359beaf9fdb05a"
+    },
+    {
+      "path": "solopi-app/README_eng.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b9d207d73661d42ab11815ac85de536a0d7bc1a7"
+    },
+    {
+      "path": "solopi-app/agentmodel/build.gradle",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "16b6887f4840b46f2f2511a4a59417620ad44fb3"
+    },
+    {
+      "path": "solopi-app/agentmodel/src/main/AndroidManifest.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "08bfea69c9718ec4b5ef6283a45a478478c9f73a"
+    },
+    {
+      "path": "solopi-app/agentmodel/src/main/java/com/alipay/hulu/agentmodel/ModelControlProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7fbb865fbff26fd3db87d4effabc73fab5f67733"
+    },
+    {
+      "path": "solopi-app/agentmodel/src/main/java/com/alipay/hulu/agentmodel/ModelRuntimeEngine.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c2d4871368c63ab367bdc6449d04c6c2234f7f0e"
+    },
+    {
+      "path": "solopi-app/agentmodel/src/main/java/com/alipay/hulu/agentmodel/RegistryState.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4ec55472cabb32b9a310bd209880a3ff012cb357"
+    },
+    {
+      "path": "solopi-app/agentmodel/src/test/java/com/alipay/hulu/agentmodel/RegistryStateTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a9eb42b486a0ad68631c3195a190dcfc33a81f50"
+    },
+    {
+      "path": "solopi-app/androidWebsockets/.gitignore",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "2474dfa142759fa47981785dc6e51deb0fc6f07b"
+    },
+    {
+      "path": "solopi-app/androidWebsockets/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c76bc946f2a5e5086e0f808869aad59e34859899"
+    },
+    {
+      "path": "solopi-app/androidWebsockets/README.md",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "17a934daf58a7fcabd383f26dddf00d3c9f46d30"
+    },
+    {
+      "path": "solopi-app/androidWebsockets/build.gradle",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "0d9ce9ec7f2ebc6a940cd30b81353a5822b29886"
+    },
+    {
+      "path": "solopi-app/androidWebsockets/src/main/AndroidManifest.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3b089ebcff1311e711888769a47b23172105aa39"
+    },
+    {
+      "path": "solopi-app/androidWebsockets/src/main/java/com/codebutler/android_websockets/HybiParser.java",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "31656f7ef0d0c74e667e8344b129b6942dfdd19a"
+    },
+    {
+      "path": "solopi-app/androidWebsockets/src/main/java/com/codebutler/android_websockets/WebSocketClient.java",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "278bd8b552820a9fe4402d19dca94edf111d18c9"
+    },
+    {
+      "path": "solopi-app/androidWebsockets/src/main/java/com/codebutler/android_websockets/WrapSocket.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "61e8189973fb609100152f0cfc6d1d6fdce816bb"
+    },
+    {
+      "path": "solopi-app/app/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "796b96d1c402326528b4ba3c12ee9d92d0e212e9"
+    },
+    {
+      "path": "solopi-app/app/build.gradle",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8f1686bd9e3546414087187b58879aabe3622d9e"
+    },
+    {
+      "path": "solopi-app/app/lint.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8423c0ef9c4d15f948aee03637204d97e5ce7c44"
+    },
+    {
+      "path": "solopi-app/app/proguard-rules.pro",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1effb5dd5a1f627340e75bb31b464bb88b8bea35"
+    },
+    {
+      "path": "solopi-app/app/src/main/AndroidManifest.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a628f7080297697f41dffdefa2a24f7d41f56ccd"
+    },
+    {
+      "path": "solopi-app/app/src/main/assets/NOTICE.html",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3cd849521fd47e3fd031c6a0b272ac295cdcff27"
+    },
+    {
+      "path": "solopi-app/app/src/main/ic_launcher-playstore.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3a7151aea7f63f43f35feee020f286882a4da270"
+    },
+    {
+      "path": "solopi-app/app/src/main/ic_launcher-web.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "be8478e73e973ab43393fe29ca1ddec27c0138ad"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/actions/ImageCompareActionProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b6bf3e1909af045624f59c9a5920188a49c515d4"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/actions/PerformanceActionProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6cbddec75dc7f10acf00bbb56ebfe5176fc22872"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/actions/RecordScreenActionProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "805d022c5a54b241a498529010f07ad70a6b4953"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/BaseActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f1c2c97dd33efa13a540834b44b275a92b3ea9b6"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/BatchExecutionActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a5035e484860d991023fc666bd82190667733e10"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/BatchReplayResultActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "38d2bbfe3252f4eaad756effac9caccc4a138720"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/CaseEditActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "357023f3b22ec94531bd0ea373a7712f43a66b71"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/CaseParamEditActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e640dffd5b089f8cbd89d89dfa6887029e659deb"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/CaseReplayResultActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c2dadcef40da974d328cac88511b678822a41f48"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/IndexActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "37581c2c44e71632d9f0d34fdff7f01331bff1f7"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/InfoActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4af23c64ea068fb4dcbe144d1b700cd4e2317971"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/LicenseActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7a3fbfd910ea4f37585f130f449cfcfcf10b6835"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/LocalReplayResultActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2a528937b95555548905fb41adb22b4d079cf819"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/MyApplication.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "db1987b06a6092bbc6c884a643f7fae5aa4c7e32"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/NewRecordActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "09f750467e1f5d7913b92eeb1e4c4c8740d85d02"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/NewReplayListActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a1c4d034f308b392099394d0a64e8a683d1edd8c"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/PatchStatusActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dd0450ca77659f5f9a19c882ecc013e422cddea3"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/PerformanceActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "26cd535649da1fb96897d0bb8032d6cb85ab14c5"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/PerformanceChartActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3ccd6712359f47ecf0ccfaa2338c56890b44192e"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/QRScanActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ef0bd5b81c7ab0877ba2f2f95c213b983724f161"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/RecordManageActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "eb5a9b35646cff0776d570d522481fb0765ba5c2"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/SettingsActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "49ae9ca1733b7cd4c63013936d6d791c6b3d57d4"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/SplashActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e0ee6984a5c66b36163fb8db8ab67c76a1301b1c"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/activity/entry/EntryActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "87b5ed0bc8db5062cf5fc983005debd2c9182dcc"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/adapter/BatchExecutionListAdapter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "98db9f3e2554a7f10d21dd52945aca51a7dc7422"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/adapter/CaseStepAdapter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0937767dbab46a9f7cddd38a65d2442d17832306"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/adapter/CaseStepMethodAdapter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7a602a14199039f53582e31a98af3cb6bf30c01d"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/adapter/CaseStepNodeAdapter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c5eed1eb0c8c828672b1efdb0dddf973d4b4d952"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/adapter/FloatStressAdapter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3d466f3822b91f91cd22b377a07c6fd89ab36017"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/adapter/FloatWinAdapter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "44623f2a36adfd9b580b5b0fc06c68740da1a198"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/adapter/LocalTaskResultListAdapter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "acd40db656405505a082f14df73d0485a77e8366"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/adapter/ParamListAdapter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0622ca4e4cb4c9257d5580fe09a0f5b5c699c131"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/adapter/PerformFloatAdapter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5aabbade2a39cde63d184ce300f40ccf110061ec"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/adapter/PerformStressAdapter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8868147223cfd2df7b9802a0dc269e92df861dd9"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/adapter/ReplayListAdapter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4ab73a6ce63a5e0311ef4b52b059cb06b41515c9"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/adapter/SoloBaseAdapter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "42bea994af1fab93b0a97880f49ebc97907c9aea"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/adapter/SoloBaseRecyclerAdapter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "37e5644c4d78ee09790132cfa0e5b3e75772a9bb"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/bean/AdvanceCaseSetting.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "853fcfce8ee33f493d2845ddc0bafb85e8f06ef4"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/bean/CaseParamBean.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "663d0ca9ef6b57833a932cdc69999024656a1b6c"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/bean/CaseRunningParam.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d5f76a89d1c3bcf47190e1fc3778a63148648c08"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/bean/CaseStepHolder.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f7729b19824d31d5c4870f1b7ee3384cfb77a755"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/bean/CaseStepStatus.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f3d9d7c9884c6198a6468ca44c615798f39e689a"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/bean/GithubReleaseBean.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0abf08f9928208139d72608e5289af5b4f65f90a"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/bean/OperationStepResult.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1229428b5c17281f31e6b225573ffcab4c4b9cb3"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/bean/ReplayResultBean.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f8e0dd55f9f63aef1e5d8429db412d43278dc9f4"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/bean/ReplayStepInfoBean.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c2aa0d9f388f05bd603f6b47e311d8ed54d27057"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/bean/ScreenshotBean.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2dce8e667cef55d2338392e01792bb3e49e1d76d"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/event/HandlePermissionEvent.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "72f7f717bd0f27d96a14cae06f19884be8d10b5f"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/event/ScanSuccessEvent.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b4ab3d8eeb83d4c8da1a5c1826defe2625aefaba"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/fragment/BaseFragment.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e529bbf676b6157e9d8c12d373a73e6dc2f33c08"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/fragment/BatchExecutionFragment.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c7b5ec1c049c77e6b61dacae21fdd43ab9ff0ac9"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/fragment/CaseDescEditFragment.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8d68b79539ee2744432cf8f696364001c04897e8"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/fragment/CaseParamSeparateFragment.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dacb1080d8b22521b8787b313d6cee27608c002e"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/fragment/CaseParamUnionFragment.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "66478219919b811a5184b720dcb0c456b5674f90"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/fragment/CaseStepEditFragment.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8f167a426388e258140c7205a165f956101ca8da"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/fragment/LocalReplayResultListFragment.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e9acd79a79d46d550a5ed622e8ee9e0bd150bfe1"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/fragment/ReplayListFragment.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5a84d28f310da76db83953d67f7eed86076a269b"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/fragment/ReplayLogFragment.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8f6a63ae64c8dfdff346ec111d1cb67a7d14c3b9"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/fragment/ReplayMainResultFragment.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "434dff3a05b25fa5629cd9a949d904777af4746d"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/fragment/ReplayScreenShotFragment.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8891c35def34c84356c9851e100968a3e28ad9f0"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/fragment/ReplayStepFragment.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "63906a1b9627dfd8d5a8356a7959c748d005b80f"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/prepare/StartAppPreparer.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "967f559aaad54127990b819bfd31a09bb21b4a63"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/prepare/StopAppPreparer.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d68a6a61ebaf9b65ec9262bae5bfbd8f500f03c5"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/replay/AbstractStepProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "185690189cadd39c595ac49bd51a809aa56839c1"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/replay/BatchStepProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5ff855c248b66bc2f8d88b25525fe46a2a2b4dcc"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/replay/MultiParamStepProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3487f72d50013796f278f6992733cd97deb62c9e"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/replay/OperationStepProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "219986936a1ad6a4ccb41af3430f1ad0059c531e"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/replay/RepeatStepProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "30fa40b3369b16577fe1485b03e721821c4d81b0"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/AgentEvidenceStore.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d8bedf8bde6256499e89900783c393115ab16ed2"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/AgentSessionSchemeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f3d94c40db8107d83157fe4eb334bb58ccbe71e4"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/AgentSessionState.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "037e690a93d0546043526908bc7c031eb9da1739"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/AgentTargetContextAndroid.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3653f288cb52b4be7fe91981b90acc9017d17284"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/AgentTargetContextGuard.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1404c614ddca64ba0da29462e25a46e73582a91b"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/AgentUiWaiter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d5da5392d74b315478a5cb858031c535c5de06b8"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/ConfigSchemeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fd2a3b155cff0ef9373c24d9421750cb09c2c9dd"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/HarnessSchemeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "54bd6ef11448148d2a431760ab9958531ba47d67"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/HarnessState.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f9d2b7c2d639c1e0c380fc6d44e45f0544976c70"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/HistorySchemeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ee74a78b6889e50075469dda229cd7b2f3de3ca2"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/PerformanceDisplaySchemeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1f23f4f6df8553012c7f70772913cfe9aae50957"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/PerformanceSchemeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1df1355c2df0d8d0188c92b60383228ff0abc94a"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/PluginSchemeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "deac9ad0f1a642234abaad19606eaeb2ecaadbae"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/RecordSchemeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f8c32332975eb46a2bd421867834e091a732813c"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/ReplaySchemeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ea285d2f257886c574ae53a264a8ea2f9542c041"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/ScanSchemeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b3bb93785b5c5fc2450b7f1c8ddd26d98ca3ea37"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/ScreenRecordSchemeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8f039c5caf97e31cfd5947e70adf852fd505ab82"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/StatusSchemeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4854bcb93e7ecba96edc09a4fe386935b9d7878e"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/StressSchemeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "28df16e055083b916570a9b91eaa50a7f0f16d28"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/scheme/VideoAnalysisSchemeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1db31c5acc909362fe69a1e8a9fcd357738b1cdd"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/screenRecord/BaseEncoder.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0632e5aaba70e257d475d465ffe554bb01994511"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/screenRecord/Encoder.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e66d0c73510e36fcec83e98e3a5d229514159af5"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/screenRecord/Notifications.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f7e71aa9352b0d6a0606d9b0c42b8bbfb5807877"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/screenRecord/RecordService.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d50e9f4eb12d2bbd139fc3e1f98195e9137f35dc"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/screenRecord/RecorderConfigActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5bf4d730de80e61b34cb2050ecd5ddc9f0db7d4a"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/screenRecord/ScreenRecorder.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f484d3509f0f091e4538d357439abbaa716770d2"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/screenRecord/ScreenRecorderLease.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dd802c227b47630402e160670faa52223c08f1a9"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/screenRecord/ScreenRecorderSessionState.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0a0d389584c26664622f9ee700cf2594a7c210dc"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/screenRecord/SimpleRecordService.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "94c4639324ff73dfd9fb9e49a8df9135855d1efa"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/screenRecord/TextSpinner.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dd4e434951f1fe3712dd05e2e1b48403d716767e"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/screenRecord/VideoAnalyzer.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "33ff873eb89c446da20c7854e203044f10edc54c"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/screenRecord/VideoEncodeConfig.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fecb75bb4956a02607265b0468b63905fde5373f"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/screenRecord/VideoEncoder.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f2f1c565e147eff396c8aef1d4e5b78f4b5d51e0"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/service/BaseService.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3f5b8bcfacbc296e80d13e39903d06ff40daea6e"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/service/CaseRecordManager.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1efdfae1a0ee1cc7f9a159410b0ab6f4358b8ae2"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/service/CaseReplayManager.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "753c41c1854904dd907a60a03e232a5592f005e2"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/service/DeviceControlLease.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2c7c9363703f59a8bc78376b95d157bf8a022e31"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/service/DisplayManager.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4e22e777bb35816e58335113fc881bb68fe962e6"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/service/FloatWinService.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a5572317aeb86c6cae129d1395dedb71f3c4fd07"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/service/HeadlessReplayNodeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c877af50e631b4535f6db421d936d14642ccd85d"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/service/InstallReceiver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2446b77369b9ae10d52c3b4c30dec840224f8fb9"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/service/ReplaySessionLease.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d7589264ddcf4f071f3e0acbe2e470c36abf8d91"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/status/StatusListener.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c8fe33bea0169183f602b871473e24ce4ce6a583"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/status/impl/HttpStatusListener.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f03570cf5a8d82c899bcb0fc48cce739b7b90a18"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/tools/HighLightService.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1141fb0e230bc556b1c287932bc248247816ed7c"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/tools/PerformStressImpl.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "34c358746c4e2c44d06fc5f6c9b606ca8d903e33"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/AnyCodeReaderView.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8b06a5d7641c11731fee6fa38aadde5512e18ad6"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/CaseStepStatusView.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7aafa9f71ec36a781a7bee7f30192ef3166dbf85"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/CheckableRelativeLayout.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2f94911bcfe3090d923a8a32b373d8f254740b56"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/ColorFilterRelativeLayout.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ebc32bee33725bc08bb1229e6a5e3bf2772c4bb1"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/FlowRadioGroup.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "18697e42e8bbc89f3341dc920dbe8f1db1663a28"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/GesturePadView.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "40669243d977a62d1dc791e4f23c8dd13666d22e"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/HeadControlPanel.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b77691424d31eb13b701b59cd2db6ec2d4a609cc"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/MaxHeightScrollView.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0cd221ae72b2174f16f1c5373655bc758e1b8dad"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/RecycleViewDivider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bc2fbdcdf5592a9dfad9ade3020488f8e7baea1b"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/ReverseImageView.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4d6b3fe5a7cdfbab05b56277f00104cfd37ffa79"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/TotalMeasureListView.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "39ccd64037ee8b47ba11bd7548e42b8d16e54b1a"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/TwoLevelSelectLayout.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ef88a4d30d1e007f2169ca127b30b909686d8a2e"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/linechart/CheckableLineChartRenderer.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "62c6bbfab3767b08896aeabf24c9aca95cf60b71"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/linechart/CheckableLineChartView.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "82303bc4a8b37e5d1cedbd049ee6305c0596095c"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/scan/Orientation.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9582bd1d3da830e62ffd52e9c2ae81eca186708f"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/scan/QRToViewPointTransformer.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6eba162f58b33c16c2cebcf0eb5a52e39e1bb8a4"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/scan/camera/AutoFocusManager.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3abb441c4124a7a4f2740b17f3645eb003d30cb0"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/scan/camera/CameraConfigurationManager.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e218c9e8d21a525b05c7e9f9f3912a01e677425c"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/scan/camera/CameraManager.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d39be66a076d447c8a9253671c5b0d682484ebb1"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/scan/camera/open/CameraFacing.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8887267dca0a378e8f83e2e9b838f578b832512f"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/scan/camera/open/OpenCamera.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2b864af2c4eab684f5b0ba2bf06e34ea93508566"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/ui/scan/camera/open/OpenCameraInterface.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "82b17f1b7c1e04b5109834eb91482204813d9401"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/upgrade/PatchRequest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e467028d34539637f1266d2dbeff72c86f86a043"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/upgrade/PatchResponse.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8c1c2e76d441bfda5b0ab8d4340b3f88d914c9f4"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/util/CaseAppendOperationProcessor.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5fbec36db142c211268776eb0b3fadce32be0b11"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/util/CaseReplayUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "54da861301a1e990a439aeb7018fee4e564b25df"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/util/DialogUtils.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "79cb2a7a67a56ce34bcaf4753d546e92aac6cebf"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/util/FunctionSelectUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "15c482d79692fbb1d25110b94a78c11e27fadc2e"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/util/LargeObjectHolder.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a87626bd0ff6b4e024daa8d59a86279c3e297c19"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/util/RecordUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0e5e79bc678ccbad8f6b4a75b5a15bbb74fd5869"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/util/SystemUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bc716e3415110d20875f50e6995496d8b8fc0708"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/util/UpgradeUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4a53032a9691b790ec9c451c53dce0be13c58ca4"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/util/VideoUtils.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a61975b967ef6a5c113a9515d79e8b87c79aab9a"
+    },
+    {
+      "path": "solopi-app/app/src/main/java/com/alipay/hulu/util/ZipUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9f7febbc9c3ba7bbcde21307a3ce7fcc9fd04c20"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/accent_button_background.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c3860d2d274b79106c0d3c5253e003a92f023442"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/accent_button_layer.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3f27f22a628bc6cfa9813049ad604be39a96f3c6"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/angel.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5d70ce711e89b0ef0425e7df29af455f589a9fa8"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/back_angel.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "75ec9ac40465e25489e912f10c3f505ad28fcfc8"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/batch_execute_remove.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a9c94cb59ad24bfca6c059c1356bf3fe56ce890a"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/bg_confirm_btn.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c7eb9b8f6538f2698d62f26baeadebd5b96c6b85"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/bg_custom_input.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "122de0108ee8514dd268767244b96118c5e295dd"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/bg_round_corner.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "59e3f00d27089bb5291d583d73708e735038339c"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/bg_settings_item.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d635a0f35852a9b717cc0c24fcfc6df8ae9f3fcd"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/bg_solid_round_btn.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a1cc9fdd19271d7aa3b559147cd4eaa99c326def"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/bg_template_list.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "42ab304a2547f5eda3ae92fc431f225c5a35fb51"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/case_edit.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1e6c6e32db94af31d3d75c25e225d49fdcca1db4"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/case_icon_close.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cff144ae82ddb50bf8cc7f5c73e2d448bfc02863"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/case_play.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "298a3c3a9836613f63fffc10e9fd15dd1b8a9277"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/case_result_item_toggle.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4229056fe21b9b4ff5bc20906db0f38e6f432546"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/case_step_add.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f023675dafde967f9b89d907c2fe98b227fa881c"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/case_step_copy.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "420550ca4456ff4426e8e73d155539ebd16da6c3"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/case_step_insert_icon.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "93b4260bcee44193e65f1ab5ecbe7af37c614971"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/case_step_paste.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f53f315b36c847b5d157dff2c2308ed7395edc13"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/case_step_select.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "49e5e413f05f1dfec0c22d66fda7aa41dbc4a499"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/close_icon.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2e095cc51b4805f90a35ab319e0ba37fe67e89f5"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/dialog_background.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6d87b75816172949fa5633d80951ebe2589ec840"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/divider.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f23c81d35e2778b3567fdee127a65c00f76cea6a"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/head_icon_delete.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4139e8972b6a4e8cbb14c4e6b548e333faca8f52"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/highlight_thumb.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a72fd92803af241be73c62ca09b015d5ece6ccc7"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/home.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "10c5991f6dd23ce7193373c523c2c035b526f29c"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/ic_launcher_foreground.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6e6ac14717677dd89878590074aa9568a6782dce"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/icon_batch_play.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ef2dede585179df1948cbd7983f62fbf8a32d21d"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/icon_config.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c41ba2378a9b692ef40206162576c3bdec670b3d"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/icon_global.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6914c522de68ca6fc388070c64823e90b0b4e471"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/icon_luxiang.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6973a8c2148e0d41f96492991f9dd46a36a37cf3"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/icon_recording.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "14df1ddb90a8f310d365a61dcc80f0050c48765c"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/icon_reload.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c5c3392ad055ed798e109a7cfce9174796e950e2"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/icon_remote_connect.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4c7bc4dbabb5afc1127324a16790a8d1d0faf62c"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/icon_replay_history.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "db06bfebfa8ecd36eaa6cc9c3be60af7dc85bc8e"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/icon_save.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "871df27cc98f30292f4e61d70d0fc13e6f89e122"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/icon_scan.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "544fd022c3f0a5ea88b6512c424dc609714ff5d5"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/icon_xingneng.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5bd564f9537e02ab290931ce000fde6863cfd308"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/icon_yijiduokong.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0eed586e4ba43e7f97f72d8f954e2634f8378143"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/item_scan.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "619a8e65021c6ca719ef82888a9eb945ef139990"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/item_url.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "effedd6ab90cdfe879fd7d264e76180607f85e52"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/not_found.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3ec671df99d237b10698a2412e1cb7169ef5b705"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/primary_button_background.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "81559e58bab9ee883d929c6f19b4d14dd6b329f5"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/primary_button_layer.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4612517023ec0d46661567e4ea909176ad6cc491"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/progress_drawable.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d9539b947cc8d2baf6b7bee92e784890626f66fa"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/recording.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "995b1decbcf73001e1989bf5ef262fa3740e8da5"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/round_rect_mask.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b7e7a4f034ed72440d960960fb11ac78a89c20a3"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/simple_close.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "71cf77cf2a2dec908b9e4595a636eb28d8bd8ec2"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/slim_divider.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f2e0e2cd52af15a0e48b3e103a5db7f398aef424"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/solopi_float.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0010a7c09f06a6cf490dcd89873d6f1842b32ada"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/solopi_gray.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "87f15f19b8535b958d392aec19dfc6d9f34c6a67"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/solopi_main.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7b48b987dc8351b3b7df421057606dd7d9be59a4"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/solopi_running.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6b9dfdeaa429abdde14a601a1b0961d719475acd"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/start.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a6d775a6ad7e28bdacf3f94854fd5eea907cf230"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/swap.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b9ab4abf24d0f7a272019948b682ad834c446f43"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/drawable/thumb.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c30add6b23064414e7622390abbed4d67d7297f4"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout-land/activity_record_chart.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f2b520c582e00d7284f26f22b7abbee658a01c94"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout-v23/item_tools_grid.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "536ade3fe737cefbd8b3ee112a034733d498e0c9"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_batch_execution.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "05768f692a610b2f2461df59965a081ac888342b"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_batch_replay_result.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b58175567a4cc0d525741d73122ba921c4f665b2"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_case_param_edit.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "76b8d043b9ef8502e6c567f95e88b63c5e61d728"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_choose_layout.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3e9a179863c75ea56b834bf5d46a03070bf352ac"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_display_replay_result.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fe9e699c4d0b7521b6a29bcee8cda2b58f2d9e99"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_edit_case.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "66455fc8af530a4d8e072da560b3ffc59245b384"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_index.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e45ed3d10ff92b562d7e925fcfec123ea12a7d30"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_info.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "014a24e587dd35fddcc760979972344456f640a1"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_license.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4ae1ca0273efbc62acc87d2fd11943568ed70988"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_new_replay_list.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cb2bec7f1216bffac267876f350f5ad8589f23c3"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_patch_status.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "62f9049be1a9d28d876056977dc8f992ece0191c"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_performance.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b902b5daa6e5a9425cf9f309ca355d6dbed05b46"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_record_chart.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "11cf2d3b765ea2415e92649e519c84a8848e706d"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_record_config.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e5ef7db3cabbb4f8a022560fb59a006cea2b4a3c"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_record_manage.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bdbefc58ea8484fd69b0ec2d06a7b60205d130c1"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_record_new.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0a1e323e7fb9eba576bee8e83616990f2cbf5c29"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_replay_result.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f9a5ac478289fdbc6f0cf1e254c62bbc23fd286d"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_scan.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c8b8d624c987e09409400b4ad56a4763c7cda3fe"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/activity_settings.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6d6c25dbf46374f1de2da4f624d2b019ed6f2582"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/auto_size_spinner_dropdown_item.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e6f2827f7b6bbfb2df6fe5a8e567be604b3f4743"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/auto_size_spinner_item.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9b036644ac82825875dcb70e3b6df02f7dd8f557"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/clickable_item.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a17f76941bda58ab8cd79936c3d101863bd3e37e"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/content_decoder.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7a5b0e4302afb8a44d2f3bc273e7be33898ab5fc"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/device_info_view.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d0265d04c876dbfd1b4268d73021baebffa51430"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_action_check_global.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fa343c7d6ac67ecabc2bd1dd4af2e2abd8ea0d6a"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_action_check_item.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4a927ce1fe6ffb8a064cad64e421965422712859"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_action_click_item.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3c1835b497137e961230e78dad45fb6886d09548"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_action_crop_image.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a8eb2e3bce7450c604e485a90c4d033b0d9f7de1"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_action_let.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "94946a298f79ab2252948cbb76d8137084e55c4b"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_action_let_global.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "88dd39b35251793747d0a513f554535c433c5063"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_action_let_item.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2f6c2086b15932f537cb2ac2e509fa5dcc73c512"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_action_record_config.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0d4a6e486514ef6e629514729f4699bdc1e7ff43"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_action_select_item.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f96b7aeae8d46e9feb13d1a1e4531409a7e4bdae"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_assert_number.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7240f45000cf5f1a5e7851c876aec9d17a4b7898"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_assert_string.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "448e160c448f7d4d866f584b742c29fb99f5b800"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_case_step_edit.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "eb906da28328bcd2a235ace192015590a4124d96"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_create_node.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "18729ae478d0114525e8d34d9b70a43612eb1a81"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_first_level_item.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5fd4fcd6176058864a18bee755c9002cbaeec443"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_global_param_setting.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a8be49c52e6df2b03f092083dcdc0332c25fedf1"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_loading.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a5cfb9451b6736ff3bda97e03935fb493d57483d"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_node_gesture.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2244a8133f4632bd01bce1e5373b2dfcb09b48da"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_param_edit.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cbd043368bc4d640497f4df8679351c881e89216"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_record_name.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "462e66e340b60ea4476226522233ac0629148edb"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_repeat_count.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8781d5d31728c06401c3cae9c9873af64066b037"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_select_app.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a1892f5f6dde52de1deb6c27f7eb7b168b7c7332"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_select_view.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "793b753ff9f55f811893ccece9cd0ab5df55b805"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_setting.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bc30f83ae70e02c21a0345edbce390b1f5f40ef6"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/dialog_while_setting_panel.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "42d852a00d85ffea63c7cffbb58a024b8c2c2f5b"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/display_main_layout.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cc3efcf65e7fa74029da8b3759f8e9afbeb71b17"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/divider.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "82d047fb37b7708971a67a76dbd0fc1da6630be1"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/float_stress_item.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "efad45fac3e0476ee4a6aaec7d5bd73b0c73702c"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/float_win.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b7036b4f92ed1f9a5796852c4f8d2be605cda637"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/float_win_list.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c84f7dd0fd7e040007a97f845d38752ea02cdfe3"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/fragment_batch_execution_list.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b22942154ab12c1472016f0b0c550f93dd26ec76"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/fragment_case_desc_edit.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ca0552db4647d9646ed6134aa84d114f94405960"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/fragment_case_step_edit.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "54b9af094a47c3e554e59f4abe05da7bb399778d"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/fragment_replay_list.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5875a75f6e632a961e8725a40f386a3d21306101"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/fragment_replay_log.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bb550a27b192ca621dc571ba234632457ae3a1d1"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/fragment_replay_result_main.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2036bb61eb25323e32e980f00766c6d595235199"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/fragment_union_param.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a8aea0c4cd1b401d3b4109ad60047f573b3780de"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/head_panel_layout.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "988b2e8ecb512633029ac8caedb8fd4f953fb13e"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/highlight_win.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5f4369787dd06fa5ded4998e7a57559cc52c88cb"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_app_list.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b503b00994236ddd2d93bac564f803bb2474500a"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_batch_execute_tag.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ec54c4377b882ef5f8a523bc43312fcfccc8f6d5"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_batch_execution_list.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a42932e187e04fc0c18ca21d0d28c89aa67d7387"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_case_param.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "45f1472479cf4790a9e1add86daeb88420b556a9"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_case_result.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a490bea791f68f7d674c64e534979e5320f9ae14"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_case_result_screenshot.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f5e506051109ab840440347f0ab374b406f09944"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_case_result_step_actions.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "baaf49baa7a567213e8d70e9b8f817b97250ea24"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_case_step.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cfd8ec0275f2c43695e8f273b0deaa7aa6b5288c"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_case_step_content.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cef0717a5a6bfb54c33f2c63fef087f6fb6609ea"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_case_step_edit_image_picker.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9755418b6bd5c450616b8e2379cf933c8dfd6f82"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_case_step_edit_input.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f52a24a5a8489745a37cda97f843911fc64b68d9"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_case_step_edit_select.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0b50cf2e13ebf802b36f1c2654bbba4253722eec"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_case_step_edit_select_dropdown.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f1f53408fb9419a1f851392d81dda84f68ff9a80"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_case_step_tag.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3766fbae7121f731c48cab0132d95454436d86bf"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_edit_field.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "24185bcb04760885c9c55445719a67c7e27dd538"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_icon_template.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4faa0ffc4a0c8c8b619bf9876dbc081899bcfa3c"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_operation_node.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0ec2cf3435369d13c76f138c1a208723fe531b19"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_param_info.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "49e950f3d1f0caaa57eba29944f08dc3408f2f58"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_patch_status.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "84de8ff5a9458b79a1abba9a68ac8f96595d2cd2"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_record_manage.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "59a63844a1168f9d0c97e3f6bc723c52074be4db"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_record_time_select.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b7db998e030c096a1e4b736e27742d9ebfd28910"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_replay_list.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "014cdd6fa7eed53da277ae236a3b3ae910241961"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_replay_result.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2eef6dab1fe2ede94e4078d139e6d78da1b02bc6"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_replay_result_info.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "32b8b8e9176066f3ea848cb7183801f63b190b40"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_screen_result.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "74fd3b34ddc6357c0f353068352a705e0a36e0e4"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/item_tools_grid.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "db38bfdb0419885ea4255bf2de607ca401470ba0"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/perform_float_list.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2de0522fe32f3c969cb939fe339f30b0250910a1"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/perform_stress_list.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ab96b9e8e0804c5a3ae9b0bdfa33c3a377d1adad"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/record_cover_view.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9c82ae2f94c4bff03a8990bd096f19fc84eb5f7c"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/record_service.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dc9a49716d7b9cfcdec1916867bfb979d3c1622d"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/screen_record_entry.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "54f3fd2f9fd5ca7d587d02a99f9788b61500235a"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/layout/splash.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d9767120b25234442068dbba123fdaa079645bd3"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a6abe3b9ef4825817e1e9d887de1fe41ee76e828"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7353dbd1fd82487df2d06121f85f7994728f1070"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "61ee0d252d02000f1fe85b2882bed8c9fcd5d73f"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/mipmap-hdpi/ic_launcher_round.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7ec04afa47f3438132de2ed77370b95e4078097d"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ca0b8db2b5d163a8e05130b96a7549853d2e3811"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/mipmap-mdpi/ic_launcher_round.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3df3a6f8b7c6132a63dcd17b096d71a4a0f6a49c"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0accd7c9a6a78a4458aa17d678d59251e93eb0a6"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ea64edcafbc82608b7d55e15b670300a555d3275"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7dc9d5b5468c235ad60165595c8d7f354543efd6"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0bd1b0526dcf21ab8be3c0b45a8344162b79930e"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0f691e00d23c3d40b874498520d1191fbc07c4e6"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "82c0859e7bf1e793c8be98052eafedff344b0511"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/values-night/colors.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "16061e65ba50789c8ed603df2192cf9fbcf32eea"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/values-zh/strings.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "01445027d02811478a4c74b6d68fdc69163be867"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/values/arrays.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "354b7b376ae68ae447180466626295d54d70a698"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/values/attrs.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1a00ea5313817c5d798abb0da29f0f3bde59d95c"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/values/colors.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b3bfebda05315b0988ee3221ad3e67a090976209"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/values/ic_launcher_background.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1c196a270129ca058d52c6a6d8372b8eef465804"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/values/strings.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d81e3f17ce8b4f4f7e91ac265a91481e1e3ab535"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/values/styles.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "724125d20a5ba22c8202da2644ad1446aabca5a6"
+    },
+    {
+      "path": "solopi-app/app/src/main/res/xml/file_provider.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3716266d234c228fcfe5f55c8b31c89749ee1967"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/actions/ImageCompareHeadlessInitializationTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c55aac7511b881a521de06a759e48bf1cddae0e3"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/common/scheme/AdbSchemeActivityTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6ff29fa4fe51e26630948133c6f2bc0ddc810fd5"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/prepare/ReplayRestartPolicyTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "856d0641ea79d68609703bfed008a052a2732975"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/scheme/AgentEvidenceStoreTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "67a0f4b05efaedc317ec3be6527be4c9ed2d44cb"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/scheme/AgentSessionSchemeResolverTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bd24aa53a9750719487ef33544cd1d5a44f1566c"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/scheme/AgentSessionStateTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dcb3613a82028c2489d84a6e9a5d4b96812a4fa7"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/scheme/AgentTargetContextAndroidTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3e64c2bd37192c401b949e641eb71dc7a5e2ee37"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/scheme/AgentTargetContextGuardTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1a5e4f8f536fa3ca2d43ad1bfe7e93d620d8a8d6"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/scheme/AgentTargetContextStateTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cbb089923b1c8c15696b55411d7a087b2dba4c95"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/scheme/AgentUiWaiterTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "87c9a0755a8913de4afaa08b5bea7c680a3ada7c"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/scheme/ConfigSchemeResolverSecurityTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "733770437fcbf2adf20648186a6b235c3eed4623"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/scheme/HarnessStateTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f4dbec49ed64dd2d00ed754c6626a24ce217c3a0"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/scheme/HostExecutionProfileTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fec65868d88a0cb1757aae13b95e3822afa9cd20"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/scheme/PerformanceDisplaySchemeResolverTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "91f1e44f90ba2133ebe9f1a5778d6de72c4c9ae0"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/scheme/ReplaySchemeResolverTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0209c425e3957e66ac4761eff2b6169aa6deb67c"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/scheme/ScanSchemeResolverTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4607262bf936d6a7525a9497f207170946519fc7"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/scheme/VideoAnalysisSchemeResolverTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a3f4afa7d35d042d42d3359b1c378c80014d0dcf"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/screenRecord/ScreenRecorderLeaseTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5e24289b467e67abb86f7aa81e39d77129cf8aff"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/screenRecord/ScreenRecorderSessionStateTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6a8dfd77468daefc11ece45b2ba3a6a5cb5efb69"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/screenRecord/VideoAnalyzerTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a3105cba0459fb5caf1780272518ee061ff4b69a"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/service/HeadlessReplayImeTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cd9ef0c06b19952be9581bdcbc7aebfaa7a80dcd"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/service/HeadlessReplayManagerTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cd03cdc7b6f456fe3d1aa91e023713ad37aa20c8"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/service/HeadlessReplayNodeResolverTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bc588363e4bb5ad28113b5a6a806bb6e1c585d2d"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/service/ReplayPreparationFailureTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9a7edcb7e13346b25f43f7fad64e507dffa07645"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/service/ReplaySessionLeaseTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cee0190d908c9b71ed698681888c3fe0ac645981"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/shared/display/DisplayProviderLeaseReadTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3a8de29648c220374728f38fd2a70c11fda0b791"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/shared/event/accessibility/AccessibilityUiEventClockTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a63ded8a18b87e0833f8d20b7d5dd1b3e1b11712"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/shared/node/tree/accessibility/AccessibilityNodeMetadataTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2d1be0a5291a5f2df20fcbc4d183a142b94551ee"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/shared/node/tree/accessibility/AccessibilityProviderReadOnlyTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dfd3cfd3612976e91552756a3221e968229f1aae"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/shared/node/utils/AppUtilTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4c6ce9026670b9378caf09bb973a9aa7d0449f9c"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/shared/node/utils/NodeTreeAssertionTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d604bc0253054ac45857c1caacb5d1fd687ef5a1"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/upgrade/PatchRequestSecurityTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9df0ee57871730b8d9fc1349319eae04c316a69c"
+    },
+    {
+      "path": "solopi-app/app/src/test/java/com/alipay/hulu/util/HeadlessReplayResultTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ad6c1c5a10097058423437dbb8b780f32963051c"
+    },
+    {
+      "path": "solopi-app/assets/dingtalk-group.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "151220bf935d67bc9d9cc5df6c35b5c0d8a46f1f"
+    },
+    {
+      "path": "solopi-app/assets/global_func.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d4869a6a8cdb8ef9d946a74f97dc4122b10a7166"
+    },
+    {
+      "path": "solopi-app/assets/icon.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f8511325c6f2626f799e4ecfc7e0150c8bbf420b"
+    },
+    {
+      "path": "solopi-app/assets/node_func.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8d7b87b1cf9d07e963e1d18a5be08d3af4a92f56"
+    },
+    {
+      "path": "solopi-app/assets/oneToMany.gif",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "38007cc7485147538457eaa6a96286f6a5dbb5a2"
+    },
+    {
+      "path": "solopi-app/assets/other_func.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0426364760615a9c0baba573781ba479c6dc3272"
+    },
+    {
+      "path": "solopi-app/assets/performance.gif",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3cb1d699393f9e35baf2c07572caa5d06f0a145c"
+    },
+    {
+      "path": "solopi-app/assets/performance.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1af6863bc53516696a553e397ec80f1ba155a458"
+    },
+    {
+      "path": "solopi-app/assets/record_config.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c6ee0c1263d56d9faee5f76f37a266df0702ea1b"
+    },
+    {
+      "path": "solopi-app/assets/replay.gif",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "50911d5c4fefe146eb739ce4ee23ffcf0f389916"
+    },
+    {
+      "path": "solopi-app/assets/replay_highlight.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "80ff32dfb9e19d1b10f6800b2b8c007d2f278f97"
+    },
+    {
+      "path": "solopi-app/assets/replay_result.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fb9c7d08763709570caa24e625f54978240fc763"
+    },
+    {
+      "path": "solopi-app/assets/save_record.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1c1d7511d053be8389c144c082bdbf6981f2521e"
+    },
+    {
+      "path": "solopi-app/assets/start_record.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2bdbabcd44bcc89d8e9e3fecabc4bae4b483b0ac"
+    },
+    {
+      "path": "solopi-app/assets/wechat-group.png",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "650ce2e10ed9c3471b7cea9d6606834be2862b8e"
+    },
+    {
+      "path": "solopi-app/build.gradle",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bc8baf62f59f2515abdf653589e83864a8b1cc8f"
+    },
+    {
+      "path": "solopi-app/common/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "796b96d1c402326528b4ba3c12ee9d92d0e212e9"
+    },
+    {
+      "path": "solopi-app/common/build.gradle",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dde6a435f5967590787a5775dbb1559b7b4f2254"
+    },
+    {
+      "path": "solopi-app/common/proguard-rules.pro",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dd3de5d6cf037fb966eccd1f449b29e719686982"
+    },
+    {
+      "path": "solopi-app/common/src/main/AndroidManifest.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "efd43d5ac7c6d47bb428ee6c9df27581a9e4007b"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/annotation/Enable.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e80daa4bed4e8f9ba41320ddf3ba5aa01020a37b"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/application/LauncherApplication.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5c5b3259a56388a07135c39cc3b5593532e9c1ec"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/bean/ContinueGesture.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a737a92360718cf31da6032efc7d8a879ccec0c2"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/bean/DeviceInfo.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ba2dcf8dda086c3dc813b4a195f44aaedaa8b9b2"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/bean/ProcessInfo.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fbb3ad785020849637be9e5870cdbff98b8a1d4e"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/constant/Constant.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "375c1ad1c6ff1dafaa13d747802244437d7518a4"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/http/HttpServer.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "26d55f11f088b2fe57dbd3a38431f023405631a6"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/injector/InjectorService.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a0b4374776f09780b619b0a0edd6a3e0cd06bd46"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/injector/cache/ClassInfo.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "155b409f621f85962437259640afc9addd001156"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/injector/cache/ClassInfoCache.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3b19c5ae436cb9ce311c69d40fb7c9015c518d98"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/injector/cache/InjectParamMeta.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "faa078e159f3ed0c0fbf18364f70b69b9281b3fe"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/injector/cache/InjectParamTypeCache.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "942e1652282ce34d1df9ea9301d3e0cc4f14ae30"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/injector/cache/ProviderInfoMeta.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b5e1ca96e35a66ebf99b058696bffca86e6d905a"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/injector/param/InjectParam.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3ade12790c9101af63980cb7e8c63ae6acf9e0ed"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/injector/param/RunningThread.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b18efc232d106b275d1dade2942014ae0ca98c90"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/injector/param/SubscribeParamEnum.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "08e867651ec88ad7033fb345c572861e0bc16cbb"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/injector/param/Subscriber.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6a5d827c7356ff8817225eaa7856b1d16ea77bcb"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/injector/provider/Param.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "88247130836068ccd8fb85db7cefede240c71442"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/injector/provider/ParamReference.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "186bc1f08cfbdbbdd077709692054f86aead94e8"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/injector/provider/Provider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "82623eb49f10981f66b82ce2ac2d65538b17ee94"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/injector/provider/ProviderInfo.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2169d9c04b7ae4212c9b855217a9a100bff7ee4e"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/injector/provider/WeakInjectItem.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f1c4ca87f4fe66dcf01f9da45b87ecb958ae0a0d"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/logger/DiskLogStrategy.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a2da1606d2cbf08a5022bd4dc78cb1e447ea4b49"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/logger/SimpleFormatStrategy.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "360c0508cd681935a21486e31be34164f5bbf344"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/logger/ThreadInfoLoggerPrinter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "543df929719be9e37978c965e4d93a8dcafa14b5"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/scheme/AdbAgentActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "97d1d4b3487ba39617567a3638866fd18b10e375"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/scheme/AdbSchemeActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2b7e95a1efdd641b80862ef8a8ddf69d88bad749"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/scheme/SchemeActionResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b0c11c21e2859233221e4904ac99d778e6f45ccf"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/scheme/SchemeActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7a2aeaea1c8ca86a576f50a7928301717fb1ef0f"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/scheme/SchemeHttpListener.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a976a1721156b73361b8e61cb91667a7858e2ba7"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/scheme/SchemeResolver.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6553f85fd843cb1bb7a5e4483fae941d377968a8"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/service/SPService.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fda1636ad48d9e54a2e4abfd7fd9b175994569ee"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/service/ScreenCaptureService.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "23e18d55b697c4dab298afae67796bcb2bbf5a49"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/service/TouchService.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "68af7eb9880494291a430e8d7a88dbe705beff7e"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/service/base/AppGuardian.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "48656845aea425218dc8ef98de2ac109b42ab3a3"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/service/base/ExportService.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f461f134cb529a36959b8ecb2f0a10d55fae64bb"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/service/base/LocalService.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5cd52c6bcd74de14f23f0f4bab8adbbaf60928d0"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/tools/AbstCmdLine.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0502d13b56017dc3fc63258c7ee51818e7852d96"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/tools/AdbIME.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a4f3912791eb2a6cb1675b02f3c57fc95a1ab30d"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/tools/AppInfoProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3464bb745d91a93c353d4c3fba0e1d9054d745d9"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/tools/BackgroundExecutor.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "af68aaaf3d80e1fe300c8394d437c4c6bed45914"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/tools/CmdLine.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fe777551dc9432d81a81f9d087d35737177a3813"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/tools/CmdTools.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3f41bacd368f513e3c5d7210c0c96d35af877a86"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/trigger/ScreenOrientationChangeTrigger.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b3aa5b318ed42283519b2928eec722ed81a53e1c"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/trigger/Trigger.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6fba8cd6c140b487b7e5320f163282b73ac24759"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/AESUtils.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7499520d21fee527ebfe18dcff92a07e910a7690"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/AppIconGlideModule.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ff449d825cc9b9a7948c2b12e1f6e0800a95605c"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/Callback.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c67ba17e53750e80e39c6d85176885ecb49f3f2e"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/ClassUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "45ec449eaf1a54832d89c5109d7243a406dbb41a"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/ContextUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ffd07d52a8eafb91709e71c44b9806079d91d6ca"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/DecompressUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dfa657b91df4fe2b34ddce6e9b10fc504de5ee64"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/DeviceInfoUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cc7d09bddfc8860ece16daa1b174ef9a4539f71e"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/FileUtils.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "be0c26ddca236c1c0fa8f4834cf92f8f0c17cba3"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/GlideUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4f10abed2bc4c8ff6eae2a73cfb6ce99d1e76386"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/HttpUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "52abd422e42b75a907a07ea2280f3729ded8415a"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/HuluCrashHandler.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "367f7a77457a5590ad188a47cd0308537c2c5725"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/InsecureSHA1PRNGKeyDerivator.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cf693b35bc8d2fee2c7ccd0b70e393cfbfaa158b"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/InstallUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1e67969df8069df080465b0dba89a324cbe87fc2"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/LogUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9e2af516b37ec32a70eb6bfe791eb4740511df24"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/MiscUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8c04aca70d24d2605675809332b51fd81d4859b7"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/PatchProcessUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b309c3ec2bb3f347a2e2ae421ee67a7f79f70a8d"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/PatchSignatureVerifier.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "86c08924473ff8ac80145317c41577b7745c13f2"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/PermissionUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "689dedc98f9ed9d8a23d70cadbcadb8c5805ff26"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/ProcessUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "890721beed8e5b66656e0e2907723011cbfa1e14"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/RuntimeSessionGuard.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7e6c160612180dd85c33dfea1aa0acd1131f5381"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/SortedItem.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "442e5985311858ce438dacec8ab804869d029a77"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/SortedList.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1f98d6024c99faad202e5e0ccf757a2e400f0cbf"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/StringUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ae69cfc883101c62fe89d9578eb16a1a5edf8bc1"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/Tls12SocketFactory.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2f37c26afe355d122b6581e51ecf6ca72159a0cb"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/activity/FileChooseDialogActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f1284b5a94fb7a4727573885bb3dbf57de1ede6e"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/activity/PermissionDialogActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b0741bd94574f7b46460691943ceff2c0e39bbd0"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/patch/PatchClassLoader.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "82536fefd9b57f0fadb5bdf3b003bb18db36e806"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/patch/PatchContext.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "15f8c4b0d5048f8c98628510b7a01eeec816f188"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/patch/PatchContextImpl.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fc6fd1546b8a5ead29b3d5b4b149b6e6a5278743"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/patch/PatchDescription.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1263ff06759623b27e7b6e4d7e454823fe56b030"
+    },
+    {
+      "path": "solopi-app/common/src/main/java/com/alipay/hulu/common/utils/patch/PatchLoadResult.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4e89edf5c4f250ac73e67062cafd432b1182ccbf"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/drawable/common_dialog_background.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "71ceb8b380ededa46b3a52f76faf2ed8dbc5fa47"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/drawable/file_choose_create.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f023675dafde967f9b89d907c2fe98b227fa881c"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/drawable/file_choose_upper_dir.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "12ab400bb43e01094074b341f940648dc807022e"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/drawable/scheme_icon.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8b29678e751711b340238765b41facb9c4823c50"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/layout/adb_ime_input.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9f79f64fa658911b3d3883bcd7f29e3d236aacf7"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/layout/file_choose_dialog_layout.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dfc067ff7f046505c48db0e283899015a60b14a0"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/layout/file_item_layout.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "70d9214efe1ac2ac8a5c7fd00b3b4ee837f65e38"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/layout/input_view.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1fd9beefba73d1f792ecc9dfd3e8eb34b21b50ac"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/layout/permission_dialog_layout.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f455f7ad2599998682891f56b5a27049cd489367"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/layout/scheme_wait_layout.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1223810002b82c648ad7b349b3d1e5e2a2ca5a40"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/values-sw600dp/dimens.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "872d76b1ea8ec3b2bbf1375b9f1c388416135c86"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/values-sw720dp/dimens.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "65859e7de32a74e6833109512964920ec695f447"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/values-zh/strings.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8778c29b0d5a27095a4db4a25bb9b32463fc16ed"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/values/colors.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "60fb0ea9e8727719ceef84502fe8fb7219f19873"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/values/dimens.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d9438b4ca07c81e32af0f59ad1289dbe9a3c0ca0"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/values/strings.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "51f3374578d9621e634ed4c97448c57136f57485"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/values/styles.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b7c77d149b910d8780c6751b4d2fae64522e59e8"
+    },
+    {
+      "path": "solopi-app/common/src/main/res/xml/methods.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a25158b1ecad1d619941d16acba805fc63b19b5a"
+    },
+    {
+      "path": "solopi-app/common/src/test/java/com/alipay/hulu/common/http/HttpServerSecurityTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4fcaeb47846f736b7632fdb21aef0313a4970007"
+    },
+    {
+      "path": "solopi-app/common/src/test/java/com/alipay/hulu/common/utils/ClassUtilPatchSecurityTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "712bc8d7bc7e7ac28fb8aad1fdf0e39581f3699f"
+    },
+    {
+      "path": "solopi-app/common/src/test/java/com/alipay/hulu/common/utils/InstalledPatchSecurityTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c4ea769d6d230886b61454b35e3faf222073dad6"
+    },
+    {
+      "path": "solopi-app/common/src/test/java/com/alipay/hulu/common/utils/PatchSignatureVerifierTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6f5d2a05b30225f3b797a9115a48df39fa1be042"
+    },
+    {
+      "path": "solopi-app/common/src/test/java/com/alipay/hulu/common/utils/RuntimeSessionGuardTest.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8043014d78e82447ab0a9140503d1e6484b6e8dd"
+    },
+    {
+      "path": "solopi-app/gradle.properties",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6c7f74b8edf927e67bddec86c951020938be9693"
+    },
+    {
+      "path": "solopi-app/gradle/wrapper/gradle-wrapper.jar",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "13372aef5e24af05341d49695ee84e5f9b594659"
+    },
+    {
+      "path": "solopi-app/gradle/wrapper/gradle-wrapper.properties",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "66318a70788d4e451bd050af4f2e47c2eab5f96d"
+    },
+    {
+      "path": "solopi-app/gradlew",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "9d82f78915133e1c35a6ea51252590fb38efac2f"
+    },
+    {
+      "path": "solopi-app/licenses/COPY.APACHEv2.0",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7a4a3ea2424c09fbe48d455aed1eaa94d9124835"
+    },
+    {
+      "path": "solopi-app/licenses/COPY.BSD2CLAUSE",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1e011418ebfb77b5332a2764fa6e91c4351d835a"
+    },
+    {
+      "path": "solopi-app/licenses/COPY.BSD3CLAUSE",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7e00341fd88060e4f95fb3517031e8c20d0bc99c"
+    },
+    {
+      "path": "solopi-app/licenses/COPY.LGPLv2.1",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "58af0d3787aec7d6f8d833535d64879156e7ec23"
+    },
+    {
+      "path": "solopi-app/licenses/COPY.MIT",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "00217dc586444b5f6bf17eca9a56e516ffe1213f"
+    },
+    {
+      "path": "solopi-app/mdlibrary/.gitignore",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "796b96d1c402326528b4ba3c12ee9d92d0e212e9"
+    },
+    {
+      "path": "solopi-app/mdlibrary/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7a4a3ea2424c09fbe48d455aed1eaa94d9124835"
+    },
+    {
+      "path": "solopi-app/mdlibrary/build.gradle",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "34385e250421bba00769fdccee2d9a3289abf597"
+    },
+    {
+      "path": "solopi-app/mdlibrary/proguard-rules.pro",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "b7fc8d0f6209058e680a5af16d602b63735310fd"
+    },
+    {
+      "path": "solopi-app/mdlibrary/src/main/AndroidManifest.xml",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "57d1db84a5a733558e94cb5136f6fc3ce168ad27"
+    },
+    {
+      "path": "solopi-app/mdlibrary/src/main/java/com/mdit/library/CallbackFilter.java",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "704fac2612ee5e639fb63aa7b9f267c21de136d6"
+    },
+    {
+      "path": "solopi-app/mdlibrary/src/main/java/com/mdit/library/Const.java",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "32d5adeb82b5e275489c94dbe2e5d2d163caa2e7"
+    },
+    {
+      "path": "solopi-app/mdlibrary/src/main/java/com/mdit/library/Enhancer.java",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "ddad771ee0428c504e7ea11d24a7e70bdcf3b8ad"
+    },
+    {
+      "path": "solopi-app/mdlibrary/src/main/java/com/mdit/library/EnhancerInterface.java",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "793c8bbc9c8a0a7f63c8bbb4e31580e8c3b0c558"
+    },
+    {
+      "path": "solopi-app/mdlibrary/src/main/java/com/mdit/library/MethodInterceptor.java",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "85f28d5d526e5121e28885d22d1983635a6192b2"
+    },
+    {
+      "path": "solopi-app/mdlibrary/src/main/java/com/mdit/library/MethodProxy.java",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "7d1159e90617e55115cc2195c1614e75b62840c6"
+    },
+    {
+      "path": "solopi-app/mdlibrary/src/main/java/com/mdit/library/MethodProxyExecuter.java",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "db29a6e2e07d1bbf38fc12d8c43f102602b46ea7"
+    },
+    {
+      "path": "solopi-app/mdlibrary/src/main/java/com/mdit/library/NoOp.java",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "d938802a5d336fc92d6385d14be18705a36f4331"
+    },
+    {
+      "path": "solopi-app/mdlibrary/src/main/java/com/mdit/library/ProxyException.java",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "6f22dfb3080efa92224d75b173f7552cf715eb53"
+    },
+    {
+      "path": "solopi-app/mdlibrary/src/main/java/com/mdit/library/ProxyHolder.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7d0a9425ac52f569ab65c7396ab519ebe5b3cfce"
+    },
+    {
+      "path": "solopi-app/mdlibrary/src/main/res/values/strings.xml",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "caa316a9cf17a9ae77bdae1e244cde310f3e26f1"
+    },
+    {
+      "path": "solopi-app/permission/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "796b96d1c402326528b4ba3c12ee9d92d0e212e9"
+    },
+    {
+      "path": "solopi-app/permission/build.gradle",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9247d3a21cb2bf0a4b471db823c1bdb1bcb2cb87"
+    },
+    {
+      "path": "solopi-app/permission/src/main/AndroidManifest.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1be6080074af89f25fb2e58f0439015f979c2606"
+    },
+    {
+      "path": "solopi-app/permission/src/main/java/com/android/permission/FloatWindowManager.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "38ff0a6e3d7257118c36482e01b163951fcbbe77"
+    },
+    {
+      "path": "solopi-app/permission/src/main/java/com/android/permission/rom/HuaweiUtils.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "22ce05069400f7d6a2e352b76b0e6d550a0edad1"
+    },
+    {
+      "path": "solopi-app/permission/src/main/java/com/android/permission/rom/MeizuUtils.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "182f870243f705fbd39a11018ff260f39b0e4a11"
+    },
+    {
+      "path": "solopi-app/permission/src/main/java/com/android/permission/rom/MiuiUtils.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b48b458879653ee273d6d959192a511f12bf39eb"
+    },
+    {
+      "path": "solopi-app/permission/src/main/java/com/android/permission/rom/OppoUtils.java",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "7de1c60611dcb54cb4fd41e042b9535337e13908"
+    },
+    {
+      "path": "solopi-app/permission/src/main/java/com/android/permission/rom/QikuUtils.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0e75c4b7a8d683e01d634d062b79b0eba1d847a4"
+    },
+    {
+      "path": "solopi-app/permission/src/main/java/com/android/permission/rom/RomUtils.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2b3c2a3bf7e4a7e8c550e04e52e2f86f195ba293"
+    },
+    {
+      "path": "solopi-app/permission/src/main/java/com/android/permission/rom/VivoUtils.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "83fac6daafb30f5dd16e1d6fec8cc058627835d0"
+    },
+    {
+      "path": "solopi-app/permission/src/main/res/values/strings.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d6a1b11237620d71bfb95a1cfc43fd23cb554ada"
+    },
+    {
+      "path": "solopi-app/portal/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "796b96d1c402326528b4ba3c12ee9d92d0e212e9"
+    },
+    {
+      "path": "solopi-app/portal/build.gradle",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ae7717633dd01a830c7c4185d780b1d52e9ed790"
+    },
+    {
+      "path": "solopi-app/portal/proguard-rules.pro",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "83d578b25aba178238bc41905b197f0e3fa60695"
+    },
+    {
+      "path": "solopi-app/portal/src/androidTest/java/com/alipay/hulu/security/PatchSecurityInstrumentation.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "79f03123e57cc6e85002b40904fefb956d409ad9"
+    },
+    {
+      "path": "solopi-app/portal/src/main/AndroidManifest.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e436f764c8ed6d873f7c3dfe8a8996e2cb39ca8a"
+    },
+    {
+      "path": "solopi-app/settings.gradle",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d54ee4c02e197cd997fb9bd70a87a3980657c7ea"
+    },
+    {
+      "path": "solopi-app/shared/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "54b2cbc8ea83e692cd9485e44a408fad7b18fd2a"
+    },
+    {
+      "path": "solopi-app/shared/build.gradle",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4419a82a1a88b49cd65b5c1f006d81bef6cf3541"
+    },
+    {
+      "path": "solopi-app/shared/proguard-rules.pro",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5d514f4e0df7459a0070c59235b00e392a671c4b"
+    },
+    {
+      "path": "solopi-app/shared/src/main/AndroidManifest.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7206cf41bd8a81fc5afc195de6e1a4cb0a843b39"
+    },
+    {
+      "path": "solopi-app/shared/src/main/cpp/CMakeLists.txt",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "64549a9b60955ad7bac0c5ad31bea9af423ae931"
+    },
+    {
+      "path": "solopi-app/shared/src/main/cpp/cpu_usage.c",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b6d812b55c39a6ded2aece23ff263c9096377d9f"
+    },
+    {
+      "path": "solopi-app/shared/src/main/cpp/memory_malloc.c",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9cea10f1ea7ac23174833e85811ff6aea40d67fb"
+    },
+    {
+      "path": "solopi-app/shared/src/main/cpp/time_convert.c",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c702a7d8e4746a591aad7f1d08a4e3c35af222e5"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/DisplayItemInfo.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6030e4d3b912765efd08c5482bdfa39c4bde5c3c"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/DisplayProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "72a9e3aca9a1dfaefe84e4f1c9100fbd328bb431"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/items/BatteryInfo.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2840912cb908daa6e4e2842ecee2bc3a97f10fcc"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/items/CPUTools.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c9eaa00edb3828fede2374a936da667cd9689a8b"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/items/FpsTools.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "01c1d5f6e8a77bbea88382c7e03425e5b3dad6b0"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/items/MemoryTools.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c1a0d0cb61b568e582ee6498b9648a9a5e7df47f"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/items/NetworkTools.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7728ac26187affc9279452a8294b16fdb44f7bc6"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/items/ResponseTools.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fd9a77c197af119433f9a085919ef3b25cfcdf52"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/items/StatusTools.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c1cc1b9934e86f7c0827a311203a63a6a19433e2"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/items/TemperatureTools.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "090ecc714c13b0e0c224be4e78894ef68b0802e0"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/items/base/DisplayItem.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b2d453733f7aa5e85ac7b143d5ad9d89e77025f1"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/items/base/Displayable.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4aa2822e6c5455405c8b053de9fc9b8636d2aa2c"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/items/base/FixedLengthCircularArray.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f4ab6e5a50ea79a82971ef2ec8a5ec6bfe1d0047"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/items/base/RecordPattern.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bc2c4d490cc84e0fb311bab24fc5eee98c90b87f"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/items/data/EventsResponseType.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1bbd20719acc114d8d8e86bcaebd45810b21fcae"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/items/util/FinalR.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2e16380854702ff531b4bfde697088826355ed3f"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/display/items/util/FpsUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1de8bb7860aca814399b8a975950af5eccbbc4d6"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/event/EventProxy.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7386e77fdc03b57581978bb9f72282a40aa7c3a3"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/event/EventService.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "23878aaa0ee835cdda8c82208353551c56e9b56e"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/event/accessibility/AccessibilityEventTracker.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0ec5cfa13cf6dffcd3b2c4d32eedc84022e03616"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/event/accessibility/AccessibilityServiceImpl.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ca1914ed9b34579749c26a4c8923ab45ebcef474"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/event/accessibility/AccessibilityUiEventClock.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0c56a555bf7d81f07034a9b2a612c659824f6bbd"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/event/bean/UniversalEventBean.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "014dd6c3016b5f973986996ec4b10483a112e383"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/event/constant/Constant.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1ff4e5c897db91b2416feba76a5eb1b1142a5cab"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/event/touch/CmdTouchService.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5338c3cbc020c151cf963e703bc8875c6e9d46f5"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/event/touch/TouchEventTracker.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fde2f72ac6f69bf16d4f895cbc4c0371c2e890d1"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/event/touch/TouchWrapper.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "391b0286332baaeffc17a7de644f98c2887790f7"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/io/OperationStepProcessor.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e9af40d5163433f384c1ac578911145773e4c699"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/io/OperationStepService.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f3dc84661c34cb507b0e40f51d82dbbd01afa1eb"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/io/bean/GeneralOperationLogBean.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c7a9cd2c48d6a08611fe9edd63719bfb438a4529"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/io/bean/OperationStepMessage.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e3fb24d576dabf2ebed2856c4f240690649e660b"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/io/bean/RecordCaseInfo.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e6416a6ec6133c79da6982494d7bf1343c06baa0"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/io/db/DaoMaster.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "83ba691dbab1f8ea026d4171b04614949ea2a621"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/io/db/DaoSession.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "67b22754a4f955a58ea06855cfcbf26ca0627419"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/io/db/GreenDaoManager.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ead154b82325acea68b7caef38a753687b32f89a"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/io/db/OperationLogHandler.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bd6dbb554d64bdfaf96c04cebf4b5dd2dd5d9a39"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/io/db/RecordCaseInfoDao.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "790e1518bdb2bdce69dae7a3f6679b17107ecc9b"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/io/db/RecordCaseOpenHelper.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f36404196461404acd0f33a6d9eb36d4dadc994f"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/io/util/OperationStepUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "be59a6229a490f5f058d3ddfa5898788f7e0e53f"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/AbstractNodeProcessor.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e8c268ba69f48d97c3be169b42cd4f0cf7190f86"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/AbstractProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3a0bec81bfd05cf796282b8f6c20565c36d6074c"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/NodeTreeGenerator.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "94e43def8b810d525b6fa36d95ce490258825f5d"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/OperationService.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b480d1b8152ba3afe830048d677f14465b607d10"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/action/CmdExecutor.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3335baef8ebb191a136d650b0b83bae74bb81188"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/action/Constant.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "debef4a9f7426b066b85bfb050be839555fd03cc"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/action/NodeKeyBoard.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f2fca0a2271706747ea6c27b07542e881151c911"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/action/OperationContext.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1d1f3de36930e345127d005e7906612000d862fc"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/action/OperationExecutor.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "09bf9073bddedd9b5b6ea0995d48524b9dea697d"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/action/OperationMethod.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cbce6fe8e02681fea1a7bc0d6528800414cf0235"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/action/PerformActionEnum.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3883e090e06748da21fdc239f82a7b98c40ec18a"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/action/PerformActionMethodMaps.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7f49b39181009b8e65be4d91e675672867be96a8"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/action/RunningModeEnum.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "91a72c39881565f96418fc179c3c88a7db53dd5b"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/action/UIOperationMessage.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "057638ccab1c32e4dc4a43c058ae1235a2ba6944"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/action/provider/ActionProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ad1b7c162765f16cd2825493797b34e6d476de57"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/action/provider/ActionProviderManager.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cf85ccac55f9a311ff73310f6060857f8227e755"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/action/provider/ViewLoadCallback.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5e9f10203deb3151f3e5fe247b48770a22d2f8d5"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/locater/AccessibilityLocator.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c29547e42f44a2b4be30cfeab7839befa524ebd5"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/locater/OperationNodeLocator.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a3d3a5dde874ce4b04f7948e7818eb96319fb337"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/locater/PositionLocator.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1f5d4c48f26b0ad4d62a35f59a4dec863d6bd803"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/locater/XpathLocator.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "396342167e4bfc8d5563c7c5d8489c8bbab9b84c"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/locater/comparator/ItemComparator.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "be33b0f6816ed30635034a6da09ba4669384205a"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/AbstractNodeTree.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "72e252d1b56c6c7a3ba71d3bfe4199e28f20a359"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/FakeNodeTree.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e1464bd98441f1534dd4a3f8b0ce1089528554d0"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/InputWindowTree.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "23abf53bea3c06b3e836a4b648c7fd08e0659842"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/MetaTree.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f21c4cc90de27a1e361727a180ddf7132df39136"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/OperationNode.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "388114a29474674e4e01975d887a49613f0c4aeb"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/accessibility/AccessibilityNodeProcessor.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "12cab59458438caf4aa1d66cb973600af46b320a"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/accessibility/AccessibilityProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a02be8770cfd1a27ea3b829e5711cf00b6e11db0"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/accessibility/tree/AccessibilityNodeTree.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b21b25cac2809e7f584ca82c2531939d99babad1"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/accessibility/util/AccessibilityUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "239379004bafac83e960244cdd4e952f24aa72fd"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/annotation/NodeProcessor.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fa2cee15712fdb3bfb2586b495266a1c7db1cf06"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/annotation/NodeProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "167943cdfad854344e3ab14ca01f2955d2064f97"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/capture/CaptureInfo.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "72723b93b81170f0107dc050b2de34f770eb6615"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/capture/CaptureProcessor.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0f4b9d1527a0f254d79d731e9e5b82d7484f9f43"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/capture/CaptureProvider.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "58fa28fe498d715d1cfce88e4b20a72345f6031e"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/capture/CaptureTree.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b3e67735e5d860b8ebfcc899ba91fc20e78cc669"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/export/BaseStepExporter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fd9a7be519506fce18735734c2b823e094841055"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/export/OperationStepExporter.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f7360ab9e1f795317a4fedc5854635f7485139ab"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/tree/export/bean/OperationStep.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f496c4ce407aeabd339025894d2003f2e294019c"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/utils/AppUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1048459ba12d4e88d71acab8c091e6233b9937bf"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/utils/AssetsManager.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "20b1b5d0ab6cebfc94198d4710e5094a38dcdbc1"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/utils/BitmapUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fe40db0a6aa6eeb784cc4b4fd32724bc451688ae"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/utils/ContentChangeWatcher.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "aa438db0aea047089dc9def93bc5787692ff8f8b"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/utils/LogicUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "081f0a2ff63f3d3001828b336bfee995fb80d614"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/utils/NodeContext.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fb8a44fd713a85f47edac26fe99dfa927af71302"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/utils/NodeTreeUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "091278bb850c7bbe3192a79f574f70259ca5cb99"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/utils/OperationUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9bee0c614a9ec9922e011b4755be40fd67afa068"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/utils/PrepareUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "065880d447bdbf1a1bdc4567bd08aad8522d59c6"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/utils/RectUtil.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "723baed131f9655b0dfee620b346bb16d8553e09"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/node/utils/prepare/PrepareWorker.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "24d162c8c27bbd0521064e4f97c8532f4ccc6ec4"
+    },
+    {
+      "path": "solopi-app/shared/src/main/java/com/alipay/hulu/shared/scan/ScanCodeType.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "41f46a54c8a3aef4578e53220602ab814b28ae14"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/bg_round_btn.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "13eba335e32f944155d4ec4789d0925701150af6"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_app_operation.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3eba86791850e4c7ff2c54b3498503b78da13779"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_assert.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "93a2dfc6d45452570418dd045ad051af9d94d058"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_back.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "161799dcc360d129a9dbd8f631e1edab2438169e"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_bar_code.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8ed9bafdf02743c7cf4ab8fad79687e36c3d7d42"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_break.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c0fdf0e25099a8b8d060018ca125684f902077c9"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_cancel.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2148d3e10b3db6bc86d555609f02e11ff7391e3a"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_change_mode.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9d82200d4b8e9f262881b9503ab9b8dff7ab9ccd"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_check.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2eb185076e5c00f85000fc69279f0ec3fb35ed86"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_click.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2944b9371237e3be018804a2a7f3fdb4777fb35c"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_click_if_exists.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d8d6660c9b760d48833ca4cdb8a4f0673ec6626b"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_cmdline.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "295f4828978ce4653022a7a9c6183eec720116f0"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_continue.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fe385b9269f8bcf5640c1885b36dc97175643454"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_device_info.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "55aa23c31a1b5c3faa7d1847428b5b92da5e94cb"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_device_operation.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3c2b6a24965f6b442d7b69295943971e8511d47c"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_export.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "826dbbe82719c264833c019636b98d111f68c0b2"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_extra.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f71129e91efc72859e3a4b2ac1a6e3761e0b14b2"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_finish.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "83327951b151db1ba550ad569556bb3bae2fca15"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_gesture.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0718e622d073d2b62bc286302210bda00b81ad7b"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_goto_index.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "823e860e69fbdf23aa1ed09c14f661a7d841942f"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_handle_alert.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bf149fc88f77250d7a6e919ec5922cf74ae9cb06"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_home.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f36dc89b66d37bd37fe4bd8300e2eeb958413861"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_if.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a62dfddc0a4555b65a17282d509314f56e308918"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_input.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "effedd6ab90cdfe879fd7d264e76180607f85e52"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_keyboard.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ffe73d15f48a1b2ccb95e349b93d9acc636ba97f"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_kill_process.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "03666693cf8478d4adf31b3fc578daa2eeb98be0"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_load_param.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e85452a6d7fead95a9364f68ecda76e4e111957a"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_logic.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e3b8c53f0a66acf8fcc80e2c71783dbadf22ea85"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_long_click.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "048c2a8291720b8020c501c7d8fd715d85f635cf"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_loop.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "49d3b9deeb9ab4075c5bbbd521f8b6060d45ffaa"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_multi_click.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4afb2b7d2cec8fb951eda1722ce73944a2907bef"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_multi_times.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a93bf8db398e7fa8afba6a6f5a9e2beb66ac2f0d"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_notification.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9e5da7418a3c209b0f298dd456b9fe1254182461"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_params_gen.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f5c31906671dc21c5a4c6a010e73cae177b881c4"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_pinch_in.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "419d55800ed78e1b1b3cb8927b5eae65d21a88f8"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_pinch_out.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "97f35073b3367f57f6396c0669a98bea3a8865c6"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_power.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bf8451d66697fce0b7e425e11bd77785be3d8473"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_qr_code.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "05c36638f61de16265e710f997bcd203ddc44f61"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_quick_click_2.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dcadb1e986bb31ed3e2a255a1bc3509027e4e93e"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_restart_app.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7c1a0716f4d7f778849f2d2298f41adc13dd6b9c"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_scheme.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "36c8f689ed587fd130bfc47ccabbaf5d5708edc9"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_screenshot.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c8b2ec1971df1c86b2a9aaeeb51f3d07e77f4d9b"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_scroll.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "15329fd1867bf162e8192d94473f0c00b3973eef"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_scroll_down.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f5f9d022a047eedb81f774fe454e1940d1188f95"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_scroll_left.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3b1d933ff7379d596dbd3b0af6123819b065baf2"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_scroll_right.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8f09c0d69ea981e06998585cb8aec2177ad56ae3"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_scroll_up.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2aaaf0840730a9d0a04a673e7120acb33da828f4"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_search.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1678fdd2d442997cad8a667d00a16370e8c77933"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_sleep.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "db02046b396616a81abdf64bf86c65c01b4a97b1"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_tasks.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fa75ab188593743040afb6647045a5d87573db12"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_action_drawable_variable.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c9828e63deed6e991c7177b9a1535afa7a6263db"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/dialog_background.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6d87b75816172949fa5633d80951ebe2589ec840"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/head_icon_back.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "75ec9ac40465e25489e912f10c3f505ad28fcfc8"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/drawable/performance_icon.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9680b7c3893453fb879ffd2e9a29d0bdae81ac65"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/values-zh/strings.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4808301e6724b2a34a9186951000186e0dcb122e"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/values/colors.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "80d13eff723fadafc0a2973712bd6d93fe461862"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/values/strings.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cf4c28ecfc6005027ccc5acb8642f1f156ed2a2c"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/values/styles.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ba318fc2ce44e913d9296312b2b986ac1e96b113"
+    },
+    {
+      "path": "solopi-app/shared/src/main/res/xml/accessibility.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5f8abb0367d1464c984b14faccd71b7b824f6ee4"
+    },
+    {
+      "path": "solopi-skill/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e43b0f988953ae3a84b00331d0ccf5f7d51cb3cf"
+    },
+    {
+      "path": "solopi-skill/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bc159287e84424adeae50578bcb10ef6545215a3"
+    },
+    {
+      "path": "solopi-skill/SKILL.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "29a6ccede3699712879694009625d54dddd4636c"
+    },
+    {
+      "path": "solopi-skill/agents/openai.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c2dc6688c573dfb9d3912332ffbe4d4fd37ec498"
+    },
+    {
+      "path": "solopi-skill/references/action-catalog.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "055a1f57508fd790b1302a821c5dd20cc56c7add"
+    },
+    {
+      "path": "solopi-skill/references/app-feature-inventory.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "896341493cb76d6dd9505a7fb0211f7c70c06912"
+    },
+    {
+      "path": "solopi-skill/references/capability-matrix.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "69f86c9822b5652e325ec078c771b2844de63e1e"
+    },
+    {
+      "path": "solopi-skill/references/case-authoring.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d5c2dccdf0a5d8e81205fdc3bb13761d7d00ae89"
+    },
+    {
+      "path": "solopi-skill/references/cli-reference.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b1b79914d0ba288982a5fe70c86f208e548cbd56"
+    },
+    {
+      "path": "solopi-skill/references/managed-execution.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "080bdafbe9fb580f0e7ad1d8a72827176b85f66c"
+    },
+    {
+      "path": "solopi-skill/references/model-deployment.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "30789cd74652c450f7e2c24d839cf8240e64ecb1"
+    },
+    {
+      "path": "solopi-skill/references/performance-testing.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b064e3a480e9eae522bfbd6fc23d852ef82e3e4d"
+    },
+    {
+      "path": "solopi-skill/references/protocol.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f109b97fdceaf5482fa92bdd1f4a27af7330a604"
+    },
+    {
+      "path": "solopi-skill/references/troubleshooting.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6785a47963c29a483238fe60c36b748e240d035a"
+    },
+    {
+      "path": "solopi-skill/references/verification-engine.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "07573de27f3a17b5a6f4d5d4077b0e1e96a1e33e"
+    },
+    {
+      "path": "solopi-skill/references/workflows.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1a9f28198e7ab37328e00629ac0e733ad32dcc6f"
+    },
+    {
+      "path": "solopi-skill/scripts/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "43ae0e2a6c6d8fca34872506ca0f2e64194fec7c"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9626f548f13c27ab91d617063758d18a19c141b2"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b9334c6ade1da3f422adac642fad050a4ec74b9d"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/executorch-counter-policy/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "461f1d782ef335dc2ef6892acd68b9d4d5ea3834"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/executorch-counter-policy/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "16aef96e27d0de75279b85b65481bfaee61380ef"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/executorch-counter-policy/manifest.sig",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "60b61eab900f83f02fd667ac423fcc7e0397e453"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/executorch-counter-policy/model.pte",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "43252ca7d3d05e8fe847e122c9c7de976e0e0096"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/DATASET.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2103bf9cb24ec7ad67b7bb49808640519ccb2339"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0ad19c596a8e87ec930047bf08b11aa13e52e66f"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/VISUAL.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f4d42ac564f5fcdd1287893678eae9e72d50f34f"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-more/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "767122a58ca38b86aa9740044cdfc4c345d2f54b"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-more/inputs-manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "56add3fd76cbca9ab861776296d6aa06460d83c6"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-more/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9ef0f58cae019779d1c1c90cbffd82a1936b5929"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d3d3db5df38d60025b650dea28b53bf0c1d3c3ae"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/home-direct/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fa7560f231e16ed1f85377785924e99c369c693d"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/home-direct/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dc20c9a8977acbd97528d3daa41904f0d513c5cd"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/home-paraphrase-1/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fa7560f231e16ed1f85377785924e99c369c693d"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/home-paraphrase-1/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8c3e166614745cc9e5540a59766ef002de15f5c9"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/home-paraphrase-2/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fa7560f231e16ed1f85377785924e99c369c693d"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/home-paraphrase-2/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "87fe97f7bbbef3410b3fc93da233430ed4a812aa"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/inputs-manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "07ad881507a71f2a824b7439674d255b42564a26"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/settings-direct/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f67b78466a206e98b009e464237db9af16b8d46e"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/settings-direct/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "28357987429d7d6e4bf59090e7ab64223fcd884c"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/settings-paraphrase-1/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f67b78466a206e98b009e464237db9af16b8d46e"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/settings-paraphrase-1/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ea980db139f6bbe79b06ba94f5977cab290b9c20"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/settings-paraphrase-2/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f67b78466a206e98b009e464237db9af16b8d46e"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/settings-paraphrase-2/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "26f644b0a3bc77c4505f7b6a2b816c9873251fa6"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/settings-paraphrase2-wrong-oracle/control-provenance.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dbbe2e0ffdd30615e1b0476651c6e46d511f22d4"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/settings-paraphrase2-wrong-oracle/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f67b78466a206e98b009e464237db9af16b8d46e"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/settings-paraphrase2-wrong-oracle/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e37a54a47781a562d1fe370a2279ee1398ae0b94"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/settings-wrong-oracle/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f67b78466a206e98b009e464237db9af16b8d46e"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-multichoice/settings-wrong-oracle/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8f01d28590296ea62e79fbdb7e6032a6d64f38ab"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-scenarios/more-services/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e1434dfc7b85046e5057a744eadca3ef01bc7a01"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-scenarios/more-services/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fdab12ecc8c6f4494aa725282e97afc1dfe1968d"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-scenarios/more-services/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "db9669dfc8273d91b7f3541ad342315defb6ede3"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-scenarios/search-input-roundtrip/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "481de85b711102ae95b1db145b5c2aa6a5797230"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-scenarios/search-input-roundtrip/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8ab25c4da29890ccf1fb1fcfb5cd971829b3a6fb"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-scenarios/search-input-roundtrip/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "37cbce8481b5febe55a046bfdda96992be1d021a"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4bfce388b32ea0ff27a373f4b3636bfe8cc46a82"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/blocked/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d34e9dfad3300e165722d7c7a5c6934c0a9d11e1"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/blocked/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a1a5e47b61e10986f0674f8e9dd950c090f95be1"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/inputs-manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2ad78cc5e97b52a6f596114c460849d045ab42dc"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/normal/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a1e34e31371251530e5f915e3478ec2b2668e662"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/normal/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "aad4c2c121c3ce0c5d4eca1b5727bcf9acf1c1b6"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/prompt-v2/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "eacee6ecf1cfc8cefb2c680eba38989ad4a489c3"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/prompt-v2/blocked/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "39ceb2860ae252c003c4327db60ec2182f6e197a"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/prompt-v2/blocked/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "106e78a1847fa8908b0ff6123a75e1d3561398e0"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/prompt-v2/inputs-manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3ec062d36f5b1e244b2d4414cfb11c20fe1c3f1a"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/prompt-v2/normal/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6b80f63f061c9416bf20ca3cb63e2f6ce01a4be7"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/prompt-v2/normal/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "47b5fe7ca7cba340b19dceca2a31aa7512d85deb"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/prompt-v2/wrong-oracle/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6b80f63f061c9416bf20ca3cb63e2f6ce01a4be7"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/prompt-v2/wrong-oracle/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b004662e6959c302c48b8212dbdf1ee9678541cb"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/wrong-oracle/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a1e34e31371251530e5f915e3478ec2b2668e662"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/alipay-search/wrong-oracle/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fefcbbe8ad23e6550e4bb9bfcb5abf048d08fae0"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/android-demo/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "762f4aabb04432cc24b1553afbf69c57f1946a37"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/android-demo/AndroidManifest.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "594cf83ed1d4027644a13be493f20072ce78157c"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/android-demo/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "19d76d52373b08d1e203ca51205cdd1daf741796"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/android-demo/build.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "daaee2ddd8b9b7cc599ceee0d36ed67e8a112d69"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/android-demo/res/values/ids.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "61c362b543a3dbbe5a063e101ae6c830ee79cba1"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/android-demo/res/values/styles.xml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5934eb172c17ebfb9f01bfb0eeb4c0e676d6c1e4"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/android-demo/src/com/solopi/fastpath/demo/MainActivity.java",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d47941aec505a6e7940854003f52c1838ce76794"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/benchmark_forest.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c9640acde11d41f4eb2a20f8bcf85ba9252edc29"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/evaluate_dataset.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2c05015e78c21747127c710c0bcfe3a776ea3a75"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/evaluate_laya_choices.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "05c57a6f906e171d212cd7363483c909437b9a93"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/evaluate_laya_vision.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "aebb8fe3f9a083020f48d9407240f9fac32c1705"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/evaluate_no_match.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "575b4e31f4871342ce9efdca085f6dd5bcd1d826"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/evaluate_offline.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e76119a654dbf251966bda3769e63630d48d95d0"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/goalpath-alipay/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e99ec5f62d9e2d308668dae2f97e7eaec6bd4b80"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/goalpath-alipay/education-browse/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f2b287c8b227c32d708df8f4f73ae9761e971e5e"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/goalpath-alipay/education-browse/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "cc060dc194bed04aa0ba0179df47bdf2ef3aa4e6"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/goalpath-alipay/negative-oracle/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6c42c3c6424b8923eaecc7727a4279f8b5ef6125"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/goalpath-alipay/negative-oracle/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f7a0a0c8cd0267ae2d72d8059741f850c1b4e277"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/goalpath-alipay/replace-query/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "daf546c1d3d4c301448345cda5edc5a8c43509bc"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/goalpath-alipay/replace-query/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "50aebf1d8727f280889c62a9b6e8ba55f6bd0d10"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/goalpath-alipay/search-draft/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6c42c3c6424b8923eaecc7727a4279f8b5ef6125"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/goalpath-alipay/search-draft/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "8f7e84a84c78068b182ea2138024dd073fdfa555"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/goalpath-alipay/service-search-draft/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "959721e42100f26e9f3ab1bf170f8afd0e156728"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/goalpath-alipay/service-search-draft/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e8804f9c8a229b9c6b76109d283cae2f658c3b61"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/prepare_demo.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7bc380f5967b2c369ea8441159295d849f5dcafa"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/requirements-mlx-lock.txt",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "83c33e9f8ddb74c0e678b6173e07459e639d0a3c"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/requirements-visual-lock.txt",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e6f88f5ed2de9ada98edd043aea90f49c6de60d9"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/examples/fastpath/visual_choice.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "1adb6cb4112322672a9c2f7f1554275f93beca82"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/fixtures/managed/android-agent-matrix.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bdb2c06b6257f377ccf2d2d2c4bf30a1b0fa06d7"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/fixtures/model/counter-offline-requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "160f411193045eaf90a593593debe74e5549b19a"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/fixtures/model/counter-policy-corpus.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c8fc8ecb55fd5a05e112541bee3c6f7387a36904"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/fixtures/model/counter-policy-evaluation.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "66f96cf879411a05b2044d735b0e8635bb18faa5"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/fixtures/verification/counter-agent-decisions.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dfdf16afe40bdd061b229f10d0a58320b9b3389d"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/fixtures/verification/counter-outcome-matrix.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ab8647560daaa43926f48fade51d3b0d911a409d"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/fixtures/verification/counter-success.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "d6e01852497883bbe7a45e651827fa1b52732841"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/pyproject.toml",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c262cac0081e4b66bbc7c0f5b18d35b0ee9bee2e"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/solopi-ai",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "ce2a232fc1588bfc27b8e57ebfafd15e86790b46"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/__init__.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c763f93008ecc241fccb223df294788d14be427d"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/__main__.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "e8b1b50f272fd9d03925f7adcd6b4e1d6e93d5b4"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/fastpath.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "49ecda68d97567c7e02542f08533a667cef546fb"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/fastpath_evaluation.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4548d063457299f7a36391ce07dd2b9243ee57db"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/fastpath_runtime.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "89870d97db16d96afc6b6314e11a3a6ce3e6f44d"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/goalpath.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "5af6da183ab0855e7261e846033bb55823acb1b2"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/goalpath_runtime.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "031613278bc112859b7166cc9cea797b7ff461b6"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/managed_execution.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4eb6bfbcb369407e0e8c9120291139b37f6eb75d"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/model_deployment.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "2afcbb6f9714f812e77a96cbe43e21b5fb76e453"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/resources/keys/solopi-poc-2026-public.pem",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0dc8d363d59ee3e54dc8355f7ecfb00eacde583b"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/resources/workflows/alipay-education/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f2b287c8b227c32d708df8f4f73ae9761e971e5e"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/resources/workflows/alipay-education/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ab9f7b1dc94e19217763f6ba56a85b4d067db592"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/resources/workflows/alipay-more-services/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "fdab12ecc8c6f4494aa725282e97afc1dfe1968d"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/resources/workflows/alipay-more-services/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "dafc6952cf52851b8bf274bd4afa1da7ca679058"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/resources/workflows/alipay-settings/policy.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "f67b78466a206e98b009e464237db9af16b8d46e"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/resources/workflows/alipay-settings/requirement.json",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4f0892e48c4d42c523a4b29a2801c7f5a1861824"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/solopi_ai.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "b4893b5a1b6cdb4986b2c3a3b6c47b097a3ce374"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/timing.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "3e4095a45ed8bbc21548f71f728a773e49cbcd79"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/verification_engine.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "bbc18efb6c5b8762e87f56dca61fa4e5b1777ec6"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/src/solopi_harness/workflows.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ffe79a94884dd0bc59f0d25e3086a3102549765c"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_fastpath.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "75ef8fe48635344789d9955fb4a0ee1882a3c65a"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_fastpath_cli.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "c7d3546705bdd2ba89b416a76a851e96127b6313"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_fastpath_evaluation.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "ffe2e13242eff3330a30553a4df6e982ac784ccd"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_fastpath_runtime.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "550b50e86d3ce950686aa991f181e9189241a313"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_fastpath_timing.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "9f716890eb6913d8842da35b38db326409a09344"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_goalpath.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "91c78584101b582d713df2ab6598d00fa53058ef"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_goalpath_cli.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a13f009127a2e819ba359c4f5892683264d93045"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_harness_http_transport.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a7e3845ea594923ace7b0fe689b4ecf49ddcc12d"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_host_execution.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "0d25bf3d2d76a1163d602b5b37e6177cfc6d89e6"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_managed_execution.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "7ec157af7de3dc23000f0cc4d3287cf2a3054396"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_model_deployment.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "913af538e87506b1fcaa80139962fbe8b65d6e08"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_solopi_ai.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6e3ad030d84cafc0a781e60079d2b4ee5b614cdf"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_verification_engine.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "6b4ba39c08d2fc50451717cc0d4716b721611a16"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_verification_transport.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "a00f6862ac67fede5b099e96f13709aa4bbdf131"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_visual_choice.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "4b6c8a666e44286ae64dcae6a5c88928c2177686"
+    },
+    {
+      "path": "solopi-skill/scripts/harness/tests/test_workflows.py",
+      "mode": "100644",
+      "type": "blob",
+      "oid": "60392358551565fbe94019881416aeeeb698232f"
+    },
+    {
+      "path": "solopi-skill/scripts/solopi-ai",
+      "mode": "100755",
+      "type": "blob",
+      "oid": "cfe07deb70cdaa5a5ba5dfc004d1402d32c196a7"
+    }
+  ]
+}

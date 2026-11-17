@@ -1,0 +1,50 @@
+import {cleanup,fireEvent,render,screen} from '@testing-library/react';
+import {afterEach,expect,it,vi} from 'vitest';
+import {Overview} from '../src/pages/Overview';
+const data=vi.hoisted(()=>({clients:[{clientId:'c1',displayName:'Mac A',online:'online',clientVersion:'1',registration:{status:'approved'},capabilities:{media:true}}],devices:[{clientId:'c1',deviceId:'d1',deviceName:'手机A',status:'online',kind:'phone'},{clientId:'c1',deviceId:'d2',deviceName:'眼镜B',status:'online',kind:'glasses'}]}));
+vi.mock('../src/hooks/useDeliveryArea',()=>({useDeliveryArea:(x:any)=>x}));
+vi.mock('../src/hooks/usePollingArea',()=>({usePollingArea:(x:any)=>({rows:x.key==='clients'?data.clients:[],status:'ready'})}));
+vi.mock('../src/hooks/useDevicesReadView',()=>({useDevicesReadView:()=>({state:{kind:'confirmed',rows:data.devices,lastUpdatedAt:1},rows:data.devices})}));
+vi.mock('../src/components/MediaViewerPanel',()=>({MediaViewerPanel:(p:any)=><div data-testid={`screen-${p.deviceId}`}>{p.autoStart?'自动观看':''}</div>}));
+vi.mock('../src/api/group-levels-ro',()=>({fetchGroupLevelsPage:async()=>({items:[{clientId:'c1',groups:[{groupId:'g1',name:'2号坑',members:[{deviceId:'d1'},{deviceId:'d2'}]}]}],nextPage:null})}));
+afterEach(()=>{cleanup();data.clients[0].online='online';});
+it('shows screens inline, Client opens all, and closing one leaves the other mounted',()=>{
+ render(<Overview deviceHub/>);
+ expect(screen.queryByTestId('screen-d1')).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'展示屏幕：手机A'}));
+ expect(screen.getByTestId('screen-d1').textContent).toContain('自动观看');
+ expect(screen.queryByTestId('screen-d2')).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'展示全部设备屏幕：Mac A'}));
+ expect(screen.getByTestId('screen-d1')).toBeTruthy();expect(screen.getByTestId('screen-d2')).toBeTruthy();
+ fireEvent.click(screen.getByRole('button',{name:'关闭屏幕：手机A'}));
+ expect(screen.queryByTestId('screen-d1')).toBeNull();expect(screen.getByTestId('screen-d2')).toBeTruthy();
+ fireEvent.click(screen.getByRole('button',{name:'展示全部设备屏幕：Mac A'}));
+ fireEvent.click(screen.getByRole('button',{name:'关闭全部设备屏幕：Mac A'}));
+ expect(screen.queryByTestId('screen-d1')).toBeNull();expect(screen.queryByTestId('screen-d2')).toBeNull();
+});
+
+it('blocks computer, group and device viewing when the computer is offline despite online device snapshots',async()=>{
+ data.clients[0].online='offline';
+ render(<Overview deviceHub/>);
+ expect(screen.getByText('离线')).toBeTruthy();
+ const all=screen.getByRole('button',{name:'展示全部设备屏幕：Mac A'}) as HTMLButtonElement;
+ expect(all.disabled).toBe(true);
+ const group=await screen.findByRole('button',{name:'查看整组屏幕'}) as HTMLButtonElement;
+ expect(group.disabled).toBe(true);
+ const device=screen.getByRole('button',{name:'展示屏幕：手机A'}) as HTMLButtonElement;
+ expect(device.disabled).toBe(true);
+ for(const button of [all,group,device])fireEvent.click(button);
+ expect(screen.queryByTestId('screen-d1')).toBeNull();
+ expect(screen.queryByTestId('screen-d2')).toBeNull();
+});
+it('unmounts viewers on loss of connection and does not reopen them on reconnection',()=>{
+ const view=render(<Overview deviceHub/>);
+ fireEvent.click(screen.getByRole('button',{name:'展示全部设备屏幕：Mac A'}));
+ expect(screen.getByTestId('screen-d1')).toBeTruthy();
+ data.clients=[{...data.clients[0],online:'offline'}];view.rerender(<Overview deviceHub/>);
+ expect(screen.queryByTestId('screen-d1')).toBeNull();
+ data.clients=[{...data.clients[0],online:'online'}];view.rerender(<Overview deviceHub/>);
+ expect(screen.queryByTestId('screen-d1')).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'展示屏幕：手机A'}));
+ expect(screen.getByTestId('screen-d1')).toBeTruthy();
+});

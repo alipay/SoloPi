@@ -1,9 +1,11 @@
+import {NativeRuntime,disposeAll} from './fixtures/harness-lifecycle.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createRequire} from 'node:module';
+test.after(disposeAll);
 const require=createRequire(import.meta.url);
 const {discoverSkills,readSkill}=require('../electron/agent/skills');
 const {recordSkillRead}=require('../electron/agent/skill-reading');
@@ -11,7 +13,7 @@ const {refreshLoadedSkills,skillUpdateFrame,assertSkillUpdatesRead}=require('../
 const {activateSkills,activeSkillNames}=require('../electron/agent/skill-scope');
 const {skillCatalogFrame}=require('../electron/agent/skill-catalog-frame');
 function fixture(t){
- const root=fs.mkdtempSync(path.join(os.tmpdir(),'solopi-skill-scope-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'solopi-skill-scope-'));t.after(async()=>{await disposeAll();fs.rmSync(root,{recursive:true,force:true})});
  const write=(name,body='Rules')=>{const p=path.join(root,name,'SKILL.md');fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,`---\nname: ${name}\ndescription: Generic ${name}\n---\n${body}\n`);return p;};
  write('archived');write('current');const catalog=()=>discoverSkills([root]).skills;
  const s={id:'scope-test',messages:[{role:'user',content:'Earlier unrelated task'}],calls:[]};
@@ -72,7 +74,7 @@ test('inactive body edits leave catalog identity stable, then explicit reuse val
  activateSkills(f.s,['current']);f.refresh();assert.match(skillUpdateFrame(f.s),/current/);assert.throws(()=>assertSkillUpdatesRead(f.s,'run_command',{name:'current'}),e=>e.code==='SKILL_RELOAD_REQUIRED');
 });
 test('actual runtime resumes from a valid receipt without chasing an unavailable historical Skill',async t=>{
- const f=fixture(t),{AgentStore}=require('../electron/agent/store'),{AgentRuntime}=require('../electron/agent/runtime');
+ const f=fixture(t),{AgentStore}=require('../electron/agent/store'),{AgentRuntime}={AgentRuntime:NativeRuntime};
  const store=new AgentStore(()=>path.join(f.root,'sessions')),s=store.create();s.messages=f.s.messages.slice(0,1);s.skillReads=f.s.skillReads;
  recordSkillRead(s,readSkill(f.catalog(),'current'));fs.rmSync(path.join(f.root,'archived'),{recursive:true});
  s.skillUpdates={'archived:SKILL.md':{name:'archived',file:'SKILL.md',success:false,error:'Skill 不存在'}};s.approvalMode='auto';store.save(s);
@@ -82,6 +84,6 @@ test('actual runtime resumes from a valid receipt without chasing an unavailable
   model:async({messages})=>{requests++;assert.doesNotMatch(messages[0].content,/archived|updated-skill-sources/);
    if(requests===1)return{role:'assistant',tool_calls:[{id:'reuse-current',type:'function',function:{name:'run_command',arguments:JSON.stringify({skillContext:{name:'current'}})}}]};
    return{role:'assistant',content:'done'};}});
- t.after(()=>runtime.stopAll());await runtime.start(s.id,'Continue');for(let i=0;i<200&&runtime.active.size;i++)await new Promise(r=>setTimeout(r,5));
+ t.after(async()=>{await runtime.stopAll()});await runtime.start(s.id,'Continue');for(let i=0;i<200&&runtime.active.size;i++)await new Promise(r=>setTimeout(r,5));
  const final=store.get(s.id);assert.equal(final.status,'idle',final.error);assert.equal(requests,2);assert.equal(executed,1);assert.deepEqual(final.calls.map(c=>c.name),['run_command']);assert.ok(final.skillUpdates['archived:SKILL.md']);
 });

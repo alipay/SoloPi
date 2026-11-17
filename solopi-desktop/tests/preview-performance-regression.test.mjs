@@ -1,3 +1,4 @@
+import {NativeRuntime,disposeAll} from './fixtures/harness-lifecycle.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -5,12 +6,13 @@ import os from 'node:os';
 import path from 'node:path';
 import vm from 'node:vm';
 import {createRequire} from 'node:module';
+test.after(disposeAll);
 const require=createRequire(import.meta.url);
 const {AgentStore}=require('../electron/agent/store');
-const {AgentRuntime}=require('../electron/agent/runtime');
+const {AgentRuntime}={AgentRuntime:NativeRuntime};
 const {createTaskSummaryCache,readTaskSummaries}=require('../electron/task-summary-cache');
 const ts=require('typescript');
-function folder(t){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'preview-performance-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));return dir;}
+function folder(t){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'preview-performance-'));t.after(async()=>{await disposeAll();fs.rmSync(dir,{recursive:true,force:true})});return dir;}
 test('5000-message waiting session does zero full loads for 1000 unchanged or unrelated progress notifications',t=>{
  const dir=folder(t), store=new AgentStore(()=>dir), s=store.create();
  s.messages=Array.from({length:5000},()=>({role:'user',content:'synthetic history'}));s.status='waiting';s.watch={kind:'task',id:'target',reviewCases:true};s.reviewCursors={target:1};store.save(s);

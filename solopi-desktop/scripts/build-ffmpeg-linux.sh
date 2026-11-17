@@ -25,14 +25,14 @@ cd "$FFMPEG_SOURCE"
  --enable-muxer=adts,flac,h264,ipod,matroska,mp3,mp4,mov,ogg,wav,webm,rawvideo,image2,pcm_s16le,pcm_s24le,pcm_s32le,pcm_u8,pcm_f32le,pcm_f64le \
  --enable-parser=aac,flac,h264,hevc,mpeg4video,mpegaudio,opus,vorbis \
  --enable-decoder=aac,alac,flac,h264,hevc,mpeg4,libspeex,mp3,mp3float,opus,vorbis,rawvideo,bmp,png,mjpeg,pcm_u8,pcm_s16le,pcm_s24le,pcm_s32le,pcm_f32le,pcm_f64le \
- --enable-encoder=rawvideo,aac,flac,libspeex,libmp3lame,libopus,mpeg4,bmp,png,mjpeg,pcm_u8,pcm_s16le,pcm_s24le,pcm_s32le,pcm_f32le,pcm_f64le \
- --enable-filter=aresample,format,aformat,scale,trim,atrim,setpts,asetpts \
- --enable-zlib --enable-libspeex --enable-libmp3lame --enable-libopus \
+ --enable-encoder=libopenh264,rawvideo,aac,flac,libspeex,libmp3lame,libopus,mpeg4,bmp,png,mjpeg,pcm_u8,pcm_s16le,pcm_s24le,pcm_s32le,pcm_f32le,pcm_f64le \
+ --enable-filter=fps,aresample,format,aformat,scale,trim,atrim,setpts,asetpts \
+ --enable-libopenh264 --enable-zlib --enable-libspeex --enable-libmp3lame --enable-libopus \
  --enable-bsf=aac_adtstoasc,h264_mp4toannexb,hevc_mp4toannexb,extract_extradata
 make -j"$JOBS" ffmpeg
 cp ffmpeg "$OUTPUT/bin/ffmpeg"
 cp COPYING.LGPLv2.1 "$OUTPUT/LICENSES/ffmpeg-LGPL-2.1.txt"
-for codec in libopus libspeex libmp3lame mpeg4 aac; do
+for codec in libopenh264 libopus libspeex libmp3lame mpeg4 aac; do
  "$OUTPUT/bin/ffmpeg" -hide_banner -encoders 2>/dev/null | awk '{print $2}' | grep -Fx "$codec" >/dev/null
  done
 ldd "$OUTPUT/bin/ffmpeg" > "$OUTPUT/link-dependencies.txt"

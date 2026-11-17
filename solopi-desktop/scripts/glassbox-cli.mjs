@@ -23,11 +23,15 @@ const VERSION = CLI_BUILD_IDENTITY.version;
 const backgroundModulePath=[path.join(CLI_SCRIPT_DIR,'background-runtime.cjs'),path.resolve(CLI_SCRIPT_DIR,'../electron/background-runtime.js')].find(p=>fs.existsSync(p));
 const backgroundPolicy=createRequire(import.meta.url)(backgroundModulePath);
 const require = createRequire(import.meta.url);
+const caseStorage=require([path.join(CLI_SCRIPT_DIR,'case-storage.cjs'),path.join(CLI_SCRIPT_DIR,'../electron/case-storage.js')].find(file=>fs.existsSync(file)));
+const caseLibraryCache=require([path.join(CLI_SCRIPT_DIR,'case-library-local.cjs'),path.join(CLI_SCRIPT_DIR,'../electron/case-library-local.js')].find(file=>fs.existsSync(file)));
+const {parallelPlans: validateParallelPlans} = require([path.join(CLI_SCRIPT_DIR,'workflow-parallel.cjs'),path.join(CLI_SCRIPT_DIR,'../electron/workflow-parallel.js')].find(p=>fs.existsSync(p)));
+const cleanupPolicy = require([path.join(CLI_SCRIPT_DIR,'workflow-cleanup.cjs'),path.join(CLI_SCRIPT_DIR,'../electron/workflow-cleanup.js')].find(p=>fs.existsSync(p)));
 const failurePolicy = require([path.join(CLI_SCRIPT_DIR,'workflow-failure-policy.cjs'),path.join(CLI_SCRIPT_DIR,'../electron/workflow-failure-policy.js')].find(p=>fs.existsSync(p)));
 const taskDeviceSelectionModule=[path.join(CLI_SCRIPT_DIR,'task-device-selection.cjs'),path.join(CLI_SCRIPT_DIR,'../electron/task-device-selection.js')].find(file=>fs.existsSync(file));
 const selectionModule = [path.join(CLI_SCRIPT_DIR,'case-selection.cjs'),path.join(CLI_SCRIPT_DIR,'../electron/agent/case-selection.js')].find(file=>fs.existsSync(file));
 const discoveryModule = [path.join(CLI_SCRIPT_DIR,'case-discovery.cjs'),path.join(CLI_SCRIPT_DIR,'../electron/agent/case-discovery.js')].find(file=>fs.existsSync(file));
-const {resolveCaseSelection}=require(selectionModule),{listCases:discoverCases}=require(discoveryModule);
+const {resolveCaseSelection}=require(selectionModule),{listCases:discoverCases,caseGraphErrors}=require(discoveryModule);
 function scopeOptions(command){return {libraryId:getOption(command,'--library'),folderId:getOption(command,'--folder'),excludeFolderIds:getOptions(command,'--exclude-folder'),excludeCaseIds:getOptions(command,'--exclude-case')};}
 const identityPath = [path.resolve(CLI_SCRIPT_DIR, 'product-identity.cjs'), path.resolve(CLI_SCRIPT_DIR, '../electron/product-identity.js'), path.resolve(CLI_SCRIPT_DIR, '../app.asar/electron/product-identity.js')].find(p => fs.existsSync(p));
 const {defaultDataDirectory} = require(identityPath);
@@ -570,13 +574,20 @@ function printHelp() {
   console.log(`solopi-desktop CLI ${VERSION}
 
 Usage:
+  solopi-desktop tools list --json
+  solopi-desktop tools describe <toolName> --json
+  solopi-desktop tools call <toolName> [--args '<JSON>' | --file <arguments.json>] [--request-id <UUID>] [--out <result.json>] --json
+  solopi-desktop tools result <requestId> --json
+  tools uses the same platform tool schemas/execution as the in-app Agent; no model call. Query the current catalog for supported tools.
   solopi-desktop logs export [--output /path/solopi-desktop-logs.json.gz] [--json]
+  solopi-desktop callbacks <target-set|subscribe|status|disable|dispatch> [--file request.json] [--json]
   solopi-desktop quick-actions <list|show|create|import-script|update|import-git|export-git|query|execute|visibility|remove> [--file request.json] [--json]
   solopi-desktop quick-actions --help
   solopi-desktop assert generate --kind json|text (--sample-log <text> | --log <file>) --target <text> [--json]
   solopi-desktop assert try --kind json|text (--sample-log <text> | --log <file>) --line-regex <re> [--conditions <json>] [--json]
   solopi-desktop config import-team --file <team.json> [--headless] [--dry-run] [--json]
   solopi-desktop config get [--headless] [--json]
+  solopi-desktop config runtime [--action get|discover|models|test] [--runtime <configured-runtime-id>] [--model NAME] [--file selection.json] [--json]
   solopi-desktop config patch --file <patch.json> [--headless] [--api-key-env ENV] [--dry-run] [--json]
   solopi-desktop battery import --file <zip|txt|log> | --serial <SN> [--json]
   solopi-desktop battery status|cancel <jobId> [--json]
@@ -593,6 +604,9 @@ Usage:
   solopi-desktop cases show <caseId> [--json]
   solopi-desktop cases pull --library <libraryId|name> [--dry-run] [--json]
   solopi-desktop cases update <caseId> --file <case.json> [--preserve-source-samples] [--dry-run] [--json]
+  并行监听：上一动作 -> 多个已有只读断言 -> 同一后继（&&）；用 edges 配置，无新增开关。
+  最新值：tts_assert 步骤 config.observationMode="latest"，其余断言命中后保留；最新值回退继续等待。
+  分支必须卡点且直接汇合；不使用 parallel/join/log_state 节点。保存后 cases show 回读。
   solopi-desktop cases import-solopi --file <SoloPi.json> --out <new-desktop-case.json> [--phone SN] [--json]
   solopi-desktop cases create --file <case.json> --library <libraryId> [--folder <folderId>] [--dry-run] [--json]
   solopi-desktop cases push --library <libraryId|name> --message <msg> [--dry-run] [--json]
@@ -804,7 +818,7 @@ function writeJsonFileAtomic(filePath, payload) {
   }
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
-  fs.writeFileSync(tempPath, JSON.stringify(payload, null, 2));
+  fs.writeFileSync(tempPath, JSON.stringify(path.basename(filePath)==='workflow-editor-state.json'?caseStorage.encodeState(payload):payload, null, 2));
   fs.renameSync(tempPath, filePath);
 }
 
@@ -824,10 +838,11 @@ function normalizeGitBranchForCli(branch) {
 }
 
 function getCaseLibraryRepoIdForCli(repoUrl, branch = 'master') {
-  return crypto.createHash('sha1')
-    .update(`${String(repoUrl || '').trim()}#${normalizeGitBranchForCli(branch)}`)
-    .digest('hex')
-    .slice(0, 16);
+  return caseLibraryCache.getLocalCaseLibraryRepoId(repoUrl,branch);
+}
+
+function getCaseLibraryRepoPathForCli(dataDir,repoUrl,branch='master') {
+  return caseLibraryCache.getLocalCaseLibraryRepoPath(dataDir,repoUrl,branch);
 }
 
 function buildAuthenticatedGitUrlForCli(repoUrl, username = '', token = '') {
@@ -1376,10 +1391,11 @@ function readWorkflowStateForCli() {
         return {
           path: statePath,
           revision: crypto.createHash('sha256').update(rawState).digest('hex'),
-          state: failurePolicy.normalizeStateFailurePolicies(JSON.parse(rawState)),
+          state: failurePolicy.normalizeStateFailurePolicies(caseStorage.decodeState(JSON.parse(rawState))),
         };
       }
     } catch (_error) {
+      if (_error.code === 'CASE_STORAGE_INVALID') throw _error;
       // Try the next known state location.
     }
   }
@@ -1835,6 +1851,7 @@ function summarizeCaseForCli(testCase, state, collections) {
   const stepTypes = steps.map((step) => step?.type).filter(Boolean);
   const hasStart = stepTypes.includes('start');
   const hasEnd = stepTypes.includes('end');
+  const graphErrors=caseGraphErrors(testCase,edges);
 
   return {
     id: testCase.id,
@@ -1853,7 +1870,8 @@ function summarizeCaseForCli(testCase, state, collections) {
     componentCount: getMergedComponentsForCli(state, testCase).length,
     hasStart,
     hasEnd,
-    runnable: Boolean(testCase.id && steps.length && hasStart && hasEnd),
+    runnable: Boolean(testCase.id && steps.length && hasStart && hasEnd && !graphErrors.length),
+    ...(graphErrors.length?{validationErrors:graphErrors}:{}),
   };
 }
 
@@ -2131,7 +2149,7 @@ async function ensureCaseLibraryRepoForCli(library = {}, options = {}) {
 
   const rootDir = options.dataDir ? path.join(options.dataDir,'case-libraries') : getCaseLibrariesRootForCli();
   const repoId = getCaseLibraryRepoIdForCli(repoUrl, branch);
-  const repoPath = path.join(rootDir, repoId);
+  const repoPath = getCaseLibraryRepoPathForCli(options.dataDir || getGlassBoxCliDataDir(),repoUrl,branch);
   fs.mkdirSync(rootDir, { recursive: true });
 
   if (fs.existsSync(path.join(repoPath, '.git'))) {
@@ -2320,10 +2338,13 @@ function mergePulledCaseLibraryIntoStateForCli(state = {}, library = {}, parsed 
   const nextFolders = currentFolders.filter((folder) => !currentLibraryFolderIds.has(folder.id));
   parsed.folders.forEach((folder) => nextFolders.push(folder));
 
-  const previousFolderIds = new Set(currentLibraryFolderIds);
+  const folderLibraries = new Map(currentFolders.map((folder) => [folder.id, getFolderLibraryIdForCli(folder)]));
   const importedFolderIds = new Set(parsed.folders.map((folder) => folder.id));
   const nextCases = (Array.isArray(state.cases) ? state.cases : [])
-    .filter((testCase) => !previousFolderIds.has(getCaseFolderIdForCli(testCase)));
+    .filter((testCase) => {
+      const owner = testCase.libraryId || folderLibraries.get(testCase.folderId) || DEFAULT_CASE_LIBRARY_ID;
+      return owner !== targetLibraryId && owner !== fallbackLibraryId;
+    });
   parsed.cases.forEach((testCase) => nextCases.push(testCase));
 
   const nextCaseEdges = { ...(state.caseEdges || {}) };
@@ -2501,7 +2522,7 @@ function writeCaseLibraryWorkspaceForCli(repoPath, library = {}, workspace = {})
     assetCount: archivedComponents.copiedAssets.size,
     updatedAt,
   }, null, 2));
-  fs.writeFileSync(path.join(casesDir, workspaceFileName), JSON.stringify(workspacePayload, null, 2));
+  fs.writeFileSync(path.join(casesDir, workspaceFileName), JSON.stringify(caseStorage.encodeState(workspacePayload), null, 2));
   if (ttsTemplate) {
     fs.writeFileSync(path.join(settingsDir, 'tts-provider.template.json'), JSON.stringify(ttsTemplate, null, 2));
   }
@@ -5574,6 +5595,10 @@ function createTaskValidationErrorForCli(testCase, index, rawMessage, options = 
 
 function validateCaseEdgesForCli(testCase, rawEdges = []) {
   const errors = [];
+  try {
+    const regions = cleanupPolicy.partitionWorkflowSteps(testCase?.steps || [], Array.isArray(rawEdges) ? rawEdges : []);
+    testCase = {...testCase, steps:regions.main};
+  } catch(error) { return [{code:error.code, field:'steps', node:'cleanup', message:error.message}]; }
   const stepIds = new Set((testCase?.steps || []).map((step) => String(step?.id || '')).filter(Boolean));
   if (!Array.isArray(rawEdges)) {
     return errors;
@@ -5647,18 +5672,7 @@ function validateCaseEdgesForCli(testCase, rawEdges = []) {
       message: '执行图包含环，无法保证从 start 到 end 的确定性执行顺序。',
     });
   }
-  const incoming = new Set(rawEdges.map((edge) => String(edge?.target || edge?.to || '').trim()));
-  const startIds = new Set((testCase?.steps || []).filter((step) => step?.type === 'start').map((step) => String(step.id)));
-  (testCase?.steps || []).forEach((step) => {
-    if (step?.type !== 'start' && !incoming.has(String(step?.id || '')) && !startIds.has(String(step?.id || ''))) {
-      errors.push({
-        code: 'CASE_EDGE_ISOLATED_NODE',
-        field: `steps.${step.id}`,
-        node: step.id,
-        message: `步骤 ${step.id} 没有入边，无法从 start 到达。`,
-      });
-    }
-  });
+  errors.push(...caseGraphErrors(testCase, rawEdges).filter(error => error.code === 'CASE_EDGE_ISOLATED_NODE'));
   return errors;
 }
 
@@ -5743,6 +5757,10 @@ function validateExecutableTaskSelectionForCli(selection) {
       recoveryActions: ['该 warning 不阻断提交；如需清理，可补齐 agent case 的 reviewStatus/tags。'],
     })));
 
+    {
+      try{validateParallelPlans(testCase.steps,(rawCaseEdges[testCase.id] || testCase.edges || []).map(e=>({...e,source:e.source||e.from,target:e.target||e.to})),Object.fromEntries(componentMap));}
+      catch(error){errors.push(createTaskValidationErrorForCli(testCase,index,error.message,{code:error.code||'PARALLEL_CONFIGURATION_INVALID',field:'edges',node:'parallel'}));}
+    }
     validateAssertionExtractionForCli(testCase, index, componentMap).forEach((error) => errors.push(error));
     try {
       assertLogSampleExtraction({components:[...componentMap.values()]},testCase);
@@ -6074,6 +6092,7 @@ function attachCliReportPackage(testCase, runResult, outputPath = '', disableRep
 }
 
 function createEdgesFromSteps(steps = []) {
+  steps = Array.isArray(steps) ? steps.filter(step => step.phase !== 'cleanup') : [];
   if (!Array.isArray(steps) || steps.length <= 1) {
     return [];
   }
@@ -7282,15 +7301,19 @@ async function updateCaseWithBrokerForCli(command) {
       const item = document.cases[0];
       document = { case: item, edges: document.caseEdges?.[item.id] ?? item.edges, nodePositions: document.nodePositions?.[item.id] };
     }
+    const { state } = readWorkflowStateForCli();
+    document=document?.case?{...document,case:caseStorage.compileDocument(document.case,state)}:caseStorage.compileDocument(document,state);
     const patch = document?.case || document;
     if (create) caseId = patch?.id;
-    const { state } = readWorkflowStateForCli();
     const existing = state?.cases?.find((item) => item.id === caseId);
     if (create) {
       if (typeof caseId !== 'string' || !caseId.trim()) throw new Error('Case id is required');
       if (existing) throw new Error(`Case already exists: ${caseId}`);
     } else if (!existing) throw new Error(`Case not found: ${caseId}`);
     if (patch?.id !== caseId) throw new Error('JSON case id must match the requested caseId');
+    const effectiveEdges = (document?.case ? (document.edges ?? patch.edges) : patch.edges) ?? state.caseEdges?.[caseId] ?? existing?.edges ?? [];
+    const graphErrors = caseGraphErrors({ ...existing, ...patch }, effectiveEdges);
+    if (graphErrors.length) return { success: false, error: 'Invalid case graph', code: 'CASE_EDGE_CYCLE', errors: graphErrors };
     const validation = validatePayload({ cases: [{ ...existing, ...patch }] }, { allowImportReviewDraft: true });
     if (!validation.success) return { success: false, error: 'Invalid case JSON', errors: validation.errors };
     // Transport only: the main process owns state writes and renderer refresh.
@@ -7356,6 +7379,63 @@ async function importReportWithBrokerForCli(command) {
 }
 
 // All quick-action operations are executed by the same desktop owner as the UI.
+function platformToolRequestForCli(command) {
+  const action = command[1];
+  if (!['list', 'describe', 'call', 'result'].includes(action)) throw Error('Usage: tools list | describe NAME | call NAME --file args.json | result UUID');
+  validateServiceArguments(command, action === 'call' ? ['--args', '--file', '--request-id', '--out'] : [], [], action === 'list' ? 0 : 1);
+  if (action === 'list') return { action };
+  if (!command[2] || command[2].startsWith('--')) throw Error('缺少工具名称或 requestId');
+  if (action === 'result') return { action, requestId: command[2] };
+  if (action === 'describe') return { action, name: command[2] };
+  const input = getOption(command, '--file'), inline = getOption(command, '--args');
+  if (command.includes('--file') && command.includes('--args')) throw Error('--args 与 --file 不能同时使用');
+  if (input && fs.statSync(input).size > 10 * 1024 ** 2) throw Error('参数文件不能超过 10 MiB');
+  const args = JSON.parse(input ? fs.readFileSync(input, 'utf8') : inline || '{}');
+  if (!args || typeof args !== 'object' || Array.isArray(args)) throw Error('工具参数必须是 JSON 对象');
+  const requestId = getOption(command, '--request-id') || crypto.randomUUID();
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestId)) throw Error('--request-id 必须是 UUID v4');
+  return { action, name: command[2], arguments: args, requestId };
+}
+
+async function platformToolWithBrokerForCli(command, dependencies = {}) {
+  const request = platformToolRequestForCli(command);
+  const dataDir = dependencies.dataDir || getGlassBoxCliDataDir();
+  const launch = dependencies.launch || getHeadlessElectronLaunchForCli();
+  if (!launch || (!launch.packaged && process.env.LENSWIPER_DEV_RUN !== '1')) throw Error('tools 需要支持统一工具接口的 App Broker；源码联调需 LENSWIPER_DEV_RUN=1');
+  const base = path.join(dataDir, 'cli-control'); fs.mkdirSync(base, { recursive: true, mode: 0o700 });
+  const dir = fs.mkdtempSync(path.join(base, 'platform-tool-'));
+  const payloadPath = path.join(dir, 'payload.json'), ackPath = path.join(dir, 'ack.json');
+  fs.writeFileSync(payloadPath, JSON.stringify({ action: 'platform-tool', request, dataDir, ackPath }), { mode: 0o600 });
+  const spawnBroker = dependencies.spawn || spawn;
+  const child = spawnBroker(launch.command, [...launch.argsPrefix, '--glassbox-cli-control-payload', payloadPath, '--glassbox-cli-data-dir', dataDir], {
+    cwd: launch.cwd, env: createHeadlessElectronEnvForCli(), detached: true, stdio: 'ignore',
+  });
+  let launchError; child.on('error', error => { launchError = error; }); child.unref();
+  let cancelled = false;
+  const cancel = () => { cancelled = true; fs.writeFileSync(path.join(dir, 'cancel'), '', { mode: 0o600 }); };
+  process.once('SIGINT', cancel); process.once('SIGTERM', cancel);
+  let deadline = Date.now() + (dependencies.timeoutMs || 65 * 60 * 1000);
+  try {
+    while (Date.now() < deadline) {
+      if (cancelled) deadline = Math.min(deadline, Date.now() + 5000);
+      if (launchError) throw launchError;
+      if (fs.existsSync(ackPath)) {
+        const result = JSON.parse(fs.readFileSync(ackPath, 'utf8'));
+        fs.rmSync(dir, { recursive: true, force: true });
+        if (result.errorCode === 'BROKER_CONTROL_ACTION_UNSUPPORTED') return { ...result, requestId: request.requestId,
+          error: '当前 App 不支持统一工具接口，请更新 App/CLI 到同一版本；本次未执行，不降级到其他写入方式。' };
+        return result;
+      }
+      await sleep(100);
+    }
+    return { success: false, errorCode: 'PLATFORM_TOOL_ACK_TIMEOUT', submissionOutcome: 'unknown', requestId: request.requestId,
+      ackPath, error: '回执超时，未自动重试；tools result REQUEST_ID 回读操作状态，或检查 ackPath。' };
+  } catch (error) {
+    return { success: false, errorCode: 'PLATFORM_TOOL_TRANSPORT_FAILED', submissionOutcome: 'unknown',
+      requestId: request.requestId, ackPath, error: error.message };
+  } finally { process.removeListener('SIGINT', cancel); process.removeListener('SIGTERM', cancel); }
+}
+
 async function quickActionWithBrokerForCli(command, dependencies = {}) {
   const action = command[1];
   const allowed = ['list','show','create','import-script','update','import-git','export-git','query','execute','visibility','remove'];
@@ -7383,7 +7463,7 @@ async function quickActionWithBrokerForCli(command, dependencies = {}) {
   const requestDir=fs.mkdtempSync(path.join(directory,'quick-action-'));
   const payloadPath=path.join(requestDir,'payload.json'),ackPath=path.join(requestDir,'ack.json');
   fs.writeFileSync(payloadPath,JSON.stringify({action:'quick-action',request:{action,args},dataDir,ackPath}),{mode:0o600});
-  const child=spawn(launch.command,[...launch.argsPrefix,'--glassbox-cli-control-payload',payloadPath,'--glassbox-cli-data-dir',dataDir],{cwd:launch.cwd,env:createHeadlessElectronEnvForCli(),detached:true,stdio:'ignore'});
+  const child=(dependencies.spawn || spawn)(launch.command,[...launch.argsPrefix,'--glassbox-cli-control-payload',payloadPath,'--glassbox-cli-data-dir',dataDir],{cwd:launch.cwd,env:createHeadlessElectronEnvForCli(),detached:true,stdio:'ignore'});
   let launchError;child.on('error',error=>{launchError=error;});child.unref();
   let cancelled = false;
   const cancel = () => { cancelled = true; fs.writeFileSync(path.join(requestDir,'cancel'),'cancel',{mode:0o600}); };
@@ -7420,7 +7500,7 @@ async function taskCleanupWithBrokerForCli(command,dependencies={}){
  if(!launch||(!launch.packaged&&process.env.LENSWIPER_DEV_RUN!=='1'))throw Error('任务清理必须使用支持该控制接口的App Broker；禁止直接改写userData。源码联调需LENSWIPER_DEV_RUN=1');
  const base=path.join(dataDir,'cli-control');fs.mkdirSync(base,{recursive:true,mode:0o700});const dir=fs.mkdtempSync(path.join(base,'task-cleanup-')),payloadPath=path.join(dir,'payload.json'),ackPath=path.join(dir,'ack.json');
  fs.writeFileSync(payloadPath,JSON.stringify({action:'task-cleanup',request,dataDir,ackPath}),{mode:0o600});
- const child=spawn(launch.command,[...launch.argsPrefix,'--glassbox-cli-control-payload',payloadPath,'--glassbox-cli-data-dir',dataDir],{cwd:launch.cwd,env:createHeadlessElectronEnvForCli(),detached:true,stdio:'ignore'});let launchError;child.on('error',e=>{launchError=e;});child.unref();
+ const child=(dependencies.spawn || spawn)(launch.command,[...launch.argsPrefix,'--glassbox-cli-control-payload',payloadPath,'--glassbox-cli-data-dir',dataDir],{cwd:launch.cwd,env:createHeadlessElectronEnvForCli(),detached:true,stdio:'ignore'});let launchError;child.on('error',e=>{launchError=e;});child.unref();
  const deadline=Date.now()+(dependencies.timeoutMs || 180000);
  while(Date.now()<deadline){if(launchError)throw launchError;if(fs.existsSync(ackPath)){const result=JSON.parse(fs.readFileSync(ackPath,'utf8'));fs.rmSync(dir,{recursive:true,force:true});return result;}await sleep(100);}
  return {success:false,errorCode:'TASK_CLEANUP_ACK_TIMEOUT',error:'清理回执超时，结果未知；请核对任务索引和回执，禁止自动重试',ackPath};
@@ -7847,7 +7927,7 @@ async function requestServiceControlForCli(payload) {
     cwd: launch.cwd || process.cwd(), env: createHeadlessElectronEnvForCli(), detached: true, stdio: 'ignore',
   });
   let launchError; child.on('error', error => { launchError = error; }); child.unref();
-  const deadline = Date.now() + (payload.action === 'case-library' ? 1200000 : payload.action === 'team-config' ? 600000 : payload.action === 'battery' && payload.operation === 'show' ? 180000 : 30000);
+  const deadline = Date.now() + (payload.action === 'settings' && payload.operation === 'runtime' && payload.runtime?.action === 'test' ? 90000 : payload.action === 'case-library' ? 1200000 : payload.action === 'team-config' ? 600000 : payload.action === 'battery' && payload.operation === 'show' ? 180000 : 30000);
   while (Date.now() < deadline) {
     if (launchError) { fs.rmSync(requestDir, { recursive: true, force: true }); throw launchError; }
     if (fs.existsSync(ackPath)) {
@@ -7866,6 +7946,18 @@ async function run(argv) {
   const args = [...argv];
   const jsonMode = hasFlag(args, '--json');
   const command = args.filter((arg) => arg !== '--json');
+  if (command[0] === 'tools') {
+    if (hasFlag(command, '--help') || hasFlag(command, '-h')) { printHelp(); return 0; }
+    try {
+      const result = await platformToolWithBrokerForCli(command);
+      const output = getOption(command, '--out');
+      if (output) {
+        fs.writeFileSync(path.resolve(output), JSON.stringify(result, null, 2) + '\n', { mode: 0o600 });
+        writeJson({ success: result.success !== false, requestId: result.requestId, output: path.resolve(output), errorCode: result.errorCode });
+      } else writeJson(result);
+      return result.success === false ? 1 : 0;
+    } catch (error) { writeJson({ success: false, errorCode: error.code || 'PLATFORM_TOOL_CLI_ERROR', error: error.message }); return 1; }
+  }
   if (command[0] === 'cases' && command[1] === 'import-solopi') {
     try {
       validateServiceArguments(command, ['--file', '--out', '--phone'], []);
@@ -7886,8 +7978,12 @@ async function run(argv) {
     try {
       let payload;
       if (command[0] === 'config') {
-        if (!['get','patch','import-team'].includes(command[1])) throw Error('Usage: config get | config patch --file <patch.json> [--headless] [--api-key-env ENV] [--dry-run] --json');
-        if (command[1] === 'import-team') {
+        if (!['get','patch','import-team','runtime'].includes(command[1])) throw Error('Usage: config get | config patch --file <patch.json> [--headless] [--api-key-env ENV] [--dry-run] --json');
+        if(command[1]==='runtime'){
+          validateServiceArguments(command,['--file','--action','--runtime','--model'],['--headless']);
+          const file=getOption(command,'--file');if(file&&fs.statSync(path.resolve(file)).size>1024**2)throw Error('运行时配置文件不能超过1MiB');
+          payload={action:'settings',operation:'runtime',runtime:file?JSON.parse(fs.readFileSync(path.resolve(file),'utf8')):{action:getOption(command,'--action')||'get',runtimeId:getOption(command,'--runtime'),model:getOption(command,'--model')}};
+        }else if (command[1] === 'import-team') {
           validateServiceArguments(command,['--file'],['--dry-run','--headless']);
           const file=getOption(command,'--file');
           if(!file || fs.statSync(path.resolve(file)).size>10*1024**2)throw Error('团队配置文件必填且不能超过10MiB');
@@ -7982,6 +8078,22 @@ async function run(argv) {
     if(!modulePath)throw Error('CLI缺少诊断模块，请升级solopi-desktop');
     console.log(JSON.stringify(require(modulePath).bundle(getGlassBoxCliDataDir(),output),null,2));return;
   }
+  if (command[0] === 'callbacks') {
+    if(hasFlag(command,'--help')||!command[1]) {console.log('callbacks target-set --file target.json | subscribe --file subscription.json | status | disable --id ID | retry --id DELIVERY_ID | dispatch --json. The App dispatches persisted task completions; dispatch is a bounded recovery pass, not a task resubmission.');return 0;}
+    const modulePath=[path.join(CLI_SCRIPT_DIR,'task-callbacks.cjs'),path.join(CLI_SCRIPT_DIR,'../electron/task-callbacks.js')].find(p=>fs.existsSync(p));
+    if(!modulePath)throw Error('CLI lacks task callbacks; update the installation');
+    const callbacks=require(modulePath).createTaskCallbacks({directory:getGlassBoxCliDataDir(),readTask:id=>getPersistedTaskForCli(id).task||null});
+    const file=getOption(command,'--file'),value=file?loadJsonFile(file).value:{};
+    let result;
+    if(command[1]==='target-set')result=callbacks.targetSet(value);
+    else if(command[1]==='subscribe')result=callbacks.subscribe(value);
+    else if(command[1]==='status')result=callbacks.status();
+    else if(command[1]==='disable')result=callbacks.disable(getOption(command,'--id'));
+    else if(command[1]==='retry')result=callbacks.retry(getOption(command,'--id'));
+    else if(command[1]==='dispatch'){await callbacks.pump();result=callbacks.status();}
+    else throw Error('Unknown callbacks command');
+    writeJson(result);return 0;
+  }
   if (command[0] === 'quick-actions') {
     if (hasFlag(command, '--help') || !command[1]) {
       console.log(`solopi-desktop quick-actions list [--query text] [--offset N] [--limit N] --json
@@ -7991,12 +8103,12 @@ solopi-desktop quick-actions import-script --script /absolute/script.sh --json
 solopi-desktop quick-actions update <id> --file request.json --json
 solopi-desktop quick-actions import-git --repo URL [--branch branch] [--directory path] --json
 solopi-desktop quick-actions export-git <id> --repo URL --branch branch [--directory path] --json
-solopi-desktop quick-actions query <id> [--values JSON] [--phone SN] [--glasses SN] --json
+solopi-desktop quick-actions query <id> [--values JSON] [--phone SN] [--glasses SN] [--phone-package PKG] [--glasses-package PKG] --json
 solopi-desktop quick-actions execute <id> --phase run|start|stop [--values JSON] [--phone SN] [--glasses SN] [--phone-package PKG] [--glasses-package PKG] --json
 solopi-desktop quick-actions visibility <id> --show|--hide --json
 solopi-desktop quick-actions remove <id> --json
---file contains the request fields (not a shell command). create: {fileName,content,configuration?}; update: {configuration:{name?,description?,inputs?,args?,queryConfig?,sessionConfig?}}.
-show returns complete input definitions. Read them before execute. Session start/stop are explicit; do not retry uncertain writes. Uses the current App broker and shared configuration.`);
+--file contains the request fields (not a shell command). create: {fileName,content,configuration?}; update: {configuration:{name?,description?,usageInstructions?,inputs?,args?,queryConfig?,sessionConfig?}}.
+show returns usage instructions, input bindings and structured CLI/Agent invocation examples. --values supplies editable inputs; hidden device/package defaults use --phone/--glasses/--phone-package/--glasses-package (Agent: context). Read usage before execute. Session start/stop are explicit; do not retry uncertain writes. Uses the current App broker and shared configuration.`);
       return 0;
     }
     try { const result=await quickActionWithBrokerForCli(command);writeJson(result);return result.success?0:1; }
@@ -9036,6 +9148,10 @@ Offline only. generate uses the same sample/target generator as the editor and v
 }
 
 export {
+  platformToolRequestForCli,
+  platformToolWithBrokerForCli,
+  getCaseLibraryRepoIdForCli,
+  getCaseLibraryRepoPathForCli,
   buildCaseLibraryRequestForCli,
   runPackageOptionsForCli,
   resolveRunPackageForCli,

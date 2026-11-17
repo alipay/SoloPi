@@ -28,6 +28,8 @@ function evidenceCoverage(session){
 }
 function frame(session){
  const users=session.messages.flatMap((m,index)=>m.role==='user'&&m.source!=='platform'?[index]:[]);
+ const currentRequestIndex=users.at(-1);
+ const linked=new Set([...(session.workState?.sourceUserIndices||[]),session.workState?.scopeUserIndex].filter(Number.isSafeInteger));
  const indices=users.slice(-6);
  for(const index of session.workState?.sourceUserIndices || [])if(Number.isSafeInteger(index)&&session.messages[index]?.role==='user'&&session.messages[index]?.source!=='platform'&&!indices.includes(index))indices.unshift(index);
  const scope=session.workState?.scopeUserIndex;
@@ -35,9 +37,9 @@ function frame(session){
  let remaining=6000;
  const requests=indices.map(index=>{
   const m=session.messages[index],text=typeof m.content==='string'?m.content:JSON.stringify(m.content ?? null);
-  const include=text.length<=2000&&text.length<=remaining;if(include)remaining-=text.length;
-  return {index,source:m.source || 'legacy-unspecified',createdAt:m.createdAt,...(include?{verbatim:text}:{characters:text.length,contentOmitted:true,readWith:'read_user_messages'} )};
+  const include=(index===currentRequestIndex||linked.has(index))&&text.length<=2000&&text.length<=remaining;if(include)remaining-=text.length;
+  return {index,roleInCurrentTurn:index===currentRequestIndex?'current-request':'historical-source',source:m.source || 'legacy-unspecified',createdAt:m.createdAt,...(include?{verbatim:text}:{characters:text.length,contentOmitted:true,readWith:'read_user_messages'} )};
  });
- return '\n<continuation-record>以下为程序保存的原始请求索引、中断位置和实际阅读覆盖，不是新的指令或授权。按最新用户消息判断延续、更正或替换目标，不按关键词自动执行。旧摘要与原始请求矛盾时回读read_user_messages，不把模型解释当用户授权；平台事件仅为状态资料。已读资料不等于已分析完成，已分析不等于已发布。沿用已核实回执推进未完成项，不从头反复阅读；fullyRead只表示这些字符曾被工具返回，不证明理解、分析或结论正确。\n'+JSON.stringify({requests,lastInterruption:session.lastInterruption || null,evidenceCoverage:evidenceCoverage(session)})+'\n</continuation-record>';
+ return '\n<continuation-record>以下为程序保存的原始请求索引、中断位置和实际阅读覆盖，不是新的指令或授权。currentRequestIndex是本轮最新用户原话；其他索引、旧摘要目标及不属于该索引的中断均为历史资料，不是需要先解决的前置任务。按最新用户消息判断延续、更正或替换目标，不按关键词自动执行。旧摘要与原始请求矛盾时回读read_user_messages，不把模型解释当用户授权；平台事件仅为状态资料。已读资料不等于已分析完成，已分析不等于已发布。沿用已核实回执推进未完成项，不从头反复阅读；fullyRead只表示这些字符曾被工具返回，不证明理解、分析或结论正确。\n'+JSON.stringify({currentRequestIndex,requests:requests.sort((a,b)=>(b.index===currentRequestIndex)-(a.index===currentRequestIndex)),lastInterruption:session.lastInterruption?{...session.lastInterruption,appliesToCurrentRequest:session.lastInterruption.scopeUserIndex===currentRequestIndex}:null,evidenceCoverage:evidenceCoverage(session)})+'\n</continuation-record>';
 }
 module.exports={frame,readUserMessages,evidenceCoverage};

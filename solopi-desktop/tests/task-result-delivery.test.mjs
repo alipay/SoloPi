@@ -1,3 +1,5 @@
+import {LlmError} from './fixtures/native-harness.mjs';
+import {NativeRuntime,disposeAll} from './fixtures/harness-lifecycle.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -5,11 +7,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
+test.after(disposeAll);
 const require = createRequire(import.meta.url);
 const { taskResultReceipt } = require('../electron/task-case-query');
 const { taskResultDelivery } = require('../electron/agent/task-result-delivery');
 const { createTools } = require('../electron/agent/tools');
-const { AgentRuntime } = require('../electron/agent/runtime');
+const { AgentRuntime } = {AgentRuntime:NativeRuntime};
 const { AgentStore } = require('../electron/agent/store');
 const fixture = () => ({ id: 'task-generic-13', name: 'run 13 cases', status: 'failed', total: 13,
   devices: { phone: { serial: 'phone-fixture', packageName: 'org.example.phone', extra: 'PRIVATE' } },
@@ -17,7 +20,7 @@ const fixture = () => ({ id: 'task-generic-13', name: 'run 13 cases', status: 'f
   cases: Array.from({ length: 13 }, (_, i) => ({ id: `execution-${i}`, caseId: `case-${i}`, caseName: `case ${i}`, status: i < 4 ? 'success' : 'failed',
     results: [{ stepId: 'assert', status: i < 4 ? 'success' : 'failed', errorCode: i < 4 ? '' : 'ASSERT_TIMEOUT', error: 'mismatch', stdout: 'PRIVATE'.repeat(20000) }],
     caseSnapshot: { secret: 'PRIVATE' }, artifacts: { logs: [{ content: 'PRIVATE'.repeat(20000) }] } })) });
-function directory(t) { const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'task-delivery-')); t.after(() => fs.rmSync(dir, { recursive: true, force: true })); return dir; }
+function directory(t) { const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'task-delivery-')); t.after(async()=>{await disposeAll();fs.rmSync(dir, { recursive: true, force: true })}); return dir; }
 test('deterministic receipt reports 4/13 execution success, not 13 validation successes; no raw artifacts', () => {
   const task = fixture(), before = JSON.stringify(task);
   const result = taskResultReceipt(task);
@@ -89,7 +92,7 @@ test('actual runtime output-limit failure preserves test result and ledger, call
     modelCalls++;
     if (modelCalls === 1) return call('submit-once', 'submit_task', {});
     if (modelCalls === 2) return call('result-once', 'read_task_result', { taskId: task.id });
-    throw Object.assign(Error('fixture output budget exhausted'), { diagnostics: { category: 'truncated', stage: 'parse', code: 'OUTPUT_LIMIT' } });
+    throw new LlmError('fixture output budget exhausted','OUTPUT_LIMIT');
   } });
   const session = store.create(); session.approvalMode = 'auto'; store.save(session);
   const before = JSON.stringify(task); await runtime.start(session.id, 'Run the fixture batch');
@@ -113,7 +116,7 @@ test('completion event delivers counts before model reply; a later model failure
   } });
   const session = store.create(); session.status = 'waiting'; session.watch = { kind: 'task', id: task.id };
   session.messages.push({ role: 'user', source: 'user', content: 'Run the fixture batch' }); store.save(session); runtime.contexts.set(session.id, {});
-  runtime.notify('task', task.id, snapshot); await ready;
+  runtime.notify('task', task.id, snapshot);let readyTimer;try{await Promise.race([ready,new Promise((_,reject)=>{readyTimer=setTimeout(()=>reject(Error(JSON.stringify({status:store.get(session.id).status,error:store.get(session.id).error}))),3000);})]);}finally{clearTimeout(readyTimer);}
   const before = store.get(session.id).messages.filter(m => m.source === 'platform-result');
   assert.equal(before.length, 1); assert.equal(before[0].taskResults[0].counts.failed, 9);
   runtime.notify('task', task.id, snapshot);

@@ -1,6 +1,12 @@
 # Public source boundary
 
-Public source consists of the generic application, CLI, the self-contained `solopi-desktop-cli` Skill and selected generic tests and documentation. Business Skills, team procedures, device assets, credentials, logs, reports, deployment records and collaboration material are not part of it.
+Public source consists of the generic application, CLI, the self-contained `solopi-desktop-cli`, `solopi-lab-task-ops` and `solopi-lab-agent` Skills and selected generic tests and documentation. Business Skills, team procedures, device assets, credentials, logs, reports, deployment records and collaboration material are not part of it.
+
+The same source snapshot includes Lab Server, its Web UI, versioned API schemas,
+database migrations and the optional independent Python coordinator. Follow
+[self-hosting](../../solopi-lab-server/docs/SELF_HOSTING.md) to install public npm packages,
+build the UI and initialize a new deployment with your own credentials. Existing
+databases, tokens and private host configuration are never copied.
 
 Create a reviewable snapshot in a new directory:
 

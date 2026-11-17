@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.1.0/heartbeat.schema.json",
+  "title": "HeartbeatTypes",
+  "$defs": {
+    "rfc3339": { "type": "string", "format": "date-time" },
+    "heartbeatRequest": {
+      "type": "object",
+      "required": ["epoch", "sessionId", "lastEventSeqAck", "occupancy", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "epoch": { "type": "integer", "minimum": 1 },
+        "sessionId": { "type": "string" },
+        "lastEventSeqAck": { "type": "integer", "minimum": 0 },
+        "occupancy": {
+          "type": "object",
+          "required": ["localUiTasks", "cliTasks", "broker"],
+          "additionalProperties": false,
+          "properties": {
+            "localUiTasks": { "type": "integer", "minimum": 0 },
+            "cliTasks": { "type": "integer", "minimum": 0 },
+            "broker": { "enum": ["running", "stopped", "not_installed"] },
+            "localExclusive": { "type": "boolean" },
+            "note": { "type": "string" }
+          }
+        },
+        "status": { "enum": ["healthy", "degraded", "busy"] }
+      }
+    },
+    "heartbeatResponse": {
+      "type": "object",
+      "required": ["epoch", "leaseExpiresAt", "serverTime", "configVersion", "pendingCommandsCount"],
+      "properties": {
+        "epoch": { "type": "integer" },
+        "leaseExpiresAt": { "$ref": "#/$defs/rfc3339" },
+        "serverTime": { "$ref": "#/$defs/rfc3339" },
+        "configVersion": { "type": "string" },
+        "pendingCommandsCount": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

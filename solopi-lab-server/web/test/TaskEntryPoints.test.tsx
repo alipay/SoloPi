@@ -1,0 +1,10 @@
+import {afterEach,describe,it,expect,vi} from 'vitest';
+import {cleanup,render,screen,waitFor} from '@testing-library/react';
+import {TaskEntryPoints,parseEntryPoints} from '../src/components/TaskEntryPoints';
+afterEach(()=>{cleanup();vi.unstubAllGlobals()});
+describe('generic task entry points',()=>{
+ it('keeps the Server workbench usable without any external integration',async()=>{vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({items:[]})}));render(<TaskEntryPoints/>);expect(screen.getByRole('link',{name:'创建任务'}).getAttribute('href')).toBe('#/agents');await waitFor(()=>expect(fetch).toHaveBeenCalled());expect(screen.getAllByRole('link')).toHaveLength(1)});
+ it('renders private deployment links from runtime metadata instead of a compiled platform locator',async()=>{vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,json:async()=>({items:[{id:'chat-bridge',label:'Chat workspace',url:'https://entry.example.test/agents/runner'}]})}));render(<TaskEntryPoints/>);const link=await screen.findByRole('link',{name:'Chat workspace ↗'});expect(link.getAttribute('href')).toBe('https://entry.example.test/agents/runner');expect(link.getAttribute('rel')).toBe('noopener noreferrer');expect(screen.getByRole('link',{name:'创建任务'})).toBeTruthy()});
+ it('retains the direct workbench when metadata is unavailable',async()=>{vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:false}));render(<TaskEntryPoints/>);await screen.findByRole('status');expect(screen.getAllByRole('link')).toHaveLength(1);expect(screen.getByRole('link',{name:'创建任务'}).getAttribute('href')).toBe('#/agents')});
+ it('does not render script URLs, embedded credentials or malformed entry lists',()=>{for(const url of ['javascript:alert(1)','https://user:secret@example.test/'])expect(()=>parseEntryPoints({items:[{id:'entry',label:'Entry',url}]})).toThrow();expect(()=>parseEntryPoints({items:{}})).toThrow();expect(()=>parseEntryPoints({items:[{id:'entry',label:'Entry',url:'https://entry.example.test/'},{id:'entry',label:'Duplicate',url:'https://entry.example.test/'}]})).toThrow()});
+});

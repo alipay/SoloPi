@@ -15,7 +15,9 @@ import deadlines from './summary-deadline.js';
 import runtimeDiagnostics from '../diagnostics.js';
 import requestPolicies from './request-policy.js';
 import boundedSummaries from './bounded-summary.js';
+import modelStepRecovery from './model-step-recovery.js';
 import duplicateResults from './duplicate-results.js';
+import virtualObservationContext from './virtual-observation-context.js';
 const { modelMessages, policy, boundaries } = context;
 const VERSION = 'deepseek-harness/0.2.1-alpha.2';
 const active = new WeakSet();
@@ -75,7 +77,14 @@ export async function prepare(session, system, {provider={},model,signal=new Abo
     if(provider.requestPolicy && provider.reasoningReplay!=='current_turn')duplicateResults.deduplicateResults(session,store);
     const latestUser = session.messages.findLastIndex(m=>m.role==='user');
     const latestBatch=session.messages.findLastIndex(m=>m.role==='assistant' && m.tool_calls?.length);
-    if(provider.requestPolicy && latestBatch>latestUser)for(const key of Object.keys(session.contextPruned || {}))if(Number(key)>latestBatch)delete session.contextPruned[key];
+    if(provider.requestPolicy && latestBatch>latestUser) {
+      // Keep only verified references to superseded observations; generic latest
+      // results and the current observation retain their existing protection.
+      const virtualReferences=session.screenMode==='virtual' && provider.reasoningReplay!=='current_turn'
+        ? virtualObservationContext.supersededVirtualReferences(session) : new Set();
+      for(const key of Object.keys(session.contextPruned || {}))
+        if(Number(key)>latestBatch && !virtualReferences.has(Number(key)))delete session.contextPruned[key];
+    }
     const initial = modelMessages(session,system,undefined,provider);
     const start = beforeCheckpoint?.through || 0;
     const prefixCount = beforeCheckpoint ? 2 + (latestUser >= 0 && latestUser < start ? 1 : 0) : 1;
@@ -160,20 +169,48 @@ export async function prepare(session, system, {provider={},model,signal=new Abo
         // Each summary HTTP request gets the configured wall-clock budget.
         // A completed chunk must not consume the next chunk’s deadline.
         let deadline;
-        const newDeadline=()=>summaryTimeoutMs !== undefined || summaryMaxDurationMs !== undefined || provider.requestPolicy
+        const totalLimit=summaryMaxDurationMs ?? (provider.requestPolicy ? provider.requestPolicy.totalSeconds*1000 : Infinity);
+        let chunkStartedAt;const retryBudget={attempts:0,rateLimits:0};
+        const newDeadline=(remaining=totalLimit)=>summaryTimeoutMs !== undefined || summaryMaxDurationMs !== undefined || provider.requestPolicy
           ? deadlines.summaryDeadline({idleMs:summaryTimeoutMs ?? (provider.requestPolicy ? provider.requestPolicy.idleSeconds*1000 : Infinity),
-            totalMs:summaryMaxDurationMs ?? (provider.requestPolicy ? provider.requestPolicy.totalSeconds*1000 : Infinity)}) : null;
+            totalMs:remaining}) : null;
         try {
           const run=async (messages,{recovery=false}={})=>{
-            if(!recovery){deadline?.close();deadline=newDeadline();}
+            if(!recovery){deadline?.close();chunkStartedAt=Date.now();deadline=newDeadline();}
+            const once=async retrySignal=>{
+            if(deadline?.signal.aborted && deadline.snapshot().timeoutKind==='idle' && !signal.aborted){
+              const remaining=totalLimit-(Date.now()-chunkStartedAt);
+              if(remaining>0){deadline.close();deadline=newDeadline(remaining);}
+              else throw Object.assign(Error('摘要请求达到总时限，原始记录已保留'),{code:'SUMMARY_TOTAL_TIMEOUT',diagnostics:{category:'timeout',timeoutKind:'total',durationMs:Date.now()-chunkStartedAt,causes:[{code:'SUMMARY_TOTAL_TIMEOUT'}]}});
+            }
+            deadline?.beginAttempt();
             signal.throwIfAborted();deadline?.signal.throwIfAborted();
             requests++;let lastEmit=0;
             session.contextState={...session.contextState,batchStartedAt:Date.now(),summaryInputTokens:context.estimateTokens(messages),outputCharacters:0,reasoningCharacters:0};save(session);
+            // A length recovery needs room to finish even when the provider keeps
+            // reasoning enabled. Spend at most twice the initial summary budget,
+            // within the declared output cap and actual remaining context. This
+            // is the existing single recovery, not an additional retry loop.
+            const remainingOutput=Number.isSafeInteger(provider.contextWindowTokens)?provider.contextWindowTokens-requestPolicies.inputEstimate(messages,provider.requestPolicy?[]:tools):Infinity;
+            const maxTokens=recovery && Number.isSafeInteger(provider.maxOutputTokens)
+              ? Math.max(options.maxTokens,Math.min(options.maxTokens*2,provider.maxOutputTokens,remainingOutput)) : options.maxTokens;
+            session.contextState={...session.contextState,summaryMaxTokens:maxTokens};
             const result=await model({provider:recovery?reasoning.compactionRecoveryReasoning(provider):reasoning.compactionReasoning(provider),messages,tools:provider.requestPolicy?[]:tools,
-              onRetry:retry=>{session.retry=retry;save(session);},maxTokens:options.maxTokens,purpose:'compaction',stream:provider.requestPolicy?.stream ?? true,toolChoice:'none',
-              onProgress:progress=>{deadline?.progress(progress);session.contextState={...session.contextState,outputCharacters:progress.outputCharacters || 0,reasoningCharacters:progress.reasoningCharacters || 0};if(Date.now()-lastEmit>=500){lastEmit=Date.now();emit(session);}},signal:deadline ? AbortSignal.any([signal,deadline.signal]) : signal});
+              onRetry:retry=>{session.retry=retry;save(session);},maxTokens,purpose:'compaction',stream:provider.requestPolicy?.stream ?? true,toolChoice:'none',
+              onProgress:progress=>{deadline?.progress(progress);session.contextState={...session.contextState,outputCharacters:progress.outputCharacters || 0,reasoningCharacters:progress.reasoningCharacters || 0};if(Date.now()-lastEmit>=500){lastEmit=Date.now();emit(session);}},signal:AbortSignal.any([signal,...(deadline?[deadline.signal]:[]),...(retrySignal?[retrySignal]:[])])});
             if(result.finish_reason==='stop' && result.content?.trim())session.contextState={...session.contextState,completedChunks:session.contextState.currentChunk};
             save(session);return result;
+            };
+            return modelStepRecovery.recoverModelStep(async retrySignal=>{
+              try{return await once(retrySignal);}catch(error){
+                if(error.code==='SUMMARY_TOTAL_TIMEOUT')throw error;
+                if(!signal.aborted && deadline?.signal.aborted){
+                  const detail=deadline.snapshot(),idle=detail.timeoutKind==='idle';
+                  throw Object.assign(Error(idle?'摘要输出停滞超时，原始记录已保留':'摘要请求达到总时限，原始记录已保留'),{code:idle?'MODEL_REQUEST_TIMEOUT':'SUMMARY_TOTAL_TIMEOUT',diagnostics:{...detail,category:'timeout',causes:[{code:idle?'MODEL_REQUEST_TIMEOUT':'SUMMARY_TOTAL_TIMEOUT'}]}});
+                }
+                throw error;
+              }
+            },{signal,budget:retryBudget,record:async record=>{session.compactionModelRecovery=record;save(session);},onRetry:state=>{session.retry=state;save(session);emit(session);}});
           };
           const summaryProvider=reasoning.compactionReasoning(provider);
           const draftKey=createHash('sha256').update(JSON.stringify([provider.model,provider.baseUrl,summaryProvider.thinking,summaryProvider.reasoningEffort,options.maxTokens,schemas,boundedSummaries.SUMMARY_CONTRACT_VERSION])).digest('hex');

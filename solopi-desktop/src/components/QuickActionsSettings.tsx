@@ -7,7 +7,7 @@ interface SelectOption { label: string; value: string }
 interface ActionInput { key: string; label: string; type: InputType; required: boolean; userInput?: boolean; defaultValue: string; placeholder?: string; options?: SelectOption[] }
 interface QueryConfig { enabled: boolean; args: string[]; resultPath: string; targetInputKey: string; rerunAfterExecute: boolean; showOnCard?: boolean }
 interface GitSource { key: string; repoUrl: string; branch: string; directory: string; relativePath: string }
-interface QuickAction { showInToolbar?: boolean; gitSource?: GitSource; sessionConfig?: { enabled: boolean; startArgs: string[]; stopArgs: string[]; exportArgs: string[] }; id: string; name: string; description: string; scriptPath: string; inputs: ActionInput[]; args: string[]; queryConfig?: QueryConfig; metadataSource?: 'script-comments' | 'positional-arguments'; detectedInputCount?: number; userConfigured?: boolean }
+interface QuickAction { showInToolbar?: boolean; gitSource?: GitSource; sessionConfig?: { enabled: boolean; startArgs: string[]; stopArgs: string[]; exportArgs: string[] }; id: string; name: string; description: string; usageInstructions?: string; scriptPath: string; inputs: ActionInput[]; args: string[]; queryConfig?: QueryConfig; metadataSource?: 'script-comments' | 'positional-arguments'; detectedInputCount?: number; userConfigured?: boolean }
 interface IpcResult { success?: boolean; canceled?: boolean; error?: string; actions?: QuickAction[]; action?: QuickAction; importedActions?: QuickAction[] }
 
 const INPUT_TYPES: Array<{ value: InputType; label: string }> = [
@@ -130,6 +130,7 @@ export function QuickActionsSettings() {
       id: draft.id,
       name: draft.name,
       description: draft.description,
+      usageInstructions: draft.usageInstructions || '',
       inputs: draft.inputs,
       args: advancedArgs ? draft.args : automaticArguments(draft.inputs),
       queryConfig: draft.queryConfig,
@@ -311,6 +312,7 @@ export function QuickActionsSettings() {
           </div>
           <label className="mt-4 block"><span className="text-[10px] font-black uppercase tracking-widest text-slate-400">说明</span><input value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} className="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-bold outline-none focus:border-blue-300 focus:bg-white" /></label>
 
+          <label className="mt-4 block"><span className="text-[10px] font-black uppercase tracking-widest text-slate-400">使用说明</span><textarea aria-label="快捷操作使用说明" maxLength={12000} value={draft.usageInstructions || ''} onChange={(event) => setDraft({ ...draft, usageInstructions: event.target.value })} placeholder="适用场景、前置条件、输入格式、副作用、成功判据及清理方式" className="mt-1.5 min-h-28 w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs outline-none focus:border-blue-300 focus:bg-white" /><span className="mt-1 block text-xs text-slate-500">供使用者与 Agent 查阅。设备与包名的传参说明会根据实际参数配置自动生成。</span></label>
           {draft.metadataSource === 'positional-arguments' && !draft.userConfigured && <div className="mt-4 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <div><p className="text-xs font-black">仅从脚本识别到 {draft.detectedInputCount ?? draft.inputs.length} 个位置参数</p><p className="mt-1 text-[11px] font-bold leading-5 text-amber-700">solopi-desktop 不知道这些参数的业务含义，也不会替你生成名称、枚举或环境配置。请按脚本实际用法在下方自行配置；不需要任何伴随配置文件。</p></div>

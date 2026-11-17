@@ -32,3 +32,7 @@ The standalone executable is a separate process. Its source attachment does not 
 - [Electron license](https://github.com/electron/electron/blob/main/LICENSE)
 - [VS Code notice generation](https://github.com/microsoft/vscode/blob/main/.github/instructions/oss-third-party-notices.instructions.md)
 - [Skill Recorder platform-specific compliance bundle](https://github.com/microsoft/skill-recorder/blob/main/THIRD-PARTY-NOTICES.md)
+
+## Locally patched picomatch
+
+Includes picomatch 4.0.7-solopi.1, a local security backport of micromatch/picomatch 4.0.7 by Jon Schlinkert (MIT). See [license](vendor/picomatch/LICENSE), [patch explanation](vendor/picomatch/SECURITY_PATCH.md) and [source fingerprints](vendor/picomatch/patch-provenance.json). This is not an official upstream release.

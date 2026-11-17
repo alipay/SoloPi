@@ -8,7 +8,7 @@ const filePath=a=>a.path || a.outputPath || a.filePath;
 async function digest(file){const hash=createHash('sha256');for await(const block of fs.createReadStream(file))hash.update(block);return hash.digest('hex');}
 function writeJson(file,value){fs.writeFileSync(file,JSON.stringify(value,null,2),{mode:0o600,flag:'wx'});}
 // Report-owned sources only. No model-supplied sequence numbers or source paths.
-async function exportCaseEvidence(task,{taskId,caseIds,deviceTypes},{root,signal}={}){
+async function exportCaseEvidence(task,{taskId,caseIds,deviceTypes},{root,signal,logFormat='gzip',includeRecordings=true}={}){
  signal?.throwIfAborted();
  if((task.id || task.taskId)!==taskId)throw Error('报告taskId不匹配');
  if(!Array.isArray(caseIds)||!caseIds.length||caseIds.length>50||new Set(caseIds).size!==caseIds.length)throw Error('需要1–50个不重复caseId');
@@ -24,7 +24,7 @@ async function exportCaseEvidence(task,{taskId,caseIds,deviceTypes},{root,signal
   const logs=(c.artifacts?.logs || []).filter(a=>!deviceTypes?.length || deviceTypes.includes(a.deviceType));
   if(!logs.length)entry.missing.push({kind:'logs',reason:'报告未记录所选设备的用例日志'});
   for(const [ai,a] of logs.entries()){
-   const sourcePath=filePath(a),item={id:`c${ci}-log${ai}`,kind:'logs',deviceType:a.deviceType,serial:a.serial,sourcePath,localPath:path.join(folder,`log-${ai}.log.gz`)};
+   const sourcePath=filePath(a),item={id:`c${ci}-log${ai}`,kind:'logs',deviceType:a.deviceType,serial:a.serial,sourcePath,localPath:path.join(folder,`log-${ai}.log${logFormat==='plain'?'':'.gz'}`)};
    entry.artifacts.push(item);
    try{
     if(!sourcePath || !path.isAbsolute(sourcePath))throw Error('日志来源路径无效');
@@ -34,13 +34,13 @@ async function exportCaseEvidence(task,{taskId,caseIds,deviceTypes},{root,signal
     if(!a.sharedTaskLog && (task.cases || []).some(other=>other!==c && (other.artifacts?.logs || []).some(b=>filePath(b)===sourcePath)))throw Error('日志被多个用例共享却缺少序列范围');
     item.scope={boundary:a.sharedTaskLog?'(startSequence,endSequence]':'case-owned-file',startSequence:start,endSequence:end};
     item.sourceSnapshot={sizeBytes:stat.size,mtimeMs:stat.mtimeMs};
-    const target={item,rawPath:item.localPath.slice(0,-3),start,end,count:0,buffers:[],bytes:0};
+    const target={item,rawPath:logFormat==='plain'?item.localPath:item.localPath.slice(0,-3),start,end,count:0,buffers:[],bytes:0};
     target.fd=fs.openSync(target.rawPath,'wx',0o600);
     if(!groups.has(sourcePath))groups.set(sourcePath,[]);groups.get(sourcePath).push(target);
    }catch(error){item.error=error.message;delete item.localPath;}
   }
-  const recordings=c.artifacts?.recordings || [];
-  if(!recordings.length)entry.missing.push({kind:'recordings',reason:'报告未记录本例录屏'});
+  const recordings=includeRecordings?(c.artifacts?.recordings || []):[];
+  if(includeRecordings&&!recordings.length)entry.missing.push({kind:'recordings',reason:'报告未记录本例录屏'});
   for(const [ai,a] of recordings.entries()){
    const item={id:`c${ci}-video${ai}`,kind:'recordings',deviceType:a.deviceType,serial:a.serial,sourcePath:filePath(a)};entry.artifacts.push(item);
    try{
@@ -67,8 +67,8 @@ async function exportCaseEvidence(task,{taskId,caseIds,deviceTypes},{root,signal
    if(targets.some(t=>after.size!==t.item.sourceSnapshot.sizeBytes || after.mtimeMs!==t.item.sourceSnapshot.mtimeMs))throw Error('日志源在导出期间变化，未生成可上传清单');
    for(const t of targets){flush(t);fs.closeSync(t.fd);t.fd=null;
     if(!t.count || t.end!==null && t.count!==t.end-t.start){t.item.error='日志为空或未覆盖报告中的完整序列范围';fs.rmSync(t.rawPath,{force:true});delete t.item.localPath;continue;}
-    await pipeline(fs.createReadStream(t.rawPath),createGzip(),fs.createWriteStream(t.item.localPath,{flags:'wx',mode:0o600}),...(signal?[{signal}]:[]));
-    t.item.lineCount=t.count;t.item.sha256=await digest(t.item.localPath);t.item.sizeBytes=fs.statSync(t.item.localPath).size;fs.rmSync(t.rawPath,{force:true});
+    if(logFormat!=='plain')await pipeline(fs.createReadStream(t.rawPath),createGzip(),fs.createWriteStream(t.item.localPath,{flags:'wx',mode:0o600}),...(signal?[{signal}]:[]));
+    t.item.lineCount=t.count;t.item.sha256=await digest(t.item.localPath);t.item.sizeBytes=fs.statSync(t.item.localPath).size;if(logFormat!=='plain')fs.rmSync(t.rawPath,{force:true});
    }
   }finally{signal?.removeEventListener('abort',abort);lines?.close();stream?.destroy();}
  }

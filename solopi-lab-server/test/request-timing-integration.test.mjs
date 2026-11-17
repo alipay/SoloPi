@@ -1,0 +1,25 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {mkdtempSync,writeFileSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {ServerSuperagent} from '../src/server-superagent.mjs';
+test('Server facade executes fresh CLI and file updates, while exposing original durable timing receipts',async t=>{
+ const dir=mkdtempSync(join(tmpdir(),'server-receipt-timing-')),db=new DatabaseSync(':memory:');
+ writeFileSync(join(dir,'host-capabilities.json'),JSON.stringify({programs:{fixture:{command:process.execPath}}}));
+ const agent=new ServerSuperagent({db,scope:{orgId:'fixture',projectId:'fixture'},memory:{},directory:dir});
+ t.after(async()=>{await agent.close();db.close();rmSync(dir,{recursive:true,force:true});});
+ const c=agent.create({title:'fixture'}),id='request';
+ db.prepare('INSERT INTO sa_message(id,conversation_id,channel,external_id,sender,text,status,request_sha) VALUES(?,?,?,?,?,?,?,?)').run(id,c.id,'web','fixture','user','fixture','running','fixture');
+ const call=(name,args,operationId)=>agent.tools(c.id,id).find(t=>t.name===name).execute(args,{operationId});
+ const plan=await call('write_work_file',{path:'plan.md',content:'plan-v1'},'write-one');assert.ok(plan.writtenAt);assert.match(plan.sha256,/^[a-f0-9]{64}$/);
+ const args={program:'fixture',args:['-e','console.log(require("node:fs").readFileSync("plan.md","utf8"))']};
+ assert.match((await call('start_host_cli',args,'cli-one')).output,/plan-v1/);
+ await call('write_work_file',{path:'plan.md',content:'plan-v2'},'write-two');
+ assert.match((await call('start_host_cli',args,'cli-two')).output,/plan-v2/);
+ const timing=await call('read_request_timing',{names:['write_work_file','start_host_cli']},'timing');
+ assert.equal(timing.requestId,id);assert.equal(timing.complete,false);assert.equal(timing.durationMs,null);
+ assert.equal(timing.calls.length,4);assert.ok(timing.calls.every(c=>c.durationMs>=0&&c.startedAt.endsWith('Z')&&c.finishedAt.endsWith('Z')));
+ assert.equal(timing.calls[0].artifact.sha256,plan.sha256);
+});

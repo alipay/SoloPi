@@ -9,9 +9,11 @@ const {acquireConfigurationLock}=require('./configuration-lock');
 const {readQuickActionDefinition}=require('./quick-actions');
 const {importGitScripts}=require('./quick-action-git');
 async function runHeadlessConfiguration({directory,payload,codec,pullCases,runGit}) {
-  const mutating=!(payload.operation==='get'||payload.dryRun);
+  const runtimeConfiguration=payload.action==='settings'&&payload.operation==='runtime';
+  const mutating=runtimeConfiguration?payload.runtime?.action==='save':!(payload.operation==='get'||payload.dryRun);
   const release=mutating?acquireConfigurationLock(directory):()=>{};
   try {
+    if(runtimeConfiguration)return await createSettingsService({directory:()=>directory,readState:()=>({}),readEnvironment:()=>({})})(payload);
     const storage=createCredentialStorage({directory});
     const read=(relative,fallback={})=>{try{return JSON.parse(fs.readFileSync(path.join(directory,relative),'utf8'));}catch(e){if(e.code==='ENOENT')return fallback;throw Error('配置文件无法读取，未覆盖原文件');}};
     const write=(relative,value)=>{

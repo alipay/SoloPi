@@ -65,9 +65,10 @@ function settingsPatch(state, environment, input) {
   }
   return { workflow: patch };
 }
-function createSettingsService({ readState, readEnvironment, writeState, writeEnvironment, applyWorkflowPatch, notifyEnvironment }) {
+function createSettingsService({ directory, readState, readEnvironment, writeState, writeEnvironment, applyWorkflowPatch, notifyEnvironment }) {
   return async input => {
     const state = readState() || {}, environment = readEnvironment() || {};
+    if (input.operation === 'runtime'){if(!directory)throw Error('运行时配置需要应用宿主');return require('./agent/local-runtime.cjs').handle(directory(),input.runtime);}
     if (input.operation === 'get') return { success: true, models: redact(state.llmProviders || []), selectedModelId: state.selectedLlmProviderId || '', components: redact(state.components || []), tts: redact(environment.ttsProvider || {}) };
     if (input.operation !== 'patch') throw Error('不支持的配置操作');
     const next = settingsPatch(state, environment, input.patch);

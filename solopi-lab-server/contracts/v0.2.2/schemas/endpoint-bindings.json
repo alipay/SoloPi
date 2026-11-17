@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.1.2/endpoint-bindings.json",
+  "title": "端点↔Schema 可执行绑定（校验实例必须经本表 $ref 解析目标；$defs 文件根不是请求 Schema）",
+  "contractVersion": "0.1.2",
+  "auth": {
+    "adminBearer": "§0.6 管理主体 Bearer；scope 由主体绑定解析，请求参数不构成授权",
+    "clientSession": "Client session Bearer；准入§2.1：Bearer 当前会话(+body.sessionId/epoch 当有body)",
+    "none": "匿名（仅注册申请、challenge、会话签发）"
+  },
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/v1/enrollments",
+      "auth": "none",
+      "request": "enrollment.schema.json#/$defs/enrollmentCreateRequest",
+      "success": {
+        "201": "enrollment.schema.json#/$defs/createEnrollmentResponse",
+        "200": "enrollment.schema.json#/$defs/enrollAcceptedResponse"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v1/enrollments",
+      "auth": "adminBearer",
+      "success": {
+        "200": "enrollment.schema.json#/$defs/enrollmentsPage"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v1/enrollments/{enrollmentId}",
+      "auth": "adminBearer",
+      "success": {
+        "200": "enrollment.schema.json#/$defs/enrollmentDetail"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/enrollments/{enrollmentId}/decision",
+      "auth": "adminBearer",
+      "request": "enrollment.schema.json#/$defs/decisionRequest",
+      "success": {
+        "200": "enrollment.schema.json#/$defs/decisionResponse"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/clients/{clientId}/revoke",
+      "auth": "adminBearer",
+      "request": "enrollment.schema.json#/$defs/revokeRequest",
+      "success": {
+        "200": "client-summary.schema.json#/$defs/clientAdminResponse"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/clients/{clientId}/renew",
+      "auth": "adminBearer",
+      "request": "enrollment.schema.json#/$defs/renewRequest",
+      "success": {
+        "200": "client-summary.schema.json#/$defs/clientAdminResponse"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/enrollments/recover/challenge",
+      "auth": "none",
+      "request": "enrollment.schema.json#/$defs/recoverChallengeRequest",
+      "success": {
+        "200": "session.schema.json#/$defs/challengeResponse"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/enrollments/recover",
+      "auth": "none",
+      "request": "enrollment.schema.json#/$defs/recoverRequest",
+      "success": {
+        "200": "enrollment.schema.json#/$defs/recoverResponse"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v1/sessions/challenge",
+      "auth": "none",
+      "success": {
+        "200": "session.schema.json#/$defs/challengeResponse"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/sessions",
+      "auth": "none",
+      "request": "session.schema.json#/$defs/sessionCreateRequest",
+      "success": {
+        "201": "session.schema.json#/$defs/sessionCreateResponse"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/heartbeat",
+      "auth": "clientSession",
+      "request": "heartbeat.schema.json#/$defs/heartbeatRequest",
+      "success": {
+        "200": "heartbeat.schema.json#/$defs/heartbeatResponse"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v1/clients",
+      "auth": "adminBearer",
+      "success": {
+        "200": "client-summary.schema.json#/$defs/clientsPage"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v1/clients/{clientId}",
+      "auth": "adminBearer",
+      "success": {
+        "200": "client-summary.schema.json#/$defs/clientSummary"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v1/events",
+      "auth": "adminBearer|clientSession",
+      "success": {
+        "200": "event.schema.json#/$defs/eventsPage"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v1/events/snapshot",
+      "auth": "adminBearer|clientSession",
+      "success": {
+        "200": "event.schema.json#/$defs/snapshotResponse"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/events/ack",
+      "auth": "clientSession",
+      "request": "event.schema.json#/$defs/ackRequest",
+      "success": {
+        "200": "event.schema.json#/$defs/ackResponse"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v1/healthz",
+      "auth": "none",
+      "success": {
+        "200": "healthz.schema.json#/$defs/healthzResponse"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/enrollments/revoke",
+      "auth": "clientSession",
+      "request": "enrollment.schema.json#/$defs/selfRevokeRequest",
+      "success": {
+        "200": "enrollment.schema.json#/$defs/revokeReceipt"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/devices/snapshot",
+      "auth": "clientSession",
+      "request": "device.schema.json#/$defs/deviceSnapshotRequest",
+      "success": {
+        "200": "device.schema.json#/$defs/deviceSnapshotResponse"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v1/devices",
+      "auth": "adminBearer",
+      "success": {
+        "200": "device.schema.json#/$defs/devicesPage"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/media-sessions",
+      "auth": "adminBearer",
+      "request": "media.schema.json#/$defs/mediaSessionCreateRequest",
+      "success": {
+        "200": "media.schema.json#/$defs/mediaSessionResponse"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/v1/media-sessions/{mediaSessionId}",
+      "auth": "adminBearer",
+      "success": {
+        "200": "media.schema.json#/$defs/mediaSessionStatusResponse"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/media-sessions/{mediaSessionId}/stop",
+      "auth": "adminBearer",
+      "success": {
+        "200": "media.schema.json#/$defs/mediaSessionStatusResponse"
+      }
+    }
+  ]
+}

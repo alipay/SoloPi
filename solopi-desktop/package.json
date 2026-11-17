@@ -2,7 +2,7 @@
   "name": "solopi-desktop",
   "productName": "solopi-desktop",
   "private": true,
-  "version": "0.1.139",
+  "version": "0.1.151",
   "main": "electron/main.js",
   "scripts": {
     "dev": "node scripts/start-electron-dev.mjs",
@@ -12,7 +12,7 @@
     "solopi-desktop": "node scripts/glassbox-cli.mjs",
     "build": "node scripts/verify-solopi-runtime.mjs && webpack --mode production && node scripts/verify-retired-capture-page.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --test --test-concurrency=4 tests/*.test.mjs",
     "skills:bundle": "node scripts/bundle-glassbox-skills.mjs",
     "skills:verify": "node scripts/verify-glassbox-skill-distribution.mjs",
     "verify:cli-readonly": "node scripts/verify-cli-readonly.mjs",
@@ -32,14 +32,45 @@
   },
   "dependencies": {
     "@deepseek-ai/cordis": "4.0.5-alpha.1",
+    "@deepseek-ai/dsh-agent": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-agent-loop": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-attachment": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-attachment-local": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-authorization": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-brand": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-commands": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-compaction": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-compaction-basic": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-compaction-image-offload": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-compaction-tool-result-pruner": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-credentials": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-fs": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-fs-local": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-home-paths": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-launch-environment": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-llm": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-llm-pi-ai": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-llm-retry": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-ptc-runtime": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-sandbox": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-sandbox-policy": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-scope": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-session": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-session-checkpoint-policy": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-session-persistence": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-session-persistence-jsonl": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-session-projection": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-skill": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-system-prompt": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-timeout": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-token-meter": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-tool-fs": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-tool-skill": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-tools": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-typert-protocol": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-user-approval": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-util-values": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-working-directory": "0.2.1-alpha.2",
     "@hookform/resolvers": "^3.10.0",
     "@modelcontextprotocol/sdk": "1.32.1",
     "@radix-ui/react-accordion": "^1.2.11",
@@ -79,14 +110,17 @@
     "framer-motion": "latest",
     "input-otp": "^1.4.2",
     "lucide-react": "latest",
+    "mammoth": "1.13.0",
     "next-themes": "^0.3.0",
+    "pdfjs-dist": "4.10.38",
+    "picomatch": "file:vendor/picomatch",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.61.1",
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^2.1.9",
-    "react-router-dom": "^6.30.1",
+    "react-router-dom": "^7.18.5",
     "reactflow": "latest",
     "recharts": "^2.15.4",
     "remark-gfm": "^4.0.1",
@@ -94,7 +128,7 @@
     "tailwind-merge": "latest",
     "vaul": "^0.9.9",
     "yaml": "2.9.1",
-    "zod": "^3.25.76"
+    "yauzl": "3.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
@@ -111,26 +145,29 @@
     "autoprefixer": "^10.4.21",
     "babel-loader": "^9.1.0",
     "css-loader": "^6.8.0",
-    "electron": "44.7.0",
-    "electron-builder": "^26.15.0",
+    "electron": "44.11.3",
+    "electron-builder": "^26.18.0",
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "follow-redirects": "1.16.2",
     "globals": "^15.15.0",
     "html-webpack-plugin": "^5.5.3",
     "less": "^4.2.0",
     "less-loader": "^12.0.0",
+    "node-forge": "1.4.3",
     "postcss": "^8.5.6",
     "postcss-loader": "^7.3.0",
+    "semver": "^7.7.3",
     "style-loader": "^3.3.0",
     "tailwindcss": "^3.4.17",
+    "tailwindcss-animate": "^1.0.7",
+    "tar": "7.5.23",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "webpack": "^5.88.0",
     "webpack-cli": "^5.1.0",
-    "webpack-dev-server": "^4.15.0",
-    "tailwindcss-animate": "^1.0.7",
-    "tar": "7.5.16"
+    "webpack-dev-server": "^6.1.0"
   },
   "build": {
     "appId": "com.glassbox.desktop",
@@ -138,6 +175,14 @@
     "directories": {
       "output": "release"
     },
+    "asarUnpack": [
+      "electron/agent/support-export.js",
+      "electron/agent/case-evidence-export.js",
+      "electron/diagnostics.js",
+      "electron/report-performance-diagnostics.js",
+      "electron/agent/diagnostic-fields.js",
+      "electron/agent/upstream-diagnostics.js"
+    ],
     "files": [
       "dist/**/*",
       "electron/adb-error.js",
@@ -191,7 +236,8 @@
           "!quick-actions{,/**}",
           "!media-runtime{,/**}",
           "!.DS_Store",
-          "!git-runtime{,/**}"
+          "!git-runtime{,/**}",
+          "!device-harness{,/**}"
         ]
       },
       {
@@ -204,7 +250,17 @@
         "filter": [
           "*.cjs",
           "*.js",
+          "agent/receipt-timing.js",
           "runtime-build.json"
+        ]
+      },
+      {
+        "from": "resources/device-harness",
+        "to": "harness",
+        "filter": [
+          "**/*.py",
+          "**/resources/**",
+          "!**/__pycache__/**"
         ]
       }
     ],
@@ -248,5 +304,17 @@
     ],
     "afterPack": "scripts/verify-packaged-runtime-after-pack.cjs"
   },
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "overrides": {
+    "shell-quote": "1.12.0",
+    "node-forge": "1.4.3",
+    "glob@>=9 <15": "14.0.6",
+    "minimatch@>=7 <12": "11.0.9",
+    "postcss-selector-parser@^6.0.0": "6.1.6",
+    "postcss-selector-parser@^7.0.0": "7.2.1",
+    "picomatch": "$picomatch"
+  }
 }

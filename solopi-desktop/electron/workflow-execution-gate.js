@@ -55,6 +55,25 @@ function createWorkflowExecutionGate() {
     const lease = {
       task: { id: task.id || '', name: task.name || '', status: task.status || 'submitted', reservedDeviceSerials: [...serials] },
       release() { owners.delete(lease); },
+      observe(observer = {}) {
+        // This method is a private capability on an actual live execution lease.
+        // Public acquire({readOnly:true}) never bypasses device admission.
+        const selected = observer.reservedDeviceSerials;
+        if (!owners.has(lease) || !Array.isArray(selected) || !selected.length
+          || new Set(selected).size !== selected.length || selected.some(s => !serials.has(s))
+          || !observer.id || observer.id === lease.task.id
+          || [...owners].some(o => o.task.id === observer.id)) {
+          throw Object.assign(new Error('观察租约必须绑定仍有效的任务及其设备。'), {code:'OBSERVER_LEASE_INVALID'});
+        }
+        const child = {
+          task: {id:observer.id,name:observer.name || '',status:'observing',reservedDeviceSerials:[...selected],parentTaskId:lease.task.id,readOnly:true},
+          release() { owners.delete(child); },
+        };
+        // A finished task cannot silently release somebody else's ongoing capture.
+        // Child ownership remains until that capture closes; new writers still see busy.
+        owners.add(child);
+        return child;
+      },
     };
     owners.add(lease);
     return lease;
@@ -64,7 +83,19 @@ function createWorkflowExecutionGate() {
     lease.task.status = 'running';
     try { return await execute(); } finally { lease.release(); }
   }
-  return { acquire, run };
+  // Trusted capture-only capability, never exposed as an execution option.
+  // A control=false video reader cannot mutate the device and must not reserve
+  // its execution slot, regardless of whether viewing or execution starts first.
+  function acquireScreenObserver(task = {}) {
+    const selected = task.reservedDeviceSerials;
+    if (!task.id || !Array.isArray(selected) || !selected.length
+      || selected.some(s => typeof s !== 'string' || !s.trim())
+      || new Set(selected).size !== selected.length) {
+      throw Object.assign(new Error('屏幕观察目标无效'), {code:'OBSERVER_LEASE_INVALID'});
+    }
+    return {task:{id:task.id,name:task.name || '',status:'observing',reservedDeviceSerials:[...selected],readOnly:true},release(){}};
+  }
+  return { acquire, run, acquireScreenObserver };
 }
 function workflowExecutionFailure(error) {
   return { success: false, submitted: false, error: error instanceof Error ? error.message : String(error),

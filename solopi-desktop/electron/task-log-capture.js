@@ -34,6 +34,9 @@ function startTaskLogCapture({ directory, devices, adbPath, spawnProcess = spawn
       session.buffer += typeof chunk === 'string' ? chunk : decoder.write(chunk);
       const lines = session.buffer.split(/\r?\n/); session.buffer = lines.pop() || '';
       const completeLines = lines.filter(Boolean);
+      // Write the same complete lines to the currently executing case files.
+      // Keep one ADB collector per device; each case still owns its own artifact.
+      if (completeLines.length) for (const receive of session.caseLogListeners || []) receive(completeLines);
       try { if (!session.journalError && completeLines.length) session.journal.append(completeLines, session.lineSequence + 1); }
       catch (error) { session.journalError = error; fail(error.message); rejectWaiters(error); }
       for (const line of completeLines) {
@@ -78,4 +81,34 @@ function startTaskLogCapture({ directory, devices, adbPath, spawnProcess = spawn
   let stopPromise;
   return { sessions: Object.fromEntries(sessions.map(item => [item.session.serial, item.session])), logs: sessions.map(item => item.artifact), stop() { return stopPromise ||= Promise.all(sessions.map(item => item.stop())); } };
 }
-module.exports = { startTaskLogCapture };
+function startCaseLogCapture(sessions,directory) {
+  fs.mkdirSync(directory,{recursive:true});
+  const captures=Object.values(sessions || {}).map(session=>{
+    const artifact={deviceType:session.deviceType,serial:session.serial,
+      path:path.join(directory,`${session.deviceType}-${String(session.serial).replace(/[^a-zA-Z0-9_-]/g,'_')}.txt`),
+      startedAt:new Date().toISOString(),error:''};
+    let stream;
+    try{stream=fs.createWriteStream(artifact.path,{flags:'wx',mode:0o600});}
+    catch(error){artifact.error=error.message;return {artifact,stop:async()=>artifact};}
+    stream.on('error',error=>{artifact.error=error.message;});
+    const receive=lines=>{if(!stream.destroyed)stream.write(lines.join('\n')+'\n');};
+    (session.caseLogListeners ||= new Set()).add(receive);
+    let done;
+    return {artifact,stop(){return done ||= (async()=>{
+      session.caseLogListeners.delete(receive);
+      artifact.error=[artifact.error,session.lastError,session.artifact?.error].filter(Boolean).join('\n');
+      if(session.exited && !artifact.error)artifact.error='用例执行期间日志采集已退出，日志可能不完整';
+      await new Promise(resolve=>{
+        if(stream.closed)return resolve();
+        const timer=setTimeout(()=>{artifact.error=[artifact.error,'用例日志关闭超时'].filter(Boolean).join('\n');stream.destroy();resolve();},5000);
+        const finish=()=>{clearTimeout(timer);resolve();};
+        stream.once('close',finish);stream.end();
+      });
+      artifact.endedAt=new Date().toISOString();
+      return artifact;
+    })();}};
+  });
+  let stopped;
+  return {stop:()=>stopped ||= Promise.all(captures.map(c=>c.stop()))};
+}
+module.exports = { startTaskLogCapture, startCaseLogCapture };

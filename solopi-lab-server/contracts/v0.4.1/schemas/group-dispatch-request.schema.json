@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.4.1/group-dispatch-request.schema.json",
+  "title": "Group dispatch request envelopes (v0.4.1 candidate, module-enforced; NOT schema-anchored)",
+  "$defs": {
+    "dispatchRequest": {
+      "title": "Group dispatch request envelope (v0.4.1 candidate (module-enforced; NOT schema-anchored/frozen), NOT schema-anchored)",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "clientId",
+        "groupId",
+        "expectedRevision",
+        "requestId",
+        "payload"
+      ],
+      "properties": {
+        "clientId": {
+          "type": "string",
+          "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "groupId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "expectedRevision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cases"
+          ],
+          "properties": {
+            "cases": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 512,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "steps"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "UTF-8 实际字节 1..128。JSON Schema maxLength 按 Unicode 码点计数，无法表达字节上限，不构成本字段的有效执法层。",
+                    "$comment": "DG108红②闭合：真实执法=模块 validateDispatchEnvelope 的 Buffer.byteLength(c.id,'utf8')<=128（本包 createGroupDispatch 即真实校验链）；例如 43个汉字=43码点<maxLength 但 129 UTF-8 字节>128，模块拒绝、schema不背书。schema的maxLength仅保留为码点上限的保守副约束，字节规则以模块同结果为准，接线时端点校验须按此口径核对。"
+                  },
+                  "steps": {
+                    "type": "array",
+                    "maxItems": 512,
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "$comment": "canonical UTF-8 ≤262144 bytes（模块执法）；steps 语义 schema 随端侧步骤合同另冻（本封套层不解释、不构成执行授权）。"
+        }
+      }
+    },
+    "cancelRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "clientId",
+        "requestId"
+      ],
+      "properties": {
+        "clientId": {
+          "type": "string",
+          "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "requestId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        }
+      }
+    }
+  }
+}

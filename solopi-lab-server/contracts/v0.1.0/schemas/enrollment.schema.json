@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.1.0/enrollment.schema.json",
+  "title": "EnrollmentTypes",
+  "$defs": {
+    "ulid": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "rfc3339": { "type": "string", "format": "date-time" },
+    "enrollmentCreateRequest": {
+      "type": "object",
+      "required": ["installationId", "publicKeyPem", "keyFingerprint", "clientVersion", "capabilities", "deviceScope", "scopeRequested"],
+      "additionalProperties": false,
+      "properties": {
+        "installationId": { "$ref": "#/$defs/ulid" },
+        "publicKeyPem": { "type": "string", "minLength": 1 },
+        "keyFingerprint": { "type": "string", "pattern": "^sha256:[A-Za-z0-9+/=_-]+$" },
+        "clientVersion": { "type": "string", "minLength": 1 },
+        "capabilities": {
+          "type": "object", "required": ["commands", "media"],
+          "properties": { "commands": { "type": "boolean" }, "media": { "type": "boolean" } }
+        },
+        "deviceScope": {
+          "type": "object", "required": ["deviceId", "os", "hostname"],
+          "additionalProperties": false,
+          "properties": {
+            "deviceId": { "type": "string", "minLength": 1 },
+            "os": { "type": "string", "minLength": 1 },
+            "hostname": { "type": "string", "minLength": 1 },
+            "description": { "type": "string" }
+          }
+        },
+        "scopeRequested": {
+          "type": "object", "required": ["orgKey", "projectKey"],
+          "additionalProperties": false,
+          "properties": { "orgKey": { "type": "string" }, "projectKey": { "type": "string" } }
+        },
+        "networkProfile": {
+          "type": "object",
+          "properties": {
+            "proxies": { "type": "array", "items": { "type": "string" } },
+            "customCa": { "type": "boolean" },
+            "restricted": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "enrollmentResponse": {
+      "type": "object",
+      "required": ["enrollmentId", "status", "createdAt"],
+      "properties": {
+        "enrollmentId": { "$ref": "#/$defs/ulid" },
+        "status": { "enum": ["pending", "approved", "rejected", "revoked", "expired"] },
+        "createdAt": { "$ref": "#/$defs/rfc3339" },
+        "clientId": { "$ref": "#/$defs/ulid" },
+        "grantedAt": { "$ref": "#/$defs/rfc3339" },
+        "leaseDefaultSec": { "type": "integer", "minimum": 1 },
+        "message": { "type": "string" }
+      }
+    },
+    "decisionRequest": {
+      "type": "object",
+      "required": ["action"],
+      "additionalProperties": false,
+      "properties": {
+        "action": { "enum": ["approve", "reject"] },
+        "reason": { "type": "string" }
+      }
+    },
+    "recoverRequest": {
+      "type": "object",
+      "required": ["installationId", "challenge", "signature", "publicKeyPem"],
+      "additionalProperties": false,
+      "properties": {
+        "installationId": { "$ref": "#/$defs/ulid" },
+        "challenge": { "type": "string", "minLength": 1 },
+        "signature": { "type": "string", "pattern": "^[A-Za-z0-9+/=_-]+$" },
+        "publicKeyPem": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

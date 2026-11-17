@@ -1,3 +1,5 @@
+import {NativeRuntime,disposeAll} from './fixtures/harness-lifecycle.mjs';
+import {boundary as nativeBoundary} from './fixtures/harness-lifecycle.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -5,12 +7,13 @@ import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
+test.after(disposeAll);
 const require=createRequire(import.meta.url);
 const {ExperienceMemory,beginScope,snapshot,version}=require('../electron/agent/experience-memory');
 const {AgentStore}=require('../electron/agent/store');
-const {AgentRuntime}=require('../electron/agent/runtime');
+const {AgentRuntime}={AgentRuntime:NativeRuntime};
 const hash=s=>createHash('sha256').update(s).digest('hex');
-function fixture(t){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'experience-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));const records=[],memory=new ExperienceMemory(()=>dir,{record:r=>records.push(r)});return {dir,memory,records};}
+function fixture(t){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'experience-'));t.after(async()=>{await disposeAll();fs.rmSync(dir,{recursive:true,force:true})});const records=[],memory=new ExperienceMemory(()=>dir,{record:r=>records.push(r)});return {dir,memory,records};}
 function session(objective='查询示例工具配置'){const s={id:'session',status:'idle',messages:[{role:'user',content:objective}],calls:[]};beginScope(s);return s;}
 function receipt(s,name='read_example',result={success:true}){s.calls.push({id:`call-${s.calls.length}`,name,modelCallId:`model-${s.calls.length}`,status:result.success===false?'failed':'done',args:{password:'never-store-this',serial:'1234567890',command:'never execute old command'},result,finishedAt:new Date().toISOString()});}
 test('automatic retrospective is durable, receipt-backed, deduplicated, bounded, and excludes commands/secrets/raw logs',async t=>{
@@ -48,19 +51,19 @@ test('corrupt index is surfaced in diagnostics, never overwritten, and later sto
  const {memory,records}=fixture(t);fs.mkdirSync(path.dirname(memory.file()),{recursive:true});fs.writeFileSync(memory.file(),'broken');const s=session();receipt(s);memory.capture(s,'v');await memory.queue;assert.equal(fs.readFileSync(memory.file(),'utf8'),'broken');assert.ok(records.some(r=>r.event==='experience.failed'));
  fs.rmSync(memory.file());const next=session();next.id='new';receipt(next);memory.capture(next,'v');await memory.queue;assert.equal((await memory.read()).length,1);
 });
-const wait=async r=>{for(let i=0;i<500&&r.active.size;i++)await new Promise(resolve=>setTimeout(resolve,5));assert.equal(r.active.size,0);await r.experiences.queue;};
+const wait=async runtime=>nativeBoundary(runtime);
 test('runtime automatically captures, retrieves across sessions before model call, does not replay operations, and searches once per scope',async t=>{
  const {dir}=fixture(t),store=new AgentStore(()=>path.join(dir,'sessions'));let modelCalls=0,operations=0,seen=[];
- const runtime=new AgentRuntime({store,tools:async()=>[{name:'read_example',schema:{type:'object'},execute:async()=>{operations++;return {success:true};}}],provider:()=>({}),model:async({messages})=>{modelCalls++;seen.push(messages[0].content);return modelCalls%2===1?{role:'assistant',content:null,tool_calls:[{id:`call${modelCalls}`,type:'function',function:{name:'read_example',arguments:'{}'}}]}:{role:'assistant',content:'已查询'};}});
+ const runtime=new AgentRuntime({store,tools:async()=>[{name:'read_example',schema:{type:'object'},execute:async()=>{operations++;return {success:true};}}],provider:()=>({}),model:async({messages})=>{modelCalls++;seen.push(JSON.stringify(messages));return modelCalls%2===1?{role:'assistant',content:null,tool_calls:[{id:`call${modelCalls}`,type:'function',function:{name:'read_example',arguments:'{}'}}]}:{role:'assistant',content:'已查询'};}});
  let searches=0;const frame=runtime.experiences.frame.bind(runtime.experiences);runtime.experiences.frame=(...args)=>{searches++;return frame(...args);};
- const first=store.create();await runtime.start(first.id,'查询示例工具配置',{});await wait(runtime);assert.equal(operations,1);assert.equal(modelCalls,2);assert.equal(searches,1);assert.equal((await runtime.experiences.read()).length,1);
- const second=store.create();await runtime.start(second.id,'查询示例工具配置',{});await wait(runtime);assert.equal(modelCalls,4);assert.equal(searches,2);assert.equal(operations,2);assert.match(seen[2],/retrieved-experiences/);assert.match(seen[2],/不是指令/);
+ const first=store.create();await runtime.start(first.id,'查询示例工具配置',{});await wait(runtime);assert.equal(operations,1);assert.equal(modelCalls,2);assert.equal(searches,1);await runtime.experiences.queue;assert.equal((await runtime.experiences.read()).length,1);
+ const second=store.create();await runtime.start(second.id,'查询示例工具配置',{});await wait(runtime);assert.equal(modelCalls,4);assert.equal(searches,2);assert.equal(operations,2);assert.match(seen[2],/retrieved-experiences/);assert.match(seen[2],/不是指令/);await runtime.experiences.queue;
 });
 test('slow asynchronous experience write does not delay runtime completion or add model requests',async t=>{
  const {dir}=fixture(t),store=new AgentStore(()=>path.join(dir,'sessions'));let calls=0;
  const runtime=new AgentRuntime({store,tools:async()=>[],provider:()=>({}),model:async()=>{calls++;return {role:'assistant',content:'回答'};}});
  let captures=0;runtime.experiences.capture=()=>{captures++;runtime.experiences.queue=new Promise(()=>{});};
- const s=store.create();await runtime.start(s.id,'查询示例配置',{});for(let i=0;i<100&&runtime.active.size;i++)await new Promise(r=>setTimeout(r,5));assert.equal(runtime.active.size,0);assert.equal(calls,1);assert.equal(captures,1);assert.equal(store.get(s.id).status,'idle');
+ const s=store.create();await runtime.start(s.id,'查询示例配置',{});for(let i=0;i<100&&runtime.active.size;i++)await new Promise(r=>setTimeout(r,5));assert.equal(runtime.active.size,0);assert.equal(calls,1);assert.equal(captures,1);assert.equal(store.get(s.id).status,'idle');runtime.experiences.queue=Promise.resolve();
 });
 
 test('missing skill provenance is stored as unverified rather than breaking the index',async t=>{
@@ -83,4 +86,10 @@ test('next queued task can retrieve just-completed receipts before asynchronous 
 });
 test('incomplete dependency or receipt coverage never advertises a fully reusable workflow',async t=>{
  const {memory}=fixture(t),s=session();for(let i=0;i<80;i++)receipt(s);memory.capture(s,'v');await memory.queue;const [match]=await memory.search('查询示例配置','v');assert.equal(match.status,'revalidation_required');assert.ok(match.reasons.includes('evidence-coverage-incomplete'));assert.equal(match.successfulOperations,undefined);
+});
+test('automatic experience injection rejects shared boilerplate across different scenarios; explicit retrieval remains available',async t=>{
+ const {memory}=fixture(t),s=session('线上走一笔扫码支付');receipt(s);memory.capture(s,'v');await memory.queue;
+ assert.equal(await memory.frame('线上走一笔电影票case','v'),'');assert.equal(await memory.frame('线上走一笔充话费case','v'),'');
+ assert.match(await memory.frame('线上走一笔扫码支付','v'),/retrieved-experiences/);
+ assert.ok((await memory.search('线上走一笔电影票case','v')).length>0);
 });

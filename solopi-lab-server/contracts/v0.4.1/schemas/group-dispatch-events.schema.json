@@ -1,0 +1,374 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.4.1/group-dispatch-events.schema.json",
+  "title": "Group dispatch events + pending-view clientWire (v0.4.1 candidate (module-enforced; NOT schema-anchored/frozen), NOT schema-anchored)",
+  "type": "object",
+  "$defs": {
+    "dispatchRequestedEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dispatchId",
+        "requestId",
+        "clientId",
+        "groupId",
+        "expectedRevision",
+        "payload",
+        "payloadSha256",
+        "payloadBytes",
+        "dispatchPlanSha256",
+        "memberSha256",
+        "requestedAtMs"
+      ],
+      "properties": {
+        "dispatchId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "clientId": {
+          "type": "string",
+          "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "groupId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expectedRevision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "payload": {
+          "type": "object"
+        },
+        "payloadSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "payloadBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dispatchPlanSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "memberSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "requestedAtMs": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "dispatchCancelRequestedEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dispatchId",
+        "requestId",
+        "clientId",
+        "cancelRequestedAt"
+      ],
+      "properties": {
+        "dispatchId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "clientId": {
+          "type": "string",
+          "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "cancelRequestedAt": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+        }
+      }
+    },
+    "clientWire": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "groupId",
+        "expectedRevision",
+        "requestId",
+        "payload",
+        "payloadSha256",
+        "payloadBytes",
+        "dispatchPlanSha256"
+      ],
+      "properties": {
+        "groupId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expectedRevision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object"
+        },
+        "payloadSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "payloadBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dispatchPlanSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "cancelRequestedAt": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+        }
+      }
+    },
+    "createAck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dispatchId",
+        "requestId",
+        "accepted",
+        "replay",
+        "status"
+      ],
+      "properties": {
+        "dispatchId": {
+          "type": "string"
+        },
+        "requestId": {
+          "type": "string"
+        },
+        "accepted": {
+          "const": true
+        },
+        "replay": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "requested",
+            "confirmed",
+            "dispatching",
+            "unknown",
+            "done",
+            "cancelled"
+          ]
+        }
+      }
+    },
+    "cancelAck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dispatchId",
+        "accepted"
+      ],
+      "properties": {
+        "dispatchId": {
+          "type": "string"
+        },
+        "accepted": {
+          "type": "boolean"
+        },
+        "replay": {
+          "type": "boolean"
+        },
+        "terminal": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "requested",
+            "confirmed",
+            "dispatching",
+            "unknown",
+            "done",
+            "cancelled"
+          ]
+        },
+        "cancelRequestedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+        }
+      }
+    },
+    "pendingItem": {
+      "type": "object",
+      "required": [
+        "dispatchId",
+        "clientId",
+        "groupId",
+        "requestId",
+        "expectedRevision",
+        "payloadSha256",
+        "payloadBytes",
+        "dispatchPlanSha256",
+        "memberSha256",
+        "status",
+        "cancelRequestedAt",
+        "createdAtMs",
+        "clientWire",
+        "payload"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "dispatchId": {
+          "type": "string"
+        },
+        "clientId": {
+          "type": "string"
+        },
+        "groupId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expectedRevision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "payloadSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "payloadBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dispatchPlanSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "memberSha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "requested",
+            "confirmed",
+            "dispatching",
+            "unknown"
+          ]
+        },
+        "cancelRequestedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+        },
+        "taskUid": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "confirmedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "terminalAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "terminalOutcome": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lateResult": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "createdAtMs": {
+          "type": "integer"
+        },
+        "updatedAtMs": {
+          "type": "integer"
+        },
+        "clientWire": {
+          "$ref": "#/$defs/clientWire"
+        },
+        "payload": {
+          "type": "object"
+        },
+        "mirrorError": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "pendingResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/pendingItem"
+          }
+        },
+        "nextCursor": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "required": [
+            "afterCreatedMs",
+            "afterDispatchUid"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "afterCreatedMs": {
+              "type": "integer"
+            },
+            "afterDispatchUid": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

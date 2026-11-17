@@ -16,7 +16,7 @@ async function searchTaskLogs(task,{fileIndex,deviceType,queries,caseId},signal)
   if(q.countOnly!==undefined && typeof q.countOnly!=='boolean')throw Error('countOnly须为布尔值');
   return{...q,id,limit,fromLine,matches:[],count:0,hasMore:false};
  });
- const selected=require('./log-source').select(task,{fileIndex,deviceType});if(selected.error)return selected.error;
+ const selected=require('./log-source').select(task,{fileIndex,deviceType,caseId});if(selected.error)return selected.error;
  const {file,files}=selected;let scope;
  if(caseId){
   const c=(task.cases || []).find(c=>c.caseId===caseId || c.id===caseId);if(!c)throw Error('报告用例不存在');
@@ -44,13 +44,13 @@ async function searchTaskLogs(task,{fileIndex,deviceType,queries,caseId},signal)
     for(const q of states){if(q.hasMore || line<q.fromLine || !text.includes(q.query) || q.timeText && !text.includes(q.timeText))continue;
      if(q.startTime||q.endTime){time ??= text.match(/\b(\d{2}:\d{2}:\d{2})/)?.[1];if(!time || q.startTime && time<q.startTime || q.endTime && time>q.endTime)continue;}
      q.count++;if(q.countOnly)continue;
-     if(q.matches.length>=q.limit)q.hasMore=true;else q.matches.push({line,text:text.slice(0,4000)});
+     if(q.matches.length>=q.limit)q.hasMore=true;else q.matches.push({line,text:text.slice(0,4000),...(text.length>4000?{textTruncated:true,textLength:text.length}: {})});
     }
     if(states.every(q=>q.hasMore)){scanComplete=false;break;}
    }}finally{signal?.removeEventListener('abort',abort);}
   }
   signal?.throwIfAborted();
-  return{success:true,file,files,deviceType:selected.deviceType,snapshot,...(scope?{scope}:{scope:{boundary:'task-wide',ownershipVerified:false}}),scanComplete,scannedLines:line,results:states.map(q=>({id:q.id,query:q.query,matches:q.matches,...(q.countOnly?{totalMatches:q.count}:{}),nextLine:q.hasMore?q.matches.at(-1).line+1:null}))};
+  return{success:true,taskId:task.id,queryMode:'literal',file,files,deviceType:selected.deviceType,snapshot,...(scope?{scope}:{scope:{boundary:'task-wide',ownershipVerified:false}}),scanComplete,scannedLines:line,results:states.map(q=>({id:q.id,query:q.query,matches:q.matches,...(q.countOnly?{totalMatches:q.count}:{}),nextLine:q.hasMore?q.matches.at(-1).line+1:null}))};
  }finally{lines?.close();stream?.destroy();await handle.close();}
 }
 module.exports={searchTaskLogs,logFiles};

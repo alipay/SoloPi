@@ -4,19 +4,14 @@ const zlib=require('node:zlib');
 let directory;
 function configure(root) {directory=path.join(root,'diagnostics');}
 // Explicit metadata allowlist. Never log messages, tool arguments, headers or raw response bodies.
-const strings=new Set(['basePromptRevision','connectionErrorCode','transportPhase','connectionId','connectionUse','clientRequestId','upstreamTraceId','upstreamCode','upstreamType','source','timeoutKind','processType','validationReason','thinking','reasoningEffort','event','sessionId','status','toolName','contextPhase','upstreamRequestId','contentType','requestId','purpose','stage','category','code','finishReason','model','version','platform','arch']);
-const numbers=new Set(['retryAfterMs','systemCharacters','basePromptCharacters','toolSchemaCharacters','historyCharacters','skillCharacters','workStateCharacters','recoveryBudgetMs','semanticIdleMs','streamIdleMs','sseDataEventCount','sseCommentCount','semanticDeltaCount','connectionAttemptMs','transportRequestCount','connectionRetryCount','automaticRetryCount','firstOutputMs','connectionEstablishMs','requestSendStartMs','requestBodySentMs','requestUploadMs','responseWaitMs','beforeTokensEstimate','afterTokensEstimate','requestBytes','serializeMs','socketBytesWritten','socketBytesRead','contextWindowTokens','timeoutMs','idleMs','cpuPercent','workingSetKb','eventLoopMaxMs','eventLoopP99Ms','sessionBytes','toolIndex','argumentCharacters','decodedFrames','deliveredFrames','acknowledgedFrames','headersMs','streamBytes','streamElapsedMs','setupMs','decodeWaitMs','maxTokens','durationMs','httpStatus','messageCount','toolCount','outputCharacters','reasoningCharacters','promptTokens','completionTokens','totalTokens','choiceCount','attempt']);
-strings.add('taskId');strings.add('caseId');strings.add('libraryId');numbers.add('protectedCaseCount');numbers.add('conflictCount');
-for(const key of ['pid','heapUsedBytes','rssBytes','externalBytes','arrayBuffersBytes','uptimeSeconds','manifestBytes','blobBytesWritten','blobsWritten','blobCacheHits','blobReferences','historyMessageCount','historyToolCount','rendererHeapUsedBytes','rendererHeapLimitBytes','diskFreeBytes'])numbers.add(key);
-for(const key of ['writeMs','diskWriteMs','indexReadMs','indexMergeMs','indexWriteMs','indexCommitMs','queueMs','uiSyncMs','bytes','coalescedCount','stateUpdateMs','payloadBytes','ipcToFrameMs','renderMs','maxRenderMs','commitCount'])numbers.add(key);
-strings.add('runtimeRevision');strings.add('toolChoice');strings.add('modelAdapterRevision');strings.add('wireFinishReason');
-for(const key of ['executionContractRevision','approvalMode','taskOpsReadState','cliReadState'])strings.add(key);
-for(const key of ['wireToolCallFragments','parsedToolCalls','unexpectedToolCallFrames'])numbers.add(key);
-for(const key of ['creationId','sourceTaskId','folderId','node','field','errorName'])strings.add(key);
-for(const key of ['caseCount','errorCount','warningCount'])numbers.add(key);
+const sharedFields=require('./agent/diagnostic-fields');
+const strings=new Set(sharedFields.strings),numbers=new Set(sharedFields.numbers);
+for (const key of require('./report-performance-diagnostics').numericFields) numbers.add(key);
 function sanitize(data) {
  const taskFlags=['phonePerformance','glassesPerformance','threadStacks','recordPhoneScreen','recordGlassesScreen','phoneSelected','glassesSelected'];
  const out={};
+ if(typeof data?.modelSelectionMatches==='boolean')out.modelSelectionMatches=data.modelSelectionMatches;
+ if(Array.isArray(data?.errorCauses))out.errorCauses=data.errorCauses.slice(0,5).map(e=>Object.fromEntries(['name','code','syscall'].filter(k=>typeof e?.[k]==='string'&&/^[A-Za-z0-9_.:-]{1,100}$/.test(e[k])).map(k=>[k,e[k]])));
  for(const key of taskFlags)if(typeof data?.[key]==='boolean')out[key]=data[key];
  if(typeof data?.wireDone==='boolean')out.wireDone=data.wireDone;
  for(const key of ['wireBeforeTokens','wireAfterTokens','newestBatchTokens','meterAfterPruningTokens','inputBudgetTokens'])

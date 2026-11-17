@@ -1,0 +1,27 @@
+{
+  "instanceId": "lab-primary",
+  "heartbeatTTL": 30,
+  "maxArtifactBytes": 536870912,
+  "credentials": [
+    {
+      "id": "task-caller",
+      "role": "user",
+      "tokenEnv": "LAB_USER_TOKEN",
+      "targets": [
+        "result-receiver"
+      ]
+    },
+    {
+      "id": "linux-a",
+      "role": "node",
+      "nodeId": "linux-a",
+      "tokenEnv": "LAB_NODE_A_TOKEN"
+    }
+  ],
+  "targets": {
+    "result-receiver": {
+      "url": "https://receiver.example.test/events",
+      "tokenEnv": "LAB_CALLBACK_SECRET"
+    }
+  }
+}

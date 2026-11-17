@@ -1,7 +1,20 @@
 // Display history and the execution ledger are immutable. Only the request projection changes.
 function wireMessage(message, keepReasoning = false) {
   const copy = { role: message.role, content: message.content ?? null };
-  for (const key of ['tool_calls', 'tool_call_id', 'name', 'attachments']) if (message[key] !== undefined) copy[key] = message[key];
+  for (const key of ['tool_calls', 'tool_call_id', 'name', 'attachments', 'reportMedia']) if (message[key] !== undefined) copy[key] = message[key];
+  if (Array.isArray(copy.tool_calls)) {
+    // The execution ledger produces one receipt per call ID. Project identical
+    // retransmissions once so upstream tool-pair balancing sees that same
+    // identity, without changing the immutable response or merging operations.
+    const seen = new Map();
+    copy.tool_calls = copy.tool_calls.filter(call => {
+      if (!call || typeof call.id !== 'string') return true;
+      const signature = JSON.stringify([call.type, call.function?.name, call.function?.arguments]);
+      if (seen.get(call.id) === signature) return false;
+      if (!seen.has(call.id)) seen.set(call.id, signature);
+      return true;
+    });
+  }
   if (keepReasoning && typeof message.reasoning_content === 'string') copy.reasoning_content = message.reasoning_content;
   return copy;
 }
@@ -55,8 +68,7 @@ async function prepareModelMessages(...args) {
   // A committed summary is progress, not proof that the actual request fits.
   // Re-enter the upstream engine only after durable progress, with minimal tail
   // retention; never send or repeatedly retry an unchanged oversized surface.
-  for(let attempt=0;inputEstimate(result,options.tools)>budget;attempt++){
-    if(attempt>=2)throw Object.assign(Error('上下文压缩后仍超过输入预算，原始历史已保留'),{code:'INPUT_BUDGET_EXCEEDED'});
+  while(inputEstimate(result,options.tools)>budget){
     const previous=JSON.stringify(result);
     result=await prepare(session,args[1],{...options,trigger:'context-overflow',compactionConfig:{...options.compactionConfig,retainTokens:0}});
     if(JSON.stringify(result)===previous)throw Object.assign(Error('当前完整消息批次超过输入预算，压缩未取得进展；原始历史已保留'),{code:'INPUT_BUDGET_EXCEEDED'});

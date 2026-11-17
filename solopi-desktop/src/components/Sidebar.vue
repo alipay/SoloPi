@@ -70,10 +70,10 @@ const navItems = [
     <div class="p-4 border-t border-slate-200">
       <div class="flex items-center gap-3 bg-white p-2.5 rounded-2xl border border-slate-200 shadow-sm">
         <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-xs font-bold text-blue-600">
-          JL
+          U
         </div>
         <div class="flex flex-col min-w-0">
-          <span class="text-xs font-black text-slate-900 truncate">珏乐</span>
+          <span class="text-xs font-black text-slate-900 truncate">用户</span>
           <span class="text-[10px] text-slate-500 font-bold truncate">Project Admin</span>
         </div>
       </div>

@@ -1,0 +1,21 @@
+{
+  "requestId": "REPLACE_STABLE_LOGICAL_REQUEST_ID",
+  "caseIds": [
+    "REPLACE_EXISTING_CASE_ID"
+  ],
+  "requirements": {
+    "platform": "android"
+  },
+  "taskName": "Laboratory regression",
+  "options": {
+    "startOptions": {
+      "recordGlassesScreen": true,
+      "keepScreenAwake": true
+    }
+  },
+  "source": {
+    "client": "cli",
+    "correlationId": "REPLACE_CORRELATION_ID"
+  },
+  "target": "result-receiver"
+}

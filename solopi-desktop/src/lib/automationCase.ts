@@ -51,6 +51,7 @@ export function isLegacyBusinessComponent(component?: Pick<TestComponent, 'legac
 }
 
 export interface AutomationStep {
+  phase?: 'main' | 'cleanup';
   id: string;
   name: string;
   type: AutomationStepType;
@@ -122,7 +123,8 @@ export interface WorkflowRunResult {
   results: Array<{
     stepId: string;
     stepName: string;
-    status: 'success' | 'failed' | 'skipped' | 'stopped';
+    phase?: 'main' | 'cleanup';
+    status: 'running' | 'success' | 'failed' | 'skipped' | 'stopped';
     startedAt: string;
     completedAt?: string;
     endedAt: string;
@@ -1723,7 +1725,12 @@ export function ensureWorkflowBoundarySteps(testCase: AutomationCase): Automatio
                 ...(step.config || {}),
               },
             }
-        : step
+        : {
+            ...step,
+            // CLI/imported documents may omit config. Every node can open the
+            // editor sidebar, whose controls expect an editable config object.
+            config: step.config || {},
+          }
     )),
   };
 }
@@ -1836,7 +1843,8 @@ export function automationCaseToYaml(testCase: AutomationCase) {
     lines.push(`description: ${yamlScalar(testCase.description)}`);
   }
 
-  lines.push(`tags: ${yamlValue(testCase.tags || [], 2).trimStart()}`);
+  lines.push('tags:');
+  lines.push(yamlValue(testCase.tags || [], 2));
   lines.push('variables:');
   lines.push(yamlValue(testCase.variables || {}, 2));
   lines.push('defaults:');
@@ -1852,6 +1860,7 @@ export function automationCaseToYaml(testCase: AutomationCase) {
     lines.push(`    name: ${yamlScalar(step.name)}`);
     lines.push(`    type: ${step.type}`);
     lines.push(`    device: ${step.device}`);
+    if (step.phase) lines.push(`    phase: ${step.phase}`);
 
     if (step.timeoutMs !== undefined) {
       lines.push(`    timeoutMs: ${step.timeoutMs}`);

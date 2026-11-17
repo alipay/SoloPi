@@ -30,7 +30,7 @@ export function verifyFFmpegCompliance(root) {
   // Catch a relabelled GPL executable even if its digest was updated.
   if (/--enable-(?:gpl|nonfree|version3)(?:[=\s\x00]|$)/.test(fs.readFileSync(binary).toString('latin1'))) throw Error('FFmpeg executable embeds GPL/nonfree build flags');
   if (!metadata.sources?.length || !metadata.sources.some(source => source.name === 'ffmpeg')) throw Error('FFmpeg corresponding source is missing');
-  for (const [flag, name] of [['--enable-libopus', 'opus'], ['--enable-libspeex', 'speex'], ['--enable-libmp3lame', 'lame']]) {
+  for (const [flag, name] of [['--enable-libopus', 'opus'], ['--enable-libspeex', 'speex'], ['--enable-libmp3lame', 'lame'], ['--enable-libopenh264', 'openh264']]) {
     if (metadata.configure.includes(flag) && !metadata.sources.some(source => source.name === name)) throw Error(`FFmpeg corresponding dependency source is missing: ${name}`);
   }
   for (const source of metadata.sources) {
@@ -42,4 +42,15 @@ export function verifyFFmpegCompliance(root) {
   verify(metadata.recipe);
   for (const file of metadata.buildFiles || []) verify(file);
   return { version: metadata.version, license: metadata.license, sources: metadata.sources.length };
+}
+
+// Explicitly reviewed prebuilt releases retain integrity gates without claiming a source rebuild.
+export function verifyFFmpegDistribution(root) {
+  if (fs.existsSync(path.join(root,'ffmpeg-build.json'))) return {...verifyFFmpegCompliance(root),mode:'source-build'};
+  const record=JSON.parse(fs.readFileSync(path.join(root,'ffmpeg-prebuilt.json'),'utf8'));
+  if(record.schemaVersion!=='media.ffmpeg-prebuilt.v1'||record.binary?.path!=='bin/ffmpeg'||!record.previousRelease?.notarySubmissionId||!record.previousRelease?.machineCodeSha256||record.sourceBuildVerified!==false)throw Error('Invalid reviewed prebuilt FFmpeg record');
+  const check=r=>{if(!r?.path||path.isAbsolute(r.path)||r.path.split(/[\\/]/).includes('..')||!r.sha256||digest(path.join(root,r.path))!==r.sha256)throw Error('Prebuilt FFmpeg integrity mismatch');};
+  check(record.binary);if(!record.licenses?.length)throw Error('Prebuilt FFmpeg license notices missing');record.licenses.forEach(check);
+  if(/--enable-(?:gpl|nonfree|version3)(?:[=\s\x00]|$)/.test(fs.readFileSync(path.join(root,record.binary.path)).toString('latin1')))throw Error('Prebuilt FFmpeg embeds GPL/nonfree build flags');
+  return {version:record.version,mode:'reviewed-prebuilt',sourceBuildVerified:false,previousRelease:record.previousRelease.version};
 }

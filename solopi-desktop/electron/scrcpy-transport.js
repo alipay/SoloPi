@@ -93,23 +93,40 @@ async function resolveScrcpyEndpoint(adb, serial, { run = execute, env = process
 async function createScrcpyTransport({ endpoint, serial, timeoutMs = 10000, signal, onEvent = () => {} }) {
   if (!serial || /[\s\x00]/.test(serial)) throw Error('Invalid recording serial');
   const sockets = new Set(), forwards = new Map(); let closed = false, videoClaimed = false;
-  const track = socket => { sockets.add(socket); socket.on('error', () => {}); socket.once('close', () => sockets.delete(socket)); if(closed)socket.destroy(Error('Recording transport closed')); return socket; };
   const event = (phase, extra = {}) => { try { onEvent({ phase, serial, ...extra }); } catch (_) {} };
+  let connectionSequence = 0, channelSequence = 0;
+  const metadata = new WeakMap();
+  const destroy = (socket, reason) => { const info=metadata.get(socket); if(info && !info.closeReason)info.closeReason=reason; socket.destroy(); };
+  const track = (socket, role='adb-upstream', channel=null) => {
+    const info={connectionId:++connectionSequence,role,channel,openedAtMs:Date.now(),lastReadAtMs:null,closeReason:''};
+    metadata.set(socket,info);sockets.add(socket);
+    const details=()=>({...info,bytesRead:socket.bytesRead,bytesWritten:socket.bytesWritten,endpoint});
+    socket.on('data',()=>{info.lastReadAtMs=Date.now();});
+    socket.on('end',()=>event('socket-peer-end',details()));
+    socket.on('timeout',()=>event('socket-timeout',details()));
+    socket.on('error',error=>event('socket-error',{...details(),error:error.message,code:error.code,syscall:error.syscall}));
+    socket.once('close',hadError=>{sockets.delete(socket);event('socket-close',{...details(),hadError,origin:info.closeReason?'local-cleanup':'peer-or-socket-error'});});
+    if(closed)destroy(socket,'transport-already-closed');return socket;
+  };
+  const pair = (client, upstream) => {
+    client.once('close',()=>destroy(upstream,`paired-socket-${metadata.get(client)?.connectionId}-closed`));
+    upstream.once('close',()=>destroy(client,`paired-socket-${metadata.get(upstream)?.connectionId}-closed`));
+  };
   async function verify() {
     const version = await query(endpoint, 'host:version', timeoutMs, signal, track);
     if (parseInt(version, 16) !== 41) throw Error('ADB protocol mismatch; shared server left unchanged');
     return { version, line: deviceLine(await query(endpoint, 'host:devices-l', timeoutMs, signal, track), serial) };
   }
-  await verify(); event('server-probe');
+  const probe=await verify(); event('server-probe',{version:probe.version,deviceState:'device',endpoint});
   const fail = (socket, error) => { if (!socket.destroyed) socket.end(Buffer.concat([Buffer.from('FAIL'), packet(error.message)])); event('transport-error', { error: error.message }); };
-  async function deviceConnection(socket, service) {
+  async function deviceConnection(socket, service, channel) {
     if (closed || socket.destroyed) return;
-    const upstream = await connect(endpoint, timeoutMs, track), input = reader(upstream);
+    const upstream = await connect(endpoint, timeoutMs, s=>track(s,'forward-upstream',channel)), input = reader(upstream);
     event('video-adb-connected');
     upstream.write(packet(`host:transport:${serial}`)); await okay(input);
     event('video-device-selected');
     upstream.write(packet(service)); await okay(input); input.release();
-    event('video-socket-ready');
+    event('video-socket-ready',{channel,connectionId:metadata.get(upstream)?.connectionId});
     if (closed || socket.destroyed) { upstream.destroy(); return; }
     if (!videoClaimed) {
       videoClaimed = true;
@@ -119,7 +136,7 @@ async function createScrcpyTransport({ endpoint, serial, timeoutMs = 10000, sign
     upstream.setTimeout(0); socket.setTimeout(0); socket.pipe(upstream); upstream.pipe(socket);
     upstream.once('data',chunk=>event('video-first-bytes',{bytes:chunk.length}));
     upstream.resume(); socket.resume();
-    socket.once('close', () => upstream.destroy()); upstream.once('close', () => socket.destroy());
+    pair(socket,upstream);
   }
   async function forward(socket, operation) {
     if (operation.startsWith('killforward:')) {
@@ -130,8 +147,8 @@ async function createScrcpyTransport({ endpoint, serial, timeoutMs = 10000, sign
     const match = /^forward:(?:norebind:)?tcp:(\d+);(localabstract:[A-Za-z0-9_.-]+)$/.exec(operation);
     if (!match || Number(match[1]) > 65535) throw Error('Unsupported recording forward');
     const target = match[2], server = net.createServer(client => {
-      event('video-client-connected');
-      track(client); client.pause(); deviceConnection(client, target).catch(error => { event('video-connect-error', {error:error.message}); client.destroy(); });
+      const channel=++channelSequence;event('video-client-connected',{channel});
+      track(client,'forward-client',channel); client.pause(); deviceConnection(client, target,channel).catch(error => { event('video-connect-error', {error:error.message,code:error.code,channel}); destroy(client,'forward-connect-failed'); });
     });
     server.on('error', error => event('listener-error', {error:error.message}));
     // Never rebind somebody else's listener, even when adb omits norebind.
@@ -161,25 +178,25 @@ async function createScrcpyTransport({ endpoint, serial, timeoutMs = 10000, sign
       remote.release();
       upstream.write(packet(deviceService)); input.release();
       upstream.setTimeout(0); socket.setTimeout(0); socket.pipe(upstream); upstream.pipe(socket); upstream.resume(); socket.resume();
-      socket.once('close',()=>upstream.destroy()); upstream.once('close',()=>socket.destroy()); return;
+      pair(socket,upstream); return;
     } else if (!['host:host-features', 'host:features'].includes(service)) throw Error('Unscoped or server lifecycle operation denied');
     const upstream = await connect(endpoint, timeoutMs, track); input.release();
     upstream.write(packet(service)); upstream.pipe(socket); socket.pipe(upstream); socket.resume();
-    socket.once('close',()=>upstream.destroy()); upstream.once('close',()=>socket.destroy());
+    pair(socket,upstream);
   }
-  const server = net.createServer(socket => { track(socket); socket.setTimeout(timeoutMs,()=>socket.destroy()); handle(socket).catch(error=>fail(socket,error)); });
+  const server = net.createServer(socket => { track(socket,'adb-client'); socket.setTimeout(timeoutMs,()=>destroy(socket,'handshake-timeout')); handle(socket).catch(error=>fail(socket,error)); });
   server.on('error', error => event('listener-error', {error:error.message}));
   let port;
   try { port = await listen(server); } catch (error) { for (const socket of sockets) socket.destroy(); throw error; }
   event('proxy-ready', { port });
-  const transport = { port, socket: `tcp:127.0.0.1:${port}`, endpoint, serial, close() {
-    if (closed) return; closed = true; signal?.removeEventListener('abort',abort); activeTransports.delete(transport); server.close(); for (const listener of forwards.values()) listener.close(); forwards.clear(); for (const socket of sockets) socket.destroy(); event('closed');
+  const transport = { port, socket: `tcp:127.0.0.1:${port}`, endpoint, serial, close(reason='transport-cleanup') {
+    if (closed) return; closed = true; signal?.removeEventListener('abort',abort); activeTransports.delete(transport); server.close(); for (const listener of forwards.values()) listener.close(); forwards.clear(); event('transport-close-requested',{reason,activeSockets:sockets.size}); for (const socket of sockets) destroy(socket,reason); event('closed',{reason});
   } };
-  const abort=()=>transport.close();signal?.addEventListener('abort',abort,{once:true});
+  const abort=()=>transport.close('preparation-aborted');signal?.addEventListener('abort',abort,{once:true});
   if(signal?.aborted){transport.close();throw signal.reason || Error('Recording stopped');}
   activeTransports.add(transport);return transport;
 }
-function closeAllScrcpyTransports() { for (const transport of [...activeTransports]) transport.close(); }
+function closeAllScrcpyTransports() { for (const transport of [...activeTransports]) transport.close('application-shutdown'); }
 function scopedAdbEnvironment(base, adb, socket) {
   const env={...base,ADB:adb,ADB_PATH:adb,SCRCPY_ADB:adb,ADB_SERVER_SOCKET:socket};
   for(const key of ['ANDROID_ADB_SERVER_PORT','ANDROID_ADB_SERVER_ADDRESS','ANDROID_SERIAL'])delete env[key];

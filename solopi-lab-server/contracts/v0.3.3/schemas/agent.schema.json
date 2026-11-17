@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.3.0/agent.schema.json",
+  "title": "AgentTaskTypes (v0.3.0 Super-agent↔Client agent双向任务面首批实施)",
+  "description": "上游dsh-superagent核验（main 8c32a9dc, 2026-10-31, MIT）：无远程Client-agent桥/远程工具调用协议——本面为最小自建，薄适配其Ticket/Assignment/Report语义：任务状态独立于Client执行器状态；结果=结构化终态（succeeded|failed）非自由文本；幂等（同键同摘要=重放重答）；迟到结果存档不改写终态；过期如实expired。Agent Loop在Client侧，Server不重造。",
+  "$defs": {
+    "ulid": { "type": "string", "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
+    "utc": { "type": "string", "format": "date-time", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$" },
+    "safeInt": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+    "taskKind": { "enum": ["tool-call", "prompt"] },
+    "toolCall": {
+      "type": "object", "required": ["name", "args"], "additionalProperties": false,
+      "description": "直接工具调用：name=Client侧工具注册名；args=任意JSON对象（结构约束由Client执行器按工具schema自行校验，Server透明载荷）",
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "args": { "type": "object", "maxProperties": 64 }
+      }
+    },
+    "promptPayload": {
+      "type": "object", "required": ["text"], "additionalProperties": false,
+      "description": "prompt委托：Client侧agent以text为目标自行规划执行（其自有Agent Loop）；context为可选结构化补充（事实输入非指令）",
+      "properties": {
+        "text": { "type": "string", "minLength": 1, "maxLength": 16384 },
+        "context": { "type": "object", "maxProperties": 32 }
+      }
+    },
+    "nullableToolCall": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/toolCall" }] },
+    "nullablePromptPayload": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/promptPayload" }] },
+    "agentTaskCreateRequest": {
+      "type": "object", "required": ["orgId", "projectId", "clientId", "kind", "idempotencyKey"], "additionalProperties": false,
+      "properties": {
+        "orgId": { "$ref": "#/$defs/ulid" },
+        "projectId": { "$ref": "#/$defs/ulid" },
+        "clientId": { "$ref": "#/$defs/ulid" },
+        "kind": { "$ref": "#/$defs/taskKind" },
+        "tool": { "$ref": "#/$defs/toolCall" },
+        "prompt": { "$ref": "#/$defs/promptPayload" },
+        "timeoutSeconds": { "type": "integer", "minimum": 30, "maximum": 86400 },
+        "idempotencyKey": { "type": "string", "minLength": 1, "maxLength": 128 }
+      }
+    },
+    "agentTaskStatus": {
+      "type": "object", "required": ["agentTaskId", "orgId", "projectId", "clientId", "kind", "tool", "prompt", "status", "progress", "timeoutSec", "createdAt", "expiresAt", "result"], "additionalProperties": false,
+      "description": "结果truth=服务端落库行；result为对象或null；status ∈ queued|delivered|running|succeeded|failed|cancelled|expired",
+      "properties": {
+        "agentTaskId": { "$ref": "#/$defs/ulid" },
+        "orgId": { "$ref": "#/$defs/ulid" },
+        "projectId": { "$ref": "#/$defs/ulid" },
+        "clientId": { "$ref": "#/$defs/ulid" },
+        "kind": { "$ref": "#/$defs/taskKind" },
+        "tool": { "$ref": "#/$defs/nullableToolCall" },
+        "prompt": { "$ref": "#/$defs/nullablePromptPayload" },
+        "status": { "enum": ["queued", "delivered", "running", "succeeded", "failed", "cancelled", "expired"] },
+        "progress": { "type": ["string", "null"], "maxLength": 1024 },
+        "timeoutSec": { "type": "integer", "minimum": 30, "maximum": 86400 },
+        "createdAt": { "$ref": "#/$defs/utc" },
+        "expiresAt": { "$ref": "#/$defs/utc" },
+        "deliveredAt": { "type": ["string", "null"], "format": "date-time" },
+        "startedAt": { "type": ["string", "null"], "format": "date-time" },
+        "cancelRequestedAt": { "type": ["string", "null"], "format": "date-time" },
+        "endedAt": { "type": ["string", "null"], "format": "date-time" },
+        "result": { "type": ["object", "null"], "maxProperties": 64 },
+        "error": { "type": ["string", "null"], "maxLength": 2048 },
+        "late": { "type": "boolean" }
+      }
+    },
+    "agentTaskCreateResponse": {
+      "type": "object", "required": ["agentTaskId", "orgId", "projectId", "clientId", "kind", "tool", "prompt", "status", "progress", "timeoutSec", "createdAt", "expiresAt", "result", "duplicate"], "additionalProperties": false,
+      "properties": {
+        "agentTaskId": { "$ref": "#/$defs/ulid" },
+        "orgId": { "$ref": "#/$defs/ulid" },
+        "projectId": { "$ref": "#/$defs/ulid" },
+        "clientId": { "$ref": "#/$defs/ulid" },
+        "kind": { "$ref": "#/$defs/taskKind" },
+        "tool": { "$ref": "#/$defs/nullableToolCall" },
+        "prompt": { "$ref": "#/$defs/nullablePromptPayload" },
+        "status": { "enum": ["queued", "delivered", "running", "succeeded", "failed", "cancelled", "expired"] },
+        "progress": { "type": ["string", "null"], "maxLength": 1024 },
+        "timeoutSec": { "type": "integer", "minimum": 30, "maximum": 86400 },
+        "createdAt": { "$ref": "#/$defs/utc" },
+        "expiresAt": { "$ref": "#/$defs/utc" },
+        "deliveredAt": { "type": ["string", "null"], "format": "date-time" },
+        "startedAt": { "type": ["string", "null"], "format": "date-time" },
+        "cancelRequestedAt": { "type": ["string", "null"], "format": "date-time" },
+        "endedAt": { "type": ["string", "null"], "format": "date-time" },
+        "result": { "type": ["object", "null"], "maxProperties": 64 },
+        "error": { "type": ["string", "null"], "maxLength": 2048 },
+        "duplicate": { "type": "boolean" },
+        "late": { "type": "boolean" }
+      }
+    },
+    "agentTaskQueueResponse": {
+      "type": "object", "required": ["items", "nextSinceId", "hasMore"], "additionalProperties": false,
+      "properties": {
+        "items": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/agentTaskStatus" } },
+        "nextSinceId": { "$ref": "#/$defs/safeInt" },
+        "hasMore": { "type": "boolean" }
+      }
+    },
+    "agentTasksPage": {
+      "type": "object", "required": ["items", "page", "pageSize"], "additionalProperties": false,
+      "properties": {
+        "items": { "type": "array", "items": { "$ref": "#/$defs/agentTaskStatus" } },
+        "page": { "type": "integer", "minimum": 1 },
+        "pageSize": { "type": "integer", "minimum": 1, "maximum": 200 },
+        "nextPage": { "type": ["integer", "null"], "minimum": 2 }
+      }
+    },
+    "agentTaskProgressRequest": {
+      "type": "object", "required": ["sessionId", "epoch"], "additionalProperties": false,
+      "properties": {
+        "sessionId": { "type": "string", "minLength": 16, "maxLength": 128 },
+        "epoch": { "$ref": "#/$defs/safeInt" },
+        "note": { "type": "string", "maxLength": 1024 }
+      }
+    },
+    "agentTaskResultRequest": {
+      "type": "object", "required": ["sessionId", "epoch", "outcome"], "additionalProperties": false,
+      "properties": {
+        "sessionId": { "type": "string", "minLength": 16, "maxLength": 128 },
+        "epoch": { "$ref": "#/$defs/safeInt" },
+        "outcome": { "enum": ["succeeded", "failed"] },
+        "result": { "type": "object", "maxProperties": 64 },
+        "error": { "type": "string", "maxLength": 2048 }
+      }
+    }
+  }
+}

@@ -22,6 +22,9 @@ function mergeCaseUpdate(state, caseId, document, options = {}) {
   const edges = document?.case ? (document.edges ?? patch.edges) : patch.edges;
   const effectiveEdges = edges ?? state.caseEdges?.[caseId] ?? existing?.edges;
   if (effectiveEdges !== undefined && (!Array.isArray(effectiveEdges) || effectiveEdges.some((edge) => !ids.has(edge.source) || !ids.has(edge.target)))) throw new Error('Edges must reference existing steps; supply updated edges when removing steps');
+  const graphError=require('./agent/case-graph').caseGraphErrors(nextCase,effectiveEdges || [])[0];
+  if(graphError)throw Object.assign(new Error(graphError.message),{code:graphError.code});
+  require('./workflow-cleanup').partitionWorkflowSteps(nextCase.steps, effectiveEdges || []);
   if (effectiveEdges !== undefined) nextCase.edges = effectiveEdges;
   if (nextCase.components !== undefined && !Array.isArray(nextCase.components)) throw new Error('Case components must be an array');
   const positions = document?.nodePositions;

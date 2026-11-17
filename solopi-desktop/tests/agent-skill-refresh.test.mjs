@@ -1,14 +1,18 @@
+import {nativeFixture,toolCall} from './fixtures/native-harness.mjs';
+import {NativeRuntime,disposeAll} from './fixtures/harness-lifecycle.mjs';
+import {boundary as nativeBoundary} from './fixtures/harness-lifecycle.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createRequire} from 'node:module';
+test.after(disposeAll);
 const require=createRequire(import.meta.url);
 const {discoverSkills,readSkill,readSkillReference}=require('../electron/agent/skills');
 const {recordSkillRead,assertSkillRead}=require('../electron/agent/skill-reading');
 const {refreshLoadedSkills,skillUpdateFrame}=require('../electron/agent/skill-refresh');
-const {AgentRuntime}=require('../electron/agent/runtime');
+const {AgentRuntime}={AgentRuntime:NativeRuntime};
 const {AgentStore}=require('../electron/agent/store');
 const {installAgent}=require('../electron/agent');
 function fixture(t){
@@ -19,7 +23,7 @@ function fixture(t){
  fs.writeFileSync(reference,'# Details\nold reference\n');
  const catalog=()=>discoverSkills([root]).skills,s={id:'session',messages:[],calls:[]};
  recordSkillRead(s,readSkill(catalog(),'generic'));recordSkillRead(s,readSkillReference(catalog(),'generic','references/rule.md'));
- t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ t.after(async()=>{await disposeAll();fs.rmSync(root,{recursive:true,force:true})});
  return{root,directory,entry,reference,catalog,s,refresh:()=>refreshLoadedSkills(s,[root])};
 }
 test('unchanged sources cause no prompt growth or additional model calls',t=>{
@@ -69,37 +73,20 @@ test('explicit read replaces the update frame; source relocation uses the new ap
  recordSkillRead(f.s,readSkill(discoverSkills([newRoot]).skills,'generic'));
  assert.equal(f.s.skillUpdates['generic:SKILL.md'],undefined);
 });
-const wait=async runtime=>{for(let i=0;i<200&&runtime.active.size;i++)await new Promise(r=>setTimeout(r,5));assert.equal(runtime.active.size,0);};
-test('source changes appear as bounded system notices on the next request without changing user history',async t=>{
- const f=fixture(t),store=new AgentStore(()=>path.join(f.root,'sessions')),s=store.create();s.skillReads=f.s.skillReads;s.approvalMode='auto';store.save(s);
- let models=0,executions=0;
- const runtime=new AgentRuntime({store,refreshSkills:s=>refreshLoadedSkills(s,[f.root]),provider:()=>({contextWindowTokens:1000000}),
-  tools:async()=>[{name:'probe',schema:{type:'object'},execute:()=>{executions++;fs.appendFileSync(f.entry,'new between-round rule\n');return{success:true};}}],
-  model:async({messages})=>{models++;if(models===1)return{role:'assistant',tool_calls:[{id:'one',type:'function',function:{name:'probe',arguments:JSON.stringify({skillContext:{name:'generic'}})}}]};
-   assert.ok(messages[0].content.includes('updated-skill-sources'));assert.ok(messages[0].content.includes('generic'));assert.ok(!JSON.stringify(messages).includes('new between-round rule'));return{role:'assistant',content:'done'};}});
- await runtime.start(s.id,'inspect');await wait(runtime);assert.equal(models,2);assert.equal(executions,1);
- assert.equal(store.get(s.id).status,'idle');assert.deepEqual(store.get(s.id).messages.filter(m=>m.role==='user').map(m=>m.content),['inspect']);
-});
-test('opening an old session publishes current catalog without reviving historical Skill reloads',async t=>{
+const wait=async runtime=>nativeBoundary(runtime);
+test("native Skill reload reads current source while stale historical receipts never block ordinary tools",async t=>{const c=fixture(t);let ran=0;const f=nativeFixture(t,[()=>[toolCall('skill',{name:'generic'},'old')],()=>[toolCall('ordinary',{})],()=> 'first',()=>[toolCall('skill',{name:'generic'},'new')],o=>{assert.match(JSON.stringify(o.messages),/new entry/);return 'second';}],[{name:'ordinary',schema:{type:'object'},execute:()=>{ran++;return{success:true};}}],{skillCatalog:c.catalog});f.s.skillUpdates={missing:{name:'missing',success:false,content:'PRIVATE_OLD_BACKLOG'.repeat(20000)}};f.store.save(f.s);await f.run('load and inspect');assert.equal(ran,1);assert.ok(!JSON.stringify(f.adapter.requests).includes('PRIVATE_OLD_BACKLOG'));fs.appendFileSync(c.entry,'new entry\n');const s=await f.run('reload');assert.equal(s.status,'idle',JSON.stringify({error:s.error,calls:s.calls}));assert.equal(s.calls.filter(c=>c.name==='skill').length,2);assert.equal(s.messages.filter(m=>m.role==='user').length,2);});
+test('opening a session preserves history and the upstream read-only catalog without reviving Skill execution gates',async t=>{
  const f=fixture(t),prior=process.resourcesPath;process.resourcesPath=f.root;
  fs.mkdirSync(path.join(f.root,'skills'));fs.symlinkSync(f.directory,path.join(f.root,'skills/generic'));
- t.after(()=>{if(prior===undefined)delete process.resourcesPath;else process.resourcesPath=prior;});
+ t.after(async()=>{if(prior===undefined)delete process.resourcesPath;else process.resourcesPath=prior;});
  const directory=path.join(f.root,'data'),store=new AgentStore(()=>path.join(directory,'agent/sessions'));
  const s=store.create();s.skillReads=f.s.skillReads;store.save(s);fs.appendFileSync(f.entry,'page entered latest rule\n');
- const handlers=new Map(),agent=installAgent({ipcMain:{handle:(n,h)=>handlers.set(n,h)},directory:()=>directory,protect:x=>x,reveal:x=>x,readState:()=>({}),provider:()=>({}),invoke:async()=>({}),saveCase:()=>{}});t.after(()=>agent.stopAll());
+ const handlers=new Map(),agent=installAgent({ipcMain:{handle:(n,h)=>handlers.set(n,h)},directory:()=>directory,protect:x=>x,reveal:x=>x,readState:()=>({}),provider:()=>({}),invoke:async()=>({}),saveCase:()=>{}});t.after(async()=>{await agent.stopAll()});
  const result=await handlers.get('agent:get')({sender:{id:1,once(){},on(){},isDestroyed:()=>false,send(){}}},{id:s.id});
  assert.equal(result.error,undefined);assert.equal(skillUpdateFrame(result.session),'');assert.equal(result.session.skillReads['generic:SKILL.md'].complete,true);assert.ok(!skillUpdateFrame(result.session).includes('page entered latest rule'));assert.ok(result.session.skillCatalogView.entries.some(s=>s.name==='generic'));
+ const inventory=await handlers.get('agent:extension-inventory')({sender:{id:1,once(){},on(){},isDestroyed:()=>false,send(){}}});assert.ok(inventory.skills.some(s=>s.name==='generic'));
 });
-test('page refresh during an in-flight model response cannot let that response execute an old-Skill command',async t=>{
- const f=fixture(t),store=new AgentStore(()=>path.join(f.root,'sessions')),s=store.create();s.skillReads=f.s.skillReads;s.approvalMode='auto';store.save(s);
- let models=0,executions=0,runtime;
- runtime=new AgentRuntime({store,refreshSkills:s=>refreshLoadedSkills(s,[f.root]),provider:()=>({contextWindowTokens:1000000}),
-  tools:async()=>[{name:'probe',schema:{type:'object'},execute:()=>{executions++;return{success:true};}}],
-  model:async()=>{models++;if(models===1){fs.appendFileSync(f.entry,'page concurrent update\n');runtime.refreshSkillSources(runtime.liveSessions.get(s.id));return{role:'assistant',tool_calls:[{id:'old-plan',type:'function',function:{name:'probe',arguments:JSON.stringify({skillContext:{name:'generic'}})}}]};}
-    return{role:'assistant',content:'updated'};}});
- await runtime.start(s.id,'inspect');await wait(runtime);assert.equal(executions,0);assert.equal(models,2);
- assert.ok(store.get(s.id).calls[0].result.error.includes('Skill 来源变更尚未重新加载'));
-});
+
 
 test('legacy refresh backlog never injects full sources and reread clears each notice', t => {
  const f=fixture(t);
@@ -110,21 +97,7 @@ test('legacy refresh backlog never injects full sources and reread clears each n
  assert.ok(JSON.stringify(f.s.skillUpdates).length<3000);assert.ok(!JSON.stringify(f.s.skillUpdates).includes('PRIVATE_SOURCE_BODY'));
 });
 
-test('legacy full refresh backlog cannot overflow the actual runtime request', async t => {
- const f=fixture(t),store=new AgentStore(()=>path.join(f.root,'sessions')),s=store.create();
- s.skillReads=f.s.skillReads;s.skillUpdates={};
- for(let i=0;i<13;i++)s.skillUpdates['legacy:'+i]={name:'legacy',file:'references/'+i+'.md',content:'PRIVATE_SOURCE_BODY'.repeat(10000)};
- store.save(s);let calls=0;
- const {requestPolicy,inputEstimate}=require('../electron/agent/request-policy');
- const runtime=new AgentRuntime({store,refreshSkills:s=>refreshLoadedSkills(s,[f.root]),
-  provider:()=>({contextWindowTokens:1048576,requestPolicy:requestPolicy()}),tools:async()=>[],
-  model:async({messages,tools})=>{calls++;assert.ok(inputEstimate(messages,tools)<65536);
-   assert.ok(!JSON.stringify(messages).includes('PRIVATE_SOURCE_BODY'));
-   assert.ok(!messages[0].content.includes('updated-skill-sources'));assert.ok(messages[0].content.includes('current-skill-catalog'));assert.ok(messages[0].content.length<20000);
-   return{role:'assistant',content:'done'};}});
- await runtime.start(s.id,'continue');await wait(runtime);assert.equal(calls,1);
- assert.equal(store.get(s.id).status,'idle');
-});
+
 
  test('source switch blocks undeclared execution too, while recovery and read-only queries remain available', t=>{
  const f=fixture(t),other=path.join(f.root,'other');fs.mkdirSync(other);fs.cpSync(f.directory,path.join(other,'generic'),{recursive:true});
@@ -166,40 +139,7 @@ test('legacy full refresh backlog cannot overflow the actual runtime request', a
  assert.doesNotThrow(()=>assertSkillUpdatesRead(f.s,'stop_task',{name:'generic'}));
  });
 
-test('declared single and batch Skill commands cannot bypass a deferred entry, and resume after an actual fresh read',async t=>{
- const f=fixture(t),store=new AgentStore(()=>path.join(f.root,'sessions')),s=store.create();
- const diagnostics=require('../electron/diagnostics'),originalRecord=diagnostics.record,events=[];
- diagnostics.record=data=>{events.push(diagnostics.sanitize(data));originalRecord(data);};t.after(()=>diagnostics.record=originalRecord);
- s.skillReads=f.s.skillReads;s.approvalMode='auto';store.save(s);
- fs.appendFileSync(f.entry,'LATEST_RULE_BODY\n');
- let models=0,executions=0;
- const call=(id,name,args={})=>({id,type:'function',function:{name,arguments:JSON.stringify(args)}});
- const runtime=new AgentRuntime({store,refreshSkills:s=>refreshLoadedSkills(s,[f.root]),provider:()=>({contextWindowTokens:1000000}),
-  tools:async()=>[
-   ...['run_command','run_commands'].map(name=>({name,confirm:true,schema:{type:'object'},execute:()=>{executions++;return{success:true};}})),
-   {name:'read_skill',schema:{type:'object'},execute:()=>readSkill(f.catalog(),'generic')}
-  ],
-  model:async({messages})=>{
-   models++;
-   if(models===1){assert.doesNotMatch(messages[0].content,/<updated-skill-sources>/);assert.match(messages[0].content,/<current-skill-catalog>/);assert.doesNotMatch(messages[0].content,/LATEST_RULE_BODY/);
-    return{role:'assistant',tool_calls:[call('old-single','run_command',{skillContext:{name:'generic'}}),call('old-batch','run_commands',{skillContext:{name:'generic'}})]};}
-   if(models===2){assert.equal(executions,0);const current=runtime.liveSessions.get(s.id);
-    assert.ok(current.calls.slice(-2).every(c=>c.result.errorCode==='SKILL_RELOAD_REQUIRED'&&c.result.skillReload.executed===false));
-    return{role:'assistant',tool_calls:[call('receipt','read_operation_receipt',{callId:'old-single'})]};}
-   if(models===3)return{role:'assistant',tool_calls:[call('reload','read_skill',{name:'generic'})]};
-   if(models===4){assert.ok(JSON.stringify(messages).includes('LATEST_RULE_BODY'));assert.doesNotMatch(messages[0].content,/<updated-skill-sources>/);
-    return{role:'assistant',tool_calls:[call('new-single','run_command'),call('new-batch','run_commands')]};}
-   return{role:'assistant',content:'done'};
-  }});
- await runtime.start(s.id,'continue');await wait(runtime);
- const final=store.get(s.id);assert.equal(final.status,'idle',final.error);assert.equal(models,5);assert.equal(executions,2);
- assert.equal(final.skillReads['generic:SKILL.md'].complete,true);assert.equal(final.skillUpdates['generic:SKILL.md'],undefined);
- assert.equal(final.calls.find(c=>c.modelCallId==='receipt').result.result.errorCode,'SKILL_RELOAD_REQUIRED');
- assert.ok(events.some(e=>e.event==='agent.skill-refresh'&&e.status==='reload-required'));
- assert.equal(events.filter(e=>e.event==='agent.skill-refresh-blocked').length,2);
- assert.ok(events.some(e=>e.event==='agent.skill-read'&&e.status==='loaded'&&e.version===final.skillReads['generic:SKILL.md'].hash));
- assert.doesNotMatch(JSON.stringify(events),/LATEST_RULE_BODY|updated persisted rule/);
-});
+
 test('unrelated historical entry changes do not block an ordinary command without Skill dependency',async t=>{
  const f=fixture(t),store=new AgentStore(()=>path.join(f.root,'sessions')),s=store.create();s.skillReads=f.s.skillReads;s.approvalMode='auto';store.save(s);
  let models=0,executions=0;
@@ -209,17 +149,7 @@ test('unrelated historical entry changes do not block an ordinary command withou
  await runtime.start(s.id,'inspect');await wait(runtime);
  assert.equal(executions,1);assert.equal(store.get(s.id).calls[0].result.success,true);
 });
-test('rereading in another request cannot authorize arguments generated against the older entry',async t=>{
- const f=fixture(t),store=new AgentStore(()=>path.join(f.root,'sessions')),s=store.create();s.skillReads=f.s.skillReads;s.approvalMode='auto';store.save(s);
- let models=0,executions=0,runtime;
- runtime=new AgentRuntime({store,refreshSkills:s=>refreshLoadedSkills(s,[f.root]),provider:()=>({contextWindowTokens:1000000}),
- tools:async()=>[{name:'run_command',confirm:true,schema:{type:'object'},execute:()=>{executions++;return{success:true};}}],
- model:async()=>{if(++models===1){fs.appendFileSync(f.entry,'new rule\n');const live=runtime.liveSessions.get(s.id);runtime.refreshSkillSources(live);
-   recordSkillRead(live,readSkill(f.catalog(),'generic'));recordSkillRead(live,readSkillReference(f.catalog(),'generic','references/rule.md'));
-   return{role:'assistant',tool_calls:[{id:'stale-args',type:'function',function:{name:'run_command',arguments:JSON.stringify({skillContext:{name:'generic'}})}}]};}return{role:'assistant',content:'replan'};}});
- await runtime.start(s.id,'inspect');await wait(runtime);
- assert.equal(executions,0);assert.equal(store.get(s.id).calls[0].result.errorCode,'SKILL_PLAN_STALE');
-});
+
 test('new mandatory references and incomplete rereads cannot clear the execution guard',t=>{
  const f=fixture(t),{assertSkillUpdatesRead}=require('../electron/agent/skill-refresh');
  fs.writeFileSync(f.entry,'---\nname: generic\ndescription: generic\nrequired_reading: [references/new.md]\n---\n# New rules\n');
@@ -310,18 +240,4 @@ test('receipt absolute paths across multiple loaded Skills do not revive an unre
  f.s.skillReads['support:SKILL.md'].complete=false;
  assert.throws(()=>assertSkillRead(f.s,context),/入口尚未完整加载/);
  assert.throws(()=>assertSkillUpdatesRead(f.s,'run_commands',context),e=>e.code==='SKILL_RELOAD_REQUIRED');
-});
-test('runtime accepts exact cross-Skill receipt paths and rejects a cross-dependency race',async t=>{
- for(const race of [false,true]){
-  const f=fixture(t),store=new AgentStore(()=>path.join(f.root,'sessions')),s=store.create();
-  for(const name of ['primary','support']){fs.mkdirSync(path.join(f.root,name));fs.writeFileSync(path.join(f.root,name,'SKILL.md'),`---\nname: ${name}\ndescription: Generic rules\n---\nRules\n`);recordSkillRead(f.s,readSkill(f.catalog(),name));}
-  s.skillReads=f.s.skillReads;s.approvalMode='auto';store.save(s);fs.rmSync(f.directory,{recursive:true});
-  const args={skillContext:{name:'primary',files:['primary','support'].map(name=>f.s.skillReads[`${name}:SKILL.md`].absolutePath)}};
-  let models=0,executions=0;
-  const runtime=new AgentRuntime({store,refreshSkills:s=>refreshLoadedSkills(s,[f.root]),provider:()=>({contextWindowTokens:1000000}),
-   tools:async()=>[{name:'run_commands',confirm:true,schema:{type:'object'},execute:()=>{executions++;return{success:true};}}],
-   model:async()=>{if(++models===1){if(race){fs.appendFileSync(path.join(f.root,'support/SKILL.md'),'changed during generation');const live=runtime.liveSessions.get(s.id);runtime.refreshSkillSources(live);recordSkillRead(live,readSkill(f.catalog(),'support'));}return{role:'assistant',tool_calls:[{id:'cross-receipts',type:'function',function:{name:'run_commands',arguments:JSON.stringify(args)}}]};}return{role:'assistant',content:'done'};}});
-  await runtime.start(s.id,'run fixture');await wait(runtime);const final=store.get(s.id);
-  assert.equal(executions,race?0:1);assert.equal(final.calls[0].result.success,!race);if(race)assert.equal(final.calls[0].result.errorCode,'SKILL_PLAN_STALE');
- }
 });

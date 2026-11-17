@@ -8,6 +8,8 @@ solopi-desktop 帮助设备厂商、应用开发者和测试团队，把眼镜�
 
 [快速开始](#快速开始) · [第一个测试](#第一个测试) · [CLI 指南](docs/agent/glassbox-cli-usage.md) · [配置说明](docs/configuration.md)
 
+实验室连接：[Desktop 接入说明](docs/cluster-client.md)。设置页提供 HTTPS 注册与审批后心跳；设备执行、媒体及跨机调度尚未接入，不表示完整集群已交付。
+
 ## 它能帮你做什么？
 
 眼镜测试通常不只发生在一个屏幕上：手机发起操作、眼镜响应、电脑收集日志，最后还要把这些信息拼起来判断是否通过。solopi-desktop 将这些工作放进同一个流程：
@@ -19,13 +21,17 @@ solopi-desktop 帮助设备厂商、应用开发者和测试团队，把眼镜�
 
 例如，你可以编排“手机触发操作 → 等待眼镜响应 → 检查日志中的目标文本 → 保存结果”。具体业务指令、日志规则和设备适配由使用者配置，solopi-desktop 不替代厂商 SDK，也不能绕过设备权限。
 
+## 新增设备控制能力
+
+左侧“三端设备控制”支持页面观察、节点操作、录制及录制用例回放；回放进入统一任务列表。Android 后台屏幕与消息自动回复受控测试在设置中心提供实验入口，默认不改变现有 Agent 行为。使用条件与验证范围见 [三端设备控制](docs/THREE_PLATFORM_CONTROL.md) 和 [后台屏幕](docs/android-virtual-agent.md)。
+
 ## 快速开始
 
 下面以 **macOS Apple Silicon + Android/ADB 设备** 为起点。这是当前主要发行验证组合，不代表所有桌面系统和穿戴设备都已验证可用。
 
 ### 1. 准备环境
 
-- 已取得本仓库源码，电脑安装 Node.js、npm 和 Git。本次文档校验使用 Node.js 22.14.0；其他版本需验证依赖兼容性。
+- 已取得本仓库源码，电脑安装 Node.js、npm 和 Git。当前 Harness 依赖 Zstandard API，开发与打包使用 Node.js 24 LTS。
 - 安装 Android SDK Platform-Tools，确保终端可以执行 `adb`。
 - 设备开启 USB 调试，并允许当前电脑的调试授权。部分厂商固件需要额外开放 ADB 或应用调试权限。
 - 使用 Git LFS 管理素材的仓库，还需要可用的 Git LFS。私有仓库需要使用者自己的访问权限。

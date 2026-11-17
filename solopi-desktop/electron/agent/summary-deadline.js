@@ -14,6 +14,8 @@ function summaryDeadline({idleMs, totalMs, now=Date.now, schedule=setTimeout, ca
   arm();
   return {
     signal:controller.signal,
+    // A recovery request restarts its counters, not the transaction deadline.
+    beginAttempt(){output=0;reasoning=0;},
     progress(p) {
       if(controller.signal.aborted)return;
       if((p.outputCharacters||0)>output || (p.reasoningCharacters||0)>reasoning) {

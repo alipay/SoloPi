@@ -1,0 +1,44 @@
+import {it,expect} from 'vitest';
+import {readFileSync,readdirSync} from 'node:fs';
+import {createRequire} from 'node:module';
+const {JSDOM,VirtualConsole}=createRequire(import.meta.url)('jsdom');
+// Compile the actual Desktop entry first; this exercises the shipped bundle,
+// rather than replacing the flow and sidebar with web-only test doubles.
+it('renders the Desktop report flow, readonly config and real node output without a native bridge',async()=>{
+ const dir=process.env.REPORT_VIEWER_DIR||'dist';
+ const errors:unknown[]=[];const console=new VirtualConsole();console.on('jsdomError',(e:Error)=>{if(e.message!=='Could not parse CSS stylesheet')errors.push(e);});
+ const dom=new JSDOM('<div id="root"></div>',{url:'https://lab.example/desktop-report.html',runScripts:'outside-only',pretendToBeVisual:true,virtualConsole:console});
+ const w=dom.window as any;w.IntersectionObserver=class{constructor(cb:any){this.cb=cb}cb:any;observe(target:any){this.cb([{isIntersecting:true,target}])}unobserve(){}disconnect(){}};w.ResizeObserver=class{observe(){}unobserve(){}disconnect(){}};w.matchMedia=()=>({matches:false,addEventListener(){},removeEventListener(){}});
+ const invoke=vi.fn();w.glassbox={ipcRenderer:{invoke,on:vi.fn(),removeListener:vi.fn()}};
+ const script=w.document.createElement('script');script.src=w.location.origin+'/desktop-report.js';Object.defineProperty(w.document,'currentScript',{value:script});
+ try{w.eval(readFileSync(dir+'/'+readdirSync(dir).find(f=>/^desktop-report\..*\.js$/.test(f)),'utf8'));
+ const caseId='case-one',task={id:'cli-original',name:'Original task',cases:[{caseId,caseName:'Original case',caseSnapshot:{schemaVersion:'glassbox.workflow.v1',id:caseId,name:'Original case',steps:[{id:'start',type:'start',name:'开始',config:{}},{id:'cmd',type:'adb',name:'Fixture command',config:{command:'echo fixture',device:'phone'}},{id:'end',type:'end',name:'结束',config:{}}]},results:[{stepId:'cmd',stepName:'Fixture command',status:'failed',stdout:'original node evidence',startedAt:'2026-11-09T03:00:00Z',endedAt:'2026-11-09T03:00:01Z'}],artifacts:{logs:[],recordings:[],screenshots:[]}}]};
+ w.dispatchEvent(new w.MessageEvent('message',{origin:w.location.origin,source:w,data:{type:'desktop-report',task,caseId}}));
+ await new Promise(r=>setTimeout(r,300));expect(w.document.body.textContent).toContain('报告查看模式');expect(w.document.querySelector('.react-flow')).toBeTruthy();expect(w.document.body.textContent).toContain('步骤配置');expect(w.document.body.textContent).toContain('original node evidence');expect(w.document.body.textContent).not.toContain('运行工作流');expect(w.document.body.textContent).not.toContain('编辑原用例');expect(invoke).not.toHaveBeenCalled();expect(w.localStorage.getItem('glassbox.workflow.editor.v1')).toBeNull();const command=w.document.querySelector('[data-id="cmd"]');command.dispatchEvent(new w.MouseEvent('click',{bubbles:true}));await new Promise(r=>setTimeout(r,40));expect(w.document.querySelector('aside input')?.value).toBe('Fixture command');task.cases[0].results[0].stdout='fresh node evidence';w.dispatchEvent(new w.MessageEvent('message',{origin:w.location.origin,source:w,data:{type:'desktop-report',task:{...task},caseId}}));await new Promise(r=>setTimeout(r,70));expect(w.document.querySelector('aside input')?.value).toBe('Fixture command');expect(w.document.body.textContent).toContain('fresh node evidence');expect(invoke).not.toHaveBeenCalled();expect(errors.map(String)).toEqual([]);
+ }finally{dom.window.close();}
+});
+it('renders the actual Desktop case list, status filters and case navigation',async()=>{
+ const dir=process.env.REPORT_VIEWER_DIR||'dist',errors:unknown[]=[],vc=new VirtualConsole();vc.on('jsdomError',(e:Error)=>{if(e.message!=='Could not parse CSS stylesheet')errors.push(e);});
+ const dom=new JSDOM('<div id="root"></div>',{url:'https://lab.example/desktop-report.html',runScripts:'outside-only',pretendToBeVisual:true,virtualConsole:vc}),w=dom.window as any;
+ w.IntersectionObserver=class{constructor(cb:any){this.cb=cb}cb:any;observe(target:any){this.cb([{isIntersecting:true,target}])}unobserve(){}disconnect(){}};w.ResizeObserver=class{observe(){}unobserve(){}disconnect(){}};w.matchMedia=()=>({matches:false,addEventListener(){},removeEventListener(){}});
+ const invoke=vi.fn();w.glassbox={ipcRenderer:{invoke,on:vi.fn(),removeListener:vi.fn()}};const messages:any[]=[];w.postMessage=(data:any)=>messages.push(data);const script=w.document.createElement('script');script.src=w.location.origin+'/desktop-report.js';Object.defineProperty(w.document,'currentScript',{value:script});
+ try{w.eval(readFileSync(dir+'/'+readdirSync(dir).find(f=>/^desktop-report\..*\.js$/.test(f)),'utf8'));const task={id:'original-task',name:'Original task',status:'failed',summary:{successCount:1,failedCount:1,stoppedCount:0,caseCount:2},cases:[{caseId:'failed-one',caseName:'Failed case row',status:'failed',completed:1,total:2,results:[{stepId:'assert',stepName:'Saved assertion',status:'failed',error:'Saved failure evidence'}]},{caseId:'success-one',caseName:'Successful case row',status:'success',completed:2,total:2,results:[]}]};
+ w.dispatchEvent(new w.MessageEvent('message',{origin:w.location.origin,source:w,data:{type:'desktop-report',task,caseId:''}}));await new Promise(r=>setTimeout(r,300));expect(w.document.body.textContent).toContain('测试报告 · Original task');expect(w.document.querySelectorAll('[data-report-case-detail]')).toHaveLength(2);expect(w.document.querySelector('.react-flow')).toBeNull();expect(w.document.body.textContent).toContain('Saved failure evidence');
+ const failed=[...w.document.querySelectorAll('button')].find((b:any)=>b.textContent==='失败 1') as any;expect(failed).toBeTruthy();failed.click();await new Promise(r=>setTimeout(r,60));expect(w.document.querySelectorAll('[data-report-case-detail]')).toHaveLength(1);
+ const row=[...w.document.querySelectorAll('button')].find((b:any)=>b.textContent.includes('Failed case row')) as any;row.click();expect(messages.some(m=>m.type==='desktop-report-case'&&m.selectedCaseId==='failed-one')).toBe(true);expect(invoke).not.toHaveBeenCalled();expect(w.localStorage.getItem('glassbox.workflow.editor.v1')).toBeNull();expect(errors.map(String)).toEqual([]);
+ const perfTask={...task,performanceOptions:{phone:true,glasses:true},performanceLoading:{phone:true,glasses:true}};
+ w.dispatchEvent(new w.MessageEvent('message',{origin:w.location.origin,source:w,data:{type:'desktop-report',task:perfTask,caseId:''}}));await new Promise(r=>setTimeout(r,80));
+ expect(w.document.body.textContent).toContain('正在加载性能采样');expect([...w.document.querySelectorAll('button')].find((b:any)=>b.textContent.includes('手机性能报告'))?.textContent).not.toContain('未启用');
+ const report=(target:string,n:number,failed=0)=>({id:target,target,name:target,createdAt:'2026-11-12T08:34:00Z',runtime:'android',serial:target,packageName:'fixture',samples:Array.from({length:n+failed},(_,i)=>i<n?{cpuPercent:40,memoryKb:102400,threadCount:100,batteryTemperatureC:28,timestamp:'2026-11-12T08:34:00Z'}:{error:'no process'})});
+ const perfReady={...task,performanceReports:{phone:report('phone',32),glasses:report('glasses',29,3)}};
+ w.dispatchEvent(new w.MessageEvent('message',{origin:w.location.origin,source:w,data:{type:'desktop-report',task:perfReady,caseId:''}}));await new Promise(r=>setTimeout(r,80));
+ expect(w.document.body.textContent).toContain('32 次');expect(w.document.body.textContent).toContain('29 次');expect(w.document.body.textContent).toContain('采样失败 3 次');expect(w.document.body.textContent).toContain('40.0%');
+ w.dispatchEvent(new w.MessageEvent('message',{origin:w.location.origin,source:w,data:{type:'desktop-report',task:{...task,performanceErrors:{phone:'Desktop offline',glasses:'Desktop offline'}},caseId:''}}));await new Promise(r=>setTimeout(r,80));expect(w.document.body.textContent).toContain('读取失败');expect([...w.document.querySelectorAll('button')].find((b:any)=>b.textContent.includes('手机性能报告'))?.textContent).not.toContain('未启用');
+ const loadingTask={...task,cases:task.cases.map(c=>({...c,results:[],detailLoading:true,artifactsLoading:true}))};
+ w.dispatchEvent(new w.MessageEvent('message',{origin:w.location.origin,source:w,data:{type:'desktop-report',task:loadingTask,caseId:''}}));await new Promise(r=>setTimeout(r,80));
+ expect(w.document.body.textContent).toContain('正在加载操作步骤');expect(w.document.body.textContent).toContain('正在加载截图及执行产物');expect(w.document.body.textContent).not.toContain('暂无执行步骤');
+ w.dispatchEvent(new w.MessageEvent('message',{origin:w.location.origin,source:w,data:{type:'desktop-report',task,caseId:''}}));await new Promise(r=>setTimeout(r,80));
+ expect(w.document.body.textContent).not.toContain('正在加载操作步骤');expect(w.document.body.textContent).not.toContain('正在加载截图及执行产物');expect(w.document.body.textContent).toContain('Saved failure evidence');
+
+ }finally{dom.window.close();}
+});

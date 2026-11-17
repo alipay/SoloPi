@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.1.2/enrollment.schema.json",
+  "title": "EnrollmentTypes",
+  "$defs": {
+    "ulid": { "type": "string", "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
+    "nullableUlidOrString": { "description": "特定字段按各自定义使用" },
+    "utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+    },
+    "nullableUtc": { "oneOf": [{ "$ref": "#/$defs/utc" }, { "type": "null" }] },
+    "safeInt": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+    "capabilities": {
+      "type": "object",
+      "required": ["commands", "media"],
+      "additionalProperties": false,
+      "properties": { "commands": { "type": "boolean" }, "media": { "type": "boolean" } }
+    },
+    "deviceScope": {
+      "type": "object",
+      "required": ["deviceId", "os", "hostname"],
+      "additionalProperties": false,
+      "properties": {
+        "deviceId": { "type": "string", "minLength": 1 },
+        "os": { "type": "string", "minLength": 1 },
+        "hostname": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" }
+      }
+    },
+    "pem": {
+      "type": "string",
+      "pattern": "^-----BEGIN PUBLIC KEY-----[A-Za-z0-9+/=\\r\\n]+-----END PUBLIC KEY-----[\\r\\n]*$",
+      "minLength": 80
+    },
+    "enrollmentCreateRequest": {
+      "type": "object",
+      "required": ["installationId", "publicKeyPem", "clientVersion", "capabilities", "deviceScope", "scopeRequested"],
+      "additionalProperties": false,
+      "properties": {
+        "installationId": { "$ref": "#/$defs/ulid" },
+        "publicKeyPem": { "$ref": "#/$defs/pem" },
+        "keyFingerprint": { "type": "string", "pattern": "^sha256:[A-Za-z0-9_-]+$" },
+        "clientVersion": { "type": "string", "minLength": 1 },
+        "capabilities": { "$ref": "#/$defs/capabilities" },
+        "deviceScope": { "$ref": "#/$defs/deviceScope" },
+        "scopeRequested": {
+          "type": "object",
+          "required": ["orgKey", "projectKey"],
+          "additionalProperties": false,
+          "properties": {
+            "orgKey": { "type": "string", "minLength": 1 },
+            "projectKey": { "type": "string", "minLength": 1 }
+          }
+        },
+        "networkProfile": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "proxies": { "type": "array", "items": { "type": "string" } },
+            "customCa": { "type": "boolean" },
+            "restricted": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "createEnrollmentResponse": {
+      "description": "POST /v1/enrollments 匿名端点（含幂等重申）唯一响应；不含 clientId（不泄露已批身份）",
+      "type": "object",
+      "required": ["enrollmentId", "status", "createdAt"],
+      "additionalProperties": false,
+      "properties": {
+        "enrollmentId": { "$ref": "#/$defs/ulid" },
+        "status": { "enum": ["pending", "approved"] },
+        "createdAt": { "$ref": "#/$defs/utc" },
+        "message": { "type": "string" }
+      }
+    },
+    "enrollmentRow": {
+      "description": "审批列表行：pending 行 clientId=null 合法",
+      "type": "object",
+      "required": ["enrollmentId", "installationId", "status", "keyFingerprint", "clientVersion", "scope", "deviceScope", "requestedAt", "clientId"],
+      "additionalProperties": false,
+      "properties": {
+        "enrollmentId": { "$ref": "#/$defs/ulid" },
+        "installationId": { "$ref": "#/$defs/ulid" },
+        "status": { "enum": ["pending", "approved", "rejected", "revoked", "expired"] },
+        "keyFingerprint": { "type": "string", "pattern": "^sha256:[A-Za-z0-9_-]+$" },
+        "clientVersion": { "type": "string", "minLength": 1 },
+        "scope": {
+          "type": "object",
+          "required": ["orgId", "projectId"],
+          "additionalProperties": false,
+          "properties": {
+            "orgId": { "$ref": "#/$defs/ulid" },
+            "projectId": { "$ref": "#/$defs/ulid" }
+          }
+        },
+        "deviceScope": { "$ref": "#/$defs/deviceScope" },
+        "requestedAt": { "$ref": "#/$defs/utc" },
+        "clientId": { "oneOf": [{ "$ref": "#/$defs/ulid" }, { "type": "null" }] },
+        "decidedAt": { "$ref": "#/$defs/nullableUtc" }
+      }
+    },
+    "enrollmentsPage": {
+      "type": "object",
+      "required": ["items", "page", "pageSize", "nextPage"],
+      "additionalProperties": false,
+      "properties": {
+        "items": { "type": "array", "items": { "$ref": "#/$defs/enrollmentRow" } },
+        "page": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+        "pageSize": { "type": "integer", "minimum": 1, "maximum": 200 },
+        "nextPage": { "oneOf": [{ "type": "integer", "minimum": 1, "maximum": 9007199254740991 }, { "type": "null" }] }
+      }
+    },
+    "enrollmentDetail": {
+      "description": "审批证据面：enrollmentRow + networkProfile + 审计 + client 摘要",
+      "type": "object",
+      "required": ["enrollmentId", "installationId", "status", "keyFingerprint", "clientVersion", "scope", "deviceScope", "requestedAt", "clientId", "networkProfile", "audit", "client"],
+      "additionalProperties": false,
+      "properties": {
+        "enrollmentId": { "$ref": "#/$defs/ulid" },
+        "installationId": { "$ref": "#/$defs/ulid" },
+        "status": { "enum": ["pending", "approved", "rejected", "revoked", "expired"] },
+        "keyFingerprint": { "type": "string", "pattern": "^sha256:[A-Za-z0-9_-]+$" },
+        "clientVersion": { "type": "string", "minLength": 1 },
+        "scope": { "$ref": "#/$defs/enrollmentRow/properties/scope" },
+        "deviceScope": { "$ref": "#/$defs/deviceScope" },
+        "requestedAt": { "$ref": "#/$defs/utc" },
+        "clientId": { "oneOf": [{ "$ref": "#/$defs/ulid" }, { "type": "null" }] },
+        "networkProfile": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "proxies": { "type": "array", "items": { "type": "string" } },
+            "customCa": { "type": "boolean" },
+            "restricted": { "type": "boolean" }
+          }
+        },
+        "audit": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "decidedAt": { "$ref": "#/$defs/nullableUtc" },
+            "decidedByLabel": { "type": "string" },
+            "reason": { "type": "string" }
+          }
+        },
+        "client": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "clientId": { "$ref": "#/$defs/ulid" },
+            "status": { "enum": ["approved", "revoked", "expired"] },
+            "validUntil": { "$ref": "#/$defs/nullableUtc" }
+          }
+        }
+      }
+    },
+    "decisionRequest": {
+      "type": "object",
+      "required": ["action"],
+      "additionalProperties": false,
+      "properties": {
+        "action": { "enum": ["approve", "reject"] },
+        "reason": { "type": "string" }
+      }
+    },
+    "approveResponse": {
+      "type": "object",
+      "required": ["enrollmentId", "clientId", "status", "grantedAt", "validUntil", "leaseDefaultSec"],
+      "additionalProperties": false,
+      "properties": {
+        "enrollmentId": { "$ref": "#/$defs/ulid" },
+        "clientId": { "$ref": "#/$defs/ulid" },
+        "status": { "const": "approved" },
+        "grantedAt": { "$ref": "#/$defs/utc" },
+        "validUntil": { "$ref": "#/$defs/utc" },
+        "leaseDefaultSec": { "type": "integer", "minimum": 60, "maximum": 86400 }
+      }
+    },
+    "rejectResponse": {
+      "type": "object",
+      "required": ["enrollmentId", "status", "decidedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "enrollmentId": { "$ref": "#/$defs/ulid" },
+        "status": { "const": "rejected" },
+        "decidedAt": { "$ref": "#/$defs/utc" }
+      }
+    },
+    "decisionResponse": {
+      "oneOf": [{ "$ref": "#/$defs/approveResponse" }, { "$ref": "#/$defs/rejectResponse" }]
+    },
+    "renewRequest": {
+      "type": "object",
+      "required": ["validUntil"],
+      "additionalProperties": false,
+      "properties": { "validUntil": { "$ref": "#/$defs/utc" } }
+    },
+    "revokeRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": { "reason": { "type": "string" } }
+    },
+    "recoverChallengeRequest": {
+      "type": "object",
+      "required": ["installationId"],
+      "additionalProperties": false,
+      "properties": { "installationId": { "$ref": "#/$defs/ulid" } }
+    },
+    "recoverRequest": {
+      "type": "object",
+      "required": ["installationId", "challenge", "signature", "publicKeyPem"],
+      "additionalProperties": false,
+      "properties": {
+        "installationId": { "$ref": "#/$defs/ulid" },
+        "challenge": { "type": "string", "minLength": 16, "maxLength": 256 },
+        "signature": { "type": "string", "pattern": "^[A-Za-z0-9+/]+=*$", "minLength": 32 },
+        "publicKeyPem": { "$ref": "#/$defs/pem" }
+      }
+    },
+    "recoverResponse": {
+      "description": "持钥找回：approved→clientId 有值；pending→clientId=null（不泄未批身份）",
+      "type": "object",
+      "required": ["enrollmentId", "clientId", "status", "createdAt"],
+      "additionalProperties": false,
+      "properties": {
+        "enrollmentId": { "$ref": "#/$defs/ulid" },
+        "clientId": { "oneOf": [{ "$ref": "#/$defs/ulid" }, { "type": "null" }] },
+        "status": { "enum": ["pending", "approved"] },
+        "createdAt": { "$ref": "#/$defs/utc" }
+      }
+    }
+  }
+}

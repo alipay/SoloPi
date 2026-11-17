@@ -9,7 +9,8 @@ import { spawnSync, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const activeStates = new Set(['submitted', 'running', 'stopping']);
-const readState = dir => JSON.parse(fs.readFileSync(path.join(dir, 'workflow-editor-state.json'), 'utf8'));
+const caseStorage=createRequire(import.meta.url)('../electron/case-storage');
+const readState = dir => caseStorage.decodeState(JSON.parse(fs.readFileSync(path.join(dir, 'workflow-editor-state.json'), 'utf8')));
 export function assertIdle(dir) {
   const state = readState(dir);
   const active = (state.automationTasks || []).filter(task => activeStates.has(task.status));
@@ -31,7 +32,7 @@ export function sourceIdentity() {
 }
 export async function prepare(sourceDir, dataDir, caseIds) {
   sourceDir=fs.realpathSync(sourceDir);
-  if(!dataDir){fs.mkdirSync(development.tempRoot(),{recursive:true,mode:0o700});dataDir=path.join(development.tempRoot(),crypto.randomUUID());}
+  if(!dataDir){fs.mkdirSync(development.workspaceRoot(sourceDir),{recursive:true,mode:0o700});dataDir=path.join(development.workspaceRoot(sourceDir),crypto.randomUUID());}
   dataDir=path.resolve(dataDir);
   if (dataDir === sourceDir || dataDir.startsWith(sourceDir + path.sep) || sourceDir.startsWith(dataDir + path.sep)) throw new Error('Development dataDir must be separate from the installed data directory');
   if (!caseIds.length) throw new Error('At least one --case-id is required');
@@ -63,10 +64,10 @@ export async function prepare(sourceDir, dataDir, caseIds) {
   };
   const cases=selection.cases.map(c=>{
     const used=new Set(c.steps.filter(s=>s.type==='component').map(s=>s.componentId));
-    return {...copyValue({...c,components:(c.components||[]).filter(component=>used.has(component.id))},c.assetBaseDir||sourceDir),assetBaseDir:dataDir};
+    return {...copyValue({...c,edges:selection.caseEdges[c.id]||c.edges||[],components:(c.components||[]).filter(component=>used.has(component.id))},c.assetBaseDir||sourceDir),assetBaseDir:dataDir};
   });
   const state={cases,components:[],caseEdges:Object.fromEntries(caseIds.map(id=>[id,selection.caseEdges[id]||[]])),nodePositions:Object.fromEntries(caseIds.map(id=>[id,selection.nodePositions[id]||{}])),deviceBindings:original.deviceBindings||{},llmProviders:original.llmProviders||[],selectedLlmProviderId:original.selectedLlmProviderId||'',automationTasks:[]};
-  fs.writeFileSync(path.join(dataDir,'workflow-editor-state.json'),JSON.stringify(state,null,2),{mode:0o600});
+  fs.writeFileSync(path.join(dataDir,'workflow-editor-state.json'),JSON.stringify(caseStorage.encodeState(state),null,2),{mode:0o600});
   const config=path.join(sourceDir,'environment-config.json');if(fs.existsSync(config))fs.copyFileSync(config,path.join(dataDir,'environment-config.json'));
   const manifest={schemaVersion:'lenswiper.dev-workspace.v1',sourceDataDir:sourceDir,dataDir,preparedAt:new Date().toISOString(),caseIds,caseSourceRevision:selection.sourceRevision,assetCount:copied.size,...sourceIdentity()};
   fs.writeFileSync(path.join(dataDir,'dev-workspace.json'),JSON.stringify(manifest,null,2),{mode:0o600});
@@ -77,7 +78,7 @@ export async function main(args) {
   const option=name=>{const i=args.indexOf(name);return i<0?'':args[i+1]||'';};
   if(args.includes('--help')||!args.length){console.log('npm run dev:cli -- prepare --source-data-dir <installed-data> --data-dir <new-isolated-dir> --case-id <id>\nnpm run dev:cli -- --data-dir <dir> devices list|run task ...|tasks show/stop ...|reports show ...\nReport import: node scripts/glassbox-cli.mjs reports import <file.glassreport> --app /Applications/solopi-desktop.app --json');return;}
   const dataDir=option('--data-dir')?path.resolve(option('--data-dir')):'';
-  if(!dataDir && args[0]!=='prepare')throw new Error('--data-dir is required; use the temporary workspace returned by prepare');
+  if(!dataDir && args[0]!=='prepare')throw new Error('--data-dir is required; use the managed workspace returned by prepare');
   if(args[0]==='prepare'){
     if(!option('--source-data-dir'))throw new Error('--source-data-dir is required');
     const ids=args.flatMap((v,i)=>v==='--case-id'?[args[i+1]]:[]);
@@ -87,7 +88,7 @@ export async function main(args) {
   if(manifest.schemaVersion!=='lenswiper.dev-workspace.v1'||fs.realpathSync(dataDir)===fs.realpathSync(manifest.sourceDataDir))throw new Error('Invalid isolated workspace');
   const command=args.filter((v,i)=>v!=='--data-dir'&&args[i-1]!=='--data-dir');
   if(command[0]==='run'){assertIdle(manifest.sourceDataDir);assertIdle(dataDir);}
-  const env={...process.env,GLASSBOX_CLI_DATA_DIR:dataDir,LENSWIPER_TASK_UI_DATA_DIR:manifest.sourceDataDir,GLASSBOX_WORKFLOW_STATE_PATH:path.join(dataDir,'workflow-editor-state.json'),GLASSBOX_WORKFLOW_RUNS_DIR:path.join(dataDir,'logs','workflow-runs'),LENSWIPER_DEV_RUN:'1',LENSWIPER_EXECUTION_PROVENANCE:JSON.stringify({...sourceIdentity(),caseSourceRevision:manifest.caseSourceRevision})};
+  const env={...process.env,GLASSBOX_CLI_DATA_DIR:dataDir,LENSWIPER_TASK_UI_DATA_DIR:dataDir,GLASSBOX_WORKFLOW_STATE_PATH:path.join(dataDir,'workflow-editor-state.json'),GLASSBOX_WORKFLOW_RUNS_DIR:path.join(dataDir,'logs','workflow-runs'),LENSWIPER_DEV_RUN:'1',LENSWIPER_EXECUTION_PROVENANCE:JSON.stringify({...sourceIdentity(),caseSourceRevision:manifest.caseSourceRevision})};
   delete env.ELECTRON_RUN_AS_NODE;
   const result=spawnSync(process.execPath,[path.join(root,'scripts/glassbox-cli.mjs'),...command],{cwd:root,env,stdio:'inherit'});
   if(result.error)throw result.error;

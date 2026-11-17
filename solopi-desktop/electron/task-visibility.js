@@ -4,10 +4,14 @@ const os = require('node:os');
 const crypto = require('node:crypto');
 const development=require(fs.existsSync(path.join(__dirname,'development-tasks.cjs'))?'./development-tasks.cjs':'./development-tasks');
 const protocol = 'lenswiper.task-visibility.v1';
-function defaultUiDataDir() {
-  if (process.env.LENSWIPER_TASK_UI_DATA_DIR) return path.resolve(process.env.LENSWIPER_TASK_UI_DATA_DIR);
-  return path.join(process.platform === 'darwin' ? path.join(os.homedir(), 'Library', 'Application Support') : process.platform === 'win32' ? process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming') : process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config'), 'Glass Box');
+const removalIds = require(fs.existsSync(path.join(__dirname,'task-removal-index.cjs'))?'./task-removal-index.cjs':'./task-removal-index').createTaskRemovalIndex();
+const identity=require(fs.existsSync(path.join(__dirname,'product-identity.cjs'))?'./product-identity.cjs':'./product-identity');
+function defaultUiDataDir({platform=process.platform,home=os.homedir(),env=process.env}={}) {
+  if (env.LENSWIPER_TASK_UI_DATA_DIR) return path.resolve(env.LENSWIPER_TASK_UI_DATA_DIR);
+  const appData=platform==='darwin'?path.join(home,'Library','Application Support'):platform==='win32'?env.APPDATA||path.join(home,'AppData','Roaming'):env.XDG_CONFIG_HOME||path.join(home,'.config');
+  return identity.defaultDataDirectory(appData);
 }
+
 function canonical(dir) { return fs.existsSync(dir) ? fs.realpathSync(dir) : path.resolve(dir); }
 function atomic(file, value) {
   fs.mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
@@ -17,7 +21,6 @@ function atomic(file, value) {
 }
 function enableTaskVisibility(uiDir) { atomic(path.join(uiDir, 'task-visibility.json'), { protocol }); }
 function assertTaskVisibility(dataDir, uiDir = defaultUiDataDir()) {
-  if(development.workspace(dataDir)){development.registerWorkspace(dataDir,uiDir);return {mode:'development',uiDataDir:dataDir};}
   if (canonical(dataDir) === canonical(uiDir)) return { mode: 'shared', uiDataDir: uiDir };
   let capability;
   try { capability = JSON.parse(fs.readFileSync(path.join(uiDir, 'task-visibility.json'), 'utf8')); } catch {}
@@ -35,7 +38,7 @@ function registerTaskSource(dataDir, uiDir = defaultUiDataDir()) {
   atomic(path.join(uiDir, 'task-sources', key + '.json'), { protocol, dataDir: canonical(dataDir) });
 }
 function publishVisibleTask(dataDir, task, uiDir = defaultUiDataDir()) {
-  if(development.isDevelopmentTask(task) || development.workspace(dataDir)){development.registerWorkspace(dataDir,uiDir);return {mode:'development',uiDataDir:dataDir};}
+  if(development.workspace(dataDir))development.registerWorkspace(dataDir,uiDir);
   if(readRemovedTaskIds(dataDir).includes(task.id))return {mode:'removed',taskId:task.id};
   const visibility = assertTaskVisibility(dataDir, uiDir);
   if (visibility.mode === 'shared') return visibility;
@@ -49,13 +52,16 @@ function publishVisibleTask(dataDir, task, uiDir = defaultUiDataDir()) {
     reportDetailPath: task.reportDetailPath || file, reportDetailLoaded: task.reportDetailPath ? false : true });
   return visibility;
 }
-function readVisibleTasks(uiDir, {includeDevelopment=false}={}) {
+function readVisibleTasks(uiDir, {includeDevelopment=true}={}) {
   const removed=new Set(readRemovedTaskIds(uiDir));
-  const sources = path.join(uiDir, 'task-sources');
+  for(const sourceKind of ['task-sources','development-workspaces']){
+  const sources = path.join(uiDir, sourceKind);
   if (fs.existsSync(sources)) for (const name of fs.readdirSync(sources).filter(name => /^[a-f0-9]{64}\.json$/.test(name))) {
     try {
       const entry = JSON.parse(fs.readFileSync(path.join(sources, name), 'utf8'));
-      if (entry.protocol !== protocol || canonical(entry.dataDir) === canonical(uiDir)) continue;
+      const managed=sourceKind==='development-workspaces'?development.workspace(entry.dataDir):null;
+      if (sourceKind==='development-workspaces' ? !managed || canonical(managed.sourceDataDir)!==canonical(uiDir) : entry.protocol!==protocol) continue;
+      if(canonical(entry.dataDir)===canonical(uiDir))continue;
       const state = JSON.parse(fs.readFileSync(path.join(entry.dataDir, 'workflow-editor-state.json'), 'utf8'));
       for (const summary of state.automationTasks || []) {
         if (!summary.id || removed.has(summary.id) || (!includeDevelopment && (development.isDevelopmentTask(summary)||development.workspace(entry.dataDir)))) continue;
@@ -67,6 +73,7 @@ function readVisibleTasks(uiDir, {includeDevelopment=false}={}) {
         publishVisibleTask(entry.dataDir, task, uiDir);
       }
     } catch { /* Keep the last known record if a source has moved or is temporarily unavailable. */ }
+  }
   }
   const dir = path.join(uiDir, 'external-tasks');
   if (!fs.existsSync(dir)) return [];
@@ -90,7 +97,7 @@ function deleteVisibleTask(uiDir, id) {
 function readRemovedTaskIds(dataDir){
  const dirs=new Set([canonical(dataDir)]),sourceDir=path.join(dataDir,'task-sources');
  if(fs.existsSync(sourceDir))for(const name of fs.readdirSync(sourceDir).filter(n=>/^[a-f0-9]{64}\.json$/.test(n))){try{const s=JSON.parse(fs.readFileSync(path.join(sourceDir,name),'utf8'));if(s.protocol===protocol)dirs.add(canonical(s.dataDir));}catch{}}
- const ids=new Set();for(const dir of dirs){try{for(const r of JSON.parse(fs.readFileSync(path.join(dir,'workflow-editor-state.json'),'utf8')).removedAutomationTasks || [])ids.add(r.id);}catch(e){if(e.code!=='ENOENT')throw e;}}
+ const ids=new Set();for(const dir of dirs)for(const id of removalIds(path.join(dir,'workflow-editor-state.json')))ids.add(id);
  const cached=path.join(dataDir,'external-tasks');if(fs.existsSync(cached))for(const name of fs.readdirSync(cached).filter(n=>/^[a-f0-9]{64}\.json$/.test(n))){try{const task=JSON.parse(fs.readFileSync(path.join(cached,name),'utf8'));if(task.visibilityDeleted)ids.add(task.id);}catch{}}
  return [...ids];
 }

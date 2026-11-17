@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.1.0/command.schema.json",
+  "title": "CommandTypes",
+  "$defs": {
+    "ulid": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "rfc3339": { "type": "string", "format": "date-time" },
+    "commandEnvelope": {
+      "type": "object",
+      "required": ["commandId", "taskId", "epoch", "digest", "issuedAt", "expiresAt", "type", "payload"],
+      "additionalProperties": false,
+      "properties": {
+        "commandId": { "$ref": "#/$defs/ulid" },
+        "taskId": { "$ref": "#/$defs/ulid" },
+        "epoch": { "type": "integer", "minimum": 1 },
+        "digest": { "type": "string", "pattern": "^sha256:[A-Za-z0-9+/=_-]+$" },
+        "issuedAt": { "$ref": "#/$defs/rfc3339" },
+        "expiresAt": { "$ref": "#/$defs/rfc3339" },
+        "type": { "enum": ["run_case", "stop", "upload_artifact", "report_state"] },
+        "payload": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "commandResultRequest": {
+      "type": "object",
+      "required": ["digest", "epoch", "outcome", "taskId"],
+      "additionalProperties": false,
+      "properties": {
+        "taskId": { "$ref": "#/$defs/ulid" },
+        "digest": { "type": "string", "pattern": "^sha256:[A-Za-z0-9+/=_-]+$" },
+        "epoch": { "type": "integer", "minimum": 1 },
+        "outcome": { "enum": ["succeeded", "failed", "stopped", "expired", "rejected", "unknown"] },
+        "resultRef": { "type": "string" },
+        "detail": { "type": "string" }
+      }
+    },
+    "taskState": {
+      "enum": [
+        "queued", "dispatched", "stop_requested", "reconciling",
+        "succeeded", "failed", "stopped", "abandoned", "unknown"
+      ]
+    }
+  }
+}

@@ -3,15 +3,17 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import assertionPolicy from '../electron/workflow-assertion.js';
+import parallel from '../electron/workflow-parallel.js';
 const source=fs.readFileSync(new URL('../electron/main.js',import.meta.url),'utf8');
 const begin=source.indexOf('    const graphMode = executionEdges.length > 0;',source.indexOf('async function runWorkflowCase('));
 const end=source.indexOf('\n  } finally {',begin);
 assert.ok(begin>0 && end>begin);
 const core=source.slice(begin,end);
-async function run({failure,continueOnError=false,beforeFailure=false,empty=false}={}) {
- const steps=empty?[]:[{id:'start',type:'start'},{id:'action',type:'component',continueOnError},{id:'end',type:'end'}];
- const edges=empty?[]:[{source:'start',target:'action'},{source:'action',target:'end'}];
- const ctx=vm.createContext({effectiveSteps:steps,executionEdges:edges,stepMap:new Map(steps.map(s=>[s.id,s])),outgoing:new Map(edges.map(e=>[e.source,[e]])),results:[],context:{nodeOutputs:{}},devices:{},artifacts:{},requestId:'isolated',
+async function run({failure,continueOnError=false,beforeFailure=false,empty=false,parallelGroup=false,parallelFailure=false}={}) {
+ const steps=parallelGroup?[{id:'start',type:'start'},{id:'trigger',type:'send_audio'},{id:'page',type:'component',componentId:'assert',config:{}},{id:'state',type:'component',componentId:'text',config:{observationMode:'latest'}},{id:'next',type:'wait'},{id:'end',type:'end'}]:empty?[]:[{id:'start',type:'start'},{id:'action',type:'component',continueOnError},{id:'end',type:'end'}];
+ const edges=parallelGroup?[['start','trigger'],['trigger','page'],['trigger','state'],['page','next'],['state','next'],['next','end']].map(([source,target])=>({source,target})):empty?[]:[{source:'start',target:'action'},{source:'action',target:'end'}];
+ const ctx=vm.createContext({initializationError:null,effectiveSteps:steps,executionEdges:edges,stepMap:new Map(steps.map(s=>[s.id,s])),outgoing:new Map([...new Set(edges.map(e=>e.source))].map(id=>[id,edges.filter(e=>e.source===id)])),parallelPlans:parallelGroup?parallel.parallelPlans(steps,edges,{assert:{kind:'json_assert'},text:{kind:'tts_assert'}}):new Map(),results:[],context:{nodeOutputs:{}},
+  resolveWorkflowValue:v=>v,executeWorkflowParallel:async(plan,_context,onProgress)=>parallel.runParallelListeners({plan,onProgress,observe:(_b,line)=>({value:line.split('=')[1],ready:line==='state=READY'}),watch:async(_b,onLine)=>{onLine('state=READY',1);return()=>{};},execute:async()=>{if(parallelFailure)throw Error('page failed');return{success:true,meta:{assertion:{passed:true}}};}}),devices:{},artifacts:{},requestId:'isolated',
   executeWorkflowAssertionStep:assertionPolicy.executeWorkflowAssertionStep,
   options:{beforeStep:async step=>{if(beforeFailure && step.id==='action')throw Error('preparation failed');}},
   isWorkflowCanceled:()=>false,sendProgress:()=>{},workflowCommandScope:{run:(_id,fn)=>fn()},prepareWorkflowActionLogBoundary:async()=>{},updateWorkflowLogAssertCheckpointForStep:()=>{},shouldApplyPostDelay:()=>false,
@@ -42,4 +44,13 @@ test('pre-step failure does not claim the action ran',async()=>{
 test('successful and empty workflows retain accurate terminal summaries',async()=>{
  const success=await run();assert.equal(success.success,true);assert.deepEqual(success.executedPath,['start','action','end']);assert.equal(success.terminationReason,'reached_end');
  const empty=await run({empty:true});assert.equal(empty.success,false);assert.deepEqual(empty.executedPath,[]);assert.equal(empty.terminationReason,'workflow_empty');
+});
+
+test('real graph runner joins both listeners exactly once then executes downstream and End',async()=>{
+ const r=await run({parallelGroup:true});assert.equal(r.success,true);assert.equal(r.reachedEnd,true);
+ for(const id of ['trigger','page','state','next','end'])assert.equal(r.executedPath.filter(x=>x===id).length,1);
+ assert.equal(r.results.find(x=>x.stepId==='state').meta.nodeOutput.value,'READY');
+});
+test('real graph runner never enters downstream when a parallel branch fails',async()=>{
+ const r=await run({parallelGroup:true,parallelFailure:true});assert.equal(r.success,false);assert.equal(r.reachedEnd,false);assert.ok(!r.executedPath.includes('next'));assert.equal(r.results.find(x=>x.stepId==='trigger').status,'success');assert.ok(r.executedPath.includes('page'));assert.ok(r.executedPath.includes('state'));
 });

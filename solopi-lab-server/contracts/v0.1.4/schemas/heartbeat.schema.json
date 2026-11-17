@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.1.1/heartbeat.schema.json",
+  "title": "HeartbeatTypes",
+  "$defs": {
+    "utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+    },
+    "safeInt": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+    "heartbeatRequest": {
+      "type": "object",
+      "required": ["epoch", "sessionId", "lastEventSeqAck", "occupancy", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "epoch": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+        "sessionId": { "type": "string", "minLength": 32 },
+        "lastEventSeqAck": { "$ref": "#/$defs/safeInt" },
+        "occupancy": {
+          "type": "object",
+          "required": ["localUiTasks", "cliTasks", "broker"],
+          "additionalProperties": false,
+          "properties": {
+            "localUiTasks": { "type": "integer", "minimum": 0, "maximum": 100000 },
+            "cliTasks": { "type": "integer", "minimum": 0, "maximum": 100000 },
+            "broker": { "enum": ["running", "stopped", "not_installed"] },
+            "localExclusive": { "type": "boolean" },
+            "note": { "type": "string" }
+          }
+        },
+        "status": { "enum": ["healthy", "degraded", "busy"] }
+      }
+    },
+    "heartbeatResponse": {
+      "type": "object",
+      "required": ["epoch", "leaseExpiresAt", "serverTime", "configVersion", "pendingCommandsCount"],
+      "additionalProperties": false,
+      "properties": {
+        "epoch": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+        "leaseExpiresAt": { "$ref": "#/$defs/utc" },
+        "serverTime": { "$ref": "#/$defs/utc" },
+        "configVersion": { "type": "string", "minLength": 1 },
+        "pendingCommandsCount": { "$ref": "#/$defs/safeInt" }
+      }
+    }
+  }
+}

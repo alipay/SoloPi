@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.1.0/session.schema.json",
+  "title": "SessionTypes",
+  "$defs": {
+    "ulid": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "rfc3339": { "type": "string", "format": "date-time" },
+    "challengeResponse": {
+      "type": "object",
+      "required": ["challenge", "expiresInSec"],
+      "properties": { "challenge": { "type": "string" }, "expiresInSec": { "type": "integer" } }
+    },
+    "sessionCreateRequest": {
+      "type": "object",
+      "required": ["clientId", "installationId", "clientVersion", "capabilities", "challenge", "signature"],
+      "additionalProperties": false,
+      "properties": {
+        "clientId": { "type": "string" },
+        "installationId": { "type": "string" },
+        "clientVersion": { "type": "string" },
+        "capabilities": {
+          "type": "object",
+          "required": ["commands", "media"],
+          "properties": { "commands": { "type": "boolean" }, "media": { "type": "boolean" } }
+        },
+        "challenge": { "type": "string" },
+        "signature": { "type": "string" }
+      }
+    },
+    "sessionCreateResponse": {
+      "type": "object",
+      "required": ["sessionId", "epoch", "leaseExpiresAt", "heartbeatIntervalSec", "maxLeaseSec", "contractVersion"],
+      "properties": {
+        "sessionId": { "type": "string" },
+        "epoch": { "type": "integer", "minimum": 1 },
+        "leaseExpiresAt": { "$ref": "#/$defs/rfc3339" },
+        "heartbeatIntervalSec": { "type": "integer", "minimum": 1 },
+        "maxLeaseSec": { "type": "integer", "minimum": 1 },
+        "contractVersion": { "type": "string" }
+      }
+    }
+  }
+}

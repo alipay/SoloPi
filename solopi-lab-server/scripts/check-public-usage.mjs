@@ -1,0 +1,9 @@
+import fs from 'node:fs';import path from 'node:path';import{fileURLToPath}from'node:url';
+export function checkPublicUsage(root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..')){
+ const required=[...(fs.existsSync(path.join(root,'solopi-desktop'))?['solopi-desktop/skills/solopi-lab-task-ops/SKILL.md','solopi-desktop/skills/solopi-lab-task-ops/references/server-http.md','solopi-lab-server/docs/PUBLIC_USAGE.md']:['skills/solopi-lab-task-ops/SKILL.md','skills/solopi-lab-task-ops/references/server-http.md','lab-server/docs/PUBLIC_USAGE.md'])];
+ for(const name of required){const file=path.join(root,name);if(!fs.existsSync(file)||!fs.statSync(file).isFile()||fs.lstatSync(file).isSymbolicLink())throw Error('Public Server usage bundle missing: '+name);}
+ const skillRoot=path.join(root,fs.existsSync(path.join(root,'solopi-desktop'))?'solopi-desktop/skills/solopi-lab-task-ops':'skills/solopi-lab-task-ops');let checked=0;
+ function walk(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isSymbolicLink())throw Error('Public Server Skill cannot reference symlinks');if(e.isDirectory()){walk(p);continue;}if(!e.name.endsWith('.md'))continue;for(const m of fs.readFileSync(p,'utf8').matchAll(/\[[^\]]*\]\(([^)\s]+)\)/g)){const href=decodeURIComponent(m[1]).split('#')[0];if(!href||/^(https?:|mailto:)/.test(href))continue;const target=path.resolve(path.dirname(p),href);if(!target.startsWith(skillRoot+path.sep)||!fs.existsSync(target))throw Error('Public Server usage reference missing: '+path.relative(skillRoot,p));checked++;}}}
+ walk(skillRoot);return{success:true,skill:'solopi-lab-task-ops',required,checkedReferences:checked};
+}
+if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url))console.log(JSON.stringify(checkPublicUsage(process.argv[2])));

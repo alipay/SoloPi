@@ -22,7 +22,7 @@ function fixture(kind, mode, blocking) {
   const ran = [], progress = [];
   const components = [{ id: 'assert', kind }];
   const context = {
-    console, Date, Map, Set, Promise, crypto: { randomBytes: () => Buffer.from('test') }, cliBackgroundMode: false,
+    require:name=>require(name.startsWith('./')?'../electron/'+name.slice(2):name),console, Date, Map, Set, Promise, crypto: { randomBytes: () => Buffer.from('test') }, cliBackgroundMode: false,
     workflowCommandScope: { run: (_id, fn) => fn() }, executeWorkflowAssertionStep,
     applyWorkflowStartConfigOverride: steps => steps, orderWorkflowStepsByEdges: steps => steps,
     getWorkflowCaseEdges: p => p.edges || [], normalizeWorkflowEdges: edges => edges,
@@ -161,7 +161,7 @@ test('nonblocking LLM assertion preserves mismatch and stream errors without fai
       formatLlmAssertDebugOutput: () => 'complete LLM result evidence', isLlmServiceError: () => false,
       captureWorkflowAssertScreenshot: async () => {},
     };
-    vm.createContext(Object.assign(context, { assertImportReviewed })); vm.runInContext(extract('executeWorkflowStep') + '\nglobalThis.execute = executeWorkflowStep;', context);
+    vm.createContext(Object.assign(context, { assertImportReviewed })); vm.runInContext(extract('getWorkflowLogAssertReadCheckpoint') + '\n' + extract('executeWorkflowStep') + '\nglobalThis.execute = executeWorkflowStep;', context);
     const step = { id: 'assert', type: 'component', componentId: 'llm', config: { assertBlocking: false }, inputs: { assertionPrompt: 'check value', lineRegex: '.+' } };
     const executionContext = { defaults: {}, components: { llm: { kind: 'llm_assert', timeoutSeconds: 10 } } };
     const pending = executeWorkflowAssertionStep(step, executionContext, () => context.execute(step, executionContext));
@@ -171,7 +171,7 @@ test('nonblocking LLM assertion preserves mismatch and stream errors without fai
 });
 test('actual assertion checkbox defaults on, toggles locally, saves and renders after reload', () => {
   const start = editor.indexOf("                    {selectedStep.type === 'component' && assertComponentKinds.has(selectedStepComponentKind) && (");
-  const end = editor.indexOf("                    {selectedStep.type === 'if' ? (", start);
+  const end = editor.indexOf("                    {selectedStepComponentKind === 'tts_assert' && (", start);
   const jsx = editor.slice(start, end).trim().slice(1, -1);
   const transpiled = ts.transpileModule(`globalThis.render = () => (${jsx});`, { compilerOptions: { jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.CommonJS } }).outputText;
   const flatten = node => !node || typeof node !== 'object' ? [] : [node, ...[node.props?.children].flat(Infinity).flatMap(flatten)];

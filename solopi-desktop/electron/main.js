@@ -52,7 +52,7 @@ const { collectPerformanceBattery } = require('./performance-battery');
 const { createBugreportJobs } = require('./bugreport/jobs');
 const bugreportJobs = createBugreportJobs({ directory: () => path.join(getGlassBoxDataDir(), 'bugreport-analysis'), adbPath: () => getAdbPath(), onChange: job => { agentOperationEvents.emit('operation', 'battery', job.id, job); maybeQuitIdleBackgroundBroker(); } });
 const { packagePerformanceReports, packageCasePerformanceReports } = require('./workflow-performance');
-const { startTaskLogCapture } = require('./task-log-capture');
+const { startTaskLogCapture, startCaseLogCapture } = require('./task-log-capture');
 const { createThreadStackCollector, normalizeThreadStackOptions } = require('./android-thread-stacks');
 const { parseAndroidTopProcess } = require('./android-top');
 const { stopOwnedLogProcess, releaseOwnedLogAssertions } = require('./owned-log-process');
@@ -211,6 +211,13 @@ let workflowTaskRevisionSequence = 0;
 function getGlassBoxDataDir() {
   return app.getPath('userData');
 }
+
+function getWorkflowTaskUiDataDir() {
+  // Foreground submissions belong to this UI, including explicit custom roots.
+  // Isolated background executors must still synchronize to their owning UI.
+  return cliBackgroundMode ? defaultUiDataDir() : getGlassBoxDataDir();
+}
+
 
 function getGlassBoxCliModulePath() {
   const candidates = [
@@ -570,9 +577,10 @@ function readWorkflowState() {
   for (const statePath of stateCandidates) {
     try {
       const storedState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
-      state = prepareSecretsForDisplay(storedState);
+      state = prepareSecretsForDisplay(require('./case-storage').decodeState(storedState));
       break;
     } catch (error) {
+      if (error.code === 'CASE_STORAGE_INVALID') throw error;
       lastError = error;
     }
   }
@@ -622,7 +630,7 @@ function writeWorkflowState(state, previousState) {
   const persistedState = splitWorkflowStateReports(state);
   const statePath = getWorkflowStatePath();
   const backupPath = getWorkflowBackupStatePath();
-  const protectedState = protectSecrets(persistedState || {}, safeStorage);
+  const protectedState = require('./case-storage').encodeState(protectSecrets(persistedState || {}, safeStorage));
   const serializedState = JSON.stringify(protectedState);
   writeJsonFileAtomic(statePath, protectedState, serializedState);
   writeJsonFileAtomic(backupPath, protectedState, serializedState);
@@ -646,10 +654,11 @@ function createWorkflowTaskCaseRecords(cases = [], caseEdges = {}) {
   });
 }
 
-function createWorkflowTaskRecord(payload = {}, cases = [], taskId = '', taskName = '', createdAt = '') {
+function createWorkflowTaskRecord(payload = {}, cases = [], taskId = '', taskName = '', createdAt = '', groupExecution) {
   const total = payload.stress?.mode === 'rounds' ? cases.length * payload.stress.value : cases.length;
   return {
     id: taskId,
+    groupExecution,
     name: taskName,
     folderId: payload.folderId || '',
     taskType: payload.stress ? 'stress' : 'standard',
@@ -694,6 +703,12 @@ function getRuntimeDiagnostics() {
     getMetrics: () => app.getAppMetrics(),
   });
 }
+let taskCallbacks;
+function getTaskCallbacks() {
+  return taskCallbacks ||= require('./task-callbacks').createTaskCallbacks({directory:getGlassBoxDataDir(),readTask:id=>{
+    const p=getWorkflowReportDetailPath(id);return fs.existsSync(p)?JSON.parse(fs.readFileSync(p,'utf8')):null;
+  },run:(command,args,options)=>runCommandWithOptions(command,args,options),onSettled:()=>{if(!taskCallbacks?.hasPending())maybeQuitIdleBackgroundBroker();}});
+}
 const workflowReportWriter = createTaskReportWriter({
   onCommit(detailPath, persistedTask) {
     const started = performance.now();
@@ -716,8 +731,9 @@ const workflowReportWriter = createTaskReportWriter({
       automationTasks: nextTasks,
     }, currentState);
     const writtenAt = performance.now();
-    publishVisibleTask(getGlassBoxDataDir(), { ...summary, reportDetailPath: detailPath });
+    publishVisibleTask(getGlassBoxDataDir(), { ...summary, reportDetailPath: detailPath }, getWorkflowTaskUiDataDir());
     agentOperationEvents.emit('operation', 'task', persistedTask.id, require('./agent/review-events').reviewSnapshot(persistedTask));
+    try { getTaskCallbacks().enqueueTask(persistedTask); } catch (error) { console.error('[task-callback] enqueue failed:',error.message); }
     return {indexReadMs:readAt-started,indexMergeMs:mergedAt-readAt,indexWriteMs:writtenAt-mergedAt,uiSyncMs:performance.now()-writtenAt};
   },
   onError(error, task) {
@@ -736,7 +752,7 @@ function persistWorkflowTaskRecord(task) {
 
   if (Array.isArray(task.cases)) task = refreshWorkflowTaskSummary(task);
 
-  const uiVisibility = assertTaskVisibility(getGlassBoxDataDir());
+  const uiVisibility = assertTaskVisibility(getGlassBoxDataDir(), getWorkflowTaskUiDataDir());
   const updatedAt = new Date().toISOString();
   workflowTaskRevisionSequence += 1;
   const activeTask = activeWorkflowTasks.get(task.id);
@@ -760,7 +776,7 @@ function persistWorkflowTaskRecord(task) {
 
   persistedTask.runtimeDiagnostics = { eventLoop: getRuntimeDiagnostics().snapshot(), reportWrite: workflowReportWriter.snapshot() };
   workflowReportWriter.schedule(getWorkflowReportDetailPath(task.id), persistedTask);
-  if (!require('./development-tasks').isDevelopmentTask(persistedTask) && !require('./development-tasks').workspace(getGlassBoxDataDir()) && mainWindow && !mainWindow.isDestroyed() && !mainWindow.webContents.isDestroyed()) {
+  if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.webContents.isDestroyed()) {
     try {
       mainWindow.webContents.send('workflow-task:changed', {
         schemaVersion: 'glassbox.workflow-task-event.v1',
@@ -790,7 +806,10 @@ async function createWorkflowTaskReportPackage(task, outputPath = '') {
   try {
     const packagePath = path.resolve(outputPath || getWorkflowTaskReportPackagePath(task));
     const normalizedPackagePath = packagePath.endsWith('.glassreport') ? packagePath : `${packagePath}.glassreport`;
-    tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'glassreport-task-export-'));
+    // The submitting agent may delete its TMPDIR before this asynchronous task finishes.
+    const stagingRoot = path.join(getGlassBoxDataDir(), 'temporary', 'report-exports');
+    fs.mkdirSync(stagingRoot, { recursive: true, mode: 0o700 });
+    tempRoot = fs.mkdtempSync(path.join(stagingRoot, 'glassreport-task-export-'));
     const packageRoot = path.join(tempRoot, 'package');
     fs.mkdirSync(packageRoot, { recursive: true });
     fs.mkdirSync(path.dirname(normalizedPackagePath), { recursive: true });
@@ -1198,36 +1217,47 @@ async function finalizeWorkflowTaskAfterException(task, error) {
     converged = refreshWorkflowTaskSummary(converged);
   }
   const activeTask = activeWorkflowTasks.get(task?.id);
-  if (activeTask?.performanceCollector) converged = applyWorkflowPerformanceSnapshot(converged, await activeTask.performanceCollector.stop());
-  await activeTask?.threadStacks?.stop();
-  if (activeTask?.taskLogCapture) {
-    converged.taskLogs = await activeTask.taskLogCapture.stop();
-    delete activeTask.taskLogCapture;
-  }
-  if (activeTask?.taskRecordingCoordinator) {
-    try {
-      converged = attachTaskRecordingArtifacts(
-        converged,
-        await activeTask.taskRecordingCoordinator.finalize()
-      );
-    } catch (recordingError) {
-      converged.recordingFinalizeError = recordingError instanceof Error
-        ? recordingError.message
-        : String(recordingError);
-    }
-    delete activeTask.taskRecordingCoordinator;
-  }
-  if (activeTask?.taskMirrorSessions?.length) {
-    await Promise.all(activeTask.taskMirrorSessions.map(stopWorkflowScreenMirror));
-    activeTask.taskMirrorSessions = [];
-  }
-  const packaged = await attachWorkflowTaskReportPackage(converged);
-  persistWorkflowTaskRecord(packaged);
-  await workflowReportWriter.flush(getWorkflowReportDetailPath(packaged.id));
+  const packaged = await require('./workflow-report-finalization').finalizeTaskReport(converged, {
+    finalizeArtifacts: async ready => {
+      let converged = ready;
+      if (activeTask?.performanceCollector) converged = applyWorkflowPerformanceSnapshot(converged, await activeTask.performanceCollector.stop());
+      await activeTask?.threadStacks?.stop();
+      if (activeTask?.taskLogCapture) {
+        converged.taskLogs = await activeTask.taskLogCapture.stop();
+        delete activeTask.taskLogCapture;
+      }
+      if (activeTask?.taskRecordingCoordinator) {
+        try {
+          converged = attachTaskRecordingArtifacts(
+            converged,
+            await activeTask.taskRecordingCoordinator.finalize()
+          );
+        } catch (recordingError) {
+          converged.recordingFinalizeError = recordingError instanceof Error
+            ? recordingError.message
+            : String(recordingError);
+        }
+        delete activeTask.taskRecordingCoordinator;
+      }
+      if (activeTask?.taskMirrorSessions?.length) {
+        await Promise.all(activeTask.taskMirrorSessions.map(stopWorkflowScreenMirror));
+        activeTask.taskMirrorSessions = [];
+      }
+      return converged;
+    },
+    persist: persistWorkflowTaskRecord,
+    flush: () => workflowReportWriter.flush(getWorkflowReportDetailPath(converged.id)),
+    exportPackage: attachWorkflowTaskReportPackage,
+    onReady: async ready => {
+      try { await desktopConnection?.lab?.publishTaskResult(ready, AbortSignal.timeout(5000)); }
+      catch (error) { console.warn('[workflow-report] result delivery deferred:', error.message); }
+    },
+  });
   return packaged;
 }
 
 async function stopWorkflowTaskById(taskId, options = {}) {
+  if(harnessTasks.owns(taskId))return harnessTasks.stop(taskId);
   const id = String(taskId || '').trim();
   const force = Boolean(options.force);
   const stoppedAt = new Date().toISOString();
@@ -1771,6 +1801,7 @@ function refreshQuickActionsFromSource(actions) {
         id: action.id,
         name: action.name || definition.name,
         description: action.description || definition.description,
+        usageInstructions: action.usageInstructions ?? definition.usageInstructions,
         inputs: configuredInputs || definition.inputs.map((input) => ({
           ...input,
           ...(inputOverrides[input.key] || {}),
@@ -2188,6 +2219,9 @@ async function requestWorkflowLlmAssert(provider, payload, options = {}) {
     'expected、actual 各不超过60字，reason 不超过100字；confidence 为0到100的数字；evidence 最多2条，每条不超过60字。',
     '只列决定通过或失败的关键字段和值，不复制整段JSON、片单、日志或用户提示词。总输出尽量控制在400字以内。',
     '完整核对全部业务条件；精简的是解释篇幅，不得省略校验条件、修改期望或把证据不足判为通过。',
+    '条件含“允许”“或”“若/则”时，先依据当前输入确定适用分支；满足任一允许结果即可，不得把互斥分支合并为全部必须满足。',
+    'currentLog/currentExtractedContent/currentJson 是本次候选的实际结果；variables 是历史上下文，仅使用断言明确引用的变量，不能用历史结果替换当前结果或增加断言未要求的限制。',
+    '输出前核对 pass 与 expected、actual、reason、evidence 一致：满足适用条件应 pass=true，不满足或证据不足应 pass=false。',
     '不要复述完整日志，不要输出 Markdown，不要输出换行解释。',
     '格式示例：{"pass":false,"confidence":80,"expected":"type 应为 OrderPreview","actual":"type 为 Other","reason":"类型不匹配","evidence":[]}',
   ].join('\n');
@@ -2244,14 +2278,8 @@ function createLlmAssertLogPayload(line, config) {
   };
 }
 
-function createLlmAssertRequestPayload(assertionPrompt, variables, logPayload) {
-  return {
-    assertion: assertionPrompt,
-    variables: variables || {},
-    currentLog: logPayload.line,
-    currentExtractedContent: logPayload.extractedContent,
-    currentJson: logPayload.parsedContent || undefined,
-  };
+function createLlmAssertRequestPayload(assertionPrompt, variables, logPayload, template) {
+  return require('./workflow-llm-input').createPayload(assertionPrompt, variables, logPayload, template);
 }
 
 function createLlmAssertCurrentLogDebugSection(requestPayload) {
@@ -2754,10 +2782,7 @@ function normalizeGitBranch(branch) {
 }
 
 function getCaseLibraryRepoId(repoUrl, branch = 'master') {
-  return crypto.createHash('sha1')
-    .update(`${String(repoUrl || '').trim()}#${normalizeGitBranch(branch)}`)
-    .digest('hex')
-    .slice(0, 16);
+  return getLocalCaseLibraryRepoId(repoUrl,branch);
 }
 
 function buildAuthenticatedGitUrl(repoUrl) {
@@ -3601,6 +3626,15 @@ function copyReportCaseArtifacts(taskId, caseRecord, packageRoot, sharedLogPaths
   fs.cpSync(runDir, targetRunDir, { recursive: true, force: true });
   packageCasePerformanceReports(targetRunDir, packageRoot, runDir);
   for (const recording of Array.isArray(artifacts.recordings) ? artifacts.recordings : []) {
+    for (const diagnosticPath of [recording?.diagnosticPath, recording?.diagnosticPath ? `${recording.diagnosticPath}.previous` : '']) {
+      if (!diagnosticPath || !path.isAbsolute(diagnosticPath) || !fs.existsSync(diagnosticPath)) continue;
+      const resolved=path.resolve(diagnosticPath);
+      if (externalArtifactMappings.has(resolved)) continue;
+      const relative=`artifacts/recording-diagnostics/${sanitizeFilePart(taskId)}-${sharedLogPaths.size}-${sanitizeFilePart(path.basename(diagnosticPath))}`;
+      fs.mkdirSync(path.dirname(path.join(packageRoot,relative)),{recursive:true});
+      fs.copyFileSync(diagnosticPath,path.join(packageRoot,relative));
+      sharedLogPaths.set(resolved,relative);externalArtifactMappings.set(resolved,relative);
+    }
     const recordingPath = String(recording?.path || '').trim();
     if (!recordingPath || !path.isAbsolute(recordingPath) || !fs.existsSync(recordingPath)) {
       continue;
@@ -3948,6 +3982,7 @@ async function getScrcpySupportedOptions(scrcpyPath) {
     if (/(?:^|\s)--no-audio(?:\s|$)/m.test(helpText)) {
       options.add('--no-audio');
     }
+    if (helpText.includes('--verbosity')) options.add('--verbosity');
     if (helpText.includes('--audio-codec')) options.add('--audio-codec');
     if (helpText.includes('--no-audio-playback')) {
       options.add('--no-audio-playback');
@@ -3974,9 +4009,10 @@ async function createScrcpySession(scrcpyPath, args, fields = {}) {
     resourcesPath: process.resourcesPath,
     isPackaged: app.isPackaged,
   });
-  const transportDiagnostics = [];
+  const diagnosticJournal = require('./recording-diagnostics').createRecordingDiagnostics(fields.path, {taskId:fields.taskId || '',serial:fields.serial,deviceType:fields.deviceType});
+  const transportDiagnostics = diagnosticJournal.events;
   let onMediaFrame = () => {};
-  const recordTransport = entry => { transportDiagnostics.push({time:new Date().toISOString(),...entry}); if(transportDiagnostics.length>64)transportDiagnostics.shift(); if(entry.phase==='video-frame-received')onMediaFrame(); };
+  const recordTransport = entry => { diagnosticJournal.record(entry); if(entry.phase==='video-frame-received')onMediaFrame(); };
   let transport;
   const preparationController = new AbortController();
   const preparationRequestId = workflowCommandScope.getStore();
@@ -4002,7 +4038,7 @@ async function createScrcpySession(scrcpyPath, args, fields = {}) {
     recordTransport({phase:'client-launch',configuredAdbPath:adbPath,effectiveAdbPath:recordingEnv.ADB,mode:remoteEndpoint?'scoped-remote':'scoped-local',endpoint:transport?.endpoint});
   } catch(error) {
     transport?.close();recordTransport({phase:'prepare-failed',error:error.message});
-    return {...fields,process:null,startFailed:true,exited:true,error:error.message,transportDiagnostics};
+    return {...fields,process:null,startFailed:true,exited:true,error:error.message,transportDiagnostics,diagnosticPath:diagnosticJournal.path,diagnosticWriteError:diagnosticJournal.writeError};
   } finally {
     const pending = workflowCommandCancels.get(preparationRequestId);pending?.delete(cancelPreparation);
     if(pending && !pending.size)workflowCommandCancels.delete(preparationRequestId);
@@ -4014,7 +4050,7 @@ async function createScrcpySession(scrcpyPath, args, fields = {}) {
   let previousOutput;
   try { previousOutput=recordingSnapshot(fields.path); } catch(error) {
     transport?.close();recordTransport({phase:'recording-output-error',error:error.message});
-    return {...fields,process:null,startFailed:true,exited:true,error:error.message,transportDiagnostics};
+    return {...fields,process:null,startFailed:true,exited:true,error:error.message,transportDiagnostics,diagnosticPath:diagnosticJournal.path,diagnosticWriteError:diagnosticJournal.writeError};
   }
   const child = spawn(scrcpyPath, args, {
     // Keep scrcpy owned by the solopi-desktop task. Detached children look like
@@ -4027,7 +4063,10 @@ async function createScrcpySession(scrcpyPath, args, fields = {}) {
   const session = {
     ...fields,
     transportDiagnostics,
-    closeTransport: () => transport?.close(),
+    diagnosticPath: diagnosticJournal.path,
+    diagnosticJournal,
+    recordDiagnostic: recordTransport,
+    closeTransport: (reason = 'session-cleanup') => transport?.close(reason),
     scrcpyPath,
     args,
     command,
@@ -4041,6 +4080,12 @@ async function createScrcpySession(scrcpyPath, args, fields = {}) {
     stopPromise: null,
   };
 
+  const healthTimer = setInterval(()=>{
+    let outputSizeBytes=null,statError='';
+    try { outputSizeBytes=require('node:fs').statSync(session.path).size; } catch(error) { statError=error.code || error.message; }
+    recordTransport({phase:'recording-health',pid:child.pid,readyAtMs:session.readyAtMs,outputSizeBytes,statError});
+  },5000);
+  healthTimer.unref?.();
   let resolveReady;
   session.readyPromise = new Promise((resolve) => {
     resolveReady = resolve;
@@ -4055,15 +4100,18 @@ async function createScrcpySession(scrcpyPath, args, fields = {}) {
   const closeOutputWatch=transport ? ()=>{} : watchRecordingOutput(session.path,previousOutput,()=>{
     recordTransport({phase:'recording-output-written'});markReady();
   },{onError:error=>{recordTransport({phase:'recording-output-error',error:error.message});resolveReady?.(0);}});
-  const appendOutput = (chunk) => {
+  recordTransport({phase:'client-spawn',pid:child.pid,command});
+  const appendOutput = (chunk, stream) => {
+    recordTransport({phase:'client-output',stream,text:chunk.toString().slice(-16384),truncated:chunk.length>16384});
     session.error = (session.error + chunk.toString()).slice(-65536);
   };
 
   session.exitPromise = new Promise((resolve) => {
     child.once('close', (code, signal) => {
+      clearInterval(healthTimer);
       closeOutputWatch();
-      session.closeTransport();
-      recordTransport({phase:'client-exit',exitCode:code,signal});
+      recordTransport({phase:'client-exit',pid:child.pid,exitCode:code,signal,stopRequested:Boolean(session.stopRequested),stopReason:session.stopReason || '',unexpected:!session.stopRequested});
+      session.closeTransport('client-exit-cleanup');
       session.exited = true;
       session.exitCode = code;
       session.exitSignal = signal;
@@ -4072,9 +4120,10 @@ async function createScrcpySession(scrcpyPath, args, fields = {}) {
       resolve({ code, signal });
     });
   });
-  child.stderr.on('data', appendOutput);
-  child.stdout.on('data', appendOutput);
+  child.stderr.on('data', chunk=>appendOutput(chunk,'stderr'));
+  child.stdout.on('data', chunk=>appendOutput(chunk,'stdout'));
   child.on('error', (error) => {
+    recordTransport({phase:'client-error',error:error.message,code:error.code,syscall:error.syscall});
     session.error += error.message;
     resolveReady?.(0);
   });
@@ -4090,7 +4139,8 @@ async function waitForScrcpySessionReady(session, timeoutMs = 15000) {
     sleep(timeoutMs).then(() => timedOut),
   ]);
   if (ready === timedOut && !session.exited) {
-    session.transportDiagnostics?.push({phase:'recording-start-timeout',timeoutMs});
+    session.recordDiagnostic?.({phase:'recording-start-timeout',timeoutMs});
+    session.stopReason = 'startup-timeout';
     return false;
   }
   return Boolean(ready) && !session.exited;
@@ -4104,8 +4154,10 @@ function signalScrcpySession(session, signal) {
   // ChildProcess.killed means a signal was sent, not that the child exited.
   // A child ignoring SIGINT must still receive the bounded SIGKILL fallback.
   try {
-    session.process.kill(signal);
+    const delivered = session.process.kill(signal);
+    session.recordDiagnostic?.({phase:'client-signal',signal,pid:session.process.pid,delivered});
   } catch (_error) {
+    session.recordDiagnostic?.({phase:'client-signal-error',signal,error:_error.message,code:_error.code});
     // Do not kill the process group here. scrcpy may have started or reused
     // the shared adb server, and killing the group can disconnect user devices.
   }
@@ -4132,6 +4184,9 @@ async function stopScrcpySession(session, options = {}) {
 
   if (session.stopPromise) return session.stopPromise;
 
+  session.stopRequested = true;
+  session.stopReason = options.reason || session.stopReason || 'recording-finalize';
+  session.recordDiagnostic?.({phase:'stop-requested',reason:session.stopReason});
   session.stopPromise = (async () => {
     const graceSignal = options.graceSignal || 'SIGINT';
     const forceAfterMs = Number.isFinite(options.forceAfterMs) ? options.forceAfterMs : 1500;
@@ -4141,6 +4196,7 @@ async function stopScrcpySession(session, options = {}) {
     const exited = await waitForScrcpyExit(session, forceAfterMs);
 
     if (!exited) {
+      session.recordDiagnostic?.({phase:'stop-escalated',forceAfterMs});
       signalScrcpySession(session, 'SIGKILL');
       await waitForScrcpyExit(session, finalWaitMs);
     }
@@ -4187,6 +4243,7 @@ async function startWorkflowScreenRecord(runDir, deviceType, serial, options = {
   // AAC remains playable in MP4 artifacts, including native desktop players.
   if (supportedOptions.has('--audio-codec')) args.push('--audio-codec=aac');
 
+  if (supportedOptions.has('--verbosity')) args.push('--verbosity=debug');
   const session = await createScrcpySession(scrcpyPath, args, {
     deviceType,
     serial,
@@ -4300,6 +4357,8 @@ async function stopWorkflowScreenRecord(session) {
     fileInfo.statError = error?.code === 'ENOENT' ? '' : (error?.message || String(error));
   }
 
+  session.recordDiagnostic?.({phase:'recording-finalized',...fileInfo});
+  session.diagnosticWriteError = session.diagnosticJournal?.writeError || session.diagnosticWriteError || '';
   return evaluateScrcpyRecording(session, fileInfo);
 }
 
@@ -4315,6 +4374,8 @@ async function stopWorkflowScreenMirror(session) {
   return persistScrcpyMirrorDiagnostic(session);
 }
 
+const WORKFLOW_SCREENSHOT_TIMEOUTS = { capture: 10000, pull: 10000, cleanup: 5000 };
+
 async function captureWorkflowScreenshot(context, deviceType, serial, step) {
   if (!serial) {
     return null;
@@ -4328,10 +4389,10 @@ async function captureWorkflowScreenshot(context, deviceType, serial, step) {
   const localPath = path.join(screenshotsDir, fileName);
 
   try {
-    await runCommand(getAdbPath(), ['-s', serial, 'shell', 'screencap', '-p', remotePath], 10000);
-    await runCommand(getAdbPath(), ['-s', serial, 'pull', remotePath, localPath], 10000);
+    await runCommand(getAdbPath(), ['-s', serial, 'shell', 'screencap', '-p', remotePath], WORKFLOW_SCREENSHOT_TIMEOUTS.capture);
+    await runCommand(getAdbPath(), ['-s', serial, 'pull', remotePath, localPath], WORKFLOW_SCREENSHOT_TIMEOUTS.pull);
     try {
-      await runCommand(getAdbPath(), ['-s', serial, 'shell', 'rm', '-f', remotePath], 5000);
+      await runCommand(getAdbPath(), ['-s', serial, 'shell', 'rm', '-f', remotePath], WORKFLOW_SCREENSHOT_TIMEOUTS.cleanup);
     } catch (_error) {
       // Best-effort cleanup.
     }
@@ -4408,6 +4469,7 @@ function createLogMatcher(pattern, matchType = 'contains', caseSensitive = true)
 }
 
 async function captureWorkflowAssertScreenshot(context, deviceType, serial, step) {
+  if (context.deferAssertScreenshots) return;
   try {
     const screenshot = await captureWorkflowScreenshot(context, deviceType, serial, step);
     if (screenshot) {
@@ -4628,7 +4690,8 @@ function getPostAssertFailurePatterns(context, device, values = {}) {
 }
 
 function getPostAssertObserveMs(values = {}) {
-  const explicit = Number(values.postPassObserveMs || values.stabilityObserveMs);
+  const configured = values.postPassObserveMs ?? values.stabilityObserveMs;
+  const explicit = configured === '' || configured == null ? NaN : Number(configured);
   if (Number.isFinite(explicit) && explicit >= 0) {
     return explicit;
   }
@@ -5316,7 +5379,7 @@ function createAdbExecution(command) {
 
   const prefixArgs = splitShellWords(shellMatch[1]);
   const remoteShellCommand = parseRemoteShellCommand(shellMatch[2].trim());
-  const remoteCommand = normalizeRemoteShellCommand(remoteShellCommand.command);
+  const remoteCommand = normalizeRemoteShellCommand(remoteShellCommand.command, remoteShellCommand.quote);
   const remoteArgs = buildAdbShellArgs(remoteCommand, remoteShellCommand.wrapped);
 
   return {
@@ -5352,7 +5415,9 @@ function requiresRemoteShell(command) {
 }
 
 function shouldKeepRemoteCommandIntact(command) {
-  return /\s--es\s+params\s/.test(` ${command} `);
+  // adb joins shell arguments before the device shell parses them. Splitting
+  // here would consume the only quoting protecting JSON, spaces or literals.
+  return /['"\\\r\n]/.test(command);
 }
 
 function parseRemoteShellCommand(command) {
@@ -5365,11 +5430,46 @@ function parseRemoteShellCommand(command) {
     return { command, wrapped: false };
   }
 
-  return { command: command.slice(1, -1), wrapped: true };
+  // Existing saved preparation scripts use a raw single-quoted multiline
+  // envelope; quotes inside that script belong to the remote interpreter.
+  if (quote === "'" && /[\r\n]/.test(command)) {
+    return { command: command.slice(1, -1), wrapped: true, quote };
+  }
+
+  // A quoted executable/argument is not necessarily a wrapper around the
+  // entire remote command. Only unwrap a single complete enclosing word.
+  let remoteSingleQuoted = false;
+  let rawInnerQuotes = false;
+  for (let index = 1; index < command.length; index += 1) {
+    if (quote === '"' && command[index] === '\\' && /[$`"\\\n]/.test(command[index + 1] || '')) {
+      index += 1;
+      continue;
+    }
+    // Saved templates can wrap the whole remote script while interpolating
+    // raw single-quoted arguments inside it. Their JSON quotes/backslashes
+    // already belong to the remote shell and must not be decoded again.
+    if (quote === '"' && command[index] === "'") {
+      remoteSingleQuoted = !remoteSingleQuoted;
+      continue;
+    }
+    if (quote === '"' && command[index] === '"' && remoteSingleQuoted) {
+      rawInnerQuotes = true;
+      continue;
+    }
+    if (command[index] === quote) {
+      return index === command.length - 1
+        ? { command: command.slice(1, -1), wrapped: true, quote: rawInnerQuotes ? undefined : quote }
+        : { command, wrapped: false };
+    }
+  }
+  return { command, wrapped: false };
 }
 
-function normalizeRemoteShellCommand(command) {
-  return String(command || '').replace(/\\"/g, '"');
+function normalizeRemoteShellCommand(command, wrapperQuote) {
+  const value = String(command || '');
+  // Decode only a removed host-style double-quoted wrapper. Escapes inside
+  // the remote command itself (including JSON strings) belong to the device.
+  return wrapperQuote === '"' ? value.replace(/\\([$`"\\\n])/g, (_match, char) => char === '\n' ? '' : char) : value;
 }
 
 function createAudioAdbExecution(command) {
@@ -5397,7 +5497,7 @@ function createAudioAdbExecution(command) {
 
   const prefixArgs = splitShellWords(shellMatch[1]);
   const remoteShellCommand = parseRemoteShellCommand(shellMatch[2].trim());
-  const remoteCommand = normalizeRemoteShellCommand(remoteShellCommand.command);
+  const remoteCommand = normalizeRemoteShellCommand(remoteShellCommand.command, remoteShellCommand.quote);
   const remoteArgs = buildAdbShellArgs(remoteCommand, remoteShellCommand.wrapped);
 
   return {
@@ -7594,6 +7694,7 @@ async function executeWorkflowStep(step, context) {
         { role: 'user', content: effectivePrompt },
       ], {
         workflowOutput: true,
+        perAttemptTimeout: true,
         temperature: Number(config.temperature ?? 0.2),
         maxTokens: Number(config.maxTokens || 4096),
         timeoutMs: Number(step.timeoutMs || config.timeoutMs || 45000),
@@ -7646,6 +7747,7 @@ async function executeWorkflowStep(step, context) {
         `Written Variables:\n${JSON.stringify(writtenVariables, null, 2)}`,
         `Parsed Output:\n${JSON.stringify(parsedOutput, null, 2)}`,
         usedFallback ? `使用 fallback：${fallbackReason}` : '模型调用成功',
+        responseMetadata?.llmRetry ? `模型请求计时：每次最多 ${responseMetadata.llmRetry.attemptTimeoutMs}ms；实际 ${responseMetadata.llmRetry.attemptCount}/${responseMetadata.llmRetry.maxAttempts} 次；含重试等待共 ${responseMetadata.llmRetry.totalDurationMs}ms` : '',
         `模型：${provider.name || 'OpenAI Compatible'} / ${provider.model || '-'}`,
         `Prompt:\n${effectivePrompt}`,
         `Raw Response:\n${rawContent}`,
@@ -7936,7 +8038,7 @@ async function executeWorkflowStep(step, context) {
           matchOperator: renderedValues.matchOperator || 'equals',
           caseSensitive: parseWorkflowBoolean(renderedValues.caseSensitive, true),
           clearBeforeStart: parseWorkflowBoolean(renderedValues.clearBeforeStart, false),
-          ignoreBeforeSequence: getWorkflowLogAssertCheckpoint(context, componentSerial, parseWorkflowBoolean(renderedValues.clearBeforeStart, false)),
+          ignoreBeforeSequence: getWorkflowLogAssertReadCheckpoint(context, componentSerial, renderedValues),
         }, timeout);
         extractedVariable = createAssertExtractedVariable(
           renderedValues,
@@ -7987,7 +8089,7 @@ async function executeWorkflowStep(step, context) {
           conditions: renderedValues.conditions,
           caseSensitive: parseWorkflowBoolean(renderedValues.caseSensitive, true),
           clearBeforeStart: parseWorkflowBoolean(renderedValues.clearBeforeStart, false),
-          ignoreBeforeSequence: getWorkflowLogAssertCheckpoint(context, componentSerial, parseWorkflowBoolean(renderedValues.clearBeforeStart, false)),
+          ignoreBeforeSequence: getWorkflowLogAssertReadCheckpoint(context, componentSerial, renderedValues),
         }, timeout);
         extractedVariable = createJsonAssertExtractedVariable(renderedValues, jsonAssertResult, context);
         await assertPostAssertLogStability(
@@ -8043,14 +8145,14 @@ async function executeWorkflowStep(step, context) {
       let llmDebugOutput = '';
       let lastLlmFailure = null;
       let extractedVariable = null;
-      let lastMatchSequence = getWorkflowLogAssertCheckpoint(context, componentSerial, parseWorkflowBoolean(renderedValues.clearBeforeStart, false));
+      let lastMatchSequence = getWorkflowLogAssertReadCheckpoint(context, componentSerial, renderedValues);
       let completedAt = '';
       try {
         const provider = resolveWorkflowLlmProvider(context, renderedValues);
         let firstWait = true;
 
         while (budgets.remaining('log') > 0) {
-          if (candidateSelection.evaluatedCount >= 3) throw Object.assign(new Error('LLM 已判断 3 条候选日志仍未通过，达到候选判断上限'), { code: 'LLM_CANDIDATE_LIMIT' });
+          if (candidateSelection.evaluatedCount >= require('./workflow-llm-budgets').MAX_CANDIDATE_JUDGMENTS) throw Object.assign(new Error('LLM 已判断 3 条候选日志仍未通过，达到候选判断上限'), { code: 'LLM_CANDIDATE_LIMIT' });
           let match = null;
 
           try {
@@ -8085,7 +8187,8 @@ async function executeWorkflowStep(step, context) {
             continue;
           }
           candidateSelection.evaluatedCount += 1;
-          llmRequestPayload = createLlmAssertRequestPayload(assertionPrompt, context.variables || {}, logPayload);
+          llmRequestPayload = createLlmAssertRequestPayload(assertionPrompt, context.variables || {}, logPayload,
+            literalParams.has('assertionPrompt') ? '' : rawValues.assertionPrompt);
           const judgmentStarted = Date.now();
           try {
             llmAssertResult = await budgets.measure('model', modelTimeout => requestWorkflowLlmAssert(provider, llmRequestPayload, {
@@ -8882,6 +8985,311 @@ ipcMain.handle = (channel, handler) => registerRendererHandler(channel, (event, 
   }
   return handler(event, ...args);
 });
+
+// Desktop-owned outbound connection. CLI/Broker-only processes never start it.
+let desktopConnection;
+let labBackgroundService=false;
+const groupNativeAuthorities = new Map();
+function createGroupNativeAuthority(options) {
+  if (!safeStorage.isEncryptionAvailable() || (process.platform === 'linux' && safeStorage.getSelectedStorageBackend?.() === 'basic_text')) return null;
+  let previous, generation = 0;
+  const authority = new (require('./cluster-client/group-native-authority.cjs').GroupNativeAuthority)({
+    directory: path.join(options.directory, 'approved-plans'),
+    waitForState: () => caseUpdateQueue.catch(() => {}), readState: () => readWorkflowState() || {},
+    seal: text => safeStorage.encryptString(text), unseal: bytes => safeStorage.decryptString(bytes),
+    getContext: context => {
+      const connection = options.connector, raw = connection.session, wc = mainWindow?.webContents;
+      if (!raw || !wc || mainWindow.isDestroyed() || wc.isDestroyed() || connection.state.clientId !== context.clientId || raw.epoch !== context.epoch) return null;
+      const scope = { kind:'configured-local', origin:connection.config.serverUrl, orgKey:connection.config.orgKey, projectKey:connection.config.projectKey };
+      const key = JSON.stringify(scope), frame = wc.mainFrame, url = wc.getURL();
+      if (!previous || previous.raw !== raw || previous.sessionId !== raw.sessionId || previous.epoch !== raw.epoch || previous.wc !== wc || previous.frame !== frame || previous.url !== url || previous.key !== key) {
+        previous = { raw,sessionId:raw.sessionId,epoch:raw.epoch,wc,frame,url,key,context:Object.freeze({clientId:context.clientId,epoch:context.epoch,
+          principalId:'local-interactive-owner:'+wc.id,scope:Object.freeze(scope),generation:++generation,
+          platformContext:Object.freeze({webContents:wc})}) };
+      }
+      return previous.context;
+    },
+    promptApproval: async metadata => {
+      if(options.isCancelled?.(metadata.binding.requestId)||options.isSelectionCurrent?.(metadata)===false)return false;
+      const group = options.service.store.get(metadata.binding.groupId);
+      if (!group || group.revision !== metadata.binding.expectedRevision) return false;
+      const members = group.members.map(({deviceId,role})=>({deviceId,role})).sort((a,b)=>a.deviceId.localeCompare(b.deviceId));
+      if (crypto.createHash('sha256').update(JSON.stringify(members)).digest('hex') !== metadata.binding.memberSha256) return false;
+      if (!mainWindow || mainWindow.isDestroyed()) return false;
+      const savedCases=readWorkflowState()?.cases||[];const caseNames=metadata.caseRefs.map(ref=>savedCases.find(c=>c.id===ref.caseId)?.name||'未命名用例');
+      const answer = await dialog.showMessageBox(mainWindow, {type:'question',buttons:['取消','批准执行'],defaultId:0,cancelId:0,
+        message:'执行所选设备组任务？',detail:'本次仅执行已保存用例中的等待流程，总等待不超过60秒，不执行设备控制、命令或业务操作。请核对设备组、用例和执行范围。\n服务器 '+options.connector.config.serverUrl+'\n配置范围 '+options.connector.config.orgKey+'/'+options.connector.config.projectKey+'\n设备组 '+group.name+' ('+group.groupId+') rev '+group.revision+'\n成员 '+members.map(m=>m.role+':'+m.deviceId).join(', ')+'\n请求 '+metadata.binding.requestId+'\n用例 '+caseNames.join('、')+'\n快照 '+metadata.snapshotSha256});
+      return answer.response === 1 && !options.isCancelled?.(metadata.binding.requestId)&&options.isSelectionCurrent?.(metadata)!==false;
+    },
+  });
+  groupNativeAuthorities.set(options.service.clientId, authority);return authority;
+}
+function approvedGroupNativeInput(clientId, rec) {
+  const authority = groupNativeAuthorities.get(clientId);
+  if (!authority) throw Object.assign(new Error('GROUP_AUTHORIZATION_REQUIRED'),{code:'GROUP_AUTHORIZATION_REQUIRED'});
+  return authority.native(rec.requestId,rec.taskId,rec.groupExecutionId);
+}
+function getDesktopConnection() {
+  if (!desktopConnection) desktopConnection = new (require('./cluster-client/desktop-service.cjs').DesktopConnection)({
+    directory: path.join(app.getPath('userData'), 'cluster-connection'), version: app.getVersion(),
+    discoverDevices: async (signal,options) => require('./cluster-client/lab-native.cjs').classifyDevices(await require('./cluster-client/device-snapshot.cjs').androidDiscovery({runAdb,parseAdbDevices})(signal,options),desktopConnection),
+    agentExecutorFactory: directory => agentService.remoteExecutor(directory),
+    labFactory: ({connection,onState}) => {
+      const native=require('./cluster-client/lab-native.cjs');
+      const sender=Object.assign(new EventEmitter(),{id:-process.pid-1,isDestroyed:()=>false,send:(...args)=>{if(mainWindow&&!mainWindow.isDestroyed())mainWindow.webContents.send(...args);}});
+      const context=()=>({sender,origin:'lab-server',clientId:connection.connector.state.clientId});
+      const directory=path.join(connection.directory,'lab',connection.connector.state.clientId);
+      return new (require('./cluster-client/lab-client.cjs').LabClient)({directory,connector:connection.connector,onState,
+        catalog:(signal,options)=>native.catalog({...options,connection,readState:readWorkflowState,hostname:connection.settings.config.computerName||require('node:os').hostname(),signal}),
+        resolveDevice:(id,signal)=>connection.deviceReporter.resolveDevice(id,connection.discoverDevices,signal),
+        api:(request,signal)=>agentService.platformApi(request,context(),signal),
+        readTask:async taskId=>{const r=await invokeApplicationHandler('workflow-report:load-task',context(),{taskId});return r.success?{...r.task,executionFinalized:!activeWorkflowTasks.has(taskId)}:null;},
+        inferContext:(input,signal)=>agentService.inferContext(input,signal),
+        planExecutor:agentService.remoteExecutor(path.join(directory,'planner'),{autoApprove:true,contextFactory:context,allowedTools:[],extraTools:()=>native.planningTools()}),
+        chatExecutor:agentService.remoteExecutor(path.join(directory,'chat'),{autoApprove:true,contextFactory:rec=>({...context(),chatCommandId:rec.agentTaskId}),
+          allowedTools:['list_devices','list_device_groups','save_device_group','list_cases','read_case','list_components','save_case','list_tasks','read_task_report','read_task_result','search_task_log','read_task_attachments','list_skills','read_skill','read_skill_reference'],
+          extraTools:ctx=>[...native.executionTools(connection,ctx),...require('./cluster-client/context-tools.cjs').contextTools(connection,ctx)]})
+      });
+    },
+    groupDispatchFactory: options => {
+      const isCancelled=requestId=>{const db=options.service.store.db;return !!(db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='local_group_submission'").get()&&db.prepare('SELECT cancel_at FROM local_group_submission WHERE request_id=?').get(requestId)?.cancel_at);};
+      const authority = createGroupNativeAuthority({...options,isCancelled,isSelectionCurrent:metadata=>require('./cluster-client/group-submission.cjs').matchesSubmittedSelection(options.service.store,metadata)});
+      return new (require('./cluster-client/group-runtime.cjs').GroupRuntime)({...options,authority,
+        trustedExecution:(wire,context)=>{if(isCancelled(wire.requestId))throw Object.assign(new Error(),{code:'GROUP_STOP_REQUESTED'});return authority ? authority.check(wire,context) : false;}});
+    },
+    groupServiceFactory: options => new (require('./cluster-client/group-service.cjs').GroupService)({
+      ...options, gate: workflowExecutionGate,
+      native: new (require('./cluster-client/group-native.cjs').GroupNative)({
+        directory: path.join(options.directory, 'native'),
+        host: {
+          prepare: ({requestId,taskId,payload}) => {
+            const snapshot = approvedGroupNativeInput(options.clientId,{requestId,taskId});
+            payload = {...payload,cases:snapshot.cases};
+            const source=groupNativeAuthorities.get(options.clientId).records.get(requestId);
+            const groupExecution={clientId:options.clientId,requestId,groupId:source.wire.groupId,revision:source.wire.expectedRevision,caseRefs:snapshot.caseRefs};
+            const task = createWorkflowTaskRecord(payload, payload.cases || [], taskId, payload.taskName || '设备组任务', new Date().toISOString(),groupExecution);
+            persistWorkflowTaskRecord({...task,status:'prepared',requestId});
+          },
+          run: async rec => {
+            // DG1 already owns the all-member lease. Reuse native exception/finalization path,
+            // not public submit; this borrowed handle must never release DG1 ownership.
+            const borrowed = {task:{status:'admitted'},release(){}};
+            const snapshot = approvedGroupNativeInput(options.clientId,rec);
+            const config = {components:snapshot.configuration.components,caseEdges:snapshot.configuration.caseEdges}; // Wait-only profile never resolves model/TTS credentials.
+            const authorityContext = groupNativeAuthorities.get(options.clientId).records.get(rec.requestId);
+            const nativeContext = authorityContext && authorityContext.plans.context(authorityContext.ctx);
+            const result = await enqueueWorkflowTaskExecution({...rec.nativePayload,...config,cases:snapshot.cases,requestId:rec.requestId,taskId:rec.taskId}, {progressSender:nativeContext?.platformContext.webContents,groupExecution:{clientId:options.clientId,requestId:rec.requestId,groupExecutionId:rec.groupExecutionId,groupId:rec.groupSnapshot.groupId,revision:rec.groupSnapshot.revision,members:rec.groupSnapshot.members.map(({deviceId,role})=>({deviceId,role})),caseRefs:snapshot.caseRefs}}, borrowed);
+            return {taskId:rec.taskId,terminal:true,resourcesReleased:true,outcome:result.stopped?'cancelled':result.success?'succeeded':'failed'};
+          },
+          recover: async () => null, // A report file alone does not prove resources were released after a crash.
+          stop: rec => stopWorkflowTaskById(rec.taskId),
+        },
+      }),
+    }),
+    mediaFactory: () => ({
+      capture: require('./cluster-client/media-client.cjs').createScrcpyCapture({
+        subscribeVideo: (serial, observer) => workflowPreviewService.subscribeVideo(serial, observer)
+          || agentPreviewService.subscribeVideo(serial, observer),
+        runtime: () => {
+          const media = resolveMediaRuntime({ resourcesPath: process.resourcesPath, isPackaged: app.isPackaged });
+          return { ...media, transportAdb: media.adb, adb: getAdbPath(), env: getScrcpyEnvironment(media, getAdbAwareCommandEnv()) };
+        },
+        acquireDevice: task => {
+          // createScrcpyCapture uses control=false and a per-stream scid/forward.
+          // Screen viewing never claims a writer slot or blocks later case execution.
+          return workflowExecutionGate.acquireScreenObserver(task);
+        },
+      }),
+    }),
+  });
+  return desktopConnection;
+}
+registerApplicationHandler('cluster-lab:connection', async (_event,input={}) => {
+  const connection=getDesktopConnection();
+  if(input.action==='status')return connection.snapshot();
+  if(input.action==='start'){labBackgroundService=true;return connection.settings.enabled?connection.start():connection.invoke('enable');}
+  if(input.action==='register'){labBackgroundService=true;const result=await connection.invoke('register',input.config);if(!connection.settings.enabled)labBackgroundService=false;return result;}
+  if(input.action==='disable'){labBackgroundService=false;return connection.invoke('disable');}
+  throw Object.assign(new Error('ACTION_INVALID'),{code:'ACTION_INVALID'});
+});
+registerApplicationHandler('cluster-lab-groups:binding', (_event,input) => require('./cluster-client/lab-native.cjs').groupBinding(getDesktopConnection(),input));
+registerApplicationHandler('cluster-lab-groups:list', async () => {
+  const connection=getDesktopConnection();if(!connection.groupService)throw Object.assign(new Error('SESSION_REQUIRED'),{code:'SESSION_REQUIRED'});
+  return {success:true,groups:connection.groupService.store.list()};
+});
+registerApplicationHandler('cluster-lab-groups:save', async (_event,input) => {
+  const connection=getDesktopConnection();if(!connection.groupService||!connection.deviceReporter)throw Object.assign(new Error('SESSION_REQUIRED'),{code:'SESSION_REQUIRED'});
+  return require('./cluster-client/lab-native.cjs').saveGroup({connection,input});
+});
+ipcMain.handle('cluster-connection:api', async (_event, request) => {
+  try { return await getDesktopConnection().invoke(request?.action, request?.config); }
+  catch { return { success: false, errorCode: 'STORAGE_UNAVAILABLE' }; }
+});
+// Private local asset preparation; existing trusted renderer guard applies to this channel.
+let localGroupAssets;
+const assetSessionHandles=new WeakMap();
+function getLocalGroupAssets(connection) {
+  const service=connection.groupService;
+  if(localGroupAssets?.store!==service.store)localGroupAssets=new (require('./cluster-client/group-assets.cjs').GroupAssets)({
+      store:service.store,
+      observe:async()=>{
+        if(!mainWindow||mainWindow.isDestroyed()||mainWindow.webContents.isDestroyed())throw Object.assign(new Error(),{code:'GROUP_AUTHORIZATION_REQUIRED'});
+        const c=connection.connector,session=c.session;if(!session)throw Object.assign(new Error(),{code:'SESSION_REQUIRED'});
+        const links=await runAdb(['devices','-l']);
+        const rows=await connection.discoverDevices();
+        if(c.session!==session)throw Object.assign(new Error(),{code:'GROUP_RECONCILIATION_REQUIRED'});
+        const devices=rows.map(d=>{const fp='sha256:'+crypto.createHash('sha256').update('android:ro.serialno\0'+d.stableId.trim()).digest('hex');const m=connection.deviceReporter.data.mappings[fp];if(!m)throw Object.assign(new Error(),{code:'GROUP_DEVICE_IDENTITY_MISMATCH'});const line=links.split(/\r?\n/).find(l=>l.split(/\s+/)[0]===d.serial);if(!line)throw Object.assign(new Error(),{code:'GROUP_DEVICE_IDENTITY_MISMATCH'});return {deviceId:m.deviceId,sourceIdentity:fp,connection:crypto.createHash('sha256').update(line).digest('hex'),label:d.name||d.serial};}).sort((a,b)=>a.deviceId.localeCompare(b.deviceId));
+        if(!assetSessionHandles.has(session))assetSessionHandles.set(session,crypto.randomUUID());
+        return {scope:{clientId:c.state.clientId,identity:c.identity.fingerprint(),epoch:session.epoch,sessionHandle:assetSessionHandles.get(session),origin:c.config.serverUrl,orgKey:c.config.orgKey,projectKey:c.config.projectKey},principal:'local-interactive-owner:'+mainWindow.webContents.id,devices};
+      },
+      confirm:async({device,role,scope})=>{const result=await dialog.showMessageBox(mainWindow,{type:'question',buttons:['取消','确认设备类型'],defaultId:0,cancelId:0,message:'确认设备类型',detail:'请核对实体设备，不能仅凭型号确认。\n设备 '+device.deviceId+'\n源身份 '+device.sourceIdentity+'\n设备类型 '+({phone:'手机',glasses:'眼镜'}[role])+'\nDesktop '+scope.clientId+'\n仅保存本地角色，不启动任务或批准执行。'});return result.response===1;},
+
+    });
+  return localGroupAssets;
+}
+ipcMain.handle('cluster-assets:api', async (event, request) => {
+  try {
+    if(event?.sender!==mainWindow?.webContents||event?.senderFrame!==mainWindow?.webContents.mainFrame||!mainWindow||mainWindow.isDestroyed())throw Object.assign(new Error(),{code:'GROUP_AUTHORIZATION_REQUIRED'});
+    const connection=getDesktopConnection();
+    if(!connection.groupService||!connection.connector.session)throw Object.assign(new Error(),{code:'SESSION_REQUIRED'});
+    const service=connection.groupService;
+    localGroupAssets=getLocalGroupAssets(connection);
+    const result=await localGroupAssets.invoke(request);
+    return {success:true,result};
+  } catch(error) { const code=error.code||'GROUP_ASSET_PREPARATION_FAILED';require('./diagnostics').record({event:'group.asset-preparation-rejected',code});return {success:false,errorCode:code}; }
+});
+const localGroupSubmissions = new WeakMap();
+registerApplicationHandler('cluster-group-tasks:api', async (event, request) => {
+  try {
+    const localCli=!!cliPlatformToolSender&&!!event&&event.sender===cliPlatformToolSender;
+    if(!mainWindow?.webContents||mainWindow.isDestroyed?.()||!event||(!localCli&&(event.sender!==mainWindow?.webContents||event.senderFrame!==mainWindow?.webContents.mainFrame)))throw Object.assign(new Error(),{code:'GROUP_AUTHORIZATION_REQUIRED'});
+    const connection=getDesktopConnection(),service=connection.groupService;
+    if(!service||!connection.connector?.session)throw Object.assign(new Error(),{code:'SESSION_REQUIRED'});
+    // A local CLI call can select/dispatch, but cannot confirm roles or issue native approval.
+    const assets=getLocalGroupAssets(connection);
+    let api=localGroupSubmissions.get(service);
+    if(!api){api=new (require('./cluster-client/group-submission.cjs').GroupSubmission)({store:service.store,connector:connection.connector,
+      readState:()=>readWorkflowState()||{},waitForState:()=>caseUpdateQueue.catch(()=>{}),assets:()=>assets.invoke({action:'list'}),publish:async()=>{for(let n=0;n<10000;n++){const before=service.store.db.prepare('SELECT count(*) n FROM group_projection_outbox WHERE acked=0').get().n;if(!before)return;await service.publish(connection.connector);const after=service.store.db.prepare('SELECT count(*) n FROM group_projection_outbox WHERE acked=0').get().n;if(after>=before)throw Object.assign(new Error(),{code:'GROUP_RECONCILIATION_REQUIRED'});}throw Object.assign(new Error(),{code:'GROUP_RECONCILIATION_REQUIRED'});},
+      stopLocal:rec=>service.stop(rec.groupExecutionId),readTask:id=>{const detail=getWorkflowReportDetailPath(id);const task=fs.existsSync(detail)?JSON.parse(fs.readFileSync(detail,'utf8')):(readWorkflowState()?.automationTasks||[]).find(t=>t.id===id)||null;return task?{...task,mediaObservers:[...(connection.media?.entries.values()||[])].filter(e=>e.parentTaskId===id&&!e.signal.aborted).map(e=>({taskId:id,deviceId:e.deviceId,mediaSessionId:e.mediaSessionId,sentFrames:e.frames,sentBytes:e.bytes}))}:null;}});localGroupSubmissions.set(service,api);}
+    api.connector=connection.connector;
+    const result=await api.invoke(request);return {success:true,result,...(result?.submission==='unknown'?{submissionOutcome:'unknown'}:{})};
+  }catch(e){return {success:false,errorCode:e.code||'GROUP_RECONCILIATION_REQUIRED'};}
+});
+ipcMain.handle('cluster-connection:pick-ca', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {title:'选择管理员提供的公开 CA 证书',properties:['openFile'],filters:[{name:'CA certificate',extensions:['crt','pem']}]});
+  return {path:result.canceled ? '' : result.filePaths[0]};
+});
+
+const harnessControl = require('./harness-control').createHarnessControl({
+  sourceDirectory: () => app.isPackaged
+    ? path.join(process.resourcesPath, 'harness')
+    : path.resolve(__dirname, '../resources/device-harness'),
+  artifactDirectory: () => path.join(getGlassBoxDataDir(), 'harness-control'),
+  recoveryStore: require('./virtual-recovery-store').createVirtualRecoveryStore({ directory:getGlassBoxDataDir, storage:safeStorage }),
+  gate: workflowExecutionGate,
+  adbPath: () => getAdbPath(),
+});
+const harnessTasks = require('./harness-tasks').createHarnessTasks({control:harnessControl,persist:async task=>{persistWorkflowTaskRecord(task);await workflowReportWriter.flush(getWorkflowReportDetailPath(task.id));},readTasks:()=> (readWorkflowState()?.automationTasks || []).map(task=>{if(task.executionEngine!=='device-harness')return task;const file=getWorkflowReportDetailPath(task.id);return fs.existsSync(file)?JSON.parse(fs.readFileSync(file,'utf8')):task;})});
+const harnessRecovery = harnessTasks.recover();
+harnessRecovery.catch(error=>console.error('[device-harness] task recovery failed:',error.message));
+// The renderer cannot choose a knowledge storage or import path.
+const replyKnowledge = require('./reply-knowledge').createKnowledgeStore({ directory: path.join(app.getPath('userData'), 'reply-knowledge') });
+const replySettings = require('./reply-settings').createReplySettings({ directory: path.join(app.getPath('userData'), 'reply-automation') });
+const replyStore = require('./message-reply-store').createMessageReplyStore({directory:getGlassBoxDataDir(),storage:safeStorage});
+const replyRunStore = require('./message-reply-store').createMessageReplyStore({directory:getGlassBoxDataDir(),storage:safeStorage,kind:'session'});
+const replyEvidenceIndex = require('./message-reply-store').createMessageReplyStore({directory:getGlassBoxDataDir(),storage:safeStorage,kind:'evidence'});
+const replyEvidence = require('./reply-evidence-store').createReplyEvidenceStore({index:replyEvidenceIndex,
+  artifactDirectory:() => path.join(getGlassBoxDataDir(), 'harness-control')});
+const replyStartConfirmation = require('./reply-start-confirmation').createReplyStartConfirmation();
+const replyFixture = require('./message-reply-fixture').createFixtureSessionFactory({control:harnessControl,evidenceStore:replyEvidence,
+  controlConfig:() => ({packageName:process.env.SOLOPI_ANDROID_CONTROL_PACKAGE || 'com.alipay.hulu.fastpath',
+    port:Number(process.env.SOLOPI_ANDROID_CONTROL_PORT || 23343)})});
+let replyActivity = null;
+let replyPersistenceFailed = false;
+const replyTask = require('./message-reply-task').createMessageReplyTask({ ...replyFixture,
+  engineStore:replyStore, runStore:replyRunStore, evidenceStore:replyEvidence,
+  createGenerate:(config, deviceSession) => require('./message-reply-model').createReplyGenerator({
+    knowledge:replyKnowledge, requestModel:require('./agent/model').requestModel,
+    textProvider:config.textProvider, visionProvider:config.visionProvider, role:config.role,
+    contextLimit:config.contextCount, captureImage:deviceSession.captureImage,
+  }),
+  onChange:status => { if(replyActivity)void replyActivity.update(status).catch(error=>{console.error('[reply] task persistence failed:',error.message);if(!replyPersistenceFailed){replyPersistenceFailed=true;void replyTask.stop();}}); if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('reply-task:changed',status); },
+});
+function replyProvider(id) {
+  const provider = (readWorkflowState()?.llmProviders || []).find(item => item.id === id);
+  if (!provider || typeof provider.baseUrl !== 'string' || typeof provider.model !== 'string' || !provider.model) throw Error('reply_model_unavailable');
+  // Code security: provider and credential come from saved desktop settings, never message content.
+  return {...provider,...revealSecrets({apiKey:provider.apiKey},safeStorage)};
+}
+const knowledgeResult = async (action) => {
+  try { return { success: true, value: await action() }; }
+  catch (error) { return { success: false, error: error.code || 'knowledge_error' }; }
+};
+registerApplicationHandler('reply-knowledge:list', () => knowledgeResult(() => replyKnowledge.list()));
+registerApplicationHandler('reply-settings:load', () => knowledgeResult(() => replySettings.load()));
+registerApplicationHandler('reply-settings:save', (_event, payload) => knowledgeResult(() => replySettings.save(payload)));
+const replyTaskResult = async action => {
+  try { return {success:true,value:await action()}; }
+  catch (error) {
+    const allowed = new Set(['reply_already_active','reply_configuration_required','reply_model_unavailable',
+      'send_requires_manual_review','cleanup_recovery_required','notification_unavailable','android_setup_required',
+      'conversation_identity_unconfirmed','fixture_entry_unavailable','fixture_device_request_failed','pending_review_changed','reply_not_running','reply_busy',
+      'reply_confirmation_expired','reply_model_address_invalid','reply_evidence_unavailable','reply_evidence_unsafe','reply_evidence_busy']);
+    return {success:false,error:allowed.has(error?.message) ? error.message : 'reply_task_failed'};
+  }
+};
+registerApplicationHandler('reply-task:status', () => knowledgeResult(() => replyTask.status()));
+registerApplicationHandler('reply-task:history', () => knowledgeResult(() => replyStore.history()));
+registerApplicationHandler('reply-evidence:list', () => replyTaskResult(() => replyTask.listEvidence()));
+registerApplicationHandler('reply-evidence:remove', (_event, id) => replyTaskResult(() => replyTask.removeEvidence(id)));
+registerApplicationHandler('reply-task:clear-history', () => replyTaskResult(() => {
+  if (['starting','running'].includes(replyTask.status().status)) throw Error('reply_already_active');
+  replyStore.clearHistory();
+}));
+registerApplicationHandler('reply-task:prepare-fixture', () => replyTaskResult(async () => {
+  const config = await replySettings.load();
+  if (!config.device || !config.textModel) throw Error('reply_configuration_required');
+  return replyStartConfirmation.prepare({deviceId:config.device,contactId:'friend-1',textProvider:replyProvider(config.textModel),
+    visionProvider:config.visionModel ? replyProvider(config.visionModel) : null,role:config.role,contextCount:config.contextCount});
+}));
+registerApplicationHandler('reply-task:cancel-fixture-confirmation', (_event, token) => replyTaskResult(() => replyStartConfirmation.cancel(token)));
+registerApplicationHandler('reply-task:start-fixture', (_event, token) => replyTaskResult(async () => {
+  await harnessRecovery;
+  if(['starting','running'].includes(replyTask.status().status))throw Error('reply_already_active');
+  const config=replyStartConfirmation.consume(token);
+  replyActivity=await harnessTasks.beginActivity({name:'消息自动回复受控测试',deviceId:config.deviceId,stop:()=>replyTask.stop()});
+  replyPersistenceFailed=false;
+  try{const value=await replyTask.start(config);return {...value,taskId:replyActivity.id};}
+  catch(error){await replyActivity.update({...replyTask.status(),status:'paused',reason:'start_failed'});throw error;}
+}));
+registerApplicationHandler('reply-task:stop', () => replyTaskResult(() => replyTask.stop()));
+registerApplicationHandler('reply-task:simulate-arrival', () => replyTaskResult(() => replyTask.simulateArrival()));
+registerApplicationHandler('reply-task:simulate-image', () => replyTaskResult(() => replyTask.simulateArrival('image')));
+registerApplicationHandler('reply-task:recover', () => replyTaskResult(() => replyTask.recover()));
+registerApplicationHandler('reply-task:review-pending', (_event, payload) => replyTaskResult(() => replyTask.reviewPending(payload?.id)));
+registerApplicationHandler('reply-knowledge:get', (_event, id) => knowledgeResult(() => replyKnowledge.get(id)));
+registerApplicationHandler('reply-knowledge:save', (_event, payload = {}) => knowledgeResult(async () => {
+  if (payload.id) { await replyKnowledge.update(payload.id, { name: payload.name, text: payload.text }); return null; }
+  return replyKnowledge.addText({ name: payload.name, text: payload.text });
+}));
+registerApplicationHandler('reply-knowledge:remove', (_event, id) => knowledgeResult(() => replyKnowledge.remove(id)));
+registerApplicationHandler('reply-knowledge:import', () => knowledgeResult(async () => {
+  const result = await dialog.showOpenDialog(mainWindow, { properties: ['openFile'], filters: [{ name: '知识文档', extensions: ['txt', 'md', 'markdown', 'pdf', 'docx'] }] });
+  return result.canceled || !result.filePaths[0] ? null : replyKnowledge.importFile(result.filePaths[0]);
+}));
+for (const operation of ['discover', 'apps', 'connect', 'command', 'disconnect', 'replay']) {
+  registerApplicationHandler(`harness:${operation}`, async (_event, payload = {}) => {
+    try { await harnessRecovery; return await (operation === 'replay' ? harnessTasks.replay(payload) : harnessControl.request(operation, payload)); }
+    catch (error) { return { success: false, error: error.code || error.message }; }
+  });
+}
+registerApplicationHandler('harness:stop', () => harnessControl.stop());
+registerApplicationHandler('harness:reveal', async () => {
+  const directory = harnessControl.artifactPath();
+  if (!directory) return { success: false, error: 'no_harness_artifacts' };
+  return { success: !(await shell.openPath(directory)) };
+});
+
 
 ipcMain.handle('adb:list-devices', async () => {
   try {
@@ -9752,11 +10160,11 @@ async function stopWorkflowRequest(requestId) {
   for (const cancel of workflowCommandCancels.get(requestId) || []) cancel();
   const runtime = activeWorkflowRuntimes.get(requestId);
 
-  if (runtime) {
+  if (runtime && !runtime.deferEvidenceStop) {
     runtime.logSessions?.forEach(stopWorkflowLogCapture);
     releaseOwnedLogAssertions(runtime.logAssertOwners, logAssertStreams, stopLogAssertStream);
     await Promise.all([
-      ...(runtime.screenRecordSessions || []).map((session) => stopScrcpySession(session, { graceSignal: 'SIGINT' })),
+      ...(runtime.screenRecordSessions || []).map((session) => stopScrcpySession(session, { graceSignal: 'SIGINT', reason:'workflow-cancelled' })),
       ...(runtime.screenMirrorSessions || []).map(stopWorkflowScreenMirror),
     ]);
   }
@@ -9860,12 +10268,31 @@ function getWorkflowLogAssertCheckpoint(context = {}, serial = '', clearBeforeSt
   if (owner && (owner.exited || logAssertStreams.get(serial) !== owner || owner.process.killed)) {
     throw Object.assign(new Error('日志流在本轮执行期间中断或被替换，不能使用历史日志继续断言。'), { code: 'LOG_EVIDENCE_UNAVAILABLE', errorType: 'log-infrastructure' });
   }
-  // Clearing is a per-assertion read boundary, never destructive to shared log capture.
+  // Serial and parallel assertions honor the same configured read boundary.
+  // Clearing is never destructive to the shared log capture.
   if (clearBeforeStart === true) return getCurrentLogAssertSequence(serial);
   const checkpoint = Number(clearBeforeStart === false
     ? context.logAssertRoundCheckpointsBySerial?.[serial]
     : context.logAssertCheckpointsBySerial?.[serial]);
   return Number.isFinite(checkpoint) && checkpoint >= 0 ? checkpoint : 0;
+}
+
+// Explicit scopes preserve action responses already captured before assertion startup.
+// They only move the reader cursor; the shared evidence stream remains intact.
+function getWorkflowLogAssertReadCheckpoint(context, serial, values = {}, fallback = false) {
+  const scope = String(values.logReadScope || '').trim();
+  let clearBeforeStart;
+  if (scope === 'action') {
+    const checkpoint = context.logAssertCheckpointsBySerial?.[serial];
+    if (!Number.isFinite(checkpoint) || checkpoint < 0) {
+      throw Object.assign(new Error('当前动作的日志边界不可用'), {code:'LOG_EVIDENCE_UNAVAILABLE'});
+    }
+    clearBeforeStart = undefined;
+  } else if (scope === 'round') clearBeforeStart = false;
+  else if (scope === 'current') clearBeforeStart = true;
+  else if (scope) throw Object.assign(new Error(`未知日志读取范围：${scope}`), {code:'LOG_READ_SCOPE_INVALID'});
+  else clearBeforeStart = values.clearBeforeStart === undefined ? (fallback === 'action' ? undefined : fallback) : parseWorkflowBoolean(values.clearBeforeStart, false);
+  return getWorkflowLogAssertCheckpoint(context, serial, clearBeforeStart);
 }
 
 function updateWorkflowLogAssertCheckpoint(context = {}, serial = '') {
@@ -10080,6 +10507,112 @@ function getWorkflowCaseComponents(components = [], caseComponents = []) {
   return Object.fromEntries(merged);
 }
 
+function getWorkflowParallelTimeoutPlan(plan, context) {
+  const branches = plan.branches.map(step => {
+    const component = context.components[step.componentId];
+    const logTimeoutMs = Number(step.timeoutMs || Number(component.timeoutSeconds || 10) * 1000);
+    const postDelayMs = Math.max(0, Number(step.postDelayMs || 0));
+    const values = resolveWorkflowValue({...Object.fromEntries((component.params || []).map(p => [p.key,p.defaultValue])), ...step.inputs}, context);
+    // Latest-value watchers have no completion phase. One-shot text/JSON
+    // assertions still run post-pass stability checks after the log deadline.
+    // Screenshots are deferred to the parent after child listeners settle.
+    if (component.kind !== 'llm_assert') {
+      const completionTimeoutMs = step.config?.observationMode === 'latest' ? 0 : getPostAssertObserveMs(values) + postDelayMs;
+      return {stepId:step.id, logTimeoutMs, completionTimeoutMs, totalTimeoutMs:logTimeoutMs + completionTimeoutMs};
+    }
+    const budget = require('./workflow-llm-budgets').createBudgets(logTimeoutMs, values.llmTimeoutMs).snapshot();
+    const completionTimeoutMs = getPostAssertObserveMs(values) + (parseWorkflowBoolean(values.captureScreenshotOnPass,true)
+      ? Object.values(WORKFLOW_SCREENSHOT_TIMEOUTS).reduce((sum,n) => sum+n,0) : 0) + postDelayMs;
+    return {stepId:step.id, ...budget, completionTimeoutMs, totalTimeoutMs:budget.totalTimeoutMs + completionTimeoutMs};
+  });
+  // Parent timer is installed first. A separate dispatch allowance prevents it
+  // from racing a negative assertion that succeeds exactly at its log deadline.
+  const schedulingTimeoutMs = 1000;
+  return {...plan, timeoutMs:Math.max(Number(plan.timeoutMs || 0), ...branches.map(b => b.totalTimeoutMs)) + schedulingTimeoutMs, schedulingTimeoutMs, timeoutBudgets:branches};
+}
+
+async function executeWorkflowParallel(plan, context, onProgress) {
+  plan = getWorkflowParallelTimeoutPlan(plan, context);
+  const requestId = workflowCommandScope.getStore();
+  const controller = new AbortController();
+  const cancel = () => controller.abort();
+  const pending = workflowCommandCancels.get(requestId) || new Set();
+  if(requestId){pending.add(cancel);workflowCommandCancels.set(requestId,pending);}
+  if(isWorkflowCanceled(requestId))controller.abort();
+  try{
+    const observers=new Map();
+    for(const step of plan.branches.filter(b=>b.config?.observationMode==='latest')){
+      const component=context.components[step.componentId];
+      const values=resolveWorkflowValue({...Object.fromEntries((component.params||[]).map(p=>[p.key,p.defaultValue])),...step.inputs},context);
+      const extract=require('./workflow-log-text').createTtsTextExtractor(values.extractRegex,parseWorkflowBoolean(values.caseSensitive,true));
+      observers.set(step.id,{values,extract});
+    }
+    const receipt=await require('./workflow-parallel').runParallelListeners({plan,signal:controller.signal,
+      observe:(step,line)=>{const {values,extract}=observers.get(step.id);const value=extract(line);return value===null?null:{value,ready:evaluateTextAssert(value,values.expectedText,values.matchOperator||'equals',parseWorkflowBoolean(values.caseSensitive,true))};},
+      onProgress:(step,update)=>{
+        if(update.status==='success'&&observers.has(step.id)){
+          const {values}=observers.get(step.id);
+          const extracted=createAssertExtractedVariable(values,update.meta.nodeOutput.value,context,'extractedText');
+          update.stdout=`实际文本：${update.meta.nodeOutput.value}\n命中日志：${update.meta.nodeOutput.line}`;
+          update.meta.assertion={blocking:true,passed:true,outcome:'matched',continued:true};
+          if(extracted)update.meta.extractedVariable=extracted;
+        }
+        onProgress(step,update);
+      },
+      watch:async(step,onLine,onError)=>{
+        const serial=getWorkflowSerial(step,context);
+        const { values } = observers.get(step.id);
+        const boundary=getWorkflowLogAssertReadCheckpoint(context,serial,values,'action');
+        const stream=await prepareLogAssertStream(serial,false);
+        const waiter={matcher:line=>{onLine(line,stream.lineSequence);return false;},reject:onError,resolve:()=>{},timer:null};
+        stream.waiters.add(waiter);
+        try{
+          // Journals yield newest first; the listener ignores older sequence numbers.
+          for(const entry of getWorkflowLogEntries(stream,boundary))onLine(entry.line,entry.sequence);
+        }catch(error){stream.waiters.delete(waiter);throw error;}
+        return ()=>stream.waiters.delete(waiter);
+      },
+      execute:async(step,signal)=>{
+        const childId=`${requestId || 'parallel'}:${crypto.randomUUID()}`;
+        const stop=()=>{workflowCancelRequests.add(childId);for(const fn of workflowCommandCancels.get(childId)||[])fn();};
+        signal.addEventListener('abort',stop,{once:true});
+        try{
+          if(signal.aborted)throw createWorkflowStoppedError();
+          // Keep branch-local extraction/output state isolated from sibling assertions.
+          const originalVariables={...context.variables};
+          const branchContext={...context,deferAssertScreenshots:true,variables:{...originalVariables},nodeOutputs:{...context.nodeOutputs}};
+          const output=await workflowCommandScope.run(childId,async()=>{
+            const value=await executeWorkflowAssertionStep(step,branchContext,()=>executeWorkflowStep(step,branchContext));
+            if(shouldApplyPostDelay(step))await sleepWorkflow(Number(step.postDelayMs||0),childId);
+            return value;
+          });
+          if(signal.aborted)throw createWorkflowStoppedError();
+          for(const [key,value] of Object.entries(branchContext.variables))if(value!==originalVariables[key])context.variables[key]=value;
+          return output;
+        }finally{signal.removeEventListener('abort',stop);workflowCommandCancels.delete(childId);workflowCancelRequests.delete(childId);}
+      },
+    });
+    return receipt;
+  }catch(error){error.meta={...error.meta,assertion:{blocking:true,passed:false,continued:false}};throw error;}
+  finally{
+    // runParallelListeners has now canceled and settled its children. Take
+    // evidence in the parent scope, so a branch timeout cannot cancel screencap.
+    // An explicit stop still cancels the parent and must not start new ADB work.
+    try {
+      if (!isWorkflowCanceled(requestId)) {
+        for (const step of plan.branches) {
+          if (isWorkflowCanceled(requestId)) break;
+          const component = context.components[step.componentId];
+          const values = resolveWorkflowValue({...Object.fromEntries((component.params || []).map(p => [p.key, p.defaultValue])), ...step.inputs}, context);
+          if (parseWorkflowBoolean(values.captureScreenshotOnPass, true)) {
+            await captureWorkflowAssertScreenshot(context, getComponentDevice(component, step), getWorkflowSerial(step, context), step);
+          }
+        }
+      }
+    } finally {pending.delete(cancel);if(requestId&&!pending.size)workflowCommandCancels.delete(requestId);}
+  }
+}
+
 async function runWorkflowCase(payload = {}, options = {}) {
   const { testCase, components = [], requestId = '', disableScreenMirror = false, startConfigOverride = null, llmProviders = [], selectedLlmProviderId = '', ttsProvider = null } = payload;
 
@@ -10092,10 +10625,16 @@ async function runWorkflowCase(payload = {}, options = {}) {
   }
 
   assertImportReviewed(testCase);
-  const stepsWithStartOverride = applyWorkflowStartConfigOverride(testCase.steps, startConfigOverride);
+  const cleanupContract = testCase.steps.some(step => step.phase != null) ? require('./workflow-cleanup') : null;
+  const allStepsWithStartOverride = applyWorkflowStartConfigOverride(testCase.steps, startConfigOverride);
   const rawCaseEdges = Array.isArray(payload.edges)
     ? payload.edges
     : (Array.isArray(payload.caseEdges?.[testCase.id]) ? payload.caseEdges[testCase.id] : (Array.isArray(testCase.edges) ? testCase.edges : []));
+  let regions;
+  try { regions = cleanupContract ? cleanupContract.partitionWorkflowSteps(allStepsWithStartOverride, rawCaseEdges) : {main:allStepsWithStartOverride, cleanup:[]}; }
+  catch(error) { return {success:false, results:[], error:error.message, errorCode:error.code}; }
+  const stepsWithStartOverride = regions.main;
+  const cleanupSteps = regions.cleanup;
   const stepIds = new Set(stepsWithStartOverride.map((step) => String(step?.id || '')).filter(Boolean));
   const rawEdgeError = rawCaseEdges.find((edge) => {
     const source = String(edge?.source || edge?.from || '').trim();
@@ -10151,6 +10690,12 @@ async function runWorkflowCase(payload = {}, options = {}) {
     cleanupImageFiles: shouldCleanupWorkflowImageFiles(effectiveSteps),
     nodeOutputs: {},
   };
+  let parallelPlans;
+  try{
+    const hasParallel=effectiveSteps.some(s=>s.config?.observationMode==='latest'||['parallel','join','log_state'].includes(s.type)||s.type!=='if'&&(outgoing.get(s.id)||[]).filter(e=>['','default'].includes(String(e.sourceHandle??e.handle??e.condition??'').trim().toLowerCase())).length>1);
+    parallelPlans=hasParallel?require('./workflow-parallel').parallelPlans(effectiveSteps,executionEdges,context.components):new Map();
+  }
+  catch(error){return {success:false,results:[],error:error.message,errorCode:error.code,reachedEnd:false,terminationReason:error.code};}
   const devices = {
     ...payload.devices,
     phone: { ...payload.devices?.phone, serial: context.defaults.phoneSerial || '', packageName: context.defaults.phonePackage || '' },
@@ -10161,35 +10706,41 @@ async function runWorkflowCase(payload = {}, options = {}) {
   const evidenceOptions = getWorkflowEvidenceOptions(effectiveSteps, { disableScreenMirror, startConfigOverride });
   context.sharedLogSessions = options.sharedLogSessions;
   context.logReadRanges = [];
-  const sharedRangeStarts = Object.fromEntries(Object.entries(options.sharedLogSessions || {}).map(([serial, session]) => [serial, session.lineSequence]));
+  const caseLogCapture = options.sharedLogSessions ? startCaseLogCapture(options.sharedLogSessions, runDir) : null;
   const logSessions = options.sharedLogSessions ? [] : (await Promise.all([
     evidenceOptions.capturePhoneLog ? startWorkflowLogCapture(runDir, 'phone', context.defaults.phoneSerial, { clearBeforeStart: !payload.stress, sinceNow: Boolean(payload.stress) }) : null,
     evidenceOptions.captureGlassesLog ? startWorkflowLogCapture(runDir, 'glasses', context.defaults.glassesSerial, { clearBeforeStart: !payload.stress, sinceNow: Boolean(payload.stress) }) : null,
   ])).filter(Boolean);
   if (!context.sharedLogSessions) context.sharedLogSessions = Object.fromEntries(logSessions.map(session => [session.serial, session]));
+  let initializationError = null;
   try {
-    await workflowCommandScope.run(requestId, () => initializeWorkflowLogAssertCheckpoints(context, effectiveSteps));
+    await workflowCommandScope.run(requestId, () => initializeWorkflowLogAssertCheckpoints(context, [...effectiveSteps, ...cleanupSteps]));
   } catch (error) {
-    logSessions.forEach(stopWorkflowLogCapture);
-    for (const [serial, owner] of Object.entries(context.logAssertStreamsBySerial || {})) {
-      if (!owner.taskOwned && logAssertStreams.get(serial) === owner) stopLogAssertStream(serial);
+    if (cleanupSteps.length) initializationError = error;
+    else {
+      logSessions.forEach(stopWorkflowLogCapture);
+      await caseLogCapture?.stop();
+      for (const [serial, owner] of Object.entries(context.logAssertStreamsBySerial || {})) {
+        if (!owner.taskOwned && logAssertStreams.get(serial) === owner) stopLogAssertStream(serial);
+      }
+      throw error;
     }
-    throw error;
   }
   const screenRecordSessions = (await Promise.all([
-    evidenceOptions.recordPhoneScreen ? startWorkflowScreenRecord(runDir, 'phone', context.defaults.phoneSerial, { showWindow: evidenceOptions.showPhoneScreen }) : null,
-    evidenceOptions.recordGlassesScreen ? startWorkflowScreenRecord(runDir, 'glasses', context.defaults.glassesSerial, { showWindow: evidenceOptions.showGlassesScreen }) : null,
+    !initializationError && evidenceOptions.recordPhoneScreen ? startWorkflowScreenRecord(runDir, 'phone', context.defaults.phoneSerial, { showWindow: evidenceOptions.showPhoneScreen }) : null,
+    !initializationError && evidenceOptions.recordGlassesScreen ? startWorkflowScreenRecord(runDir, 'glasses', context.defaults.glassesSerial, { showWindow: evidenceOptions.showGlassesScreen }) : null,
   ])).filter(Boolean);
   const screenMirrorSessions = (await Promise.all([
-    evidenceOptions.showPhoneScreen
+    !initializationError && evidenceOptions.showPhoneScreen
       ? startWorkflowScreenMirror('phone', context.defaults.phoneSerial, { runDir })
       : null,
-    evidenceOptions.showGlassesScreen
+    !initializationError && evidenceOptions.showGlassesScreen
       ? startWorkflowScreenMirror('glasses', context.defaults.glassesSerial, { runDir })
       : null,
   ])).filter(Boolean);
   const runtimeTrackingId = requestId || `ui-runtime-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
   activeWorkflowRuntimes.set(runtimeTrackingId, {
+    deferEvidenceStop: true,
     logSessions,
     logAssertOwners: context.logAssertStreamsBySerial,
     screenRecordSessions,
@@ -10282,6 +10833,7 @@ async function runWorkflowCase(payload = {}, options = {}) {
       const startedAt = new Date().toISOString();
 
       try {
+        if (initializationError) throw initializationError;
         if (isWorkflowCanceled(requestId)) {
           throw createWorkflowStoppedError();
         }
@@ -10334,7 +10886,20 @@ async function runWorkflowCase(payload = {}, options = {}) {
           terminationReason = 'reached_end';
           currentStep = null;
         } else if (graphMode) {
-          const nextStep = selectWorkflowNextStep(step, output, stepMap, outgoing);
+          const plan=parallelPlans.get(step.id);
+          let nextStep;
+          if(plan && !['error','false'].includes(String(output.branch||output.meta?.branch||''))){
+            try{
+              const resolvedPlan={...plan,branches:plan.branches.map(b=>({...b,config:resolveWorkflowValue(b.config||{},context)}))};
+              const receipt=await workflowCommandScope.run(requestId,()=>executeWorkflowParallel(resolvedPlan,context,(branch,update)=>{
+                const row={stepId:branch.id,stepName:branch.name,...update};
+                if(update.status==='running'&&!visited.has(branch.id)){visited.add(branch.id);executedPath.push(branch.id);}
+                if(update.status!=='running'){results.push(row);context.nodeOutputs[branch.id]={...(update.meta?.nodeOutput||{}),success:update.status==='success'};}
+                sendProgress(row);
+              }));
+              result.meta={...result.meta,parallel:receipt};nextStep=plan.join;
+            }catch(error){error.parallelGroup=true;error.parallelStepId=results.findLast(r=>plan.branches.some(b=>b.id===r.stepId)&&['failed','stopped'].includes(r.status))?.stepId||plan.branches[0].id;throw error;}
+          }else nextStep=selectWorkflowNextStep(step,output,stepMap,outgoing);
           if (!nextStep) {
             failedEdge = { source: stepId, target: null };
             addStructuralFailure('WORKFLOW_PATH_TERMINATED_EARLY', `节点 ${stepId} 执行后没有合法后继，执行图提前终止。`, step, { failedEdge });
@@ -10354,8 +10919,8 @@ async function runWorkflowCase(payload = {}, options = {}) {
         updateWorkflowLogAssertCheckpointForStep(context, step);
 
         const result = {
-          stepId: step.id,
-          stepName: step.name,
+          stepId: error.parallelStepId || step.id,
+          stepName: stepMap.get(error.parallelStepId)?.name || step.name,
           status: stopped ? 'stopped' : 'failed',
           startedAt,
           completedAt,
@@ -10377,7 +10942,7 @@ async function runWorkflowCase(payload = {}, options = {}) {
           audioArtifact: error.audioArtifact,
         };
 
-        results.push(result);
+        if(!error.parallelGroup || !results.some(r=>r.stepId===result.stepId&&r.status===result.status))results.push(result);
         sendProgress(result);
 
         if (stopped) {
@@ -10401,7 +10966,7 @@ async function runWorkflowCase(payload = {}, options = {}) {
 
         // Explicit/default assertion barriers take precedence over legacy continue-on-error.
         const blockingAssertionFailed = error.meta?.assertion?.blocking === true && error.meta.assertion.passed === false;
-        if (blockingAssertionFailed || !step.continueOnError || String(error.errorCode || error.code || '').startsWith('WORKFLOW_LOG_BOUNDARY_')) {
+        if (error.parallelGroup || blockingAssertionFailed || !step.continueOnError || String(error.errorCode || error.code || '').startsWith('WORKFLOW_LOG_BOUNDARY_')) {
           terminationReason = executedPath.includes(stepId) ? 'step_failed' : 'before_step_failed';
           finalResponse = {
             success: false,
@@ -10448,6 +11013,46 @@ async function runWorkflowCase(payload = {}, options = {}) {
     };
     return finalResponse;
   } finally {
+    // Await cleanup before terminal publication, artifact finalization, device
+    // release or the next case. A normal stop cancels only the business scope.
+    if (cleanupSteps.length) {
+      const cleanupRequestId = `${runtimeTrackingId}:cleanup`;
+      try {
+        const timedCleanupSteps = cleanupSteps.map(step => ({...step, timeoutMs: step.timeoutMs || (step.type === 'component'
+          ? Number(context.components[step.componentId]?.timeoutSeconds || 10) * 1000
+          : step.type === 'wait' ? Math.max(30000, (Number(step.config?.durationMs) || 0) + 1000) : Number(step.config?.timeoutMs || 30000))}));
+        const cleanup = await cleanupContract.runCleanupSteps(timedCleanupSteps, async step => {
+          const stepRequestId = `${cleanupRequestId}:${step.id}`;
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            workflowCancelRequests.add(stepRequestId);
+            for (const cancel of workflowCommandCancels.get(stepRequestId) || []) cancel();
+          }, Math.min(2147483647, step.timeoutMs + Math.max(0, Number(step.postDelayMs) || 0)));
+          try {
+            const output = await workflowCommandScope.run(stepRequestId, async () => {
+              let boundaryWarning;
+              try { await prepareWorkflowActionLogBoundary(context, step); }
+              catch(error) { boundaryWarning = error.message; }
+              const output = await executeWorkflowAssertionStep({...step, config:{...step.config, assertBlocking:true}}, context, () => executeWorkflowStep(step, context));
+              if (boundaryWarning) output.meta = {...output.meta, cleanupLogBoundaryWarning:boundaryWarning};
+              context.nodeOutputs[step.id] = {...(output.meta?.nodeOutput || {}), stdout:output.stdout || '', stderr:output.stderr || '', success:output.success !== false};
+              if (shouldApplyPostDelay(step)) await sleepWorkflow(Number(step.postDelayMs) || 0, stepRequestId);
+              return output;
+            });
+            if (timedOut) throw Object.assign(new Error('清理节点执行超时'), {code:'WORKFLOW_CLEANUP_TIMEOUT'});
+            return output;
+          } catch(error) {
+            if (timedOut) { error.code = 'WORKFLOW_CLEANUP_TIMEOUT'; error.message = '清理节点执行超时'; }
+            throw error;
+          } finally { clearTimeout(timer); workflowCancelRequests.delete(stepRequestId); }
+        }, row => {
+          if (row.status !== 'running') results.push(row);
+          sendProgress(row);
+        });
+        cleanupContract.attachCleanupResult(finalResponse, cleanup);
+      } finally { workflowCancelRequests.delete(cleanupRequestId); }
+    }
     if (finalResponse && typeof options.onTerminal === 'function') {
       try {
         await options.onTerminal({
@@ -10519,12 +11124,13 @@ async function runWorkflowCase(payload = {}, options = {}) {
       artifacts.screenMirrors = (await Promise.all(screenMirrorSessions.map(stopWorkflowScreenMirror))).filter(Boolean);
       artifacts.screenshots = [...(context.screenshots || [])];
       artifacts.logs = options.sharedLogSessions
-        ? Object.entries(options.sharedLogSessions).map(([serial, session]) => ({ ...session.artifact, sharedTaskLog: true, startSequence: sharedRangeStarts[serial], endSequence: session.lineSequence }))
+        ? await caseLogCapture.stop()
         : logSessions.map(stopWorkflowLogCapture).filter(Boolean);
       artifacts.logReadRanges = context.logReadRanges.map(range => ({ ...range, endSequence: range.endSequence ?? context.sharedLogSessions?.[range.serial]?.lineSequence }));
       artifacts.evidenceReady = true;
       artifacts.finalizedAt = new Date().toISOString();
     } finally {
+      await caseLogCapture?.stop();
       releaseOwnedLogAssertions(context.logAssertStreamsBySerial, logAssertStreams, stopLogAssertStream);
       activeWorkflowRuntimes.delete(runtimeTrackingId);
       if (requestId) {
@@ -10535,6 +11141,7 @@ async function runWorkflowCase(payload = {}, options = {}) {
 }
 
 function createWorkflowEdgesFromSteps(steps = []) {
+  steps = Array.isArray(steps) ? steps.filter(step => step.phase !== 'cleanup') : [];
   if (!Array.isArray(steps) || steps.length <= 1) {
     return [];
   }
@@ -10647,7 +11254,7 @@ async function runWorkflowTask(payload = {}, options = {}) {
   const taskName = payload.taskName || `CLI 自动化任务 · ${new Date().toLocaleTimeString('zh-CN', { hour12: false })}`;
   const createdAt = payload.createdAt || new Date().toISOString();
   const taskCases = [];
-  let task = createWorkflowTaskRecord(payload, cases, taskId, taskName, createdAt);
+  let task = createWorkflowTaskRecord(payload, cases, taskId, taskName, createdAt,options.groupExecution);
   let hasFailure = false;
   let wasStopped = false;
   const taskStartedAtMs = Date.now();
@@ -10959,6 +11566,12 @@ async function runWorkflowTask(payload = {}, options = {}) {
 
     wasStopped = wasStopped || Boolean(runResult.stopped) || Boolean(activeTask.stopRequested);
     hasFailure = hasFailure || status === 'failed';
+    if (runResult.cleanup?.status === 'failed') {
+      wasStopped = true;
+      activeTask.stopRequested = true;
+      activeTask.stopReason = '用例清理失败，已停止后续用例，避免残留影响下一条。';
+      activeTask.stopFailure = {caseId, error:activeTask.stopReason, errorCode:'WORKFLOW_CLEANUP_FAILED', errorType:'cleanup'};
+    }
     if (status === 'failed' && isWorkflowTaskEnvironmentPreflightFailure(runResult)) {
       wasStopped = true;
       activeTask.stopRequested = true;
@@ -10992,6 +11605,7 @@ async function runWorkflowTask(payload = {}, options = {}) {
       finishedAt: endedAt,
       results: runResult.results || [],
       artifacts: runResult.artifacts || null,
+      cleanup: runResult.cleanup,
       error: runResult.success ? undefined : runResult.error || `${testCase.name || testCase.id || '用例'} 执行失败`,
       errorCode: runResult.success ? undefined : runResult.errorCode || '',
       errorType: runResult.success ? undefined : runResult.errorType || '',
@@ -11071,26 +11685,36 @@ async function runWorkflowTask(payload = {}, options = {}) {
     recoveryActions: terminalFailure?.recoveryActions || [],
     diagnostics: terminalFailure?.diagnostics,
   };
-  if (performanceCollector) {
-    task = applyWorkflowPerformanceSnapshot(task, await performanceCollector.stop());
-  }
-  if (taskRecordingCoordinator) {
-    task = attachTaskRecordingArtifacts(task, await taskRecordingCoordinator.finalize());
-    delete activeTask.taskRecordingCoordinator;
-  }
-  if (taskMirrorSessions.length) {
-    await Promise.all(taskMirrorSessions.map(stopWorkflowScreenMirror));
-    activeTask.taskMirrorSessions = [];
-  }
-  await activeTask.threadStacks?.stop();
-  if (activeTask.taskLogCapture) {
-    task.taskLogs = await activeTask.taskLogCapture.stop();
-    delete activeTask.taskLogCapture;
-    task.taskLogWarning = task.taskLogs.filter((log) => log.error).map((log) => `${log.deviceType}: ${log.error}`).join('\n');
-  }
-  task = await attachWorkflowTaskReportPackage(task);
-  persistWorkflowTaskRecord(task);
-  await workflowReportWriter.flush(getWorkflowReportDetailPath(taskId));
+  task = await require('./workflow-report-finalization').finalizeTaskReport(task, {
+    finalizeArtifacts: async ready => {
+      let task = ready;
+      if (performanceCollector) {
+        task = applyWorkflowPerformanceSnapshot(task, await performanceCollector.stop());
+      }
+      if (taskRecordingCoordinator) {
+        task = attachTaskRecordingArtifacts(task, await taskRecordingCoordinator.finalize());
+        delete activeTask.taskRecordingCoordinator;
+      }
+      if (taskMirrorSessions.length) {
+        await Promise.all(taskMirrorSessions.map(stopWorkflowScreenMirror));
+        activeTask.taskMirrorSessions = [];
+      }
+      await activeTask.threadStacks?.stop();
+      if (activeTask.taskLogCapture) {
+        task.taskLogs = await activeTask.taskLogCapture.stop();
+        delete activeTask.taskLogCapture;
+        task.taskLogWarning = task.taskLogs.filter((log) => log.error).map((log) => `${log.deviceType}: ${log.error}`).join('\n');
+      }
+      return task;
+    },
+    persist: persistWorkflowTaskRecord,
+    flush: () => workflowReportWriter.flush(getWorkflowReportDetailPath(taskId)),
+    exportPackage: attachWorkflowTaskReportPackage,
+    onReady: async ready => {
+      try { await desktopConnection?.lab?.publishTaskResult(ready, AbortSignal.timeout(5000)); }
+      catch (error) { console.warn('[workflow-report] result delivery deferred:', error.message); }
+    },
+  });
   activeWorkflowTasks.delete(taskId);
   maybeQuitIdleBackgroundBroker();
 
@@ -11161,7 +11785,7 @@ function submitWorkflowTask(payload = {}, options = {}) {
   const taskName = payload.taskName || `CLI 自动化任务 · ${new Date().toLocaleTimeString('zh-CN', { hour12: false })}`;
   const createdAt = new Date().toISOString();
   const task = {
-    ...createWorkflowTaskRecord(payload, cases, taskId, taskName, createdAt),
+    ...createWorkflowTaskRecord(payload, cases, taskId, taskName, createdAt,options.groupExecution),
     status: cases.length ? 'submitted' : 'failed',
     error: cases.length ? undefined : '自动化任务没有可执行用例',
     finishedAt: cases.length ? undefined : new Date().toISOString(),
@@ -11211,13 +11835,24 @@ function submitWorkflowTask(payload = {}, options = {}) {
 }
 
 registerApplicationHandler('workflow-task:creation-event', (_event, payload) => require('./task-creation-diagnostics').recordClientEvent(payload));
+registerApplicationHandler('workflow-report:performance', require('./report-performance-diagnostics').createReportPerformanceRecorder());
+
+registerApplicationHandler('diagnostics:export', require('./diagnostic-export').createDiagnosticExporter({
+  dialog, directory:getGlassBoxDataDir, downloads:()=>app.getPath('downloads'),
+}));
 
 registerApplicationHandler('workflow-task:submit', async (_event, payload = {}) => {
   if(payload.taskId && getRemovedWorkflowTaskIds().includes(payload.taskId))return {success:false,errorCode:'TASK_ID_RETIRED',error:'该任务ID已移除，请为新任务使用新的ID'};
   let result;
   try {
     const resolved = await resolveWorkflowTaskDevices(_event,payload);
-    result = submitWorkflowTask({ ...resolved, source: payload.source || 'ui-broker' });
+    let groupExecution;
+    if(payload.groupId){
+      const binding=await require('./cluster-client/lab-native.cjs').groupBinding(getDesktopConnection(),{groupId:payload.groupId,expectedRevision:payload.expectedGroupRevision});
+      for(const role of ['phone','glasses'])if((resolved.devices?.[role]?.serial||'')!==(binding.devices[role]?.serial||''))throw Object.assign(new Error('GROUP_DEVICE_SELECTION_MISMATCH'),{code:'GROUP_DEVICE_SELECTION_MISMATCH'});
+      groupExecution={clientId:binding.clientId,groupId:binding.groupId,revision:binding.revision,members:binding.members,requestId:String(payload.taskId||'').replace(/^agent-/,''),caseIds:payload.caseIds};
+    }
+    result = submitWorkflowTask({ ...resolved, source: payload.source || 'ui-broker' },{progressSender:_event?.sender,groupExecution});
   } catch (error) {
     if (['TEST_TASK_BUSY','DEVICE_PREFLIGHT_NO_MATCH'].includes(error.code)) return workflowExecutionFailure(error);
     throw error;
@@ -11517,6 +12152,7 @@ ipcMain.handle('workflow-case:update-failed', (event, requestId, error) => {
 
 async function updateCaseFromCli(payload) {
   const state = readWorkflowState() || {};
+  payload={...payload,document:require('./case-storage').compileDocument(payload.document, state)};
   require('./agent/case-batch').checkRevision(state, payload);
   const options = { create: payload.action === 'create-case', libraryId: payload.libraryId, folderId: payload.folderId };
   const existing=state.cases?.find(c=>c.id===payload.caseId);
@@ -11688,6 +12324,16 @@ registerApplicationHandler('workflow-task:stop', async (_event, payload = {}) =>
   return stopWorkflowTaskById(payload.taskId, { force: Boolean(payload.force) });
 });
 
+registerApplicationHandler('workflow-report:read-evidence', async (event, payload = {}) => {
+  try {
+    if (!['search_task_log', 'read_case_artifact'].includes(payload.tool)) throw Error('报告查看器仅允许只读证据工具');
+    const result = await invokeApplicationHandler('workflow-report:load-task', event, {taskId:payload.args?.taskId});
+    if (!result.success) return result;
+    return await require('./report-viewer-read').readReportEvidence(result.task, payload.tool, payload.args || {});
+  } catch (error) { return {success:false,error:error.message}; }
+});
+
+const readWorkflowReportDetail = require('./report-detail-reader').createReportDetailReader();
 registerApplicationHandler('workflow-report:load-task', async (_event, payload = {}) => {
   try {
     const taskId = String(payload.taskId || '').trim();
@@ -11700,18 +12346,17 @@ registerApplicationHandler('workflow-report:load-task', async (_event, payload =
 
     const liveTask = activeWorkflowTasks.get(taskId)?.task;
     if (!liveTask && (!detailPath || !fs.existsSync(detailPath))) {
-      return { success: false, error: '报告详情文件不存在' };
+      return { success: false, errorCode: 'REPORT_DETAIL_NOT_FOUND', taskId, reportDetailPath: detailPath || null,
+        error: `未找到任务 ${taskId} 对应的报告详情：${detailPath || '未记录路径'}；请核对原任务回执中的完整 taskId。` };
     }
-    const task = liveTask || JSON.parse(await fs.promises.readFile(detailPath, 'utf8'));
-    return {
+    const project = task => ({
       success: true,
       reviewSnapshot: require('./agent/review-events').reviewSnapshot(task),
-      task: {
-        ...createWorkflowTaskRendererDetail(task),
-        reportDetailPath: detailPath,
-        reportDetailLoaded: true,
-      },
-    };
+      task: {...createWorkflowTaskRendererDetail(task),reportDetailPath:detailPath,reportDetailLoaded:true},
+    });
+    const result=liveTask ? project(liveTask) : await readWorkflowReportDetail(detailPath,project,{refresh:payload.refresh===true});
+    if(result.task.id!==taskId)throw Error('REPORT_TASK_IDENTITY_MISMATCH');
+    return result;
   } catch (error) {
     return {
       success: false,
@@ -12424,11 +13069,12 @@ registerApplicationHandler('quick-actions:import-script', async (_event, payload
       const action = {
         ...definition,
         ...existing,
-        showInToolbar: existing ? existing.showInToolbar !== false : false,
+        showInToolbar: existing ? existing.showInToolbar !== false : payload.showInToolbar !== false,
         id: existing?.id || crypto.randomUUID(),
         ...(preserveUserConfiguration ? {
           name: existing.name || definition.name,
           description: existing.description || definition.description,
+          usageInstructions: existing.usageInstructions ?? definition.usageInstructions,
           configuredInputs: existing.configuredInputs || null,
           inputOverrides: existing.inputOverrides || {},
           argsOverride: existing.argsOverride || null,
@@ -12511,6 +13157,7 @@ registerApplicationHandler('quick-actions:update', async (_event, payload = {}) 
       ...actions[index],
       name,
       description: String(payload.description ?? actions[index].description ?? '').trim(),
+      usageInstructions: require('./quick-action-usage').normalizeUsageInstructions(payload.usageInstructions ?? actions[index].usageInstructions ?? ''),
       inputs: requestedInputs,
       configuredInputs: requestedInputs,
       inputOverrides: {},
@@ -12739,7 +13386,7 @@ ipcMain.handle('file:save-text', async (_event, payload = {}) => {
     }
 
     fs.mkdirSync(path.dirname(saveResult.filePath), { recursive: true });
-    fs.writeFileSync(saveResult.filePath, content, 'utf8');
+    require('./save-text-export').saveTextExport(saveResult.filePath, content, payload.attachments);
 
     return {
       success: true,
@@ -12753,8 +13400,10 @@ ipcMain.handle('file:save-text', async (_event, payload = {}) => {
   }
 });
 
-ipcMain.handle('file:read-image-data-url', async (_event, targetPath) => {
-  if (!targetPath) {
+ipcMain.handle('file:read-image-data-url', async (_event, request) => {
+  const targetPath = typeof request === 'string' ? request : request?.path;
+  const maxDimension = typeof request === 'object' ? request?.maxDimension : undefined;
+  if (!targetPath || typeof targetPath !== 'string') {
     return { success: false, error: 'Missing path' };
   }
 
@@ -12775,7 +13424,16 @@ ipcMain.handle('file:read-image-data-url', async (_event, targetPath) => {
       return { success: false, error: 'Unsupported image type' };
     }
 
-    const buffer = fs.readFileSync(resolvedPath);
+    const buffer = await fs.promises.readFile(resolvedPath);
+    if (maxDimension !== undefined) {
+      if (!Number.isInteger(maxDimension) || maxDimension < 64 || maxDimension > 1024) return { success: false, error: 'Invalid thumbnail size' };
+      const picture = require('electron').nativeImage.createFromBuffer(buffer);
+      if (picture.isEmpty()) return { success: false, error: 'Invalid image' };
+      const { width, height } = picture.getSize();
+      const ratio = Math.min(1, maxDimension / Math.max(width, height));
+      const thumbnail = picture.resize({ width: Math.max(1, Math.round(width * ratio)), height: Math.max(1, Math.round(height * ratio)) });
+      return { success: true, dataUrl: thumbnail.toDataURL() };
+    }
     return {
       success: true,
       dataUrl: `data:${mimeType};base64,${buffer.toString('base64')}`,
@@ -12981,7 +13639,7 @@ registerApplicationHandler('case-library:pull-git-repo', async (_event, payload 
   try {
     const rootDir = getCaseLibrariesRoot();
     const repoId = getCaseLibraryRepoId(repoUrl, branch);
-    const repoPath = path.join(rootDir, repoId);
+    const repoPath = getLocalCaseLibraryRepoPath(app.getPath('userData'),repoUrl,branch);
 
     fs.mkdirSync(rootDir, { recursive: true });
 
@@ -13068,7 +13726,7 @@ ipcMain.handle('case-library:push-git-repo', async (_event, payload = {}) => {
 
     const rootDir = getCaseLibrariesRoot();
     const repoId = getCaseLibraryRepoId(repoUrl, branch);
-    const repoPath = path.join(rootDir, repoId);
+    const repoPath = getLocalCaseLibraryRepoPath(app.getPath('userData'),repoUrl,branch);
     fs.mkdirSync(rootDir, { recursive: true });
 
     if (fs.existsSync(path.join(repoPath, '.git'))) {
@@ -13130,7 +13788,7 @@ ipcMain.handle('case-library:push-git-repo', async (_event, payload = {}) => {
       assetCount: archivedComponents.copiedAssets.size,
       updatedAt,
     }, null, 2));
-    fs.writeFileSync(path.join(casesDir, workspaceFileName), JSON.stringify(workspacePayload, null, 2));
+    fs.writeFileSync(path.join(casesDir, workspaceFileName), JSON.stringify(require('./case-storage').encodeState(workspacePayload), null, 2));
     const uploadedWorkspaceBytes = fs.readFileSync(path.join(casesDir, workspaceFileName), 'utf8');
     const confirmUploadedSnapshot = async () => {
       try {
@@ -13140,7 +13798,7 @@ ipcMain.handle('case-library:push-git-repo', async (_event, payload = {}) => {
       const committed = await runCommandWithOptions('git', ['show', `HEAD:cases/${workspaceFileName}`], { cwd: repoPath, timeout: 10000, maxBuffer: 1024 * 1024 * 20 });
       if (committed.stdout !== uploadedWorkspaceBytes || fs.readFileSync(path.join(casesDir, workspaceFileName), 'utf8') !== uploadedWorkspaceBytes) return { synchronizedCaseIds: [], skippedCaseIds: cases.map(c => c.id), cases: [], warning: 'Git上传已完成，但提交内容与导出快照不同，本地修改已保留' };
       const sync = require('./case-library-upload-sync').reconcileUpload(readWorkflowState() || {}, uploadSnapshot,
-        hydrateCaseLibraryAssets(workspacePayload.cases, repoPath));
+        hydrateCaseLibraryAssets(workspacePayload.cases, repoPath), {repoPath});
       if (sync.synchronizedCaseIds.length) writeWorkflowState(sync.state);
       require('./diagnostics').record({ event: 'case-library.upload-sync', libraryId: payload.libraryId || '', status: !uploadSnapshot ? 'legacy-no-provenance' : sync.skippedCaseIds.length ? 'local-changes-preserved' : 'synchronized', protectedCaseCount: sync.synchronizedCaseIds.length, conflictCount: sync.skippedCaseIds.length });
       const { state: _state, ...receipt } = sync;
@@ -13353,10 +14011,11 @@ function showMainWindow() {
 }
 
 function hasActiveBrokerWork() {
-  return pendingCliBrokerRequests > 0 || bugreportJobs.hasActive() || activeWorkflowTasks.size > 0 || activeWorkflowRuntimes.size > 0;
+  return labBackgroundService || pendingCliBrokerRequests > 0 || bugreportJobs.hasActive() || activeWorkflowTasks.size > 0 || activeWorkflowRuntimes.size > 0;
 }
 
 function promoteToDesktop() {
+  try { void getDesktopConnection().start(); } catch { /* Settings displays restricted-storage errors. */ }
   desktopModeRequested = true;
   cliBackgroundMode = false;
   suppressForegroundUntil = 0;
@@ -13373,7 +14032,7 @@ function promoteToDesktop() {
 
 function maybeQuitIdleBackgroundBroker() {
   setImmediate(() => {
-    if (desktopModeRequested || hasActiveBrokerWork() || isQuitting) {
+    if (desktopModeRequested || hasActiveBrokerWork() || taskCallbacks?.hasPending() || isQuitting) {
       return;
     }
     isQuitting = true;
@@ -13606,6 +14265,7 @@ function enqueueCliBrokerRequest(kind, payloadPath) {
 
 const batteryControl = createBatteryControl({ jobs: bugreportJobs, directory: () => path.join(getGlassBoxDataDir(), 'bugreport-analysis') });
 const settingsService = createSettingsService({
+  directory:getGlassBoxDataDir,
   readState: readWorkflowState, readEnvironment: readEnvironmentConfig, writeState: writeWorkflowState,
   writeEnvironment: config => writeEnvironmentConfig({ ...config, ttsProvider: normalizeTtsConfig(config.ttsProvider) }),
   notifyEnvironment: () => {
@@ -13627,6 +14287,7 @@ const settingsService = createSettingsService({
   },
 });
 
+let cliPlatformToolSender;
 async function processCliControlPayload(payloadPath) {
   let payload = {};
   try {
@@ -13636,7 +14297,26 @@ async function processCliControlPayload(payloadPath) {
       throw new Error(`Broker dataDir mismatch: broker=${app.getPath('userData')} request=${path.resolve(requestedDataDir)}`);
     }
     let result;
-    if (payload.action === 'quick-action') {
+    if (payload.action === 'platform-tool') {
+      const controller = new AbortController();
+      const cancelFile = path.join(path.dirname(payloadPath), 'cancel');
+      const checkCancel = () => { if (fs.existsSync(cancelFile)) controller.abort(); };
+      checkCancel();
+      const timer = setInterval(checkCancel, 100);
+      // CLI and native Agent use the same tool factory and application handlers.
+      // A background caller has no renderer; environment updates still reach the live UI.
+      if (!cliPlatformToolSender) {
+        cliPlatformToolSender = Object.assign(new EventEmitter(), {
+          id: -process.pid, isDestroyed: () => false,
+          send: (...args) => {
+            if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send(...args);
+          },
+        });
+      }
+      const event = { sender: cliPlatformToolSender };
+      try { result = await agentService.platformApi(payload.request, event, controller.signal); }
+      finally { clearInterval(timer); }
+    } else if (payload.action === 'quick-action') {
       const controller = new AbortController();
       const cancelFile = path.join(path.dirname(payloadPath), 'cancel');
       const checkCancel = () => { if (fs.existsSync(cancelFile)) controller.abort(); };
@@ -13773,7 +14453,23 @@ if (!hasSingleInstanceLock) {
   try {
     const releaseConfiguration=require('./configuration-lock').acquireConfigurationLock(getGlassBoxDataDir(), {ignoreSingleton:true});
     app.once('quit',releaseConfiguration);
-  } catch(error) {shouldStartApp=false;console.error('[configuration]',error.code||'CONFIGURATION_IN_USE');app.exit(1);}
+    const stopMailbox = require('./broker-mailbox').serveRequests(getGlassBoxDataDir(), request => handleBrokerArgv([], request));
+    app.once('quit', stopMailbox);
+  } catch(error) {
+    shouldStartApp=false;
+    if (error.code === 'CONFIGURATION_IN_USE' && isCliRunMode) {
+      try {
+        if (require('./broker-mailbox').forwardRequest(getGlassBoxDataDir(), createSingleInstanceRequestData())) {
+          app.exit(0);
+          return;
+        }
+      } catch (forwardError) {
+        console.warn('[broker-mailbox] forwarding unavailable:', forwardError.code || forwardError.message);
+      }
+    }
+    require('./broker-startup-refusal').writeBrokerStartupRefusal({taskPayloadPath:getCliRunTaskPayloadPath(),controlPayloadPath:getCliControlPayloadPath(),error});
+    console.error('[configuration]',error.code||'CONFIGURATION_IN_USE');app.exit(1);
+  }
   app.on('second-instance', (_event, argv = [], _workingDirectory = '', additionalData = {}) => {
     if (isQuitting) return;
     if (handleBrokerArgv(argv, additionalData)) {
@@ -13791,6 +14487,7 @@ let stopDevelopmentRetention;
 if (shouldStartApp) {
   app.whenReady().then(() => {
     getRuntimeDiagnostics();
+    getTaskCallbacks().start();
     if (cliBackgroundMode) {
       const backend=backgroundRuntime.headless ? 'headless' : 'desktop';
       console.info('[background-runtime]',JSON.stringify({backend,pid:process.pid}));
@@ -13829,7 +14526,7 @@ const agentPreviewService = createScrcpyPreview({
   warmIdleMs: 120000,
   runtime: () => {
     const media = resolveMediaRuntime({ resourcesPath: process.resourcesPath, isPackaged: app.isPackaged });
-    return { ...media, adb: media.adb || getAdbPath(), env: getScrcpyEnvironment(media, getAdbAwareCommandEnv()) };
+    return { ...media, transportAdb: media.adb, adb: getAdbPath(), env: getScrcpyEnvironment(media, getAdbAwareCommandEnv()) };
   },
   allowed: target => mirrorTargets(activeWorkflowTasks.get(target.taskId)?.task).some(t => t.role === target.role && t.serial === target.serial),
 });
@@ -13847,7 +14544,7 @@ const workflowPreviewService = createScrcpyPreview({
   warmIdleMs: 120000,
   runtime: () => {
     const media = resolveMediaRuntime({ resourcesPath: process.resourcesPath, isPackaged: app.isPackaged });
-    return { ...media, adb: media.adb || getAdbPath(), env: getScrcpyEnvironment(media, getAdbAwareCommandEnv()) };
+    return { ...media, transportAdb: media.adb, adb: getAdbPath(), env: getScrcpyEnvironment(media, getAdbAwareCommandEnv()) };
   },
   onState: (target, state) => { const s = embeddedMirrorSessions.get(target.taskId); if (s) Object.assign(s, state); },
   allowed: target => { const s = embeddedMirrorSessions.get(target.taskId); return Boolean(s && s.serial === target.serial && s.deviceType === target.role); },
@@ -13925,7 +14622,9 @@ require('./team-configuration-ipc').installTeamConfiguration({
 });
 
 const agentService = installAgent({
-  ipcMain, directory: getGlassBoxDataDir, invoke: invokeApplicationHandler,
+  ipcMain, registerService: registerApplicationHandler, directory: getGlassBoxDataDir, invoke: invokeApplicationHandler,
+  virtualControl: harnessControl, getVirtualDevice: () => ({ ...currentHeaderDevices.phone }),
+  getVirtualControlConfig: () => ({packageName:process.env.SOLOPI_ANDROID_CONTROL_PACKAGE || 'com.alipay.hulu',port:Number(process.env.SOLOPI_ANDROID_CONTROL_PORT || 23342)}),
   deviceOperation: (action, args, signal) => require('./agent/device-operation').deviceOperation(action, args, { runAdb, signal }),
   getMirrorTargets: id => mirrorTargets(activeWorkflowTasks.get(id)?.task), previewService: agentPreviewService,
   subscribeOperations: listener => { agentOperationEvents.on('operation', listener); return () => agentOperationEvents.off('operation', listener); },
@@ -13936,6 +14635,8 @@ const agentService = installAgent({
   readState: () => readWorkflowState() || {},
   provider: async () => {
     const state = readWorkflowState() || {};
+    const localSelection=require('./agent/local-runtime.cjs').readSelection(getGlassBoxDataDir());
+    if(localSelection.mode==='local-runtime')return {...await require('./agent/local-runtime.cjs').resolveProvider({...localSelection,runtimeDirectory:getGlassBoxDataDir()}),contextWindowTokens:131072,maxOutputTokens:8192};
     const pinnedId=process.env.NODE_ENV==='development'&&process.env.LENSWIPER_DEV_AGENT_MODEL?process.env.LENSWIPER_DEV_AGENT_PROVIDER_ID:undefined;
     const provider = state.llmProviders?.find(p => p.id === (pinnedId || state.selectedLlmProviderId)) || (!pinnedId?state.llmProviders?.[0]:undefined);
     if (!provider) throw Error(pinnedId?'开发 Agent 指定的模型配置不存在':'请先在设置中心添加支持工具调用的模型');
@@ -13947,7 +14648,8 @@ const agentService = installAgent({
   getAgentModelOverride:()=>process.env.NODE_ENV==='development'?process.env.LENSWIPER_DEV_AGENT_MODEL:undefined,
   getAgentModelProviderId:()=>process.env.NODE_ENV==='development'&&process.env.LENSWIPER_DEV_AGENT_MODEL?process.env.LENSWIPER_DEV_AGENT_PROVIDER_ID:undefined,
   saveCase: async payload => {
-    let doc = payload.document?.case || payload.document;
+    let doc = require('./case-storage').compileDocument(payload.document?.case || payload.document, readWorkflowState() || {});
+    payload={...payload,document:payload.document?.case?{...payload.document,case:doc}:doc};
     if (payload.action === 'create-case') {
       doc = newAgentCase(doc);
       payload = { ...payload, document: payload.document?.case ? { ...payload.document, case: doc } : doc };
@@ -13973,10 +14675,12 @@ app.on('before-quit', (event) => {
   if (quitCleanupStarted) return;
   quitCleanupStarted = true;
   stopDevelopmentRetention?.();
+  taskCallbacks?.stop();
   isQuitting = true;
   const stops = [
+    desktopConnection?.close(),
     soloPiRecording.stopAll(),
-    agentService.stopAll(),
+    Promise.allSettled([agentService.stopAll(), replyTask.stop(), harnessTasks.stopAll()]).then(() => harnessControl.stop()),
     agentPreviewService.close(),
     bugreportJobs.stopAll(),
     ...[...performanceCrashSessions.values()].map(entry => entry.collector.stop()),
@@ -13999,6 +14703,7 @@ app.on('before-quit', (event) => {
   void Promise.race([drained, new Promise((resolve) => { quitTimer = setTimeout(resolve, 3000); })])
     .finally(async () => {
       clearTimeout(quitTimer);
+      harnessControl.terminateOwnedProcess();
       cancelAllManagedCommands();
       require('./scrcpy-transport').closeAllScrcpyTransports();
       for (const active of activeWorkflowTasks.values()) {

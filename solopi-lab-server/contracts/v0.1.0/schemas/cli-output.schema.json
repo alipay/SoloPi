@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.1.0/cli-output.schema.json",
+  "title": "CliOutputEnvelope",
+  "type": "object",
+  "required": ["ok"],
+  "additionalProperties": false,
+  "properties": {
+    "ok": { "type": "boolean" },
+    "data": { "type": "object", "additionalProperties": true },
+    "error": {
+      "type": "object",
+      "required": ["code", "message", "retryable"],
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" },
+        "retryable": { "type": "boolean" },
+        "details": { "type": "object", "additionalProperties": true },
+        "retryAfterSec": { "type": "integer" }
+      }
+    }
+  }
+}

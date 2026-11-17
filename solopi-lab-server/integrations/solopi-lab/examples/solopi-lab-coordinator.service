@@ -1,0 +1,19 @@
+[Unit]
+Description=SoloPi laboratory coordinator
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=solopi
+UMask=0077
+WorkingDirectory=/var/lib/solopi-lab/coordinator
+EnvironmentFile=/etc/solopi-lab/coordinator.env
+ExecStart=/opt/solopi-lab/venv/bin/solopi-lab --config /etc/solopi-lab/coordinator.json coordinator --root /var/lib/solopi-lab/coordinator
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=60
+# Default listener is loopback. Configure a TLS reverse proxy before remote nodes connect.
+
+[Install]
+WantedBy=multi-user.target

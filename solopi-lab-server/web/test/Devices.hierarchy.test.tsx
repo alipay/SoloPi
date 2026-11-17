@@ -1,0 +1,7 @@
+import {cleanup,render,screen,within} from '@testing-library/react';import {afterEach,expect,it,vi} from 'vitest';import {Overview} from '../src/pages/Overview';
+vi.mock('../src/hooks/useDeliveryArea',()=>({useDeliveryArea:(x:any)=>x}));
+vi.mock('../src/hooks/usePollingArea',()=>({usePollingArea:(x:any)=>({status:'ready',rows:x.key==='clients'?[{clientId:'a',displayName:'Mac A',online:'online',registration:{status:'approved'},capabilities:{media:true}},{clientId:'b',displayName:'Mac B',online:'online',registration:{status:'approved'},capabilities:{media:true}}]:[]})}));
+vi.mock('../src/hooks/useDevicesReadView',()=>({useDevicesReadView:()=>({state:{kind:'confirmed',rows:[{clientId:'a',deviceId:'d1',deviceName:'手机A',status:'online'},{clientId:'b',deviceId:'d2',deviceName:'眼镜B',status:'online'}]},rows:[]})}));
+vi.mock('../src/api/group-levels-ro',()=>({fetchGroupLevelsPage:async()=>({items:[{clientId:'a',groups:[{groupId:'g1',name:'真实组一',deleted:false,members:[{deviceId:'d1'}]}]}],nextPage:null})}));
+vi.mock('../src/components/MediaViewerPanel',()=>({MediaViewerPanel:()=>null}));afterEach(cleanup);
+it('nests actual group membership under the owning Desktop and retains ungrouped devices',async()=>{render(<Overview deviceHub/>);const g=await screen.findByRole('region',{name:'真实组一'});expect(within(g).getByText('手机A')).toBeTruthy();expect(within(g).queryByText('眼镜B')).toBeNull();expect(screen.getAllByText('手机A')).toHaveLength(1);expect(screen.getByText('此电脑尚未建立设备组')).toBeTruthy();});

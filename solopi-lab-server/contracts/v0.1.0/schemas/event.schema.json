@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.1.0/event.schema.json",
+  "title": "EventEnvelope",
+  "$defs": {
+    "ulid": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "rfc3339": { "type": "string", "format": "date-time" }
+  },
+  "type": "object",
+  "required": ["eventId", "stream", "seq", "epoch", "type", "data", "occurredAt"],
+  "additionalProperties": false,
+  "properties": {
+    "eventId": { "$ref": "#/$defs/ulid" },
+    "stream": { "type": "string", "pattern": "^(client|web):[0-9A-HJKMNP-TV-Z]{26}$" },
+    "seq": { "type": "integer", "minimum": 1 },
+    "epoch": { "type": "integer", "minimum": 1 },
+    "type": {
+      "enum": [
+        "heartbeat.missed", "enrollment.approved", "enrollment.rejected",
+        "client.revoked", "client.renewed",
+        "task.dispatched", "task.cancel_requested", "task.state_changed",
+        "command.result", "asset.updated", "media.state"
+      ]
+    },
+    "data": { "type": "object", "additionalProperties": true },
+    "occurredAt": { "$ref": "#/$defs/rfc3339" }
+  }
+}

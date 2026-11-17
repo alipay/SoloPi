@@ -1,10 +1,12 @@
-import { verifyFFmpegCompliance } from './ffmpeg-compliance.mjs';
+import {verifyStagedCliFile} from './verify-staged-cli.mjs';
+import { verifyFFmpegDistribution } from './ffmpeg-compliance.mjs';
 import { verifyFFmpegSourceArchive } from './create-ffmpeg-source-archive.mjs';
 import { verifyThirdPartyNotices } from './third-party-notices.mjs';
 import { verifyElectronEntitlements } from './verify-mac-entitlements.mjs';
 import {verifyRetiredAppUpdate} from './verify-retired-app-update.mjs';
 import { verifyRetiredCapturePage } from './verify-retired-capture-page.mjs';
 import { verifyPackagedRuntimeDependencies } from './verify-packaged-runtime-dependencies.mjs';
+import {verifyCliTaskQuery} from './prepare-cli-task-query.mjs';
 import { createRequire } from 'node:module';
 import { execFileSync, spawnSync } from 'node:child_process';
 import crypto from 'node:crypto';
@@ -133,11 +135,13 @@ if (fs.existsSync(packagedUpdateConfigPath)) {
 }
 const mediaRuntimeVerificationWorkspace = fs.mkdtempSync(path.join(root, 'build', 'verify-media-runtime-'));
 try {
-  verifyFFmpegCompliance(sourceMediaRuntimePath);
+  const mediaDistribution=verifyFFmpegDistribution(sourceMediaRuntimePath);
+  if(mediaDistribution.mode==='source-build') {
   await verifyFFmpegSourceArchive(path.join(root,'release',`solopi-desktop-${packageJson.version}-darwin-arm64-ffmpeg-sources.tar.gz`),{requireChecksum:true});
   const record=JSON.parse(fs.readFileSync(path.join(sourceMediaRuntimePath,'ffmpeg-build.json'),'utf8'));
   const recordFiles=['ffmpeg-build.json',record.recipe.path,...(record.buildFiles||[]).map(r=>r.path),...record.sources.flatMap(s=>[s.archive.path,s.license.path,...(s.buildRecipe?[s.buildRecipe.path]:[])])];
   for(const file of recordFiles) if(!fs.readFileSync(path.join(packagedMediaRuntimePath,file)).equals(fs.readFileSync(path.join(sourceMediaRuntimePath,file)))) throw Error(`Packaged FFmpeg source/build material differs: ${file}`);
+  } else if(!fs.readFileSync(path.join(packagedMediaRuntimePath,'ffmpeg-prebuilt.json')).equals(fs.readFileSync(path.join(sourceMediaRuntimePath,'ffmpeg-prebuilt.json')))) throw Error('Prebuilt verification record changed');
   const sourceGitRuntime = path.join(root, 'resources/git-runtime/darwin-arm64');
   const packagedGitCode = fingerprintMachOCode(path.join(packagedGitRuntime, 'bin/git-lfs'), mediaRuntimeVerificationWorkspace, 'packaged-git-lfs');
   const sourceGitCode = fingerprintMachOCode(path.join(sourceGitRuntime, 'bin/git-lfs'), mediaRuntimeVerificationWorkspace, 'source-git-lfs');
@@ -358,19 +362,26 @@ console.log(`verified packaged app resources: ${appPath}`);
 
 if (!fs.readFileSync(path.join(appPath, 'Contents/Resources/cli/development-tasks.cjs')).equals(fs.readFileSync(path.join(root, 'electron/development-tasks.js')))) throw new Error('Packaged development task module mismatch');
 if (!fs.readFileSync(path.join(appPath, 'Contents/Resources/cli/task-visibility.cjs')).equals(fs.readFileSync(path.join(root, 'electron/task-visibility.js')))) throw new Error('Packaged task visibility module mismatch');
+if (!fs.readFileSync(path.join(appPath, 'Contents/Resources/cli/task-removal-index.cjs')).equals(fs.readFileSync(path.join(root, 'electron/task-removal-index.js')))) throw new Error('Packaged task removal index mismatch');
 
 if (!fs.readFileSync(path.join(appPath, 'Contents/Resources/cli/workflow-performance.cjs')).equals(fs.readFileSync(path.join(root, 'electron/workflow-performance.js')))) throw new Error('Packaged workflow performance module mismatch');
 
 if (!fs.readFileSync(path.join(appPath, 'Contents/Resources/cli/performance-battery.cjs')).equals(fs.readFileSync(path.join(root, 'electron/performance-battery.js')))) throw new Error('Packaged CLI battery parser differs from source');
 if (!fs.readFileSync(path.join(appPath, 'Contents/Resources/cli/workflow-log-text.cjs')).equals(fs.readFileSync(path.join(root, 'electron/workflow-log-text.js')))) throw new Error('Packaged CLI log sample validator differs from source');
 
-if (!fs.readFileSync(path.join(appPath, 'Contents/Resources/cli/diagnostics.cjs')).equals(fs.readFileSync(path.join(root, 'electron/diagnostics.js')))) throw new Error('Packaged diagnostics module mismatch');
+verifyStagedCliFile(path.join(appPath,'Contents/Resources'),root,'diagnostics.cjs');
 
 if (!fs.readFileSync(path.join(appPath, 'Contents/Resources/cli/workflow-log-diagnostics.cjs')).equals(fs.readFileSync(path.join(root, 'electron/workflow-log-diagnostics.js')))) throw new Error('Packaged CLI log diagnostics differs from source');
 
 if (!fs.existsSync(path.join(appPath, "Contents/Resources/cli/headless-configuration.cjs"))) throw Error("Packaged CLI headless configuration service is missing");
-if (fs.readFileSync(path.join(appPath, 'Contents/Resources/cli/task-case-query.cjs'), 'utf8') !== fs.readFileSync(path.join(root, 'electron/task-case-query.js'), 'utf8')) throw Error('Packaged CLI task case query is stale');
+verifyCliTaskQuery(root, path.join(appPath, 'Contents/Resources/cli'));
 
-for(const name of ['case-selection','case-discovery','selection-receipt','case-scope-summary']){const expected=fs.readFileSync(path.join(root,'electron','agent',name+'.js'),'utf8').replace("require('./case-discovery')","require('./case-discovery.cjs')").replaceAll("require('./selection-receipt')","require('./selection-receipt.cjs')").replaceAll("require('./case-scope-summary')","require('./case-scope-summary.cjs')");if(fs.readFileSync(path.join(appPath,'Contents/Resources/cli',name+'.cjs'),'utf8')!==expected)throw Error('Packaged case selection module mismatch: '+name);}
+for(const name of ['case-selection','case-discovery','case-graph','selection-receipt','case-scope-summary']){const expected=fs.readFileSync(path.join(root,'electron','agent',name+'.js'),'utf8').replace("require('./case-discovery')","require('./case-discovery.cjs')").replaceAll("require('./selection-receipt')","require('./selection-receipt.cjs')").replaceAll("require('./case-scope-summary')","require('./case-scope-summary.cjs')").replaceAll("require('./case-graph')","require('./case-graph.cjs')");if(fs.readFileSync(path.join(appPath,'Contents/Resources/cli',name+'.cjs'),'utf8')!==expected)throw Error('Packaged case selection module mismatch: '+name);}
 
 if(fs.readFileSync(path.join(appPath,'Contents/Resources/cli/task-device-selection.cjs'),'utf8')!==fs.readFileSync(path.join(root,'electron/task-device-selection.js'),'utf8'))throw Error('Packaged device selection module mismatch');
+
+if (fs.readFileSync(path.join(appPath, 'Contents/Resources/cli/workflow-parallel.cjs'), 'utf8') !== fs.readFileSync(path.join(root, 'electron/workflow-parallel.js'), 'utf8')) throw Error('Packaged CLI parallel validator is stale');
+
+const callbackSource=fs.readFileSync(path.join(root,'electron/task-callbacks.js'),'utf8').replace("require('./managed-command')","require('./managed-command.cjs')").replace("require('./workflow-task-events')","require('./workflow-task-events.cjs')");
+if(fs.readFileSync(path.join(appPath,'Contents/Resources/cli/task-callbacks.cjs'),'utf8')!==callbackSource)throw Error('Packaged callback module mismatch');
+if(!fs.readFileSync(path.join(appPath,'Contents/Resources/cli/managed-command.cjs')).equals(fs.readFileSync(path.join(root,'electron/managed-command.js'))))throw Error('Packaged callback command runtime mismatch');

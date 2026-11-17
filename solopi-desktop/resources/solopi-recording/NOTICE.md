@@ -1,7 +1,7 @@
 # SoloPi recording companion
 
-SoloPi.apk is the unmodified official SoloPi v1.0.2 release from
-https://github.com/alipay/SoloPi/releases/tag/v1.0.2 .
+SoloPi.apk is the unmodified SoloPi v1.0.4 companion from the upstream repository:
+https://github.com/alipay/SoloPi/tree/84c28ed045926c413eaa548359d953f77ad0d7fb .
 
 Copyright 2015-present Ant Financial Services Group and SoloPi contributors.
 Licensed under the Apache License, Version 2.0; see LICENSE.txt.

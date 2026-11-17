@@ -1,0 +1,20 @@
+[Unit]
+Description=SoloPi laboratory node
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=solopi
+UMask=0077
+WorkingDirectory=/var/lib/solopi-lab/node
+EnvironmentFile=/etc/solopi-lab/node.env
+ExecStart=/opt/solopi-lab/venv/bin/solopi-lab --config /etc/solopi-lab/node.json node --root /var/lib/solopi-lab/node
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=60
+# Use the same user and configured SoloPi data directory as the installed executor.
+# This node owns only tasks it submitted; desktop-owned tasks keep their existing lifecycle.
+
+[Install]
+WantedBy=multi-user.target

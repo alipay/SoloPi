@@ -249,17 +249,18 @@ function escapeHtml(value: string) {
 
 function getReportSummary(report: PerformanceReport) {
   return {
-    memory: summarize(report.samples.map((item) => item.memoryKb)),
-    cpu: summarize(report.samples.map((item) => item.cpuPercent)),
-    threads: summarize(report.samples.map((item) => item.threadCount)),
-    systemMemory: summarize(report.samples.map((item) => item.systemAvailableMemoryKb)),
-    systemCpu: summarize(report.samples.map((item) => item.systemAvailableCpuPercent)),
+    memory: summarize(report.samples.filter(item => !item.error).map((item) => item.memoryKb)),
+    cpu: summarize(report.samples.filter(item => !item.error).map((item) => item.cpuPercent)),
+    temperature: summarize(report.samples.filter(item => !item.error).map(item => item.batteryTemperatureC)),
+    threads: summarize(report.samples.filter(item => !item.error).map((item) => item.threadCount)),
+    systemMemory: summarize(report.samples.filter(item => !item.error).map((item) => item.systemAvailableMemoryKb)),
+    systemCpu: summarize(report.samples.filter(item => !item.error).map((item) => item.systemAvailableCpuPercent)),
     failedCount: report.samples.filter((item) => item.error).length,
     latestSample: report.samples[report.samples.length - 1],
   };
 }
 
-function buildExportTrendSvg(report: PerformanceReport) {
+export function buildExportTrendSvg(report: PerformanceReport) {
   const width = 720;
   const height = 220;
   const chartLeft = 62;
@@ -270,8 +271,8 @@ function buildExportTrendSvg(report: PerformanceReport) {
   const chartHeight = height - chartTop - chartBottom;
 
   return metricTrendConfigs.map((config) => {
-    const values = report.samples.map(config.getValue);
-    const extraValues = config.getExtraValue ? report.samples.map(config.getExtraValue) : [];
+    const values = report.samples.map(sample => sample.error ? undefined : config.getValue(sample));
+    const extraValues = config.getExtraValue ? report.samples.map(sample => sample.error ? undefined : config.getExtraValue!(sample)) : [];
     const range = getRange([...values, ...extraValues], config.floorAtZero);
     const chart = { left: chartLeft, top: chartTop, width: chartWidth, height: chartHeight };
     const path = buildLinePath(values, range, chart);
@@ -287,9 +288,10 @@ function buildExportTrendSvg(report: PerformanceReport) {
     }).filter(Boolean).join('');
 
     return `<section class="trend-card">
-      <h3>${escapeHtml(config.label)}${config.unit ? ` ${escapeHtml(config.unit)}` : ''}</h3>
-      <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(config.label)}趋势图">
+      <h3>${escapeHtml(config.label)}${config.unit ? ` ${escapeHtml(config.unit)}` : ''}${config.extraLabel ? ` · 虚线：${escapeHtml(config.extraLabel)}` : ''}</h3>
+      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(config.label)}趋势图">
         <rect x="0" y="0" width="${width}" height="${height}" rx="14" fill="#f8fafc" />
+        <text x="${chartLeft}" y="17" font-family="sans-serif" font-size="11" fill="#334155">${escapeHtml(config.label)} ${escapeHtml(config.unit)}${config.extraLabel ? ` · 虚线：${escapeHtml(config.extraLabel)}` : ''}</text>
         ${ticks.map((tick, tickIndex) => {
           const y = chartTop + tickIndex * (chartHeight / 2);
           return `<g>
@@ -306,7 +308,7 @@ function buildExportTrendSvg(report: PerformanceReport) {
   }).join('\n');
 }
 
-function buildReportMarkdown(report: PerformanceReport) {
+export function buildReportMarkdown(report: PerformanceReport, imageDirectory?: string) {
   const summary = getReportSummary(report);
   const createdAt = new Date(report.createdAt).toLocaleString('zh-CN', { hour12: false });
   const trendSvg = buildExportTrendSvg(report);
@@ -331,7 +333,8 @@ function buildReportMarkdown(report: PerformanceReport) {
     `- 版本：${report.packageVersion || '-'}`,
     `- 系统：${report.runtime === 'android' ? 'Android / adb' : '鸿蒙 / hdc'}`,
     `- 采样：${report.samples.length} 次，失败 ${summary.failedCount} 次`,
-    `- 间隔：${report.intervalSeconds}s`,
+    `- 间隔：${report.intervalSeconds > 0 ? `${report.intervalSeconds}s` : '以实际采样时间为准'}`,
+    `- 采样窗口：${report.samples[0]?.timestamp || '-'} → ${report.samples[report.samples.length - 1]?.timestamp || '-'}`,
     `- 应用崩溃：${crashSummary(report.crashes)}`,
     `- 采集范围：${report.crashes?.scope === 'device' ? `设备全部应用，目标包及子进程 ${report.crashes.targetCount ?? 0} 次；系统事件与应用崩溃日志去重` : '历史采集：仅目标包系统事件'}`,
     `- 崩溃采集状态：${report.crashes?.status || '未采集'} ${report.crashes?.error || ''}`,
@@ -344,22 +347,22 @@ function buildReportMarkdown(report: PerformanceReport) {
     `- CPU：均值 ${formatMetric(summary.cpu.avg, '%')}，峰值 ${formatMetric(summary.cpu.max, '%')}，可用最低 ${formatMetric(summary.systemCpu.min, '%')}`,
     `- 线程：均值 ${formatMetric(summary.threads.avg)}，峰值 ${formatMetric(summary.threads.max)}，最后采样 ${summary.latestSample ? new Date(summary.latestSample.timestamp).toLocaleTimeString('zh-CN', { hour12: false }) : '-'}`,
     '',
+    `- 电池温度（设备）：均值 ${formatMetric(summary.temperature.avg, '°C')}，峰值 ${formatMetric(summary.temperature.max, '°C')}`,
+    '',
     '## 趋势图',
     '',
-    '<div class="trend-grid">',
-    trendSvg,
-    '</div>',
+    ...(imageDirectory ? metricTrendConfigs.map(config => `![${config.label}趋势图](${imageDirectory}/${config.key}.png)`) : [trendSvg]),
     '',
     '## 采样明细',
     '',
     '| 时间 | PID | 内存 | CPU | 线程 | 电池温度（设备） | 可用内存 | 可用CPU | 状态 |',
     '| --- | --- | --- | --- | --- | --- | --- | --- | --- |',
-    ...rows.map((row) => `| ${row.map((cell) => String(cell).replace(/\|/g, '\\|')).join(' | ')} |`),
+    ...rows.map((row) => `| ${row.map((cell) => escapeHtml(String(cell)).replace(/\r?\n/g, '<br>').replace(/\|/g, '\\|')).join(' | ')} |`),
     '',
   ].join('\n');
 }
 
-function buildReportHtml(report: PerformanceReport) {
+export function buildReportHtml(report: PerformanceReport) {
   const summary = getReportSummary(report);
   const createdAt = new Date(report.createdAt).toLocaleString('zh-CN', { hour12: false });
   const trendSvg = buildExportTrendSvg(report);
@@ -388,6 +391,8 @@ function buildReportHtml(report: PerformanceReport) {
     h1 { margin: 0 0 8px; font-size: 28px; }
     .meta, .card { border: 1px solid #e2e8f0; background: #fff; border-radius: 16px; padding: 18px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06); }
     .meta-grid, .summary { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    @media (max-width: 800px) { .trend-grid, .summary, .meta-grid { grid-template-columns: 1fr !important; } main { padding: 16px; } }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; }
     .trend-grid { display: grid; gap: 14px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .trend-card { border: 1px solid #e2e8f0; background: #fff; border-radius: 16px; padding: 14px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06); }
     .trend-card h3 { margin: 0 0 10px; color: #334155; font-size: 14px; }
@@ -404,13 +409,14 @@ function buildReportHtml(report: PerformanceReport) {
   <main>
     <h1>${escapeHtml(report.name)}</h1>
     <p class="muted">${escapeHtml(createdAt)} · ${report.samples.length} 次采样 / 失败 ${summary.failedCount} 次</p>
+    <p class="muted">采样窗口：${escapeHtml(report.samples[0]?.timestamp || '-')} → ${escapeHtml(report.samples[report.samples.length - 1]?.timestamp || '-')}</p>
     <section class="meta">
       <div class="meta-grid">
         <div><div class="muted">设备</div><strong>${escapeHtml(report.serial || '-')}</strong></div>
         <div><div class="muted">包名</div><strong>${escapeHtml(report.packageName || '-')}</strong></div>
         <div><div class="muted">版本</div><strong>${escapeHtml(report.packageVersion || '-')}</strong></div>
         <div><div class="muted">系统</div><strong>${report.runtime === 'android' ? 'Android / adb' : '鸿蒙 / hdc'}</strong></div>
-        <div><div class="muted">间隔</div><strong>${report.intervalSeconds}s</strong></div>
+        <div><div class="muted">间隔</div><strong>${report.intervalSeconds > 0 ? `${report.intervalSeconds}s` : '以实际采样时间为准'}</strong></div>
       </div>
     </section>
     <section><h2>应用崩溃：${escapeHtml(crashSummary(report.crashes))}</h2>
@@ -420,9 +426,10 @@ function buildReportHtml(report: PerformanceReport) {
       ${(report.crashes?.events || []).map(event => `<pre>${event.isTarget === true ? '目标包' : event.isTarget === false ? '其他进程' : '历史记录'} · ${escapeHtml(event.processName)} · ${escapeHtml(event.sources?.join(' + ') || 'am_crash')}\n${escapeHtml(event.evidence)}</pre>`).join('')}
     </section>
     <section class="summary">
-      <div class="card"><div class="muted">内存峰值 / 可用最低</div><div class="value">${escapeHtml(formatMemory(summary.memory.max))} / ${escapeHtml(formatMemory(summary.systemMemory.min))}</div></div>
-      <div class="card"><div class="muted">CPU峰值 / 可用最低</div><div class="value">${escapeHtml(formatMetric(summary.cpu.max, '%'))} / ${escapeHtml(formatMetric(summary.systemCpu.min, '%'))}</div></div>
-      <div class="card"><div class="muted">线程峰值 / 最后采样</div><div class="value">${escapeHtml(formatMetric(summary.threads.max))} / ${summary.latestSample ? escapeHtml(new Date(summary.latestSample.timestamp).toLocaleTimeString('zh-CN', { hour12: false })) : '-'}</div></div>
+      <div class="card"><div class="muted">电池温度峰值 / 均值（设备）</div><div class="value">${escapeHtml(formatMetric(summary.temperature.max, '°C'))} / ${escapeHtml(formatMetric(summary.temperature.avg, '°C'))}</div></div>
+      <div class="card"><div class="muted">内存峰值 / 均值 / 可用最低</div><div class="value">${escapeHtml(formatMemory(summary.memory.max))} / ${escapeHtml(formatMemory(summary.memory.avg))} / ${escapeHtml(formatMemory(summary.systemMemory.min))}</div></div>
+      <div class="card"><div class="muted">CPU峰值 / 均值 / 可用最低</div><div class="value">${escapeHtml(formatMetric(summary.cpu.max, '%'))} / ${escapeHtml(formatMetric(summary.cpu.avg, '%'))} / ${escapeHtml(formatMetric(summary.systemCpu.min, '%'))}</div></div>
+      <div class="card"><div class="muted">线程峰值 / 均值 / 最后采样</div><div class="value">${escapeHtml(formatMetric(summary.threads.max))} / ${escapeHtml(formatMetric(summary.threads.avg))} / ${summary.latestSample ? escapeHtml(new Date(summary.latestSample.timestamp).toLocaleTimeString('zh-CN', { hour12: false })) : '-'}</div></div>
     </section>
     <section>
       <h2>趋势图</h2>
@@ -440,16 +447,42 @@ function buildReportHtml(report: PerformanceReport) {
 </html>`;
 }
 
-async function exportReport(report: PerformanceReport, format: 'md' | 'html') {
+// Rasterize the same vector charts used by HTML; Markdown readers need real image files.
+async function renderReportImages(report: PerformanceReport) {
+  const charts = buildExportTrendSvg(report).match(/<svg[\s\S]*?<\/svg>/g) || [];
+  return Promise.all(charts.map(async (svg, index) => {
+    const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+    try {
+      const image = new Image();
+      await new Promise<void>((resolve, reject) => {
+        image.onload = () => resolve();
+        image.onerror = () => reject(new Error('图表图片生成失败'));
+        image.src = url;
+      });
+      const canvas = document.createElement('canvas');
+      canvas.width = 1440; canvas.height = 440;
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('当前环境不支持生成图表图片');
+      context.fillStyle = '#ffffff'; context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      return { name: `${metricTrendConfigs[index].key}.png`, base64: canvas.toDataURL('image/png').split(',')[1] };
+    } finally { URL.revokeObjectURL(url); }
+  }));
+}
+
+export async function exportReport(report: PerformanceReport, format: 'md' | 'html') {
   const baseName = sanitizeFileName(report.name);
   const electronApi = getElectronApi();
   const isMarkdown = format === 'md';
-  const content = isMarkdown ? buildReportMarkdown(report) : buildReportHtml(report);
+  const imageDirectory = `performance-images-${crypto.randomUUID()}`;
+  const attachments = isMarkdown ? await renderReportImages(report) : undefined;
+  const content = isMarkdown ? buildReportMarkdown(report, imageDirectory) : buildReportHtml(report);
   const extension = isMarkdown ? 'md' : 'html';
   const result = await electronApi?.ipcRenderer?.invoke('file:save-text', {
     title: isMarkdown ? '导出 Markdown 报告' : '导出 HTML 报告',
     defaultPath: `${baseName}.${extension}`,
     content,
+    ...(attachments ? { attachments: { directory: imageDirectory, files: attachments } } : {}),
     filters: [
       {
         name: isMarkdown ? 'Markdown' : 'HTML',
@@ -939,11 +972,11 @@ function SampleTable({ samples }: { samples: PerformanceSample[] }) {
 function ReportSnapshot({ report }: { report: PerformanceReport }) {
   const [exportMessage, setExportMessage] = useState('');
   const [exportedPath, setExportedPath] = useState('');
-  const memorySummary = summarize(report.samples.map((item) => item.memoryKb));
-  const cpuSummary = summarize(report.samples.map((item) => item.cpuPercent));
-  const threadSummary = summarize(report.samples.map((item) => item.threadCount));
-  const systemMemorySummary = summarize(report.samples.map((item) => item.systemAvailableMemoryKb));
-  const systemCpuSummary = summarize(report.samples.map((item) => item.systemAvailableCpuPercent));
+  const memorySummary = summarize(report.samples.filter(item => !item.error).map((item) => item.memoryKb));
+  const cpuSummary = summarize(report.samples.filter(item => !item.error).map((item) => item.cpuPercent));
+  const threadSummary = summarize(report.samples.filter(item => !item.error).map((item) => item.threadCount));
+  const systemMemorySummary = summarize(report.samples.filter(item => !item.error).map((item) => item.systemAvailableMemoryKb));
+  const systemCpuSummary = summarize(report.samples.filter(item => !item.error).map((item) => item.systemAvailableCpuPercent));
   const failedCount = report.samples.filter((item) => item.error).length;
   const latestSample = report.samples[report.samples.length - 1];
   const handleExport = async (format: 'md' | 'html') => {

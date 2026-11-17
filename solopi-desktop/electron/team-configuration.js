@@ -23,7 +23,7 @@ function validateManifest(input) {
   let value;
   try { value = typeof input === 'string' ? JSON.parse(input) : clone(input); } catch { throw Error('团队配置不是有效 JSON'); }
   if (Buffer.byteLength(JSON.stringify(value)) > 5 * 1024 * 1024) throw Error('团队配置不能超过 5 MB');
-  fields(value, ['schemaVersion','id','name','version','caseRepositories','shortcutRepositories','quickActions','llmProviders','selectedLlmProviderId','ttsProvider','deviceBindings'], '团队配置');
+  fields(value, ['schemaVersion','id','name','version','caseRepositories','shortcutRepositories','quickActions','llmProviders','selectedLlmProviderId','ttsProvider','deviceBindings','localRuntimes'], '团队配置');
   if (value.schemaVersion !== VERSION) throw Error('不支持的团队配置版本');
   for (const k of ['id','name','version']) text(value[k], k);
   for (const key of ['caseRepositories','shortcutRepositories','quickActions','llmProviders']) {
@@ -68,6 +68,7 @@ function validateManifest(input) {
       }
     }
   }
+  if (value.localRuntimes !== undefined) require('./agent/runtime-registry.cjs').validate(value.localRuntimes);
   if (value.ttsProvider !== undefined) {
     const t = value.ttsProvider; fields(t, ttsFields, 'ttsProvider');
     if (t.url) http(t.url, 'ttsProvider.url');
@@ -112,7 +113,7 @@ function configurationPatch(state, manifest, overwrite = true) {
   return patch;
 }
 const pick=(source,keys)=>Object.fromEntries(keys.filter(k=>source[k]!==undefined).map(k=>[k,source[k]]));
-function exportManifest({state,environment,actions,id='team',name='我的团队配置',version='1',includeKeys=false,readScript}) {
+function exportManifest({state,environment,actions,id='team',name='我的团队配置',version='1',includeKeys=false,readScript,localRuntimes}) {
   const result={schemaVersion:VERSION,id,name,version,
     caseRepositories:(state.caseLibraries || []).filter(l=>l.repoUrl).map(l=>({...pick(l,repositoryFields),branch:l.gitBranch || l.branch || 'master'})),
     quickActions:actions.filter(a=>!a.gitSource).map(a=>({id:a.teamSource?.actionId||a.id,fileName:require('node:path').basename(a.scriptPath),content:readScript(a.scriptPath),configuration:require('./quick-action-git').portableConfig(a),showInToolbar:a.showInToolbar!==false})),
@@ -121,6 +122,7 @@ function exportManifest({state,environment,actions,id='team',name='我的团队�
     ...(state.selectedLlmProviderId ? {selectedLlmProviderId:state.selectedLlmProviderId} : {}),
     ...(environment.ttsProvider ? {ttsProvider:pick(environment.ttsProvider,ttsFields)} : {}),
     ...(state.deviceBindings ? {deviceBindings:pick(state.deviceBindings,bindingFields)} : {})};
+  if (localRuntimes?.length) result.localRuntimes=localRuntimes;
   if (!includeKeys) {
     result.llmProviders.forEach(p=>delete p.apiKey);
     result.caseRepositories.forEach(p=>{delete p.authToken;});
@@ -128,7 +130,7 @@ function exportManifest({state,environment,actions,id='team',name='我的团队�
   }
   return validateManifest(result);
 }
-function createImporter({readState,savePatch,readEnvironment,saveEnvironment,pullCases,parseCases,mergeCases,importScripts,importAction,progress=()=>{}}) {
+function createImporter({readState,savePatch,readEnvironment,saveEnvironment,pullCases,parseCases,mergeCases,importScripts,importAction,saveRuntimes,progress=()=>{}}) {
   let busy=false;
   return async (input,{overwrite=true}={})=>{
     if (busy) return {success:false,errorCode:'TEAM_IMPORT_BUSY',error:'团队配置正在导入'};
@@ -140,12 +142,27 @@ function createImporter({readState,savePatch,readEnvironment,saveEnvironment,pul
     };
     try {
       const m=validateManifest(input);manifest=m;
+      if(m.localRuntimes&&!saveRuntimes)throw Error('当前宿主不支持运行时配置导入');
       configurationPatch(readState(),m,overwrite); // Validate cross references before any write/network.
-      await step('configuration','模型、常用设备与默认包',()=>savePatch(s=>configurationPatch(s,m,overwrite)));
-      if (m.ttsProvider) await step('tts','TTS 配置',async()=>{
-        if (!overwrite && readEnvironment().ttsProvider?.url) return {success:true,unchanged:true};
-        return saveEnvironment({...m.ttsProvider,headersText:m.ttsProvider.headersText || ''});
-      });
+      // Start independent configuration categories together. savePatch applies
+      // field-only patches against current state; its storage adapter queues commits.
+      // Await every started category before releasing busy or starting Git work.
+      const local = await Promise.allSettled([
+        ...(m.localRuntimes?[step('runtimes','本地运行时',()=>saveRuntimes(m.localRuntimes,{overwrite}))]:[]),
+        step('configuration','模型配置',()=>savePatch(s=>configurationPatch(s,pick(m,['llmProviders','selectedLlmProviderId']),overwrite))),
+        ...(m.deviceBindings ? [step('devices','常用设备与默认包',()=>savePatch(s=>configurationPatch(s,{deviceBindings:m.deviceBindings},overwrite)))] : []),
+        ...(m.ttsProvider ? [step('tts','TTS 配置',async()=>{
+          if (!overwrite && readEnvironment().ttsProvider?.url) return {success:true,unchanged:true};
+          return saveEnvironment({...m.ttsProvider,headersText:m.ttsProvider.headersText || ''});
+        })] : []),
+        (async()=>{
+          // Actions share a store: keep their read/modify/write sequence ordered.
+          for (const action of m.quickActions || []) await step(`action:${action.id}`,`快捷操作 · ${action.configuration?.name || action.id}`,()=>importAction(m.id,action,{overwrite}));
+        })(),
+      ]);
+      const failed=local.find(r=>r.status==='rejected');
+      if(failed) throw failed.reason;
+      for (const repo of m.shortcutRepositories || []) await step(`shortcuts:${repo.id}`,`快捷仓库 · ${repo.name || repo.id}`,()=>importScripts(repo,{overwrite}));
       for (const repo of m.caseRepositories || []) await step(`cases:${repo.id}`,`用例库 · ${repo.name || repo.id}`,async()=>{
         const existing=(readState().caseLibraries || []).find(l=>l.id===repo.id || (l.repoUrl===repo.repoUrl && (l.gitBranch||l.branch||'master')===(repo.branch||'master')));
         if (existing && !overwrite) return {success:true,unchanged:true};
@@ -176,12 +193,10 @@ function createImporter({readState,savePatch,readEnvironment,saveEnvironment,pul
           return pick(next,fields);
         });
       });
-      for (const repo of m.shortcutRepositories || []) await step(`shortcuts:${repo.id}`,`快捷仓库 · ${repo.name || repo.id}`,()=>importScripts(repo,{overwrite}));
-      for (const action of m.quickActions || []) await step(`action:${action.id}`,`快捷操作 · ${action.configuration?.name || action.id}`,()=>importAction(m.id,action,{overwrite}));
       return {success:true,id:m.id,version:m.version,steps};
     } catch(error) {
       // Do not echo input (may contain keys) or arbitrary provider/Git errors into diagnostics.
-      return {success:false,id:manifest?.id,version:manifest?.version,errorCode:'TEAM_IMPORT_FAILED',error:steps.at(-1)?.errorCode==='BUNDLED_GIT_LFS_UNAVAILABLE'?'内置 Git LFS 不可用，请修复或重新安装 solopi-desktop；已完成项目保留。':steps.at(-1)?.errorCode==='GIT_LFS_MISSING'?'本机缺少 Git LFS，请先完成 Git LFS 配置后重试；已完成项目保留。':'导入未全部完成，已完成项目保留；请检查失败项目的来源、权限或配置后重试。',steps,validationError:steps.length===0 ? error.message : undefined};
+      return {success:false,id:manifest?.id,version:manifest?.version,errorCode:'TEAM_IMPORT_FAILED',error:steps.find(r=>r.status==='failed')?.errorCode==='BUNDLED_GIT_LFS_UNAVAILABLE'?'内置 Git LFS 不可用，请修复或重新安装 solopi-desktop；已完成项目保留。':steps.find(r=>r.status==='failed')?.errorCode==='GIT_LFS_MISSING'?'本机缺少 Git LFS，请先完成 Git LFS 配置后重试；已完成项目保留。':'导入未全部完成，已完成项目保留；请检查失败项目的来源、权限或配置后重试。',steps,validationError:steps.length===0 ? error.message : undefined};
     } finally {busy=false;}
   };
 }

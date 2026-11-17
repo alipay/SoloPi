@@ -2,3 +2,27 @@
 /doc/
 /output/
 .DS_Store
+
+# Local development and release outputs
+**/node_modules/
+**/dist/
+**/build/
+**/release/
+**/.desktop-*
+**/data/
+**/handoff/
+**/__pycache__/
+**/*.egg-info/
+.private-local/
+.env
+.env.*
+*.local
+
+# Local packaging inputs and signing receipts are never source archives.
+**/.glassbox-notary/
+**/.glassbox-package-mac.lock
+**/.metadata_never_index
+solopi-desktop/resources/media-runtime/*
+!solopi-desktop/resources/media-runtime/README.md
+solopi-desktop/resources/git-runtime/
+**/.DS_Store

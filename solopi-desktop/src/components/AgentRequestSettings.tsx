@@ -10,7 +10,7 @@ export default function AgentRequestSettings({id,busy,onClose}:{id?:string;busy:
   const [policy,setPolicy]=useState<Policy|null>(null),[report,setReport]=useState<Report|null>(null),[error,setError]=useState(''),[pairs,setPairs]=useState(3),[saving,setSaving]=useState(false);
   const invoke=async(channel:string,args={})=>{const r=await api?.invoke(channel,args);if(!r)throw Error('请通过桌面端打开');if(r.success===false)throw Error(r.error);return r;};
   useEffect(()=>{let live=true;void invoke('agent:request-policy').then(r=>{if(live)setPolicy(r.policy);}).catch(e=>{if(live)setError(e.message);});if(id)void invoke('agent:comparison',{id}).then(r=>{if(live)setReport(r.report);});
-    const update=(_event:unknown,value:{id:string;report:Report})=>{if(value.id===id)setReport(value.report);};api?.on('agent:comparison',update);return()=>{live=false;api?.removeListener('agent:comparison',update);};},[id]);
+    const update=(_event:unknown,value:{id:string;report:Report})=>{if(value.id===id)setReport(value.report);};api?.on?.('agent:comparison',update);return()=>{live=false;api?.removeListener?.('agent:comparison',update);};},[id]);
   const running=report?.status==='running',locked=busy||running||saving;
   const save=async()=>{setSaving(true);setError('');try{await invoke('agent:save-request-policy',{policy});}catch(e){setError(e instanceof Error?e.message:String(e));throw e;}finally{setSaving(false);}};
   return <Dialog open onOpenChange={open=>{if(!open)onClose();}}><DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto"><DialogTitle>模型请求与流式对照</DialogTitle><DialogDescription>设置应用于后续 Agent 请求。对照固定最近一次模型输入，不执行工具；会产生模型用量。</DialogDescription>

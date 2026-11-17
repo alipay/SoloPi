@@ -1,11 +1,11 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const os = require('node:os');
 const crypto = require('node:crypto');
 const TERMINAL = new Set(['success','failed','stopped','completed','cancelled','interrupted']);
 const RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 const INTERVAL_MS = 24 * 60 * 60 * 1000;
-const tempRoot = () => path.join(os.tmpdir(), 'solopi-desktop-development');
+// Keep report sources outside OS temporary storage and outside the formal data directory.
+const workspaceRoot = ownerDir => path.join(path.dirname(real(ownerDir)), 'solopi-desktop-development', crypto.createHash('sha256').update(real(ownerDir)).digest('hex').slice(0, 16));
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const real = dir => fs.existsSync(dir) ? fs.realpathSync(dir) : path.resolve(dir);
 function workspace(dir) {
@@ -13,7 +13,7 @@ function workspace(dir) {
 }
 function provenance(dataDir) {const m=workspace(dataDir);return m?{mode:'development',commit:m.commit,sourceSha256:m.sourceSha256,caseSourceRevision:m.caseSourceRevision}:undefined;}
 function isDevelopmentTask(task) { return task?.executionProvenance?.mode==='development'; }
-function visibleTasks(tasks, dataDir) { return workspace(dataDir) ? [] : tasks.filter(t=>!isDevelopmentTask(t)); }
+function visibleTasks(tasks, dataDir) { return tasks; }
 function registerWorkspace(dataDir, ownerDir) {
   const m=workspace(dataDir);if(!m || real(m.sourceDataDir)!==real(ownerDir))return false;
   const dir=path.join(ownerDir,'development-workspaces');fs.mkdirSync(dir,{recursive:true,mode:0o700});
@@ -26,7 +26,7 @@ function claimWorkspace(dataDir) {
 }
 function pidAlive(pid) { if(!Number.isSafeInteger(pid)||pid<1)return false;try{process.kill(pid,0);return true;}catch(e){return e.code!=='ESRCH';} }
 function latestTime(task) { return Date.parse(task.finishedAt || task.updatedAt || task.createdAt || ''); }
-async function sweep({signal, ownerDir, listLegacy=()=>[], cleanLegacy, now=Date.now(), retentionMs=RETENTION_MS, root=tempRoot(), alive=pidAlive}) {
+async function sweep({signal, ownerDir, listLegacy=()=>[], cleanLegacy, now=Date.now(), retentionMs=RETENTION_MS, root=workspaceRoot(ownerDir), alive=pidAlive}) {
   const result={removedWorkspaces:[],removedTaskIds:[],skipped:[],errors:[]};
   // Old development records are purged through their owning Broker, never by
   // rewriting another application's task index or recursively deleting its root.
@@ -59,7 +59,7 @@ async function sweep({signal, ownerDir, listLegacy=()=>[], cleanLegacy, now=Date
     try{
       const {dataDir}=read(entry);if(!fs.existsSync(dataDir)){fs.unlinkSync(entry);continue;}
       const m=workspace(dataDir),resolved=real(dataDir),base=real(root);
-      // Only our dedicated temporary root is eligible for whole-directory expiry.
+      // Only our dedicated managed root is eligible for whole-directory expiry.
       if(!m || real(m.sourceDataDir)!==real(ownerDir) || path.dirname(resolved)!==base || fs.lstatSync(dataDir).isSymbolicLink()){result.skipped.push(dataDir);continue;}
       const state=read(path.join(dataDir,'workflow-editor-state.json')),tasks=state.automationTasks || [];
       let ownerPid=m.ownerPid;try{ownerPid=read(path.join(dataDir,'dev-workspace-owner.json')).pid;}catch(e){if(e.code!=='ENOENT')throw e;}
@@ -77,4 +77,4 @@ function startRetention(options) {
   const timer=setInterval(run,INTERVAL_MS);timer.unref?.();void run();
   return ()=>{stopped=true;controller.abort();clearInterval(timer);};
 }
-module.exports={RETENTION_MS,INTERVAL_MS,tempRoot,workspace,provenance,claimWorkspace,isDevelopmentTask,visibleTasks,registerWorkspace,sweep,startRetention};
+module.exports={RETENTION_MS,INTERVAL_MS,workspaceRoot,workspace,provenance,claimWorkspace,isDevelopmentTask,visibleTasks,registerWorkspace,sweep,startRetention};

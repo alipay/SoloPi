@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.1.0/client-summary.schema.json",
+  "title": "ClientSummary",
+  "$defs": {
+    "ulid": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "rfc3339": { "type": "string", "format": "date-time" }
+  },
+  "type": "object",
+  "required": ["orgId", "projectId", "clientId", "installationId", "keyFingerprint", "status", "online", "lastHeartbeatAt", "leaseExpiresAt", "clientVersion", "capabilities", "occupancy", "deviceScope"],
+  "additionalProperties": false,
+  "properties": {
+    "orgId": { "$ref": "#/$defs/ulid" },
+    "projectId": { "$ref": "#/$defs/ulid" },
+    "clientId": { "$ref": "#/$defs/ulid" },
+    "installationId": { "$ref": "#/$defs/ulid" },
+    "keyFingerprint": { "type": "string" },
+    "status": { "enum": ["pending", "approved", "revoked", "expired", "rejected"] },
+    "online": { "enum": ["online", "offline", "unknown"] },
+    "lastHeartbeatAt": { "oneOf": [{ "$ref": "#/$defs/rfc3339" }, { "const": "—" }] },
+    "leaseExpiresAt": { "oneOf": [{ "$ref": "#/$defs/rfc3339" }, { "const": "—" }] },
+    "clientVersion": { "type": "string" },
+    "capabilities": {
+      "type": "object",
+      "required": ["commands", "media"],
+      "properties": { "commands": { "type": "boolean" }, "media": { "type": "boolean" } }
+    },
+    "occupancy": {
+      "type": "object",
+      "required": ["localUiTasks", "cliTasks"],
+      "properties": { "localUiTasks": { "type": "integer" }, "cliTasks": { "type": "integer" } }
+    },
+    "deviceScope": {
+      "type": "object",
+      "required": ["deviceId", "os", "hostname"],
+      "properties": {
+        "deviceId": { "type": "string" },
+        "os": { "type": "string" },
+        "hostname": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
+    "grantedAt": { "$ref": "#/$defs/rfc3339" },
+    "validUntil": { "$ref": "#/$defs/rfc3339" }
+  }
+}

@@ -12,7 +12,7 @@ function createSessionUpdates() {
     next(s) {
       const old=snapshots.get(s.id);
       const {messages,calls}=s;
-      const metadata=Object.fromEntries(['id','title','status','updatedAt','error','errorDetails','streaming','retry','watch','approvalMode','contextState','queuedMessages','pendingMessages'].filter(k=>s[k]!==undefined).map(k=>[k,s[k]]));
+      const metadata=Object.fromEntries(['screenMode','screenCleanup','screenReport','id','title','status','updatedAt','error','errorDetails','streaming','retry','watch','approvalMode','contextState','queuedMessages','pendingMessages'].filter(k=>s[k]!==undefined).map(k=>[k,s[k]]));
       let from=0;
       if(old) while(from<old.messages.length && from<messages.length && sameContent(old.messages[from],messages[from])) from++;
       const changed=calls.filter(c=>{

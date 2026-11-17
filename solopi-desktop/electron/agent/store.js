@@ -57,8 +57,12 @@ class AgentStore {
     const search = { query, fromOffset: offset, mode: 'literal', source };
     const start = query ? text.indexOf(query, offset) : offset;
     if (start < 0) return { evidenceId: id, found: false, total: text.length, search, message: '当前证据范围内未找到该文本；不代表其他用例没有结果，也不证明并发冲突。核对source后读取对应任务/用例证据。' };
-    const end = Math.min(text.length, start + limit);
-    return { evidenceId: id, total: text.length, search, offset: start, content: text.slice(start, end), nextOffset: end < text.length ? end : null };
+    let end = Math.min(text.length, start + limit);
+    const page = () => ({ evidenceId: id, total: text.length, search, offset: start, content: text.slice(start, end), nextOffset: end < text.length ? end : null });
+    // Account for JSON escaping before the Harness prunes tool results. Every
+    // returned page must survive intact; nextOffset still covers all source text.
+    while (JSON.stringify(page()).length > 5500 && end > start + 1) end = start + Math.max(1, Math.floor((end - start) * .75));
+    return page();
   }
   readStored(id) {return JSON.parse(fs.readFileSync(this.file(id),'utf8'));}
   hydrate(id,value,version) {return version===2?this.texts.decode(id,value):value;}
@@ -90,8 +94,8 @@ class AgentStore {
     if (!fs.existsSync(this.directory())) return [];
     return fs.readdirSync(this.directory()).filter(name => /^[a-zA-Z0-9-]+\.json$/.test(name)).map(name => {
       const id=name.slice(0,-5);
-      if (recover && this.metadata(id).summary.status==='running') {
-        const s=this.get(id); s.status='interrupted';s.error='上次执行已中断，请核对任务记录后继续。';this.save(s);
+      if (recover && ['running','awaiting_approval'].includes(this.metadata(id).summary.status)) {
+        const s=this.get(id); s.status='interrupted';if(s.screenMode==='virtual'&&s.screenCleanup?.confirmed===false)s.screenCleanup={confirmed:false};s.error='上次执行已中断，请核对任务记录后继续。';this.save(s);
       }
       return {...this.metadata(id).summary};
     }).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));

@@ -57,6 +57,91 @@
       "source": "https://raw.githubusercontent.com/theKashey/react-remove-scroll-bar/8ca9ba5ea52de03308fe8ced94f7b159a44d28ff/LICENSE",
       "sha256": "a79aae0c0f21990d9d963bb3c5a79cdcea9a46f8523ba55c58d7fe776b6ebc84",
       "reviewNote": "npm gitHead is unavailable in the public repository; full LICENSE taken from public upstream package version 2.3.7 with the same MIT declaration."
+    },
+    {
+      "name": "@earendil-works/pi-ai",
+      "version": "1.4.0",
+      "file": "-earendil-works-pi-ai-1.4.0.txt",
+      "source": "https://raw.githubusercontent.com/earendil-works/pi/36be9c612e64082a4f0d4d0a94706c38ecbc20a1/LICENSE",
+      "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48"
+    },
+    {
+      "name": "@aws-sdk/credential-provider-http",
+      "version": "3.972.78",
+      "file": "-aws-sdk-credential-provider-http-3.972.78.txt",
+      "source": "https://raw.githubusercontent.com/aws/aws-sdk-js-v3/163a566ffba89915cade6109031c5892ea3193c4/LICENSE",
+      "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d"
+    },
+    {
+      "name": "@aws-sdk/credential-provider-login",
+      "version": "3.972.83",
+      "file": "-aws-sdk-credential-provider-login-3.972.83.txt",
+      "source": "https://raw.githubusercontent.com/aws/aws-sdk-js-v3/163a566ffba89915cade6109031c5892ea3193c4/LICENSE",
+      "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d"
+    },
+    {
+      "name": "@aws-sdk/nested-clients",
+      "version": "3.997.50",
+      "file": "-aws-sdk-nested-clients-3.997.50.txt",
+      "source": "https://raw.githubusercontent.com/aws/aws-sdk-js-v3/163a566ffba89915cade6109031c5892ea3193c4/LICENSE",
+      "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d"
+    },
+    {
+      "name": "data-uri-to-buffer",
+      "version": "4.0.1",
+      "file": "data-uri-to-buffer-4.0.1.txt",
+      "source": "https://raw.githubusercontent.com/TooTallNate/node-data-uri-to-buffer/85cd8c854aefbf1bb636789d80364cfac8ea1583/README.md",
+      "sha256": "a7cc4332acfa1f9b6530e01aac77fefe74f2efa32579215fddaa473013f9a25c"
+    },
+    {
+      "name": "@koromix/koffi-darwin-arm64",
+      "version": "3.1.1",
+      "file": "-koromix-koffi-darwin-arm64-3.1.1.txt",
+      "source": "https://raw.githubusercontent.com/Koromix/koffi/2294ba0fa05b6edf1c87c6d9fbe8c66e98b313fe/LICENSE.txt",
+      "sha256": "54abb741a2ba1a7fa89e98d2d3199575e548c8708885eeadab0f5bb83ad22e0e"
+    },
+    {
+      "name": "standardwebhooks",
+      "version": "1.1.1",
+      "file": "standardwebhooks-1.1.1.txt",
+      "source": "https://raw.githubusercontent.com/standard-webhooks/standard-webhooks/b4d2c14fc5b4ccff3ff271e3b087dff812254c59/LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "name": "@earendil-works/pi-telemetry",
+      "version": "1.4.0",
+      "file": "-earendil-works-pi-telemetry-1.4.0.txt",
+      "source": "https://raw.githubusercontent.com/earendil-works/pi/36be9c612e64082a4f0d4d0a94706c38ecbc20a1/LICENSE",
+      "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48"
+    },
+    {
+      "name": "@img/sharp-libvips-darwin-arm64",
+      "version": "1.3.4",
+      "file": "-img-sharp-libvips-darwin-arm64-1.3.4.txt",
+      "source": "https://raw.githubusercontent.com/lovell/sharp-libvips/ebb95f8add54eee8bed840e3fb587e4cbec857d7/LICENSE",
+      "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1"
+    },
+    {
+      "name": "proxy-agent-negotiate",
+      "version": "1.1.0",
+      "file": "proxy-agent-negotiate-1.1.0.txt",
+      "source": "https://raw.githubusercontent.com/TooTallNate/proxy-agents/4813885d3f4e2ff837878ceffdba656a71dc31f0/packages/agent-base/LICENSE",
+      "sha256": "8d8c55319c7729d57be811c747452636688d54f19701ee0752b6b15ad3771d9a",
+      "reviewNote": "Package declares MIT and Nathan Rajlich as author but omits license text; preserved the full Nathan Rajlich MIT notice from agent-base in the same upstream monorepo, rather than claiming the file shipped in negotiate."
+    },
+    {
+      "name": "@napi-rs/canvas-darwin-arm64",
+      "version": "0.1.100",
+      "file": "napi-rs-canvas-0.1.100.txt",
+      "source": "https://raw.githubusercontent.com/Brooooooklyn/canvas/db337893b9b53483050ca7b24c6d306e4da06741/LICENSE",
+      "sha256": "8802fecf9da4367bc23bcf20b21cc143785fc6c92b152f3fa7fbe6ce08d344d6"
+    },
+    {
+      "name": "isarray",
+      "version": "1.0.0",
+      "file": "isarray-1.0.0.txt",
+      "source": "https://raw.githubusercontent.com/juliangruber/isarray/2a23a281f369e9ae06394c0fb4d2381355a6ba33/README.md",
+      "sha256": "ff138e683771b187f3629c383db72ee7d632009010a36d08e18e8d2a34222ec7"
     }
   ]
 }

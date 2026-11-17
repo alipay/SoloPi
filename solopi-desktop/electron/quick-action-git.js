@@ -67,6 +67,7 @@ async function importGitScripts({ root, repoUrl, branch, directory, run, readDef
       sessionConfig: existing?.sessionConfig ?? definition.sessionConfig,
       name: existing?.name || definition.name,
       description: existing?.description || definition.description,
+      usageInstructions: existing?.usageInstructions ?? definition.usageInstructions,
       inputs: existing?.configuredInputs || definition.inputs,
       args: existing?.argsOverride || definition.args,
       queryConfig: existing?.queryConfig || definition.queryConfig,
@@ -82,6 +83,7 @@ async function importGitScripts({ root, repoUrl, branch, directory, run, readDef
 function portableConfig(action) {
   if (!Array.isArray(action.inputs) || !Array.isArray(action.args)) throw new Error('快捷操作参数配置无效');
   return { name: String(action.name || ''), description: String(action.description || ''),
+    usageInstructions:require('./quick-action-usage').normalizeUsageInstructions(action.usageInstructions??''),
     inputs: action.inputs, args: action.args, queryConfig: action.queryConfig || null,
     sessionConfig: action.sessionConfig || null };
 }

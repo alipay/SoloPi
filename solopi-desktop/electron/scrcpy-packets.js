@@ -1,6 +1,6 @@
 // scrcpy Streamer frame metadata: big-endian uint64 flags/PTS + uint32 size.
 const MAX_PACKET=8*1024*1024;
-function createPacketParser(onPacket){
+function createPacketParser(onPacket,{protocolMajor=3}={}){
  let buffer=Buffer.alloc(0);
  return chunk=>{
   buffer=buffer.length?Buffer.concat([buffer,chunk]):Buffer.from(chunk);
@@ -8,8 +8,13 @@ function createPacketParser(onPacket){
    const flags=buffer.readBigUInt64BE(0),size=buffer.readUInt32BE(8);
    if(!size||size>MAX_PACKET)throw Object.assign(Error('scrcpy 视频包长度无效'),{code:'INVALID_VIDEO_PACKET'});
    if(buffer.length<12+size)break;
-   const timestamp=Number(flags&((1n<<62n)-1n));if(!Number.isSafeInteger(timestamp))throw Error('scrcpy 视频时间戳超出范围');
-   onPacket({configuration:!!(flags&(1n<<63n)),type:flags&(1n<<62n)?'key':'delta',timestamp,data:Buffer.from(buffer.subarray(12,12+size))});
+   // scrcpy 4 reserves bit63 for session metadata and moves both media flags.
+   // Stream metadata is explicitly disabled by the matched server launcher.
+   const major=typeof protocolMajor==='function'?protocolMajor():protocolMajor;
+   const configBit=major>=4?62n:63n,keyBit=configBit-1n;
+   if(major>=4&&flags&(1n<<63n))throw Error('意外的 scrcpy 会话元数据');
+   const timestamp=Number(flags&((1n<<keyBit)-1n));if(!Number.isSafeInteger(timestamp))throw Error('scrcpy 视频时间戳超出范围');
+   onPacket({configuration:!!(flags&(1n<<configBit)),type:flags&(1n<<keyBit)?'key':'delta',timestamp,data:Buffer.from(buffer.subarray(12,12+size))});
    buffer=buffer.subarray(12+size);
   }
   if(buffer.length>MAX_PACKET+12)throw Error('scrcpy 视频包缓冲超出限制');

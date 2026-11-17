@@ -1,7 +1,7 @@
 // Shared CLI / Agent projection. Filter before paging, preserve whole-task totals.
 const CASE_STATUSES = ['pending', 'running', 'success', 'failed', 'stopped'];
-function selectTaskCases(task, {caseIds, statuses, offset=0, limit=20}={}) {
-  if (!Number.isSafeInteger(offset) || offset<0 || !Number.isSafeInteger(limit) || limit<1 || limit>50) throw Error('报告分页需要 offset>=0，limit为1–50');
+function selectTaskCases(task, {caseIds, statuses, offset=0, limit=20}={}, maxLimit=50) {
+  if (!Number.isSafeInteger(offset) || offset<0 || !Number.isSafeInteger(limit) || limit<1 || limit>maxLimit) throw Error(`报告分页需要 offset>=0，limit为1–${maxLimit}`);
   for (const values of [caseIds,statuses]) if (values!==undefined && (!Array.isArray(values) || !values.length || values.some(v=>typeof v!=='string'||!v.length))) throw Error('报告筛选必须是非空字符串数组');
   if (statuses?.some(status=>!CASE_STATUSES.includes(status))) throw Error(`用例状态必须为 ${CASE_STATUSES.join('|')}`);
   const all=task.cases || [];
@@ -78,6 +78,7 @@ function taskResultReceipt(task, { offset = 0, limit = 10 } = {}) {
   const text = (value, max) => String(value || '').slice(0, max);
   return { schemaVersion: 'glassbox.task.result.v1', success: true, successScope: 'query',
     observedAt: new Date().toISOString(),
+    timing: {...require('./agent/receipt-timing').interval(task.startedAt,task.finishedAt),source:'native-task'},
     taskId: task.id, taskName: text(task.name, 200), status: task.status, terminal,
     executionComplete: terminal && countsComplete && counts.completed === total,
     counts, countsComplete, countsSource: 'loaded-case-records',
@@ -103,15 +104,17 @@ module.exports={CASE_STATUSES,selectTaskCases,caseQueryOverview,taskPerformanceO
 
 // Whole-case pages: large attachment paths never force character pagination.
 function caseListOverview(task,options={}) {
-  const {all,page,...selection}=selectTaskCases(task,options);
+  const {all,page,...selection}=selectTaskCases(task,options,200);
+  const maxChars=(options.limit||20)>50?64000:10000;
   const rows=page.map(c=>{
     const failed=(c.results || []).find(r=>r.success===false || r.status==='failed');
     const error=String(c.error || failed?.error || '');
-    return {caseId:c.caseId || c.id,name:String(c.caseName || c.name || c.caseSnapshot?.name || ''),status:c.status,firstFailedStepId:failed?.stepId,error:error.slice(0,240),...(error.length>240?{errorTruncated:true}:{})};
+    return {completed:c.completed ?? (c.results || []).length,total:c.total ?? c.caseSnapshot?.steps?.length,artifactCounts:Object.fromEntries(['logs','recordings','screenshots'].map(kind=>[kind,(c.artifacts?.[kind] || []).length])),caseOrdinal:all.indexOf(c)+1,caseId:c.caseId || c.id,sourceCaseId:c.sourceCaseId,startedAt:c.startedAt,endedAt:c.endedAt || c.finishedAt,name:String(c.caseName || c.name || c.caseSnapshot?.name || ''),status:c.status,firstFailedStepId:failed?.stepId,error:error.slice(0,240),...(error.length>240?{errorTruncated:true}:{})};
   });
-  const result={id:task.id,name:task.name,status:task.status,summary:task.summary,...selection,cases:[],returnedCaseCount:0,pageComplete:false,selectionComplete:false};
+  const metadata=Object.fromEntries(['groupExecution','source','taskType','createdAt','startedAt','finishedAt','devices','runtimeEnvironment','startOptions','performanceOptions','stress','currentRound','total','completed'].filter(key=>task[key]!==undefined).map(key=>[key,task[key]]));
+  const result={id:task.id,name:task.name,status:task.status,summary:task.summary,...metadata,...selection,cases:[],returnedCaseCount:0,pageComplete:false,selectionComplete:false};
   for(const row of rows){
-    if(result.cases.length && JSON.stringify({...result,cases:[...result.cases,row]}).length>10000)break;
+    if(result.cases.length && JSON.stringify({...result,cases:[...result.cases,row]}).length>maxChars)break;
     result.cases.push(row);
   }
   result.returnedCaseCount=result.cases.length;

@@ -8,24 +8,26 @@ function captureUpload(payload) {
   if (JSON.stringify(ids) !== JSON.stringify(payload.sourceCases.map(c => c.id).sort()) || new Set(ids).size !== ids.length) {
     throw Error('上传源快照与导出用例集合不一致，未开始上传');
   }
-  return { libraryId: payload.libraryId, digests: Object.fromEntries(payload.sourceCases.map(c => [c.id, digest(state, c)])) };
+  const normalizeAssets=require('./case-asset-identity').createAssetIdentity();
+  return { libraryId: payload.libraryId, assetDigests:Object.fromEntries(payload.sourceCases.map(c=>[c.id,digest(state,c,normalizeAssets)])), digests: Object.fromEntries(payload.sourceCases.map(c => [c.id, digest(state, c)])) };
 }
 
 // Call only after a confirmed push and verification of the written workspace.
 // Synchronize the exact exported representation, never a newer editor revision.
-function reconcileUpload(state, snapshot, uploadedCases) {
+function reconcileUpload(state, snapshot, uploadedCases, {repoPath} = {}) {
   if (!snapshot) return { state, synchronizedCaseIds: [], skippedCaseIds: [], cases: [] };
   const uploaded = new Map(uploadedCases.map(c => [c.id, c]));
   const expected = Object.keys(snapshot.digests).sort();
   if (JSON.stringify([...uploaded.keys()].sort()) !== JSON.stringify(expected)) throw Error('上传回读的用例集合不一致，未确认本地同步');
   const synchronizedCaseIds = [], skippedCaseIds = [], replacements = new Map();
+  const normalizeAssets=require('./case-asset-identity').createAssetIdentity();
   for (const id of expected) {
     const current = state.cases?.find(c => c.id === id);
-    if (!current || libraryOf(state, current) !== snapshot.libraryId || digest(state, current) !== snapshot.digests[id]) {
+    if (!current || libraryOf(state, current) !== snapshot.libraryId || digest(state, current) !== snapshot.digests[id] || snapshot.assetDigests?.[id] && digest(state,current,normalizeAssets)!==snapshot.assetDigests[id]) {
       skippedCaseIds.push(id); continue;
     }
     // Retain local ownership/base metadata; exported config/components/edges are authoritative for this receipt.
-    replacements.set(id, { ...uploaded.get(id), libraryId: current.libraryId, folderId: current.folderId, assetBaseDir: current.assetBaseDir });
+    replacements.set(id, { ...uploaded.get(id), libraryId: current.libraryId, folderId: current.folderId, assetBaseDir: repoPath || current.assetBaseDir });
     synchronizedCaseIds.push(id);
   }
   const guards = { ...state.caseEditGuards };
@@ -37,7 +39,7 @@ function reconcileUpload(state, snapshot, uploadedCases) {
     if (Array.isArray(c.edges)) caseEdges[id] = c.edges;
   }
   return {
-    state: synchronizedCaseIds.length ? { ...state, cases: state.cases.map(c => replacements.get(c.id) || c), caseEditGuards: guards, caseEdges } : state,
+    state: synchronizedCaseIds.length ? { ...state, cases: state.cases.map(c => replacements.get(c.id) || c), caseEditGuards: guards, caseEdges, caseLibraries: repoPath ? state.caseLibraries?.map(l=>l.id===snapshot.libraryId?{...l,localRepoPath:repoPath}:l) : state.caseLibraries } : state,
     synchronizedCaseIds, skippedCaseIds, cases: [...replacements.values()],
   };
 }

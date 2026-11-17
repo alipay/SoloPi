@@ -1,3 +1,6 @@
+import {nativeFixture,toolCall,LlmError} from './fixtures/native-harness.mjs';
+import {NativeRuntime,disposeAll} from './fixtures/harness-lifecycle.mjs';
+import {boundary as nativeBoundary} from './fixtures/harness-lifecycle.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -5,9 +8,10 @@ import os from 'node:os';
 import path from 'node:path';
 import http from 'node:http';
 import { createRequire } from 'node:module';
+test.after(disposeAll);
 const require = createRequire(import.meta.url);
 const { recoverModelStep, recoveryReason } = require('../electron/agent/model-step-recovery');
-const { AgentRuntime } = require('../electron/agent/runtime');
+const { AgentRuntime } = {AgentRuntime:NativeRuntime};
 const { AgentStore } = require('../electron/agent/store');
 const { requestModel } = require('../electron/agent/model');
 const failure = (code = 'UND_ERR_SOCKET', extra = {}) => Object.assign(Error('PRIVATE_ERROR'), {
@@ -15,10 +19,10 @@ const failure = (code = 'UND_ERR_SOCKET', extra = {}) => Object.assign(Error('PR
     requestBodySent: true, connectionUse: 'reused', streamBytes: 0, ...extra },
 });
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const settle = async runtime => { for (let i = 0; i < 500 && runtime.active.size; i++) await sleep(5); assert.equal(runtime.active.size, 0); };
+const settle = async runtime=>nativeBoundary(runtime);
 function fixture(t, model, tools = [], options = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'model-recovery-'));
-  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  t.after(async()=>{await disposeAll();fs.rmSync(dir, { recursive: true, force: true })});
   const store = new AgentStore(() => dir);
   const runtime = new AgentRuntime({ store, model, provider: () => ({}), tools: async () => tools,
     modelRecoveryOptions: { wait: async () => {}, random: () => 0.5, ...options } });
@@ -80,40 +84,8 @@ test('failed durable scheduling write prevents retry and countdown', async () =>
     record: () => { throw Error('save failed'); }, wait: () => assert.fail('must not wait'),
   }), /save failed/); assert.equal(calls, 1);
 });
-test('runtime retries only failed model step: prior write executes once, partial text/tools never enter history', async t => {
-  let requests = 0, writes = 0; const inputs = [];
-  const f = fixture(t, async o => {
-    assert.equal(o.retry, false); inputs.push(JSON.stringify(o.messages)); requests++;
-    if (requests === 1) return { role: 'assistant', content: null, tool_calls: [{ id: 'write-once', type: 'function', function: { name: 'fixture_write', arguments: '{}' } }] };
-    if (requests === 2) { o.onDelta({ content: 'FAILED_PARTIAL', reasoning: 'FAILED_REASONING', toolCallCount: 1 }); throw failure('UND_ERR_SOCKET', { stage: 'parse', streamBytes: 99 }); }
-    const live=f.runtime.liveSessions.get(f.s.id);
-    assert.equal(live.streaming.content, ''); assert.equal(live.streaming.toolCallCount, 0);
-    return { role: 'assistant', content: 'complete' };
-  }, [{ name: 'fixture_write', schema: { type: 'object' }, execute: async () => { writes++; return { success: true }; } }], {
-    wait: async () => {
-      const saved = f.store.get(f.s.id);
-      assert.equal(saved.modelRecovery.events.at(-1).phase, 'scheduled'); assert.ok(saved.retry);
-      assert.equal(saved.calls.filter(c => c.status === 'done').length, 1);
-    },
-  });
-  await f.runtime.start(f.s.id, 'run fixture'); await settle(f.runtime);
-  const saved = f.store.get(f.s.id);
-  assert.equal(saved.status, 'idle'); assert.equal(saved.messages.at(-1).content, 'complete');
-  assert.equal(writes, 1); assert.equal(requests, 3); assert.equal(inputs[1], inputs[2]);
-  assert.doesNotMatch(JSON.stringify(saved.messages), /FAILED_PARTIAL|FAILED_REASONING/);
-  assert.equal(saved.modelRecovery.phase, 'completed'); assert.equal(saved.retry, null);
-});
-test('new user steering during recovery cancels old step and does not retry old input', async t => {
-  let count = 0;
-  const f = fixture(t, async () => { if (++count === 1) throw failure(); return { role: 'assistant', content: 'new answer' }; }, [], {
-    wait: async () => { await f.runtime.start(f.s.id, 'new request'); },
-  });
-  await f.runtime.start(f.s.id, 'old request'); await settle(f.runtime);
-  const saved = f.store.get(f.s.id);
-  assert.equal(count, 2); assert.equal(saved.status, 'idle');
-  assert.equal(saved.messages.at(-1).content, 'new answer');
-  assert.equal(saved.modelRecoveryHistory.at(-1).events.at(-1).phase, 'cancelled');
-});
+test("native durable retry repeats only failed model step and never the prior write", async t=>{let writes=0;const f=nativeFixture(t,[()=>[toolCall('write')],()=>{throw new LlmError('disconnect','TRANSPORT');},o=>{assert.match(JSON.stringify(o.messages),/saved-once/);return 'done';}],[{name:'write',schema:{type:'object'},execute:()=>{writes++;return{success:true,receipt:'saved-once'};}}],{retryPolicy:{mode:'normal',maxRetries:2,backoff:{initialDelayMs:1,maxDelayMs:1,jitterRatio:0}}});const s=await f.run();assert.equal(s.status,'idle');assert.equal(writes,1);assert.equal(f.adapter.requests.length,3);const host=f.runtime.hosts.get(s.id);assert.ok(Array.from({length:host.agent.session.seq},(_,i)=>host.agent.session.eventAt(i)).some(e=>e.type==='llm/retry'));});
+test("native steering cancels retry backoff and starts the new input", async t=>{let entered;const ready=new Promise(r=>entered=r);const f=nativeFixture(t,[()=>{entered();throw new LlmError('disconnect','TRANSPORT');},o=>{assert.match(JSON.stringify(o.messages),/new direction/);return 'new answer';}],[],{retryPolicy:{mode:'normal',maxRetries:5,backoff:{initialDelayMs:1000,maxDelayMs:1000,jitterRatio:0}}});await f.runtime.start(f.s.id,'old',{});await ready;await f.runtime.start(f.s.id,'new direction',{});await nativeBoundary(f.runtime);assert.equal(f.adapter.requests.length,2);assert.equal(f.store.get(f.s.id).messages.at(-1).content,'new answer');});
 test('real reused socket disconnect recovers with new connection; low-level retries remain disabled', async t => {
   let hits = 0; const sockets = [];
   const server = http.createServer((req, res) => {
@@ -125,7 +97,7 @@ test('real reused socket disconnect recovers with new connection; low-level retr
   });
   await new Promise(r => server.listen(0, '127.0.0.1', r));
   const { Agent, fetch } = require('undici'); const dispatcher = new Agent({ connections: 1 });
-  t.after(async () => { server.closeAllConnections(); await dispatcher.destroy(); await new Promise(r => server.close(r)); });
+  t.after(async()=>{ server.closeAllConnections(); await dispatcher.destroy(); await new Promise(r => server.close(r)); });
   const options = { provider: { baseUrl: `http://127.0.0.1:${server.address().port}`, model: 'fixture' }, messages: [], tools: [], retry: false,
     fetchImpl: (url, o) => fetch(url, { ...o, dispatcher }) };
   await requestModel(options); const events = [];
@@ -134,24 +106,8 @@ test('real reused socket disconnect recovers with new connection; low-level retr
   assert.equal(sockets[0], sockets[1]); assert.notEqual(sockets[1], sockets[2]);
   assert.equal(events[0].failure.connectionUse, 'reused'); assert.equal(events[0].failure.code, 'UND_ERR_SOCKET');
 });
-test('runtime exhaustion retains original diagnostics and persists same budget without hidden extra calls', async t => {
-  let count = 0; const f = fixture(t, async () => { count++; throw failure(); });
-  await f.runtime.start(f.s.id, 'fixture'); await settle(f.runtime);
-  const saved = f.store.get(f.s.id);
-  assert.equal(saved.status, 'failed'); assert.equal(count, 2); assert.equal(saved.errorDetails.automaticRetryCount, 1);
-  assert.equal(saved.modelRecovery.phase, 'failed'); assert.equal(saved.retry, null);
-  assert.equal(saved.modelRecovery.events.filter(e => e.phase === 'scheduled').length, 1);
-});
-test('runtime stop cancels backoff and does not resume it after store reload', async t => {
-  let count = 0; const f = fixture(t, async () => { count++; throw failure(); }, [], {
-    wait: async () => { f.runtime.stop(f.s.id); },
-  });
-  await f.runtime.start(f.s.id, 'fixture'); await settle(f.runtime);
-  const saved = new AgentStore(() => f.store.directory()).get(f.s.id);
-  assert.equal(count, 1); assert.equal(saved.status, 'interrupted'); assert.equal(saved.retry, null);
-  assert.equal(saved.modelRecovery.phase, 'cancelled');
-  assert.equal(saved.modelRecovery.events.filter(e => e.phase === 'started').length, 0);
-});
+test("native retry exhaustion keeps failure category and durable attempt evidence with a readable summary", async t=>{const f=nativeFixture(t,Array.from({length:3},()=>()=>{throw new LlmError('server unavailable','SERVER');}),[],{retryPolicy:{mode:'normal',maxRetries:2,backoff:{initialDelayMs:1,maxDelayMs:1,jitterRatio:0}}});const s=await f.run();assert.equal(s.status,'failed');assert.equal(f.adapter.requests.length,3);assert.match(s.error,/模型服务暂时不可用/);assert.equal(s.errorDetails.code,'SERVER');const evidence=JSON.parse(f.store.readEvidence(s.id,s.errorDetails.evidenceId).content);assert.equal(evidence.requestCount,3);assert.equal(evidence.retryCount,2);assert.deepEqual(evidence.failures.map(x=>x.code),['SERVER','SERVER','SERVER']);const h=f.runtime.hosts.get(s.id);assert.equal(Array.from({length:h.agent.session.seq},(_,i)=>h.agent.session.eventAt(i)).filter(e=>e.type==='llm/retry').length,2);});
+test("native stop cancels retry backoff and reopening never reissues the failed request", async t=>{let entered;const ready=new Promise(r=>entered=r);const f=nativeFixture(t,[()=>{entered();throw new LlmError('timeout','TIMEOUT');}],[],{retryPolicy:{mode:'normal',maxRetries:5,backoff:{initialDelayMs:1000,maxDelayMs:1000,jitterRatio:0}}});await f.runtime.start(f.s.id,'old',{});await ready;f.runtime.stop(f.s.id);await nativeBoundary(f.runtime);assert.equal(f.adapter.requests.length,1);assert.equal(f.store.get(f.s.id).status,'interrupted');await f.runtime.stopAll();assert.equal(new AgentStore(()=>f.dir).get(f.s.id).status,'interrupted');});
 
 test('recovery budget prevents a backoff that cannot fit; original first request is unaffected',async()=>{
  let calls=0;const events=[];

@@ -2,6 +2,8 @@ import { useCallback, useSyncExternalStore } from 'react';
 
 type Draft = { text: string; attachments: File[]; revision: number; sending: boolean };
 const drafts = new Map<string, Draft>();
+const submissions = new Map<string, Draft>();
+const sameFiles = (a: File[], b: File[]) => a.length === b.length && a.every((file, i) => file === b[i]);
 const listeners = new Set<() => void>();
 const storageKey = (id: string) => `solopi-desktop.agent-draft.${id}`;
 function read(id: string): Draft {
@@ -27,21 +29,29 @@ function update(id: string, patch: Partial<Draft>, edited = true) {
 export const agentDrafts = {
   read,
   setText(id: string, value: string | ((previous: string) => string)) {
-    update(id, { text: typeof value === 'function' ? value(read(id).text) : value });
+    const text = typeof value === 'function' ? value(read(id).text) : value;
+    if (text !== read(id).text) update(id, { text });
   },
   setAttachments(id: string, value: File[] | ((previous: File[]) => File[])) {
-    update(id, { attachments: typeof value === 'function' ? value(read(id).attachments) : value });
+    const attachments = typeof value === 'function' ? value(read(id).attachments) : value;
+    if (!sameFiles(attachments, read(id).attachments)) update(id, { attachments });
   },
   beginSend(id: string) {
     const draft = read(id);
     if (draft.sending) return null;
+    submissions.set(id, draft);
     update(id, { sending: true }, false);
     return draft;
   },
   finishSend(id: string, revision: number, success: boolean) {
+    const submitted = submissions.get(id);
+    if (!submitted || submitted.revision !== revision) return;
+    submissions.delete(id);
     const draft = read(id);
-    update(id, success && draft.revision === revision
-      ? { sending: false, text: '', attachments: [] } : { sending: false }, false);
+    update(id, { sending: false,
+      ...(success && draft.text === submitted.text ? { text: '' } : {}),
+      ...(success && sameFiles(draft.attachments, submitted.attachments) ? { attachments: [] } : {}),
+    }, false);
   },
 };
 const subscribe = (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; };

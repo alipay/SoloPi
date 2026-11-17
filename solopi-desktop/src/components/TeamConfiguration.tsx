@@ -1,12 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ArrowRight, Check, Download, FileJson, GitBranch, Loader2, MonitorSmartphone, Play, Sparkles, Upload, XCircle } from 'lucide-react';
+import { configurationDemos, capabilityDemos, type OnboardingDestination } from './OnboardingDemo';
+import { OnboardingSpotlight } from './OnboardingSpotlight';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from './ui/dialog';
 
-type Destination = 'team' | 'device' | 'model' | 'tts' | 'quick-actions' | 'cases' | 'agent';
-type Props = { onNavigate: (where: Destination) => void };
+type Destination = OnboardingDestination;
+type Props = { onNavigate: (where: Destination) => void; onDemonstrationChange?: (active:boolean)=>void };
 type Step = { id: string; label: string; status: 'running' | 'success' | 'failed'; unchanged?: boolean; errorCode?: string };
 type Bindings = {phoneSerials?: string[];glassesSerials?: string[];phoneDefaultPackage?: string;glassesDefaultPackage?: string};
-type Status = {success: boolean;counts: {caseRepositories:number;quickActions:number;llmProviders:number;tts:boolean;phone:number;glasses:number;phonePackage:string;glassesPackage:string};deviceBindings:Bindings;showWelcome:boolean;onboarding?:{step:number;status:string};lastImport?:{id:string;success:boolean;time:string;steps:Step[]}};
+type Status = {success: boolean;counts: {caseRepositories:number;quickActions:number;llmProviders:number;tts:boolean;phone:number;glasses:number;phonePackage:string;glassesPackage:string};deviceBindings:Bindings;showWelcome:boolean;onboarding?:{step:number;status:string;route?:'choice'|'team'|'manual';demoIndex?:number};lastImport?:{id:string;success:boolean;time:string;steps:Step[]}};
 type Summary = {id:string;name:string;version:string;caseRepositories:number;shortcutRepositories:number;quickActions:number;llmProviders:number;tts:boolean;devices:boolean};
 type Result = {success:boolean;canceled?:boolean;error?:string;summary?:Summary;steps?:Step[]};
 async function invoke<T>(channel: string, payload?: unknown): Promise<T> {
@@ -46,7 +48,7 @@ function ConfigurationImport({onBusyChange=()=>{}}:{onBusyChange?:(busy:boolean)
     }catch(e){setMessage(String(e));}
   };
   const apply=async()=>{
-    setBusy(true);onBusyChange(true);setSteps([]);setMessage('正在导入，仓库下载可能需要一些时间。');
+    setBusy(true);onBusyChange(true);setSteps([]);setMessage('模型、设备默认值、TTS 和本地快捷操作并发导入，再下载快捷仓库，最后导入用例与素材。');
     try{const r=await invoke<Result>('team-config:import',{manifest,overwrite});if(r.steps)setSteps(r.steps);setMessage(r.success?'团队配置已导入。可继续确认本机设备，也可直接浏览用例。':r.error||'导入未完成，已保存项目保留。');}
     catch{setMessage('未收到导入结果，请先查看下方进度和当前配置。');}
     finally{setBusy(false);onBusyChange(false);}
@@ -94,13 +96,45 @@ function DeviceMapping({onBusyChange}:{onBusyChange:(busy:boolean)=>void}) {
   const save=async()=>{setBusy(true);onBusyChange(true);try{const r=await invoke<Result>('team-config:devices',{deviceBindings:{phoneSerials:phone?[phone]:[],glassesSerials:glasses?[glasses]:[]}});setMessage(r.success?'设备角色已保存；任务运行前仍会检查在线状态。':r.error||'设备映射保存失败');await refresh();}catch{setMessage('设备映射保存失败，请检查角色是否重复。');}finally{setBusy(false);onBusyChange(false);}};
   return <div className="space-y-4"><p className="text-sm leading-6 text-slate-500">团队里的设备可能不在这台电脑上。只在你点击检测时查询设备，不安装应用、不重启 ADB。</p><button className={button} disabled={busy} onClick={()=>void discover()}>{busy?<Loader2 className="h-4 w-4 animate-spin"/>:<MonitorSmartphone className="h-4 w-4"/>}检测已连接设备</button><div className="grid grid-cols-2 gap-3">{[['手机',phone,setPhone],['眼镜',glasses,setGlasses]].map(([label,value,setter])=><label key={String(label)} className="text-sm font-bold">{String(label)}<select aria-label={`${label}设备映射`} value={String(value)} disabled={busy} onChange={e=>(setter as (v:string)=>void)(e.target.value)} className="mt-2 w-full rounded-xl border p-3 font-mono text-xs"><option value="">暂不设置</option>{value&&!devices.some(d=>d.serial===value)&&<option value={String(value)}>{String(value)} · 团队候选 / 未验证</option>}{devices.map(d=><option key={d.serial} value={d.serial} disabled={d.state!=='device'}>{d.model||d.serial} · {d.serial} · {d.state}</option>)}</select></label>)}</div><p className="text-xs text-slate-500">默认包：手机 {status?.counts.phonePackage||'未配置'} / 眼镜 {status?.counts.glassesPackage||'未配置'}</p><button className={primary} disabled={busy||!!(phone&&phone===glasses)} onClick={()=>void save()}>确认设备角色</button>{phone&&phone===glasses&&<p role="alert" className="text-sm text-red-600">手机和眼镜不能选择同一设备。</p>}{message&&<p role="status" className="text-sm text-slate-600">{message}</p>}</div>;
 }
-export function TeamOnboarding({onNavigate}:Props) {
-  const {status}=useStatus();const [open,setOpen]=useState(false),[step,setStep]=useState(0),[busy,setBusy]=useState(false),[error,setError]=useState('');const initial=useRef(false);
-  useEffect(()=>{if(status&&!initial.current){initial.current=true;if(status.showWelcome||status.onboarding?.status==='active'){setStep(status.onboarding?.step||0);setOpen(true);if(!status.onboarding)void invoke('team-config:onboarding',{step:0,status:'active'}).catch(()=>setError('未能保存引导进度，可稍后重试。'));}}},[status]);
-  useEffect(()=>{const show=()=>{setStep(status?.onboarding?.step||0);setOpen(true);};window.addEventListener('solopi-desktop:show-onboarding',show);return()=>window.removeEventListener('solopi-desktop:show-onboarding',show);},[status]);
-  const persist=async(next:number,action:'active'|'dismissed'|'completed')=>{
-    try{await invoke('team-config:onboarding',{step:next,status:action});setStep(next);if(action!=='active')setOpen(false);setError('');return true;}catch{setError('未能保存引导进度，请重试。');return false;}
+export function TeamOnboarding({onNavigate,onDemonstrationChange}:Props) {
+  const {status}=useStatus();
+  const [open,setOpen]=useState(false),[step,setStep]=useState(0),[route,setRoute]=useState<'choice'|'team'|'manual'>('choice');
+  const [demoIndex,setDemoIndex]=useState(0),[preview,setPreview]=useState<keyof typeof capabilityDemos|null>(null);
+  const [busy,setBusy]=useState(false),[error,setError]=useState('');const initial=useRef(false);
+  useEffect(()=>{if(status&&!initial.current){initial.current=true;if(status.showWelcome||status.onboarding?.status==='active'){
+    setStep(status.onboarding?.step||0);setRoute(status.onboarding?.route||(status.onboarding?'team':'choice'));
+    setDemoIndex(Math.min(status.onboarding?.demoIndex||0,configurationDemos.length-1));setOpen(true);
+  }}},[status]);
+  // Keep the real application inaccessible; the dialog itself is portaled to body.
+  useEffect(()=>{if(!open)return;const root=document.getElementById('root');if(!root)return;const previous=root.inert;root.inert=true;return()=>{root.inert=previous;};},[open]);
+  useEffect(()=>{const show=()=>{setRoute('choice');setStep(0);setPreview(null);setError('');setOpen(true);};window.addEventListener('solopi-desktop:show-onboarding',show);return()=>window.removeEventListener('solopi-desktop:show-onboarding',show);},[]);
+  const persist=async(next:number,action:'active'|'dismissed'|'completed',nextRoute=route,nextDemo=demoIndex)=>{
+    setBusy(true);
+    try{await invoke('team-config:onboarding',{step:next,status:action,route:nextRoute,demoIndex:nextDemo});setStep(next);setRoute(nextRoute);setDemoIndex(nextDemo);if(action!=='active')setOpen(false);setError('');return true;}
+    catch{setError('未能保存引导进度，请重试。');return false;}finally{setBusy(false);}
   };
-  const go=async(where:Destination)=>{if(await persist(step,'dismissed'))onNavigate(where);};
-  return <Dialog open={open} onOpenChange={next=>{if(!next&&!busy)void persist(step,'dismissed');}}><DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto rounded-3xl p-6" onEscapeKeyDown={e=>{if(busy)e.preventDefault();}} onPointerDownOutside={e=>{if(busy)e.preventDefault();}}><div className="pr-7"><span className="text-xs font-bold tracking-widest text-blue-600">SoloPi Desktop · {step+1} / 3</span><DialogTitle className="mt-2 text-2xl font-black">{['把团队配置带过来','确认这台电脑的设备','从这里开始'][step]}</DialogTitle><DialogDescription className="mt-2 text-sm leading-6">{['不用从零填写。导入一次，完成常用配置。也可以跳过，稍后自行设置。','设备角色由你确认，模型和 TTS 不要求登录。','配置已保存不等于服务已验证。使用时只检查当前任务需要的依赖。'][step]}</DialogDescription></div><SetupAnimation key={step} step={step}/>{step===0?<ConfigurationImport onBusyChange={setBusy}/>:step===1?<DeviceMapping onBusyChange={setBusy}/>:<CapabilityCards status={status} onNavigate={where=>void go(where)}/>}<footer className="mt-2 flex items-center justify-between gap-3 border-t border-slate-100 pt-4"><button className="text-sm text-slate-500" disabled={busy} onClick={()=>void persist(step,'dismissed')}>暂时跳过</button><div className="flex gap-2">{step>0&&<button className={button} disabled={busy} onClick={()=>void persist(step-1,'active')}>上一步</button>}<button className={primary} disabled={busy} onClick={()=>void persist(Math.min(step+1,2),step===2?'completed':'active')}>{step===2?'开始使用':'下一步'}<ArrowRight className="h-4 w-4"/></button></div></footer>{error&&<p role="alert" className="text-sm text-red-600">{error}</p>}</DialogContent></Dialog>;
+  const demo=preview?capabilityDemos[preview]:route==='manual'?configurationDemos[demoIndex]:null;
+  const demonstrationCallback=useRef(onDemonstrationChange);demonstrationCallback.current=onDemonstrationChange;
+  const demonstrating=!!(open&&demo);
+  useLayoutEffect(()=>{demonstrationCallback.current?.(demonstrating);return()=>{if(demonstrating)demonstrationCallback.current?.(false);};},[demonstrating]);
+  if(open&&demo)return <OnboardingSpotlight key={demo.id} demo={demo} progress={preview?'使用演示':`配置介绍 ${demoIndex+1}/${configurationDemos.length}`} onNavigate={onNavigate} busy={busy} error={error}
+    onNext={()=>{if(preview)setPreview(null);else void persist(0,demoIndex===configurationDemos.length-1?'completed':'active','manual',Math.min(demoIndex+1,configurationDemos.length-1));}}
+    onBack={()=>{if(preview)setPreview(null);else void persist(0,'active',demoIndex>0?'manual':'choice',Math.max(0,demoIndex-1));}}
+    onExit={()=>void persist(step,'dismissed')} nextLabel={preview?'返回开始使用':demoIndex===configurationDemos.length-1?'完成介绍':'下一项'}/>;
+  const titles=['把团队配置带过来','确认这台电脑的设备','从这里开始'];
+  return <Dialog open={open} onOpenChange={next=>{if(!next&&!busy)void persist(step,'dismissed');}}>
+    <DialogContent overlayClassName="z-[200] bg-slate-950/60" className="z-[201] max-h-[90dvh] w-[calc(100vw-2rem)] max-w-3xl overflow-y-auto rounded-3xl p-6 sm:p-7" onKeyDown={e=>e.stopPropagation()} onEscapeKeyDown={e=>{if(busy)e.preventDefault();}} onPointerDownOutside={e=>e.preventDefault()}>
+      <div className="pr-7"><span className="text-xs font-bold tracking-widest text-blue-600">solopi-desktop · {route==='team'?`${step+1} / 3`:'欢迎使用'}</span>
+        <DialogTitle className="mt-2 text-2xl font-black">{route==='choice'?'欢迎使用 solopi-desktop':titles[step]}</DialogTitle>
+        <DialogDescription className="mt-2 text-sm leading-6">{route==='choice'?'选择适合你的入门方式，稍后也可从设置中心重新打开引导。':step===0?'导入团队已有配置，再确认本机设备。':step===1?'设备角色由你确认；只有点击检测时才查询设备。':'先看看各项能力怎么使用，再开始实际操作。'}</DialogDescription>
+      </div>
+      {route==='choice'?<div className="grid gap-4 sm:grid-cols-2">
+        <button type="button" aria-label="有团队配置文件" disabled={busy} className="rounded-2xl border border-blue-200 bg-blue-50 p-6 text-left transition hover:border-blue-500 disabled:opacity-40" onClick={()=>void persist(0,'active','team',0)}><FileJson className="mb-4 h-8 w-8 text-blue-600"/><strong className="block text-lg">有团队配置文件</strong><span className="mt-2 block text-sm leading-6 text-slate-600">导入团队提供的 JSON，沿用已有模型、TTS、快捷操作和用例库配置。</span></button>
+        <button type="button" aria-label="无团队配置文件" disabled={busy} className="rounded-2xl border border-slate-200 bg-white p-6 text-left transition hover:border-blue-500 disabled:opacity-40" onClick={()=>void persist(0,'active','manual',0)}><Sparkles className="mb-4 h-8 w-8 text-blue-600"/><strong className="block text-lg">无团队配置文件</strong><span className="mt-2 block text-sm leading-6 text-slate-600">在真实页面上跟随高亮和箭头，逐项了解配置入口和用途。</span></button>
+      </div>:<><SetupAnimation key={step} step={step}/>{step===0?<ConfigurationImport onBusyChange={setBusy}/>:step===1?<DeviceMapping onBusyChange={setBusy}/>:<CapabilityCards status={status} onNavigate={where=>setPreview(where==='model'?'agent':where as keyof typeof capabilityDemos)}/>}</>}
+      <footer className="mt-2 flex items-center justify-between gap-3 border-t border-slate-100 pt-4"><button className="text-sm text-slate-500" disabled={busy} onClick={()=>void persist(step,'dismissed')}>暂时跳过</button><div className="flex gap-2">
+        {preview?<button className={primary} onClick={()=>setPreview(null)}>返回开始使用</button>:route==='manual'?<><button className={button} disabled={busy} onClick={()=>void persist(0,'active',demoIndex>0?'manual':'choice',Math.max(0,demoIndex-1))}>{demoIndex>0?'上一步':'返回选择'}</button><button className={primary} disabled={busy} onClick={()=>void persist(0,demoIndex===configurationDemos.length-1?'completed':'active','manual',Math.min(demoIndex+1,configurationDemos.length-1))}>{demoIndex===configurationDemos.length-1?'完成介绍':'下一项'}<ArrowRight className="h-4 w-4"/></button></>:route==='team'?<><button className={button} disabled={busy} onClick={()=>void persist(Math.max(0,step-1),'active',step===0?'choice':'team')}>{step>0?'上一步':'返回选择'}</button><button className={primary} disabled={busy} onClick={()=>void persist(Math.min(step+1,2),step===2?'completed':'active')}>{step===2?'开始使用':'下一步'}<ArrowRight className="h-4 w-4"/></button></>:null}
+      </div></footer>{error&&<p role="alert" className="text-sm text-red-600">{error}</p>}
+    </DialogContent>
+  </Dialog>;
 }

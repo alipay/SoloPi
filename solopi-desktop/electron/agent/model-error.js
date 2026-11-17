@@ -16,6 +16,21 @@ function upstreamFailure(payload) {
   });
 }
 function modelFailure(error, { url, model, stage, startedAt, status, requestId, aborted, purpose = 'conversation', responseMetadata }) {
+  // Native adapters can wrap a structured provider error in failure.message.
+  // Retain only its error metadata, never the wrapper's body/headers or an
+  // arbitrary non-JSON message. INVALID_REQUEST is a response, not a network fault.
+  let native = {};
+  if(typeof error.failure?.message==='string' && error.failure.message.length<=65536){
+    try{
+      const payload=JSON.parse(error.failure.message);
+      if(payload?.error && typeof payload.error==='object' && typeof payload.error.message==='string'){
+        const parsed=upstreamFailure(payload);
+        native={upstreamCode:parsed.upstreamCode,upstreamType:parsed.upstreamType,upstreamRequestId:parsed.upstreamRequestId,
+          upstreamMessage:require('./upstream-diagnostics').redactUpstreamMessage(parsed.upstreamMessage)};
+      }
+    }catch{}
+  }
+  const upstream={...native,...Object.fromEntries(['upstreamCode','upstreamType','upstreamRequestId','upstreamMessage'].filter(k=>error[k]!==undefined).map(k=>[k,error[k]]))};
   const causes = []; const seen = new Set();
   function visit(e, depth = 0) {
     if (!e || depth > 5 || seen.has(e)) return;
@@ -33,11 +48,14 @@ function modelFailure(error, { url, model, stage, startedAt, status, requestId, 
   if (aborted) { category = 'cancelled'; hint = '模型请求已取消。'; }
   else if(codes.includes('INPUT_BUDGET_EXCEEDED')){category='input-budget';hint='请求超过单次输入预算，未发送。历史与完整证据已保留；请压缩历史、按章节读取资料或调整请求预算。';}
   else if(codes.includes('MODEL_REQUEST_TIMEOUT')){category='timeout';hint=`${responseMetadata?.timeoutKind==='first-response'?'等待首个HTTP响应':responseMetadata?.timeoutKind==='idle'?'模型输出停滞':'模型请求总耗时'}达到 ${Math.round((responseMetadata?.timeoutMs || 0)/1000)} 秒时限，已取消本次请求；已完成操作和原始证据保留。${responseMetadata?.timeoutKind==='idle' && Number.isFinite(responseMetadata?.streamIdleMs)?` 最近收到流数据距今 ${Math.round(responseMetadata.streamIdleMs/1000)} 秒；流连接有数据不代表模型产生了有效输出。`:''}`;}
+  else if(codes.includes('MODEL_REDIRECT_BLOCKED')){category='redirect-blocked';hint='模型服务返回重定向，已停止请求；请检查确认的模型服务地址。';}
   else if (codes.includes('OUTPUT_LIMIT')) { category = 'output-limit'; hint = `模型输出达到上限（结束原因 length，输出用量 ${responseMetadata?.completionTokens ?? '未知'} tokens，正文 ${responseMetadata?.outputCharacters ?? 0} 字符，推理 ${responseMetadata?.reasoningCharacters ?? 0} 字符）。本次响应未执行工具；请在模型设置中提高输出上限或调整推理设置。`; }
   else if (codes.includes('EMPTY_RESPONSE')) { category = 'empty-response'; hint = '模型响应没有有效正文或工具调用，未执行操作；请核查模型服务返回。'; }
   else if (codes.includes('INVALID_TOOL_CALL')) { category = 'invalid-tool-call'; hint = '模型返回的工具调用参数不完整或无效，未执行操作。'; }
   else if (codes.includes('CONTEXT_WINDOW_EXCEEDED')) { category = 'context-overflow'; hint = '模型服务确认请求超出上下文容量。'; }
-  else if (require('./rate-limit-retry').isRateLimit({diagnostics:{httpStatus:status,upstreamCode:error.upstreamCode,upstreamType:error.upstreamType}})) { category = 'rate-limit'; hint = '模型服务限流，自动重试已用尽；请稍后再试或检查模型额度。'; }
+  else if (require('./rate-limit-retry').isRateLimit({diagnostics:{httpStatus:status,upstreamCode:upstream.upstreamCode,upstreamType:upstream.upstreamType}})) { category = 'rate-limit'; hint = '模型服务限流，自动重试已用尽；请稍后再试或检查模型额度。'; }
+  else if (codes.some(c=>['QUOTA','ACCOUNT_QUOTA'].includes(c))) { category='quota'; hint='模型服务额度不足，需恢复额度后再继续。'; }
+  else if (codes.includes('INVALID_REQUEST')) { category='request'; hint=upstream.upstreamMessage ? `模型服务拒绝请求：${upstream.upstreamMessage}` : '模型服务拒绝请求，请检查原始上游错误及模型配置。'; }
   else if (codes.includes('UPSTREAM_ERROR')) { category = 'upstream'; hint = '模型服务返回错误，详见诊断中的上游错误码和请求 ID。'; }
   else if (status && status >= 400) {
     category = 'http';
@@ -53,9 +71,9 @@ function modelFailure(error, { url, model, stage, startedAt, status, requestId, 
   else if (stage === 'validate') { category = 'response'; hint = error.message; }
   const diagnostics = { time: new Date().toISOString(), service: new URL(url).origin, model, purpose, stage, category, durationMs: Date.now() - startedAt, causes, ...(status ? { httpStatus: status } : {}), ...(requestId && /^[\w.-]{1,160}$/.test(requestId) ? { requestId } : {}) };
   for (const key of ['upstreamCode','upstreamType','upstreamRequestId']) {
-    const value=safeIdentifier(error[key]); if(value !== undefined) diagnostics[key]=value;
+    const value=safeIdentifier(upstream[key]); if(value !== undefined) diagnostics[key]=value;
   }
-  if (error.upstreamMessage !== undefined) diagnostics.upstreamMessage = require('./upstream-diagnostics').redactUpstreamMessage(error.upstreamMessage);
+  if (upstream.upstreamMessage !== undefined) diagnostics.upstreamMessage = require('./upstream-diagnostics').redactUpstreamMessage(upstream.upstreamMessage);
   if (responseMetadata) Object.assign(diagnostics, require('../diagnostics').sanitize(responseMetadata));
   const code = diagnostics.upstreamCode || (status >= 400 ? `HTTP ${status}` : codes[0]);
   const result = new Error(`${purpose === 'compaction' ? '上下文压缩请求失败' : '模型请求失败'}${code ? `（${code}）` : ''}：${hint}`);

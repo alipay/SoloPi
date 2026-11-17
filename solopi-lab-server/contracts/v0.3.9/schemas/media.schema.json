@@ -1,0 +1,406 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.3.0/media.schema.json",
+  "title": "MediaTypes (r3独立数据面实施面)",
+  "description": "单设备最短候选：独立media-view数据面进程承载WSS有界H264原码透传；控制API只做授权/读取/停止。判定已核：新域名网关ecluse-streaming模式完整透传Upgrade（X-WS-Tunnel-By在案），WSS经域名可达。不转码、不落盘、无控制/音频；RO只读列表永不隐式授予媒体权限。",
+  "$defs": {
+    "ulid": {
+      "type": "string",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+    },
+    "safeInt": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "mediaRole": {
+      "enum": [
+        "viewer",
+        "client"
+      ]
+    },
+    "mediaTicket": {
+      "type": "object",
+      "required": [
+        "role",
+        "token",
+        "expiresAt",
+        "oneTimeUse"
+      ],
+      "additionalProperties": false,
+      "description": "短时单用途票据：consume为一次性原子UPDATE；一次性；只可由获取方本人使用，不复用不转发",
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/mediaRole"
+        },
+        "token": {
+          "type": "string",
+          "minLength": 32
+        },
+        "expiresAt": {
+          "$ref": "#/$defs/utc"
+        },
+        "oneTimeUse": {
+          "const": true
+        }
+      }
+    },
+    "mediaSessionCreateRequest": {
+      "type": "object",
+      "required": [
+        "orgId",
+        "projectId",
+        "clientId",
+        "deviceId",
+        "purpose",
+        "transportIntent"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "orgId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "projectId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "clientId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "deviceId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "purpose": {
+          "enum": [
+            "screen-preview"
+          ],
+          "description": "单设备屏幕查看；audio恒关"
+        },
+        "transportIntent": {
+          "enum": [
+            "wss-frames"
+          ],
+          "description": "r3实施面唯一可用传输：独立数据面WSS原码透传"
+        },
+        "requestedForSeconds": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 86400,
+          "description": "会话时长上限；缺省600s"
+        }
+      }
+    },
+    "dataPlaneInfo": {
+      "type": "object",
+      "required": [
+        "mode",
+        "pathTemplate",
+        "acceptsBinaryFrom",
+        "backpressure",
+        "limits",
+        "h264Framing"
+      ],
+      "additionalProperties": false,
+      "description": "数据面为独立进程；控制API（本schema所有HTTP端点）不承载任何逐路码流",
+      "properties": {
+        "mode": {
+          "const": "wss-relay"
+        },
+        "pathTemplate": {
+          "const": "/ws/media/{ticket}"
+        },
+        "acceptsBinaryFrom": {
+          "enum": [
+            "client"
+          ],
+          "description": "仅Client→viewer方向传输H264帧；viewer方向禁止任何输入（无控制/无触控/无音频）"
+        },
+        "backpressure": {
+          "type": "object",
+          "required": [
+            "maxBufferedBytes",
+            "maxQueueMessages",
+            "violationPolicy"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "maxBufferedBytes": {
+              "$ref": "#/$defs/safeInt"
+            },
+            "maxQueueMessages": {
+              "$ref": "#/$defs/safeInt"
+            },
+            "violationPolicy": {
+              "const": "disconnect-session-failed",
+              "description": "持续背压超限→viewer断开、会话failed释放，绝不无界缓冲"
+            }
+          }
+        },
+        "sweepIntervalMs": {
+          "type": "integer",
+          "minimum": 250,
+          "maximum": 10000,
+          "description": "停止/过期/吊销经DB标志在≤sweep内传导到数据面连接"
+        },
+        "limits": {
+          "type": "object",
+          "required": [
+            "maxConcurrentSessions",
+            "maxUplinkBytesPerSec",
+            "uplinkWindowMs",
+            "ticketTtlSec"
+          ],
+          "additionalProperties": false,
+          "description": "Per device: one capture source, up to sixteen independently authorized viewers; bandwidth, ticket TTL and source capacity remain bounded.",
+          "properties": {
+            "maxConcurrentSessions": {
+              "const": 16
+            },
+            "maxUplinkBytesPerSec": {
+              "$ref": "#/$defs/safeInt"
+            },
+            "uplinkWindowMs": {
+              "type": "integer",
+              "minimum": 250,
+              "maximum": 10000
+            },
+            "ticketTtlSec": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 3600
+            }
+          }
+        },
+        "h264Framing": {
+          "type": "object",
+          "required": [
+            "messageBoundary",
+            "initialization",
+            "keyframeRecovery",
+            "ptsPassthrough"
+          ],
+          "additionalProperties": false,
+          "description": "B6 H264透传合同：Server零解码/零转码/零重组/零存储；framing责任在Desktop适配层与浏览器解码层",
+          "properties": {
+            "messageBoundary": {
+              "const": "annex-b-access-unit",
+              "description": "每个binary WS message=一个完整H264 access unit（Annex-B起始码00000001/000001，边界对齐NAL边界）；破碎chunk不得直接入流，Desktop薄适配负责按access unit成帧"
+            },
+            "initialization": {
+              "const": "idr-with-sps-pps-first",
+              "description": "会话第一个access unit必须为IDR且前置SPS/PPS；viewer中途接入也以下一个IDR起渲染"
+            },
+            "keyframeRecovery": {
+              "const": "client-gop-idr",
+              "description": "首关键帧恢复=Client采集参数保证IDR间隔（GOP≤2s）；Server不解析NAL、不缓存不重发；viewer入场前至下一个IDR之间的非关键帧允许丢弃，浏览器以IDR起捷新渲染"
+            },
+            "ptsPassthrough": {
+              "const": "au-passthrough-no-pts",
+              "description": "WS仅透传Annex-B access unit字节，不含原采集PTS——scrcpy 12字节头在Client适配层解析剥离，原PTS仅在采集回调即时可取且当前不写入任何状态或持久存储；浏览器解码呈现使用解码器侧单调时钟合成时间轴（W20.2实现常量逐字核实：每AU递增33000µs，即33ms；33ms=33000µs）——该合成时间是监视呈现时间，不代表原PTS。后续任一端需要真实PTS须另立合同增量（如AU前置微秒字段或SEI），不得默认已具备。"
+            }
+          }
+        }
+      }
+    },
+    "mediaSessionResponse": {
+      "type": "object",
+      "required": [
+        "mediaSessionId",
+        "orgId",
+        "projectId",
+        "clientId",
+        "deviceId",
+        "purpose",
+        "status",
+        "createdAt",
+        "expiresAt",
+        "viewerTicket",
+        "dataPlane"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "mediaSessionId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "orgId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "projectId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "clientId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "deviceId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "purpose": {
+          "enum": [
+            "screen-preview"
+          ]
+        },
+        "status": {
+          "enum": [
+            "authorized",
+            "live",
+            "stopped",
+            "failed",
+            "expired"
+          ]
+        },
+        "createdAt": {
+          "$ref": "#/$defs/utc"
+        },
+        "expiresAt": {
+          "$ref": "#/$defs/utc"
+        },
+        "viewerTicket": {
+          "$ref": "#/$defs/mediaTicket",
+          "description": "仅返回给发起方（admin Bearer响应体）；client票据只经client事件流media.authorized下发，绝不入任何RO/匿名面"
+        },
+        "dataPlane": {
+          "$ref": "#/$defs/dataPlaneInfo"
+        },
+        "endedReason": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "endedReason枚举（事实记录）: viewer-closed|client-closed|backpressure|expired|stopped|revoked|internal"
+        },
+        "endedAt": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "mediaSessionStatusResponse": {
+      "type": "object",
+      "required": [
+        "mediaSessionId",
+        "clientId",
+        "deviceId",
+        "purpose",
+        "status",
+        "createdAt",
+        "expiresAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "mediaSessionId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "clientId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "deviceId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "purpose": {
+          "enum": [
+            "screen-preview"
+          ]
+        },
+        "status": {
+          "enum": [
+            "authorized",
+            "live",
+            "stopped",
+            "failed",
+            "expired"
+          ]
+        },
+        "createdAt": {
+          "$ref": "#/$defs/utc"
+        },
+        "expiresAt": {
+          "$ref": "#/$defs/utc"
+        },
+        "clientJoinedAt": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "viewerJoinedAt": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "endedReason": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "endedAt": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "mediaEventPayload": {
+      "type": "object",
+      "required": [
+        "mediaSessionId",
+        "deviceId",
+        "clientTicket",
+        "expiresAt",
+        "dataPlanePath"
+      ],
+      "additionalProperties": false,
+      "description": "media.authorized事件data（client事件流）：Client凭此票据连接数据面开始采集发送；断线未明不假装停止，以DB/事件流对账",
+      "properties": {
+        "mediaSessionId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "deviceId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "clientTicket": {
+          "$ref": "#/$defs/mediaTicket"
+        },
+        "expiresAt": {
+          "$ref": "#/$defs/utc"
+        },
+        "dataPlanePath": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

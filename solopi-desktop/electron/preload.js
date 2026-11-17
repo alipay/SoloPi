@@ -1,9 +1,14 @@
 // Explicit IPC surface. Never expose Node, Electron, or raw IPC events.
 const { contextBridge, ipcRenderer, webUtils } = require('electron');
 const channels = new Set([
+  'diagnostics:export',
+  'agent:screen-settings', 'agent:save-screen-settings',
+  'reply-knowledge:list', 'reply-knowledge:get', 'reply-knowledge:save', 'reply-knowledge:import', 'reply-knowledge:remove', 'reply-settings:load', 'reply-settings:save', 'reply-evidence:list', 'reply-evidence:remove', 'reply-task:status', 'reply-task:history', 'reply-task:clear-history', 'reply-task:prepare-fixture', 'reply-task:cancel-fixture-confirmation', 'reply-task:start-fixture', 'reply-task:simulate-arrival', 'reply-task:simulate-image', 'reply-task:stop', 'reply-task:recover', 'reply-task:review-pending', 'harness:discover', 'harness:apps', 'harness:connect', 'harness:command', 'harness:disconnect', 'harness:replay', 'harness:stop', 'harness:reveal', 'agent:virtual-cleanup', 'agent:virtual-forget-recovery', 'agent:virtual-report', 'reply-task:changed', 'agent:virtual-preview',
+  "cluster-connection:api", "cluster-assets:api", "cluster-group-tasks:api", "cluster-connection:pick-ca",
   "solopi:current", "solopi:record-start", "solopi:record-stop", "solopi:record-discard", "solopi:convert", "solopi:select-file",
   "team-config:devices", "team-config:status", "team-config:validate", "team-config:import", "team-config:export", "team-config:onboarding",
-  "agent:performance", "agent:request-policy", "agent:save-request-policy", "agent:compare-model", "agent:comparison", "agent:stop-comparison", "preview:frame-ack", "agent:models", "agent:select-model", "agent:mirror-targets", "agent:mirror-start", "agent:mirror-stop", "agent:list", "agent:create", "agent:get", "agent:call-details", "agent:send", "agent:edit-queued", "agent:delete-queued", "agent:steer-queued", "agent:approval-mode", "agent:approve", "agent:stop", "agent:extensions", "agent:extension-inventory", "agent:skill-detail", "agent:test-mcp", "agent:save-extensions",
+  "agent:performance", "agent:request-policy", "agent:save-request-policy", "agent:compare-model", "agent:comparison", "agent:stop-comparison", "preview:frame-ack", "agent:runtime-config",
+  "agent:models", "agent:select-model", "agent:mirror-targets", "agent:mirror-start", "agent:mirror-stop", "agent:list", "agent:create", "agent:get", "agent:call-details", "agent:send", "agent:edit-queued", "agent:delete-queued", "agent:steer-queued", "agent:approval-mode", "agent:approve", "agent:stop", "agent:extensions", "agent:extension-inventory", "agent:skill-detail", "agent:test-mcp", "agent:save-extensions",
   "bugreport:pick", "bugreport:start", "bugreport:status", "bugreport:current", "bugreport:cancel", "bugreport:history", "bugreport:open-report", "bugreport:reveal-source",
   "adb:list-devices",
   "adb:list-packages",
@@ -28,14 +33,14 @@ const channels = new Set([
   "workflow:run",
   "workflow:validate-task-selection",
   "workflow:set-header-devices",
-  "workflow-report:finalize-task",
+  "workflow-report:finalize-task", "workflow-report:performance",
   "workflow-state:load",
   "workflow-state:save",
   "workflow-case:update-failed",
   "workflow-task:list",
   "workflow-task:clean",
   "workflow-task:stop",
-  "workflow-report:load-task",
+  "workflow-report:load-task", "workflow-report:read-evidence",
   "workflow-report:delete-task-detail",
   "workflow-report:export-package",
   "workflow-report:open-package",
@@ -75,7 +80,7 @@ const channels = new Set([
   "case-library:check-apply",
   "case-library:push-git-repo"
 ]);
-const events = new Set(['settings:workflow-update', 'settings:environment-updated', 'team-config:progress','team-config:changed','agent:comparison','quick-actions:changed', 'agent:environment-update', 'agent:configuration-update', 'agent:mirror-frame', 'agent:changed', 'workflow-case:update', 'workflow-task:changed', 'workflow:progress', 'case-library:local-changed', 'adb:logcat-state']);
+const events = new Set(['reply-task:changed', 'agent:virtual-preview', 'settings:workflow-update', 'settings:environment-updated', 'team-config:progress','team-config:changed','agent:comparison','quick-actions:changed', 'agent:environment-update', 'agent:configuration-update', 'agent:mirror-frame', 'agent:changed', 'workflow-case:update', 'workflow-task:changed', 'workflow:progress', 'case-library:local-changed', 'adb:logcat-state']);
 const listeners = new Map();
 contextBridge.exposeInMainWorld('glassbox', {
   ipcRenderer: {

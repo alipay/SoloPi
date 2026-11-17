@@ -21,14 +21,14 @@ async function searchTaskLog(task, { deviceType, fileIndex, query = '', fromLine
       if ((startTime || endTime) && (!time || (startTime && time < startTime) || (endTime && time > endTime))) continue;
       if (line < fromLine || !text.includes(query) || (timeText && !text.includes(timeText))) continue;
       if (matches.length >= limit) { hasMore = true; break; }
-      matches.push({ line, text: text.slice(0, 4000) });
+      matches.push({line,text:text.slice(0,4000),...(text.length>4000?{textTruncated:true,textLength:text.length}: {})});
     }
   } finally { lines.close(); stream.destroy(); }
   return { success: true, file, files, deviceType:selected.deviceType, matches,
     nextLine: hasMore ? matches.at(-1).line + 1 : null };
 }
 function recordingReceipt(item) {
-  const receipt=Object.fromEntries(['deviceType','serial','path','sourcePath','success','evidenceReady','error','errorCode','sizeBytes','segmentationPhase','partial','sourceErrorCode','sourceError','sourceExitCode','exitCode','signal'].filter(key=>item?.[key]!==undefined).map(key=>[key,item[key]]));
+  const receipt=Object.fromEntries(['deviceType','serial','path','sourcePath','success','evidenceReady','error','errorCode','sizeBytes','segmentationPhase','partial','sourceErrorCode','sourceError','sourceExitCode','exitCode','signal','diagnosticPath','diagnosticWriteError','stopRequested','stopReason'].filter(key=>item?.[key]!==undefined).map(key=>[key,item[key]]));
   if(typeof item?.scrcpyOutput==='string')receipt.outputPreview=item.scrcpyOutput.slice(-1500);
   return receipt;
 }

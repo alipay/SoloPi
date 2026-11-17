@@ -29,7 +29,7 @@ function assertScope(before,after,allowedPaths){
     if(!Array.isArray(allowedPaths)||!allowedPaths.length||allowedPaths.length>40)throw Error('allowedPaths需要1至40个字段路径');
     const patterns=allowedPaths.map(segments);
     const outside=changes.filter(parts=>!patterns.some(pattern=>pattern.length<=parts.length&&pattern.every((p,i)=>p==='*'||p===parts[i])));
-    if(outside.length)throw Object.assign(Error(`修改超出本次字段范围：${outside.slice(0,10).map(pointer).join(', ')}；未写入任何用例`),{code:'EDIT_SCOPE_EXCEEDED'});
+    if(outside.length)throw Object.assign(Error(`修改超出本次字段范围：${outside.slice(0,10).map(pointer).join(', ')}；未写入任何用例。当前允许：${allowedPaths.join(', ')}。请还原无关修改；已授权目标漏声明字段时，重新export_cases声明正确范围后只重放目标补丁。预检不会回滚导出文件，不要直接重试同一份带有多余改动的文件。`),{code:'EDIT_SCOPE_EXCEEDED',allowedPaths:[...allowedPaths],outsidePaths:outside.map(pointer)});
   }
   return changes.map(pointer);
 }

@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.1.1/session.schema.json",
+  "title": "SessionTypes",
+  "$defs": {
+    "ulid": {
+      "type": "string",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+    },
+    "safeInt": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "challengeResponse": {
+      "type": "object",
+      "required": [
+        "challenge",
+        "expiresInSec"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "challenge": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 256
+        },
+        "expiresInSec": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 600
+        }
+      }
+    },
+    "sessionCreateRequest": {
+      "type": "object",
+      "required": [
+        "clientId",
+        "installationId",
+        "clientVersion",
+        "capabilities",
+        "challenge",
+        "signature"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "clientId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "installationId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "clientVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capabilities": {
+          "type": "object",
+          "required": [
+            "commands",
+            "media"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "commands": {
+              "type": "boolean"
+            },
+            "media": {
+              "type": "boolean"
+            },
+            "agent": {
+              "type": "boolean"
+            }
+          }
+        },
+        "challenge": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 256
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]+=*$",
+          "minLength": 32
+        }
+      }
+    },
+    "sessionCreateResponse": {
+      "type": "object",
+      "required": [
+        "sessionId",
+        "epoch",
+        "leaseExpiresAt",
+        "heartbeatIntervalSec",
+        "maxLeaseSec",
+        "contractVersion"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "minLength": 32
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "leaseExpiresAt": {
+          "$ref": "#/$defs/utc"
+        },
+        "heartbeatIntervalSec": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300
+        },
+        "maxLeaseSec": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 86400
+        },
+        "contractVersion": {
+          "type": "string",
+          "pattern": "^0\\.1\\.[0-9]+$"
+        }
+      }
+    }
+  }
+}

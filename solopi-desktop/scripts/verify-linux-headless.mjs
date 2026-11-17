@@ -54,9 +54,14 @@ try{
   const executed=task.cases?.[0];
   if(kind==='success' && !executed?.results?.some(r=>r.stepId==='command' && r.status==='success' && r.stdout?.includes('HEADLESS_EXECUTION_OK')))throw Error('Native success command did not execute');
   if(kind==='failure' && executed?.diagnostics?.details?.exitCode!==7)throw Error('Expected command exit code was not preserved');
-  const report=result.reportPackagePath||task.reportPackage?.path;
-  if(!report||!fs.existsSync(report)||!fs.statSync(report).size)throw Error('Missing terminal report');
-  checks.push({kind,taskId:id,status:task.status,reportBytes:fs.statSync(report).size});
+  const detail=task.reportDetailPath||path.join(dataDir,'workflow-report-details',id+'.json');
+  if(!fs.existsSync(detail)||!JSON.parse(fs.readFileSync(detail,'utf8')).finishedAt)throw Error('Missing readable execution report');
+  // Execution outcome and portable archive readiness are separate contracts.
+  let archiveTask=task;const archiveDeadline=Date.now()+45000;
+  while(!archiveTask.reportPackage?.path&&Date.now()<archiveDeadline){if(archiveTask.reportPackageStatus==='failed')throw Error('Archive export failed');await wait(200);archiveTask=invoke(['tasks','show',id]).task;}
+  const report=archiveTask.reportPackage?.path;
+  if(!report||!fs.existsSync(report)||!fs.statSync(report).size)throw Error('Missing eventual archive');
+  checks.push({kind,taskId:id,status:task.status,readableExecutionReport:true,archiveWasSeparate:!task.reportPackage?.path,reportBytes:fs.statSync(report).size});
  }
  fs.writeFileSync(path.join(output,'result.json'),JSON.stringify({success:true,displayRequired:false,checks},null,2));
  console.log('Native no-display execution passed: async success, command failure, stop and reports.');

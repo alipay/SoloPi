@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.4.2/group-levels.schema.json",
+  "title": "Group levels read-only page (真实Desktop→设备组→设备层级数据面，DG142)",
+  "$defs": {
+    "ulid": { "type": "string", "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "member": {
+      "type": "object", "additionalProperties": false,
+      "required": ["deviceId", "role"],
+      "properties": {
+        "deviceId": { "type": ["string", "null"], "description": "登记成员deviceId（原样；若登记体非串如实null）" },
+        "role": { "type": ["string", "null"], "enum": ["phone", "glasses", null], "description": "登记时明确角色；null=登记体缺失字段如实缺失" },
+        "deviceKind": { "type": ["string", "null"], "description": "device表真值（未确认=other）；无记录=null，不推断" },
+        "deviceName": { "type": ["string", "null"], "description": "device表名称真值；无记录=null" },
+        "deviceStatus": { "type": ["string", "null"], "description": "device表状态真值（online/stale/offline）；无记录=null" }
+      }
+    },
+    "execution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["groupExecutionId", "requestId", "taskId", "phase", "updatedAtMs"],
+      "properties": {
+        "groupExecutionId": { "type": ["string", "null"] },
+        "requestId": { "type": ["string", "null"] },
+        "taskId": { "type": ["string", "null"], "description": "原生单绑定taskId原样（仅显式已存在标识）" },
+        "phase": { "type": "string", "enum": ["prepared", "dispatching", "unknown", "done"], "description": "投影前向状态机原值；prepared/unknown≠执行成功" },
+        "updatedAtMs": { "type": "integer", "minimum": 0 },
+        "stopRequestedAt": { "type": "string", "description": "取消请求时间戳原样；体缺省即不出现" },
+        "receipt": { "type": "object", "additionalProperties": false, "required": ["taskId", "terminal", "resourcesReleased", "outcome", "reportRef"],
+          "properties": {
+            "taskId": { "type": ["string", "null"] },
+            "terminal": { "type": "boolean", "description": "回执终态位；缺省字段恒false-ish如实" },
+            "resourcesReleased": { "type": "boolean" },
+            "outcome": { "type": ["string", "null"], "enum": ["succeeded", "failed", "cancelled", null] },
+            "reportRef": { "type": ["string", "null"], "description": "报告原文标识（仅显式已有）" }
+          }, "description": "仅回执存在时才出现；prepared/unknown不伴随该对象" }
+      }
+    },
+    "group": {
+      "type": "object", "additionalProperties": false,
+      "required": ["groupId", "name", "revision", "deleted", "updatedAtMs", "members", "executions"],
+      "properties": {
+        "groupId": { "type": "string" },
+        "name": { "type": "string" },
+        "revision": { "type": "integer", "minimum": 1, "description": "登记投影当前revision（历史已被CAS取代只见最新）" },
+        "deleted": { "type": "boolean", "description": "墓碑真值：true=Desktop声明的删除登记" },
+        "updatedAtMs": { "type": "integer", "minimum": 0 },
+        "members": { "type": "array", "items": { "$ref": "#/$defs/member" } },
+        "executions": { "type": "array", "items": { "$ref": "#/$defs/execution" } }
+      }
+    },
+    "level": {
+      "type": "object", "additionalProperties": false,
+      "required": ["clientId", "clientStatus", "deviceScope", "groups"],
+      "properties": {
+        "clientId": { "type": "string" },
+        "clientStatus": { "type": "string", "enum": ["approved", "revoked", "rejected", "expired"], "description": "Desktop身份真值（含吊销——历史如实可见）" },
+        "deviceScope": { "type": ["object", "null"], "additionalProperties": false, "properties": { "hostname": { "type": "string" } }, "required": ["hostname"], "description": "Desktop自申报主机名（无则null）" },
+        "groups": { "type": "array", "items": { "$ref": "#/$defs/group" } }
+      }
+    },
+    "groupLevelsPage": {
+      "type": "object", "additionalProperties": false,
+      "required": ["items", "page", "pageSize", "nextPage"],
+      "properties": {
+        "items": { "type": "array", "items": { "$ref": "#/$defs/level" } },
+        "page": { "type": "integer", "minimum": 1 },
+        "pageSize": { "type": "integer", "minimum": 1, "maximum": 200 },
+        "nextPage": { "type": ["integer", "null"], "minimum": 2 }
+      }
+    }
+  }
+}

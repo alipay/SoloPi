@@ -57,6 +57,10 @@ function evaluateScrcpyRecording(session = {}, fileInfo = {}) {
     exitCode,
     signal,
     scrcpyOutput: output,
+    diagnosticPath: session.diagnosticPath || '',
+    diagnosticWriteError: session.diagnosticWriteError || '',
+    stopRequested: Boolean(session.stopRequested),
+    stopReason: session.stopReason || '',
     transportDiagnostics: session.transportDiagnostics || [],
   };
 
@@ -110,7 +114,11 @@ function evaluateScrcpyRecording(session = {}, fileInfo = {}) {
       signal,
       failureReasons,
       scrcpyOutput: output,
-      transportDiagnostics: session.transportDiagnostics || [],
+      diagnosticPath: session.diagnosticPath || '',
+    diagnosticWriteError: session.diagnosticWriteError || '',
+    stopRequested: Boolean(session.stopRequested),
+    stopReason: session.stopReason || '',
+    transportDiagnostics: session.transportDiagnostics || [],
     },
   };
 

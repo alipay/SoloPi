@@ -1,0 +1,312 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solopi-lab/contracts/v0.2.0/device.schema.json",
+  "title": "DeviceTypes (v0.2.0设备子集冻结)",
+  "$defs": {
+    "ulid": {
+      "type": "string",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+    },
+    "safeInt": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "discoveryFingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "发现层稳定指纹=sha256(设备稳定标识物如ro.serialno)的小写hex64；不得使用USB/WiFi传输serial——传输信息放adbSerial"
+    },
+    "deviceEntry": {
+      "type": "object",
+      "required": [
+        "deviceId",
+        "kind",
+        "discoveryFingerprint",
+        "os",
+        "connectedAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "deviceId": {
+          "$ref": "#/$defs/ulid",
+          "description": "Client首见时生成并本地持久映射的ULID；同一物理设备跨重插拔/WiFi切换稳定"
+        },
+        "kind": {
+          "enum": [
+            "phone",
+            "glasses",
+            "tablet",
+            "other"
+          ]
+        },
+        "deviceName": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "discoveryFingerprint": {
+          "$ref": "#/$defs/discoveryFingerprint"
+        },
+        "os": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "adbSerial": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "信息性传输serial（USB/WiFi可变）；不参与身份/归属/顺序判定"
+        },
+        "connectedAt": {
+          "$ref": "#/$defs/utc",
+          "description": "仅信息展示；顺序判定不得使用本时钟（乱序只由epoch+seq裁决）"
+        }
+      }
+    },
+    "deviceSnapshotRequest": {
+      "type": "object",
+      "required": [
+        "sessionId",
+        "epoch",
+        "seq",
+        "snapshotId",
+        "takenAt",
+        "discoveryStatus",
+        "devices"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "minLength": 32
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991,
+          "description": "必须等于当前会话epoch；旧epoch在途快照随会话失效被拒"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991,
+          "description": "Client在当前epoch内严格递增的安装序号（每epoch从1开始）；跳号→422 SNAPSHOT_SEQ_GAP，须先从心跳deviceSnapshot水位重新对齐"
+        },
+        "snapshotId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "takenAt": {
+          "$ref": "#/$defs/utc",
+          "description": "仅信息展示；顺序判定不得使用本时钟"
+        },
+        "discoveryStatus": {
+          "enum": [
+            "ok",
+            "failed"
+          ],
+          "description": "发现失败必须failed且devices=[]——服务端不安装、不抹去既有清单，只推进水位"
+        },
+        "devices": {
+          "type": "array",
+          "maxItems": 500,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/deviceEntry"
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "discoveryStatus": {
+            "const": "failed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "devices": {
+            "type": "array",
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    "deviceSummary": {
+      "type": "object",
+      "required": [
+        "orgId",
+        "projectId",
+        "clientId",
+        "deviceId",
+        "kind",
+        "status",
+        "lastSnapshotAt",
+        "discoveredAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "orgId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "projectId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "clientId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "deviceId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "deviceName": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "enum": [
+            "phone",
+            "glasses",
+            "tablet",
+            "other"
+          ]
+        },
+        "status": {
+          "enum": [
+            "online",
+            "stale",
+            "offline"
+          ],
+          "description": "服务端唯一权威三态；本合同不输出冗余online字段——旧deviceSummary双状态字段即废除"
+        },
+        "lastSeenAt": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/utc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lastSnapshotAt": {
+          "$ref": "#/$defs/utc"
+        },
+        "lastSnapshotId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ulid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "discoveredAt": {
+          "$ref": "#/$defs/utc"
+        }
+      }
+    },
+    "devicesPage": {
+      "type": "object",
+      "required": [
+        "items",
+        "page",
+        "pageSize",
+        "nextPage"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/deviceSummary"
+          }
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "pageSize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "nextPage": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "deviceSnapshotResponse": {
+      "type": "object",
+      "required": [
+        "snapshotId",
+        "revision",
+        "installed"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "snapshotId": {
+          "$ref": "#/$defs/ulid"
+        },
+        "revision": {
+          "$ref": "#/$defs/safeInt",
+          "description": "服务端权威已安装清单版本号（安装时head.revision+1；丢弃/重放回当前head.revision）"
+        },
+        "installed": {
+          "type": "boolean",
+          "description": "false=迟到丢弃(dropped)、幂等重放(duplicate)或发现失败(reason=discovery-failed)，三者清单状态均不变"
+        },
+        "dropped": {
+          "type": "boolean",
+          "description": "seq低于已安装水位——迟到全量不覆盖新清单，直接丢弃"
+        },
+        "duplicate": {
+          "type": "boolean",
+          "description": "同epoch同seq同snapshotId同内容——幂等重放返回原revision"
+        },
+        "reason": {
+          "enum": [
+            "discovery-failed"
+          ]
+        },
+        "devicesUpserted": {
+          "$ref": "#/$defs/safeInt"
+        },
+        "devicesRemoved": {
+          "$ref": "#/$defs/safeInt"
+        },
+        "statusByDevice": {
+          "type": "object",
+          "description": "安装后该Client名下全部device→即时权威态",
+          "additionalProperties": {
+            "enum": [
+              "online",
+              "stale",
+              "offline"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

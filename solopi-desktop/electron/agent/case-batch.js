@@ -32,7 +32,7 @@ async function exportCases(state, caseIds, {allowedPaths}={}) {
   const filePath = path.join(dir, 'cases.json');
   await fs.writeFile(filePath, JSON.stringify({ version: allowedPaths ? 2 : 1, updates }, null, 2), { mode: 0o600 });
   if(allowedPaths)await fs.writeFile(filePath+'.scope.json',JSON.stringify({allowedPaths,caseIds}),{mode:0o400});
-  return { success: true, filePath, allowedPaths, count: updates.length, message: '使用run_command脚本修改此文件的updates[].document，保留caseId/expectedRevision及未修改字段；然后save_cases_from_file一次提交。不要直接编辑运行中的用例库存储文件。' };
+  return { success: true, filePath, allowedPaths, count: updates.length, message: '使用run_command脚本修改updates[].document；inputs是节点参数，componentId是组件引用。切换已有引用不合并组件params/helperText。保留干净副本、caseId/expectedRevision及未改字段；save_cases_from_file校验失败不会回滚此文件，应还原无关改动或重新导出后重放目标补丁。不要直接编辑运行中的用例库存储文件。' };
 }
 async function saveCasesFromFile({ filePath, dryRun = false }, { readState, saveCase, signal }) {
   if (!path.isAbsolute(filePath)) throw Error('filePath必须是绝对路径');

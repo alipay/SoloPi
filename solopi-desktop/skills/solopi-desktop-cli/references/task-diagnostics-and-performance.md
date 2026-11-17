@@ -14,6 +14,8 @@
 
 包内仅包含新版本采集的模型请求/响应结构、长度、结束原因、token统计、错误代码与Agent状态元数据；不包含聊天正文、推理正文、附件、配置凭据或设备业务日志。旧版本故障不能追溯补录，records为0时须升级重启、复现、再导出。解压gzip后为JSON，可直接程序读取。
 
+DMG 自带 CLI，无需另装一个包。若终端报 `command not found`，使用已安装 App 内的 `Contents/Resources/bin/solopi-desktop logs export --json`（先按主技能定位 App），不要安装另一套旧 CLI。若报 `Cannot find module`，属于安装包依赖缺失，需要包含修复的新版安装包；配置 PATH 无法修复缺文件。任务报告里的设备日志与这里的应用诊断包用途不同。
+
 ## 离线日志正则诊断
 
 给定日志原文和目标提取内容生成正则、验证 JSON 解析或断言时，读取[离线正则生成与试跑](offline-log-assert.md)。无需查询设备、任务或整库；不因诊断自动修改用例。先用 `assert --help` 核实当前安装支持该入口。

@@ -1,6 +1,6 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import crypto from "node:crypto";
-import { withTimestampRetry } from "./electron-builder-sign.mjs";
+import { withTimestampRetry, timestampAuthority } from "./electron-builder-sign.mjs";
 import { verifyElectronEntitlements } from "./verify-mac-entitlements.mjs";
 import fs from "node:fs";
 import path from "node:path";
@@ -118,7 +118,8 @@ if (codesignIdentity) {
   if (codesignIdentity.name.startsWith("Apple Development:")) {
     codesignArgs.push("--timestamp=none");
   } else {
-    codesignArgs.push("--timestamp");
+    if (timestampAuthority()) codesignArgs.push("--timestamp=" + timestampAuthority());
+    else codesignArgs.push("--timestamp");
   }
 }
 codesignArgs.push("--sign", codesignIdentityHash || "-", appPath);
@@ -210,7 +211,8 @@ if (codesignIdentity) {
   if (codesignIdentity.name.startsWith("Apple Development:")) {
     dmgCodesignArgs.push("--timestamp=none");
   } else {
-    dmgCodesignArgs.push("--timestamp");
+    if (timestampAuthority()) dmgCodesignArgs.push("--timestamp=" + timestampAuthority());
+    else dmgCodesignArgs.push("--timestamp");
   }
   dmgCodesignArgs.push("--sign", codesignIdentityHash, dmgPath);
   await withTimestampRetry(() => execFileSync("codesign", dmgCodesignArgs, {

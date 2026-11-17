@@ -8,7 +8,7 @@ SoloPi 是一套面向移动端研发的开源自动化与 AI Harness 工程。�
 真机上的录制、回放、断言和性能诊断能力，并增加 Agent 接入、动态页面安全执行、独立结果
 判定、无人值守托管和同次运行证据，让一次设备操作可以交付为可进入研发与 CI 流程的结论。
 
-> 产品源码包含 `solopi-app`、`solopi-skill` 和 `solopi-desktop` 三个顶层模块。Harness 随 Skill 放在
+> 产品源码包含 `solopi-app`、`solopi-skill`、`solopi-desktop` 和 `solopi-lab-server` 四个顶层模块。Harness 随 Skill 放在
 > `solopi-skill/scripts/harness`；配套文档与许可证保留在仓库中。
 
 ## 开源模块
@@ -18,6 +18,7 @@ SoloPi 是一套面向移动端研发的开源自动化与 AI Harness 工程。�
 | [`solopi-app/`](solopi-app/README.md) | 真机执行内核 | 录制回放、页面观察、触屏前复核、断言、性能与网络采集、动作回执；当前开源实现为 Android |
 | [`solopi-skill/`](solopi-skill/SKILL.md) | Agent 入口与宿主机 Harness | 使用说明、类型化 CLI、设备协议、验证计划、独立验收、单机托管与证据报告；核心实现位于 `scripts/harness` |
 | [`solopi-desktop/`](solopi-desktop/README.md) | 桌面测试工作台 | Electron 桌面端、可视化用例编排、设备操作、CLI 与测试报告 |
+| [`solopi-lab-server/`](solopi-lab-server/README.md) | 实验室服务端 | Server API、Superagent、Web、契约及部署工具；Web 位于 `web/` |
 
 被测 App 不需要接入 Agent SDK，也不需要因为使用 Harness 修改业务代码。
 
@@ -417,3 +418,13 @@ limitations under the License.
 ## Disclaimer（免责声明）
 
 [免责声明](Disclaimer.md)
+
+## 实验室服务端
+
+本仓库在 SoloPi 的 App、Skill、Desktop 目录布局上保留独立的 `solopi-lab-server/`。部署方式见 [自托管说明](solopi-lab-server/docs/SELF_HOSTING.md)。Web 和 Server 不要求用户登录；构建时保留与 `solopi-desktop/` 的相邻关系。
+
+## 联合仓库验证
+
+使用 Node.js 24 LTS。先在 `solopi-desktop/`、`solopi-lab-server/`、`solopi-lab-server/web/` 各运行 `npm ci`，再运行 Server 的 `npm test`、Web 的 `npm test`，最后运行 Desktop 的 `npm test`、`npm run typecheck` 和 `npm run build`。Desktop 的仓库级集成测试会校验 Server 共享源码与已构建 Web；独立 Desktop 运行不要求启动 Server。
+
+依赖修复、picomatch 本地补丁来源和验证方法见 [安全依赖说明](solopi-desktop/docs/DEPENDENCY_SECURITY.md)。
