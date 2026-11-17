@@ -1,0 +1,62 @@
+solopi-app/app/src/main/res/values/star_prompt.xml
+  s_fd5c66a72fb1e8::t_0ab4af54b47dab 3-4
+  s_fd5c66a72fb1e8::t_77491c120461b7 6
+  s_fd5c66a72fb1e8::t_b57da9852e60e7 1-2,5,7-10
+solopi-app/app/src/main/java/com/alipay/hulu/activity/MyApplication.java
+  s_fd5c66a72fb1e8::t_b57da9852e60e7 291
+solopi-app/app/src/main/java/com/alipay/hulu/util/StarPromptPolicy.java
+  s_fd5c66a72fb1e8::t_b57da9852e60e7 16-84
+  s_fd5c66a72fb1e8::t_1c30ca2550a700 1-15
+solopi-app/app/build.gradle
+  s_fd5c66a72fb1e8::t_b57da9852e60e7 35,39
+  s_fd5c66a72fb1e8::t_165490817dbb41 18-22
+solopi-app/app/src/main/res/layout/activity_info.xml
+  s_fd5c66a72fb1e8::t_b57da9852e60e7 78-88,151
+solopi-app/app/src/main/res/drawable/star_secondary_background.xml
+  s_fd5c66a72fb1e8::t_0ab4af54b47dab 1-4
+solopi-app/app/src/main/res/layout/dialog_star_prompt.xml
+  s_fd5c66a72fb1e8::t_0ab4af54b47dab 1-37
+solopi-app/app/src/main/java/com/alipay/hulu/activity/InfoActivity.java
+  s_fd5c66a72fb1e8::t_ed45442790a0b2 71-75
+solopi-app/app/src/main/java/com/alipay/hulu/util/StarPromptController.java
+  s_fd5c66a72fb1e8::t_5f37810f51dd7c 1-15
+  s_fd5c66a72fb1e8::t_b57da9852e60e7 16-18,20-23,25-32,38-56,58-106,109-133,135,137-143,160-163,166,173-204
+  s_fd5c66a72fb1e8::t_165490817dbb41 24,107-108,134,136,157-159
+  s_fd5c66a72fb1e8::t_0ab4af54b47dab 19,33-37,57,144-156,164-165,167-172
+solopi-app/app/src/main/res/drawable/star_primary_background.xml
+  s_fd5c66a72fb1e8::t_0ab4af54b47dab 1-4
+solopi-app/app/src/main/res/values-zh/star_prompt.xml
+  s_fd5c66a72fb1e8::t_0ab4af54b47dab 2-4,7
+  s_fd5c66a72fb1e8::t_b57da9852e60e7 1,5,8-10
+  s_fd5c66a72fb1e8::t_77491c120461b7 6
+solopi-app/app/src/test/java/com/alipay/hulu/util/StarPromptPolicyTest.java
+  s_fd5c66a72fb1e8::t_d961a3dfc15fa1 16-101
+  s_fd5c66a72fb1e8::t_5a75c1a0268a8d 1-15
+solopi-app/app/src/main/java/com/alipay/hulu/activity/IndexActivity.java
+  s_fd5c66a72fb1e8::t_b57da9852e60e7 93-97,122,289
+  s_fd5c66a72fb1e8::t_cce2b2e45fc527 92
+STAR_PROMPT.md
+  s_fd5c66a72fb1e8::t_21cd967f303897 1-10,13-30
+  s_fd5c66a72fb1e8::t_b00041a7a1e6f3 31-32,35
+  s_fd5c66a72fb1e8::t_77491c120461b7 11-12,33-34
+solopi-app/app/src/main/res/drawable/star_badge_background.xml
+  s_fd5c66a72fb1e8::t_0ab4af54b47dab 1-4
+solopi-app/app/src/main/res/drawable/star_card_background.xml
+  s_fd5c66a72fb1e8::t_0ab4af54b47dab 1-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9a4b4740d3c3b74c4c0f7a4867f801d0d56a1030",
+  "prompts": {},
+  "sessions": {
+    "s_fd5c66a72fb1e8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1383c-9f7d-7323-8d7f-6ff60953824b",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "承沐 <liuzimu.lzm@antgroup.com>"
+    }
+  }
+}

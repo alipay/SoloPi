@@ -1,0 +1,38 @@
+solopi-desktop/tests/startup-time-workflow.test.mjs
+  s_6e7663aa10c67e::t_04cbff8b1bc0e9 8-9,41-58
+  s_6e7663aa10c67e::t_dc31a9bf8e6d24 1-7,10-14,16-21,23,25-40,59-80
+  s_6e7663aa10c67e::t_5faa081b2d5a4f 15,22
+  s_6e7663aa10c67e::t_749af85748cc6b 24
+solopi-desktop/electron/main.js
+  s_6e7663aa10c67e::t_105b1f9c75bb37 5855-5859
+  s_6e7663aa10c67e::t_a355e5a2dd0746 5852-5854,5860-5864
+solopi-desktop/electron/agent/system-prompt.js
+  s_6e7663aa10c67e::t_a355e5a2dd0746 7
+solopi-desktop/electron/startup-time.js
+  s_6e7663aa10c67e::t_d8dd8fc883500a 1-26,28-82
+  s_6e7663aa10c67e::t_749af85748cc6b 27
+solopi-desktop/src/components/WorkflowEditor.tsx
+  s_6e7663aa10c67e::t_749af85748cc6b 1640-1642,17243
+  s_6e7663aa10c67e::t_5faa081b2d5a4f 16304-16318
+solopi-desktop/electron/agent/virtual-system-prompt.js
+  s_6e7663aa10c67e::t_86c6dd318fcb74 5
+solopi-desktop/electron/agent/tools.js
+  s_6e7663aa10c67e::t_5faa081b2d5a4f 45-47,49
+  s_6e7663aa10c67e::t_a355e5a2dd0746 44,48,50-51,240
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9e67ab08be4d6e097ca49b1717c86b403e0ff600",
+  "prompts": {},
+  "sessions": {
+    "s_6e7663aa10c67e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1cf93-fc09-7561-8515-f2aac1613d36",
+        "model": "gpt-6.1-terra"
+      },
+      "human_author": "YuriyPikachu <YuriyPikachu@users.noreply.github.com>"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+solopi-app/common/src/main/res/values-sw600dp/dimens.xml
+  s_fd5c66a72fb1e8::t_27e405eb54dd1d 47
+solopi-app/common/src/main/res/values-sw720dp/dimens.xml
+  s_fd5c66a72fb1e8::t_6f49ae0382ad85 48
+solopi-app/common/src/main/res/values/dimens.xml
+  s_fd5c66a72fb1e8::t_cbf8a85967dee0 46
+solopi-app/shared/src/main/res/values-zh-rTW/strings.xml
+  s_fd5c66a72fb1e8::t_3255e7bb2ad633 57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7684f334d2fa780eff15247a38f3f2eb140677af",
+  "prompts": {},
+  "sessions": {
+    "s_fd5c66a72fb1e8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1383c-9f7d-7323-8d7f-6ff60953824b",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Liu Zimu <85295081+Lzm1645@users.noreply.github.com>"
+    }
+  }
+}
