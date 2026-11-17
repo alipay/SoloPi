@@ -142,6 +142,54 @@
       "file": "isarray-1.0.0.txt",
       "source": "https://raw.githubusercontent.com/juliangruber/isarray/2a23a281f369e9ae06394c0fb4d2381355a6ba33/README.md",
       "sha256": "ff138e683771b187f3629c383db72ee7d632009010a36d08e18e8d2a34222ec7"
+    },
+    {
+      "name": "@aws-sdk/credential-provider-http",
+      "version": "3.972.86",
+      "file": "-aws-sdk-credential-provider-http-3.972.86.txt",
+      "source": "https://raw.githubusercontent.com/aws/aws-sdk-js-v3/38038e7f8c9b4d9004b5e184537e2974ae081ab6/LICENSE",
+      "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d",
+      "reviewNote": "npm omits license text and gitHead; preserved official upstream root Apache-2.0 license at pinned commit, consistent with package metadata."
+    },
+    {
+      "name": "@aws-sdk/credential-provider-login",
+      "version": "3.972.92",
+      "file": "-aws-sdk-credential-provider-login-3.972.92.txt",
+      "source": "https://raw.githubusercontent.com/aws/aws-sdk-js-v3/38038e7f8c9b4d9004b5e184537e2974ae081ab6/LICENSE",
+      "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d",
+      "reviewNote": "npm omits license text and gitHead; preserved official upstream root Apache-2.0 license at pinned commit, consistent with package metadata."
+    },
+    {
+      "name": "@aws-sdk/nested-clients",
+      "version": "3.998.3",
+      "file": "-aws-sdk-nested-clients-3.998.3.txt",
+      "source": "https://raw.githubusercontent.com/aws/aws-sdk-js-v3/38038e7f8c9b4d9004b5e184537e2974ae081ab6/LICENSE",
+      "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d",
+      "reviewNote": "npm omits license text and gitHead; preserved official upstream root Apache-2.0 license at pinned commit, consistent with package metadata."
+    },
+    {
+      "name": "@earendil-works/pi-ai",
+      "version": "1.5.2",
+      "file": "-earendil-works-pi-ai-1.5.2.txt",
+      "source": "https://raw.githubusercontent.com/earendil-works/pi/b4afdddf44e059c67ccf5097e5317d913521b470/LICENSE",
+      "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48",
+      "reviewNote": "Official upstream v1.5.2 tag commit; npm omits license text."
+    },
+    {
+      "name": "@earendil-works/pi-schema",
+      "version": "1.5.2",
+      "file": "-earendil-works-pi-schema-1.5.2.txt",
+      "source": "https://raw.githubusercontent.com/earendil-works/pi/b4afdddf44e059c67ccf5097e5317d913521b470/LICENSE",
+      "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48",
+      "reviewNote": "Official upstream v1.5.2 tag commit; npm omits license text."
+    },
+    {
+      "name": "@earendil-works/pi-telemetry",
+      "version": "1.5.2",
+      "file": "-earendil-works-pi-telemetry-1.5.2.txt",
+      "source": "https://raw.githubusercontent.com/earendil-works/pi/b4afdddf44e059c67ccf5097e5317d913521b470/LICENSE",
+      "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48",
+      "reviewNote": "Official upstream v1.5.2 tag commit; npm omits license text."
     }
   ]
 }

@@ -75,3 +75,14 @@ test('inventory cannot redirect verification outside notice directory', t => {
   manifest.artifacts[0].file = '../LICENSE'; f.write('packaged-resources/third-party/inventory.json', manifest);
   assert.throws(() => verifyThirdPartyNotices(f.output), /Unsafe notice path/);
 });
+
+test('an upgraded dependency cannot reuse a different-version license supplement', t => {
+  const f = fixture(t); fs.rmSync(path.join(f.root, 'node_modules/example/LICENSE'));
+  const data = 'Original upstream permission text';
+  const record = { name: 'example', version: '1.0.0', file: 'example.txt', source: `https://raw.githubusercontent.com/example/project/${'a'.repeat(40)}/LICENSE`, sha256: crypto.createHash('sha256').update(data).digest('hex') };
+  f.write('resources/third-party/npm-supplements/example.txt', data);
+  f.write('resources/third-party/npm-supplements/manifest.json', { licenses: [record] });
+  assert.throws(() => prepareThirdPartyNotices(f.options), /Missing license text: example@2.0.0/);
+  f.write('resources/third-party/npm-supplements/manifest.json', { licenses: [{ ...record, version: '2.0.0' }] });
+  assert.equal(prepareThirdPartyNotices(f.options).packages, 1);
+});

@@ -1965,7 +1965,17 @@
       "bytes": 11352
     },
     {
+      "path": "resources/third-party/npm-supplements/-aws-sdk-credential-provider-http-3.972.86.txt",
+      "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d",
+      "bytes": 11352
+    },
+    {
       "path": "resources/third-party/npm-supplements/-aws-sdk-credential-provider-login-3.972.83.txt",
+      "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d",
+      "bytes": 11352
+    },
+    {
+      "path": "resources/third-party/npm-supplements/-aws-sdk-credential-provider-login-3.972.92.txt",
       "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d",
       "bytes": 11352
     },
@@ -1975,12 +1985,32 @@
       "bytes": 11352
     },
     {
+      "path": "resources/third-party/npm-supplements/-aws-sdk-nested-clients-3.998.3.txt",
+      "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d",
+      "bytes": 11352
+    },
+    {
       "path": "resources/third-party/npm-supplements/-earendil-works-pi-ai-1.4.0.txt",
       "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48",
       "bytes": 1069
     },
     {
+      "path": "resources/third-party/npm-supplements/-earendil-works-pi-ai-1.5.2.txt",
+      "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48",
+      "bytes": 1069
+    },
+    {
+      "path": "resources/third-party/npm-supplements/-earendil-works-pi-schema-1.5.2.txt",
+      "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48",
+      "bytes": 1069
+    },
+    {
       "path": "resources/third-party/npm-supplements/-earendil-works-pi-telemetry-1.4.0.txt",
+      "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48",
+      "bytes": 1069
+    },
+    {
+      "path": "resources/third-party/npm-supplements/-earendil-works-pi-telemetry-1.5.2.txt",
       "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48",
       "bytes": 1069
     },
@@ -2031,8 +2061,8 @@
     },
     {
       "path": "resources/third-party/npm-supplements/manifest.json",
-      "sha256": "d0a967dc6578d498b60b56e3ddf6e19e53fffb91ebd3f121ebe497f1bdf8c049",
-      "bytes": 7234
+      "sha256": "9423ae1494b447bdc1f37cfc9b1b0776548037ac78b915dfab81363e45b2a122",
+      "bytes": 10047
     },
     {
       "path": "resources/third-party/npm-supplements/napi-rs-canvas-0.1.100.txt",
@@ -3741,8 +3771,8 @@
     },
     {
       "path": "tests/third-party-notices.test.mjs",
-      "sha256": "f43b9e42810bbb71367e814ddbed1d350c5356b6bfc362ba792a32ab7aa7e54d",
-      "bytes": 5820
+      "sha256": "86f1fbd716e22c4cb72d40656380e5148a22831f789c7216e0c57aff4266efb1",
+      "bytes": 6720
     },
     {
       "path": "tests/timestamp-routing.test.mjs",
