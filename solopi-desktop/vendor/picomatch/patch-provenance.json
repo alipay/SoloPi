@@ -1,0 +1,7 @@
+{
+  "upstream": "picomatch@4.0.7",
+  "advisory": "https://github.com/advisories/GHSA-fc5q-39xc-vjpf",
+  "upstreamParseSha256": "4e1e05447668aa1e94366c5516a2bcd8f5fff800cc92b1d0cd7d77703b8618c4",
+  "patchedParseSha256": "101facb1da8aabe68f5a747fc2e3821938b0d4edb06afc4ba6c6bb11240cd3ce",
+  "localVersion": "4.0.7-solopi.1"
+}

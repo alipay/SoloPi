@@ -1,0 +1,464 @@
+[
+  {
+    "name": "brace-expansion",
+    "range": "<1.1.17",
+    "url": "https://github.com/advisories/GHSA-mh99-v99m-4gvg",
+    "severity": "high"
+  },
+  {
+    "name": "brace-expansion",
+    "range": ">=2.0.0 <2.1.3",
+    "url": "https://github.com/advisories/GHSA-mh99-v99m-4gvg",
+    "severity": "high"
+  },
+  {
+    "name": "brace-expansion",
+    "range": ">=4.0.0 <5.0.8",
+    "url": "https://github.com/advisories/GHSA-mh99-v99m-4gvg",
+    "severity": "high"
+  },
+  {
+    "name": "brace-expansion",
+    "range": ">=4.0.0 <5.0.9",
+    "url": "https://github.com/advisories/GHSA-rgw5-rvv9-x895",
+    "severity": "high"
+  },
+  {
+    "name": "brace-expansion",
+    "range": ">=2.0.0 <2.1.4",
+    "url": "https://github.com/advisories/GHSA-rgw5-rvv9-x895",
+    "severity": "high"
+  },
+  {
+    "name": "brace-expansion",
+    "range": "<1.1.18",
+    "url": "https://github.com/advisories/GHSA-rgw5-rvv9-x895",
+    "severity": "high"
+  },
+  {
+    "name": "brace-expansion",
+    "range": ">=2.0.0 <2.1.2",
+    "url": "https://github.com/advisories/GHSA-3jxr-9vmj-r5cp",
+    "severity": "high"
+  },
+  {
+    "name": "brace-expansion",
+    "range": "<1.1.16",
+    "url": "https://github.com/advisories/GHSA-3jxr-9vmj-r5cp",
+    "severity": "high"
+  },
+  {
+    "name": "brace-expansion",
+    "range": ">=3.0.0 <5.0.7",
+    "url": "https://github.com/advisories/GHSA-3jxr-9vmj-r5cp",
+    "severity": "high"
+  },
+  {
+    "name": "brace-expansion",
+    "range": ">=4.0.0 <5.0.11",
+    "url": "https://github.com/advisories/GHSA-qhr7-859c-m2p7",
+    "severity": "high"
+  },
+  {
+    "name": "brace-expansion",
+    "range": "<1.1.19",
+    "url": "https://github.com/advisories/GHSA-6j4f-fj2g-mc7p",
+    "severity": "high"
+  },
+  {
+    "name": "brace-expansion",
+    "range": ">=2.0.0 <2.1.5",
+    "url": "https://github.com/advisories/GHSA-6j4f-fj2g-mc7p",
+    "severity": "high"
+  },
+  {
+    "name": "brace-expansion",
+    "range": ">=4.0.0 <5.0.10",
+    "url": "https://github.com/advisories/GHSA-6j4f-fj2g-mc7p",
+    "severity": "high"
+  },
+  {
+    "name": "brace-expansion",
+    "range": "<1.1.21",
+    "url": "https://github.com/advisories/GHSA-q2hr-2g5m-vwhr",
+    "severity": "moderate"
+  },
+  {
+    "name": "brace-expansion",
+    "range": ">=2.0.0 <2.1.7",
+    "url": "https://github.com/advisories/GHSA-q2hr-2g5m-vwhr",
+    "severity": "moderate"
+  },
+  {
+    "name": "brace-expansion",
+    "range": ">=4.0.0 <5.0.12",
+    "url": "https://github.com/advisories/GHSA-q2hr-2g5m-vwhr",
+    "severity": "moderate"
+  },
+  {
+    "name": "brace-expansion",
+    "range": "<1.1.20",
+    "url": "https://github.com/advisories/GHSA-qhr7-859c-m2p7",
+    "severity": "high"
+  },
+  {
+    "name": "brace-expansion",
+    "range": ">=2.0.0 <2.1.6",
+    "url": "https://github.com/advisories/GHSA-qhr7-859c-m2p7",
+    "severity": "high"
+  },
+  {
+    "name": "minimatch",
+    "range": ">=7.0.0 <11.0.1",
+    "url": "https://github.com/advisories/GHSA-g3hv-75wg-m249",
+    "severity": "moderate"
+  },
+  {
+    "name": "qs",
+    "range": ">=2.2.5 <6.16.0",
+    "url": "https://github.com/advisories/GHSA-4mjr-xmp4-gh2g",
+    "severity": "moderate"
+  },
+  {
+    "name": "qs",
+    "range": ">=6.7.0 <=6.16.0",
+    "url": "https://github.com/advisories/GHSA-6pq8-jhm2-2vcw",
+    "severity": "moderate"
+  },
+  {
+    "name": "baseline-browser-mapping",
+    "range": ">=2.0.0 <2.11.0",
+    "url": "https://github.com/advisories/GHSA-w5vr-8v7q-w6rv",
+    "severity": "moderate"
+  },
+  {
+    "name": "browserslist",
+    "range": "<=4.28.6",
+    "url": "https://github.com/advisories/GHSA-c83g-rgw3-j3cx",
+    "severity": "high"
+  },
+  {
+    "name": "browserslist",
+    "range": "<=4.28.6",
+    "url": "https://github.com/advisories/GHSA-73wf-gq98-2v4g",
+    "severity": "high"
+  },
+  {
+    "name": "glob",
+    "range": ">=9.0.0 <=14.0.1",
+    "url": "https://github.com/advisories/GHSA-3g3m-2fjr-6pw4",
+    "severity": "moderate"
+  },
+  {
+    "name": "compression",
+    "range": "<1.8.2",
+    "url": "https://github.com/advisories/GHSA-vc2v-76pw-4v95",
+    "severity": "high"
+  },
+  {
+    "name": "follow-redirects",
+    "range": ">=1.16.0 <=1.16.1",
+    "url": "https://github.com/advisories/GHSA-mrwp-f3q8-3g9p",
+    "severity": "high"
+  },
+  {
+    "name": "follow-redirects",
+    "range": ">=1.16.0 <1.16.1",
+    "url": "https://github.com/advisories/GHSA-q3jh-wrc6-jgq8",
+    "severity": "high"
+  },
+  {
+    "name": "follow-redirects",
+    "range": ">=1.16.0 <1.16.1",
+    "url": "https://github.com/advisories/GHSA-8r9p-f939-6h3c",
+    "severity": "high"
+  },
+  {
+    "name": "form-data",
+    "range": ">=4.0.0 <4.0.6",
+    "url": "https://github.com/advisories/GHSA-hmw2-7cc7-3qxx",
+    "severity": "high"
+  },
+  {
+    "name": "http-proxy-middleware",
+    "range": ">=0.16.0 <2.0.10",
+    "url": "https://github.com/advisories/GHSA-64mm-vxmg-q3vj",
+    "severity": "moderate"
+  },
+  {
+    "name": "js-yaml",
+    "range": ">=4.0.0 <4.3.0",
+    "url": "https://github.com/advisories/GHSA-52cp-r559-cp3m",
+    "severity": "high"
+  },
+  {
+    "name": "js-yaml",
+    "range": ">=4.0.0 <4.3.1",
+    "url": "https://github.com/advisories/GHSA-5p4m-2wfm-xmqj",
+    "severity": "high"
+  },
+  {
+    "name": "js-yaml",
+    "range": ">=4.0.0 <4.3.2",
+    "url": "https://github.com/advisories/GHSA-2883-xcg3-v3hh",
+    "severity": "high"
+  },
+  {
+    "name": "launch-editor",
+    "range": "<=2.14.1",
+    "url": "https://github.com/advisories/GHSA-698v-4r3x-3vcv",
+    "severity": "moderate"
+  },
+  {
+    "name": "launch-editor",
+    "range": "<=2.14.1",
+    "url": "https://github.com/advisories/GHSA-r825-w8mm-5pxw",
+    "severity": "moderate"
+  },
+  {
+    "name": "launch-editor",
+    "range": "<=2.14.1",
+    "url": "https://github.com/advisories/GHSA-587h-7wmj-h5pm",
+    "severity": "high"
+  },
+  {
+    "name": "nanoid",
+    "range": "<3.3.16",
+    "url": "https://github.com/advisories/GHSA-28wg-ghj8-5hjv",
+    "severity": "high"
+  },
+  {
+    "name": "nanoid",
+    "range": "<3.3.18",
+    "url": "https://github.com/advisories/GHSA-2v37-7h3g-55p8",
+    "severity": "high"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-86w9-cpqp-85rv",
+    "severity": "high"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-8hrf-8g6f-7xwp",
+    "severity": "high"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-hqq3-7jhf-c5jx",
+    "severity": "high"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-5x38-2vff-x55p",
+    "severity": "high"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.2",
+    "url": "https://github.com/advisories/GHSA-6889-vf6x-f3g5",
+    "severity": "low"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.2",
+    "url": "https://github.com/advisories/GHSA-w4xr-hqv8-ch44",
+    "severity": "moderate"
+  },
+  {
+    "name": "node-forge",
+    "range": ">=0.1.2 <=1.4.2",
+    "url": "https://github.com/advisories/GHSA-6cv4-p8m7-4r25",
+    "severity": "moderate"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.2",
+    "url": "https://github.com/advisories/GHSA-j8rw-jp99-435v",
+    "severity": "moderate"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-9wg5-mj3p-v49q",
+    "severity": "low"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-2vgq-wchc-25w7",
+    "severity": "low"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-h46v-rmh6-fq4f",
+    "severity": "moderate"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-rhr8-3pm8-cq29",
+    "severity": "high"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-6qrw-m8cv-hcxf",
+    "severity": "high"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-4642-5mcj-2rqw",
+    "severity": "low"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-6wvx-3r32-xmcg",
+    "severity": "moderate"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-525v-9gp9-w22h",
+    "severity": "moderate"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-7wch-p9px-956x",
+    "severity": "high"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-h6cr-wjv9-3cpp",
+    "severity": "low"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-4487-j8r4-4g2f",
+    "severity": "low"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-5cwg-6vw7-rj6p",
+    "severity": "moderate"
+  },
+  {
+    "name": "node-forge",
+    "range": "<=1.4.0",
+    "url": "https://github.com/advisories/GHSA-jc66-7q78-782g",
+    "severity": "high"
+  },
+  {
+    "name": "postcss",
+    "range": "<=8.5.22",
+    "url": "https://github.com/advisories/GHSA-fxqj-rqcc-2cmp",
+    "severity": "moderate"
+  },
+  {
+    "name": "postcss",
+    "range": "<=8.5.17",
+    "url": "https://github.com/advisories/GHSA-r28c-9q8g-f849",
+    "severity": "high"
+  },
+  {
+    "name": "postcss-selector-parser",
+    "range": ">=7.1.0 <7.1.3",
+    "url": "https://github.com/advisories/GHSA-w9m9-85wc-3x92",
+    "severity": "low"
+  },
+  {
+    "name": "postcss-selector-parser",
+    "range": ">=6.1.0 <6.1.3",
+    "url": "https://github.com/advisories/GHSA-w9m9-85wc-3x92",
+    "severity": "low"
+  },
+  {
+    "name": "postcss-selector-parser",
+    "range": "<6.1.5",
+    "url": "https://github.com/advisories/GHSA-rj75-hqrm-r3gf",
+    "severity": "moderate"
+  },
+  {
+    "name": "postcss-selector-parser",
+    "range": ">=7.0.0 <7.1.6",
+    "url": "https://github.com/advisories/GHSA-rj75-hqrm-r3gf",
+    "severity": "moderate"
+  },
+  {
+    "name": "source-map-js",
+    "range": ">=1.0.0 <1.2.2",
+    "url": "https://github.com/advisories/GHSA-68fv-2mgg-jv7q",
+    "severity": "high"
+  },
+  {
+    "name": "uuid",
+    "range": "<11.1.1",
+    "url": "https://github.com/advisories/GHSA-w5hq-g745-h8pq",
+    "severity": "moderate"
+  },
+  {
+    "name": "webpack-dev-middleware",
+    "range": "<7.4.5",
+    "url": "https://github.com/advisories/GHSA-g84c-rxfj-3j2c",
+    "severity": "high"
+  },
+  {
+    "name": "webpack-dev-server",
+    "range": "<=5.2.0",
+    "url": "https://github.com/advisories/GHSA-9jgg-88mc-972h",
+    "severity": "moderate"
+  },
+  {
+    "name": "webpack-dev-server",
+    "range": "<=5.2.0",
+    "url": "https://github.com/advisories/GHSA-4v9v-hfq4-rm2v",
+    "severity": "moderate"
+  },
+  {
+    "name": "webpack-dev-server",
+    "range": "<=5.2.3",
+    "url": "https://github.com/advisories/GHSA-79cf-xcqc-c78w",
+    "severity": "moderate"
+  },
+  {
+    "name": "webpack-dev-server",
+    "range": "<5.2.5",
+    "url": "https://github.com/advisories/GHSA-mx8g-39q3-5c79",
+    "severity": "moderate"
+  },
+  {
+    "name": "webpack-dev-server",
+    "range": "<=5.2.5",
+    "url": "https://github.com/advisories/GHSA-f5vj-f2hx-8m93",
+    "severity": "moderate"
+  },
+  {
+    "name": "webpack-dev-server",
+    "range": "<=5.2.5",
+    "url": "https://github.com/advisories/GHSA-m28w-2pqf-7qgj",
+    "severity": "moderate"
+  },
+  {
+    "name": "react-router",
+    "range": ">=6.0.0 <7.18.0",
+    "url": "https://github.com/advisories/GHSA-wrjc-x8rr-h8h6",
+    "severity": "moderate"
+  },
+  {
+    "name": "react-router",
+    "range": ">=6.4.0 <7.18.0",
+    "url": "https://github.com/advisories/GHSA-337j-9hxr-rhxg",
+    "severity": "moderate"
+  }
+]

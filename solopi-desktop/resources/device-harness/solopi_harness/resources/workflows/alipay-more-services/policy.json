@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "solopi.ai.fastpath-policy/v1",
+  "targetPackage": "com.eg.android.AlipayGphone",
+  "steps": {
+    "open-more": {
+      "instructions": "选择完成请求需要点击的控件。",
+      "readyWhen": {
+        "selector": {
+          "packageName": "com.eg.android.AlipayGphone",
+          "className": "android.widget.TextView",
+          "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text"
+        },
+        "field": "text",
+        "equals": "更多"
+      },
+      "stopWhen": {
+        "selector": {
+          "packageName": "com.eg.android.AlipayGphone",
+          "className": "android.widget.TextView",
+          "resourceId": "com.alipay.android.phone.wallet.homemarket:id/title_bar_content"
+        },
+        "field": "text",
+        "equals": "更多服务"
+      },
+      "candidateSelectors": [
+        {
+          "packageName": "com.eg.android.AlipayGphone",
+          "className": "android.widget.RelativeLayout",
+          "description": "搜索框"
+        },
+        {
+          "packageName": "com.eg.android.AlipayGphone",
+          "className": "android.widget.TextView",
+          "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text",
+          "text": "更多"
+        },
+        {
+          "packageName": "com.eg.android.AlipayGphone",
+          "className": "android.widget.TextView",
+          "resourceId": "com.alipay.android.tablauncher:id/tab_description",
+          "text": "我的"
+        }
+      ],
+      "candidateResolution": "self-or-clickable-ancestor",
+      "maxCandidates": 3,
+      "exactText": "更多"
+    },
+    "leave-more": {
+      "instructions": "选择完成请求需要点击的控件。",
+      "readyWhen": {
+        "selector": {
+          "packageName": "com.eg.android.AlipayGphone",
+          "className": "android.widget.TextView",
+          "resourceId": "com.alipay.android.phone.wallet.homemarket:id/title_bar_content"
+        },
+        "field": "text",
+        "equals": "更多服务"
+      },
+      "stopWhen": {
+        "selector": {
+          "packageName": "com.eg.android.AlipayGphone",
+          "className": "android.widget.TextView",
+          "resourceId": "com.alipay.android.phone.openplatform.app:id/more_app_text"
+        },
+        "field": "text",
+        "equals": "更多"
+      },
+      "candidateSelectors": [
+        {
+          "packageName": "com.eg.android.AlipayGphone",
+          "className": "android.widget.FrameLayout",
+          "resourceId": "com.alipay.android.phone.wallet.homemarket:id/title_bar_back",
+          "description": "返回"
+        },
+        {
+          "packageName": "com.eg.android.AlipayGphone",
+          "className": "android.widget.FrameLayout",
+          "resourceId": "com.alipay.android.phone.wallet.homemarket:id/title_bar_search",
+          "description": "搜索"
+        },
+        {
+          "packageName": "com.eg.android.AlipayGphone",
+          "className": "android.widget.TextView",
+          "resourceId": "com.alipay.android.phone.wallet.homemarket:id/recent_use_title",
+          "text": "最近使用"
+        }
+      ],
+      "candidateResolution": "self-or-clickable-ancestor",
+      "maxCandidates": 3,
+      "exactText": "返回"
+    }
+  }
+}

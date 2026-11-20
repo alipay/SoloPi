@@ -1,0 +1,21 @@
+import {nodeFixtureSpawn} from './fixtures/node-broker.mjs';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import {quickActionWithBrokerForCli} from '../scripts/glassbox-cli.mjs';
+test('CLI sends structured quick-action requests to owner broker and reads success/failure ACK without retry',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'quick-cli-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const broker=path.join(dir,'broker.cjs'),log=path.join(dir,'requests.jsonl');
+ fs.writeFileSync(broker,`const fs=require('fs');const p=JSON.parse(fs.readFileSync(process.argv[process.argv.indexOf('--glassbox-cli-control-payload')+1]));fs.appendFileSync(${JSON.stringify(log)},JSON.stringify(p)+'\\n');fs.writeFileSync(p.ackPath,JSON.stringify({success:p.request.action!=='query',request:p.request,error:p.request.action==='query'?'fixture error':undefined}));`);
+ const deps={dataDir:dir,spawn:nodeFixtureSpawn(t),launch:{command:process.execPath,argsPrefix:[broker],packaged:true,cwd:dir}};
+ const r=await quickActionWithBrokerForCli(['quick-actions','execute','a','--phase','run','--values','{"message":"a b; $(literal)"}','--phone','fixture-phone','--glasses','fixture-glasses'],deps);
+ assert.equal(r.success,true);assert.equal(r.request.action,'execute');assert.equal(r.request.args.values.message,'a b; $(literal)');assert.equal(r.request.args.context.glassesSerial,'fixture-glasses');
+ const config=path.join(dir,'config.json');fs.writeFileSync(config,JSON.stringify({configuration:{description:'new'}}));
+ const update=await quickActionWithBrokerForCli(['quick-actions','update','a','--file',config],deps);assert.equal(update.request.args.configuration.description,'new');
+ const git=await quickActionWithBrokerForCli(['quick-actions','export-git','a','--repo','https://example.com/repo.git','--branch','topic','--directory','scripts'],deps);assert.equal(git.request.args.branch,'topic');
+ const fail=await quickActionWithBrokerForCli(['quick-actions','query','a'],deps);assert.equal(fail.success,false);assert.equal(fail.error,'fixture error');
+ assert.equal(fs.readFileSync(log,'utf8').trim().split('\n').length,4);assert.deepEqual(fs.readdirSync(path.join(dir,'cli-control')),[]);
+ await assert.rejects(quickActionWithBrokerForCli(['quick-actions','bogus'],deps),/Unknown/);
+});

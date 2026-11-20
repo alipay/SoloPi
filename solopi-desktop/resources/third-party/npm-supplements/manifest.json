@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "licenses": [
+    {
+      "name": "embla-carousel",
+      "version": "8.6.0",
+      "file": "embla-carousel-8.6.0.txt",
+      "source": "https://raw.githubusercontent.com/davidjerleke/embla-carousel/0fe65834136f1aa35e4c1a4a477e5ccb4bb5ee54/LICENSE",
+      "sha256": "992490064b90ec94c302fe5f29dcc14cb44145857064e46f9ffe6c8f511c1093"
+    },
+    {
+      "name": "embla-carousel-react",
+      "version": "8.6.0",
+      "file": "embla-carousel-react-8.6.0.txt",
+      "source": "https://raw.githubusercontent.com/davidjerleke/embla-carousel/0fe65834136f1aa35e4c1a4a477e5ccb4bb5ee54/LICENSE",
+      "sha256": "992490064b90ec94c302fe5f29dcc14cb44145857064e46f9ffe6c8f511c1093"
+    },
+    {
+      "name": "embla-carousel-reactive-utils",
+      "version": "8.6.0",
+      "file": "embla-carousel-reactive-utils-8.6.0.txt",
+      "source": "https://raw.githubusercontent.com/davidjerleke/embla-carousel/0fe65834136f1aa35e4c1a4a477e5ccb4bb5ee54/LICENSE",
+      "sha256": "992490064b90ec94c302fe5f29dcc14cb44145857064e46f9ffe6c8f511c1093"
+    },
+    {
+      "name": "input-otp",
+      "version": "1.4.2",
+      "file": "input-otp-1.4.2.txt",
+      "source": "https://raw.githubusercontent.com/guilhermerodz/input-otp/81ccdb48c010d800b24942aa231909f0c971b1ca/LICENSE",
+      "sha256": "079031192fea535a245aa64a637d8433c406b82a14f91c3606b1d63e41c00152"
+    },
+    {
+      "name": "victory-vendor",
+      "version": "36.9.2",
+      "file": "victory-vendor-36.9.2.txt",
+      "source": "https://raw.githubusercontent.com/FormidableLabs/victory/dd86278d205f3f306e2ab38c317a6f9c56f0a6f8/LICENSE.txt",
+      "sha256": "34dee5fd5e5cc756efb5ad4d64652bce719bdf5e900ca5d7538253e737930bc4"
+    },
+    {
+      "name": "cookie-signature",
+      "version": "1.0.7",
+      "file": "cookie-signature-1.0.7.txt",
+      "source": "https://raw.githubusercontent.com/visionmedia/node-cookie-signature/432ea0c14fbdd8d24354820faff2c6f6d2426757/Readme.md",
+      "sha256": "c0a936e4727a7503020745eaf063acffbb81291fcfd21a0cd8db4b4fce95d902"
+    },
+    {
+      "name": "next-themes",
+      "version": "0.3.0",
+      "file": "next-themes-0.3.0.txt",
+      "source": "https://raw.githubusercontent.com/pacocoursey/next-themes/f5df9660d1c4b977ff31adc3e69ccc50896191fa/license.md",
+      "sha256": "b5acfd21b3b61508365224c40ec1b03ec71091248baaf989d4be916551e7d532"
+    },
+    {
+      "name": "react-remove-scroll-bar",
+      "version": "2.3.8",
+      "file": "react-remove-scroll-bar-2.3.8.txt",
+      "source": "https://raw.githubusercontent.com/theKashey/react-remove-scroll-bar/8ca9ba5ea52de03308fe8ced94f7b159a44d28ff/LICENSE",
+      "sha256": "a79aae0c0f21990d9d963bb3c5a79cdcea9a46f8523ba55c58d7fe776b6ebc84",
+      "reviewNote": "npm gitHead is unavailable in the public repository; full LICENSE taken from public upstream package version 2.3.7 with the same MIT declaration."
+    },
+    {
+      "name": "@earendil-works/pi-ai",
+      "version": "1.4.0",
+      "file": "-earendil-works-pi-ai-1.4.0.txt",
+      "source": "https://raw.githubusercontent.com/earendil-works/pi/36be9c612e64082a4f0d4d0a94706c38ecbc20a1/LICENSE",
+      "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48"
+    },
+    {
+      "name": "@aws-sdk/credential-provider-http",
+      "version": "3.972.78",
+      "file": "-aws-sdk-credential-provider-http-3.972.78.txt",
+      "source": "https://raw.githubusercontent.com/aws/aws-sdk-js-v3/163a566ffba89915cade6109031c5892ea3193c4/LICENSE",
+      "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d"
+    },
+    {
+      "name": "@aws-sdk/credential-provider-login",
+      "version": "3.972.83",
+      "file": "-aws-sdk-credential-provider-login-3.972.83.txt",
+      "source": "https://raw.githubusercontent.com/aws/aws-sdk-js-v3/163a566ffba89915cade6109031c5892ea3193c4/LICENSE",
+      "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d"
+    },
+    {
+      "name": "@aws-sdk/nested-clients",
+      "version": "3.997.50",
+      "file": "-aws-sdk-nested-clients-3.997.50.txt",
+      "source": "https://raw.githubusercontent.com/aws/aws-sdk-js-v3/163a566ffba89915cade6109031c5892ea3193c4/LICENSE",
+      "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d"
+    },
+    {
+      "name": "data-uri-to-buffer",
+      "version": "4.0.1",
+      "file": "data-uri-to-buffer-4.0.1.txt",
+      "source": "https://raw.githubusercontent.com/TooTallNate/node-data-uri-to-buffer/85cd8c854aefbf1bb636789d80364cfac8ea1583/README.md",
+      "sha256": "a7cc4332acfa1f9b6530e01aac77fefe74f2efa32579215fddaa473013f9a25c"
+    },
+    {
+      "name": "@koromix/koffi-darwin-arm64",
+      "version": "3.1.1",
+      "file": "-koromix-koffi-darwin-arm64-3.1.1.txt",
+      "source": "https://raw.githubusercontent.com/Koromix/koffi/2294ba0fa05b6edf1c87c6d9fbe8c66e98b313fe/LICENSE.txt",
+      "sha256": "54abb741a2ba1a7fa89e98d2d3199575e548c8708885eeadab0f5bb83ad22e0e"
+    },
+    {
+      "name": "standardwebhooks",
+      "version": "1.1.1",
+      "file": "standardwebhooks-1.1.1.txt",
+      "source": "https://raw.githubusercontent.com/standard-webhooks/standard-webhooks/b4d2c14fc5b4ccff3ff271e3b087dff812254c59/LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "name": "@earendil-works/pi-telemetry",
+      "version": "1.4.0",
+      "file": "-earendil-works-pi-telemetry-1.4.0.txt",
+      "source": "https://raw.githubusercontent.com/earendil-works/pi/36be9c612e64082a4f0d4d0a94706c38ecbc20a1/LICENSE",
+      "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48"
+    },
+    {
+      "name": "@img/sharp-libvips-darwin-arm64",
+      "version": "1.3.4",
+      "file": "-img-sharp-libvips-darwin-arm64-1.3.4.txt",
+      "source": "https://raw.githubusercontent.com/lovell/sharp-libvips/ebb95f8add54eee8bed840e3fb587e4cbec857d7/LICENSE",
+      "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1"
+    },
+    {
+      "name": "proxy-agent-negotiate",
+      "version": "1.1.0",
+      "file": "proxy-agent-negotiate-1.1.0.txt",
+      "source": "https://raw.githubusercontent.com/TooTallNate/proxy-agents/4813885d3f4e2ff837878ceffdba656a71dc31f0/packages/agent-base/LICENSE",
+      "sha256": "8d8c55319c7729d57be811c747452636688d54f19701ee0752b6b15ad3771d9a",
+      "reviewNote": "Package declares MIT and Nathan Rajlich as author but omits license text; preserved the full Nathan Rajlich MIT notice from agent-base in the same upstream monorepo, rather than claiming the file shipped in negotiate."
+    },
+    {
+      "name": "@napi-rs/canvas-darwin-arm64",
+      "version": "0.1.100",
+      "file": "napi-rs-canvas-0.1.100.txt",
+      "source": "https://raw.githubusercontent.com/Brooooooklyn/canvas/db337893b9b53483050ca7b24c6d306e4da06741/LICENSE",
+      "sha256": "8802fecf9da4367bc23bcf20b21cc143785fc6c92b152f3fa7fbe6ce08d344d6"
+    },
+    {
+      "name": "isarray",
+      "version": "1.0.0",
+      "file": "isarray-1.0.0.txt",
+      "source": "https://raw.githubusercontent.com/juliangruber/isarray/2a23a281f369e9ae06394c0fb4d2381355a6ba33/README.md",
+      "sha256": "ff138e683771b187f3629c383db72ee7d632009010a36d08e18e8d2a34222ec7"
+    },
+    {
+      "name": "@aws-sdk/credential-provider-http",
+      "version": "3.972.86",
+      "file": "-aws-sdk-credential-provider-http-3.972.86.txt",
+      "source": "https://raw.githubusercontent.com/aws/aws-sdk-js-v3/38038e7f8c9b4d9004b5e184537e2974ae081ab6/LICENSE",
+      "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d",
+      "reviewNote": "npm omits license text and gitHead; preserved official upstream root Apache-2.0 license at pinned commit, consistent with package metadata."
+    },
+    {
+      "name": "@aws-sdk/credential-provider-login",
+      "version": "3.972.92",
+      "file": "-aws-sdk-credential-provider-login-3.972.92.txt",
+      "source": "https://raw.githubusercontent.com/aws/aws-sdk-js-v3/38038e7f8c9b4d9004b5e184537e2974ae081ab6/LICENSE",
+      "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d",
+      "reviewNote": "npm omits license text and gitHead; preserved official upstream root Apache-2.0 license at pinned commit, consistent with package metadata."
+    },
+    {
+      "name": "@aws-sdk/nested-clients",
+      "version": "3.998.3",
+      "file": "-aws-sdk-nested-clients-3.998.3.txt",
+      "source": "https://raw.githubusercontent.com/aws/aws-sdk-js-v3/38038e7f8c9b4d9004b5e184537e2974ae081ab6/LICENSE",
+      "sha256": "edea91454b811f127fbdea3d86f378f6719bd372ed440abf82b232f6fca06c3d",
+      "reviewNote": "npm omits license text and gitHead; preserved official upstream root Apache-2.0 license at pinned commit, consistent with package metadata."
+    },
+    {
+      "name": "@earendil-works/pi-ai",
+      "version": "1.5.2",
+      "file": "-earendil-works-pi-ai-1.5.2.txt",
+      "source": "https://raw.githubusercontent.com/earendil-works/pi/b4afdddf44e059c67ccf5097e5317d913521b470/LICENSE",
+      "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48",
+      "reviewNote": "Official upstream v1.5.2 tag commit; npm omits license text."
+    },
+    {
+      "name": "@earendil-works/pi-schema",
+      "version": "1.5.2",
+      "file": "-earendil-works-pi-schema-1.5.2.txt",
+      "source": "https://raw.githubusercontent.com/earendil-works/pi/b4afdddf44e059c67ccf5097e5317d913521b470/LICENSE",
+      "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48",
+      "reviewNote": "Official upstream v1.5.2 tag commit; npm omits license text."
+    },
+    {
+      "name": "@earendil-works/pi-telemetry",
+      "version": "1.5.2",
+      "file": "-earendil-works-pi-telemetry-1.5.2.txt",
+      "source": "https://raw.githubusercontent.com/earendil-works/pi/b4afdddf44e059c67ccf5097e5317d913521b470/LICENSE",
+      "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48",
+      "reviewNote": "Official upstream v1.5.2 tag commit; npm omits license text."
+    }
+  ]
+}

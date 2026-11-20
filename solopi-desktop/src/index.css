@@ -1,0 +1,200 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 222 47% 11%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 47.4% 11.2%;
+
+    --radius: 0.75rem;
+
+    /* Custom Tokens for Workflow Nodes (Light Mode) */
+    --node-start: 221 70% 50%;
+    --node-llm: 271 81% 56%;
+    --node-tool: 217 91% 60%;
+    --node-condition: 280 67% 60%;
+    --node-end: 24 95% 53%;
+    --canvas-bg: 210 40% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    background-color: #f8fafc;
+  }
+}
+
+.app-drag-region {
+  -webkit-app-region: drag;
+  height: 36px;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 50;
+}
+
+button,
+input,
+select,
+textarea,
+[role="button"],
+.nodrag,
+.react-flow,
+.react-flow * {
+  -webkit-app-region: no-drag;
+}
+
+.react-flow__pane {
+  background-color: hsl(var(--canvas-bg));
+}
+
+.react-flow__edge-path {
+  stroke: hsl(var(--muted-foreground) / 0.3);
+  stroke-width: 2;
+}
+
+.react-flow__edge-interaction {
+  stroke-width: 24;
+}
+
+webview {
+  display: flex;
+  min-height: 0;
+}
+
+.react-flow__handle {
+  width: 14px;
+  height: 14px;
+  background-color: hsl(var(--background));
+  border: 2px solid hsl(var(--primary));
+  z-index: 10;
+}
+
+.react-flow__node {
+  @apply rounded-xl border border-border shadow-md;
+  cursor: grab;
+}
+
+.react-flow__node.dragging {
+  cursor: grabbing;
+}
+
+.workflow-editor-config-panel {
+  min-width: 0;
+  overscroll-behavior: contain;
+}
+
+.workflow-editor-config-panel fieldset,
+.workflow-editor-config-panel fieldset > *,
+.workflow-editor-config-panel .grid,
+.workflow-editor-config-panel .flex,
+.workflow-editor-config-panel .flex > * {
+  min-width: 0;
+}
+
+.workflow-editor-config-panel input:not([type="checkbox"]):not([type="radio"]),
+.workflow-editor-config-panel select,
+.workflow-editor-config-panel textarea,
+.workflow-editor-config-panel pre {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+.workflow-editor-config-panel textarea,
+.workflow-editor-config-panel pre {
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.workflow-editor-config-panel .break-all,
+.workflow-editor-config-panel .break-words {
+  overflow-wrap: anywhere;
+}
+
+.workflow-editor-config-panel div.flex,
+.workflow-editor-config-panel label.flex,
+.workflow-editor-config-panel .justify-between {
+  flex-wrap: wrap;
+}
+
+.workflow-editor-config-panel .grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+/* Device details use their card width, including when the mirror panel is open. */
+.device-header-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+}
+.device-header-card {
+  container: device-header / inline-size;
+}
+.device-header-fields {
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.1fr) minmax(4rem, 0.55fr);
+}
+.device-header-fields label {
+  white-space: nowrap;
+}
+.device-header-toolbar select:focus-visible {
+  opacity: 1;
+  outline: 2px solid hsl(var(--primary) / 0.4);
+  border-radius: 9999px;
+}
+@container device-header (max-width: 27rem) {
+  .device-header-fields {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  }
+  .device-header-version {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .device-header-version > div {
+    min-width: 0;
+    height: 1.25rem;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font-size: 10px;
+  }
+}

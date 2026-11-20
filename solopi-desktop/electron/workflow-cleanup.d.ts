@@ -1,0 +1,3 @@
+export function partitionWorkflowSteps<T extends {id: string; type: string; phase?: string}>(steps: T[], edges?: Array<{source?: string; target?: string; from?: string; to?: string}>): {main:T[]; cleanup:T[]};
+export function moveWorkflowStepToPhase<T extends {id:string; type:string; phase?:string}, E extends {id?:string; source:string; target:string}>(testCase:{steps:T[]}, edges:E[], stepId:string, phase:'main'|'cleanup'): {steps:T[]; edges:E[]};
+export function migrateLegacyCleanupEdges<T extends {id:string; type:string; phase?:string}, E extends {id?:string; source:string; target:string}>(testCase:{steps:T[]}, edges:E[]): {edges:E[]; changed:boolean; errors:Array<{code:string; message:string}>};
