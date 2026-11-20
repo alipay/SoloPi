@@ -10,7 +10,7 @@ function load(file, initialStates=[]) {
   const code=require('@babel/core').transformSync(fs.readFileSync(filename,'utf8'),{filename,presets:[['@babel/preset-env',{targets:{node:'current'},modules:'commonjs'}],['@babel/preset-react',{runtime:'automatic'}],'@babel/preset-typescript']}).code;
   const loaded=new Module(filename);loaded.filename=filename;loaded.paths=Module._nodeModulePaths(path.dirname(filename));
   let cursor=0; const state=[...initialStates]; const realRequire=loaded.require.bind(loaded);
-  loaded.require=name=>name==='./RecordingTargetFields'?{default:'RecordingTargetFields'}:name==='react'?{...React,useEffect:()=>{},useRef:()=>({current:0}),useState:value=>{const index=cursor++;if(!(index in state))state[index]=value;return [state[index],next=>{state[index]=typeof next==='function'?next(state[index]):next;}];}}:realRequire(name);
+  loaded.require=name=>name==='../language'?{useLanguage:()=>({t:chinese=>chinese})}:name==='./RecordingTargetFields'?{default:'RecordingTargetFields'}:name==='react'?{...React,useEffect:()=>{},useRef:()=>({current:0}),useState:value=>{const index=cursor++;if(!(index in state))state[index]=value;return [state[index],next=>{state[index]=typeof next==='function'?next(state[index]):next;}];}}:realRequire(name);
   loaded._compile(code,filename);
   return {render:props=>{cursor=0;return loaded.exports.default(props);}};
 }

@@ -1,3 +1,4 @@
+import { useLanguage } from '../language.ts';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Activity,
@@ -26,6 +27,8 @@ export function PerformanceComboBox({ value, onChange, options, disabled, placeh
   label: string;
   loading?: boolean;
 }) {
+  const { t } = useLanguage();
+
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(-1);
@@ -71,7 +74,7 @@ export function PerformanceComboBox({ value, onChange, options, disabled, placeh
           className={`block w-full px-3 py-2 text-left text-sm hover:bg-blue-50 ${index === active ? 'bg-blue-50' : ''}`}>
           <span className="block break-all font-mono font-semibold text-slate-800">{option.value}</span>
           {option.label && <span className="block text-xs text-slate-500">{option.label}</span>}
-        </button>) : <div className="px-3 py-2 text-sm text-slate-400">{loading ? '正在读取…' : '没有匹配项，可手动输入'}</div>}
+        </button>) : <div className="px-3 py-2 text-sm text-slate-400">{loading ? '正在读取…' : t("没有匹配项，可手动输入", "No matches. Enter a value manually.")}</div>}
       </div>}
     </div>
   );
@@ -142,23 +145,24 @@ export type CrashStats = {
   events: { id: string; timestamp: string; pid: string; processName: string; isTarget?: boolean; sources?: string[]; type: string; exception: string; message: string; evidence: string }[];
 };
 
-export function crashSummary(crashes?: CrashStats) {
-  if (!crashes) return '未采集';
-  if (crashes.status === 'unsupported') return '不支持';
-  return `${crashes.count} 次${crashes.status === 'failed' ? '（采集不完整）' : crashes.status === 'pending' ? '（准备中）' : ''}`;
+export function crashSummary(crashes?: CrashStats, t: (chinese: string, english: string) => string = (chinese) => chinese) {
+  if (!crashes) return t('未采集', 'Not collected');
+  if (crashes.status === 'unsupported') return t('不支持', 'Unsupported');
+  return `${t(`${crashes.count} 次`, String(crashes.count))}${crashes.status === 'failed' ? t('（采集不完整）', ' (incomplete)') : crashes.status === 'pending' ? t('（准备中）', ' (preparing)') : ''}`;
 }
 
 export function CrashSummary({ crashes }: { crashes?: CrashStats }) {
+  const { t } = useLanguage();
   return <section className="rounded-2xl border border-slate-200 bg-white p-4">
-    <div className="flex items-center justify-between"><h3 className="text-sm font-black text-slate-900">应用崩溃</h3>
-      <span className={`text-lg font-black ${crashes?.count ? 'text-red-600' : 'text-slate-700'}`}>{crashSummary(crashes)}</span></div>
-    <p className="mt-1 text-xs text-slate-500">{crashes?.scope === 'device' ? `设备全部应用 · 目标包及子进程 ${crashes.targetCount ?? crashes.events.filter(event => event.isTarget).length} 次 · 系统事件与应用崩溃日志去重` : '历史采集：仅目标包及子进程的系统崩溃事件'} · 不含正常退出、强制停止和 ANR{crashes?.status === 'running' ? ' · 监听中' : ''}</p>
-    {crashes?.startedAt && <p className="mt-1 text-xs text-slate-400">{new Date(crashes.startedAt).toLocaleString('zh-CN', { hour12: false })} → {crashes.endedAt ? new Date(crashes.endedAt).toLocaleString('zh-CN', { hour12: false }) : '采集中'}</p>}
+    <div className="flex items-center justify-between"><h3 className="text-sm font-black text-slate-900">{t("应用崩溃", "App crashes")}</h3>
+      <span className={`text-lg font-black ${crashes?.count ? 'text-red-600' : 'text-slate-700'}`}>{crashSummary(crashes, t)}</span></div>
+    <p className="mt-1 text-xs text-slate-500">{crashes?.scope === 'device' ? t(`设备全部应用 · 目标包及子进程 ${crashes.targetCount ?? crashes.events.filter(event => event.isTarget).length} 次 · 系统事件与应用崩溃日志去重`, `All apps · ${crashes.targetCount ?? crashes.events.filter(event => event.isTarget).length} target events · Duplicate events removed`) : t('历史采集：仅目标包及子进程的系统崩溃事件','Historical records cover the target app and its subprocesses')} · {t('不含正常退出、强制停止和 ANR','Excludes normal exits, force stops, and ANRs')}{crashes?.status === 'running' ? t(' · 监听中', ' · Listening') : ''}</p>
+    {crashes?.startedAt && <p className="mt-1 text-xs text-slate-400">{new Date(crashes.startedAt).toLocaleString('zh-CN', { hour12: false })} → {crashes.endedAt ? new Date(crashes.endedAt).toLocaleString('zh-CN', { hour12: false }) : t("采集中", "Collecting")}</p>}
     {crashes?.error && <p role="alert" className="mt-2 text-sm text-amber-700">{crashes.error}</p>}
-    {!!crashes?.events.length && <details className="mt-3"><summary className="cursor-pointer text-sm text-blue-600">查看崩溃明细（{crashes.count}）</summary>
+    {!!crashes?.events.length && <details className="mt-3"><summary className="cursor-pointer text-sm text-blue-600">{t("查看崩溃明细（", "Crash details (")}{crashes.count}）</summary>
       <div className="mt-2 max-h-72 overflow-auto space-y-2">{crashes.events.map(event => <div key={event.id} className="rounded-lg bg-red-50 p-2 text-xs">
-        <div>{new Date(event.timestamp).toLocaleString('zh-CN', { hour12: false })} · {event.type} · PID {event.pid} · {event.isTarget === true ? '目标包' : event.isTarget === false ? '其他进程' : '历史记录'} · {event.sources?.join(' + ') || 'am_crash'}</div>
-        <div className="break-all font-mono">{event.processName || '进程名未解析'} · {event.exception}</div><pre className="whitespace-pre-wrap break-all">{event.evidence}</pre>
+        <div>{new Date(event.timestamp).toLocaleString('zh-CN', { hour12: false })} · {event.type} · PID {event.pid} · {event.isTarget === true ? t("目标包", "Target package") : event.isTarget === false ? t("其他进程", "Other process") : t("历史记录", "Historical record")} · {event.sources?.join(' + ') || 'am_crash'}</div>
+        <div className="break-all font-mono">{event.processName || t("进程名未解析", "Process name unavailable")} · {event.exception}</div><pre className="whitespace-pre-wrap break-all">{event.evidence}</pre>
       </div>)}</div></details>}
   </section>;
 }
@@ -259,7 +263,7 @@ function getReportSummary(report: PerformanceReport) {
   };
 }
 
-function buildExportTrendSvg(report: PerformanceReport) {
+function buildExportTrendSvg(report: PerformanceReport, locale: 'zh-CN' | 'en' = 'zh-CN') {
   const width = 720;
   const height = 220;
   const chartLeft = 62;
@@ -283,12 +287,14 @@ function buildExportTrendSvg(report: PerformanceReport) {
       }
 
       const x = chartLeft + (index / Math.max(report.samples.length - 1, 1)) * chartWidth;
-      return `<text x="${x.toFixed(1)}" y="${height - 10}" text-anchor="middle" fill="#64748b" font-size="10" font-weight="700">${escapeHtml(new Date(sample.timestamp).toLocaleTimeString('zh-CN', { hour12: false }))}</text>`;
+      return `<text x="${x.toFixed(1)}" y="${height - 10}" text-anchor="middle" fill="#64748b" font-size="10" font-weight="700">${escapeHtml(new Date(sample.timestamp).toLocaleTimeString(locale, { hour12: false }))}</text>`;
     }).filter(Boolean).join('');
 
+    const label = locale === 'en' ? config.englishLabel : config.label;
+    const chartLabel = locale === 'en' ? `${label} trend` : `${label}趋势图`;
     return `<section class="trend-card">
-      <h3>${escapeHtml(config.label)}${config.unit ? ` ${escapeHtml(config.unit)}` : ''}</h3>
-      <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(config.label)}趋势图">
+      <h3>${escapeHtml(label)}${config.unit ? ` ${escapeHtml(config.unit)}` : ''}</h3>
+      <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(chartLabel)}">
         <rect x="0" y="0" width="${width}" height="${height}" rx="14" fill="#f8fafc" />
         ${ticks.map((tick, tickIndex) => {
           const y = chartTop + tickIndex * (chartHeight / 2);
@@ -306,12 +312,13 @@ function buildExportTrendSvg(report: PerformanceReport) {
   }).join('\n');
 }
 
-function buildReportMarkdown(report: PerformanceReport) {
+function buildReportMarkdown(report: PerformanceReport, locale: 'zh-CN' | 'en' = 'zh-CN') {
+  const t = (zh: string, en: string) => locale === 'en' ? en : zh;
   const summary = getReportSummary(report);
   const createdAt = new Date(report.createdAt).toLocaleString('zh-CN', { hour12: false });
-  const trendSvg = buildExportTrendSvg(report);
+  const trendSvg = buildExportTrendSvg(report, locale);
   const rows = report.samples.map((sample) => [
-    new Date(sample.timestamp).toLocaleString('zh-CN', { hour12: false }),
+    new Date(sample.timestamp).toLocaleString(locale, { hour12: false }),
     sample.pid || '-',
     formatMemory(sample.memoryKb),
     formatMetric(sample.cpuPercent, '%'),
@@ -319,7 +326,7 @@ function buildReportMarkdown(report: PerformanceReport) {
     formatMetric(sample.batteryTemperatureC, ' °C'),
     formatMemory(sample.systemAvailableMemoryKb),
     formatMetric(sample.systemAvailableCpuPercent, '%'),
-    sample.error ? `失败：${sample.error}` : '成功',
+    sample.error ? `${t('失败：', 'Failed: ')}${sample.error}` : t("成功", "Passed"),
   ]);
 
   return [
@@ -338,34 +345,35 @@ function buildReportMarkdown(report: PerformanceReport) {
     `- 崩溃采集窗口：${report.crashes?.startedAt || '-'} → ${report.crashes?.endedAt || '-'}`,
     ...(report.crashes?.events || []).map(event => `- ${event.timestamp} · ${event.processName} · PID ${event.pid} · ${event.type} · ${event.isTarget === true ? '目标包' : event.isTarget === false ? '其他进程' : '历史记录'} · ${event.sources?.join(' + ') || 'am_crash'}\n\n    ${event.evidence}`),
     '',
-    '## 指标摘要',
+    t("## 指标摘要", "## Metrics summary"),
     '',
-    `- 内存：均值 ${formatMemory(summary.memory.avg)}，峰值 ${formatMemory(summary.memory.max)}，可用最低 ${formatMemory(summary.systemMemory.min)}`,
-    `- CPU：均值 ${formatMetric(summary.cpu.avg, '%')}，峰值 ${formatMetric(summary.cpu.max, '%')}，可用最低 ${formatMetric(summary.systemCpu.min, '%')}`,
-    `- 线程：均值 ${formatMetric(summary.threads.avg)}，峰值 ${formatMetric(summary.threads.max)}，最后采样 ${summary.latestSample ? new Date(summary.latestSample.timestamp).toLocaleTimeString('zh-CN', { hour12: false }) : '-'}`,
+    `- ${t("内存：均值 ", "Memory: average ")}${formatMemory(summary.memory.avg)}${t("，峰值 ", " · peak ")}${formatMemory(summary.memory.max)}${t("，可用最低 ", " · lowest available ")}${formatMemory(summary.systemMemory.min)}`,
+    `- ${t("CPU：均值 ", "CPU: average ")}${formatMetric(summary.cpu.avg, '%')}${t("，峰值 ", " · peak ")}${formatMetric(summary.cpu.max, '%')}${t("，可用最低 ", " · lowest available ")}${formatMetric(summary.systemCpu.min, '%')}`,
+    `- ${t("线程：均值 ", "Threads: average ")}${formatMetric(summary.threads.avg)}${t("，峰值 ", " · peak ")}${formatMetric(summary.threads.max)}${t("，最后采样 ", " · last sample ")}${summary.latestSample ? new Date(summary.latestSample.timestamp).toLocaleTimeString(locale, { hour12: false }) : '-'}`,
     '',
-    '## 趋势图',
+    t("## 趋势图", "## Trends"),
     '',
     '<div class="trend-grid">',
     trendSvg,
     '</div>',
     '',
-    '## 采样明细',
+    t("## 采样明细", "## Samples"),
     '',
-    '| 时间 | PID | 内存 | CPU | 线程 | 电池温度（设备） | 可用内存 | 可用CPU | 状态 |',
+    t("| 时间 | PID | 内存 | CPU | 线程 | 电池温度（设备） | 可用内存 | 可用CPU | 状态 |", "| Time | PID | Memory | CPU | Threads | Device battery temperature | Available memory | Available CPU | Status |"),
     '| --- | --- | --- | --- | --- | --- | --- | --- | --- |',
     ...rows.map((row) => `| ${row.map((cell) => String(cell).replace(/\|/g, '\\|')).join(' | ')} |`),
     '',
   ].join('\n');
 }
 
-function buildReportHtml(report: PerformanceReport) {
+function buildReportHtml(report: PerformanceReport, locale: 'zh-CN' | 'en' = 'zh-CN') {
+  const t = (zh: string, en: string) => locale === 'en' ? en : zh;
   const summary = getReportSummary(report);
   const createdAt = new Date(report.createdAt).toLocaleString('zh-CN', { hour12: false });
-  const trendSvg = buildExportTrendSvg(report);
+  const trendSvg = buildExportTrendSvg(report, locale);
   const rows = report.samples.map((sample) => `
     <tr>
-      <td>${escapeHtml(new Date(sample.timestamp).toLocaleString('zh-CN', { hour12: false }))}</td>
+      <td>${escapeHtml(new Date(sample.timestamp).toLocaleString(locale, { hour12: false }))}</td>
       <td>${escapeHtml(sample.pid || '-')}</td>
       <td>${escapeHtml(formatMemory(sample.memoryKb))}</td>
       <td>${escapeHtml(formatMetric(sample.cpuPercent, '%'))}</td>
@@ -373,12 +381,12 @@ function buildReportHtml(report: PerformanceReport) {
       <td>${escapeHtml(formatMetric(sample.batteryTemperatureC, ' °C'))}</td>
       <td>${escapeHtml(formatMemory(sample.systemAvailableMemoryKb))}</td>
       <td>${escapeHtml(formatMetric(sample.systemAvailableCpuPercent, '%'))}</td>
-      <td>${escapeHtml(sample.error ? `失败：${sample.error}` : '成功')}</td>
+      <td>${escapeHtml(sample.error ? `${t('失败：', 'Failed: ')}${sample.error}` : t("成功", "Passed"))}</td>
     </tr>
   `).join('');
 
   return `<!doctype html>
-<html lang="zh-CN">
+<html lang="${locale}">
 <head>
   <meta charset="utf-8" />
   <title>${escapeHtml(report.name)}</title>
@@ -413,11 +421,11 @@ function buildReportHtml(report: PerformanceReport) {
         <div><div class="muted">间隔</div><strong>${report.intervalSeconds}s</strong></div>
       </div>
     </section>
-    <section><h2>应用崩溃：${escapeHtml(crashSummary(report.crashes))}</h2>
-      <p>${report.crashes?.scope === 'device' ? `设备全部应用 · 目标包及子进程 ${report.crashes.targetCount ?? 0} 次 · 多源去重` : '历史采集：仅目标包系统事件'}</p>
-      <p>${escapeHtml(report.crashes?.status || '未采集')} ${escapeHtml(report.crashes?.error || '')}</p>
+    <section><h2>${t("应用崩溃：", "App crashes: ")}${escapeHtml(crashSummary(report.crashes, t))}</h2>
+      <p>${report.crashes?.scope === 'device' ? `${t("设备全部应用 · 目标包及子进程 ", "All apps · target package and child processes: ")}${report.crashes.targetCount ?? 0}${t(" 次 · 多源去重", " · deduplicated across sources")}` : t("历史采集：仅目标包系统事件", "Historical capture: target package system events only")}</p>
+      <p>${escapeHtml(report.crashes?.status || t("未采集", "Not collected"))} ${escapeHtml(report.crashes?.error || '')}</p>
       <p>${escapeHtml(report.crashes?.startedAt || '-')} → ${escapeHtml(report.crashes?.endedAt || '-')}</p>
-      ${(report.crashes?.events || []).map(event => `<pre>${event.isTarget === true ? '目标包' : event.isTarget === false ? '其他进程' : '历史记录'} · ${escapeHtml(event.processName)} · ${escapeHtml(event.sources?.join(' + ') || 'am_crash')}\n${escapeHtml(event.evidence)}</pre>`).join('')}
+      ${(report.crashes?.events || []).map(event => `<pre>${event.isTarget === true ? t("目标包", "Target package") : event.isTarget === false ? t("其他进程", "Other process") : t("历史记录", "Historical record")} · ${escapeHtml(event.processName)} · ${escapeHtml(event.sources?.join(' + ') || 'am_crash')}\n${escapeHtml(event.evidence)}</pre>`).join('')}
     </section>
     <section class="summary">
       <div class="card"><div class="muted">内存峰值 / 可用最低</div><div class="value">${escapeHtml(formatMemory(summary.memory.max))} / ${escapeHtml(formatMemory(summary.systemMemory.min))}</div></div>
@@ -425,13 +433,13 @@ function buildReportHtml(report: PerformanceReport) {
       <div class="card"><div class="muted">线程峰值 / 最后采样</div><div class="value">${escapeHtml(formatMetric(summary.threads.max))} / ${summary.latestSample ? escapeHtml(new Date(summary.latestSample.timestamp).toLocaleTimeString('zh-CN', { hour12: false })) : '-'}</div></div>
     </section>
     <section>
-      <h2>趋势图</h2>
+      <h2>${t("趋势图", "Trends")}</h2>
       <div class="trend-grid">${trendSvg}</div>
     </section>
     <section>
-      <h2>采样明细</h2>
+      <h2>${t("采样明细", "Samples")}</h2>
       <table>
-        <thead><tr><th>时间</th><th>PID</th><th>内存</th><th>CPU</th><th>线程</th><th>电池温度（设备）</th><th>可用内存</th><th>可用CPU</th><th>状态</th></tr></thead>
+        <thead><tr><th>${t("时间", "Time")}</th><th>PID</th><th>${t("内存", "Memory")}</th><th>CPU</th><th>${t("线程", "Threads")}</th><th>${t("电池温度（设备）", "Device battery temperature")}</th><th>${t("可用内存", "Available memory")}</th><th>${t("可用CPU", "Available CPU")}</th><th>${t("状态", "Status")}</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </section>
@@ -440,14 +448,15 @@ function buildReportHtml(report: PerformanceReport) {
 </html>`;
 }
 
-async function exportReport(report: PerformanceReport, format: 'md' | 'html') {
+async function exportReport(report: PerformanceReport, format: 'md' | 'html', locale: 'zh-CN' | 'en') {
+  const t = (zh: string, en: string) => locale === 'en' ? en : zh;
   const baseName = sanitizeFileName(report.name);
   const electronApi = getElectronApi();
   const isMarkdown = format === 'md';
-  const content = isMarkdown ? buildReportMarkdown(report) : buildReportHtml(report);
+  const content = isMarkdown ? buildReportMarkdown(report, locale) : buildReportHtml(report, locale);
   const extension = isMarkdown ? 'md' : 'html';
   const result = await electronApi?.ipcRenderer?.invoke('file:save-text', {
-    title: isMarkdown ? '导出 Markdown 报告' : '导出 HTML 报告',
+    title: isMarkdown ? t("导出 Markdown 报告", "Export Markdown report") : t("导出 HTML 报告", "Export HTML report"),
     defaultPath: `${baseName}.${extension}`,
     content,
     filters: [
@@ -459,7 +468,7 @@ async function exportReport(report: PerformanceReport, format: 'md' | 'html') {
   }) as { success?: boolean; canceled?: boolean; filePath?: string; error?: string } | undefined;
 
   if (!result) {
-    throw new Error('当前环境不支持保存文件');
+    throw new Error(t("当前环境不支持保存文件", "File saving is unavailable here"));
   }
 
   if (result.canceled) {
@@ -467,7 +476,7 @@ async function exportReport(report: PerformanceReport, format: 'md' | 'html') {
   }
 
   if (!result.success || !result.filePath) {
-    throw new Error(result.error || '导出失败');
+    throw new Error(result.error || t("导出失败", "Export failed"));
   }
 
   return result.filePath;
@@ -608,6 +617,7 @@ type MetricTrendKind = 'memory' | 'cpu' | 'threads' | 'temperature';
 type MetricTrendConfig = {
   key: MetricTrendKind;
   label: string;
+  englishLabel: string;
   unit: string;
   color: string;
   extraColor?: string;
@@ -617,12 +627,14 @@ type MetricTrendConfig = {
   formatValue: (value: number | undefined) => string;
   formatExtraValue?: (value: number | undefined) => string;
   extraLabel?: string;
+  extraEnglishLabel?: string;
 };
 
 const metricTrendConfigs: MetricTrendConfig[] = [
   {
     key: 'cpu',
     label: 'CPU',
+    englishLabel: 'CPU',
     unit: '%',
     color: '#ea580c',
     extraColor: '#fdba74',
@@ -632,10 +644,12 @@ const metricTrendConfigs: MetricTrendConfig[] = [
     formatValue: (value) => formatMetric(value, '%'),
     formatExtraValue: (value) => formatMetric(value, '%'),
     extraLabel: '可用 CPU',
+    extraEnglishLabel: 'Available CPU',
   },
   {
     key: 'memory',
     label: '内存',
+    englishLabel: 'Memory',
     unit: 'MB',
     color: '#0284c7',
     extraColor: '#7dd3fc',
@@ -645,10 +659,12 @@ const metricTrendConfigs: MetricTrendConfig[] = [
     formatValue: (value) => (typeof value === 'number' ? `${value.toFixed(1)} MB` : '-'),
     formatExtraValue: (value) => (typeof value === 'number' ? `${value.toFixed(1)} MB` : '-'),
     extraLabel: '可用内存',
+    extraEnglishLabel: 'Available memory',
   },
   {
     key: 'threads',
     label: '线程',
+    englishLabel: 'Threads',
     unit: '',
     color: '#059669',
     floorAtZero: false,
@@ -656,7 +672,7 @@ const metricTrendConfigs: MetricTrendConfig[] = [
     formatValue: (value) => formatMetric(value),
   },
   {
-    key: 'temperature', label: '电池温度（设备）', unit: '°C', color: '#e11d48',
+    key: 'temperature', label: '电池温度（设备）', englishLabel: 'Device battery temperature', unit: '°C', color: '#e11d48',
     floorAtZero: false,
     getValue: sample => sample.batteryTemperatureC,
     formatValue: value => formatMetric(value, ' °C'),
@@ -819,24 +835,32 @@ function MetricTrendPanel({ config, samples }: { config: MetricTrendConfig; samp
 }
 
 function TrendChart({ samples }: { samples: PerformanceSample[] }) {
+  const { t } = useLanguage();
   if (samples.length === 0) {
     return (
       <div className="flex h-[300px] items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-sm font-bold text-slate-400">
-        采样后展示内存、CPU、线程和电池温度趋势
+        {t("采样后展示内存、CPU、线程和电池温度趋势", "Collect samples to see CPU, memory, thread count, and battery temperature trends")}
       </div>
     );
   }
 
+  const names: Record<MetricTrendConfig['key'], string> = {
+    cpu: 'CPU',
+    memory: t('内存', 'Memory'),
+    threads: t('线程', 'Threads'),
+    temperature: t('电池温度（设备）', 'Device battery temperature'),
+  };
   return (
     <div className="grid grid-cols-4 gap-3">
       {metricTrendConfigs.map((config) => (
-        <MetricTrendPanel key={config.key} config={config} samples={samples} />
+        <MetricTrendPanel key={config.key} config={{ ...config, label: names[config.key], extraLabel: config.extraLabel && t(config.extraLabel, config.key === "cpu" ? "Available CPU" : "Available memory") }} samples={samples} />
       ))}
     </div>
   );
 }
 
 function MetricSummaryCards({ samples }: { samples: PerformanceSample[] }) {
+  const { t } = useLanguage();
   const latestSample = samples[samples.length - 1];
   const memorySummary = summarize(samples.map((item) => item.memoryKb));
   const cpuSummary = summarize(samples.map((item) => item.cpuPercent));
@@ -846,29 +870,29 @@ function MetricSummaryCards({ samples }: { samples: PerformanceSample[] }) {
     {
       label: 'CPU',
       value: formatMetric(latestSample?.cpuPercent, '%'),
-      detail: `均值 ${formatMetric(cpuSummary.avg, '%')} / 峰值 ${formatMetric(cpuSummary.max, '%')} / 系统可用 ${formatMetric(latestSample?.systemAvailableCpuPercent, '%')}`,
+      detail: `${t("均值", "Average")} ${formatMetric(cpuSummary.avg, '%')} / ${t("峰值", "Peak")} ${formatMetric(cpuSummary.max, '%')} / ${t("系统可用", "System available")} ${formatMetric(latestSample?.systemAvailableCpuPercent, '%')}`,
       icon: Cpu,
       tone: 'text-amber-600 bg-amber-50 border-amber-100',
     },
     {
-      label: '内存',
+      label: t("内存", "Memory"),
       value: formatMemory(latestSample?.memoryKb),
-      detail: `均值 ${formatMemory(memorySummary.avg)} / 峰值 ${formatMemory(memorySummary.max)} / 系统可用 ${formatMemory(latestSample?.systemAvailableMemoryKb)}`,
+      detail: `${t("均值", "Average")} ${formatMemory(memorySummary.avg)} / ${t("峰值", "Peak")} ${formatMemory(memorySummary.max)} / ${t("系统可用", "System available")} ${formatMemory(latestSample?.systemAvailableMemoryKb)}`,
       icon: HardDrive,
       tone: 'text-sky-600 bg-sky-50 border-sky-100',
     },
     {
-      label: '线程',
+      label: t("线程", "Threads"),
       value: formatMetric(latestSample?.threadCount),
-      detail: `均值 ${formatMetric(threadSummary.avg)} / 峰值 ${formatMetric(threadSummary.max)}`,
+      detail: `${t("均值", "Average")} ${formatMetric(threadSummary.avg)} / ${t("峰值", "Peak")} ${formatMetric(threadSummary.max)}`,
       icon: Activity,
       tone: 'text-emerald-600 bg-emerald-50 border-emerald-100',
     },
     {
-      label: '电池温度',
+      label: t("电池温度", "Battery temperature"),
       value: formatMetric(latestSample?.batteryTemperatureC, ' °C'),
-      detail: `设备电池 · 均值 ${formatMetric(temperatureSummary.avg, ' °C')} / 峰值 ${formatMetric(temperatureSummary.max, ' °C')}`,
-      secondary: latestSample?.batteryError || `电量 ${formatMetric(latestSample?.batteryLevelPercent, '%')} · ${latestSample?.batteryPowered === undefined ? '供电状态未知' : latestSample.batteryPowered ? '外部供电已接入' : '电池供电'}`,
+      detail: `${t("设备电池", "Device battery")} · ${t("均值", "Average")} ${formatMetric(temperatureSummary.avg, ' °C')} / ${t("峰值", "Peak")} ${formatMetric(temperatureSummary.max, ' °C')}`,
+      secondary: latestSample?.batteryError || `${t("电量", "Charge")} ${formatMetric(latestSample?.batteryLevelPercent, '%')} · ${latestSample?.batteryPowered === undefined ? t("供电状态未知", "Power source unknown") : latestSample.batteryPowered ? t("外部供电已接入", "External power connected") : t("电池供电", "On battery")}`,
       icon: Thermometer,
       tone: 'text-rose-600 bg-rose-50 border-rose-100',
     },
@@ -892,26 +916,27 @@ function MetricSummaryCards({ samples }: { samples: PerformanceSample[] }) {
 }
 
 function SampleTable({ samples }: { samples: PerformanceSample[] }) {
+  const { t } = useLanguage();
   return (
     <div className="max-h-[520px] overflow-auto">
       <table className="w-full min-w-[760px] text-left text-xs">
         <thead className="sticky top-0 bg-slate-50 text-[10px] font-black uppercase tracking-wide text-slate-500">
           <tr>
-            <th className="px-4 py-3">时间</th>
+            <th className="px-4 py-3">{t("时间", "Time")}</th>
             <th className="px-4 py-3">PID</th>
-            <th className="px-4 py-3">内存</th>
+            <th className="px-4 py-3">{t("内存", "Memory")}</th>
             <th className="px-4 py-3">CPU</th>
-            <th className="px-4 py-3">线程</th>
-            <th className="px-4 py-3">电池温度（设备）</th>
-            <th className="px-4 py-3">可用内存</th>
-            <th className="px-4 py-3">可用CPU</th>
-            <th className="px-4 py-3">状态</th>
+            <th className="px-4 py-3">{t("线程", "Threads")}</th>
+            <th className="px-4 py-3">{t("电池温度（设备）", "Device battery temperature")}</th>
+            <th className="px-4 py-3">{t("可用内存", "Available memory")}</th>
+            <th className="px-4 py-3">{t("可用CPU", "Available CPU")}</th>
+            <th className="px-4 py-3">{t("状态", "Status")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
           {samples.length === 0 ? (
             <tr>
-              <td colSpan={9} className="px-4 py-16 text-center text-sm font-bold text-slate-400">点击开始后会按间隔采集性能数据</td>
+              <td colSpan={9} className="px-4 py-16 text-center text-sm font-bold text-slate-400">{t("点击开始后会按间隔采集性能数据", "Select Start to begin collecting performance data")}</td>
             </tr>
           ) : samples.map((sample, index) => (
             <tr key={`${sample.timestamp}-${index}`} className="bg-white">
@@ -925,7 +950,7 @@ function SampleTable({ samples }: { samples: PerformanceSample[] }) {
               <td className="px-4 py-3 font-bold text-slate-500">{formatMetric(sample.systemAvailableCpuPercent, '%')}</td>
               <td className="px-4 py-3">
                 <span className={`rounded-full px-2 py-1 text-[10px] font-black ${sample.error ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                  {sample.error ? '失败' : '成功'}
+                  {sample.error ? t("失败", "Failed") : t("成功", "Passed")}
                 </span>
               </td>
             </tr>
@@ -937,6 +962,7 @@ function SampleTable({ samples }: { samples: PerformanceSample[] }) {
 }
 
 function ReportSnapshot({ report }: { report: PerformanceReport }) {
+  const { t } = useLanguage();
   const [exportMessage, setExportMessage] = useState('');
   const [exportedPath, setExportedPath] = useState('');
   const memorySummary = summarize(report.samples.map((item) => item.memoryKb));
@@ -948,12 +974,12 @@ function ReportSnapshot({ report }: { report: PerformanceReport }) {
   const latestSample = report.samples[report.samples.length - 1];
   const handleExport = async (format: 'md' | 'html') => {
     try {
-      setExportMessage('正在导出报告...');
+      setExportMessage(t("正在导出报告...", "Exporting report…"));
       setExportedPath('');
-      const filePath = await exportReport(report, format);
+      const filePath = await exportReport(report, format, t('zh-CN', 'en') as 'zh-CN' | 'en');
 
       if (!filePath) {
-        setExportMessage('已取消导出');
+        setExportMessage(t("已取消导出", "Export cancelled"));
         return;
       }
 
@@ -961,7 +987,7 @@ function ReportSnapshot({ report }: { report: PerformanceReport }) {
       setExportMessage(`导出成功：${filePath}`);
     } catch (error) {
       setExportedPath('');
-      setExportMessage(`导出失败：${error instanceof Error ? error.message : String(error)}`);
+      setExportMessage(t(`导出失败：${error instanceof Error ? error.message : String(error)}`, `Export failed: ${error instanceof Error ? error.message : String(error)}`));
     }
   };
 
@@ -985,7 +1011,7 @@ function ReportSnapshot({ report }: { report: PerformanceReport }) {
           <div className="flex flex-col items-end gap-2">
             <div className="text-right text-xs font-bold leading-5 text-slate-500">
               <div>{new Date(report.createdAt).toLocaleString('zh-CN', { hour12: false })}</div>
-              <div>{report.samples.length} 次采样 / 失败 {failedCount} 次</div>
+              <div>{t(`${report.samples.length} 次采样 / 失败 ${failedCount} 次`, `${report.samples.length} samples / ${failedCount} failed`)}</div>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -1008,10 +1034,10 @@ function ReportSnapshot({ report }: { report: PerformanceReport }) {
           </div>
         </div>
         <div className="mt-4 grid gap-3 text-xs font-bold leading-6 text-slate-600 lg:grid-cols-4">
-          <div>设备：<span className="font-mono text-slate-900">{report.serial || '-'}</span></div>
-          <div>包名：<span className="font-mono text-slate-900">{report.packageName || '-'}</span></div>
-          <div>版本：<span className="font-mono text-slate-900">{report.packageVersion || '-'}</span></div>
-          <div>系统：{report.runtime === 'android' ? 'Android / adb' : '鸿蒙 / hdc'}</div>
+          <div>{t("设备：", "Device ")}<span className="font-mono text-slate-900">{report.serial || '-'}</span></div>
+          <div>{t("包名：", "Package ")}<span className="font-mono text-slate-900">{report.packageName || '-'}</span></div>
+          <div>{t("版本：", "Version ")}<span className="font-mono text-slate-900">{report.packageVersion || '-'}</span></div>
+          <div>{t("系统：", "Platform ")}{report.runtime === 'android' ? 'Android / adb' : t("鸿蒙 / hdc", "HarmonyOS / HDC")}</div>
         </div>
         {exportMessage && (
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-600">
@@ -1022,7 +1048,7 @@ function ReportSnapshot({ report }: { report: PerformanceReport }) {
                 onClick={() => void openExportedFileLocation()}
                 className="shrink-0 rounded-lg bg-white px-3 py-1.5 text-[11px] font-black text-blue-600 ring-1 ring-slate-200 hover:bg-blue-50"
               >
-                打开位置
+                {t("打开位置", "Show file")}
               </button>
             )}
           </div>
@@ -1033,23 +1059,23 @@ function ReportSnapshot({ report }: { report: PerformanceReport }) {
 
       <div className="grid gap-3 lg:grid-cols-3">
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <div className="text-xs font-black uppercase tracking-wide text-slate-400">内存峰值 / 可用最低</div>
+          <div className="text-xs font-black uppercase tracking-wide text-slate-400">{t("内存峰值 / 可用最低", "Peak memory / minimum available")}</div>
           <div className="mt-2 text-2xl font-black text-slate-950">{formatMemory(memorySummary.max)} / {formatMemory(systemMemorySummary.min)}</div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <div className="text-xs font-black uppercase tracking-wide text-slate-400">CPU峰值 / 可用最低</div>
+          <div className="text-xs font-black uppercase tracking-wide text-slate-400">{t("CPU峰值 / 可用最低", "Peak CPU / minimum available")}</div>
           <div className="mt-2 text-2xl font-black text-slate-950">{formatMetric(cpuSummary.max, '%')} / {formatMetric(systemCpuSummary.min, '%')}</div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <div className="text-xs font-black uppercase tracking-wide text-slate-400">线程峰值 / 最后采样</div>
+          <div className="text-xs font-black uppercase tracking-wide text-slate-400">{t("线程峰值 / 最后采样", "Peak threads / latest sample")}</div>
           <div className="mt-2 text-2xl font-black text-slate-950">{formatMetric(threadSummary.max)} / {latestSample ? new Date(latestSample.timestamp).toLocaleTimeString('zh-CN', { hour12: false }) : '-'}</div>
         </div>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5">
         <div className="flex h-12 items-center justify-between border-b border-slate-100 px-4">
-          <div className="text-sm font-black text-slate-900">趋势图</div>
-          <div className="text-xs font-bold text-slate-400">只读</div>
+          <div className="text-sm font-black text-slate-900">{t("趋势图", "Trends")}</div>
+          <div className="text-xs font-bold text-slate-400">{t("只读", "Read-only")}</div>
         </div>
         <div className="p-4">
           <TrendChart samples={report.samples} />
@@ -1060,8 +1086,8 @@ function ReportSnapshot({ report }: { report: PerformanceReport }) {
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5">
         <div className="flex h-12 items-center justify-between border-b border-slate-100 px-4">
-          <div className="text-sm font-black text-slate-900">采样明细</div>
-          <div className="text-xs font-bold text-slate-400">{report.samples.length} 条</div>
+          <div className="text-sm font-black text-slate-900">{t("采样明细", "Samples")}</div>
+          <div className="text-xs font-bold text-slate-400">{t(`${report.samples.length} 条`, `${report.samples.length} samples`)}</div>
         </div>
         <SampleTable samples={report.samples} />
       </div>
@@ -1070,6 +1096,7 @@ function ReportSnapshot({ report }: { report: PerformanceReport }) {
 }
 
 export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', onOpenReports }: PerformanceTestPageProps) => {
+  const { t } = useLanguage();
   const [runtime, setRuntime] = useState<DeviceRuntime>('android');
   const [serial, setSerial] = useState(phoneSerial);
   const [packageName, setPackageName] = useState(phonePackage);
@@ -1108,7 +1135,7 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
     const electronApi = getElectronApi();
 
     if (!electronApi?.ipcRenderer) {
-      setMessage('当前环境不支持 Electron 能力');
+      setMessage(t("当前环境不支持 Electron 能力", "This feature requires SoloPi Desktop"));
       return;
     }
 
@@ -1121,7 +1148,7 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
       if (result.error) {
         setMessage(`设备列表读取失败：${result.error}`);
       } else {
-        setMessage(`${runtime === 'harmony' ? 'hdc list targets' : 'adb devices'} 读取到 ${nextDevices.length} 台设备`);
+        setMessage(t(`${runtime === 'harmony' ? 'hdc list targets' : 'adb devices'} 读取到 ${nextDevices.length} 台设备`, `Devices found: ${nextDevices.length}`));
       }
 
       if (nextDevices.length > 0 && !nextDevices.some((item) => item.serial === serial)) {
@@ -1234,7 +1261,7 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
     const electronApi = getElectronApi();
 
     if (!electronApi?.ipcRenderer) {
-      setMessage('当前环境不支持 Electron 能力');
+      setMessage(t("当前环境不支持 Electron 能力", "This feature requires SoloPi Desktop"));
       return;
     }
 
@@ -1242,7 +1269,7 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
     const nextPackage = packageName.trim();
 
     if (!nextSerial || !nextPackage) {
-      setMessage('请先填写设备 SN 和包名');
+      setMessage(t("请先填写设备 SN 和包名", "Enter a device serial number and app package first"));
       return;
     }
 
@@ -1261,13 +1288,13 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
         serial: nextSerial,
         packageName: nextPackage,
         runtime,
-        error: result.error || '采样失败',
+        error: result.error || t("采样失败", "Sampling failed"),
       };
 
       setSamples((current) => [...current, nextSample]);
-      setMessage(nextSample.error ? `采样失败：${nextSample.error}` : '采样成功');
+      setMessage(nextSample.error ? `采样失败：${nextSample.error}` : t("采样成功", "Sample collected"));
     } catch (error) {
-      const errorMessage = normalizeIpcError(error, '开始采样');
+      const errorMessage = normalizeIpcError(error, t("开始采样", "Start sampling"));
       setSamples((current) => [
         ...current,
         {
@@ -1288,11 +1315,11 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
   const startCollecting = async () => {
     const electronApi = getElectronApi();
     if (!serial.trim() || !packageName.trim() || !electronApi?.ipcRenderer) {
-      setMessage('请确认 Electron 环境，并填写设备 SN 和包名'); return;
+      setMessage(t("请确认 Electron 环境，并填写设备 SN 和包名", "Open SoloPi Desktop and enter a device serial number and app package")); return;
     }
     const generation = ++generationRef.current;
     const seconds = Math.max(1, Number(intervalSeconds) || 5);
-    setSamples([]); setCrashes(undefined); setMessage('正在开始采集...'); setIsRunning(true);
+    setSamples([]); setCrashes(undefined); setMessage(t("正在开始采集...", "Starting collection…")); setIsRunning(true);
     try {
       crashStartRef.current = electronApi.ipcRenderer.invoke('performance:crashes-start', { runtime, serial: serial.trim(), packageName: packageName.trim() });
       const result = await crashStartRef.current as CrashStats & { id: string };
@@ -1311,7 +1338,7 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
       }, 1000);
       void collectSample(); stopTimer();
       timerRef.current = window.setInterval(() => void collectSample(), seconds * 1000);
-    } catch (error) { setMessage(normalizeIpcError(error, '开始性能采集')); setIsRunning(false); }
+    } catch (error) { setMessage(normalizeIpcError(error, t("开始性能采集", "Start performance collection"))); setIsRunning(false); }
   };
 
   const stopCollecting = async () => {
@@ -1327,14 +1354,14 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
     }
     setIsRunning(false);
     setReportName(`性能报告 ${new Date().toLocaleString('zh-CN', { hour12: false })}`);
-    setIsReportDialogOpen(true); setMessage('采集已结束，请保存本次性能报告');
+    setIsReportDialogOpen(true); setMessage(t("采集已结束，请保存本次性能报告", "Collection complete. Save the performance report."));
   };
 
   const saveCurrentReport = () => {
     const nextName = reportName.trim();
 
     if (!nextName) {
-      setMessage('请输入报告名称');
+      setMessage(t("请输入报告名称", "Enter a report name"));
       return;
     }
 
@@ -1355,7 +1382,7 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
     setSelectedReportId(frozenReport.id);
     setIsReportDialogOpen(false);
     onOpenReports?.();
-    setMessage(`已保存报告：${nextName}`);
+    setMessage(t(`已保存报告：${nextName}`, `Report saved: ${nextName}`));
   };
 
   const packageOptions = useMemo(() => {
@@ -1377,7 +1404,7 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
                   <BarChart3 className="h-4 w-4" />
                   Performance Test
                 </div>
-                <h2 className="mt-1 text-xl font-black text-slate-900">性能任务</h2>
+                <h2 className="mt-1 text-xl font-black text-slate-900">{t("性能任务", "Performance tests")}</h2>
               </div>
               <div className="flex items-center gap-2">
                 {isRunning && (
@@ -1389,12 +1416,12 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
                 {isRunning ? (
                   <button type="button" onClick={stopCollecting} className="flex h-9 items-center gap-2 rounded-xl bg-slate-950 px-4 text-xs font-black text-white hover:bg-slate-800">
                     <Square className="h-3.5 w-3.5 fill-current" />
-                    结束
+                    {t("结束", "Stop")}
                   </button>
                 ) : (
                   <button type="button" onClick={startCollecting} className="flex h-9 items-center gap-2 rounded-xl bg-blue-600 px-4 text-xs font-black text-white hover:bg-blue-700">
                     <Play className="h-3.5 w-3.5 fill-current" />
-                    开始
+                    {t("开始", "Start")}
                   </button>
                 )}
               </div>
@@ -1402,16 +1429,16 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
 
             <div className="mt-4 grid gap-3 lg:grid-cols-[150px_minmax(0,1.1fr)_minmax(0,1.35fr)_minmax(10rem,0.7fr)_120px]">
               <label className="block">
-                <span className="text-[10px] font-black uppercase tracking-wide text-slate-500">系统</span>
+                <span className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("系统", "Platform")}</span>
                 <select value={runtime} onChange={(event) => setRuntime(event.target.value as DeviceRuntime)} disabled={isRunning} className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-bold outline-none focus:border-blue-300 disabled:opacity-60">
                   <option value="android">Android / adb</option>
-                  <option value="harmony">鸿蒙 / hdc</option>
+                  <option value="harmony">{t("鸿蒙 / hdc", "HarmonyOS / HDC")}</option>
                 </select>
               </label>
               <label className="block min-w-0">
                 <span className="text-[10px] font-black uppercase tracking-wide text-slate-500">SN</span>
                 <div className="mt-1 flex min-w-0 gap-2">
-                  <PerformanceComboBox value={serial} onChange={setSerial} options={devices.map(device => ({ value: device.serial, label: [device.state, device.kind && device.kind !== 'unknown' ? device.kind : '', device.model || device.product || device.device || ''].filter(Boolean).join(' / ') }))} disabled={isRunning} label="设备 SN" placeholder="选择或输入设备 SN" />
+                  <PerformanceComboBox value={serial} onChange={setSerial} options={devices.map(device => ({ value: device.serial, label: [device.state, device.kind && device.kind !== 'unknown' ? device.kind : '', device.model || device.product || device.device || ''].filter(Boolean).join(' / ') }))} disabled={isRunning} label={t("设备 SN", "Device serial number")} placeholder={t("选择或输入设备 SN", "Select or enter a device serial number")} />
                   <button type="button" onClick={() => void refreshDevices()} disabled={isRunning || isLoadingDevices} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50" title={runtime === 'harmony' ? '刷新 hdc list targets' : '刷新 adb devices'}>
                     <RefreshCw className={`h-4 w-4 ${isLoadingDevices ? 'animate-spin' : ''}`} />
                   </button>
@@ -1419,19 +1446,19 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
 
               </label>
               <label className="block min-w-0">
-                <span className="text-[10px] font-black uppercase tracking-wide text-slate-500">包名 / 进程名</span>
+                <span className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("包名 / 进程名", "Package / process")}</span>
                 <div className="relative mt-1">
-                  <PerformanceComboBox value={packageName} onChange={setPackageName} options={packageOptions.map(value => ({ value }))} disabled={isRunning} loading={isLoadingPackages} label="包名 / 进程名" placeholder="搜索或输入包名" />
+                  <PerformanceComboBox value={packageName} onChange={setPackageName} options={packageOptions.map(value => ({ value }))} disabled={isRunning} loading={isLoadingPackages} label={t("包名 / 进程名", "Package / process")} placeholder={t('搜索或输入包名', 'Search or enter a package name')} />
                 </div>
               </label>
               <div className="block min-w-0">
-                <span className="text-[10px] font-black uppercase tracking-wide text-slate-500">版本</span>
+                <span className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("版本", "Version")}</span>
                 <div className="mt-1 flex h-10 items-center rounded-xl border border-slate-200 bg-slate-50 px-3 font-mono text-sm font-bold text-slate-700">
                   <span className="truncate">{packageVersion || '-'}</span>
                 </div>
               </div>
               <label className="block">
-                <span className="text-[10px] font-black uppercase tracking-wide text-slate-500">间隔秒</span>
+                <span className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("间隔秒", "Interval (seconds)")}</span>
               <input type="number" min={1} value={intervalSeconds} onChange={(event) => setIntervalSeconds(Math.max(1, Number(event.target.value || 1)))} disabled={isRunning} className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-bold outline-none focus:border-blue-300 disabled:opacity-60" />
               </label>
             </div>
@@ -1454,15 +1481,15 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
               <div className="flex h-12 items-center justify-between border-b border-slate-100 px-4">
                 <div className="flex items-center gap-2">
                   {[
-                    ['trend', '趋势图'],
-                    ['samples', '采样明细'],
+                    ['trend', t("趋势图", "Trends")],
+                    ['samples', t("采样明细", "Samples")],
                   ].map(([id, label]) => (
                     <button key={id} type="button" onClick={() => setResultTab(id as ResultTab)} className={`rounded-lg px-3 py-1.5 text-xs font-black transition-colors ${resultTab === id ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
                       {label}
                     </button>
                   ))}
                 </div>
-                <div className="text-xs font-bold text-slate-400">{samples.length} 条</div>
+                <div className="text-xs font-bold text-slate-400">{t(`${samples.length} 条`, `${samples.length} samples`)}</div>
               </div>
               {resultTab === 'trend' ? (
                 <div className="p-4">
@@ -1478,12 +1505,12 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
             <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm shadow-slate-900/5">
               <div className="flex h-9 items-center gap-2 px-2 text-sm font-black text-slate-900">
                 <FileText className="h-4 w-4 text-blue-600" />
-                性能报告
+                {t("性能报告", "Performance reports")}
               </div>
               <div className="mt-2 space-y-2">
                 {reports.length === 0 ? (
                   <div className="flex h-56 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-center text-sm font-bold text-slate-400">
-                    结束一次采集后保存报告
+                    {t("结束一次采集后保存报告", "Save a report after collecting samples")}
                   </div>
                 ) : reports.map((report) => {
                   const isSelected = selectedReport?.id === report.id;
@@ -1507,7 +1534,7 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
               <ReportSnapshot report={selectedReport} />
             ) : (
               <div className="flex min-h-[520px] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white text-sm font-bold text-slate-400">
-                暂无性能报告
+                {t("暂无性能报告", "No performance reports yet")}
               </div>
             )}
           </section>
@@ -1517,18 +1544,18 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
       {isReportDialogOpen && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/35 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-950/25">
-            <div className="text-lg font-black text-slate-900">保存性能报告</div>
+            <div className="text-lg font-black text-slate-900">{t("保存性能报告", "Save performance report")}</div>
             <div className="mt-2 text-xs font-bold leading-5 text-slate-500">
-              本次采集数据会固化为只读报告，后续只能在性能报告 tab 查看。
+              {t("本次采集数据会固化为只读报告，后续只能在性能报告 tab 查看。", "Save these samples as a read-only performance report.")}
             </div>
             <label className="mt-4 block">
-              <span className="text-[10px] font-black uppercase tracking-wide text-slate-500">报告名称</span>
+              <span className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("报告名称", "Report name")}</span>
               <input
                 value={reportName}
                 onChange={(event) => setReportName(event.target.value)}
                 autoFocus
                 className="mt-1 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-bold text-slate-900 outline-none focus:border-blue-300 focus:bg-white"
-                placeholder="请输入报告名称"
+                placeholder={t("请输入报告名称", "Enter a report name")}
               />
             </label>
             <div className="mt-5 flex justify-end gap-2">
@@ -1537,14 +1564,14 @@ export const PerformanceTestPage = ({ phoneSerial, phonePackage, view = 'task', 
                 onClick={() => setIsReportDialogOpen(false)}
                 className="h-10 rounded-xl border border-slate-200 bg-white px-4 text-xs font-black text-slate-600 hover:bg-slate-50"
               >
-                取消
+                {t("取消", "Cancel")}
               </button>
               <button
                 type="button"
                 onClick={saveCurrentReport}
                 className="h-10 rounded-xl bg-blue-600 px-4 text-xs font-black text-white hover:bg-blue-700"
               >
-                保存报告
+                {t("保存报告", "Save report")}
               </button>
             </div>
           </div>

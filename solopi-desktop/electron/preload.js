@@ -1,6 +1,7 @@
 // Explicit IPC surface. Never expose Node, Electron, or raw IPC events.
 const { contextBridge, ipcRenderer, webUtils } = require('electron');
 const channels = new Set([
+  'settings:system-language',
   'reply-knowledge:list', 'reply-knowledge:get', 'reply-knowledge:save', 'reply-knowledge:import', 'reply-knowledge:remove',
   'reply-settings:load', 'reply-settings:save',
   'reply-evidence:list', 'reply-evidence:remove',

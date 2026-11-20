@@ -1,11 +1,14 @@
+import { useLanguage } from '../language';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, Search } from 'lucide-react';
 
-export function DeviceSerialSelect({ value, options, onChange, disabled = false, placeholder = '未检测到设备' }: {
+export function DeviceSerialSelect({ value, options, onChange, disabled = false, placeholder: customPlaceholder }: {
   value: string; options: { value: string; label: string }[]; onChange: (value: string) => void; disabled?: boolean; placeholder?: string;
 }) {
+  const { t } = useLanguage();
+  const placeholder = customPlaceholder ?? t('未检测到设备', 'No devices detected');
   return <div className="relative group min-w-0 flex-1">
-    <select aria-label="设备序列号" title={options.find(option => option.value === value)?.label || placeholder} value={value} disabled={disabled} onChange={event => onChange(event.target.value)} className="w-full h-8 bg-secondary/50 border border-border/50 rounded-xl pl-3 pr-7 text-[12px] appearance-none cursor-pointer focus:outline-none focus:ring-1 ring-primary/30 truncate">
+    <select aria-label={t("设备序列号", "Device serial number")} title={options.find(option => option.value === value)?.label || placeholder} value={value} disabled={disabled} onChange={event => onChange(event.target.value)} className="w-full h-8 bg-secondary/50 border border-border/50 rounded-xl pl-3 pr-7 text-[12px] appearance-none cursor-pointer focus:outline-none focus:ring-1 ring-primary/30 truncate">
       {(!value || options.length === 0) && <option value="">{placeholder}</option>}
       {options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
     </select>
@@ -13,10 +16,11 @@ export function DeviceSerialSelect({ value, options, onChange, disabled = false,
   </div>;
 }
 
-export function PackageSelect({ selectedPackage, packageOptions, onPackageChange, packageListId, disabled = false, placeholder = '搜索包名', labels }: {
+export function PackageSelect({ selectedPackage, packageOptions, onPackageChange, packageListId, disabled = false, placeholder: customPlaceholder, labels }: {
   selectedPackage: string; packageOptions: string[]; onPackageChange: (value: string) => void; packageListId: string; disabled?: boolean; placeholder?: string; labels?: Record<string, string>;
 }) {
-
+  const { t } = useLanguage();
+  const placeholder = customPlaceholder ?? t('搜索包名', 'Search packages');
   const packageInputRef = useRef<HTMLInputElement>(null);
   const [packageQuery, setPackageQuery] = useState(selectedPackage);
   const [isPackageMenuOpen, setIsPackageMenuOpen] = useState(false);
@@ -51,7 +55,7 @@ export function PackageSelect({ selectedPackage, packageOptions, onPackageChange
             <input
               ref={packageInputRef}
               disabled={disabled}
-              aria-label="应用包名"
+              aria-label={t("应用包名", "App package name")}
               title={selectedPackage || placeholder}
               value={packageQuery}
               onChange={(event) => {
@@ -109,8 +113,8 @@ export function PackageSelect({ selectedPackage, packageOptions, onPackageChange
                 setIsPackageMenuOpen(true);
               }}
               className="nodrag absolute right-1 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground hover:bg-slate-100 hover:text-foreground"
-              title="展开包名列表"
-              aria-label="展开包名列表"
+              title={t('展开包名列表', 'Show package list')}
+              aria-label={t('展开包名列表', 'Show package list')}
             >
               <ChevronDown className={`h-3 w-3 transition-transform ${isPackageMenuOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -142,7 +146,7 @@ export function PackageSelect({ selectedPackage, packageOptions, onPackageChange
                   ))
                 ) : (
                   <div className="px-3 py-4 text-center text-[11px] font-medium text-slate-400">
-                    未找到匹配包名
+                    {t("未找到匹配包名", "No matching packages")}
                   </div>
                 )}
               </div>

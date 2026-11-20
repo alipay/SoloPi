@@ -1,3 +1,4 @@
+import { useLanguage } from '../language';
 import { useCallback, useEffect, useState } from 'react';
 import AgentExtensions from './AgentExtensions';
 import AgentRequestSettings from './AgentRequestSettings';
@@ -7,14 +8,15 @@ import type { AgentModel } from './agent-turns';
 export type AgentSettingsSection = 'agent-request' | 'agent-reply' | 'agent-extensions';
 
 export default function AgentSettingsCenter({ section, sessionId }: { section: AgentSettingsSection; sessionId: string }) {
+  const { t } = useLanguage();
   const [models, setModels] = useState<AgentModel[]>([]);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState('');
   const api = window.glassbox?.ipcRenderer;
   const invoke = useCallback(async (channel: string, payload: Record<string, unknown> = {}) => {
-    if (!api) throw Error('请通过桌面应用打开设置中心');
+    if (!api) throw Error(t("请通过桌面应用打开设置中心", "Open Settings in SoloPi Desktop."));
     const result = await api.invoke(channel, payload);
-    if (!result || result.success === false) throw Error(result?.error || '读取设置失败');
+    if (!result || result.success === false) throw Error(result?.error || t("读取设置失败", "Could not load settings"));
     return result;
   }, [api]);
 
@@ -30,7 +32,7 @@ export default function AgentSettingsCenter({ section, sessionId }: { section: A
     refreshSessions();
     if (section === 'agent-reply') void invoke('agent:models').then(result => {
       if (active) { setModels(Array.isArray(result.models) ? result.models : []); setError(''); }
-    }).catch(e => { if (active) setError(e instanceof Error ? e.message : '无法读取模型'); });
+    }).catch(e => { if (active) setError(e instanceof Error ? e.message : t("无法读取模型", "Could not load models")); });
     const changed = () => {
       if (timer) return;
       timer = setTimeout(() => { timer = undefined; refreshSessions(); }, 250);

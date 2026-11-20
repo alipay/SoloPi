@@ -1,3 +1,4 @@
+import { useLanguage } from '../language';
 import {
   MessageSquare,
   Settings,
@@ -23,24 +24,24 @@ function cn(...inputs: ClassValue[]) {
 }
 
 const topNavItems = [
-  { id: 'agent', label: 'Agent 对话', icon: MessageSquare },
-  { id: 'device-control', label: '三端设备控制', icon: MonitorSmartphone },
+  { id: 'agent', label: 'Agent 对话', english: 'Agent chat', icon: MessageSquare },
+  { id: 'device-control', label: '三端设备控制', english: 'Device control', icon: MonitorSmartphone },
 ];
 
 const navItems = [
-  { id: 'sites', label: '常用站点', icon: Globe2 },
+  { id: 'sites', label: '常用站点', english: 'Saved sites', icon: Globe2 },
 ];
 
 const performanceItems = [
-  { id: 'performance-task', label: '性能任务', icon: Gauge },
-  { id: 'performance-reports', label: '性能报告', icon: FileText },
-  { id: 'performance-bugreport', label: '耗电分析', icon: Gauge },
+  { id: 'performance-task', label: '性能任务', english: 'Performance tests', icon: Gauge },
+  { id: 'performance-reports', label: '性能报告', english: 'Reports', icon: FileText },
+  { id: 'performance-bugreport', label: '耗电分析', english: 'Battery analysis', icon: Gauge },
 ];
 
 const automationItems = [
-  { id: 'automation-cases', label: '用例库', icon: ListChecks },
-  { id: 'automation-tasks', label: '测试任务', icon: ClipboardList },
-  { id: 'automation-components', label: '测试组件管理', icon: Blocks },
+  { id: 'automation-cases', label: '用例库', english: 'Test cases', icon: ListChecks },
+  { id: 'automation-tasks', label: '测试任务', english: 'Test runs', icon: ClipboardList },
+  { id: 'automation-components', label: '测试组件管理', english: 'Test components', icon: Blocks },
 ];
 
 interface SidebarProps {
@@ -52,6 +53,7 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistantOpen, collapsed = false, onToggleCollapsed }: SidebarProps) => {
+  const { t } = useLanguage();
   const isAutomationActive = activeTab.startsWith('automation');
   const isPerformanceActive = activeTab.startsWith('performance') || activeTab === 'logs';
   const sidebarRef = useRef<HTMLElement>(null);
@@ -97,8 +99,8 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
           type="button"
           onClick={onToggleCollapsed}
           className="absolute -right-3 top-1/2 z-30 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-md transition-colors hover:border-blue-200 hover:text-blue-600"
-          title={collapsed ? '展开左侧导航' : '收起左侧导航'}
-          aria-label={collapsed ? '展开左侧导航' : '收起左侧导航'}
+          title={collapsed ? t("展开左侧导航", "Expand sidebar") : t("收起左侧导航", "Collapse sidebar")}
+          aria-label={collapsed ? t("展开左侧导航", "Expand sidebar") : t("收起左侧导航", "Collapse sidebar")}
         >
           {collapsed ? <PanelLeftOpen className="h-3.5 w-3.5" /> : <PanelLeftClose className="h-3.5 w-3.5" />}
         </button>
@@ -145,7 +147,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
               "w-4 h-4 transition-colors",
               activeTab === item.id ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
             )} />
-            {!collapsed && <span className="text-sm font-bold">{item.label}</span>}
+            {!collapsed && <span className="text-sm font-bold">{t(item.label, item.english)}</span>}
             {!collapsed && activeTab === item.id && <ChevronRight className="w-3 h-3 ml-auto opacity-50" />}
           </button>
         ))}
@@ -159,7 +161,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
               }
               setActiveTab('automation-cases');
             }}
-            title="自动化"
+            title={t("自动化", "Automation")}
             aria-haspopup={collapsed ? 'menu' : undefined}
             aria-expanded={collapsed ? openCollapsedMenu === 'automation' : undefined}
             className={cn(
@@ -174,7 +176,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
               "w-4 h-4 transition-colors",
               isAutomationActive ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
             )} />
-            {!collapsed && <span className="text-sm font-bold">自动化</span>}
+            {!collapsed && <span className="text-sm font-bold">{t("自动化", "Automation")}</span>}
             {!collapsed && isAutomationActive && <ChevronRight className="w-3 h-3 ml-auto opacity-50" />}
             {collapsed && <ChevronRight className="absolute bottom-1.5 right-1 h-2.5 w-2.5 text-slate-400" aria-hidden="true" />}
           </button>
@@ -191,14 +193,14 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
                 )}
               >
                 <item.icon className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate text-[12px] font-bold">{item.label}</span>
+                <span className="truncate text-[12px] font-bold">{t(item.label, item.english)}</span>
               </button>
             ))}
           </div>}
           {collapsed && openCollapsedMenu === 'automation' && (
-            <div className="absolute left-full top-0 z-50 w-52 pl-2" role="menu" aria-label="自动化二级菜单">
+            <div className="absolute left-full top-0 z-50 w-52 pl-2" role="menu" aria-label={t("自动化二级菜单", "Automation submenu")}>
               <div className="rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
-                <div className="px-2 pb-1.5 pt-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">自动化</div>
+                <div className="px-2 pb-1.5 pt-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">{t("自动化", "Automation")}</div>
                 {automationItems.map((item) => (
                   <button
                     key={item.id}
@@ -213,7 +215,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
                     )}
                   >
                     <item.icon className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate text-xs font-bold">{item.label}</span>
+                    <span className="truncate text-xs font-bold">{t(item.label, item.english)}</span>
                   </button>
                 ))}
               </div>
@@ -225,7 +227,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
           <button
             key={item.id}
             onClick={() => setActiveTab(item.id)}
-            title={item.label}
+            title={t(item.label, item.english)}
             className={cn(
               "w-full flex items-center rounded-xl transition-all duration-200 group",
               collapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3",
@@ -238,7 +240,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
               "w-4 h-4 transition-colors",
               activeTab === item.id ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
             )} />
-            {!collapsed && <span className="text-sm font-bold">{item.label}</span>}
+            {!collapsed && <span className="text-sm font-bold">{t(item.label, item.english)}</span>}
             {!collapsed && activeTab === item.id && <ChevronRight className="w-3 h-3 ml-auto opacity-50" />}
           </button>
         ))}
@@ -252,7 +254,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
               }
               setActiveTab('performance-task');
             }}
-            title="性能测试"
+            title={t("性能测试", "Performance")}
             aria-haspopup={collapsed ? 'menu' : undefined}
             aria-expanded={collapsed ? openCollapsedMenu === 'performance' : undefined}
             className={cn(
@@ -267,7 +269,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
               "w-4 h-4 transition-colors",
               isPerformanceActive ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
             )} />
-            {!collapsed && <span className="text-sm font-bold">性能测试</span>}
+            {!collapsed && <span className="text-sm font-bold">{t("性能测试", "Performance")}</span>}
             {!collapsed && isPerformanceActive && <ChevronRight className="w-3 h-3 ml-auto opacity-50" />}
             {collapsed && <ChevronRight className="absolute bottom-1.5 right-1 h-2.5 w-2.5 text-slate-400" aria-hidden="true" />}
           </button>
@@ -284,14 +286,14 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
                 )}
               >
                 <item.icon className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate text-[12px] font-bold">{item.label}</span>
+                <span className="truncate text-[12px] font-bold">{t(item.label, item.english)}</span>
               </button>
             ))}
           </div>}
           {collapsed && openCollapsedMenu === 'performance' && (
-            <div className="absolute left-full top-0 z-50 w-52 pl-2" role="menu" aria-label="性能测试二级菜单">
+            <div className="absolute left-full top-0 z-50 w-52 pl-2" role="menu" aria-label={t("性能测试二级菜单", "Performance submenu")}>
               <div className="rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
-                <div className="px-2 pb-1.5 pt-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">性能测试</div>
+                <div className="px-2 pb-1.5 pt-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">{t("性能测试", "Performance")}</div>
                 {performanceItems.map((item) => (
                   <button
                     key={item.id}
@@ -306,7 +308,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
                     )}
                   >
                     <item.icon className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate text-xs font-bold">{item.label}</span>
+                    <span className="truncate text-xs font-bold">{t(item.label, item.english)}</span>
                   </button>
                 ))}
               </div>
@@ -319,7 +321,8 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
         <button
           type="button"
           onClick={() => setActiveTab('settings')}
-          title="设置中心"
+          data-onboarding-target="nav-settings"
+          title={t("设置中心", "Settings")}
           className={cn(
             "w-full flex items-center rounded-lg transition-all font-medium",
             collapsed ? "justify-center px-0 py-3" : "gap-3 px-3 py-2",
@@ -329,7 +332,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onAssistantOpen: _onAssistant
           )}
         >
           <Settings className="w-4 h-4" />
-          {!collapsed && <span className="text-sm">设置中心</span>}
+          {!collapsed && <span className="text-sm">{t("设置中心", "Settings")}</span>}
         </button>
       </div>
 

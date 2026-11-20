@@ -1,3 +1,4 @@
+import { useLanguage } from '../language';
 import DeviceRuntimeSelect from './DeviceRuntimeSelect';
 import CopyValueButton from './CopyValueButton';
 import { DeviceSerialSelect, PackageSelect } from './DeviceSelectors';
@@ -178,6 +179,8 @@ const DeviceCard = ({
   isInstallingApk,
   isLogcatRunning,
 }: DeviceProps) => {
+  const { t } = useLanguage();
+
   const isPhone = type === 'Phone';
   const packageOptions = getPackagesWithDefault(packages, defaultPackage);
   const dragDepthRef = useRef(0);
@@ -235,7 +238,7 @@ const DeviceCard = ({
         }`}>
           <div className="flex items-center gap-2 text-xs font-bold">
             <Download className="h-4 w-4" />
-            <span>{`松开后安装到${isPhone ? '手机' : '眼镜'}设备`}</span>
+            <span>{t(`松开后安装到${isPhone ? '手机' : '眼镜'}设备`, `Drop to install on ${isPhone ? 'the phone' : 'the glasses'}`)}</span>
           </div>
         </div>
       )}
@@ -261,7 +264,7 @@ const DeviceCard = ({
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1 text-xs font-bold">
-                <span>正在安装 APK</span>
+                <span>{t("正在安装 APK", "Installing APK")}</span>
                 <span className="flex items-end gap-0.5" aria-hidden="true">
                   {[0, 1, 2].map((dot) => (
                     <span
@@ -272,7 +275,7 @@ const DeviceCard = ({
                   ))}
                 </span>
               </div>
-              <p className="mt-0.5 text-[10px] font-medium opacity-70">正在发送到设备，请勿断开连接</p>
+              <p className="mt-0.5 text-[10px] font-medium opacity-70">{t("正在发送到设备，请勿断开连接", "Sending to the device. Keep it connected.")}</p>
             </div>
           </div>
         </div>
@@ -288,13 +291,13 @@ const DeviceCard = ({
         </div>
         {isPhone && (
           <div className="flex shrink-0 items-center gap-1.5">
-            <DeviceRuntimeSelect value={runtime} onChange={onRuntimeChange} label={`${isPhone ? '手机' : '眼镜'}系统`} />
+            <DeviceRuntimeSelect value={runtime} onChange={onRuntimeChange} label={t(`${isPhone ? '手机' : '眼镜'}系统`, `${isPhone ? 'Phone' : 'Glasses'} OS`)} />
             <button
               type="button"
               onClick={onChooseApk}
               disabled={isInstallingApk}
               className="nodrag h-7 w-7 rounded-full border border-slate-200 bg-white text-muted-foreground hover:text-blue-600 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50 transition-colors flex items-center justify-center"
-              title="选择 APK 并安装到手机"
+              title={t("选择 APK 并安装到手机", "Select an APK and install it on the phone")}
             >
               <Download className="w-3.5 h-3.5" />
             </button>
@@ -302,7 +305,7 @@ const DeviceCard = ({
               type="button"
               onClick={onMirrorScreen}
               className="nodrag h-7 w-7 rounded-full border border-slate-200 bg-white text-muted-foreground hover:text-foreground hover:bg-slate-50 transition-colors flex items-center justify-center"
-              title="投屏手机屏幕"
+              title={t("投屏手机屏幕", "Mirror the phone screen")}
             >
               <MonitorSmartphone className="w-3.5 h-3.5" />
             </button>
@@ -314,7 +317,7 @@ const DeviceCard = ({
                   ? 'border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100'
                   : 'border-slate-200 bg-white text-muted-foreground hover:text-foreground hover:bg-slate-50'
               }`}
-              title={isLogcatRunning ? '停止采集手机日志' : '开始采集手机日志'}
+              title={isLogcatRunning ? t("停止采集手机日志", "Stop collecting phone logs") : t("开始采集手机日志", "Start collecting phone logs")}
             >
               {isLogcatRunning ? <Square className="w-3 h-3 fill-current" /> : <FileText className="w-3.5 h-3.5" />}
             </button>
@@ -322,7 +325,7 @@ const DeviceCard = ({
               type="button"
               onClick={onRefresh}
               className="nodrag h-7 w-7 rounded-full border border-slate-200 bg-white text-muted-foreground hover:text-foreground hover:bg-slate-50 transition-colors flex items-center justify-center"
-              title="刷新手机信息"
+              title={t("刷新手机信息", "Refresh phone details")}
             >
               <RefreshCw className="w-3.5 h-3.5" />
             </button>
@@ -330,13 +333,13 @@ const DeviceCard = ({
         )}
         {!isPhone && (
           <div className="flex shrink-0 items-center gap-1.5">
-            <DeviceRuntimeSelect value={runtime} onChange={onRuntimeChange} label={`${isPhone ? '手机' : '眼镜'}系统`} />
+            <DeviceRuntimeSelect value={runtime} onChange={onRuntimeChange} label={t(`${isPhone ? '手机' : '眼镜'}系统`, `${isPhone ? 'Phone' : 'Glasses'} OS`)} />
             <button
               type="button"
               onClick={onChooseApk}
               disabled={isInstallingApk}
               className="nodrag h-7 w-7 rounded-full border border-slate-200 bg-white text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50 transition-colors flex items-center justify-center"
-              title="选择 APK 并安装到眼镜"
+              title={t("选择 APK 并安装到眼镜", "Select an APK and install it on the glasses")}
             >
               <Download className="w-3.5 h-3.5" />
             </button>
@@ -344,7 +347,7 @@ const DeviceCard = ({
               type="button"
               onClick={onMirrorScreen}
               className="nodrag h-7 w-7 rounded-full border border-slate-200 bg-white text-muted-foreground hover:text-foreground hover:bg-slate-50 transition-colors flex items-center justify-center"
-              title="投屏眼镜屏幕"
+              title={t("投屏眼镜屏幕", "Mirror the glasses screen")}
             >
               <MonitorSmartphone className="w-3.5 h-3.5" />
             </button>
@@ -356,7 +359,7 @@ const DeviceCard = ({
                   ? 'border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100'
                   : 'border-slate-200 bg-white text-muted-foreground hover:text-foreground hover:bg-slate-50'
               }`}
-              title={isLogcatRunning ? '停止采集眼镜日志' : '开始采集眼镜日志'}
+              title={isLogcatRunning ? t("停止采集眼镜日志", "Stop collecting glasses logs") : t("开始采集眼镜日志", "Start collecting glasses logs")}
             >
               {isLogcatRunning ? <Square className="w-3 h-3 fill-current" /> : <FileText className="w-3.5 h-3.5" />}
             </button>
@@ -364,7 +367,7 @@ const DeviceCard = ({
               type="button"
               onClick={onRefresh}
               className="nodrag h-7 w-7 rounded-full border border-slate-200 bg-white text-muted-foreground hover:text-foreground hover:bg-slate-50 transition-colors flex items-center justify-center"
-              title="刷新眼镜信息"
+              title={t("刷新眼镜信息", "Refresh glasses details")}
             >
               <RefreshCw className="w-3.5 h-3.5" />
             </button>
@@ -374,19 +377,19 @@ const DeviceCard = ({
 
       <div className="device-header-fields grid gap-2 items-end">
         <div className="flex min-w-0 flex-col gap-1">
-          <div className="flex h-5 items-center gap-1"><label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">SN</label><CopyValueButton value={selectedSerial} label={`${isPhone ? '手机' : '眼镜'} SN`} /></div>
+          <div className="flex h-5 items-center gap-1"><label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">SN</label><CopyValueButton value={selectedSerial} label={t(`${isPhone ? '手机' : '眼镜'} SN`, `${isPhone ? 'Phone' : 'Glasses'} serial number`)} /></div>
           <DeviceSerialSelect value={selectedSerial} options={devices.map(device => ({ value: device.serial, label: getDeviceLabel(device) }))} onChange={onSerialChange} />
         </div>
 
         <div className="flex min-w-0 flex-col gap-1">
-          <div className="flex h-5 items-center gap-1"><label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Package</label><CopyValueButton value={selectedPackage} label={`${isPhone ? '手机' : '眼镜'}包名`} /></div>
+          <div className="flex h-5 items-center gap-1"><label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Package</label><CopyValueButton value={selectedPackage} label={t(`${isPhone ? '手机' : '眼镜'}包名`, `${isPhone ? 'Phone' : 'Glasses'} app package`)} /></div>
           <PackageSelect selectedPackage={selectedPackage} packageOptions={packageOptions} onPackageChange={onPackageChange} packageListId={`${type.toLowerCase()}-package-options`} />
         </div>
 
         <div className="device-header-version flex min-w-0 flex-col gap-1">
-          <div className="flex h-5 items-center gap-1"><label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Version</label><CopyValueButton value={version} label={`${isPhone ? '手机' : '眼镜'}版本`} /></div>
+          <div className="flex h-5 items-center gap-1"><label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Version</label><CopyValueButton value={version} label={t(`${isPhone ? '手机' : '眼镜'}版本`, `${isPhone ? 'Phone' : 'Glasses'} version`)} /></div>
           <div className="h-8 bg-secondary/30 border border-border/30 rounded-xl px-3 text-[12px] font-mono text-foreground/80 flex items-center">
-            <span className="truncate" title={version || '未获取版本'}>{version || '-'}</span>
+            <span className="truncate" title={version || t("未获取版本", "Version unavailable")}>{version || '-'}</span>
           </div>
         </div>
       </div>
@@ -412,6 +415,7 @@ export const DeviceHeader = ({
   onGlassesRuntimeChange,
   deviceBindings,
 }: DeviceHeaderProps) => {
+  const { t } = useLanguage();
   const [phoneDevices, setPhoneDevices] = useState<AdbDevice[]>([]);
   const [glassesDevices, setGlassesDevices] = useState<AdbDevice[]>([]);
   const [phoneRuntime, setPhoneRuntime] = useState<DeviceRuntime>('android');
@@ -690,28 +694,28 @@ export const DeviceHeader = ({
     const isPhone = slot === 'phone';
     const runtime = isPhone ? phoneRuntime : glassesRuntime;
     const serial = isPhone ? phoneSerial : glassesSerial;
-    const deviceName = isPhone ? '手机' : '眼镜';
+    const deviceName = isPhone ? t("手机", "Phone") : t("眼镜", "Glasses");
     if (runtime !== 'android') {
       setLogcatDialog({
         open: true,
-        title: '无法安装 APK',
-        message: `APK 只能安装到 Android 设备，请先把${deviceName}系统切换为 Android。`,
+        title: t("无法安装 APK", "Could not install APK"),
+        message: t(`APK 只能安装到 Android 设备，请先把${deviceName}系统切换为 Android。`, `APKs require Android. Set the ${deviceName} platform to Android first.`),
       });
       return;
     }
     if (!serial) {
       setLogcatDialog({
         open: true,
-        title: '无法安装 APK',
-        message: `请先选择在线的${deviceName}设备。`,
+        title: t("无法安装 APK", "Could not install APK"),
+        message: t(`请先选择在线的${deviceName}设备。`, `Select a connected ${deviceName} first.`),
       });
       return;
     }
     if (!/\.apk$/i.test(apkPath)) {
       setLogcatDialog({
         open: true,
-        title: '文件格式不支持',
-        message: '仅支持安装单个 .apk 文件。',
+        title: t("文件格式不支持", "Unsupported file format"),
+        message: t("仅支持安装单个 .apk 文件。", "Select a single .apk file."),
       });
       return;
     }
@@ -727,8 +731,8 @@ export const DeviceHeader = ({
       if (!result?.success) {
         setLogcatDialog({
           open: true,
-          title: `${deviceName}装包失败`,
-          message: result?.error || 'APK 安装失败，请检查设备连接后重试。',
+          title: t(`${deviceName}装包失败`, `Installation failed on ${deviceName}`),
+          message: result?.error || t("APK 安装失败，请检查设备连接后重试。", "Could not install the APK. Check the device connection and try again."),
           tone: 'error',
           guidance: result?.recoveryActions?.filter(Boolean),
           installFailure: result || undefined,
@@ -739,17 +743,17 @@ export const DeviceHeader = ({
       else await refreshGlassesInfo();
       setLogcatDialog({
         open: true,
-        title: `${deviceName}装包成功`,
+        title: t(`${deviceName}装包成功`, `Installed on ${deviceName}`),
         message: `${result.fileName || 'APK'} 已安装到设备 ${serial}。`,
         tone: 'success',
       });
     } catch (error) {
       setLogcatDialog({
         open: true,
-        title: `${deviceName}装包失败`,
-        message: '装包服务暂时不可用，请稍后重试。',
+        title: t(`${deviceName}装包失败`, `Installation failed on ${deviceName}`),
+        message: t("装包服务暂时不可用，请稍后重试。", "Installer unavailable. Try again shortly."),
         tone: 'error',
-        guidance: ['确认设备仍保持连接，然后返回 solopi-desktop 刷新设备。'],
+        guidance: [t("确认设备仍保持连接，然后返回 solopi-desktop 刷新设备。", "Keep the device connected and refresh the device list in SoloPi Desktop.")],
       });
     } finally {
       setApkInstalling((current) => ({ ...current, [slot]: false }));
@@ -761,8 +765,8 @@ export const DeviceHeader = ({
     if (!serial) {
       setLogcatDialog({
         open: true,
-        title: '无法安装 APK',
-        message: `请先选择在线的${slot === 'phone' ? '手机' : '眼镜'}设备。`,
+        title: t("无法安装 APK", "Could not install APK"),
+        message: t(`请先选择在线的${slot === 'phone' ? '手机' : '眼镜'}设备。`, `Select connected ${slot === 'phone' ? 'phone' : 'glasses'} first.`),
       });
       return;
     }
@@ -775,8 +779,8 @@ export const DeviceHeader = ({
     if (!/\.apk$/i.test(file.name)) {
       setLogcatDialog({
         open: true,
-        title: '文件格式不支持',
-        message: '请拖入单个 .apk 文件。',
+        title: t("文件格式不支持", "Unsupported file format"),
+        message: t("请拖入单个 .apk 文件。", "Drop a single .apk file."),
       });
       return;
     }
@@ -787,8 +791,8 @@ export const DeviceHeader = ({
     if (!filePath) {
       setLogcatDialog({
         open: true,
-        title: '无法读取 APK',
-        message: '没有获取到本地文件路径，请改用顶部按钮选择 APK。',
+        title: t("无法读取 APK", "Could not read APK"),
+        message: t("没有获取到本地文件路径，请改用顶部按钮选择 APK。", "Local file path unavailable. Use the toolbar button to choose an APK."),
       });
       return;
     }
@@ -814,8 +818,8 @@ export const DeviceHeader = ({
     if (!serial) {
       setLogcatDialog({
         open: true,
-        title: '操作失败',
-        message: '请先选择设备',
+        title: t("操作失败", "Operation failed"),
+        message: t("请先选择设备", "Select a device first"),
       });
       return;
     }
@@ -830,8 +834,8 @@ export const DeviceHeader = ({
 
       setLogcatDialog({
         open: true,
-        title: isRunning ? '停止采集失败' : '开始采集失败',
-        message: result?.error || '日志采集操作失败',
+        title: isRunning ? t("停止采集失败", "Could not stop collection") : t("开始采集失败", "Could not start collection"),
+        message: result?.error || t("日志采集操作失败", "Log collection failed"),
       });
       return;
     }
@@ -841,8 +845,8 @@ export const DeviceHeader = ({
     if (isRunning) {
       setLogcatDialog({
         open: true,
-        title: '日志已保存',
-        message: '日志采集已停止，文件已保存到本机。',
+        title: t("日志已保存", "Logs saved"),
+        message: t("日志采集已停止，文件已保存到本机。", "Log collection stopped. Files were saved to this computer."),
         filePath: result.filePath,
       });
     }
@@ -852,8 +856,8 @@ export const DeviceHeader = ({
     if (!serial) {
       setLogcatDialog({
         open: true,
-        title: '无法投屏',
-        message: `请先选择${deviceName}设备。`,
+        title: t("无法投屏", "Could not mirror device"),
+        message: t(`请先选择${deviceName}设备。`, `Select a ${deviceName} first.`),
       });
       return;
     }
@@ -863,8 +867,8 @@ export const DeviceHeader = ({
     if (result?.success) {
       setLogcatDialog({
         open: true,
-        title: '投屏已启动',
-        message: `已通过 scrcpy 打开${deviceName}屏幕。`,
+        title: t("投屏已启动", "Mirroring started"),
+        message: t(`已通过 scrcpy 打开${deviceName}屏幕。`, `Opened the ${deviceName} screen using scrcpy.`),
       });
       return;
     }
@@ -872,8 +876,8 @@ export const DeviceHeader = ({
     if (result?.missingScrcpy) {
       setLogcatDialog({
         open: true,
-        title: '未安装 scrcpy',
-        message: '当前电脑未检测到 scrcpy。请先安装 scrcpy 后再使用投屏功能。macOS 推荐通过 Homebrew 安装。',
+        title: t("未安装 scrcpy", "scrcpy is not installed"),
+        message: t("当前电脑未检测到 scrcpy。请先安装 scrcpy 后再使用投屏功能。macOS 推荐通过 Homebrew 安装。", "Install scrcpy on this computer to mirror a device. On macOS, you can install it with Homebrew."),
         installCommand: result.installCommand || 'brew install scrcpy',
         tutorialUrl: result.tutorialUrl || 'https://github.com/Genymobile/scrcpy/blob/master/doc/macos.md',
       });
@@ -882,8 +886,8 @@ export const DeviceHeader = ({
 
     setLogcatDialog({
       open: true,
-      title: '投屏失败',
-      message: result?.error || 'scrcpy 启动失败，请确认设备已连接且已开启 USB 调试。',
+      title: t("投屏失败", "Mirroring failed"),
+      message: result?.error || t("scrcpy 启动失败，请确认设备已连接且已开启 USB 调试。", "Could not start scrcpy. Check that the device is connected and USB debugging is enabled."),
     });
   };
 
@@ -900,16 +904,16 @@ export const DeviceHeader = ({
       ? 'error'
       : (/成功|已保存|已启动/.test(logcatDialog.title) ? 'success' : 'info'));
   const installSummary: Record<string, [string, string]> = {
-    APK_INSTALL_USER_RESTRICTED: ['设备未允许安装', '请在设备上允许 USB 安装，并确认安装提示后重试。'],
-    APK_INSTALL_SIGNATURE_MISMATCH: ['安装包签名不匹配', '请联系安装包提供方，获取与设备现有应用签名一致的版本。'],
-    APK_INSTALL_VERSION_DOWNGRADE: ['安装包版本过低', '请选择不低于设备当前版本的安装包。'],
-    APK_INSTALL_INSUFFICIENT_STORAGE: ['设备空间不足', '请释放设备存储空间后重试。'],
-    APK_INSTALL_ABI_MISMATCH: ['安装包不适配此设备', '请获取适配设备处理器的安装包。'],
-    APK_INSTALL_DEVICE_UNAVAILABLE: ['设备连接不可用', '请检查 USB 连接和调试授权后重试。'],
+    APK_INSTALL_USER_RESTRICTED: [t("设备未允许安装", "Installation blocked by the device"), t("请在设备上允许 USB 安装，并确认安装提示后重试。", "Allow USB installation on the device, confirm the prompt, and try again.")],
+    APK_INSTALL_SIGNATURE_MISMATCH: [t("安装包签名不匹配", "APK signing mismatch"), t("请联系安装包提供方，获取与设备现有应用签名一致的版本。", "Ask the APK provider for a build signed with the same key as the installed app.")],
+    APK_INSTALL_VERSION_DOWNGRADE: [t("安装包版本过低", "APK version is older than the installed version"), t("请选择不低于设备当前版本的安装包。", "Choose an APK with the same or a newer version.")],
+    APK_INSTALL_INSUFFICIENT_STORAGE: [t("设备空间不足", "Not enough device storage"), t("请释放设备存储空间后重试。", "Free storage on the device and try again.")],
+    APK_INSTALL_ABI_MISMATCH: [t("安装包不适配此设备", "APK incompatible with this device"), t("请获取适配设备处理器的安装包。", "Get an APK built for the device’s processor architecture.")],
+    APK_INSTALL_DEVICE_UNAVAILABLE: [t("设备连接不可用", "Device connection unavailable"), t("请检查 USB 连接和调试授权后重试。", "Check the USB connection and debugging authorization, then try again.")],
   };
   const compactInstall = logcatDialog.installFailure
     ? installSummary[logcatDialog.installFailure.errorCode || '']
-      || ['安装未完成', '可展开错误详情，查看原因或提供给开发人员排查。']
+      || [t("安装未完成", "Installation incomplete"), t("可展开错误详情，查看原因或提供给开发人员排查。", "Open the error details to see what happened or share them with the developer.")]
     : undefined;
   const DialogIcon = dialogTone === 'error'
     ? CircleAlert
@@ -920,7 +924,7 @@ export const DeviceHeader = ({
       <div className="relative z-[60] px-4 py-1.5 bg-background/80 backdrop-blur-xl border-b border-border device-header-grid grid gap-2 shrink-0">
         <DeviceCard
           type="Phone"
-          title="手机设备 / Mobile"
+          title={t("手机设备 / Mobile", "Mobile device")}
           defaultPackage={phoneDefaultPackage}
           runtime={phoneRuntime}
           devices={phoneCandidateDevices}
@@ -933,7 +937,7 @@ export const DeviceHeader = ({
           onPackageChange={setPhonePackage}
           onRefresh={refreshPhoneInfo}
           onToggleLogcat={() => toggleLogcat(phoneSerial, 'phone', phoneLogcatRunning, setPhoneLogcatRunning)}
-          onMirrorScreen={() => startScrcpy(phoneSerial, '手机')}
+          onMirrorScreen={() => startScrcpy(phoneSerial, t("手机", "Phone"))}
           onChooseApk={() => chooseAndInstallApk('phone')}
           onDropApk={(file) => installDroppedApk('phone', file)}
           isInstallingApk={apkInstalling.phone}
@@ -941,7 +945,7 @@ export const DeviceHeader = ({
         />
         <DeviceCard
           type="Glasses"
-          title="眼镜设备 / Glasses"
+          title={t("眼镜设备 / Glasses", "Smart glasses")}
           defaultPackage={glassesDefaultPackage}
           runtime={glassesRuntime}
           devices={glassesCandidateDevices}
@@ -954,7 +958,7 @@ export const DeviceHeader = ({
           onPackageChange={setGlassesPackage}
           onRefresh={refreshGlassesInfo}
           onToggleLogcat={() => toggleLogcat(glassesSerial, 'glasses', glassesLogcatRunning, setGlassesLogcatRunning)}
-          onMirrorScreen={() => startScrcpy(glassesSerial, '眼镜')}
+          onMirrorScreen={() => startScrcpy(glassesSerial, t("眼镜", "Glasses"))}
           onChooseApk={() => chooseAndInstallApk('glasses')}
           onDropApk={(file) => installDroppedApk('glasses', file)}
           isInstallingApk={apkInstalling.glasses}
@@ -975,7 +979,7 @@ export const DeviceHeader = ({
                 <Dialog.Description className="mt-2 break-words text-sm leading-6 text-slate-500">{compactInstall?.[1] || logcatDialog.message}</Dialog.Description>
                 {!logcatDialog.installFailure && Boolean(logcatDialog.guidance?.length) && (
                   <div className="mt-4 rounded-xl border border-amber-200/80 bg-amber-50/70 px-3.5 py-3">
-                    <p className="text-xs font-bold text-amber-900">请检查</p>
+                    <p className="text-xs font-bold text-amber-900">{t("请检查", "Check")}</p>
                     <ul className="mt-2 space-y-1.5 pl-4 text-xs leading-5 text-amber-900/80">
                       {logcatDialog.guidance?.map((item, index) => (
                         <li key={`${item}-${index}`} className="list-disc pl-0.5">{item}</li>
@@ -988,8 +992,8 @@ export const DeviceHeader = ({
                 type="button"
                 onClick={() => setLogcatDialog((current) => ({ ...current, open: false }))}
                 className="nodrag -mr-1 -mt-1 shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-                title="关闭"
-                aria-label="关闭"
+                title={t("关闭", "Close")}
+                aria-label={t("关闭", "Close")}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -998,18 +1002,18 @@ export const DeviceHeader = ({
             {logcatDialog.installFailure && (
               <details className="group mb-5 rounded-xl border border-slate-200 bg-slate-50/60 text-xs text-slate-600">
                 <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl px-3.5 py-3 font-medium hover:bg-slate-100 [&::-webkit-details-marker]:hidden">
-                  查看错误详情
+                  {t("查看错误详情", "View error details")}
                   <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
                 </summary>
                 <div className="space-y-2 border-t border-slate-200 px-3.5 py-3">
                   <p className="break-words">{logcatDialog.message}</p>
-                  {logcatDialog.installFailure.packageName && <p className="break-all">包名：{logcatDialog.installFailure.packageName}</p>}
-                  {logcatDialog.installFailure.currentVersion && <p>当前版本：{logcatDialog.installFailure.currentVersion.versionName || '未知'}（{logcatDialog.installFailure.currentVersion.versionCode || '未知'}）</p>}
-                  {logcatDialog.installFailure.targetVersion && <p>目标版本：{logcatDialog.installFailure.targetVersion.versionName || '未知'}（{logcatDialog.installFailure.targetVersion.versionCode || '未知'}）</p>}
-                  <p className="break-all">错误码：{logcatDialog.installFailure.androidErrorCode || logcatDialog.installFailure.errorCode || '未知'}</p>
+                  {logcatDialog.installFailure.packageName && <p className="break-all">{t("包名：", "Package:")}{logcatDialog.installFailure.packageName}</p>}
+                  {logcatDialog.installFailure.currentVersion && <p>{t("当前版本：", "Installed version:")}{logcatDialog.installFailure.currentVersion.versionName || t("未知", "Unknown")}（{logcatDialog.installFailure.currentVersion.versionCode || t("未知", "Unknown")}）</p>}
+                  {logcatDialog.installFailure.targetVersion && <p>{t("目标版本：", "APK version:")}{logcatDialog.installFailure.targetVersion.versionName || t("未知", "Unknown")}（{logcatDialog.installFailure.targetVersion.versionCode || t("未知", "Unknown")}）</p>}
+                  <p className="break-all">{t("错误码：", "Error code:")}{logcatDialog.installFailure.androidErrorCode || logcatDialog.installFailure.errorCode || t("未知", "Unknown")}</p>
                   {logcatDialog.guidance?.map((text, index) => <p key={`guidance-${index}`} className="break-words">{text}</p>)}
                   {logcatDialog.installFailure.metadataErrors?.map((text, index) => <p key={index} className="break-words text-slate-500">{text}</p>)}
-                  <label className="block pt-1">原始错误（可选中复制）
+                  <label className="block pt-1">{t("原始错误（可选中复制）", "Raw error (copyable)")}
                     <textarea readOnly value={logcatDialog.installFailure.technicalDetails || logcatDialog.message} className="mt-2 h-28 w-full resize-none rounded-lg border border-slate-200 bg-white p-2.5 font-mono text-xs leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </label>
                 </div>
@@ -1033,7 +1037,7 @@ export const DeviceHeader = ({
                   onClick={() => showItemInFolder(logcatDialog.filePath!)}
                   className="nodrag mr-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
                 >
-                  打开所在文件夹
+                  {t("打开所在文件夹", "Open containing folder")}
                 </button>
               )}
               {logcatDialog.tutorialUrl && (
@@ -1042,7 +1046,7 @@ export const DeviceHeader = ({
                   onClick={() => openExternal(logcatDialog.tutorialUrl!)}
                   className="nodrag mr-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
                 >
-                  查看安装教程
+                  {t("查看安装教程", "View installation guide")}
                 </button>
               )}
               <button
@@ -1050,7 +1054,7 @@ export const DeviceHeader = ({
                 onClick={() => setLogcatDialog((current) => ({ ...current, open: false }))}
                 className="nodrag h-9 shrink-0 rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-blue-700 active:translate-y-px"
               >
-                知道了
+                {t("知道了", "OK")}
               </button>
             </div>
           </Dialog.Content>

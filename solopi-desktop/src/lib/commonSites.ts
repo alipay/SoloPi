@@ -40,10 +40,10 @@ export function writeCommonSites(sites: CommonSite[]) {
   window.dispatchEvent(new CustomEvent(COMMON_SITES_CHANGED_EVENT));
 }
 
-export function createCommonSite(): CommonSite {
+export function createCommonSite(name = '新站点'): CommonSite {
   return {
     id: `site-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    name: '新站点',
+    name,
     url: 'https://',
     enabled: true,
   };

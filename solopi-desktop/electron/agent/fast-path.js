@@ -11,7 +11,8 @@ function planFastPath(message, session) {
   return null;
 }
 
-function formatFastPathResult(plan, ledger) {
+function formatFastPathResult(plan, ledger, language) {
+  if (language === 'en') return formatEnglishResult(plan, ledger);
   if(plan.syntaxError)return `❌ ${plan.syntaxError}。本次未执行工具。`;
   const result = ledger?.result;
   if (ledger?.status !== 'done') return `❌ ${plan.name} 未成功：${result?.error || '请查看工具调用明细'}。\n\n原始回执已保留，未自动重试。`;
@@ -28,5 +29,22 @@ function formatFastPathResult(plan, ledger) {
   if(text.length>12000)return `✅ ${plan.name} 调用完成，回执已保留在工具调用明细中。${result?.evidenceId ? `完整证据 ID：${result.evidenceId}。` : ''}\n\n这是工具回执，不代表任务或业务验证通过。`;
   const page=result?.task?.nextOffset ?? result?.nextOffset;
   return `✅ ${plan.name} 调用完成（工具回执，不代表业务通过）。\n\n\`\`\`json\n${text}\n\`\`\`${page != null ? `\n\n结果尚有下一页，nextOffset=${page}；未将当前页当作全部结果。` : ''}`;
+}
+
+function formatEnglishResult(plan, ledger) {
+  if (plan.syntaxError) return '❌ Usage: `/tool tool_name {JSON arguments}`. The tool did not run.';
+  const result = ledger?.result;
+  if (ledger?.status !== 'done') {
+    return `❌ ${plan.name} did not complete. See the tool call details for the original receipt. No automatic retry was made.`;
+  }
+  const text = JSON.stringify(result ?? null, null, 2);
+  const heading = `✅ ${plan.name} completed. This receipt only confirms the tool call.`;
+  if (text.length > 12000) {
+    const evidence = result?.evidenceId ? ` Evidence ID: ${result.evidenceId}.` : '';
+    return `${heading} The full receipt is in the tool call details.${evidence}`;
+  }
+  const page = result?.task?.nextOffset ?? result?.nextOffset;
+  const pagination = page == null ? '' : `\n\nMore results are available (nextOffset=${page}).`;
+  return `${heading}\n\n\`\`\`json\n${text}\n\`\`\`${pagination}`;
 }
 module.exports={planFastPath,formatFastPathResult};
