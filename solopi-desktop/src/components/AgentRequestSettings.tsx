@@ -1,4 +1,5 @@
 import {useEffect,useState} from 'react';
+import { useLanguage } from '../language';
 import {Dialog,DialogContent,DialogTitle,DialogDescription} from './ui/dialog';
 type Check={selectorKey:'resourceId'|'text'|'description';selectorValue:string;operator:'equals'|'contains';expected:string};
 type Policy={stream:boolean;screenMode:'main'|'virtual';virtualChecks:Check[];conversationReasoning:'inherit'|'low';summaryReasoning:'inherit'|'disabled'|'low';summaryMaxTokens:number;inputBudgetTokens:number;firstResponseSeconds:number;idleSeconds:number;totalSeconds:number;minIntervalMs:number};
@@ -7,9 +8,10 @@ type Stats={attempts:number;successes:number;successRate:number;medianMs:number|
 type Report={status:string;model?:string;inputHash?:string;rows:Row[];streaming?:Stats;nonStreaming?:Stats;error?:string};
 const seconds=(ms?:number|null)=>ms==null?'—':`${(ms/1000).toFixed(2)}s`;
 export default function AgentRequestSettings({id,busy,onClose,embedded=false}:{id?:string;busy:boolean;onClose?:()=>void;embedded?:boolean}){
+  const { t } = useLanguage();
   const api=window.glassbox?.ipcRenderer;
   const [policy,setPolicy]=useState<Policy|null>(null),[report,setReport]=useState<Report|null>(null),[error,setError]=useState(''),[pairs,setPairs]=useState(3),[saving,setSaving]=useState(false);
-  const invoke=async(channel:string,args={})=>{const r=await api?.invoke(channel,args);if(!r)throw Error('请通过桌面端打开');if(r.success===false)throw Error(r.error);return r;};
+  const invoke=async(channel:string,args={})=>{const r=await api?.invoke(channel,args);if(!r)throw Error(t("请通过桌面端打开", "Open this in SoloPi Desktop."));if(r.success===false)throw Error(r.error);return r;};
   useEffect(()=>{let live=true;void invoke('agent:request-policy').then(r=>{if(live)setPolicy(r.policy);}).catch(e=>{if(live)setError(e.message);});if(id)void invoke('agent:comparison',{id}).then(r=>{if(live)setReport(r.report);});
     const update=(_event:unknown,value:{id:string;report:Report})=>{if(value.id===id)setReport(value.report);};api?.on('agent:comparison',update);return()=>{live=false;api?.removeListener('agent:comparison',update);};},[id]);
   const running=report?.status==='running',locked=busy||running||saving;

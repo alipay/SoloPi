@@ -1,3 +1,4 @@
+import { useLanguage } from '../language';
 import { useEffect, useState } from 'react';
 import { DeviceSerialSelect, PackageSelect } from './DeviceSelectors';
 
@@ -6,6 +7,8 @@ export default function RecordingTargetFields({ api, target, runtime, excludedSe
   api: { ipcRenderer: { invoke: (channel: string, ...args: unknown[]) => Promise<any> } } | null; target: Target; runtime: 'android' | 'harmony'; excludedSerial?: string;
   disabled: boolean; onChange: (target: Target) => void;
 }) {
+  const { t } = useLanguage();
+
   const [devices, setDevices] = useState<{ serial: string; model?: string; kind?: string; state: string }[]>([]);
   const [packages, setPackages] = useState<string[]>([]);
   const [error, setError] = useState('');
@@ -15,7 +18,7 @@ export default function RecordingTargetFields({ api, target, runtime, excludedSe
       try {
         const result = await api?.ipcRenderer.invoke('performance:list-devices', { runtime });
         if (!active) return;
-        if (!result || result.error) throw Error(result?.error || '无法读取手机列表');
+        if (!result || result.error) throw Error(result?.error || t("无法读取手机列表", "Could not load the phone list"));
         setDevices((result.devices || []).filter((d: { state: string; serial: string; kind?: string }) => d.state === 'device' && d.kind !== 'glasses' && d.serial !== excludedSerial));
         setError('');
       } catch (e) { if (active) setError(e instanceof Error ? e.message : String(e)); }
@@ -32,10 +35,10 @@ export default function RecordingTargetFields({ api, target, runtime, excludedSe
     return () => { active = false; };
   }, [api, runtime, target.serial]);
   const options = devices.map(d => ({ value: d.serial, label: d.model ? `${d.serial} / ${d.model}` : d.serial }));
-  if (target.serial && !options.some(o => o.value === target.serial)) options.unshift({ value: target.serial, label: `${target.serial}（等待连接确认）` });
+  if (target.serial && !options.some(o => o.value === target.serial)) options.unshift({ value: target.serial, label: t(`${target.serial}（等待连接确认）`, `${target.serial} (waiting for connection)`) });
   return <div className="grid gap-3 sm:grid-cols-2">
-    <div className="min-w-0"><p className="mb-1 text-xs font-bold">手机 SN</p><DeviceSerialSelect value={target.serial} options={options} onChange={serial => onChange({ ...target, serial })} disabled={disabled} placeholder="请选择在线手机" /></div>
-    <div className="min-w-0"><p className="mb-1 text-xs font-bold">启动应用包名</p><PackageSelect selectedPackage={target.packageName} packageOptions={[...new Set([target.packageName, ...packages].filter(Boolean))]} onPackageChange={packageName => onChange({ ...target, packageName })} packageListId="recording-package-options" disabled={disabled} /></div>
+    <div className="min-w-0"><p className="mb-1 text-xs font-bold">{t("手机 SN", "Phone serial number")}</p><DeviceSerialSelect value={target.serial} options={options} onChange={serial => onChange({ ...target, serial })} disabled={disabled} placeholder={t("请选择在线手机", "Select a connected phone")} /></div>
+    <div className="min-w-0"><p className="mb-1 text-xs font-bold">{t("启动应用包名", "App package to launch")}</p><PackageSelect selectedPackage={target.packageName} packageOptions={[...new Set([target.packageName, ...packages].filter(Boolean))]} onPackageChange={packageName => onChange({ ...target, packageName })} packageListId="recording-package-options" disabled={disabled} /></div>
     {error && <p role="status" className="text-xs text-amber-700 sm:col-span-2">{error}</p>}
   </div>;
 }

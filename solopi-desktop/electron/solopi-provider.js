@@ -80,7 +80,11 @@ function createSoloPiProvider({runAdb,resourcesDirectory,httpRequest=request,now
      const deadline=now()+20000;
      while(now()<deadline){signal.throwIfAborted();try{if((await get('harness',{type:'capabilities'})).success===true){ready=true;break;}}catch{}await pause(300);}
     }
-    if(!ready)throw Error('手机录制组件未就绪，请在手机完成SoloPi授权后重试');
+    if (!ready) {
+      throw Object.assign(Error('手机录制组件未就绪，请打开手机上的 SoloPi，完成首次启动提示后重试。'), {
+        code: 'SOLOPI_COMPANION_NOT_READY',
+      });
+    }
    }
    const read=async(action,params)=>{
     let last;

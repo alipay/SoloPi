@@ -1,3 +1,6 @@
+import { useLanguage } from '../language';
+import { componentDisplayCopy } from '../lib/componentDisplayCopy';
+import LanguageSettings from './LanguageSettings';
 import { loadTaskForFailedRerun } from '../lib/task-rerun-source';
 import { useTaskActionFeedback } from '../hooks/use-task-action-feedback';
 import TaskActionNotice from './TaskActionNotice';
@@ -147,6 +150,7 @@ const DEFAULT_TEXT_ASSERT_VARIABLE_NAME = 'extractedText';
 const DEFAULT_LLM_ASSERT_VARIABLE_NAME = 'extractedLlmLog';
 const DEFAULT_LLM_TEXT_VARIABLE_NAME = 'voiceText';
 const DEFAULT_LLM_ASSERT_PROMPT = '请根据前置提取的数据 {{variables.extractedJson}} 和当前日志内容，判断当前状态是否符合预期。请重点核对关键字段是否一致；如果不一致，请在 reason 中说明差异。';
+const ENGLISH_LLM_ASSERT_PROMPT = 'Use the extracted data {{variables.extractedJson}} and the current log to determine whether the state meets expectations. Compare key fields and explain any differences in reason.';
 
 
 const glassBoxSkills: GlassBoxSkill[] = [
@@ -1146,6 +1150,13 @@ const defaultPhonePackageName = '';
 const defaultGlassesPackageName = '';
 const defaultImageMockCommandTemplate = 'adb -s {{serial}} shell "am broadcast -a {{action}} --es {{pathExtraKey}} \\"{{remoteImagePath}}\\" {{extraArgs}}"';
 
+const englishComponentKind: Record<TestComponentKind, string> = {
+  adb: 'ADB command', pc_command: 'Local command', activity: 'Launch activity',
+  audio: 'Audio input', image_mock: 'Image mock', mobile_ui_action: 'Mobile UI action',
+  mobile_ui_assert: 'Mobile UI assertion', tts_assert: 'TTS assertion',
+  json_assert: 'JSON assertion', llm_assert: 'LLM assertion',
+};
+
 const componentLibraryTabs = [
   { key: 'execute', label: '执行', kinds: ['adb', 'pc_command', 'activity', 'audio', 'image_mock', 'mobile_ui_action'] as TestComponentKind[] },
   { key: 'detect', label: '检测', kinds: ['mobile_ui_assert', 'tts_assert', 'json_assert', 'llm_assert'] as TestComponentKind[] },
@@ -1172,6 +1183,11 @@ const jsonAssertOperatorOptions: Array<{ value: JsonAssertCondition['operator'];
 ];
 
 type TextAssertOperator = 'equals' | 'notEquals' | 'contains' | 'notContains' | 'regex' | 'notRegex';
+
+const englishAssertOperator: Record<JsonAssertCondition['operator'], string> = {
+  equals: 'Equals', notEquals: 'Does not equal', contains: 'Contains', notContains: 'Does not contain',
+  regex: 'Matches regex', notRegex: 'Does not match regex', exists: 'Exists', notExists: 'Does not exist',
+};
 
 const textAssertOperatorOptions: Array<{ value: TextAssertOperator; label: string }> = [
   { value: 'equals', label: '等于' },
@@ -2677,7 +2693,7 @@ interface StoredWorkflowEditorState {
   deviceBindings?: DeviceBindings;
 }
 
-type SettingsSection = 'team' | 'model' | 'environment' | 'tts' | 'quick-actions' | 'sites' | 'device' | AgentSettingsSection;
+type SettingsSection = 'language' | 'team' | 'model' | 'environment' | 'tts' | 'quick-actions' | 'sites' | 'device' | AgentSettingsSection;
 
 interface TtsProviderParam {
   key: string;
@@ -3325,12 +3341,13 @@ function AssertVariableExtractionCard({
   onEnabledChange: (enabled: boolean) => void;
   onVariableNameChange: (name: string) => void;
 }) {
+  const { t } = useLanguage();
   return (
     <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-3">
       <label className="flex items-center justify-between gap-3 text-xs font-bold text-emerald-800">
         <span>
-          提取为变量
-          <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">默认关闭</span>
+          {t('提取为变量', 'Extract to variable')}
+          <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">{t('默认关闭', 'Off by default')}</span>
         </span>
         <input
           type="checkbox"
@@ -3346,7 +3363,7 @@ function AssertVariableExtractionCard({
       {enabled && (
         <div className="mt-3 space-y-2">
           <div>
-            <label className="text-[10px] font-black uppercase tracking-wide text-emerald-700">变量名（必填）</label>
+            <label className="text-[10px] font-black uppercase tracking-wide text-emerald-700">{t('变量名（必填）', 'Variable name (required)')}</label>
             <div className="mt-1 flex h-9 overflow-hidden rounded-lg border border-emerald-100 bg-white">
               <span className="flex shrink-0 items-center border-r border-emerald-100 bg-emerald-50 px-2 font-mono text-[10px] font-bold text-emerald-600">variables.</span>
               <input
@@ -3354,12 +3371,12 @@ function AssertVariableExtractionCard({
                 onChange={(event) => onVariableNameChange(event.target.value)}
                 required
                 className="min-w-0 flex-1 px-2 font-mono text-xs font-bold outline-none"
-                placeholder="请输入唯一变量名"
+                placeholder={t('请输入唯一变量名', 'Enter a unique variable name')}
               />
             </div>
           </div>
           <div className="text-[10px] font-bold leading-5 text-emerald-700">
-            {description} 后续节点可引用 <span className="font-mono">{referenceExample}</span>。
+            {description} {t(`后续节点可引用 ${referenceExample}。`, `Later steps can reference ${referenceExample}.`)}
           </div>
         </div>
       )}
@@ -3368,6 +3385,10 @@ function AssertVariableExtractionCard({
 }
 
 export default function WorkflowEditor() {
+  const { t } = useLanguage();
+  const caseLabel = (item: AutomationCase) => item.id === 'glassbox-generic-smoke' && item.name === '通用自动化 Smoke' ? t(item.name, 'Generic smoke test') : item.name;
+  const folderLabel = (item: CaseFolder) => item.id === DEFAULT_CASE_FOLDER_ID && item.name === '默认用例集' ? t(item.name, 'Default test folder') : item.name;
+  const libraryLabel = (item: CaseLibrary) => item.id === DEFAULT_CASE_LIBRARY_ID && item.name === '全量用例' ? t(item.name, 'All test cases') : item.name;
   const storedWorkflowState = useMemo(() => readStoredWorkflowState(), []);
   const [uiSmoke] = useState(() => new URLSearchParams(window.location.search).get('ui-smoke') === 'tasks');
   const [activeTab, setActiveTab] = useState(uiSmoke ? 'automation-tasks' : 'agent');
@@ -3462,7 +3483,7 @@ export default function WorkflowEditor() {
     selectedProviderId: selectedLlmProviderId, setSelectedProviderId: setSelectedLlmProviderId,
     testProvider: provider => electronApi?.ipcRenderer?.invoke('llm:test-provider', { provider }) || Promise.resolve(undefined),
   });
-  const [settingsSection, setSettingsSection] = useState<SettingsSection>('model');
+  const [settingsSection, setSettingsSection] = useState<SettingsSection>('language');
   const [environmentDraft, setEnvironmentDraft] = useState<EnvironmentConfig>({ adbPath: '' });
   const [environmentMessage, setEnvironmentMessage] = useState('');
   const [effectiveAdbPath, setEffectiveAdbPath] = useState('');
@@ -4304,11 +4325,11 @@ export default function WorkflowEditor() {
 
   const refreshSettingsDevices = async () => {
     if (!electronApi?.ipcRenderer) {
-      setDeviceSettingsMessage('当前环境无法读取 adb devices');
+      setDeviceSettingsMessage(t('当前环境无法读取 adb devices', 'ADB device detection is unavailable'));
       return;
     }
 
-    setDeviceSettingsMessage('正在扫描 adb devices...');
+    setDeviceSettingsMessage(t('正在扫描 adb devices...', 'Scanning for ADB devices…'));
 
     try {
       const result = await electronApi.ipcRenderer.invoke('adb:list-devices') as {
@@ -4316,10 +4337,10 @@ export default function WorkflowEditor() {
         error?: string;
       };
       setSettingsDevices(result.devices || []);
-      setDeviceSettingsMessage(result.error ? `扫描失败：${result.error}` : `已检测到 ${result.devices?.length || 0} 台设备`);
+      setDeviceSettingsMessage(result.error ? t(`扫描失败：${result.error}`, `Device scan failed: ${result.error}`) : t(`已检测到 ${result.devices?.length || 0} 台设备`, `Devices found: ${result.devices?.length || 0}`));
     } catch (error) {
       setSettingsDevices([]);
-      setDeviceSettingsMessage(error instanceof Error ? error.message : '扫描设备失败');
+      setDeviceSettingsMessage(error instanceof Error ? error.message : t('扫描设备失败', 'Device scan failed'));
     }
   };
 
@@ -4333,7 +4354,7 @@ export default function WorkflowEditor() {
     const serial = rawSerial.trim();
 
     if (!serial) {
-      setDeviceSettingsMessage('请输入或选择设备 SN');
+      setDeviceSettingsMessage(t('请输入或选择设备 SN', 'Enter or select a device serial number'));
       return;
     }
 
@@ -8047,7 +8068,7 @@ export default function WorkflowEditor() {
       setMobileUiDebug({
         stepId: step.id,
         status: 'error',
-        message: '当前环境无法调试手机 UI 节点',
+        message: t('当前环境无法调试手机 UI 节点', 'Phone UI debugging is unavailable here.'),
       });
       return;
     }
@@ -8055,11 +8076,12 @@ export default function WorkflowEditor() {
     setMobileUiDebug({
       stepId: step.id,
       status: 'running',
-      message: selectedStepComponentKind === 'mobile_ui_assert' ? '正在校验当前元素...' : '正在执行当前操作...',
+      message: selectedStepComponentKind === 'mobile_ui_assert' ? t('正在校验当前元素...', 'Checking the selected element…') : t('正在执行当前操作...', 'Running the selected action…'),
     });
 
     try {
       const result = await electronApi.ipcRenderer.invoke('mobile-ui:debug-step', {
+        language: t('zh-CN', 'en'),
         step,
         component: selectedStepComponent,
         defaults: {
@@ -8083,7 +8105,7 @@ export default function WorkflowEditor() {
         setMobileUiDebug({
           stepId: step.id,
           status: 'error',
-          message: result?.error || '当前节点调试失败',
+          message: result?.error || t('当前节点调试失败', 'Could not run the selected step.'),
           command: result?.command,
           stdout: result?.stdout,
           stderr: result?.stderr,
@@ -8096,7 +8118,7 @@ export default function WorkflowEditor() {
       setMobileUiDebug({
         stepId: step.id,
         status: 'success',
-        message: selectedStepComponentKind === 'mobile_ui_assert' ? '元素校验通过' : '节点操作执行成功',
+        message: selectedStepComponentKind === 'mobile_ui_assert' ? t('元素校验通过', 'Element assertion passed') : t('节点操作执行成功', 'Action completed'),
         command: result.command,
         stdout: result.stdout,
         stderr: result.stderr,
@@ -8112,7 +8134,7 @@ export default function WorkflowEditor() {
         stepId: step.id,
         status: 'error',
         message: error instanceof Error ? error.message : String(error),
-        recoveryActions: ['确认手机设备在线并已允许 USB 调试后重试。'],
+        recoveryActions: [t('确认手机设备在线并已允许 USB 调试后重试。', 'Check that the phone is online and USB debugging is authorized, then try again.')],
       });
     }
   };
@@ -9367,7 +9389,7 @@ export default function WorkflowEditor() {
             className="min-w-0 flex-1 truncate text-xs font-bold"
             title={`${testCase.name}（双击重命名）`}
           >
-            {testCase.name}
+            {caseLabel(testCase)}
           </span>
         )}
       </button>
@@ -9487,7 +9509,7 @@ export default function WorkflowEditor() {
                 className="min-w-0 flex-1 truncate text-xs font-black text-slate-700"
                 title={`${folder.name}（双击重命名）`}
               >
-                {folder.name}
+                {folderLabel(folder)}
               </span>
             )}
             <span className="shrink-0 rounded-full bg-white px-1.5 py-0.5 text-[10px] font-black text-slate-400">{folderCaseCount}</span>
@@ -9578,14 +9600,14 @@ export default function WorkflowEditor() {
             </button>
             <button type="button" data-tree-action="true" onClick={() => createCase(folder.id)} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-slate-50">
               <FilePlus className="h-3.5 w-3.5" />
-              新建用例
+              {t("新建用例", "New test case")}
             </button>
             <button type="button" data-tree-action="true" onClick={() => openFolderImport(folder.id)} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-slate-50">
               <FileUp className="h-3.5 w-3.5" />
-              导入用例
+              {t("导入用例", "Import test cases")}
             </button>
-            <button type="button" data-tree-action="true" onClick={() => { setSoloPiDialog({ mode: 'import', folderId: folder.id, libraryId: library.id }); setCaseCreateMenuFor(null); }} className="w-full rounded-lg px-3 py-2 text-left hover:bg-slate-50">导入 SoloPi 用例</button>
-            <button type="button" data-tree-action="true" onClick={() => { setSoloPiDialog({ mode: 'record', folderId: folder.id, libraryId: library.id }); setCaseCreateMenuFor(null); }} className="w-full rounded-lg px-3 py-2 text-left hover:bg-slate-50">SoloPi 录制生成</button>
+            <button type="button" data-tree-action="true" onClick={() => { setSoloPiDialog({ mode: 'import', folderId: folder.id, libraryId: library.id }); setCaseCreateMenuFor(null); }} className="w-full rounded-lg px-3 py-2 text-left hover:bg-slate-50">{t('导入 SoloPi 用例', 'Import SoloPi case')}</button>
+            <button type="button" data-tree-action="true" onClick={() => { setSoloPiDialog({ mode: 'record', folderId: folder.id, libraryId: library.id }); setCaseCreateMenuFor(null); }} className="w-full rounded-lg px-3 py-2 text-left hover:bg-slate-50">{t('SoloPi 录制生成', 'Record with SoloPi')}</button>
           </div>
         )}
         {isExpanded && (
@@ -9693,7 +9715,7 @@ export default function WorkflowEditor() {
           <div className="flex items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
               <Folder className="h-4 w-4 text-blue-600" />
-              <h2 className="truncate text-sm font-black text-slate-900">用例库</h2>
+              <h2 className="truncate text-sm font-black text-slate-900">{t("用例库", "Test cases")}</h2>
             </div>
             <div className="relative flex items-center gap-1">
               <button
@@ -9785,9 +9807,9 @@ export default function WorkflowEditor() {
                           setEditingName({ type: 'library', id: library.id, value: library.name });
                         }}
                         className="min-w-0 flex-1 truncate text-xs font-black text-slate-800"
-                        title={`${library.name}（双击重命名）`}
+                        title={t(`${library.name}（双击重命名）`, `${library.name} (double-click to rename)`)}
                       >
-                        {library.name}
+                        {libraryLabel(library)}
                       </span>
                     )}
                     <span className="shrink-0 rounded-full bg-white px-1.5 py-0.5 text-[10px] font-black text-slate-400">{libraryCaseCount}</span>
@@ -9798,7 +9820,7 @@ export default function WorkflowEditor() {
                       data-tree-action="true"
                       onClick={() => setCaseCreateMenuFor(caseCreateMenuFor === `library:${library.id}` ? null : `library:${library.id}`)}
                       className="rounded-md p-1 text-slate-400 hover:bg-white hover:text-slate-700"
-                      title="新建"
+                      title={t('新建', 'Create')}
                     >
                       <Plus className="h-3.5 w-3.5" />
                     </button>
@@ -9808,7 +9830,7 @@ export default function WorkflowEditor() {
                       onClick={() => void pullRemoteCases(library)}
                       disabled={isPullingCaseLibrary}
                       className="rounded-md p-1 text-slate-400 hover:bg-white hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-30"
-                      title="从云端拉取"
+                      title={t("从云端拉取", "Pull from remote")}
                     >
                       <CloudDownload className="h-3.5 w-3.5" />
                     </button>
@@ -9817,7 +9839,7 @@ export default function WorkflowEditor() {
                       data-tree-action="true"
                       onClick={() => void pushCaseLibrary(library)}
                       className="rounded-md p-1 text-slate-400 hover:bg-white hover:text-emerald-600"
-                      title="上传到云端"
+                      title={t("上传到云端", "Push to remote")}
                     >
                       <CloudUpload className="h-3.5 w-3.5" />
                     </button>
@@ -9830,7 +9852,7 @@ export default function WorkflowEditor() {
                         setCaseCreateMenuFor(null);
                       }}
                       className="rounded-md p-1 text-slate-400 hover:bg-white hover:text-slate-700"
-                      title="更多操作"
+                      title={t("更多操作", "More actions")}
                     >
                       <MoreHorizontal className="h-3.5 w-3.5" />
                     </button>
@@ -9854,7 +9876,7 @@ export default function WorkflowEditor() {
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-slate-50"
                     >
                       <Zap className={`h-3.5 w-3.5 ${library.autoUpdate ? 'text-blue-600' : 'text-slate-400'}`} />
-                      {library.autoUpdate ? '关闭自动更新' : '开启自动更新'}
+                      {library.autoUpdate ? t("关闭自动更新", "Disable automatic refresh") : t("开启自动更新", "Enable automatic refresh")}
                     </button>
                     <button
                       type="button"
@@ -9876,7 +9898,7 @@ export default function WorkflowEditor() {
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-slate-50"
                     >
                       <GitBranch className="h-3.5 w-3.5" />
-                      Git配置
+                      {t("Git配置", "Git settings")}
                     </button>
                     <button
                       type="button"
@@ -9885,7 +9907,7 @@ export default function WorkflowEditor() {
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-rose-600 hover:bg-rose-50"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
-                      删除当前库
+                      {t("删除当前库", "Delete this library")}
                     </button>
                   </div>
                 )}
@@ -9893,18 +9915,18 @@ export default function WorkflowEditor() {
                   <div className="ml-9 mt-1 w-36 overflow-hidden rounded-xl border border-slate-200 bg-white p-1 text-xs font-bold text-slate-600 shadow-xl">
                     <button type="button" onClick={() => createCaseFolder(library.id)} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-slate-50">
                       <FolderPlus className="h-3.5 w-3.5" />
-                      新建文件夹
+                      {t("新建文件夹", "New folder")}
                     </button>
                     <button type="button" onClick={() => createCase(libraryFolders[0]?.id || DEFAULT_CASE_FOLDER_ID)} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-slate-50">
                       <FilePlus className="h-3.5 w-3.5" />
-                      新建用例
+                      {t("新建用例", "New test case")}
                     </button>
                     <button type="button" onClick={() => openFolderImport(libraryFolders[0]?.id || DEFAULT_CASE_FOLDER_ID)} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-slate-50">
                       <FileUp className="h-3.5 w-3.5" />
-                      导入用例
+                      {t("导入用例", "Import test cases")}
                     </button>
-                    <button type="button" onClick={() => { setSoloPiDialog({ mode: 'import', folderId: libraryFolders[0]?.id || DEFAULT_CASE_FOLDER_ID, libraryId: library.id }); setCaseCreateMenuFor(null); }} className="w-full rounded-lg px-3 py-2 text-left hover:bg-slate-50">导入 SoloPi 用例</button>
-                    <button type="button" onClick={() => { setSoloPiDialog({ mode: 'record', folderId: libraryFolders[0]?.id || DEFAULT_CASE_FOLDER_ID, libraryId: library.id }); setCaseCreateMenuFor(null); }} className="w-full rounded-lg px-3 py-2 text-left hover:bg-slate-50">SoloPi 录制生成</button>
+                    <button type="button" onClick={() => { setSoloPiDialog({ mode: 'import', folderId: libraryFolders[0]?.id || DEFAULT_CASE_FOLDER_ID, libraryId: library.id }); setCaseCreateMenuFor(null); }} className="w-full rounded-lg px-3 py-2 text-left hover:bg-slate-50">{t('导入 SoloPi 用例', 'Import SoloPi case')}</button>
+                    <button type="button" onClick={() => { setSoloPiDialog({ mode: 'record', folderId: libraryFolders[0]?.id || DEFAULT_CASE_FOLDER_ID, libraryId: library.id }); setCaseCreateMenuFor(null); }} className="w-full rounded-lg px-3 py-2 text-left hover:bg-slate-50">{t('SoloPi 录制生成', 'Record with SoloPi')}</button>
                   </div>
                 )}
                 {isLibraryExpanded && (
@@ -9924,12 +9946,12 @@ export default function WorkflowEditor() {
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
               <h2 className="truncate text-lg font-black text-slate-900">
-                {caseLibraryViewMode === 'library' ? selectedCaseLibrary?.name : selectedFolder?.name || '用例库'}
+                {caseLibraryViewMode === 'library' && selectedCaseLibrary ? libraryLabel(selectedCaseLibrary) : selectedFolder ? folderLabel(selectedFolder) : t('用例库', 'Test cases')}
               </h2>
               <p className="mt-1 text-xs font-medium text-slate-500">
                 {caseLibraryViewMode === 'library'
-                  ? '当前展示库信息和一级文件夹。点击文件夹进入文件夹视图。'
-                  : '当前展示子文件夹和用例。可按名称或 tag 搜索用例。'}
+                  ? t("当前展示库信息和一级文件夹。点击文件夹进入文件夹视图。", "Browse this library and its top-level folders. Select a folder to see its contents.")
+                  : t("当前展示子文件夹和用例。可按名称或 tag 搜索用例。", "Browse subfolders and cases. Search by case name or tag.")}
               </p>
             </div>
             <button
@@ -9938,14 +9960,14 @@ export default function WorkflowEditor() {
               onClick={() => void refreshSelectedCaseLibrary()}
               disabled={isRefreshingCaseLibrary}
               className="inline-flex h-9 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-slate-600 shadow-sm transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-              title="重新读取当前本地用例库 JSON/YAML；不会执行 Git pull 或 push"
+              title={t("重新读取当前本地用例库 JSON/YAML；不会执行 Git pull 或 push", "Reload local case JSON/YAML files without pulling or pushing to Git")}
             >
               {isRefreshingCaseLibrary ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
                 <RefreshCw className="h-3.5 w-3.5" />
               )}
-              {isRefreshingCaseLibrary ? '刷新中' : '刷新用例'}
+              {isRefreshingCaseLibrary ? t('刷新中', 'Refreshing') : t('刷新用例', 'Refresh cases')}
             </button>
           </div>
 
@@ -9959,31 +9981,31 @@ export default function WorkflowEditor() {
                   <div className="flex items-center gap-2">
                     <div className="text-xs font-black uppercase tracking-widest text-slate-400">Team Case Library</div>
                     {!selectedCaseLibrary?.repoUrl && (
-                      <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-black text-amber-600">未配置 Git</span>
+                      <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-black text-amber-600">{t("未配置 Git", "Git not configured")}</span>
                     )}
                     {selectedCaseLibrary?.autoUpdate && (
                       <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-black text-blue-600">自动更新</span>
                     )}
                   </div>
                   <div className="mt-2 min-h-9 w-full truncate rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-800">
-                    {selectedCaseLibrary?.repoUrl || '未配置 Git 用例库地址，点击左侧库节点的拉取/上传会引导配置'}
+                    {selectedCaseLibrary?.repoUrl || t('未配置 Git 用例库地址，点击左侧库节点的拉取/上传会引导配置', 'Set a Git URL by selecting Pull or Push in the library sidebar.')}
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
                     <div className="rounded-xl bg-slate-50 px-3 py-2">
-                      <div className="text-[10px] font-black uppercase tracking-wide text-slate-400">当前分支</div>
-                      <div className="mt-1 truncate text-xs font-black text-slate-700">{selectedCaseLibrary?.branch || selectedCaseLibrary?.gitBranch || '未同步'}</div>
+                      <div className="text-[10px] font-black uppercase tracking-wide text-slate-400">{t("当前分支", "Current branch")}</div>
+                      <div className="mt-1 truncate text-xs font-black text-slate-700">{selectedCaseLibrary?.branch || selectedCaseLibrary?.gitBranch || t('未同步', 'Not synced')}</div>
                     </div>
                     <div className="rounded-xl bg-slate-50 px-3 py-2">
-                      <div className="text-[10px] font-black uppercase tracking-wide text-slate-400">最新更新时间</div>
-                      <div className="mt-1 truncate text-xs font-black text-slate-700">{formatLibraryTime(selectedCaseLibrary?.lastUpdatedAt)}</div>
+                      <div className="text-[10px] font-black uppercase tracking-wide text-slate-400">{t("最新更新时间", "Last updated")}</div>
+                      <div className="mt-1 truncate text-xs font-black text-slate-700">{selectedCaseLibrary?.lastUpdatedAt ? formatLibraryTime(selectedCaseLibrary.lastUpdatedAt) : t('未同步', 'Not synced')}</div>
                     </div>
                     <div className="rounded-xl bg-slate-50 px-3 py-2">
-                      <div className="text-[10px] font-black uppercase tracking-wide text-slate-400">更新人</div>
-                      <div className="mt-1 truncate text-xs font-black text-slate-700">{selectedCaseLibrary?.lastUpdatedBy || '未同步'}</div>
+                      <div className="text-[10px] font-black uppercase tracking-wide text-slate-400">{t("更新人", "Updated by")}</div>
+                      <div className="mt-1 truncate text-xs font-black text-slate-700">{selectedCaseLibrary?.lastUpdatedBy || t('未同步', 'Not synced')}</div>
                     </div>
                     <div className="rounded-xl bg-slate-50 px-3 py-2">
-                      <div className="text-[10px] font-black uppercase tracking-wide text-slate-400">提交信息</div>
-                      <div className="mt-1 truncate text-xs font-black text-slate-700">{selectedCaseLibrary?.lastCommitMessage || '未同步'}</div>
+                      <div className="text-[10px] font-black uppercase tracking-wide text-slate-400">{t("提交信息", "Commit message")}</div>
+                      <div className="mt-1 truncate text-xs font-black text-slate-700">{selectedCaseLibrary?.lastCommitMessage || t('未同步', 'Not synced')}</div>
                     </div>
                   </div>
                 </div>
@@ -9997,7 +10019,7 @@ export default function WorkflowEditor() {
               <input
                 value={caseSearch}
                 onChange={(event) => setCaseSearch(event.target.value)}
-                placeholder="搜索当前文件夹用例名称 / tag"
+                placeholder={t("搜索当前文件夹用例名称 / tag", "Search this folder by case name or tag")}
                 className="h-8 min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-700 outline-none placeholder:text-slate-400"
               />
             </div>
@@ -10022,12 +10044,12 @@ export default function WorkflowEditor() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <FolderOpen className="h-4 w-4 shrink-0 text-blue-600" />
-                        <h3 className="truncate text-sm font-black text-slate-900">{folder.name}</h3>
+                        <h3 className="truncate text-sm font-black text-slate-900">{folderLabel(folder)}</h3>
                       </div>
-                      <p className="mt-2 text-xs leading-5 text-slate-500">点击进入文件夹视图</p>
+                      <p className="mt-2 text-xs leading-5 text-slate-500">{t("点击进入文件夹视图", "Open folder")}</p>
                     </div>
                     <div className="rounded-xl bg-slate-100 px-3 py-1 text-xs font-black text-slate-500">
-                      {folderCaseCount} 用例
+                      {t(`${folderCaseCount} 用例`, `${folderCaseCount} ${folderCaseCount === 1 ? 'case' : 'cases'}`)}
                     </div>
                   </div>
                 </button>
@@ -10062,12 +10084,12 @@ export default function WorkflowEditor() {
                           setEditingName({ type: 'case', id: testCase.id, value: testCase.name });
                         }}
                         className="truncate text-sm font-black text-slate-900"
-                        title="双击重命名"
+                        title={t("双击重命名", "Double-click to rename")}
                       >
                         {testCase.name}
                       </h3>
                     )}
-                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-500">{testCase.description || '暂无描述'}</p>
+                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-500">{testCase.description || t("暂无描述", "No description")}</p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <div className="rounded-xl bg-blue-50 px-3 py-1 text-xs font-black text-blue-600">
@@ -10084,7 +10106,7 @@ export default function WorkflowEditor() {
                       </span>
                     ))
                   ) : (
-                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-400">无 Tag</span>
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-400">{t("无 Tag", "No tags")}</span>
                   )}
                 </div>
               </div>
@@ -10092,26 +10114,26 @@ export default function WorkflowEditor() {
             {caseLibraryViewMode === 'library' && selectedLibraryRootFolders.length === 0 && (
               <div className="col-span-full rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center">
                 <FolderPlus className="mx-auto h-8 w-8 text-slate-300" />
-                <div className="mt-3 text-sm font-black text-slate-700">这个库还没有文件夹</div>
+                <div className="mt-3 text-sm font-black text-slate-700">{t("这个库还没有文件夹", "This library has no folders yet")}</div>
                 <button
                   type="button"
                   onClick={() => selectedCaseLibrary && createCaseFolder(selectedCaseLibrary.id)}
                   className="mt-4 rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white hover:bg-blue-700"
                 >
-                  新建第一个文件夹
+                  {t("新建第一个文件夹", "Create your first folder")}
                 </button>
               </div>
             )}
             {caseLibraryViewMode === 'folder' && selectedFolderChildren.length === 0 && selectedFolderCases.length === 0 && (
               <div className="col-span-full rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center">
                 <FilePlus className="mx-auto h-8 w-8 text-slate-300" />
-                <div className="mt-3 text-sm font-black text-slate-700">这个文件夹还没有内容</div>
+                <div className="mt-3 text-sm font-black text-slate-700">{t("这个文件夹还没有内容", "This folder is empty")}</div>
                 <button
                   type="button"
                   onClick={() => createCase(selectedCaseFolderId)}
                   className="mt-4 rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white hover:bg-blue-700"
                 >
-                  新建第一个用例
+                  {t("新建第一个用例", "Create your first case")}
                 </button>
               </div>
             )}
@@ -10157,7 +10179,7 @@ export default function WorkflowEditor() {
       );
     }
     const latestDetail = getWorkflowRunLogDetail(latest) || latest.command || '';
-    const latestName = latest.stepName || (latest as unknown as { name?: string }).name || latest.stepId || '步骤';
+    const latestName = latest.stepName || (latest as unknown as { name?: string }).name || latest.stepId || t("步骤", "Steps");
     const latestIndex = (latest as unknown as { index?: number }).index;
     const durationLabel = formatRunDuration(latest);
 
@@ -10175,7 +10197,7 @@ export default function WorkflowEditor() {
                 ? 'bg-slate-800 text-white'
                 : 'bg-rose-50 text-rose-600'
           }`}>
-            {latest.status === 'success' ? '成功' : latest.status === 'stopped' ? '强制停止' : '失败'}
+            {latest.status === 'success' ? t("成功", "Passed") : latest.status === 'stopped' ? t("强制停止", "Force stop") : t("失败", "Failed")}
           </div>
         </div>
         {latestDetail && (
@@ -10223,21 +10245,21 @@ export default function WorkflowEditor() {
         {report ? (
           <div className="mt-3 grid grid-cols-4 gap-2 text-xs font-bold text-slate-500">
             <div>
-              <div className="text-[10px] font-black text-slate-400">CPU均值</div>
+              <div className="text-[10px] font-black text-slate-400">{t("CPU均值", "Average CPU")}</div>
               <div className="mt-1 text-slate-900">{formatPerformanceMetric(cpuSummary.avg, '%')}</div>
             </div>
             <div>
-              <div className="text-[10px] font-black text-slate-400">内存均值</div>
+              <div className="text-[10px] font-black text-slate-400">{t("内存均值", "Average memory")}</div>
               <div className="mt-1 text-slate-900">{formatPerformanceMemory(memorySummary.avg)}</div>
             </div>
             <div>
-              <div className="text-[10px] font-black text-slate-400">线程均值</div>
+              <div className="text-[10px] font-black text-slate-400">{t("线程均值", "Average thread count")}</div>
               <div className="mt-1 text-slate-900">{formatPerformanceMetric(threadSummary.avg)}</div>
             </div>
-            <div><div className="text-[10px] font-black text-slate-400">电池温度均值（设备）</div><div className="mt-1 text-slate-900">{formatPerformanceMetric(temperatureSummary.avg, '°C')}</div></div>
-            <div className={`col-span-4 ${report.crashes?.count ? 'text-red-600' : ''}`} title={report.crashes?.scope === 'device' ? '设备全部应用；系统事件与应用崩溃日志合并去重' : '历史报告仅统计目标包 am_crash；0 次不代表没有应用异常'}>应用崩溃：{crashSummary(report.crashes)}{report.crashes?.scope === 'device' && ` · 目标包 ${report.crashes.targetCount ?? 0} 次`}</div>
+            <div><div className="text-[10px] font-black text-slate-400">{t("电池温度均值（设备）", "Average device battery temperature")}</div><div className="mt-1 text-slate-900">{formatPerformanceMetric(temperatureSummary.avg, '°C')}</div></div>
+            <div className={`col-span-4 ${report.crashes?.count ? 'text-red-600' : ''}`} title={report.crashes?.scope === 'device' ? t("设备全部应用；系统事件与应用崩溃日志合并去重", "All apps on the device. System events and app crash logs are deduplicated.") : t("历史报告仅统计目标包 am_crash；0 次不代表没有应用异常", "Older reports count only am_crash events for the target package. Zero does not rule out other errors.")}>{t("应用崩溃：", "App crashes:")}{crashSummary(report.crashes)}{report.crashes?.scope === 'device' && ` · 目标包 ${report.crashes.targetCount ?? 0} 次`}</div>
             {failedSamples > 0 && (
-              <div className="col-span-4 text-[11px] font-black text-rose-600">采样失败 {failedSamples} 次</div>
+              <div className="col-span-4 text-[11px] font-black text-rose-600">{t("采样失败", "Sampling failed")} {failedSamples} 次</div>
             )}
           </div>
         ) : (
@@ -10312,7 +10334,7 @@ export default function WorkflowEditor() {
             <path d={toPath(series)} fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           )}
           {series.length === 0 && secondarySeries.length === 0 && (
-            <text x={width / 2} y={height / 2} textAnchor="middle" className="fill-slate-400 text-xs font-bold">暂无趋势数据</text>
+            <text x={width / 2} y={height / 2} textAnchor="middle" className="fill-slate-400 text-xs font-bold">{t("暂无趋势数据", "No trend data yet")}</text>
           )}
           {firstTime && (
             <text x={padding.left} y={height - 8} className="fill-slate-400 text-[10px] font-bold">{formatRunTime(firstTime)}</text>
@@ -10346,7 +10368,7 @@ export default function WorkflowEditor() {
               </div>
               <h3 className="mt-1 text-lg font-black text-slate-900">{performanceReportDialog.name}</h3>
               <div className="mt-1 text-xs font-bold text-slate-500">
-                {performanceReportDialog.runtime === 'android' ? 'Android / adb' : '鸿蒙 / hdc'} · {performanceReportDialog.serial || '-'} · {performanceReportDialog.packageName || '-'}
+                {performanceReportDialog.runtime === 'android' ? 'Android / adb' : t("鸿蒙 / hdc", "HarmonyOS / hdc")} · {performanceReportDialog.serial || '-'} · {performanceReportDialog.packageName || '-'}
               </div>
             </div>
             <button
@@ -10361,19 +10383,19 @@ export default function WorkflowEditor() {
           <div className="min-h-0 flex-1 overflow-auto p-5">
             <div className="grid grid-cols-4 gap-3">
               <div className="rounded-2xl border border-slate-200 p-4">
-                <div className="text-xs font-black text-slate-400">CPU峰值 / 均值</div>
+                <div className="text-xs font-black text-slate-400">{t("CPU峰值 / 均值", "CPU peak / average")}</div>
                 <div className="mt-2 text-2xl font-black text-slate-950">{formatPerformanceMetric(cpuSummary.max, '%')} / {formatPerformanceMetric(cpuSummary.avg, '%')}</div>
               </div>
               <div className="rounded-2xl border border-slate-200 p-4">
-                <div className="text-xs font-black text-slate-400">内存峰值 / 均值</div>
+                <div className="text-xs font-black text-slate-400">{t("内存峰值 / 均值", "Memory peak / average")}</div>
                 <div className="mt-2 text-2xl font-black text-slate-950">{formatPerformanceMemory(memorySummary.max)} / {formatPerformanceMemory(memorySummary.avg)}</div>
               </div>
               <div className="rounded-2xl border border-slate-200 p-4">
-                <div className="text-xs font-black text-slate-400">线程峰值 / 均值</div>
+                <div className="text-xs font-black text-slate-400">{t("线程峰值 / 均值", "Thread count peak / average")}</div>
                 <div className="mt-2 text-2xl font-black text-slate-950">{formatPerformanceMetric(threadSummary.max)} / {formatPerformanceMetric(threadSummary.avg)}</div>
               </div>
               <div className="rounded-2xl border border-slate-200 p-4">
-                <div className="text-xs font-black text-slate-400">电池温度峰值 / 均值（设备）</div>
+                <div className="text-xs font-black text-slate-400">{t("电池温度峰值 / 均值（设备）", "Device battery temperature peak / average")}</div>
                 <div className="mt-2 text-2xl font-black text-slate-950">{formatPerformanceMetric(temperatureSummary.max, '°C')} / {formatPerformanceMetric(temperatureSummary.avg, '°C')}</div>
               </div>
             </div>
@@ -10383,20 +10405,20 @@ export default function WorkflowEditor() {
                 'CPU %', performanceReportDialog.samples,
                 sample => sample.cpuPercent,
                 value => formatPerformanceMetric(value, '%'), '#ea580c',
-                { label: '可用CPU', getValue: sample => sample.systemAvailableCpuPercent, color: '#fdba74' }
+                { label: t("可用CPU", "Available CPU"), getValue: sample => sample.systemAvailableCpuPercent, color: '#fdba74' }
               )}
               {renderAutomationPerformanceTrendCard(
-                '内存 MB', performanceReportDialog.samples,
+                t("内存 MB", "Memory (MB)"), performanceReportDialog.samples,
                 sample => typeof sample.memoryKb === 'number' ? sample.memoryKb / 1024 : undefined,
                 value => typeof value === 'number' ? `${value.toFixed(0)}MB` : '-', '#0284c7',
-                { label: '可用内存', getValue: sample => typeof sample.systemAvailableMemoryKb === 'number' ? sample.systemAvailableMemoryKb / 1024 : undefined, color: '#7dd3fc' }
+                { label: t("可用内存", "Available memory"), getValue: sample => typeof sample.systemAvailableMemoryKb === 'number' ? sample.systemAvailableMemoryKb / 1024 : undefined, color: '#7dd3fc' }
               )}
               {renderAutomationPerformanceTrendCard(
-                '线程', performanceReportDialog.samples, sample => sample.threadCount,
+                t("线程", "Threads"), performanceReportDialog.samples, sample => sample.threadCount,
                 value => typeof value === 'number' ? value.toFixed(0) : '-', '#059669'
               )}
               {renderAutomationPerformanceTrendCard(
-                '电池温度（设备）', performanceReportDialog.samples, sample => sample.batteryTemperatureC,
+                t("电池温度（设备）", "Device battery temperature"), performanceReportDialog.samples, sample => sample.batteryTemperatureC,
                 value => typeof value === 'number' ? `${value.toFixed(1)}°C` : '-', '#e11d48'
               )}
             </div>
@@ -10404,15 +10426,15 @@ export default function WorkflowEditor() {
               <table className="w-full min-w-[820px] text-left text-xs">
                 <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-wide text-slate-500">
                   <tr>
-                    <th className="px-4 py-3">时间</th>
+                    <th className="px-4 py-3">{t("时间", "Time")}</th>
                     <th className="px-4 py-3">PID</th>
-                    <th className="px-4 py-3">内存</th>
+                    <th className="px-4 py-3">{t("内存", "Memory")}</th>
                     <th className="px-4 py-3">CPU</th>
-                    <th className="px-4 py-3">线程</th>
-                    <th className="px-4 py-3">电池温度</th>
-                    <th className="px-4 py-3">可用内存</th>
-                    <th className="px-4 py-3">可用CPU</th>
-                    <th className="px-4 py-3">状态</th>
+                    <th className="px-4 py-3">{t("线程", "Threads")}</th>
+                    <th className="px-4 py-3">{t("电池温度", "Battery temperature")}</th>
+                    <th className="px-4 py-3">{t("可用内存", "Available memory")}</th>
+                    <th className="px-4 py-3">{t("可用CPU", "Available CPU")}</th>
+                    <th className="px-4 py-3">{t("状态", "Status")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -10428,15 +10450,15 @@ export default function WorkflowEditor() {
                       <td className="px-4 py-3 font-bold text-slate-500">{formatPerformanceMetric(sample.systemAvailableCpuPercent, '%')}</td>
                       <td className="px-4 py-3">
                         <span className={`rounded-full px-2 py-1 text-[10px] font-black ${sample.error ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                          {sample.error ? '失败' : '成功'}
+                          {sample.error ? t("失败", "Failed") : t("成功", "Passed")}
                         </span>
-                        {sample.rawEvidencePath && <button className="ml-2 text-blue-600 underline" onClick={() => void openPathInFolder(sample.rawEvidencePath)}>原始证据</button>}
+                        {sample.rawEvidencePath && <button className="ml-2 text-blue-600 underline" onClick={() => void openPathInFolder(sample.rawEvidencePath)}>{t("原始证据", "Raw evidence")}</button>}
                       </td>
                     </tr>
                   ))}
                   {performanceReportDialog.samples.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="px-4 py-12 text-center text-sm font-bold text-slate-400">没有采样数据</td>
+                      <td colSpan={9} className="px-4 py-12 text-center text-sm font-bold text-slate-400">{t("没有采样数据", "No sample data")}</td>
                     </tr>
                   )}
                 </tbody>
@@ -10456,13 +10478,13 @@ export default function WorkflowEditor() {
         <div className="flex-1 min-h-0 bg-slate-50 p-6">
           <div className="mx-auto max-w-6xl rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
             <Rocket className="mx-auto h-8 w-8 text-slate-300" />
-            <div className="mt-3 text-sm font-black text-slate-700">未选择测试报告</div>
+            <div className="mt-3 text-sm font-black text-slate-700">{t("未选择测试报告", "No test report selected")}</div>
             <button
               type="button"
               onClick={() => setActiveTab('automation-tasks')}
               className="mt-4 rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white hover:bg-blue-700"
             >
-              返回任务列表
+              {t("返回任务列表", "Back to tasks")}
             </button>
           </div>
         </div>
@@ -10524,25 +10546,25 @@ export default function WorkflowEditor() {
       phone?: { serial?: string; packageName?: string };
       glasses?: { serial?: string; packageName?: string };
     } | undefined;
-    const taskEnvironment = String(selectedTask.runtimeEnvironment?.environment || selectedTask.runtimeEnvironment?.env || '未记录');
+    const taskEnvironment = String(selectedTask.runtimeEnvironment?.environment || selectedTask.runtimeEnvironment?.env || t("未记录", "Not recorded"));
     const taskOptions = [
       selectedTask.startOptions?.recordPhoneScreen ? '手机录屏' : '',
       selectedTask.startOptions?.recordGlassesScreen ? '眼镜录屏' : '',
-      selectedTask.performanceOptions?.phone ? '手机性能' : '',
-      selectedTask.performanceOptions?.glasses ? '眼镜性能' : '',
+      selectedTask.performanceOptions?.phone ? t("手机性能", "Phone performance") : '',
+      selectedTask.performanceOptions?.glasses ? t("眼镜性能", "Glasses performance") : '',
     ].filter(Boolean);
 
     return (
       <div className="flex-1 min-h-0 bg-slate-50 p-6 overflow-auto">
         <div className="mx-auto max-w-6xl">
           {(selectedTask.performanceOptions?.threadStacks?.enabled || selectedTask.threadStacks?.length) && <section className="mb-4 rounded-xl border bg-white p-4">
-            <div className="flex justify-between"><strong>线程栈快照</strong>{selectedTaskActive && !selectedTask.readonly && <button className="text-blue-600" onClick={async () => {
+            <div className="flex justify-between"><strong>{t("线程栈快照", "Thread stack snapshot")}</strong>{selectedTaskActive && !selectedTask.readonly && <button className="text-blue-600" onClick={async () => {
               try { const result = await electronApi?.ipcRenderer?.invoke('workflow-task:capture-stacks', { taskId: selectedTask.id }) as { success?: boolean; error?: string } | undefined;
-                alert(result?.success ? '线程栈已采集，结果会同步到报告' : result?.error || '未完成采集：请查看诊断，可能触发间隔或容量限制');
+                alert(result?.success ? t("线程栈已采集，结果会同步到报告", "Thread stacks collected. Results will sync to the report.") : result?.error || t("未完成采集：请查看诊断，可能触发间隔或容量限制", "Capture incomplete. See diagnostics for possible interval or capacity limits."));
               } catch (error) { alert(String(error)); }
-            }}>立即采集</button>}</div>
-            <p className="text-xs text-slate-500">SIGQUIT 栈快照不代表线程 CPU 执行耗时；信号成功不等于文件采集成功。完整证据随报告包导出。</p>
-            {(selectedTask.threadStacks || []).map(record => <details key={record.id} className="mt-2 text-xs"><summary>{record.startedAt} · {record.target} · PID {record.pid || '未知'} · 第 {record.round || '-'} 轮 · {record.reason} · {record.status}</summary>
+            }}>{t("立即采集", "Capture now")}</button>}</div>
+            <p className="text-xs text-slate-500">{t("SIGQUIT 栈快照不代表线程 CPU 执行耗时；信号成功不等于文件采集成功。完整证据随报告包导出。", "SIGQUIT snapshots show stack frames. Verify file capture separately from signal delivery. Full evidence is included in the report package.")}</p>
+            {(selectedTask.threadStacks || []).map(record => <details key={record.id} className="mt-2 text-xs"><summary>{record.startedAt} · {record.target} · PID {record.pid || t("未知", "Unknown")} · 第 {record.round || '-'} 轮 · {record.reason} · {record.status}</summary>
               <p>{record.errorCode} {record.error}</p>
               {record.files.map(file => <p key={file.path}><button className="text-blue-600" onClick={() => void openPathInFolder(file.path, 'open')}>{file.path}</button></p>)}
               <pre className="overflow-auto whitespace-pre-wrap">{JSON.stringify(record, null, 2)}</pre>
@@ -10560,11 +10582,11 @@ export default function WorkflowEditor() {
 	              </button>
 	              <div className="min-w-0">
 	                <div className="flex min-w-0 items-center gap-2">
-	                  <h2 className="truncate text-lg font-black text-slate-900">测试报告 · {selectedTask.name}</h2>
+	                  <h2 className="truncate text-lg font-black text-slate-900">{t("测试报告 ·", "Test report \u00b7")} {selectedTask.name}</h2>
 	                  <div className={`shrink-0 rounded-full px-3 py-1 text-xs font-black ${
 	                    selectedTask.status === 'success' ? 'bg-emerald-50 text-emerald-600' : selectedTask.status === 'failed' ? 'bg-rose-50 text-rose-600' : selectedTaskActive ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-500'
 	                  }`}>
-	                    {selectedTask.status === 'success' ? stoppedCount ? '已停止' : '已完成' : selectedTask.status === 'failed' ? '有失败' : selectedTask.status === 'stopped' ? '已停止' : selectedTask.status === 'stopping' ? '停止中' : selectedTaskActive ? '执行中' : '等待执行'}
+	                    {selectedTask.status === 'success' ? stoppedCount ? t("已停止", "Stopped") : t("已完成", "Completed") : selectedTask.status === 'failed' ? t("有失败", "Failed") : selectedTask.status === 'stopped' ? t("已停止", "Stopped") : selectedTask.status === 'stopping' ? t("停止中", "Stopping") : selectedTaskActive ? t("执行中", "Running") : t("等待执行", "Waiting to run")}
 	                  </div>
 	                </div>
 	                <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-slate-500">
@@ -10583,21 +10605,21 @@ export default function WorkflowEditor() {
                 className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <FileDown className="h-3.5 w-3.5" />
-                导出报告包
+                {t("导出报告包", "Export report")}
               </button>
               <button
                 type="button"
                 onClick={() => deleteAutomationTasks([selectedTask.id])}
                 disabled={selectedTaskActive}
                 className="inline-flex items-center gap-1.5 rounded-xl border border-rose-100 bg-rose-50 px-3 py-1.5 text-xs font-black text-rose-700 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-45"
-                title={selectedTaskActive ? '执行中的任务不能删除' : '删除当前测试报告'}
+                title={selectedTaskActive ? t("执行中的任务不能删除", "Running tasks cannot be deleted") : t("删除当前测试报告", "Delete this test report")}
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                删除报告
+                {t("删除报告", "Delete report")}
               </button>
               {selectedTask.imported && (
                 <div className="rounded-full bg-slate-900 px-3 py-1 text-xs font-black text-white">
-                  只读报告
+                  {t("只读报告", "Read-only report")}
                 </div>
               )}
 	              {!selectedTask.readonly && (
@@ -10607,10 +10629,10 @@ export default function WorkflowEditor() {
                     onClick={() => rerunFailedAutomationTask(selectedTask)}
                     disabled={!canRerunFailed || pendingTaskActions.has(selectedTask.id)}
                     className="inline-flex items-center gap-1.5 rounded-xl border border-rose-100 bg-rose-50 px-3 py-1.5 text-xs font-black text-rose-700 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-45"
-                    title={selectedTaskActive ? '任务执行中不可重跑失败' : failedCount > 0 ? '只重跑执行失败的用例' : '没有失败用例可重跑'}
+                    title={selectedTaskActive ? t("任务执行中不可重跑失败", "Wait for the task to finish before rerunning failures") : failedCount > 0 ? t("只重跑执行失败的用例", "Rerun only failed cases") : t("没有失败用例可重跑", "No failed cases to rerun")}
                   >
                     <RefreshCw className={`h-3.5 w-3.5 ${pendingTaskActions.has(selectedTask.id) ? 'animate-spin' : ''}`} />
-                    {pendingTaskActions.has(selectedTask.id) ? '正在提交…' : '重跑失败'}
+                    {pendingTaskActions.has(selectedTask.id) ? t("正在提交…", "Submitting…") : t("重跑失败", "Rerun failed")}
                   </button>
                   <button
                     type="button"
@@ -10623,7 +10645,7 @@ export default function WorkflowEditor() {
                     }`}
                   >
                     {selectedTaskActive ? <Square className="h-3.5 w-3.5 fill-current" /> : <Play className="h-3.5 w-3.5 fill-current" />}
-                    {taskStopPending.has(selectedTask.id) ? '正在请求…' : selectedTask.status === 'stopping' ? '停止中…' : selectedTaskActive ? '停止' : '重跑'}
+                    {taskStopPending.has(selectedTask.id) ? t("正在请求…", "Requesting…") : selectedTask.status === 'stopping' ? t("停止中…", "Stopping…") : selectedTaskActive ? t("停止", "Stop") : t("重跑", "Rerun")}
                   </button>
                 </>
               )}
@@ -10631,29 +10653,29 @@ export default function WorkflowEditor() {
           </div>
 
           <TaskActionNotice feedback={taskActionFeedback[selectedTask.id]} onOpenTask={openTaskActionReport} />
-          {taskStopFeedback[selectedTask.id] && <p role="status" className="mt-3 text-sm text-slate-600">{selectedTaskActive ? taskStopFeedback[selectedTask.id] : '任务已结束'}</p>}
+          {taskStopFeedback[selectedTask.id] && <p role="status" className="mt-3 text-sm text-slate-600">{selectedTaskActive ? taskStopFeedback[selectedTask.id] : t("任务已结束", "Task finished")}</p>}
           <div className="mt-4 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-xs text-slate-600 shadow-sm md:grid-cols-2 xl:grid-cols-4">
             <div>
-              <div className="font-black text-slate-400">环境 / 来源</div>
-              <div className="mt-1 font-bold text-slate-800">{taskEnvironment} · {selectedTask.source === 'cli' ? 'CLI Broker' : '桌面 UI'}</div>
+              <div className="font-black text-slate-400">{t("环境 / 来源", "Environment / source")}</div>
+              <div className="mt-1 font-bold text-slate-800">{taskEnvironment} · {selectedTask.source === 'cli' ? 'CLI Broker' : t("桌面 UI", "Desktop UI")}</div>
             </div>
             <div>
-              <div className="font-black text-slate-400">设备</div>
+              <div className="font-black text-slate-400">{t("设备", "Devices")}</div>
               <div className="mt-1 break-all font-mono font-bold text-slate-800">
-                手机 {taskDevices?.phone?.serial || '未记录'} · 眼镜 {taskDevices?.glasses?.serial || '未记录'}
+                {t("手机", "Phone")} {taskDevices?.phone?.serial || t("未记录", "Not recorded")} · 眼镜 {taskDevices?.glasses?.serial || t("未记录", "Not recorded")}
               </div>
             </div>
             <div>
-              <div className="font-black text-slate-400">时间</div>
+              <div className="font-black text-slate-400">{t("时间", "Time")}</div>
               <div className="mt-1 font-bold text-slate-800">
                 {formatRunTime(selectedTask.startedAt || selectedTask.createdAt)}
                 {selectedTask.finishedAt ? ` → ${formatRunTime(selectedTask.finishedAt)}` : ' → 执行中'}
               </div>
             </div>
             <div>
-              <div className="font-black text-slate-400">采集 / 报告</div>
+              <div className="font-black text-slate-400">{t("采集 / 报告", "Capture / report")}</div>
               <div className="mt-1 break-all font-bold text-slate-800">
-                {taskOptions.length ? taskOptions.join('、') : '未启用额外采集'}
+                {taskOptions.length ? taskOptions.join('、') : t("未启用额外采集", "No extra data collected")}
                 {selectedTask.reportPackagePath ? ` · ${selectedTask.reportPackagePath}` : ''}
               </div>
             </div>
@@ -10663,8 +10685,8 @@ export default function WorkflowEditor() {
             <div className="font-bold">压测任务 · {selectedTask.stress.mode === 'rounds' ? `${selectedTask.stress.value} 轮` : `${selectedTask.stress.value} 分钟`} · 当前第 {selectedTask.currentRound || 1} 轮</div>
             <div className="mt-2 flex flex-wrap gap-3">
               {(selectedTask.taskLogs || []).map((log) => <div key={log.deviceType}>
-                <button className="text-xs font-bold text-blue-700 underline" type="button" disabled={!log.path} onClick={() => void openPathInFolder(log.path)}>{log.deviceType === 'glasses' ? '眼镜' : '手机'}完整日志</button>
-                {log.error && <p className="mt-1 max-w-xl break-words text-xs text-rose-600">日志采集异常：{log.error}</p>}
+                <button className="text-xs font-bold text-blue-700 underline" type="button" disabled={!log.path} onClick={() => void openPathInFolder(log.path)}>{log.deviceType === 'glasses' ? t("眼镜", "Glasses") : t("手机", "Phone")}完整日志</button>
+                {log.error && <p className="mt-1 max-w-xl break-words text-xs text-rose-600">{t("日志采集异常：", "Log collection error:")}{log.error}</p>}
               </div>)}
             </div>
           </div>}
@@ -10680,11 +10702,11 @@ export default function WorkflowEditor() {
               />
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
-              {renderTaskPerformanceCard('手机性能报告', selectedTask.performanceReports?.phone, {
+              {renderTaskPerformanceCard(t("手机性能报告", "Phone performance"), selectedTask.performanceReports?.phone, {
                 enabled: selectedTask.performanceOptions?.phone,
                 running: selectedTaskActive,
               })}
-              {renderTaskPerformanceCard('眼镜性能报告', selectedTask.performanceReports?.glasses, {
+              {renderTaskPerformanceCard(t("眼镜性能报告", "Glasses performance"), selectedTask.performanceReports?.glasses, {
                 enabled: selectedTask.performanceOptions?.glasses,
                 running: selectedTaskActive,
               })}
@@ -10697,14 +10719,14 @@ export default function WorkflowEditor() {
                     value={reportCaseSearch}
                     onChange={(event) => setReportCaseSearch(event.target.value)}
                     className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-9 text-xs font-bold text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
-                    placeholder="搜索用例名、caseId、节点名、错误日志、stdout/stderr"
+                    placeholder={t("搜索用例名、caseId、节点名、错误日志、stdout/stderr", "Search case name, case ID, step, error log, stdout, or stderr")}
                   />
                   {reportCaseSearch && (
                     <button
                       type="button"
                       onClick={() => setReportCaseSearch('')}
                       className="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-                      title="清空搜索"
+                      title={t("清空搜索", "Clear search")}
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -10715,9 +10737,9 @@ export default function WorkflowEditor() {
                     ['all', `全部 ${selectedTaskCases.length}`],
                     ['failed', `失败 ${failedCount}`],
                     ['success', `成功 ${successCount}`],
-                    ['running', '执行中'],
+                    ['running', t("执行中", "Running")],
                     ['stopped', `停止 ${stoppedCount}`],
-                    ['pending', '等待'],
+                    ['pending', t("等待", "Pending")],
                   ] as Array<[ReportCaseStatusFilter, string]>).map(([value, label]) => (
                     <button
                       key={value}
@@ -10741,9 +10763,9 @@ export default function WorkflowEditor() {
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                   {([
-                    ['all', '所有产物'],
-                    ['withArtifacts', '有执行产物'],
-                    ['withScreenshots', '有校验截图'],
+                    ['all', t("所有产物", "All artifacts")],
+                    ['withArtifacts', t("有执行产物", "With artifacts")],
+                    ['withScreenshots', t("有校验截图", "With assertion screenshots")],
                   ] as Array<[ReportCaseArtifactFilter, string]>).map(([value, label]) => (
                     <button
                       key={value}
@@ -10773,7 +10795,7 @@ export default function WorkflowEditor() {
                       }}
                       className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] font-black text-slate-500 hover:bg-slate-100"
                     >
-                      清空过滤
+                      {t("清空过滤", "Clear filters")}
                     </button>
                   )}
                 </div>
@@ -10790,8 +10812,8 @@ export default function WorkflowEditor() {
               {selectedTaskFilteredCases.length === 0 && !isReportDetailLoading && (
                 <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-5 py-10 text-center">
                   <Search className="mx-auto h-7 w-7 text-slate-300" />
-                  <div className="mt-3 text-sm font-black text-slate-700">没有匹配的用例</div>
-                  <div className="mt-1 text-xs font-bold text-slate-400">换个关键词，或清空状态/产物筛选。</div>
+                  <div className="mt-3 text-sm font-black text-slate-700">{t("没有匹配的用例", "No matching cases")}</div>
+                  <div className="mt-1 text-xs font-bold text-slate-400">{t("换个关键词，或清空状态/产物筛选。", "Try a different keyword or clear the status and artifact filters.")}</div>
                 </div>
               )}
               {selectedTaskFilteredCases.map((caseRecord) => {
@@ -11076,7 +11098,7 @@ export default function WorkflowEditor() {
             className="flex min-w-0 flex-1 items-center gap-2 text-left">
             <CaseTreeDisclosure expanded={expanded} />
             <Folder className="h-4 w-4 shrink-0 text-blue-500" />
-            <span className="min-w-0 flex-1 truncate" title={folder.name}>{folder.name}</span>
+            <span className="min-w-0 flex-1 truncate" title={folder.name}>{folderLabel(folder)}</span>
           </button>
           <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ${
             isPartial ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-500'
@@ -11097,7 +11119,7 @@ export default function WorkflowEditor() {
               className="h-4 w-4 rounded border-slate-300 text-blue-600"
             />
             <ListChecks className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-            <span className="min-w-0 flex-1 truncate font-bold">{testCase.name}</span>
+            <span className="min-w-0 flex-1 truncate font-bold">{caseLabel(testCase)}</span>
             <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-500">
               {testCase.steps.length} 步
             </span>
@@ -11155,8 +11177,8 @@ export default function WorkflowEditor() {
       <div className="mx-auto max-w-6xl">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-black text-slate-900">测试任务</h2>
-            <p className="mt-1 text-xs font-medium text-slate-500">从用例库圈选用例组成测试任务，报告详情单独进入报告页查看。</p>
+            <h2 className="text-lg font-black text-slate-900">{t("测试任务", "Test runs")}</h2>
+            <p className="mt-1 text-xs font-medium text-slate-500">{t("从用例库圈选用例组成测试任务，报告详情单独进入报告页查看。", "Select cases from the library to create a run. Open its report to review the results.")}</p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -11165,21 +11187,21 @@ export default function WorkflowEditor() {
               className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white shadow-sm hover:bg-blue-700"
             >
               <Plus className="h-3.5 w-3.5" />
-              创建测试任务
+              {t("创建测试任务", "Create test run")}
             </button>
-            <button type="button" onClick={() => openTaskCreateDialog(true)} className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 hover:bg-blue-100">创建压测任务</button>
+            <button type="button" onClick={() => openTaskCreateDialog(true)} className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 hover:bg-blue-100">{t("创建压测任务", "Create stress test")}</button>
             <button
               type="button"
               onClick={() => void openAutomationTaskReportPackage()}
               className="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 hover:bg-blue-100"
             >
               <FileUp className="h-3.5 w-3.5" />
-              打开报告包
+              {t("打开报告包", "Open report package")}
             </button>
           </div>
         </div>
 
-        {Object.entries(taskStopFeedback).map(([id, message]) => <p key={id} role="status" className="mt-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-slate-700">{automationTasks.find(task => task.id === id)?.name || id}：{isAutomationTaskActive(automationTasks.find(task => task.id === id) || { status: 'stopped' } as AutomationTaskRecord) ? message : '任务已结束'}</p>)}
+        {Object.entries(taskStopFeedback).map(([id, message]) => <p key={id} role="status" className="mt-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-slate-700">{automationTasks.find(task => task.id === id)?.name || id}：{isAutomationTaskActive(automationTasks.find(task => task.id === id) || { status: 'stopped' } as AutomationTaskRecord) ? message : t("任务已结束", "Task finished")}</p>)}
         {automationTasks.length > 0 && (
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
             <label className="flex items-center gap-2 text-xs font-black text-slate-600">
@@ -11190,7 +11212,7 @@ export default function WorkflowEditor() {
                 onChange={(event) => setAllAutomationTaskSelection(event.target.checked)}
                 className="h-4 w-4 rounded border-slate-300 text-blue-600 disabled:opacity-40"
               />
-              全选可删除报告
+              {t("全选可删除报告", "Select all deletable reports")}
             </label>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-slate-400">
@@ -11203,9 +11225,9 @@ export default function WorkflowEditor() {
                 className="inline-flex items-center gap-1.5 rounded-xl border border-rose-100 bg-rose-50 px-3 py-1.5 text-xs font-black text-rose-700 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-45"
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                删除选中
+                {t("删除选中", "Delete selected")}
               </button>
-              <label className="flex items-center gap-1 text-xs text-slate-500"><input type="checkbox" checked={purgeTaskArtifacts} disabled={!taskCleanupSupported || taskCleanupBusy} onChange={e=>setPurgeTaskArtifacts(e.target.checked)}/>同时清理产物</label>
+              <label className="flex items-center gap-1 text-xs text-slate-500"><input type="checkbox" checked={purgeTaskArtifacts} disabled={!taskCleanupSupported || taskCleanupBusy} onChange={e=>setPurgeTaskArtifacts(e.target.checked)}/>{t("同时清理产物", "Also delete artifacts")}</label>
               {!taskCleanupSupported && <span className="text-xs text-slate-400">清理功能需更新并重启桌面服务</span>}
             </div>
           </div>
@@ -11215,8 +11237,8 @@ export default function WorkflowEditor() {
           {automationTasks.length === 0 ? (
             <div className="px-5 py-10 text-center">
               <Rocket className="mx-auto h-8 w-8 text-slate-300" />
-              <div className="mt-3 text-sm font-black text-slate-700">暂无测试任务</div>
-              <div className="mt-1 text-xs font-bold text-slate-400">点击“创建测试任务”，从库、文件夹或单条用例维度圈选要执行的用例。</div>
+              <div className="mt-3 text-sm font-black text-slate-700">{t("暂无测试任务", "No test runs yet")}</div>
+              <div className="mt-1 text-xs font-bold text-slate-400">{t("点击“创建测试任务”，从库、文件夹或单条用例维度圈选要执行的用例。", "Create a test run to select an entire library, a folder, or individual cases.")}</div>
             </div>
           ) : automationTasks.map((task) => {
             const { successCount, failedCount, stoppedCount, caseCount } = getAutomationTaskCounts(task);
@@ -11230,7 +11252,7 @@ export default function WorkflowEditor() {
                   disabled={isTaskRunning}
                   onChange={(event) => toggleAutomationTaskSelection(task.id, event.target.checked)}
                   className="h-4 w-4 rounded border-slate-300 text-blue-600 disabled:cursor-not-allowed disabled:opacity-35"
-                  title={isTaskRunning ? '执行中的任务不能删除' : '选择报告'}
+                  title={isTaskRunning ? t("执行中的任务不能删除", "Running tasks cannot be deleted") : t("选择报告", "Select report")}
                 />
                 <button
                   type="button"
@@ -11241,10 +11263,10 @@ export default function WorkflowEditor() {
                   <div className="flex min-w-0 items-center gap-2">
                     <div className="truncate text-sm font-black text-slate-900 hover:text-blue-600">{task.name}</div>
                     {task.stress && <div className="mt-1 text-xs font-bold text-blue-600">压测 · {task.stress.mode === 'rounds' ? `${task.stress.value} 轮` : `${task.stress.value} 分钟`} · 第 {task.currentRound || 1} 轮</div>}
-                    {task.externalSource && <span className="shrink-0 text-xs font-bold text-blue-600">隔离执行 · 已同步</span>}
+                    {task.externalSource && <span className="shrink-0 text-xs font-bold text-blue-600">{t("隔离执行 · 已同步", "Isolated run · Synced")}</span>}
                     {task.imported && (
                       <span className="shrink-0 rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-black text-white">
-                        只读
+                        {t("只读", "Read only")}
                       </span>
                     )}
                   </div>
@@ -11259,7 +11281,7 @@ export default function WorkflowEditor() {
                 <div className={`text-xs font-bold ${
                   task.status === 'success' ? 'text-emerald-600' : task.status === 'failed' ? 'text-rose-600' : isTaskRunning ? 'text-blue-600' : 'text-slate-500'
                 }`}>
-                  {task.status === 'success' ? stoppedCount ? '已停止' : '已完成' : task.status === 'failed' ? '有失败' : task.status === 'stopped' ? '已停止' : task.status === 'stopping' ? '停止中' : isTaskRunning ? '执行中' : '等待执行'}
+                  {task.status === 'success' ? stoppedCount ? t("已停止", "Stopped") : t("已完成", "Completed") : task.status === 'failed' ? t("有失败", "Failed") : task.status === 'stopped' ? t("已停止", "Stopped") : task.status === 'stopping' ? t("停止中", "Stopping") : isTaskRunning ? t("执行中", "Running") : t("等待执行", "Waiting to run")}
                 </div>
                 <div className="text-xs font-mono font-bold">
                   <span className="text-emerald-600">{successCount}</span>
@@ -11274,9 +11296,9 @@ export default function WorkflowEditor() {
                     type="button"
                     disabled={!canRerunFailed || pendingTaskActions.has(task.id)}
                     onClick={() => rerunFailedAutomationTask(task)}
-                    title={isTaskRunning ? '任务执行中不可重跑失败' : failedCount > 0 ? '只重跑执行失败的用例' : '没有失败用例可重跑'}
+                    title={isTaskRunning ? t("任务执行中不可重跑失败", "Wait for the task to finish before rerunning failures") : failedCount > 0 ? t("只重跑执行失败的用例", "Rerun only failed cases") : t("没有失败用例可重跑", "No failed cases to rerun")}
                   >
-                    {pendingTaskActions.has(task.id) ? '正在提交…' : '重跑失败'}
+                    {pendingTaskActions.has(task.id) ? t("正在提交…", "Submitting…") : t("重跑失败", "Rerun failed")}
                   </button>
                   <button
                     className={`rounded-lg px-3 py-1.5 text-xs font-bold ${
@@ -11288,25 +11310,25 @@ export default function WorkflowEditor() {
                     disabled={task.readonly || taskStopPending.has(task.id) || (!isTaskRunning && pendingTaskActions.has(task.id))}
                     onClick={() => isTaskRunning ? void stopAutomationTask(task.id) : rerunAutomationTask(task)}
                   >
-                    {task.readonly ? '只读' : taskStopPending.has(task.id) ? '正在请求…' : task.status === 'stopping' ? '停止中…' : isTaskRunning ? '停止' : '重跑'}
+                    {task.readonly ? t("只读", "Read only") : taskStopPending.has(task.id) ? t("正在请求…", "Requesting…") : task.status === 'stopping' ? t("停止中…", "Stopping…") : isTaskRunning ? t("停止", "Stop") : t("重跑", "Rerun")}
                   </button>
                   <button
                     className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
                     type="button"
                     onClick={() => void openAutomationTaskReport(task)}
-                    title={task.error || '查看测试报告'}
+                    title={task.error || t("查看测试报告", "View test report")}
                   >
-                    报告
+                    {t("报告", "Report")}
                   </button>
                   <button
                     className="inline-flex items-center gap-1 rounded-lg border border-rose-100 bg-white px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-45"
                     type="button"
                     disabled={isTaskRunning}
                     onClick={() => deleteAutomationTasks([task.id])}
-                    title={isTaskRunning ? '执行中的任务不能删除' : '删除测试报告'}
+                    title={isTaskRunning ? t("执行中的任务不能删除", "Running tasks cannot be deleted") : t("删除测试报告", "Delete test report")}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                    删除
+                    {t("删除", "Delete")}
                   </button>
                 </div>
                 {taskActionFeedback[task.id] && <div className="col-span-full"><TaskActionNotice feedback={taskActionFeedback[task.id]} onOpenTask={openTaskActionReport} /></div>}
@@ -11600,13 +11622,13 @@ export default function WorkflowEditor() {
             <input
               value={param.key}
               onChange={(event) => updateComponentDraftParam(index, { key: event.target.value })}
-              placeholder="key，如 audioPath"
+              placeholder={t("key，如 audioPath", "Key, e.g. audioPath")}
               className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-xs font-bold outline-none focus:border-blue-300"
             />
             <input
-              value={param.label}
+              value={componentDisplayCopy(param.label, t)}
               onChange={(event) => updateComponentDraftParam(index, { label: event.target.value })}
-              placeholder="展示名称"
+              placeholder={t("展示名称", "Display name")}
               className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-xs font-bold outline-none focus:border-blue-300"
             />
             <select
@@ -11614,16 +11636,16 @@ export default function WorkflowEditor() {
               onChange={(event) => updateComponentDraftParam(index, { inputType: event.target.value as ComponentParam['inputType'] })}
               className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-xs font-bold outline-none focus:border-blue-300"
             >
-              <option value="text">文本</option>
-              <option value="textarea">多行文本</option>
-              <option value="number">数字</option>
+              <option value="text">{t("文本", "Text")}</option>
+              <option value="textarea">{t("多行文本", "Multiline text")}</option>
+              <option value="number">{t("数字", "Number")}</option>
               <option value="json">JSON</option>
             </select>
             <button
               type="button"
               onClick={() => removeComponentDraftParam(index)}
               className="h-9 rounded-lg text-rose-500 hover:bg-rose-50"
-              title="删除参数"
+              title={t("删除参数", "Remove parameter")}
             >
               <Trash2 className="mx-auto h-4 w-4" />
             </button>
@@ -11632,13 +11654,13 @@ export default function WorkflowEditor() {
             <input
               value={param.defaultValue || ''}
               onChange={(event) => updateComponentDraftParam(index, { defaultValue: event.target.value })}
-              placeholder="默认值"
+              placeholder={t("默认值", "Default value")}
               className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-xs outline-none focus:border-blue-300"
             />
             <input
-              value={param.helperText || ''}
+              value={componentDisplayCopy(param.helperText || '', t)}
               onChange={(event) => updateComponentDraftParam(index, { helperText: event.target.value })}
-              placeholder="引导文案"
+              placeholder={t("引导文案", "Help text")}
               className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-xs outline-none focus:border-blue-300"
             />
           </div>
@@ -11655,18 +11677,18 @@ export default function WorkflowEditor() {
     const selectedComponent = visibleComponents.find((component) => component.id === selectedComponentId) || visibleComponents[0];
     const componentTemplates: Record<ComponentLibraryTab, Array<[TestComponentKind, string, string]>> = {
       execute: [
-        ['adb', '通用 ADB 命令', '通过 adb 命令模板执行通用动作'],
-        ['pc_command', '通用 PC 命令', '在当前电脑执行命令，无需选择设备'],
-        ['activity', '拉起 Activity', '拉起指定 Activity 并校验前台状态'],
-        ['audio', '音频输入', '选择/录制音频，push 后触发 adb 命令'],
-        ['image_mock', '图片 Mock', '选择图片，push 到设备后执行 Mock 命令'],
-        ['mobile_ui_action', '手机 UI 操作', '点击、输入、滑动或返回手机页面'],
+        ['adb', t("通用 ADB 命令", "ADB Command"), t("通过 adb 命令模板执行通用动作", "Run an action through an ADB command template")],
+        ['pc_command', t("通用 PC 命令", "Local Command"), t("在当前电脑执行命令，无需选择设备", "Run a command on this computer without selecting a device")],
+        ['activity', t("拉起 Activity", "Launch Activity"), t("拉起指定 Activity 并校验前台状态", "Launch an Activity and verify that it is in the foreground")],
+        ['audio', t("音频输入", "Audio Input"), t("选择/录制音频，push 后触发 adb 命令", "Choose or record audio, push it to the device, and run an ADB command")],
+        ['image_mock', t("图片 Mock", "Mock Image"), t("选择图片，push 到设备后执行 Mock 命令", "Push an image to the device and run a mock command")],
+        ['mobile_ui_action', t("手机 UI 操作", "Phone UI Action"), t("点击、输入、滑动或返回手机页面", "Tap, type, swipe, or go back on the phone")],
       ],
       detect: [
-        ['mobile_ui_assert', '手机 UI 元素校验', '校验手机页面上是否存在指定元素'],
-        ['tts_assert', '日志文本提取断言', '从日志提取文本并比对期望值'],
-        ['json_assert', 'JSON 日志断言', '正则定位日志，解析 JSON 后校验字段'],
-        ['llm_assert', 'LLM 语义断言', '结合变量和当前日志做语义断言'],
+        ['mobile_ui_assert', t("手机 UI 元素校验", "Phone UI Element Assertion"), t("校验手机页面上是否存在指定元素", "Check for a specific element on the phone screen")],
+        ['tts_assert', t("日志文本提取断言", "Log Text Assertion"), t("从日志提取文本并比对期望值", "Extract text from a log and compare it with an expected value")],
+        ['json_assert', t("JSON 日志断言", "JSON Log Assertion"), t("正则定位日志，解析 JSON 后校验字段", "Find a log with a regex, parse the JSON payload, and check its fields")],
+        ['llm_assert', t("LLM 语义断言", "LLM Semantic Assertion"), t("结合变量和当前日志做语义断言", "Use variables and current logs to evaluate an assertion with an LLM")],
       ],
     };
 
@@ -11676,7 +11698,7 @@ export default function WorkflowEditor() {
           <aside>
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-black text-slate-900">测试组件管理</h2>
+                <h2 className="text-sm font-black text-slate-900">{t("测试组件管理", "Test components")}</h2>
               </div>
               <div className="mt-3 grid grid-cols-2 rounded-xl border border-slate-200 bg-slate-100 p-1">
                 {componentLibraryTabs.map((tab) => (
@@ -11690,7 +11712,7 @@ export default function WorkflowEditor() {
                         : 'text-slate-500 hover:text-slate-900'
                     }`}
                   >
-                    {tab.label}
+                    {t(tab.label, tab.key === 'execute' ? 'Actions' : 'Checks')}
                   </button>
                 ))}
               </div>
@@ -11700,7 +11722,7 @@ export default function WorkflowEditor() {
                   onClick={() => setIsAddComponentMenuOpen((current) => !current)}
                   className="w-full rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100"
                 >
-                  新增测试组件
+                  {t("新增测试组件", "Add test component")}
                 </button>
                 {isAddComponentMenuOpen && (
                   <div className="absolute left-0 right-0 top-11 z-20 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
@@ -11743,16 +11765,16 @@ export default function WorkflowEditor() {
                           )}
                         </div>
                         <div className="min-w-0">
-                          <div className="truncate text-xs font-black text-slate-900">{component.name}</div>
+                          <div className="truncate text-xs font-black text-slate-900">{componentDisplayCopy(component.name, t)}</div>
                           <div className="mt-1 text-[10px] font-bold text-slate-500">
-                            {componentKindLabels[component.kind || 'adb']} · {component.params.length} 个参数
+                            {t(componentKindLabels[component.kind || 'adb'], englishComponentKind[component.kind || 'adb'])} · {component.params.length} {t("个参数", "arguments")}
                           </div>
                         </div>
                       </div>
                     </button>
                 )) : (
                   <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-6 text-center text-xs font-bold text-slate-400">
-                    当前分类暂无组件
+                    {t("当前分类暂无组件", "No components in this category")}
                   </div>
                 )}
               </div>
@@ -11762,53 +11784,53 @@ export default function WorkflowEditor() {
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-sm font-black text-slate-900">组件配置</h2>
-                <p className="mt-1 text-xs text-slate-500">组件可以是 ADB 命令、音频输入或日志断言，参数会在 Flow 步骤里呈现。</p>
+                <h2 className="text-sm font-black text-slate-900">{t("组件配置", "Component settings")}</h2>
+                <p className="mt-1 text-xs text-slate-500">{t("组件可以是 ADB 命令、音频输入或日志断言，参数会在 Flow 步骤里呈现。", "Components can run ADB commands, send audio input, or check logs. Their parameters are available in workflow steps.")}</p>
               </div>
               <div className="rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-500">
-                ADB 命令模板
+                {t("ADB 命令模板", "ADB command template")}
               </div>
             </div>
 
             <div className="mt-5 grid grid-cols-2 gap-4">
               <div>
-                <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">组件名称</label>
+                <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("组件名称", "Component name")}</label>
                 <input
-                  value={componentDraft.name}
+                  value={componentDisplayCopy(componentDraft.name, t)}
                   onChange={(event) => setComponentDraft((current) => ({ ...current, name: event.target.value }))}
                   className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-bold outline-none focus:border-blue-300"
                 />
               </div>
               <div>
-                <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">组件类型</label>
+                <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("组件类型", "Component type")}</label>
                 <div className="mt-1 flex h-10 items-center rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-black text-slate-700">
-                  {componentKindLabels[componentDraft.kind]}
+                  {t(componentKindLabels[componentDraft.kind], englishComponentKind[componentDraft.kind])}
                 </div>
               </div>
               {componentDraft.kind !== 'image_mock' && componentDraft.kind !== 'pc_command' && (
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">目标设备类型</label>
+                  <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("目标设备类型", "Target device type")}</label>
                   <select
                     value={componentDraft.device}
                     onChange={(event) => setComponentDraft((current) => ({ ...current, device: event.target.value as TestComponent['device'] }))}
                     className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-bold outline-none focus:border-blue-300"
                   >
-                    <option value="phone">手机</option>
-                    <option value="glasses">眼镜</option>
-                    {componentDraft.kind === 'audio' && <option value="pc">当前电脑（PC）</option>}
+                    <option value="phone">{t("手机", "Phone")}</option>
+                    <option value="glasses">{t("眼镜", "Glasses")}</option>
+                    {componentDraft.kind === 'audio' && <option value="pc">{t("当前电脑（PC）", "This computer")}</option>}
                   </select>
                 </div>
               )}
               {componentDraft.kind === 'pc_command' && (
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">执行位置</label>
+                  <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("执行位置", "Run on")}</label>
                   <div className="mt-1 flex h-10 items-center rounded-xl border border-blue-100 bg-blue-50 px-3 text-sm font-black text-blue-700">
-                    当前电脑（无需选择设备）
+                    {t("当前电脑（无需选择设备）", "This computer")}
                   </div>
                 </div>
               )}
               <div>
-                <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">Tag，逗号分隔</label>
+                <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("Tag，逗号分隔", "Tags, comma separated")}</label>
                 <input
                   value={componentDraft.tags}
                   onChange={(event) => setComponentDraft((current) => ({ ...current, tags: event.target.value }))}
@@ -11816,7 +11838,7 @@ export default function WorkflowEditor() {
                 />
               </div>
               <div>
-                <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">超时，秒</label>
+                <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("超时，秒", "Timeout (seconds)")}</label>
                 <input
                   type="number"
                   value={componentDraft.timeoutSeconds}
@@ -11825,9 +11847,9 @@ export default function WorkflowEditor() {
                 />
               </div>
               <div className="col-span-2">
-                <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">描述</label>
+                <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("描述", "Description")}</label>
                 <input
-                  value={componentDraft.description}
+                  value={componentDisplayCopy(componentDraft.description, t)}
                   onChange={(event) => setComponentDraft((current) => ({ ...current, description: event.target.value }))}
                   className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-bold outline-none focus:border-blue-300"
                 />
@@ -11836,22 +11858,22 @@ export default function WorkflowEditor() {
               {componentDraft.kind === 'audio' && (
                 <div className="col-span-2 space-y-4">
                   <div className="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-4">
-                    <div className="text-xs font-black text-slate-900">1. 音频选择</div>
+                    <div className="text-xs font-black text-slate-900">{t("1. 音频选择", "1. Select audio")}</div>
                     <div className="mt-3 grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">音频来源</label>
+                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("音频来源", "Audio source")}</label>
                         <select
                           value={getComponentDraftParamValue('sourceType', 'file')}
                           onChange={(event) => setComponentDraftParamValue('sourceType', event.target.value)}
                           className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold outline-none focus:border-blue-300"
                         >
-                          <option value="file">直接选择电脑音频文件</option>
-                          <option value="record">电脑录制音频</option>
-                          <option value="tts">TTS 合成</option>
+                          <option value="file">{t("直接选择电脑音频文件", "Choose a local audio file")}</option>
+                          <option value="record">{t("电脑录制音频", "Record on this computer")}</option>
+                          <option value="tts">{t("TTS 合成", "Text-to-speech")}</option>
                         </select>
                       </div>
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">最终音频格式</label>
+                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("最终音频格式", "Output audio format")}</label>
                         <select
                           value={getComponentDraftParamValue('outputFormat', 'pcm')}
                           onChange={(event) => {
@@ -11869,7 +11891,7 @@ export default function WorkflowEditor() {
                     </div>
 
                     <div className="mt-3 rounded-xl border border-indigo-100 bg-white/70 p-3">
-                      <div className="text-[11px] font-black text-slate-700">电脑录音转码参数</div>
+                      <div className="text-[11px] font-black text-slate-700">{t("电脑录音转码参数", "Recording conversion settings")}</div>
                       <div className="mt-2 grid grid-cols-2 gap-2">
                         <div>
                           <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">sampleFormat</label>
@@ -11893,7 +11915,7 @@ export default function WorkflowEditor() {
                           />
                         </div>
                         <div className="col-span-2">
-                          <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">尾部静音（ms）</label>
+                          <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("尾部静音（ms）", "Trailing silence (ms)")}</label>
                           <input
                             type="number"
                             min="0"
@@ -11906,27 +11928,27 @@ export default function WorkflowEditor() {
                         </div>
                       </div>
                       <div className="mt-2 text-[10px] font-bold leading-4 text-slate-400">
-                        codeFmt 由最终音频格式决定；声道数固定为 1。尾部静音会写入实际推送文件，默认 800ms。默认对齐 receiveDenoiseAudio(audioBuffer, "pcm", AV_SAMPLE_FMT_S16, 16000, 1, extInfo)。
+                        {t("codeFmt 由最终音频格式决定；声道数固定为 1。尾部静音会写入实际推送文件，默认 800ms。默认对齐 receiveDenoiseAudio(audioBuffer, \"pcm\", AV_SAMPLE_FMT_S16, 16000, 1, extInfo)。", "The output format determines codeFmt. Audio is mono. The file includes 800 ms of trailing silence by default and matches receiveDenoiseAudio(audioBuffer, \"pcm\", AV_SAMPLE_FMT_S16, 16000, 1, extInfo).")}
                       </div>
                     </div>
 
                     {getComponentDraftParamValue('sourceType', 'file') === 'tts' ? (
                       <div className="mt-3">
-                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">TTS 文本</label>
+                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("TTS 文本", "Text to synthesize")}</label>
                         <textarea
                           value={getComponentDraftParamValue('ttsText', '')}
                           onChange={(event) => setComponentDraftParamValue('ttsText', event.target.value)}
                           className="mt-1 h-20 w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold leading-5 outline-none focus:border-blue-300"
-                          placeholder="执行时通过设置中心的 HTTP TTS 合成"
+                          placeholder={t("执行时通过设置中心的 HTTP TTS 合成", "Synthesize at runtime with the HTTP TTS service configured in Settings")}
                         />
                         <div className="mt-2 rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-[11px] font-bold text-amber-700">
-                          执行时会读取设置中心的 HTTP TTS 配置，合成音频后推送到设备。
+                          {t("执行时会读取设置中心的 HTTP TTS 配置，合成音频后推送到设备。", "The workflow uses the HTTP TTS settings to synthesize audio and push it to the device.")}
                         </div>
                       </div>
                     ) : (
                       <div className="mt-3">
                         <div className="flex items-center justify-between">
-                          <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">本地音频文件</label>
+                          <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("本地音频文件", "Local audio file")}</label>
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
@@ -11942,7 +11964,7 @@ export default function WorkflowEditor() {
                               ) : (
                                 <Mic className="h-3 w-3" />
                               )}
-                              {recordingState?.stepId === `component-draft-${selectedComponentId}` ? '结束录音' : '电脑录音'}
+                              {recordingState?.stepId === `component-draft-${selectedComponentId}` ? t("结束录音", "Stop recording") : t("电脑录音", "Record on this computer")}
                             </button>
                             <button
                               type="button"
@@ -11950,14 +11972,14 @@ export default function WorkflowEditor() {
                               disabled={!recordingPreviewUrls[`component-draft-${selectedComponentId}`] && !String(getComponentDraftParamValue('localPath', '')).trim()}
                               className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] font-bold text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                             >
-                              播放音频
+                              {t("播放音频", "Play audio")}
                             </button>
                             <button
                               type="button"
                               onClick={() => void selectAudioFileForComponentDraft()}
                               className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] font-bold text-slate-500 hover:bg-slate-50"
                             >
-                              选择文件
+                              {t("选择文件", "Choose file")}
                             </button>
                           </div>
                         </div>
@@ -11972,12 +11994,12 @@ export default function WorkflowEditor() {
                   </div>
 
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <div className="text-xs font-black text-slate-900">2. 音频 push 文件夹</div>
+                    <div className="text-xs font-black text-slate-900">{t("2. 音频 push 文件夹", "2. Destination for audio files")}</div>
                     <label className="mt-3 flex items-center gap-2 text-xs font-bold">
                       <input type="checkbox" checked={getComponentDraftParamValue('pushEnabled', componentDraft.device === 'pc' ? 'false' : 'true') === 'true'} onChange={(event) => setComponentDraftParamValue('pushEnabled', String(event.target.checked))} />
-                      启用 ADB push（PC 默认关闭）
+                      {t("启用 ADB push（PC 默认关闭）", "Enable ADB push (off by default for local commands)")}
                     </label>
-                    {componentDraft.device === 'pc' && getComponentDraftParamValue('pushEnabled', 'false') === 'true' && <select aria-label="音频 push 目标设备" value={getComponentDraftParamValue('pushDevice', 'phone')} onChange={(event) => setComponentDraftParamValue('pushDevice', event.target.value)}><option value="phone">手机</option><option value="glasses">眼镜</option></select>}
+                    {componentDraft.device === 'pc' && getComponentDraftParamValue('pushEnabled', 'false') === 'true' && <select aria-label={t('音频 push 目标设备', 'Audio push destination')} value={getComponentDraftParamValue('pushDevice', 'phone')} onChange={(event) => setComponentDraftParamValue('pushDevice', event.target.value)}><option value="phone">{t("手机", "Phone")}</option><option value="glasses">{t("眼镜", "Glasses")}</option></select>}
                     <input
                       disabled={getComponentDraftParamValue('pushEnabled', componentDraft.device === 'pc' ? 'false' : 'true') !== 'true'}
                       value={getComponentDraftParamValue('remotePath', createDefaultAudioRemoteDir())}
@@ -11988,7 +12010,7 @@ export default function WorkflowEditor() {
                   </div>
 
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <div className="text-xs font-black text-slate-900">3. {componentDraft.device === 'pc' ? 'PC 执行命令' : 'ADB 触发命令'}</div>
+                    <div className="text-xs font-black text-slate-900">3. {componentDraft.device === 'pc' ? t("PC 执行命令", "Run a local command") : t("ADB 触发命令", "Trigger an ADB command")}</div>
                     <textarea
                       value={componentDraft.commandTemplate}
                       onChange={(event) => setComponentDraft((current) => ({ ...current, commandTemplate: event.target.value }))}
@@ -11996,20 +12018,20 @@ export default function WorkflowEditor() {
                       placeholder='adb -s {{serial}} shell am broadcast -a ... --es audio_path "{{remotePath}}"'
                     />
                     <div className="mt-2 text-[11px] leading-5 text-slate-500">
-                      {'{{localPath}}'} 为处理后的本地音频；{'{{defaults.adbPath}}'} 为当前 ADB 路径。PC 命令直接执行程序及参数，不自动套 shell。
+                      {t('{{localPath}} 为处理后的本地音频；{{defaults.adbPath}} 为当前 ADB 路径。PC 命令直接执行程序及参数，不自动套 shell。', '{{localPath}} is the processed audio file. {{defaults.adbPath}} is the current ADB path. Local commands run directly without a shell wrapper.')}
                     </div>
                     <div className="mt-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-[11px] font-bold leading-5 text-blue-700">
-                      启用 push 后，{'{{remotePath}}'} 为设备端完整路径；禁用后远端路径为空，请用 {'{{localPath}}'}。
+                      {t('启用 push 后，{{remotePath}} 为设备端完整路径；禁用后远端路径为空，请用 {{localPath}}。', 'When push is enabled, {{remotePath}} is the full path on the device. Otherwise use {{localPath}}.')}
                     </div>
                     <div className="mt-4">
                       <div className="mb-2 flex items-center justify-between">
-                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">ADB 触发命令参数</label>
+                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("ADB 触发命令参数", "ADB command arguments")}</label>
                         <button
                           type="button"
                           onClick={addComponentDraftParam}
                           className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-500 hover:bg-slate-50"
                         >
-                          + 参数
+                          {t("+ 参数", "+ Parameter")}
                         </button>
                       </div>
                       {renderComponentParamEditor(componentDraft.params
@@ -12025,50 +12047,50 @@ export default function WorkflowEditor() {
                   <div className="rounded-2xl border-2 border-cyan-200 bg-cyan-50/70 p-4 shadow-sm">
                     <div className="flex items-center gap-2 text-xs font-black text-slate-900">
                       <span className="rounded-lg bg-cyan-600 px-2 py-1 text-[10px] text-white">STEP 1</span>
-                      图片选择
+                      {t("图片选择", "Select image")}
                     </div>
                     <div className="mt-3">
                       <div className="flex items-center justify-between">
-                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">图片路径或 URL</label>
+                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("图片路径或 URL", "Image path or URL")}</label>
                         <button
                           type="button"
                           onClick={() => void selectImageFileForComponentDraft()}
                           className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] font-bold text-slate-500 hover:bg-slate-50"
                         >
-                          选择文件
+                          {t("选择文件", "Choose file")}
                         </button>
                       </div>
                       <input
                         value={getComponentDraftParamValue('imagePath', '')}
                         onChange={(event) => setComponentDraftParamValue('imagePath', event.target.value)}
                         className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 font-mono text-xs font-bold outline-none focus:border-blue-300"
-                        placeholder="/path/to/mock.png 或 https://..."
+                        placeholder={t("/path/to/mock.png 或 https://...", "/path/to/mock.png or https://...")}
                       />
                     </div>
                     <div className="mt-3 rounded-xl border border-cyan-100 bg-white/70 px-3 py-2 text-[11px] font-bold leading-5 text-cyan-800">
-                      输入 http/https 会在执行时下载；选择电脑图片后，推送用例库到 Git 时会自动归档到 assets/images，其他人拉取后仍可执行。
+                      {t("输入 http/https 会在执行时下载；选择电脑图片后，推送用例库到 Git 时会自动归档到 assets/images，其他人拉取后仍可执行。", "Remote images are downloaded at runtime. Local images are saved under assets/images when pushing the test repository to Git.")}
                     </div>
                   </div>
 
                   <div className="rounded-2xl border-2 border-blue-200 bg-blue-50/70 p-4 shadow-sm">
                     <div className="flex items-center gap-2 text-xs font-black text-slate-900">
                       <span className="rounded-lg bg-blue-600 px-2 py-1 text-[10px] text-white">STEP 2</span>
-                      图片 push 路径
+                      {t("图片 push 路径", "Image destination")}
                     </div>
                     <div className="mt-3 grid grid-cols-[150px_minmax(0,1fr)] gap-3">
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">推送设备</label>
+                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("推送设备", "Destination device")}</label>
                         <select
                           value={getComponentDraftParamValue('pushDevice', 'glasses')}
                           onChange={(event) => setComponentDraftParamValue('pushDevice', event.target.value)}
                           className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold outline-none focus:border-blue-300"
                         >
-                          <option value="glasses">眼镜</option>
-                          <option value="phone">手机</option>
+                          <option value="glasses">{t("眼镜", "Glasses")}</option>
+                          <option value="phone">{t("手机", "Phone")}</option>
                         </select>
                       </div>
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">设备侧图片路径</label>
+                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("设备侧图片路径", "Image path on device")}</label>
                         <input
                           value={getComponentDraftParamValue('remoteImagePath', defaultImageMockRemotePath)}
                           onChange={(event) => setComponentDraftParamValue('remoteImagePath', event.target.value)}
@@ -12078,25 +12100,25 @@ export default function WorkflowEditor() {
                       </div>
                     </div>
                     <div className="mt-2 text-[11px] font-bold leading-5 text-blue-700">
-                      可以填写完整文件路径；如果以 / 结尾，会自动拼接图片文件名。
+                      {t("可以填写完整文件路径；如果以 / 结尾，会自动拼接图片文件名。", "Enter a full file path, or end the path with / to append the image filename.")}
                     </div>
                   </div>
 
                   <div className="rounded-2xl border-2 border-violet-200 bg-violet-50/70 p-4 shadow-sm">
                     <div className="flex items-center gap-2 text-xs font-black text-slate-900">
                       <span className="rounded-lg bg-violet-600 px-2 py-1 text-[10px] text-white">STEP 3</span>
-                      Mock指令
+                      {t("Mock指令", "Mock command")}
                     </div>
                     <div className="mt-3">
-                      <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">执行设备</label>
+                      <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("执行设备", "Execution target")}</label>
                       <select
                         value={getComponentDraftParamValue('commandDevice', 'phone')}
                         onChange={(event) => setComponentDraftParamValue('commandDevice', event.target.value)}
                         className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold outline-none focus:border-blue-300"
                       >
-                        <option value="phone">手机</option>
-                        <option value="glasses">眼镜</option>
-                        <option value="pc">本机 PC</option>
+                        <option value="phone">{t("手机", "Phone")}</option>
+                        <option value="glasses">{t("眼镜", "Glasses")}</option>
+                        <option value="pc">{t("本机 PC", "This computer")}</option>
                       </select>
                     </div>
                     <textarea
@@ -12106,21 +12128,21 @@ export default function WorkflowEditor() {
                       placeholder={defaultImageMockCommandTemplate}
                     />
                     <div className="mt-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-[11px] font-bold leading-5 text-blue-700">
-                      {'{{serial}}'} 是执行设备的 SN（本机 PC 时为空）；第三步命令可用 {'{{remoteImagePath}}'} 引用第 2 步 push 后的设备侧图片路径。也可使用 {'{{pushSerial}}'}、{'{{commandSerial}}'}、{'{{localImagePath}}'}、{'{{imageFileName}}'}。本机 PC 直接执行程序及参数，不自动套 shell；可用 {'{{phoneSerial}}'}、{'{{glassesSerial}}'} 指定设备，{'{{defaults.adbPath}}'} 读取当前 ADB 路径。
+                      {t('{{serial}} 是执行设备的 SN（本机 PC 时为空）；第三步命令可用 {{remoteImagePath}} 引用第 2 步 push 后的设备侧图片路径。也可使用 {{pushSerial}}、{{commandSerial}}、{{localImagePath}}、{{imageFileName}}。本机 PC 直接执行程序及参数，不自动套 shell；可用 {{phoneSerial}}、{{glassesSerial}} 指定设备，{{defaults.adbPath}} 读取当前 ADB 路径。', '{{serial}} is the execution device serial and is blank for local commands. Use {{remoteImagePath}} for the image pushed in step 2. Other available variables are {{pushSerial}}, {{commandSerial}}, {{localImagePath}}, and {{imageFileName}}. Local commands run directly without a shell wrapper. Use {{phoneSerial}} or {{glassesSerial}} for a device serial and {{defaults.adbPath}} for the ADB path.')}
                     </div>
                     <div className="mt-3">
-                      <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">Mock指令预览</label>
+                      <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("Mock指令预览", "Mock command preview")}</label>
                       <pre className="mt-1 h-16 w-full overflow-auto rounded-xl border border-slate-200 bg-white p-3 font-mono text-xs leading-5 text-slate-700 whitespace-pre-wrap break-words">{buildImageMockDraftCommandPreview()}</pre>
                     </div>
                     <div className="mt-4">
                       <div className="mb-2 flex items-center justify-between">
-                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">Flow 页面自定义参数</label>
+                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("Flow 页面自定义参数", "Workflow parameters")}</label>
                         <button
                           type="button"
                           onClick={addComponentDraftParam}
                           className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-500 hover:bg-slate-50"
                         >
-                          + 参数
+                          {t("+ 参数", "+ Parameter")}
                         </button>
                       </div>
                       {renderComponentParamEditor(componentDraft.params
@@ -12135,14 +12157,14 @@ export default function WorkflowEditor() {
                 <div className="col-span-2">
                   <div className="flex items-center justify-between gap-2">
                     <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">
-                      {componentDraft.kind === 'pc_command' ? 'PC 命令模板' : 'ADB 命令模板'}
+                      {componentDraft.kind === 'pc_command' ? t("PC 命令模板", "Local command template") : t("ADB 命令模板", "ADB command template")}
                     </label>
                     <button
                       type="button"
                       onClick={() => setCommandVariableGuide(componentDraft.kind === 'pc_command' ? 'pc_command' : 'adb')}
                       className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600 transition-colors hover:border-blue-200 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                      title="查看变量使用教程"
-                      aria-label="查看命令变量使用教程"
+                      title={t("查看变量使用教程", "View the variable guide")}
+                      aria-label={t("查看命令变量使用教程", "View the command variable guide")}
                     >
                       <CircleHelp className="h-4 w-4" />
                     </button>
@@ -12154,8 +12176,8 @@ export default function WorkflowEditor() {
                   />
                   <div className="mt-2 text-[11px] leading-5 text-slate-500">
                     {componentDraft.kind === 'pc_command'
-                      ? <>命令在当前电脑直接执行，不经过 shell。内置变量：{'{{phoneSerial}}'}、{'{{glassesSerial}}'}、{'{{phonePackage}}'}、{'{{glassesPackage}}'}；自定义参数用 {'{{参数key}}'} 关联。</>
-                      : <>内置变量：{'{{serial}}'}、{'{{phoneSerial}}'}、{'{{glassesSerial}}'}、{'{{phonePackage}}'}、{'{{glassesPackage}}'}。自定义参数用 {'{{参数key}}'} 关联。</>}
+                      ? <>{t("命令在当前电脑直接执行，不经过 shell。内置变量：", "Commands run on this computer without a shell. Built-in variables: ")}{'{{phoneSerial}}'}、{'{{glassesSerial}}'}、{'{{phonePackage}}'}、{'{{glassesPackage}}'}{t("；自定义参数用 {{参数key}} 关联。", ". Reference custom parameters with {{parameterKey}}.")}</>
+                      : <>{t("内置变量：", "Built-in variables: ")}{'{{serial}}'}、{'{{phoneSerial}}'}、{'{{glassesSerial}}'}、{'{{phonePackage}}'}、{'{{glassesPackage}}'}{t("。自定义参数用 {{参数key}} 关联。", ". Reference custom parameters with {{parameterKey}}.")}</>}
                   </div>
                 </div>
               )}
@@ -12165,9 +12187,9 @@ export default function WorkflowEditor() {
                   <div className="rounded-2xl border border-orange-100 bg-orange-50/70 p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="text-xs font-black text-slate-900">日志文本提取规则</div>
+                        <div className="text-xs font-black text-slate-900">{t("日志文本提取规则", "Log text extraction rules")}</div>
                         <div className="mt-1 text-[11px] font-bold text-slate-500">
-                          填写日志样例和要提取的文本片段，生成可复用的提取正则。
+                          {t("填写日志样例和要提取的文本片段，生成可复用的提取正则。", "Enter a sample log and the text to extract to generate a reusable regex.")}
                         </div>
                       </div>
                       <button
@@ -12175,31 +12197,31 @@ export default function WorkflowEditor() {
                         onClick={generateTtsRegexFromSelection}
                         className="rounded-xl bg-orange-600 px-3 py-2 text-xs font-black text-white hover:bg-orange-700"
                       >
-                        生成正则
+                        {t("生成正则", "Generate regex")}
                       </button>
                     </div>
                     <div className="mt-3">
-                      <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">日志样例</label>
+                      <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("日志样例", "Log sample")}</label>
                       <textarea
                         id="tts-sample-log-input"
                         value={getComponentDraftParamValue('sampleLog', '')}
                         onChange={(event) => setComponentDraftParamValue('sampleLog', event.target.value)}
                         className="mt-1 h-24 w-full resize-none rounded-xl border border-orange-100 bg-white px-3 py-2 font-mono text-xs leading-5 outline-none focus:border-orange-300"
-                        placeholder="粘贴一条包含目标文本的 logcat 日志，并选中文本部分"
+                        placeholder={t("粘贴一条包含目标文本的 logcat 日志，并选中文本部分", "Paste a logcat entry and select the target text")}
                       />
                     </div>
                     <div className="mt-3">
-                      <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">提取内容</label>
+                      <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("提取内容", "Text to extract")}</label>
                       <input
                         value={getComponentDraftParamValue('sampleExtractText', '')}
                         onChange={(event) => setComponentDraftParamValue('sampleExtractText', event.target.value)}
                         className="mt-1 h-10 w-full rounded-xl border border-orange-100 bg-white px-3 text-sm font-bold outline-none focus:border-orange-300"
-                        placeholder="例如：已退出支付"
+                        placeholder={t("例如：已退出支付", "Example: Payment closed")}
                       />
                     </div>
                     <div className="mt-3 grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">期望文本</label>
+                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("期望文本", "Expected text")}</label>
                         <input
                           value={getComponentDraftParamValue('expectedText', '')}
                           onChange={(event) => setComponentDraftParamValue('expectedText', event.target.value)}
@@ -12208,38 +12230,38 @@ export default function WorkflowEditor() {
                         />
                       </div>
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">比较方式</label>
+                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("比较方式", "Comparison")}</label>
                         <select
                           value={getComponentDraftParamValue('matchOperator', 'equals')}
                           onChange={(event) => setComponentDraftParamValue('matchOperator', event.target.value)}
                           className="mt-1 h-10 w-full rounded-xl border border-orange-100 bg-white px-3 text-sm font-bold outline-none focus:border-orange-300"
                         >
-                          <option value="equals">等于</option>
-                          <option value="contains">包含</option>
+                          <option value="equals">{t("等于", "Equals")}</option>
+                          <option value="contains">{t("包含", "Contains")}</option>
                         </select>
                       </div>
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">区分大小写</label>
+                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("区分大小写", "Case sensitive")}</label>
                         <select
                           value={getComponentDraftParamValue('caseSensitive', 'true')}
                           onChange={(event) => setComponentDraftParamValue('caseSensitive', event.target.value)}
                           className="mt-1 h-10 w-full rounded-xl border border-orange-100 bg-white px-3 text-sm font-bold outline-none focus:border-orange-300"
                         >
-                          <option value="true">是</option>
-                          <option value="false">否</option>
+                          <option value="true">{t("是", "Yes")}</option>
+                          <option value="false">{t("否", "No")}</option>
                         </select>
                       </div>
                     </div>
                     <div className="mt-3">
-                      <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">提取正则</label>
+                      <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("提取正则", "Extraction regex")}</label>
                       <textarea
                         value={getComponentDraftParamValue('extractRegex', '')}
                         onChange={(event) => setComponentDraftParamValue('extractRegex', event.target.value)}
                         className="mt-1 h-24 w-full resize-none rounded-xl border border-orange-100 bg-slate-950 p-3 font-mono text-xs leading-5 text-slate-100 outline-none focus:border-orange-300"
-                        placeholder="例如：prefix (?<ttsText>.*?) suffix"
+                        placeholder={t("例如：prefix (?<ttsText>.*?) suffix", "Example: prefix (?<ttsText>.*?) suffix")}
                       />
                       <div className="mt-2 text-[11px] leading-5 text-orange-700">
-                        正则需要包含命名捕获组 {'(?<ttsText>...)'}，或者至少一个普通捕获组。执行时会提取真实文本，并按比较方式校验“期望文本”。
+                        {t('正则需要包含命名捕获组 (?<ttsText>...)，或者至少一个普通捕获组。执行时会提取真实文本，并按比较方式校验“期望文本”。', 'Include the named capture group (?<ttsText>...) or at least one regular capture group. The captured text is checked against the expected text using the selected comparison.')}
                       </div>
                     </div>
                   </div>
@@ -12247,7 +12269,7 @@ export default function WorkflowEditor() {
                     enabled={getComponentDraftParamValue('extractVariableEnabled', 'false') === 'true'}
                     variableName={getComponentDraftParamValue('extractVariableName', '')}
                     defaultVariableName={DEFAULT_TEXT_ASSERT_VARIABLE_NAME}
-                    description="断言通过后会把提取正则捕获到的文本写入该变量。"
+                    description={t("断言通过后会把提取正则捕获到的文本写入该变量。", "When the assertion passes, store the captured text in this variable.")}
                     referenceExample={'{{variables.extractedText}}'}
                     onEnabledChange={(enabled) => setComponentDraftParamValue('extractVariableEnabled', String(enabled))}
                     onVariableNameChange={(name) => setComponentDraftParamValue('extractVariableName', name)}
@@ -12258,44 +12280,44 @@ export default function WorkflowEditor() {
               {componentDraft.kind === 'json_assert' && (
                 <div className="col-span-2 space-y-4">
                   <div className="rounded-2xl border border-cyan-100 bg-cyan-50/70 p-4">
-                    <div className="text-xs font-black text-slate-900">JSON 日志字段断言</div>
+                    <div className="text-xs font-black text-slate-900">{t("JSON 日志字段断言", "JSON Log Field Assertion")}</div>
                     <div className="mt-1 text-[11px] font-bold leading-5 text-slate-500">
-                      先从日志原文生成 JSON 提取正则；命中后会递归解析日志中的转义 JSON 字符串，再逐条校验字段条件。
+                      {t("先从日志原文生成 JSON 提取正则；命中后会递归解析日志中的转义 JSON 字符串，再逐条校验字段条件。", "Generate a regex from a sample log. When it matches, the workflow decodes nested JSON strings and checks each field condition.")}
                     </div>
                     <div className="mt-3 grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">日志原文</label>
+                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("日志原文", "Full log entry")}</label>
                         <textarea
                           value={getComponentDraftParamValue('sampleLog', '')}
                           onChange={(event) => setComponentDraftParamValue('sampleLog', event.target.value)}
                           className="mt-1 h-28 w-full resize-none rounded-xl border border-cyan-100 bg-white px-3 py-2 font-mono text-xs leading-5 outline-none focus:border-cyan-300"
-                          placeholder="粘贴一条完整 logcat 日志"
+                          placeholder={t("粘贴一条完整 logcat 日志", "Paste a complete logcat entry")}
                         />
                       </div>
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">提取内容</label>
+                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("提取内容", "Text to extract")}</label>
                         <textarea
                           value={getComponentDraftParamValue('samplePayload', '')}
                           onChange={(event) => setComponentDraftParamValue('samplePayload', event.target.value)}
                           className="mt-1 h-28 w-full resize-none rounded-xl border border-cyan-100 bg-white px-3 py-2 font-mono text-xs leading-5 outline-none focus:border-cyan-300"
-                          placeholder="粘贴日志里要提取出来的 JSON 片段"
+                          placeholder={t("粘贴日志里要提取出来的 JSON 片段", "Paste the JSON payload to extract")}
                         />
                       </div>
                     </div>
                     <div className="mt-3 flex items-center justify-between">
                       <div className="text-[11px] leading-5 text-cyan-700">
-                        会用提取内容前后的文本生成边界，中间用捕获组承接 JSON，避免手写转义出错。
+                        {t("会用提取内容前后的文本生成边界，中间用捕获组承接 JSON，避免手写转义出错。", "The generated regex uses surrounding text to define the boundaries and a capture group to extract the JSON.")}
                       </div>
                       <button
                         type="button"
                         onClick={generateJsonRegexFromSample}
                         className="rounded-lg bg-cyan-600 px-3 py-1.5 text-[11px] font-black text-white hover:bg-cyan-700"
                       >
-                        生成正则
+                        {t("生成正则", "Generate regex")}
                       </button>
                     </div>
                     <div className="mt-3">
-                      <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">JSON 提取正则</label>
+                      <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("JSON 提取正则", "JSON extraction regex")}</label>
                       <textarea
                         value={getComponentDraftParamValue('lineRegex', '')}
                         onChange={(event) => setComponentDraftParamValue('lineRegex', event.target.value)}
@@ -12303,30 +12325,30 @@ export default function WorkflowEditor() {
                         placeholder="dataJson=([\\s\\S]*?), extfo="
                       />
                       <div className="mt-2 text-[11px] leading-5 text-cyan-700">
-                        正则必须能匹配目标日志；优先使用第一个捕获组作为 JSON 内容，没有捕获组时会尝试从整行截取 JSON。
+                        {t("正则必须能匹配目标日志；优先使用第一个捕获组作为 JSON 内容，没有捕获组时会尝试从整行截取 JSON。", "Match the target log entry. The first capture group is used as JSON when available. Otherwise, the entire entry is searched for JSON.")}
                       </div>
                     </div>
                     <div className="mt-3 rounded-2xl border border-cyan-100 bg-white p-3">
                       <div className="mb-2 flex items-center justify-between">
-                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">条件设置</label>
+                        <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("条件设置", "Conditions")}</label>
                         <button
                           type="button"
                           onClick={addJsonAssertComponentCondition}
                           className="inline-flex items-center gap-1 rounded-lg border border-cyan-100 px-2 py-1 text-[10px] font-black text-cyan-700 hover:bg-cyan-50"
                         >
                           <Plus className="h-3 w-3" />
-                          添加条件
+                          {t("添加条件", "Add condition")}
                         </button>
                       </div>
                       <div className="space-y-2">
                         {parseJsonAssertConditionsForUi(getComponentDraftParamValue('conditions', '[]')).length === 0 ? (
                           <div className="rounded-xl border border-dashed border-cyan-100 bg-cyan-50/60 px-3 py-4 text-center text-[11px] font-bold text-cyan-700">
-                            暂无条件。点击“添加条件”后配置 path、处理方式和期望值。
+                            {t("暂无条件。点击“添加条件”后配置 path、处理方式和期望值。", "Add a condition to set a path, operator, and expected value.")}
                           </div>
                         ) : parseJsonAssertConditionsForUi(getComponentDraftParamValue('conditions', '[]')).map((condition, conditionIndex) => (
                           <div key={`component-json-condition-${conditionIndex}`} className="min-w-0 rounded-xl bg-slate-50 p-2">
                             <div className="flex items-center justify-between gap-2">
-                              <div className="text-[10px] font-black uppercase tracking-wide text-slate-400">条件 {conditionIndex + 1}</div>
+                              <div className="text-[10px] font-black uppercase tracking-wide text-slate-400">{t("条件", "Condition")} {conditionIndex + 1}</div>
                               <button
                                 type="button"
                                 onClick={() => removeJsonAssertComponentCondition(conditionIndex)}
@@ -12339,7 +12361,7 @@ export default function WorkflowEditor() {
                               value={condition.path}
                               onChange={(event) => updateJsonAssertComponentCondition(conditionIndex, { path: event.target.value })}
                               className="mt-2 h-8 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-2 text-xs font-bold outline-none focus:border-cyan-300"
-                              placeholder="path，如 data.prompt"
+                              placeholder={t("path，如 data.prompt", "Path, e.g. data.prompt")}
                             />
                             <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
                               <select
@@ -12348,7 +12370,7 @@ export default function WorkflowEditor() {
                                 className="h-8 min-w-0 rounded-lg border border-slate-200 bg-white px-2 text-xs font-bold outline-none focus:border-cyan-300"
                               >
                                 {jsonAssertOperatorOptions.map((option) => (
-                                  <option key={option.value} value={option.value}>{option.label}</option>
+                                  <option key={option.value} value={option.value}>{t(option.label, englishAssertOperator[option.value])}</option>
                                 ))}
                               </select>
                               <label className="flex shrink-0 items-center justify-center gap-1 text-[10px] font-bold text-slate-500">
@@ -12358,28 +12380,28 @@ export default function WorkflowEditor() {
                                   onChange={(event) => updateJsonAssertComponentCondition(conditionIndex, { ignoreCase: event.target.checked })}
                                   className="h-3 w-3"
                                 />
-                                忽略大小写
+                                {t("忽略大小写", "Ignore case")}
                               </label>
                             </div>
                             <input
                               value={condition.value}
                               onChange={(event) => updateJsonAssertComponentCondition(conditionIndex, { value: event.target.value })}
                               className="mt-2 h-8 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-2 text-xs font-bold outline-none focus:border-cyan-300"
-                              placeholder="期望值"
+                              placeholder={t("期望值", "Expected value")}
                               disabled={condition.operator === 'exists' || condition.operator === 'notExists'}
                             />
                           </div>
                         ))}
                       </div>
                       <div className="mt-2 text-[11px] leading-5 text-cyan-700">
-                        path 支持短路径，例如 type、data.prompt；执行时会在解析后的 JSON 树里查找匹配路径。
+                        {t("path 支持短路径，例如 type、data.prompt；执行时会在解析后的 JSON 树里查找匹配路径。", "Short paths such as type and data.prompt are matched within the parsed JSON tree.")}
                       </div>
                     </div>
                     <div className="mt-3 grid grid-cols-1 gap-3">
                       <div className="rounded-xl border border-emerald-100 bg-white px-3 py-2">
                         <div className="flex items-center justify-between text-xs font-bold text-emerald-800">
-                          提取为变量
-                          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">默认关闭</span>
+                          {t("提取为变量", "Extract to variable")}
+                          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">{t("默认关闭", "Off by default")}</span>
                           <input
                             type="checkbox"
                             checked={getComponentDraftParamValue('extractVariableEnabled', 'false') === 'true'}
@@ -12392,7 +12414,7 @@ export default function WorkflowEditor() {
                         </div>
                         {getComponentDraftParamValue('extractVariableEnabled', 'false') === 'true' && <div className="mt-3 space-y-2">
                           <div>
-                            <label className="text-[10px] font-black uppercase tracking-wide text-emerald-700">变量名</label>
+                            <label className="text-[10px] font-black uppercase tracking-wide text-emerald-700">{t("变量名", "Variable name")}</label>
                             <input
                               value={getComponentDraftParamValue('extractVariableName', '')}
                               onChange={(event) => {
@@ -12401,16 +12423,16 @@ export default function WorkflowEditor() {
                               }}
                               required
                               className="mt-1 h-8 w-full rounded-lg border border-emerald-100 bg-emerald-50/40 px-2 font-mono text-xs font-bold outline-none focus:border-emerald-300"
-                              placeholder="请输入唯一变量名"
+                              placeholder={t("请输入唯一变量名", "Enter a unique variable name")}
                             />
                           </div>
                           <div className="text-[10px] font-bold leading-5 text-emerald-700">
-                            断言通过后会把“JSON 提取正则”捕获并解析出的内容写入该变量，后续节点可引用 {'{{variables.extractedJson.xxx}}'}。
+                            {t('断言通过后会把“JSON 提取正则”捕获并解析出的内容写入该变量，后续节点可引用 {{variables.extractedJson.xxx}}。', 'If the assertion passes, the parsed JSON is stored in this variable. Later steps can reference {{variables.extractedJson.xxx}}.')}
                           </div>
                         </div>}
                       </div>
                       <label className="flex items-center justify-between rounded-xl border border-cyan-100 bg-white px-3 py-2 text-xs font-bold text-slate-600">
-                        正则区分大小写
+                        {t("正则区分大小写", "Case-sensitive regex")}
                         <input
                           type="checkbox"
                           checked={getComponentDraftParamValue('caseSensitive', 'true') !== 'false'}
@@ -12429,7 +12451,7 @@ export default function WorkflowEditor() {
                     enabled={getComponentDraftParamValue('extractVariableEnabled', 'false') === 'true'}
                     variableName={getComponentDraftParamValue('extractVariableName', '')}
                     defaultVariableName={DEFAULT_LLM_ASSERT_VARIABLE_NAME}
-                    description="断言通过后会把当前日志正则捕获并解析出的内容写入该变量。"
+                    description={t("断言通过后会把当前日志正则捕获并解析出的内容写入该变量。", "When the assertion passes, store the parsed content captured by the log regex in this variable.")}
                     referenceExample={'{{variables.extractedLlmLog.xxx}}'}
                     onEnabledChange={(enabled) => setComponentDraftParamValue('extractVariableEnabled', String(enabled))}
                     onVariableNameChange={(name) => setComponentDraftParamValue('extractVariableName', name)}
@@ -12440,7 +12462,7 @@ export default function WorkflowEditor() {
               {componentDraft.kind !== 'audio' && componentDraft.kind !== 'image_mock' && componentDraft.kind !== 'tts_assert' && componentDraft.kind !== 'json_assert' && (
               <div className="col-span-2">
                 <div className="mb-2 flex items-center justify-between">
-                  <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">参数列表</label>
+                  <label className="text-[10px] font-black uppercase tracking-wide text-slate-500">{t("参数列表", "Parameters")}</label>
                   <button
                     type="button"
                     onClick={() => setComponentDraft((current) => ({
@@ -12459,7 +12481,7 @@ export default function WorkflowEditor() {
                     }))}
                     className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-bold text-slate-500 hover:bg-slate-50"
                   >
-                    + 参数
+                    {t("+ 参数", "+ Parameter")}
                   </button>
                 </div>
                 <div className="space-y-3">
@@ -12475,16 +12497,16 @@ export default function WorkflowEditor() {
                             ...current,
                             params: current.params.map((item, itemIndex) => itemIndex === index ? { ...item, key: event.target.value } : item),
                           }))}
-                          placeholder="key，如 packageName"
+                          placeholder={t("key，如 packageName", "Key, e.g. packageName")}
                           className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-xs font-bold outline-none focus:border-blue-300"
                         />
                         <input
-                          value={param.label}
+                          value={componentDisplayCopy(param.label, t)}
                           onChange={(event) => setComponentDraft((current) => ({
                             ...current,
                             params: current.params.map((item, itemIndex) => itemIndex === index ? { ...item, label: event.target.value } : item),
                           }))}
-                          placeholder="展示名称"
+                          placeholder={t("展示名称", "Display name")}
                           className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-xs font-bold outline-none focus:border-blue-300"
                         />
                         <select
@@ -12495,9 +12517,9 @@ export default function WorkflowEditor() {
                           }))}
                           className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-xs font-bold outline-none focus:border-blue-300"
                         >
-                          <option value="text">文本</option>
-                          <option value="textarea">多行文本</option>
-                          <option value="number">数字</option>
+                          <option value="text">{t("文本", "Text")}</option>
+                          <option value="textarea">{t("多行文本", "Multiline text")}</option>
+                          <option value="number">{t("数字", "Number")}</option>
                           <option value="json">JSON</option>
                         </select>
                         <button
@@ -12507,28 +12529,30 @@ export default function WorkflowEditor() {
                             params: current.params.filter((_, itemIndex) => itemIndex !== index),
                           }))}
                           className="h-9 rounded-lg text-rose-500 hover:bg-rose-50"
-                          title="删除参数"
+                          title={t("删除参数", "Remove parameter")}
                         >
                           <Trash2 className="mx-auto h-4 w-4" />
                         </button>
                       </div>
                       <div className="mt-2 grid grid-cols-2 gap-2">
                         <input
-                          value={param.defaultValue || ''}
+                          value={componentDraft.kind === 'llm_assert' && param.key === 'assertionPrompt' && param.defaultValue === DEFAULT_LLM_ASSERT_PROMPT
+                            ? t(DEFAULT_LLM_ASSERT_PROMPT, ENGLISH_LLM_ASSERT_PROMPT)
+                            : param.defaultValue || ''}
                           onChange={(event) => setComponentDraft((current) => ({
                             ...current,
                             params: current.params.map((item, itemIndex) => itemIndex === index ? { ...item, defaultValue: event.target.value } : item),
                           }))}
-                          placeholder="默认值"
+                          placeholder={t("默认值", "Default value")}
                           className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-xs outline-none focus:border-blue-300"
                         />
                         <input
-                          value={param.helperText || ''}
+                          value={componentDisplayCopy(param.helperText || '', t)}
                           onChange={(event) => setComponentDraft((current) => ({
                             ...current,
                             params: current.params.map((item, itemIndex) => itemIndex === index ? { ...item, helperText: event.target.value } : item),
                           }))}
-                          placeholder="引导文案"
+                          placeholder={t("引导文案", "Help text")}
                           className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-xs outline-none focus:border-blue-300"
                         />
                       </div>
@@ -12552,7 +12576,7 @@ export default function WorkflowEditor() {
                 className="flex items-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100"
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                删除组件
+                {t("删除组件", "Delete component")}
               </button>
               <button
                 type="button"
@@ -12560,7 +12584,7 @@ export default function WorkflowEditor() {
                 className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white hover:bg-blue-700"
               >
                 <Save className="h-3.5 w-3.5" />
-                保存组件
+                {t("保存组件", "Save component")}
               </button>
             </div>
           </section>
@@ -12578,34 +12602,36 @@ export default function WorkflowEditor() {
               <Settings2 className="h-3.5 w-3.5" />
               Settings Center
             </div>
-            <h2 className="mt-3 text-xl font-black text-slate-900">设置中心</h2>
+            <h2 className="mt-3 text-xl font-black text-slate-900">{t('设置中心', 'Settings')}</h2>
             <p className="mt-1 text-sm font-bold text-slate-500">
-              管理模型、Agent、设备和自动化配置。
+              {t('管理模型、Agent、设备和自动化配置。', 'Manage models, agents, devices, and automation settings.')}
             </p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-500">
-            配置保存后立即对 CLI 与 Flow 生效
+            {t('配置保存后立即对 CLI 与 Flow 生效', 'Saved settings take effect immediately in CLI and Flow.')}
           </div>
         </div>
 
         <div className="mt-5 grid grid-cols-1 items-start gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
           <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm lg:sticky lg:top-0">
-            <h3 className="px-2 text-[11px] font-black uppercase tracking-widest text-slate-400">配置导航</h3>
+            <h3 className="px-2 text-[11px] font-black uppercase tracking-widest text-slate-400">{t('配置导航', 'Settings navigation')}</h3>
             <div className="mt-3 grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-1">
               {([
-                ['team', '团队配置与入门', Settings2],
-                ['model', '模型配置', Sparkles],
-                ['agent-request', 'Agent 请求与屏幕', Bot],
-                ['agent-reply', '消息自动回复', MessageSquare],
-                ['agent-extensions', 'MCP 与 Skills', Settings2],
-                ['environment', '环境配置', Terminal],
-                ['tts', 'TTS 配置', Mic],
-                ['quick-actions', '快捷操作', FileCode2],
-                ['sites', '常用站点', Globe2],
-                ['device', '设备管理', MonitorSmartphone],
+                ['language', t('语言', 'Language'), Globe2],
+                ['team', t('团队配置与入门', 'Team setup'), Settings2],
+                ['model', t('模型配置', 'Model configuration'), Sparkles],
+                ['agent-request', t('Agent 请求与屏幕', 'Agent requests and screen'), Bot],
+                ['agent-reply', t('消息自动回复', 'Automatic replies'), MessageSquare],
+                ['agent-extensions', 'MCP & Skills', Settings2],
+                ['environment', t('环境配置', 'Environment'), Terminal],
+                ['tts', t('TTS 配置', 'TTS settings'), Mic],
+                ['quick-actions', t('快捷操作', 'Quick actions'), FileCode2],
+                ['sites', t('常用站点', 'Saved sites'), Globe2],
+                ['device', t('设备管理', 'Device management'), MonitorSmartphone],
               ] satisfies Array<[SettingsSection, string, React.ComponentType<{ className?: string }>]>) .map(([key, label, Icon]) => (
                 <button
                   key={String(key)}
+                  data-onboarding-target={`settings-${key}`}
                   type="button"
                   onClick={() => setSettingsSection(key as SettingsSection)}
                   className={`rounded-2xl border px-3 py-3 text-left transition-all ${
@@ -12667,7 +12693,9 @@ export default function WorkflowEditor() {
             )}
           </section>
 
-          {settingsSection === 'team' ? (
+          {settingsSection === 'language' ? (
+            <LanguageSettings />
+          ) : settingsSection === 'team' ? (
             <TeamConfigurationPanel onNavigate={(section) => { if (section === 'cases') setActiveTab('automation-cases'); else if (section === 'agent') setActiveTab('agent'); else { setSettingsSection(section); setActiveTab('settings'); } }} />
           ) : settingsSection === 'agent-request' || settingsSection === 'agent-reply' || settingsSection === 'agent-extensions' ? (
           <div className="min-w-0"><AgentSettingsCenter section={settingsSection} sessionId={mirrorSessionId} /></div>
@@ -12816,8 +12844,8 @@ export default function WorkflowEditor() {
           <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h3 className="text-sm font-black text-slate-900">环境配置</h3>
-                <p className="mt-1 text-xs font-bold text-slate-400">配置本机执行环境。保存后所有 adb 命令都会使用这里的 adb。</p>
+                <h3 className="text-sm font-black text-slate-900">{t("环境配置", "Environment")}</h3>
+                <p className="mt-1 text-xs font-bold text-slate-400">{t("配置本机执行环境。保存后所有 adb 命令都会使用这里的 adb。", "Configure the local runtime. All ADB commands use the saved executable.")}</p>
               </div>
               <button
                 type="button"
@@ -12826,20 +12854,20 @@ export default function WorkflowEditor() {
                 className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-black text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSavingEnvironment ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-                保存环境
+                {t("保存环境", "Save environment")}
               </button>
             </div>
             <div className="mt-5">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">ADB 路径</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t("ADB 路径", "ADB path")}</label>
               <input
                 value={environmentDraft.adbPath}
                 onChange={(event) => setEnvironmentDraft({ adbPath: event.target.value })}
                 className="mt-1 h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 font-mono text-sm font-bold outline-none focus:border-blue-300 focus:bg-white"
-                placeholder="留空自动查找，例如 /path/to/platform-tools/adb"
+                placeholder={t("留空自动查找，例如 /path/to/platform-tools/adb", "Leave blank to auto-detect. Example /path/to/platform-tools/adb")}
               />
               <div className="mt-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">当前生效 ADB</div>
-                <div className="mt-1 break-all font-mono text-xs font-bold text-slate-700">{effectiveAdbPath || '自动查找 adb'}</div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t("当前生效 ADB", "Active ADB executable")}</div>
+                <div className="mt-1 break-all font-mono text-xs font-bold text-slate-700">{effectiveAdbPath || t("自动查找 adb", "Detect ADB automatically")}</div>
               </div>
               {environmentMessage && (
                 <div className="mt-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-600">
@@ -12853,8 +12881,8 @@ export default function WorkflowEditor() {
             <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-sm font-black text-slate-900">接口请求配置</h3>
-	                  <p className="mt-1 text-xs font-bold text-slate-400">配置 TTS 接口请求和音频 URL 解析。Flow 里只传入 text。</p>
+                  <h3 className="text-sm font-black text-slate-900">{t("接口请求配置", "TTS request setup")}</h3>
+	                  <p className="mt-1 text-xs font-bold text-slate-400">{t("配置 TTS 接口请求和音频 URL 解析。Flow 里只传入 text。", "Configure the TTS request and audio URL parsing. Workflows pass the text parameter.")}</p>
                 </div>
                 <button
                   type="button"
@@ -12863,13 +12891,13 @@ export default function WorkflowEditor() {
                   className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-black text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSavingEnvironment ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-                  保存
+                  {t("保存", "Save")}
                 </button>
               </div>
 
               <div className="mt-5 space-y-4">
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <div className="text-xs font-black text-slate-900">请求配置</div>
+                  <div className="text-xs font-black text-slate-900">{t("请求配置", "Request settings")}</div>
                   <div className="mt-4 grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">METHOD</label>
@@ -12884,7 +12912,7 @@ export default function WorkflowEditor() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">超时时间(ms)</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t("超时时间(ms)", "Timeout (ms)")}</label>
                       <input
                         type="number"
                         value={String(ttsProviderDraft.timeoutMs)}
@@ -12894,29 +12922,29 @@ export default function WorkflowEditor() {
                     </div>
 
                     <div className="col-span-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">TTS 接口 URL</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t("TTS 接口 URL", "TTS endpoint URL")}</label>
 	                      <div className="mt-1">
 	                        <input
 	                          value={ttsProviderDraft.url}
 	                          onChange={(event) => setTtsProviderDraft((current) => ({ ...current, enabled: true, url: event.target.value }))}
 	                          className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 font-mono text-sm font-bold outline-none focus:border-blue-300"
-	                          placeholder="例如：https://tts.example.com/synthesize?synText={{textUrlEncoded}}&voice=female"
+	                          placeholder={t("例如：https://tts.example.com/synthesize?synText={{textUrlEncoded}}&voice=female", "Example: https://tts.example.com/synthesize?synText={{textUrlEncoded}}&voice=female")}
 	                        />
 	                      </div>
                       {ttsProviderDraft.url && !/{{[^}]+?}}/.test(ttsProviderDraft.url) && (
                         <div className="mt-2 rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-[11px] font-bold leading-5 text-amber-700">
-                          当前 URL 没有使用任何 {'{{参数名}}'}，运行时参数不会替换到请求里。
+                          {t('当前 URL 没有使用任何 {{参数名}}，运行时参数不会替换到请求里。', 'The URL has no {{parameter}} placeholders. Runtime values will not be substituted into the URL.')}
                         </div>
                       )}
                       {ttsProviderDraft.url && !ttsProviderUsesTextParam(ttsProviderDraft) && (
                         <div className="mt-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-[11px] font-bold leading-5 text-rose-700">
-                          当前 URL/Header/Body 没有使用 {'{{text}} / {{textUrlEncoded}} / {{textJson}}'}，无法动态输入文本去合成。
+                          {t('当前 URL/Header/Body 没有使用 {{text}} / {{textUrlEncoded}} / {{textJson}}，无法动态输入文本去合成。', 'To synthesize runtime text, add {{text}}, {{textUrlEncoded}}, or {{textJson}} to the URL, headers, or body.')}
                         </div>
                       )}
                     </div>
 
                     <div className="col-span-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">HEADERS 模板</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t("HEADERS 模板", "Headers template")}</label>
                       <textarea
                         value={ttsProviderDraft.headersText}
                         onChange={(event) => setTtsProviderDraft((current) => ({ ...current, enabled: true, headersText: event.target.value }))}
@@ -12925,7 +12953,7 @@ export default function WorkflowEditor() {
                     </div>
                     {ttsProviderDraft.method !== 'GET' && (
                       <div className="col-span-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">BODY 模板</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t("BODY 模板", "Body template")}</label>
                         <textarea
                           value={ttsProviderDraft.bodyTemplate}
                           onChange={(event) => setTtsProviderDraft((current) => ({ ...current, enabled: true, bodyTemplate: event.target.value }))}
@@ -12935,33 +12963,33 @@ export default function WorkflowEditor() {
                     )}
 
 	                    <div className="col-span-2 rounded-2xl border border-slate-200 bg-white p-4">
-	                      <div className="text-xs font-black text-slate-900">请求参数</div>
+	                      <div className="text-xs font-black text-slate-900">{t("请求参数", "Request parameters")}</div>
 	                      <div className="mt-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-[11px] font-bold leading-5 text-blue-700">
-	                        Flow 只会传入一个动态参数 <span className="font-mono text-slate-800">{'{{text}}'}</span>。音色、采样、噪声权重、鉴权等其它参数请直接写死在 URL、Header 或 Body 模板里。
+	                        {t('Flow 只会传入一个动态参数 ', 'The workflow provides one dynamic parameter ')}<span className="font-mono text-slate-800">{'{{text}}'}</span>{t('。音色、采样、噪声权重、鉴权等其它参数请直接写死在 URL、Header 或 Body 模板里。', ' . Set voice, sampling, noise, and authentication in the URL, headers, or body templates.')}
 	                      </div>
 	                      <div className="mt-3 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 px-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
-	                        <span>参数名</span>
-	                        <span>来源</span>
+	                        <span>{t("参数名", "Parameter name")}</span>
+	                        <span>{t("来源", "Source")}</span>
 	                      </div>
 	                      <div className="mt-2 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
 	                        <div className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 pt-2 font-mono text-xs font-black text-slate-700">text</div>
-	                        <div className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 pt-2 text-xs font-bold text-slate-500">Flow TTS 节点的 Text</div>
+	                        <div className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 pt-2 text-xs font-bold text-slate-500">{t("Flow TTS 节点的 Text", "Text from the workflow TTS step")}</div>
 	                      </div>
 	                    </div>
                   </div>
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <div className="text-xs font-black text-slate-900">响应解析</div>
+                  <div className="text-xs font-black text-slate-900">{t("响应解析", "Response parsing")}</div>
                   <div className="mt-4 grid grid-cols-2 gap-4">
 	                    <div>
-	                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">响应音频类型</label>
+	                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t("响应音频类型", "Response audio type")}</label>
 	                      <div className="mt-1 flex h-11 items-center rounded-2xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-800">
-	                        JSON 字段返回音频 URL
+	                        {t("JSON 字段返回音频 URL", "Audio URL in JSON response")}
 	                      </div>
 	                    </div>
                     <div>
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">输出扩展名</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t("输出扩展名", "Output file extension")}</label>
                       <select
                         value={ttsProviderDraft.outputExtension}
                         onChange={(event) => setTtsProviderDraft((current) => ({ ...current, enabled: true, outputExtension: event.target.value }))}
@@ -12975,9 +13003,9 @@ export default function WorkflowEditor() {
                       </select>
                     </div>
 	                    <div className="col-span-2 rounded-2xl border border-slate-200 bg-white p-4">
-	                      <div className="text-xs font-black text-slate-900">音频 URL 字段路径</div>
+	                      <div className="text-xs font-black text-slate-900">{t("音频 URL 字段路径", "Audio URL field path")}</div>
 	                      <div className="mt-1 text-[11px] font-bold leading-5 text-slate-400">
-	                        填写 TTS 响应 JSON 里音频 URL 所在路径。执行后 Flow 固定输出 <span className="font-mono text-slate-600">${'{variables.<节点名>.audioPath}'}</span> 和 <span className="font-mono text-slate-600">${'{variables.<节点名>.audioUrl}'}</span>。
+	                        {t('填写 TTS 响应 JSON 里音频 URL 所在路径。执行后 Flow 固定输出 ', 'Enter the field path for the audio URL. The workflow outputs ')}<span className="font-mono text-slate-600">${t('{variables.<节点名>.audioPath}', '{variables.<step-name>.audioPath}')}</span>{t(" 和 ", " and ")}<span className="font-mono text-slate-600">${t('{variables.<节点名>.audioUrl}', '{variables.<step-name>.audioUrl}')}</span>。
 	                      </div>
 	                      <input
 	                        value={ttsProviderDraft.urlField || normalizeTtsResponseMappings(ttsProviderDraft.responseMappings, 'data.url')[0]?.responsePath || 'data.url'}
@@ -12995,15 +13023,15 @@ export default function WorkflowEditor() {
 	                        placeholder="data.url"
 	                      />
 	                      <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-[11px] font-bold leading-5 text-emerald-700">
-	                        示例：节点名为 <span className="font-mono text-slate-800">生成支付语音</span> 时，音频 Mock 本地路径填写 <span className="font-mono text-slate-800">${'{variables.生成支付语音.audioPath}'}</span>，报告或外部工具可引用 <span className="font-mono text-slate-800">${'{variables.生成支付语音.audioUrl}'}</span>。
+	                        {t('示例：节点名为 ', 'For a step named ')}<span className="font-mono text-slate-800">{t('生成支付语音', 'Payment audio')}</span>{t(' 时，音频 Mock 本地路径填写 ', ', use ')}<span className="font-mono text-slate-800">${t('{variables.生成支付语音.audioPath}', '{variables.Payment audio.audioPath}')}</span>{t('，报告或外部工具可引用 ', ' for the local audio path and ')}<span className="font-mono text-slate-800">${t('{variables.生成支付语音.audioUrl}', '{variables.Payment audio.audioUrl}')}</span>{t('。', ' for the URL in reports and external tools.')}
 	                      </div>
 	                    </div>
                     <div className="col-span-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3">
-                      <div className="text-xs font-black text-blue-900">TTS 音频文件描述</div>
+                      <div className="text-xs font-black text-blue-900">{t("TTS 音频文件描述", "TTS audio file format")}</div>
                       <div className="mt-1 text-xs font-bold leading-5 text-blue-700">
                         {ttsProviderDraft.outputExtension === 'pcm'
-                          ? 'PCM 没有文件头，需要补充采样率、采样格式和声道，后续音频 Mock 或转码会按这里处理。'
-                          : '压缩音频通常自带格式信息，这里主要用于声明文件扩展名，方便后续节点识别和分享。'}
+                          ? t("PCM 没有文件头，需要补充采样率、采样格式和声道，后续音频 Mock 或转码会按这里处理。", "PCM has no header. Set the sample rate, sample format, and channels for audio mocking and transcoding.")
+                          : t("压缩音频通常自带格式信息，这里主要用于声明文件扩展名，方便后续节点识别和分享。", "Compressed audio usually includes format metadata. This setting supplies the file extension for downstream steps and sharing.")}
                       </div>
                     </div>
                     {ttsProviderDraft.outputExtension === 'pcm' && (
@@ -13047,8 +13075,8 @@ export default function WorkflowEditor() {
               </div>
               <div className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <div>
-                  <div className="text-xs font-black text-slate-900">接口测试</div>
-                  <div className="mt-1 text-[11px] font-bold text-slate-400">点击后填写参数值，并按当前配置发起请求。</div>
+                  <div className="text-xs font-black text-slate-900">{t("接口测试", "Test endpoint")}</div>
+                  <div className="mt-1 text-[11px] font-bold text-slate-400">{t("点击后填写参数值，并按当前配置发起请求。", "Enter parameter values and send a request with the current settings.")}</div>
                 </div>
                 <button
                   type="button"
@@ -13057,7 +13085,7 @@ export default function WorkflowEditor() {
                   className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isTestingTts ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
-                  测试
+                  {t("测试", "Test")}
                 </button>
               </div>
               {ttsMessage && (
@@ -13076,8 +13104,8 @@ export default function WorkflowEditor() {
           <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h3 className="text-sm font-black text-slate-900">设备管理</h3>
-                <p className="mt-1 text-xs font-bold text-slate-400">固定常用 SN 的设备角色。顶部设备栏每 5 秒自动检测，命中后会自动分配到对应栏位。</p>
+                <h3 className="text-sm font-black text-slate-900">{t("设备管理", "Device management")}</h3>
+                <p className="mt-1 text-xs font-bold text-slate-400">{t("固定常用 SN 的设备角色。顶部设备栏每 5 秒自动检测，命中后会自动分配到对应栏位。", "Assign roles to devices by serial number. The device bar checks every five seconds and assigns known devices automatically.")}</p>
               </div>
               <button
                 type="button"
@@ -13085,12 +13113,12 @@ export default function WorkflowEditor() {
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-600 hover:bg-slate-50"
               >
                 <RefreshCw className="h-3.5 w-3.5" />
-                刷新设备
+                {t("刷新设备", "Refresh devices")}
               </button>
             </div>
 
             <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">设备 SN</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t("设备 SN", "Device serial number")}</label>
               <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto_auto] gap-2">
                 <div className="relative">
                   <input
@@ -13098,7 +13126,7 @@ export default function WorkflowEditor() {
                     onChange={(event) => setDeviceBindingDraft(event.target.value)}
                     list="settings-adb-device-options"
                     className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 pr-10 font-mono text-sm font-bold outline-none focus:border-blue-300"
-                    placeholder="输入 SN，或从 adb devices 中搜索选择"
+                    placeholder={t("输入 SN，或从 adb devices 中搜索选择", "Enter a serial number or select a device detected by ADB")}
                   />
                   <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <datalist id="settings-adb-device-options">
@@ -13115,7 +13143,7 @@ export default function WorkflowEditor() {
                   className="inline-flex h-11 items-center gap-2 rounded-2xl bg-blue-600 px-4 text-xs font-black text-white hover:bg-blue-700"
                 >
                   <Smartphone className="h-3.5 w-3.5" />
-                  固定为手机
+                  {t("固定为手机", "Assign as phone")}
                 </button>
                 <button
                   type="button"
@@ -13123,7 +13151,7 @@ export default function WorkflowEditor() {
                   className="inline-flex h-11 items-center gap-2 rounded-2xl bg-emerald-600 px-4 text-xs font-black text-white hover:bg-emerald-700"
                 >
                   <MonitorSmartphone className="h-3.5 w-3.5" />
-                  固定为眼镜
+                  {t("固定为眼镜", "Assign as glasses")}
                 </button>
               </div>
               {deviceSettingsMessage && (
@@ -13135,7 +13163,7 @@ export default function WorkflowEditor() {
 
             <div className="mt-5 grid grid-cols-2 gap-4">
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">手机默认包名</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t("手机默认包名", "Default phone package")}</label>
                 <input
                   value={deviceBindings.phoneDefaultPackage}
                   onChange={(event) => setDeviceBindings((current) => ({
@@ -13145,10 +13173,10 @@ export default function WorkflowEditor() {
                   className="mt-2 h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 font-mono text-sm font-bold outline-none focus:border-blue-300"
                   placeholder={defaultPhonePackageName}
                 />
-                <div className="mt-2 text-[11px] font-bold leading-5 text-slate-400">启动或手机 SN 更新时默认选中该包名。</div>
+                <div className="mt-2 text-[11px] font-bold leading-5 text-slate-400">{t("启动或手机 SN 更新时默认选中该包名。", "Select this package at startup or when the phone serial number changes.")}</div>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">眼镜默认包名</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t("眼镜默认包名", "Default glasses package")}</label>
                 <input
                   value={deviceBindings.glassesDefaultPackage}
                   onChange={(event) => setDeviceBindings((current) => ({
@@ -13158,14 +13186,14 @@ export default function WorkflowEditor() {
                   className="mt-2 h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 font-mono text-sm font-bold outline-none focus:border-blue-300"
                   placeholder={defaultGlassesPackageName}
                 />
-                <div className="mt-2 text-[11px] font-bold leading-5 text-slate-400">启动或眼镜 SN 更新时默认选中该包名。</div>
+                <div className="mt-2 text-[11px] font-bold leading-5 text-slate-400">{t("启动或眼镜 SN 更新时默认选中该包名。", "Select this package at startup or when the glasses serial number changes.")}</div>
               </div>
             </div>
 
             <div className="mt-5 grid grid-cols-2 gap-4">
               {([
-                ['phone', '手机设备', Smartphone, deviceBindings.phoneSerials],
-                ['glasses', '眼镜设备', MonitorSmartphone, deviceBindings.glassesSerials],
+                ['phone', t("手机设备", "Phone"), Smartphone, deviceBindings.phoneSerials],
+                ['glasses', t("眼镜设备", "Glasses"), MonitorSmartphone, deviceBindings.glassesSerials],
               ] satisfies Array<['phone' | 'glasses', string, React.ComponentType<{ className?: string }>, string[]]>) .map(([kind, label, Icon, serials]) => (
                 <div key={String(kind)} className="rounded-2xl border border-slate-200 bg-white p-4">
                   <div className="flex items-center gap-2 text-sm font-black text-slate-900">
@@ -13175,7 +13203,7 @@ export default function WorkflowEditor() {
                   <div className="mt-3 space-y-2">
                     {(serials as string[]).length === 0 ? (
                       <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-6 text-center text-xs font-bold text-slate-400">
-                        暂未固定 SN
+                        {t("暂未固定 SN", "No fixed serial number")}
                       </div>
                     ) : (serials as string[]).map((serial) => (
                       <div key={serial} className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
@@ -13187,7 +13215,7 @@ export default function WorkflowEditor() {
                           type="button"
                           onClick={() => removeDeviceBinding(serial)}
                           className="shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
-                          title="取消固定"
+                          title={t("取消固定", "Unpin")}
                         >
                           <X className="h-3.5 w-3.5" />
                         </button>
@@ -13385,7 +13413,7 @@ export default function WorkflowEditor() {
               <div className="mt-3 space-y-2">
                 {pendingAssistantDraft.draftCases.map((testCase) => (
                   <div key={testCase.id} className="rounded-xl bg-slate-50 px-3 py-2">
-                    <div className="truncate text-xs font-black text-slate-800">{testCase.name}</div>
+                    <div className="truncate text-xs font-black text-slate-800">{caseLabel(testCase)}</div>
                     <div className="mt-1 text-[10px] font-bold text-slate-400">{testCase.steps.length} 步</div>
                   </div>
                 ))}
@@ -13815,10 +13843,10 @@ export default function WorkflowEditor() {
       {renderPerformanceReportDialog()}
       {quickTaskPerformanceDialog && (
         <div className="fixed inset-0 z-[82] flex items-center justify-center bg-slate-900/35 px-4">
-          <div role="dialog" aria-modal="true" aria-label="快捷创建测试任务" className="max-h-[86vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
+          <div role="dialog" aria-modal="true" aria-label={t("快捷创建测试任务", "Create a test run")} className="max-h-[86vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <h3 className="text-sm font-black text-slate-900">快捷创建测试任务</h3>
+                <h3 className="text-sm font-black text-slate-900">{t("快捷创建测试任务", "Create a test run")}</h3>
                 <p className="mt-1 truncate text-xs font-bold text-slate-400">
                   {quickTaskPerformanceDialog.folderName}
                 </p>
@@ -14090,7 +14118,7 @@ export default function WorkflowEditor() {
                           className="flex min-w-0 flex-1 items-center gap-2 text-left">
                           <CaseTreeDisclosure expanded={expanded} />
                           <FolderOpen className="h-4 w-4 shrink-0 text-blue-600" />
-                          <span className="min-w-0 flex-1 truncate" title={library.name}>{library.name}</span>
+                          <span className="min-w-0 flex-1 truncate" title={library.name}>{libraryLabel(library)}</span>
                         </button>
                         <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ${
                           isPartial ? 'bg-amber-50 text-amber-600' : 'bg-white text-slate-500'
@@ -14157,7 +14185,7 @@ export default function WorkflowEditor() {
           <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h3 className="text-sm font-black text-slate-900">配置 Git 用例库地址</h3>
+                <h3 className="text-sm font-black text-slate-900">{t("配置 Git 用例库地址", "Configure the Git test library URL")}</h3>
                 <p className="mt-1 text-xs font-bold text-slate-400">
                   配置后将继续执行{gitConfigDialog.intent === 'push' ? '上传' : gitConfigDialog.intent === 'auto' ? '自动更新' : '拉取'}操作。
                 </p>
@@ -14519,7 +14547,7 @@ export default function WorkflowEditor() {
                   )}
                   {isReportFlowReadOnly && (
                     <span className="shrink-0 rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-black text-white">
-                      报告查看模式
+                      {t("报告查看模式", "Report view")}
                     </span>
                   )}
                 </div>
@@ -14534,7 +14562,7 @@ export default function WorkflowEditor() {
                     title="跳转到用例库中的原用例进行编辑"
                   >
                     <FilePlus className="h-3.5 w-3.5" />
-                    编辑原用例
+                    {t("编辑原用例", "Edit original case")}
                   </button>
                 )}
                 {!isReportFlowReadOnly && (
@@ -14551,7 +14579,7 @@ export default function WorkflowEditor() {
                       ) : (
                         <RefreshCw className="w-3.5 h-3.5" />
                       )}
-                      {isRefreshingCaseLibrary ? '刷新中' : '刷新用例'}
+                      {isRefreshingCaseLibrary ? t('刷新中', 'Refreshing') : t('刷新用例', 'Refresh cases')}
                     </button>
                     <button
                       type="button"
@@ -14560,7 +14588,7 @@ export default function WorkflowEditor() {
                       title="按执行顺序散开节点布局"
                     >
                       <GitBranch className="w-3.5 h-3.5" />
-                      整理布局
+                      {t("整理布局", "Auto layout")}
                     </button>
                     <div className="h-4 w-[1px] bg-slate-200 mx-1" />
                     <button
@@ -14575,7 +14603,7 @@ export default function WorkflowEditor() {
                       }`}
                     >
                       {isRunning ? <Square className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
-                      {isRunning ? '强制停止' : soloPiPendingSteps.length ? `待处理 ${soloPiPendingSteps.length} 项` : '运行工作流'}
+                      {isRunning ? t('强制停止', 'Force stop') : soloPiPendingSteps.length ? t(`待处理 ${soloPiPendingSteps.length} 项`, `${soloPiPendingSteps.length} pending steps`) : t('运行工作流', 'Run workflow')}
                     </button>
                   </>
                 )}
@@ -14606,14 +14634,14 @@ export default function WorkflowEditor() {
               {!isReportFlowReadOnly && renderLocalCaseLibraryChangeBanner()}
               {isReportFlowReadOnly && (
                 <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-900 px-6 py-2 text-xs font-bold text-slate-100">
-                  <span>正在查看测试报告快照。节点、连线和配置均为只读，不会写回用例库。</span>
+                  <span>{t("正在查看测试报告快照。节点、连线和配置均为只读，不会写回用例库。", "You are viewing a read-only snapshot of the test run.")}</span>
                   {!isImportedReportFlow && (
                     <button
                       type="button"
                       onClick={openEditableCaseFromReport}
                       className="shrink-0 rounded-lg bg-white/10 px-3 py-1 text-[11px] font-black text-white hover:bg-white/20"
                     >
-                      去编辑原用例
+                      {t("去编辑原用例", "Edit original case")}
                     </button>
                   )}
                 </div>
@@ -16514,12 +16542,12 @@ export default function WorkflowEditor() {
                                 <div className="min-w-0">
                                   <div className="flex items-center gap-2">
                                     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-900 text-[10px] font-black text-white">1</span>
-                                    <div className="text-[11px] font-black text-slate-900">从手机页面选择</div>
+                                    <div className="text-[11px] font-black text-slate-900">{t('从手机页面选择', 'Select from the phone screen')}</div>
                                   </div>
                                   <div className="mt-1 pl-7 text-[10px] font-bold leading-4 text-slate-400">
                                     {mobileUiInspector.elements.length > 0
-                                      ? `已识别 ${mobileUiInspector.elements.length} 个元素，点击蓝框或下方列表完成选择`
-                                      : mobileUiInspector.error || '先读取当前手机页面，再选择需要操作的元素'}
+                                      ? t(`已识别 ${mobileUiInspector.elements.length} 个元素，点击蓝框或下方列表完成选择`, `Found ${mobileUiInspector.elements.length} elements. Select a blue outline or an item in the list.`)
+                                      : mobileUiInspector.error || t('先读取当前手机页面，再选择需要操作的元素', 'Read the current phone screen, then select an element.')}
                                   </div>
                                 </div>
                                 <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
@@ -16530,21 +16558,21 @@ export default function WorkflowEditor() {
                                     disabled={mobileUiInspector.loading || mobileUiDebug.status === 'running'}
                                   >
                                     {mobileUiInspector.loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                                    {mobileUiInspector.loading ? '读取中' : '刷新'}
+                                    {mobileUiInspector.loading ? t('读取中', 'Reading…') : t('刷新', 'Refresh')}
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => void debugMobileUiStep(selectedStep)}
                                     className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg bg-emerald-600 px-2.5 text-[10px] font-black text-white shadow-sm transition-colors hover:bg-emerald-700 active:translate-y-px disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
                                     disabled={!hasConfiguredMobileUiTarget || mobileUiInspector.loading || mobileUiDebug.status === 'running'}
-                                    title={hasConfiguredMobileUiTarget ? '只执行当前节点，不运行整个工作流' : '请先选择一个手机页面元素'}
+                                    title={hasConfiguredMobileUiTarget ? t('只执行当前节点，不运行整个工作流', 'Run only the selected step') : t('请先选择一个手机页面元素', 'Select a phone element first')}
                                   >
                                     {mobileUiDebug.status === 'running' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
                                     {mobileUiDebug.status === 'running'
-                                      ? '调试中'
+                                      ? t('调试中', 'Running…')
                                       : selectedStepComponentKind === 'mobile_ui_assert'
-                                        ? '校验一次'
-                                        : '执行一次'}
+                                        ? t('校验一次', 'Check once')
+                                        : t('执行一次', 'Run once')}
                                   </button>
                                 </div>
                               </div>

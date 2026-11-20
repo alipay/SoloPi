@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLanguage } from '../language';
 import { Check, Copy, ChevronRight, Loader2 } from 'lucide-react';
 import AgentMarkdown from './AgentMarkdown';
 import { agentTurns, turnTimeline, type AgentMessage, type AgentCall } from './agent-turns';
@@ -48,6 +49,7 @@ export default function AgentTurn({ sessionId, turn, labels, latestReasoning, re
 }
 
 function CallDetails({sessionId,call:c,label}:{sessionId:string;call:ReturnType<typeof agentTurns>[number]['calls'][number];label:string}) {
+  const { t } = useLanguage();
   const [open,setOpen]=useState(false);
   const [details,setDetails]=useState<{parameters:unknown;result:unknown}|null>(null),[error,setError]=useState('');
   useEffect(()=>{
@@ -56,7 +58,7 @@ function CallDetails({sessionId,call:c,label}:{sessionId:string;call:ReturnType<
     const api=window.glassbox?.ipcRenderer;
     if(!api){setError('桌面接口不可用');return;}
     void api.invoke('agent:call-details',{id:sessionId,callId:c.id}).then((r:{call?:AgentCall;error?:string})=>{
-      if(!live)return;if(!r.call)throw Error(r.error || '读取调用详情失败');setDetails({parameters:r.call.args,result:r.call.result});
+      if(!live)return;if(!r.call)throw Error(r.error || t("读取调用详情失败", "Could not load call details"));setDetails({parameters:r.call.args,result:r.call.result});
     }).catch((e:Error)=>{if(live)setError(e.message);});
     return()=>{live=false;setDetails(null);};
   },[open,sessionId,c.id,c.status,c.detailsAvailable]);
