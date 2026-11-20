@@ -216,8 +216,10 @@ function installAgent({ ipcMain, directory, invoke, readState, saveCase, provide
           if(comparisonRuns.size)throw Error('模型对照进行中，请等待或停止对照后发送');
           store.get(args.id);
           const attachments = require('./attachments').importAttachments(path.join(directory(), 'agent', 'attachments'), args.attachments || []);
-          if (args.enqueue === true || runtime.active.has(args.id)) return { session: sessionView(runtime.enqueue(args.id, args.text || (attachments.length ? '请查看附件' : ''), attachments)) };
-          return { session: sessionView(await runtime.start(args.id, args.text || (attachments.length ? '请查看附件' : ''), event, attachments)) };
+          const language = require('./reply-language').normalizeReplyLanguage(args.replyLanguage);
+          const text = args.text || (attachments.length ? language === 'en' ? 'Please review the attachments.' : '请查看附件' : '');
+          if (args.enqueue === true || runtime.active.has(args.id)) return { session: sessionView(runtime.enqueue(args.id, text, attachments, language)) };
+          return { session: sessionView(await runtime.start(args.id, text, event, attachments, null, language)) };
         }
         if (action === 'edit-queued') return {session:sessionView(runtime.editQueued(args.id,args.messageId,{text:args.text,editing:args.editing}))};
         if (action === 'delete-queued') return {session:sessionView(runtime.deleteQueued(args.id,args.messageId))};

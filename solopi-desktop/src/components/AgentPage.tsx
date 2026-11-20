@@ -1,4 +1,5 @@
 import { useLanguage } from "../language";
+import { englishAgentError } from './agent-error-copy';
 import { chatScrollMetrics, chatScrollUpdate, type ChatScrollMetrics } from './agent-chat-scroll';
 import AgentQueuedMessage from './AgentQueuedMessage';
 import { agentDrafts, useAgentDraft } from './agent-drafts';
@@ -99,7 +100,7 @@ function CompactionStatus({state}:{state:{currentChunk?:number;totalChunks?:numb
   return <span>{t("压缩历史", "Compacting history")} · {state.currentChunk || 1}/{state.totalChunks || 1} {t("批", "batches")} · {t("本批耗时", "Elapsed")} {Math.max(0,Math.floor((now-(state.batchStartedAt || now))/1000))}s · {t("摘要", "Summary")} {state.outputCharacters || 0} {t("字", "chars")}{state.reasoningCharacters ? t(` · 推理 ${state.reasoningCharacters} 字`, ` · Reasoning ${state.reasoningCharacters} chars`) : ''}</span>;
 }
 export default function AgentPage({ onNavigate, onOpenSettings, deviceControls, initialSessionId, onSessionChange }: { onNavigate: (tab: string) => void; onOpenSettings: (section: 'agent-request' | 'agent-reply' | 'agent-extensions' | 'model') => void; deviceControls: ReactNode; initialSessionId: string; onSessionChange: (id: string) => void }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const api = window.glassbox?.ipcRenderer;
   const [sessions, setSessions] = useState<Summary[]>([]);
   const [session, setSession] = useState<Session | null>(null);
@@ -243,7 +244,7 @@ export default function AgentPage({ onNavigate, onOpenSettings, deviceControls, 
     setError('');
     let accepted = false;
     try {
-      const r = await invoke('agent:send', { id, text: draft.text, enqueue: ['running','waiting'].includes(session.status), attachments: await Promise.all(draft.attachments.map(encode)) });
+      const r = await invoke('agent:send', { id, text: draft.text, replyLanguage: language, enqueue: ['running','waiting'].includes(session.status), attachments: await Promise.all(draft.attachments.map(encode)) });
       accepted = true;
       if (selected.current === id) setSession(r.session);
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
@@ -256,6 +257,10 @@ export default function AgentPage({ onNavigate, onOpenSettings, deviceControls, 
   const busy = sending || session?.status === 'running';
   const labels = Object.fromEntries(Object.entries(toolLabels).map(([key, copy]) => [key, t(...copy)]));
   const pending = session?.calls.find(c => c.status === 'pending');
+  const rawError = error || session?.error || '';
+  const errorDetails = error ? undefined : session?.errorDetails;
+  const errorSummary = language === 'en' ? englishAgentError(rawError, errorDetails) : undefined;
+  const diagnosticText = [errorSummary ? rawError : '', errorDetails ? JSON.stringify(errorDetails, null, 2) : ''].filter(Boolean).join('\n\n');
   return <Profiler id="agent" onRender={profileRender}><div className="flex flex-1 min-h-0 min-w-0 bg-[#fafaf8]">
     <div className="flex flex-1 min-w-0 min-h-0 flex-col">
       <div className="relative shrink-0 bg-white" aria-label={t('设备与快捷操作', 'Devices and quick actions')}>{deviceControls}</div>
@@ -301,7 +306,14 @@ export default function AgentPage({ onNavigate, onOpenSettings, deviceControls, 
           </div>}
           {busy && <div role="status" className="flex gap-2 items-center text-xs text-slate-500"><Loader2 size={14} className="animate-spin" />{session?.contextState?.phase === 'compacting' ? <CompactionStatus state={session.contextState}/> : session?.streaming?.stage==='queued' ? t('等待同一模型请求队列…', 'Queued for this model…') : session?.streaming?.stage==='waiting' ? t('等待模型响应…', 'Waiting for the model…') : session?.streaming?.toolCallCount ? t('正在生成工具调用…', 'Preparing tool calls…') : session?.streaming?.stage==='receiving' ? t('正在生成…', 'Generating…') : t('正在执行…', 'Running…')}</div>}
           {session?.retry && <RetryCountdown retry={session.retry} />}
-          {(error || session?.error) && <div role="alert" className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error || session?.error}<MessageFooter message={{role:'assistant',content:[error || session?.error, session?.updatedAt ? `${t('时间：', 'Time: ')}${session.updatedAt}` : '', session?.errorDetails ? `${t('错误诊断记录：', 'Error diagnostics:')}\n${JSON.stringify(session.errorDetails, null, 2)}` : ''].filter(Boolean).join('\n\n'),createdAt:session?.updatedAt}} />{ !!session?.errorDetails && <details className="mt-2 text-xs text-slate-600"><summary className="cursor-pointer">{t('查看错误诊断记录', 'View error diagnostics')}</summary><pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-all">{JSON.stringify(session.errorDetails, null, 2)}</pre></details>}</div>}
+          {rawError && <div role="alert" className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+            {errorSummary || rawError}
+            <MessageFooter message={{ role: 'assistant', content: [rawError, errorDetails ? JSON.stringify(errorDetails, null, 2) : ''].filter(Boolean).join('\n\n'), createdAt: session?.updatedAt }} />
+            {diagnosticText && <details className="mt-2 text-xs text-slate-600">
+              <summary className="cursor-pointer">{t('查看错误诊断记录', 'View error diagnostics')}</summary>
+              <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-all">{diagnosticText}</pre>
+            </details>}
+          </div>}
 
         </div>
       </div>

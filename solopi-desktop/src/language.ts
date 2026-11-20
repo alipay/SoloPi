@@ -14,16 +14,18 @@ function readPreference(): LanguagePreference {
   }
 }
 
-function resolveLanguage(locale: string) {
+function resolveLanguage(locale: string): Exclude<LanguagePreference, 'system'> {
   return /^zh(?:[-_]|$)/i.test(locale) ? 'zh-CN' : 'en';
 }
 
 const LanguageContext = createContext<{
   preference: LanguagePreference;
+  language: Exclude<LanguagePreference, 'system'>;
   setPreference: (value: LanguagePreference) => void;
   t: (chinese: string, english: string) => string;
 }>({
   preference: 'system',
+  language: 'zh-CN',
   setPreference: () => {},
   t: (chinese) => chinese,
 });
@@ -76,6 +78,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   return createElement(LanguageContext.Provider, { value: {
     preference,
+    language,
     setPreference: changePreference,
     t: (chinese, english) => language === 'en' ? english : chinese,
   } }, children);

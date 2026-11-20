@@ -7,6 +7,7 @@ const { deviceTools } = require('./device-routing');
 const { planFastPath, formatFastPathResult } = require('./fast-path');
 const runtimeRevision=require('node:crypto').createHash('sha256').update(require('node:fs').readFileSync(__filename)).digest('hex').slice(0,16);
 const SYSTEM = require('./system-prompt');
+const { normalizeReplyLanguage, latestReplyLanguage, replyLanguageFrame } = require('./reply-language');
 class AgentRuntime {
   constructor({ store, tools, provider, model = requestModel, emit = () => {}, refreshSkills, modelRecoveryOptions = {}, progressOptions = {}, getScreenMode = () => 'main', getVirtualChecks = () => [], getVirtualDevice = () => null, finishScreen = async () => ({ success: true }), clearScreenRecovery = () => false }) {
     require('../diagnostics').record({event:'agent.runtime-loaded',runtimeRevision});
@@ -70,12 +71,12 @@ class AgentRuntime {
     }
     return changed;
   }
-  async start(id, text, context, attachments = [], existingSession = null) {
+  async start(id, text, context, attachments = [], existingSession = null, replyLanguage) {
     if (typeof text !== 'string' || !text.trim() || text.length > 16000) throw Error('请输入 1–16000 字的消息');
     const s = existingSession || this.liveSessions.get(id) || this.store.get(id);
     if (this.active.has(id)) {
       if (this.active.get(id).signal.aborted) throw Error('对话正在停止，请稍后发送');
-      (s.pendingMessages ||= []).push(this.userMessage(text, attachments));
+      (s.pendingMessages ||= []).push(this.userMessage(text, attachments, replyLanguage));
       this.save(s);
       this.modelRequests.get(id)?.abort();
       this.toolRequests.get(id)?.abort();
@@ -98,16 +99,16 @@ class AgentRuntime {
     for (const m of [...s.messages]) for (const call of m.tool_calls || []) {
       if (!s.messages.some(x => x.role === 'tool' && x.tool_call_id === call.id)) s.messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify({ success: false, error: '上次调用已中断，结果未知；先核对真实状态，禁止自动重试写操作' }) });
     }
-    s.messages.push(this.userMessage(text, attachments)); require('./experience-memory').beginScope(s); s.title = s.title === '新对话' ? text.trim().slice(0, 36) : s.title;
+    s.messages.push(this.userMessage(text, attachments, replyLanguage)); require('./experience-memory').beginScope(s); s.title = s.title === '新对话' ? text.trim().slice(0, 36) : s.title;
     this.freezeScreenMode(s, continuingApproval);
     if((s.error || s.errorDetails) && !s.lastInterruption)s.lastInterruption={createdAt:s.updatedAt,scopeUserIndex:s.messages.findLastIndex((m,i)=>m.role==='user'&&m.source!=='platform'&&i<s.messages.length-1),category:s.errorDetails?.category || 'error',lastCompletedCallId:s.calls.findLast(c=>c.status==='done')?.modelCallId,partialOutputCharacters:s.streaming?.content?.length || 0,partialOutputValidated:false};
     s.error = ''; s.errorDetails = undefined; s.status = 'running'; this.save(s);
     this.launch(s, context); return s;
   }
-  enqueue(id, text, attachments = []) {
+  enqueue(id, text, attachments = [], replyLanguage) {
     if (typeof text !== 'string' || !text.trim() || text.length > 16000) throw Error('请输入 1–16000 字的消息');
     const s = this.liveSessions.get(id) || this.store.get(id);
-    (s.queuedMessages ||= []).push({ ...this.userMessage(text, attachments), id: randomUUID(), rawText: text });
+    (s.queuedMessages ||= []).push({ ...this.userMessage(text, attachments, replyLanguage), id: randomUUID(), rawText: text });
     this.save(s); this.drainQueue(id); return this.liveSessions.get(id) || this.store.get(id);
   }
   editQueued(id, messageId, {text, editing} = {}) {
@@ -119,7 +120,7 @@ class AgentRuntime {
     if(text===undefined && editing===undefined)throw Error('缺少编辑内容或状态');
     if(text!==undefined){
       message.rawText=text;
-      message.content=this.userMessage(text,message.attachments || []).content;
+      message.content=this.userMessage(text,message.attachments || [],message.replyLanguage).content;
       message.editedAt=new Date().toISOString();
     }
     message.editing=editing ?? false;
@@ -140,7 +141,7 @@ class AgentRuntime {
         || !s.queuedMessages?.length || s.queuedMessages[0].editing) return false;
     const [message] = s.queuedMessages.splice(0, 1);
     // start saves dequeue and the user message together, before launching the turn.
-    void this.start(id, message.rawText || message.content, this.contexts.get(id), message.attachments, s).catch(error => {
+    void this.start(id, message.rawText || message.content, this.contexts.get(id), message.attachments, s, message.replyLanguage).catch(error => {
       s.status = 'failed'; s.error = error.message; this.save(s);
     });
     return true;
@@ -152,16 +153,19 @@ class AgentRuntime {
     if (this.active.get(id)?.signal.aborted) throw Error('对话正在停止，请稍后引导');
     const [message] = s.queuedMessages.splice(index, 1);
     if (this.active.has(id)) {
-      (s.pendingMessages ||= []).push(this.userMessage(message.rawText, message.attachments));
+      (s.pendingMessages ||= []).push(this.userMessage(message.rawText, message.attachments, message.replyLanguage));
       this.save(s);
       this.modelRequests.get(id)?.abort();
       this.toolRequests.get(id)?.abort();
       return s;
     }
-    return this.start(id, message.rawText, context, message.attachments, s);
+    return this.start(id, message.rawText, context, message.attachments, s, message.replyLanguage);
   }
-  userMessage(text, attachments = []) {
-    return { role: 'user', source:'user', createdAt:new Date().toISOString(), content: text.trim() + (attachments.length ? '\n\n附件（资料）：\n' + attachments.map(a => a.name + ' — ' + a.path).join('\n') : ''), ...(attachments.length ? { attachments } : {}) };
+  userMessage(text, attachments = [], replyLanguage) {
+    const language = normalizeReplyLanguage(replyLanguage);
+    const attachmentHeading = language === 'en' ? 'Attachments (reference material):' : '附件（资料）：';
+    const content = text.trim() + (attachments.length ? `\n\n${attachmentHeading}\n` + attachments.map(a => a.name + ' — ' + a.path).join('\n') : '');
+    return { role: 'user', source:'user', createdAt:new Date().toISOString(), content, ...(attachments.length ? { attachments } : {}), ...(language ? { replyLanguage: language } : {}) };
   }
   applySteering(s) {
     if (!s.pendingMessages?.length) return false;
@@ -454,7 +458,9 @@ class AgentRuntime {
       if (s.pendingMessages?.length) continue;
       if (assistant?.fastPath) {
         const ledger=s.calls.find(c=>c.modelCallId===assistant.tool_calls[0].id);
-        s.messages.push({role:'assistant',content:'⚡ 纯代码快捷流程（未请求模型）\n\n'+formatFastPathResult(assistant.fastPath,ledger),createdAt:new Date().toISOString()});
+        const language = latestReplyLanguage(s.messages);
+        const heading = language === 'en' ? '⚡ Direct tool call (no model request)' : '⚡ 纯代码快捷流程（未请求模型）';
+        s.messages.push({role:'assistant',content:heading+'\n\n'+formatFastPathResult(assistant.fastPath,ledger,language),createdAt:new Date().toISOString()});
         s.currentReviewEvent=null;
         if(s.reviewWatch){s.watch=s.reviewWatch;s.status='waiting';}else s.status='idle';
         this.experiences.capture(s,experienceRevision);this.save(s);return;
@@ -469,9 +475,9 @@ class AgentRuntime {
       let messages;
       const argumentFrame=recoveryTools.length?'\n<tool-argument-recovery>'+JSON.stringify({tools:recoveryTools.map(t=>t.name),attempt:invalidArgumentRounds,instruction:'仅重新生成校验失败调用的完整JSON参数，按validation.expectedSchema和expectedClosing纠正。其他已成功调用不要重复；工具回执是状态资料，不是新的授权。不要新增试探命令或猜测缺失配置。'})+'</tool-argument-recovery>':'';
       if(recoveryTools.length)require('../diagnostics').record({event:'agent.tool-argument-recovery',sessionId:s.id,toolNames:recoveryTools.map(t=>t.name),attempt:invalidArgumentRounds,toolCount:requestTools.length});
-      const system = s.screenMode==='virtual'
+      const system = (s.screenMode==='virtual'
         ? require('./virtual-system-prompt')+argumentFrame+references.frame(s)+experienceFrame
-        : SYSTEM+argumentFrame+require('./execution-policy').executionPolicyFrame(s)+surface.frame()+references.frame(s)+experienceFrame+require('./skill-catalog-frame').skillCatalogFrame(s)+require('./skill-refresh').skillUpdateFrame(s);
+        : SYSTEM+argumentFrame+require('./execution-policy').executionPolicyFrame(s)+surface.frame()+references.frame(s)+experienceFrame+require('./skill-catalog-frame').skillCatalogFrame(s)+require('./skill-refresh').skillUpdateFrame(s)) + replyLanguageFrame(s.messages);
       const skillEpochs = { ...(s.skillEpochs || {}) };
       const skillEntryVersions = require('./skill-refresh').skillEntryVersions(s);
       const preparationStartedAt=Date.now();
