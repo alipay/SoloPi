@@ -59,7 +59,14 @@ test('record dialog uses changing header device selection and exposes no externa
  const ts=require('typescript'),vm=require('node:vm'),effects=[];let tree;const calls=[];
  const exports={},react={useRef:()=>({current:0}),useState:v=>[v,()=>{}],useEffect:fn=>effects.push(fn)};
  const api={ipcRenderer:{invoke:async(channel,value)=>{calls.push({channel,value});return{success:true,sessions:[],id:'owned'};}}};
- vm.runInNewContext(ts.transpileModule(fs.readFileSync(new URL('../src/components/SoloPiImport.tsx',import.meta.url),'utf8'),{compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports,require:name=>name==='react'?react:{jsx:(type,props)=>({type,props}),jsxs:(type,props)=>({type,props})}});
+ const modules = {
+   react,
+   '../language': { useLanguage: () => ({ t: chinese => chinese }) },
+   'react/jsx-runtime': { jsx: (type,props) => ({type,props}), jsxs: (type,props) => ({type,props}) },
+   'lucide-react': {},
+   './RecordingTargetFields': { default: () => null },
+ };
+ vm.runInNewContext(ts.transpileModule(fs.readFileSync(new URL('../src/components/SoloPiImport.tsx',import.meta.url),'utf8'),{compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports,require:name=>modules[name]});
  const render=(serial,pkg)=>exports.default({api,mode:'record',phoneSerial:serial,phonePackage:pkg,onImport(){},onClose(){}});
  function find(node,predicate){if(!node)return null;if(Array.isArray(node)){for(const child of node){const hit=find(child,predicate);if(hit)return hit;}return null;}if(typeof node!=='object')return null;return predicate(node)?node:find(node.props?.children,predicate);}
  tree=render('','org.example.app');assert.equal(find(tree,n=>n.type==='button'&&JSON.stringify(n.props.children).includes('开始录制')).props.disabled,true);

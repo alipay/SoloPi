@@ -111,7 +111,7 @@ test('actual component dispatcher keeps native variables literal and routes to p
  assert.match(main,/literalParams\.has\(key\) \? value : resolveWorkflowValue\(value, context\)/);
 });
 test('native sidebar renders editable actions, limits long sequences to 20 per page, and visibly reports missing input',()=>{
- const ts=require('typescript'),React=require('react'),{renderToStaticMarkup}=require('react-dom/server'),context={exports:{},require:name=>name==='../../electron/solopi-native-schema'?require('../electron/solopi-native-schema'):require(name)};
+ const ts=require('typescript'),React=require('react'),{renderToStaticMarkup}=require('react-dom/server'),context={exports:{},require:name=>name==='../../electron/solopi-native-schema'?require('../electron/solopi-native-schema'):name==='../language'?{useLanguage:()=>({t:chinese=>chinese})}:require(name)};
  vm.runInNewContext(ts.transpileModule(fsSync.readFileSync('src/components/SoloPiNativeEditor.tsx','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2022}}).outputText,context);
  const doc=buildNativeCase(source([step('INPUT',{text:''}),...Array.from({length:40},(_,i)=>({...step('LONG_CLICK',{text:'500'}),stepId:`step-${i}`}))]));
  const html=renderToStaticMarkup(React.createElement(context.exports.default,{value:JSON.stringify(doc),inputs:{},onChange(){},onInputChange(){},restartApp:'false',timeout:'600000',onRestartChange(){},onTimeoutChange(){}}));

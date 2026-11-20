@@ -8059,7 +8059,7 @@ export default function WorkflowEditor({ reportHost }: { reportHost?: WorkflowRe
       setMobileUiDebug({
         stepId: step.id,
         status: 'error',
-        message: '当前环境无法调试手机 UI 节点',
+        message: t('当前环境无法调试手机 UI 节点', 'Phone UI debugging is unavailable here.'),
       });
       return;
     }
@@ -8067,11 +8067,12 @@ export default function WorkflowEditor({ reportHost }: { reportHost?: WorkflowRe
     setMobileUiDebug({
       stepId: step.id,
       status: 'running',
-      message: selectedStepComponentKind === 'mobile_ui_assert' ? '正在校验当前元素...' : '正在执行当前操作...',
+      message: selectedStepComponentKind === 'mobile_ui_assert' ? t('正在校验当前元素...', 'Checking the selected element…') : t('正在执行当前操作...', 'Running the selected action…'),
     });
 
     try {
       const result = await electronApi.ipcRenderer.invoke('mobile-ui:debug-step', {
+        language: t('zh-CN', 'en'),
         step,
         component: selectedStepComponent,
         defaults: {
@@ -8095,7 +8096,7 @@ export default function WorkflowEditor({ reportHost }: { reportHost?: WorkflowRe
         setMobileUiDebug({
           stepId: step.id,
           status: 'error',
-          message: result?.error || '当前节点调试失败',
+          message: result?.error || t('当前节点调试失败', 'Could not run the selected step.'),
           command: result?.command,
           stdout: result?.stdout,
           stderr: result?.stderr,
@@ -8108,7 +8109,7 @@ export default function WorkflowEditor({ reportHost }: { reportHost?: WorkflowRe
       setMobileUiDebug({
         stepId: step.id,
         status: 'success',
-        message: selectedStepComponentKind === 'mobile_ui_assert' ? '元素校验通过' : '节点操作执行成功',
+        message: selectedStepComponentKind === 'mobile_ui_assert' ? t('元素校验通过', 'Element assertion passed') : t('节点操作执行成功', 'Action completed'),
         command: result.command,
         stdout: result.stdout,
         stderr: result.stderr,
@@ -8124,7 +8125,7 @@ export default function WorkflowEditor({ reportHost }: { reportHost?: WorkflowRe
         stepId: step.id,
         status: 'error',
         message: error instanceof Error ? error.message : String(error),
-        recoveryActions: ['确认手机设备在线并已允许 USB 调试后重试。'],
+        recoveryActions: [t('确认手机设备在线并已允许 USB 调试后重试。', 'Check that the phone is online and USB debugging is authorized, then try again.')],
       });
     }
   };
@@ -16457,12 +16458,12 @@ export default function WorkflowEditor({ reportHost }: { reportHost?: WorkflowRe
                                 <div className="min-w-0">
                                   <div className="flex items-center gap-2">
                                     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-900 text-[10px] font-black text-white">1</span>
-                                    <div className="text-[11px] font-black text-slate-900">从手机页面选择</div>
+                                    <div className="text-[11px] font-black text-slate-900">{t('从手机页面选择', 'Select from the phone screen')}</div>
                                   </div>
                                   <div className="mt-1 pl-7 text-[10px] font-bold leading-4 text-slate-400">
                                     {mobileUiInspector.elements.length > 0
-                                      ? `已识别 ${mobileUiInspector.elements.length} 个元素，点击蓝框或下方列表完成选择`
-                                      : mobileUiInspector.error || '先读取当前手机页面，再选择需要操作的元素'}
+                                      ? t(`已识别 ${mobileUiInspector.elements.length} 个元素，点击蓝框或下方列表完成选择`, `Found ${mobileUiInspector.elements.length} elements. Select a blue outline or an item in the list.`)
+                                      : mobileUiInspector.error || t('先读取当前手机页面，再选择需要操作的元素', 'Read the current phone screen, then select an element.')}
                                   </div>
                                 </div>
                                 <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
@@ -16473,21 +16474,21 @@ export default function WorkflowEditor({ reportHost }: { reportHost?: WorkflowRe
                                     disabled={mobileUiInspector.loading || mobileUiDebug.status === 'running'}
                                   >
                                     {mobileUiInspector.loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                                    {mobileUiInspector.loading ? '读取中' : '刷新'}
+                                    {mobileUiInspector.loading ? t('读取中', 'Reading…') : t('刷新', 'Refresh')}
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => void debugMobileUiStep(selectedStep)}
                                     className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg bg-emerald-600 px-2.5 text-[10px] font-black text-white shadow-sm transition-colors hover:bg-emerald-700 active:translate-y-px disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
                                     disabled={!hasConfiguredMobileUiTarget || mobileUiInspector.loading || mobileUiDebug.status === 'running'}
-                                    title={hasConfiguredMobileUiTarget ? '只执行当前节点，不运行整个工作流' : '请先选择一个手机页面元素'}
+                                    title={hasConfiguredMobileUiTarget ? t('只执行当前节点，不运行整个工作流', 'Run only the selected step') : t('请先选择一个手机页面元素', 'Select a phone element first')}
                                   >
                                     {mobileUiDebug.status === 'running' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
                                     {mobileUiDebug.status === 'running'
-                                      ? '调试中'
+                                      ? t('调试中', 'Running…')
                                       : selectedStepComponentKind === 'mobile_ui_assert'
-                                        ? '校验一次'
-                                        : '执行一次'}
+                                        ? t('校验一次', 'Check once')
+                                        : t('执行一次', 'Run once')}
                                   </button>
                                 </div>
                               </div>

@@ -5802,6 +5802,7 @@ async function inspectMobileUi(serial, options = {}) {
 }
 
 async function waitForMobileUiElement(serial, selector, options = {}) {
+  const t = (zh, en) => options.language === 'en' ? en : zh;
   const timeout = Number(options.timeout || 10000);
   const matchMode = String(options.matchMode || 'auto');
   const pollIntervalMs = Math.min(500, Math.max(120, Number(options.pollIntervalMs || 250)));
@@ -5826,13 +5827,13 @@ async function waitForMobileUiElement(serial, selector, options = {}) {
     normalizedSelector.contentDesc && `contentDesc=${normalizedSelector.contentDesc}`,
     normalizedSelector.className && `class=${normalizedSelector.className}`,
   ].filter(Boolean).join(', ') || JSON.stringify(normalizedSelector);
-  const error = new Error(`超时未找到手机元素：${hint}`);
+  const error = new Error(t(`超时未找到手机元素：${hint}`, `Timed out waiting for a phone element: ${hint}`));
   error.errorCode = 'MOBILE_UI_ELEMENT_NOT_FOUND';
   error.errorType = 'device-element-not-found';
   error.recoveryActions = [
-    '刷新手机页面，确认目标元素当前可见。',
-    '如果刚手工修改了文本，请确认页面确实暴露了文本完全一致的独立元素。',
-    '如果页面只暴露包含多个按钮的父容器，请让页面为每个按钮提供独立的 resource-id 或无障碍节点。',
+    t('刷新手机页面，确认目标元素当前可见。', 'Refresh the phone screen and confirm the target element is visible.'),
+    t('如果刚手工修改了文本，请确认页面确实暴露了文本完全一致的独立元素。', 'If you edited the text selector, check that a separate element exposes that exact text.'),
+    t('如果页面只暴露包含多个按钮的父容器，请让页面为每个按钮提供独立的 resource-id 或无障碍节点。', 'If only a parent container is exposed, give each button its own resource ID or accessibility node.'),
   ];
   error.snapshot = lastSnapshot;
   error.attempts = attempts;
@@ -5947,6 +5948,7 @@ async function executeSoloPiReplayStep(step, context, config, serial) {
 }
 
 async function executeMobileUiStep(step, context, config) {
+  const t = (zh, en) => context.language === 'en' ? en : zh;
   const serial = getWorkflowSerial({ ...step, device: 'phone' }, context);
   const action = String(config.action || 'tap');
   if (action === 'solopi_replay') return executeSoloPiReplayStep(step, context, config, serial);
@@ -5966,6 +5968,7 @@ async function executeMobileUiStep(step, context, config) {
       timeout,
       matchMode,
       pollIntervalMs: config.pollIntervalMs,
+      language: context.language,
     });
     snapshot = result.snapshot;
     element = result.element;
@@ -5978,7 +5981,7 @@ async function executeMobileUiStep(step, context, config) {
     const result = await runCommand(getAdbPath(), args, timeout);
     return {
       command: buildAdbCommandPreview(args),
-      stdout: action === 'home' ? '已执行主页键' : '已执行返回键',
+      stdout: action === 'home' ? t('已执行主页键', 'Pressed Home') : t('已执行返回键', 'Pressed Back'),
       stderr: result.stderr || '',
     };
   }
@@ -5988,7 +5991,9 @@ async function executeMobileUiStep(step, context, config) {
     const gesture = getMobileUiElementSwipe(element.rect, snapshot.screen, config);
     const args = ['-s', serial, 'shell', 'input', 'swipe', String(gesture.fromX), String(gesture.fromY), String(gesture.toX), String(gesture.toY), String(gesture.duration)];
     const result = await runCommand(getAdbPath(), args, timeout);
-    return { command: buildAdbCommandPreview(args), stdout: `已按命中元素执行 ${config.direction} 滑动 ${config.distancePercent ?? 100}%：${gesture.fromX},${gesture.fromY} → ${gesture.toX},${gesture.toY}`, stderr: result.stderr || '' };
+    const coordinates = `${gesture.fromX},${gesture.fromY} → ${gesture.toX},${gesture.toY}`;
+    const distance = config.distancePercent ?? 100;
+    return { command: buildAdbCommandPreview(args), stdout: t(`已按命中元素执行 ${config.direction} 滑动 ${distance}%：${coordinates}`, `Swiped ${config.direction} ${distance}% within the matched element: ${coordinates}`), stderr: result.stderr || '' };
   }
 
   if (action === 'swipe') {
@@ -5999,14 +6004,14 @@ async function executeMobileUiStep(step, context, config) {
     const durationMs = Math.max(0, Number(swipe.durationMs || config.durationMs || 400));
 
     if (!start || !end) {
-      throw new Error('手机 UI 滑动节点缺少有效 swipe.startXRatio/startYRatio/endXRatio/endYRatio');
+      throw new Error(t('手机 UI 滑动节点缺少有效 swipe.startXRatio/startYRatio/endXRatio/endYRatio', 'The swipe step requires valid start and end coordinate ratios.'));
     }
 
     const args = ['-s', serial, 'shell', 'input', 'swipe', String(start.x), String(start.y), String(end.x), String(end.y), String(durationMs)];
     const result = await runCommand(getAdbPath(), args, timeout);
     return {
       command: buildAdbCommandPreview(args),
-      stdout: `已执行手机滑动：${start.x},${start.y} -> ${end.x},${end.y} (${durationMs}ms)`,
+      stdout: `${t('已执行手机滑动：', 'Swiped on the phone: ')}${start.x},${start.y} -> ${end.x},${end.y} (${durationMs}ms)`,
       stderr: result.stderr || '',
     };
   }
@@ -6016,14 +6021,14 @@ async function executeMobileUiStep(step, context, config) {
     return {
       command: `mobile ui ${action} · ${JSON.stringify(selector)}`,
       stdout: [
-        action === 'wait' ? '手机元素已出现' : '手机元素断言通过',
-        `轮询次数：${element.__attempts || '-'}`,
-        `命中时间：${snapshot?.capturedAt || '-'}`,
-        `命中元素：${element.label}`,
-        `bounds：${element.bounds}`,
-        `resourceId：${element.resourceId || '-'}`,
-        `text：${element.text || '-'}`,
-        `contentDesc：${element.contentDesc || '-'}`,
+        action === 'wait' ? t('手机元素已出现', 'Phone element found') : t('手机元素断言通过', 'Phone element assertion passed'),
+        `${t('轮询次数：', 'Attempts: ')}${element.__attempts || '-'}`,
+        `${t('命中时间：', 'Matched at: ')}${snapshot?.capturedAt || '-'}`,
+        `${t('命中元素：', 'Matched element: ')}${element.label}`,
+        `${t('bounds：', 'Bounds: ')}${element.bounds}`,
+        `${t('resourceId：', 'Resource ID: ')}${element.resourceId || '-'}`,
+        `${t('text：', 'Text: ')}${element.text || '-'}`,
+        `${t('contentDesc：', 'Content description: ')}${element.contentDesc || '-'}`,
       ].join('\n'),
       stderr: '',
     };
@@ -6043,7 +6048,7 @@ async function executeMobileUiStep(step, context, config) {
         const result = await runCommand(getAdbPath(), args, timeout);
         return {
           command: buildAdbCommandPreview(args),
-          stdout: `未命中元素，已使用比例/边界兜底点击：${point.x},${point.y}`,
+          stdout: `${t('未命中元素，已使用比例/边界兜底点击：', 'Element not found. Tapped fallback coordinates: ')}${point.x},${point.y}`,
           stderr: result.stderr || '',
         };
       }
@@ -6054,6 +6059,13 @@ async function executeMobileUiStep(step, context, config) {
     const tapArgs = ['-s', serial, 'shell', 'input', 'tap', String(point.x), String(point.y)];
     const tapResult = await runCommand(getAdbPath(), tapArgs, timeout);
     commands.push(buildAdbCommandPreview(tapArgs));
+    const tapDetails = [
+      `${t('命中元素：', 'Matched element: ')}${element.label}`,
+      `${t('点击位置：', 'Tap position: ')}${tapPosition}`,
+      `${t('横向内缩：', 'Horizontal inset: ')}${tapInsetXPx}px`,
+      `${t('纵向内缩：', 'Vertical inset: ')}${tapInsetYPx}px`,
+      `${t('坐标：', 'Coordinates: ')}${point.x},${point.y}`,
+    ];
 
     if (action === 'input') {
       if (parseWorkflowBoolean(config.clearBeforeInput, false)) {
@@ -6066,7 +6078,7 @@ async function executeMobileUiStep(step, context, config) {
 
       const text = String(config.inputText || '');
       if (!text) {
-        throw new Error('手机 UI 输入节点缺少 inputText');
+        throw new Error(t('手机 UI 输入节点缺少 inputText', 'The input step is missing text to enter.'));
       }
       const inputArgs = ['-s', serial, 'shell', 'input', 'text', escapeAdbInputText(text)];
       const inputResult = await runCommand(getAdbPath(), inputArgs, timeout);
@@ -6074,19 +6086,19 @@ async function executeMobileUiStep(step, context, config) {
 
       return {
         command: commands.join('\n'),
-        stdout: [`已点击元素并输入文本`, `命中元素：${element.label}`, `点击位置：${tapPosition}`, `横向内缩：${tapInsetXPx}px`, `纵向内缩：${tapInsetYPx}px`, `坐标：${point.x},${point.y}`, tapResult.stdout, inputResult.stdout].filter(Boolean).join('\n'),
+        stdout: [t('已点击元素并输入文本', 'Tapped the element and entered text'), ...tapDetails, tapResult.stdout, inputResult.stdout].filter(Boolean).join('\n'),
         stderr: [tapResult.stderr, inputResult.stderr].filter(Boolean).join('\n'),
       };
     }
 
     return {
       command: commands.join('\n'),
-      stdout: [`已点击手机元素`, `命中元素：${element.label}`, `点击位置：${tapPosition}`, `横向内缩：${tapInsetXPx}px`, `纵向内缩：${tapInsetYPx}px`, `坐标：${point.x},${point.y}`, tapResult.stdout].filter(Boolean).join('\n'),
+      stdout: [t('已点击手机元素', 'Tapped the phone element'), ...tapDetails, tapResult.stdout].filter(Boolean).join('\n'),
       stderr: tapResult.stderr || '',
     };
   }
 
-  throw new Error(`暂不支持的手机 UI 动作：${action}`);
+  throw new Error(t(`暂不支持的手机 UI 动作：${action}`, `Unsupported phone UI action: ${action}`));
 }
 
 function createDefaultTtsConfig() {
@@ -9401,6 +9413,7 @@ ipcMain.handle('solopi:select-file', async () => {
 });
 
 ipcMain.handle('mobile-ui:debug-step', async (_event, payload = {}) => {
+  const t = (zh, en) => payload.language === 'en' ? en : zh;
   const step = payload.step && typeof payload.step === 'object' ? payload.step : null;
   const component = payload.component && typeof payload.component === 'object' ? payload.component : null;
   const supportedKinds = new Set(['mobile_ui_action', 'mobile_ui_assert']);
@@ -9409,14 +9422,15 @@ ipcMain.handle('mobile-ui:debug-step', async (_event, payload = {}) => {
     return {
       success: false,
       errorCode: 'MOBILE_UI_DEBUG_STEP_INVALID',
-      error: '仅支持调试当前手机 UI 操作或元素校验节点',
-      recoveryActions: ['选择一个手机 UI 操作或元素校验节点后重试。'],
+      error: t('仅支持调试当前手机 UI 操作或元素校验节点', 'Only phone UI action and element assertion steps can be debugged here.'),
+      recoveryActions: [t('选择一个手机 UI 操作或元素校验节点后重试。', 'Select a phone UI action or element assertion step and try again.')],
     };
   }
 
   const startedAt = new Date().toISOString();
   const startedAtMs = Date.now();
   const context = {
+    language: payload.language,
     defaults: payload.defaults && typeof payload.defaults === 'object' ? payload.defaults : {},
     variables: payload.variables && typeof payload.variables === 'object' ? payload.variables : {},
     components: { [component.id]: component },
@@ -9446,7 +9460,7 @@ ipcMain.handle('mobile-ui:debug-step', async (_event, payload = {}) => {
     const errorCode = error?.errorCode || error?.code || 'MOBILE_UI_DEBUG_STEP_FAILED';
     const recoveryActions = Array.isArray(error?.recoveryActions) && error.recoveryActions.length > 0
       ? error.recoveryActions
-      : ['确认手机设备在线并已允许 USB 调试。', '刷新手机页面并重新选择目标元素后重试。'];
+      : [t('确认手机设备在线并已允许 USB 调试。', 'Check that the phone is online and USB debugging is authorized.'), t('刷新手机页面并重新选择目标元素后重试。', 'Refresh the phone screen, select the target element again, and retry.')];
     return {
       success: false,
       stepId: step.id,

@@ -26,11 +26,26 @@ export default function SoloPiImport({ api, mode, phoneSerial, phonePackage, pho
   const recordingTarget = targetOverride || { serial: phoneSerial, packageName: phonePackage };
   const recordingSerial = recordingTarget.serial;
   const recordingPackage = recordingTarget.packageName;
+  const permissionDetails: Record<string, [string, string]> = {
+    adb: ['Internal ADB connection', 'Unlock the phone, authorize USB debugging, and try again.'],
+    float: ['Display over other apps', 'Allow SoloPi to display over other apps in the phone settings.'],
+    background: ['Background activity', 'Allow SoloPi to run in the background in the phone settings.'],
+    accessibility: ['Accessibility service', 'Enable the SoloPi service in the phone’s Accessibility settings.'],
+    powerSave: ['Battery optimization exemption', 'Allow unrestricted battery usage for SoloPi in the phone settings.'],
+    appVisibility: ['App list access', 'Allow SoloPi to access the app list in the phone’s privacy settings.'],
+  };
   async function invoke(channel: string, value?: unknown) {
     if (!api) throw new Error(t("请在桌面应用中使用 SoloPi 导入/录制", "Open SoloPi import and recording in the desktop app"));
     const result = await api.ipcRenderer.invoke(channel, value);
     if (result.canceled) return null;
-    if (!result.success) throw Object.assign(new Error(result.error || t("SoloPi 操作失败", "SoloPi operation failed")), { permissionCheck: result.permissionCheck });
+    if (!result.success) {
+      const message = result.code === 'SOLOPI_COMPANION_NOT_READY'
+        ? t('手机录制组件未就绪，请打开手机上的 SoloPi，完成首次启动提示后重试。', 'The recording service is not ready. Open SoloPi on the phone, complete any startup prompts, and try again.')
+        : result.code === 'SOLOPI_PERMISSIONS_REQUIRED'
+          ? t(result.error || 'SoloPi 权限未就绪', 'SoloPi requires additional permissions on the phone.')
+          : result.error || t('SoloPi 操作失败', 'SoloPi operation failed');
+      throw Object.assign(new Error(message), { permissionCheck: result.permissionCheck });
+    }
     return result;
   }
   async function refresh() {
@@ -124,7 +139,7 @@ export default function SoloPiImport({ api, mode, phoneSerial, phonePackage, pho
         <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
           <h3 id="solopi-permissions-title" className="font-bold text-slate-900">{t("SoloPi 权限未就绪", "SoloPi permissions required")}</h3>
           <p className="mt-2 text-sm text-slate-600">{permissionCheck.root ? t("已尝试使用 root 补齐权限，以下项目仍未通过手机端检查。", "Desktop tried to grant permissions with root. The phone still reports these missing permissions.") : t("未取得可用的 root 授权，请在手机系统设置中处理以下项目。", "Root is unavailable. Grant the following permissions in the phone settings.")}{t("如果已经授权或系统检测不准确，可点击“我已授权，直接进入”，跳过本次 Desktop 权限预检。手机端实际缺失的权限仍可能导致启动失败。", "If you have already granted permissions, you can skip the Desktop check. Recording may still fail if the phone is missing a required permission.")}</p>
-          <ul className="mt-3 space-y-3 text-sm">{permissionCheck.missing.map(item => <li key={item.key}><strong>{item.label}</strong><p className="text-slate-600">{item.action}</p></li>)}</ul>
+          <ul className="mt-3 space-y-3 text-sm">{permissionCheck.missing.map(item => <li key={item.key}><strong>{t(item.label, permissionDetails[item.key]?.[0] ?? 'Phone permissions')}</strong><p className="text-slate-600">{t(item.action, permissionDetails[item.key]?.[1] ?? 'Check the SoloPi permissions on the phone and try again.')}</p></li>)}</ul>
           <div className="mt-4 flex flex-wrap gap-3">
             <button type="button" disabled={Boolean(startBlockReason)} className={primaryButton} onClick={() => void startRecording(true)}>{t("我已授权，直接进入", "Permissions granted, continue")}</button>
             <button type="button" disabled={busy} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" onClick={() => setPermissionCheck(null)}>{t("返回，处理后重新开始", "Go back and check again")}</button>

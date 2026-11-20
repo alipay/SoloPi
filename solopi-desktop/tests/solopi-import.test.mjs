@@ -98,7 +98,8 @@ test('record and import dialogs render distinct entry points without a device co
   const source = fs.readFileSync(new URL('../src/components/SoloPiImport.tsx', import.meta.url), 'utf8');
   const loadTs = filename => {
     const loaded = { exports: {} };
-    const resolve = name => name.startsWith('./') ? loadTs(path.resolve(path.dirname(filename), name + '.tsx')) : require(name);
+    const resolve = name => name === '../language' ? { useLanguage: () => ({ t: chinese => chinese }) }
+      : name.startsWith('./') ? loadTs(path.resolve(path.dirname(filename), name + '.tsx')) : require(name);
     vm.runInNewContext(ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText, { exports: loaded.exports, require: resolve });
     return loaded.exports;
   };
